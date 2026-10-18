@@ -65,3 +65,13 @@ def test_a_fresh_look_writes_its_layers_first_then_the_body_then_the_form():
 def test_the_route_follows_the_face():
     assert looks.route_of(Look(face_change=True)) == looks.ROUTES["face"]
     assert looks.route_of(Look(layers=Layers(top="a coat"))) == looks.ROUTES["garment"]
+
+
+def test_a_spent_wall_stops_the_redraws_and_keeps_the_best(tmp_path, capsys):
+    """Owner 2026-10-18: 3 draws per picture and a 15 min wall; the first draw always happens."""
+    book, calls = fx.book(tmp_path), []
+    now = iter([0.0, 15 * 60.0, 15 * 60.0, 15 * 60.0, 15 * 60.0])
+    done = looks.draw_missing(book, fx.episode({"narrator": "borrowed"}), draws(calls),
+                              lambda p, l: verdict(False), clock=lambda: next(now))
+    assert len(calls) == 1 and done == ["narrator/borrowed (flagged)"]
+    assert "CAP places" in capsys.readouterr().out

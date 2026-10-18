@@ -25,17 +25,19 @@ import hashlib
 import json
 import re
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import cast_refs, continuity, episode_home, look_timeline  # noqa: E402
+from studio import cast_refs, continuity, episode_home, look_timeline, step_caps  # noqa: E402
 from studio.episode_home import episode_arg  # noqa: E402
 
 ROUTES = {"garment": "edit", "face": "fresh"}
 """Which one-hop route draws a look, by what it changes.  Bench B-3 (verdict S
 §4) measures edit vs fresh per kind; flipping a kind is this one row."""
-MAX_REDRAWS = 2
+MAX_REDRAWS = step_caps.rounds("places") - 1
+"""Redraws after the first draw: the cap table's 3 draws per look (owner 2026-10-18)."""
 LAYER_OF = {"headwear": "headwear", "hair_colour": "hair", "facial_hair": "face", "top": "top", "dirt": "dirt"}
 ORDER = ("hair", "face", "headwear", "top", "dirt")
 FORM = ("Character reference sheet on a plain mid-grey backdrop with even soft light: full-body front view, "
@@ -165,7 +167,7 @@ def lead_of(verdict) -> str:
     return LAYER_OF.get(hard[0].kind.removeprefix("look_"), "") if hard else ""
 
 
-def climb(book: Path, who: str, look_id: str, card, draws: dict, judge) -> tuple[int, object]:
+def climb(book: Path, who: str, look_id: str, card, draws: dict, judge, wall=lambda: False) -> tuple[int, object]:
     """Draw, judge, redraw on seed+1 with the fault first (cap MAX_REDRAWS); the
     best kept.  Returns (the kept seed, its verdict, flagged when none passed)."""
     _, seed0 = base_prompt(book, who)
@@ -176,6 +178,9 @@ def climb(book: Path, who: str, look_id: str, card, draws: dict, judge) -> tuple
         if best is None or score(verdict) < score(best[1]):
             best = (seed0 + k, verdict, path.read_bytes())
         if verdict.passed:
+            break
+        if wall():
+            print(step_caps.cap_line("places", k + 1, MAX_REDRAWS + 1, step_caps.wall_s("places"), 0), flush=True)
             break
         lead = lead_of(verdict)
     look_path(book, who, look_id).write_bytes(best[2])
@@ -201,12 +206,14 @@ def record(book: Path, who: str, look_id: str, seed: int, verdict) -> None:
     path.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
 
 
-def draw_missing(book: Path, episode, draws: dict, judge) -> list[str]:
-    """Every missing look of this episode drawn, judged, recorded; their keys."""
-    done = []
+def draw_missing(book: Path, episode, draws: dict, judge, clock=time.time) -> list[str]:
+    """Every missing look of this episode drawn, judged, recorded; their keys.  Past the cap
+    table's wall no look is redrawn (the first draw of each always is)."""
+    done, began = [], clock()
+    spent = lambda: clock() - began >= step_caps.wall_s("places")  # noqa: E731
     for who, look_id in missing_looks(book, episode):
         card = look_timeline.load(book).characters[who]
-        seed, verdict = climb(book, who, look_id, card, draws, judge)
+        seed, verdict = climb(book, who, look_id, card, draws, judge, spent)
         record(book, who, look_id, seed, verdict)
         done.append(f"{who}/{look_id}" + (" (flagged)" if verdict.terminal else ""))
     return done

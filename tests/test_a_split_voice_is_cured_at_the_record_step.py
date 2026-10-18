@@ -50,9 +50,8 @@ def test_a_split_voice_is_not_done_until_its_lines_were_said_again(tmp_path):
     ctx, _ = _ctx(tmp_path, split, redone=[[3, 7, 16]])
     assert step.done(ctx) is False                    # one round taken, a second allowed
     ctx, _ = _ctx(tmp_path, split, redone=[[3, 7, 16], [36]])
-    assert step.done(ctx) is False                    # two rounds of three (ep27, 2026-10-09)
-    ctx, _ = _ctx(tmp_path, split, redone=[[3, 7, 16], [36], [36]])
-    assert step.done(ctx) is True                     # three rounds: the door decides
+    assert step.done(ctx) is True                     # the cap table's two rounds (owner 2026-10-18;
+                                                      # three since ep27): the door decides
     ctx, _ = _ctx(tmp_path, split, redone=[3, 7, 16])
     assert step.done(ctx) is False                    # the flat file of one round (ep21, 15:33Z)
     ctx, _ = _ctx(tmp_path, {"n": {"ok": True, "under": []}})
@@ -98,3 +97,21 @@ def test_the_publish_refusal_routes_back_to_the_record_step():
 def test_the_brain_names_a_model_the_sdk_knows():
     from studio import brain
     assert brain.TRIAGE_MODEL == "claude-sonnet-5"
+
+
+def test_a_spent_voice_wall_ends_the_revoice_like_the_rounds(tmp_path):
+    """Owner 2026-10-18: 2 revoice rounds per episode and a 30 min wall (persisted seconds)."""
+    from studio import step_attempts, step_caps
+    split = {"n": {"ok": False, "under": EP21}}
+    ctx, _ = _ctx(tmp_path, split, redone=[[3, 7, 16]])
+    assert step.done(ctx) is False
+    step_attempts.spend(ctx.home, "voice", step_caps.wall_s("voice"))
+    assert step.done(ctx) is True                     # the wall is the cap: the door decides
+
+
+def test_the_revoice_stops_at_the_wall_and_says_the_cap(tmp_path, capsys):
+    from studio import step_attempts, step_caps
+    ctx, calls = _ctx(tmp_path, {"n": {"ok": False, "under": EP21}})
+    step_attempts.spend(ctx.home, "voice", step_caps.wall_s("voice"))
+    step.revoice(ctx)
+    assert calls == [] and "CAP voice" in capsys.readouterr().out

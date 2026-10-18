@@ -33,6 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import numpy as np  # noqa: E402
 
 from studio import episode_clock, episode_home, face_gate, face_track, face_refine as fr  # noqa: E402
+from studio import step_attempts, step_caps  # noqa: E402
 from studio.face_paste import sha8  # noqa: E402
 
 TAKES = Path("takes") / "r2v"
@@ -75,10 +76,29 @@ def current(doc: dict, room: Path, index: int) -> bool:
 
 
 def pending(book: Path, number: int, among: list[int] | None = None) -> list[int]:
-    """Selected takes with no decision on their current bytes."""
-    room = room_of(book, number)
+    """Selected takes with no decision on their current bytes and refines left (the cap table)."""
+    room, home = room_of(book, number), episode_home.home(book, number)
     doc = read(room / DOC, {})
-    return [i for i in selection(book, number) if (among is None or i in among) and not current(doc, room, i)]
+    return [i for i in selection(book, number) if (among is None or i in among) and not current(doc, room, i)
+            and not refined_out(home, i)]
+
+
+def refine_key(index: int) -> str:
+    return f"face_refine.T{index:02d}"
+
+
+def refined_out(home: Path, index: int) -> bool:
+    """The take has had its refines (owner 2026-10-18: 1 per take, persisted in attempts.json)."""
+    return step_attempts.count(home, refine_key(index)) >= step_caps.rounds("face_refine")
+
+
+def count_refine(home: Path, index: int) -> None:
+    step_attempts.spend(home, refine_key(index))
+
+
+def wall_spent(began: float, now: float) -> bool:
+    """The refine's wall (the cap table's 15 min): no take is queued past it."""
+    return now - began >= step_caps.wall_s("face_refine")
 
 
 def owed(book: Path, number: int, among: list[int] | None = None) -> dict[int, float]:
@@ -95,12 +115,12 @@ def write_entry(room: Path, index: int, entry: dict) -> None:
     episode_home.write_json(room / DOC, doc)
 
 
-def record_cut(room: Path, indices: list[int], price: float, book: Path, number: int) -> None:
-    """The clock cut the refine: said in refine.json, the takes still owed one."""
+def record_cut(room: Path, indices: list[int], price: float, book: Path, number: int, why: str = "") -> None:
+    """The clock (or the refine's wall) cut the refine: said in refine.json, the takes still owed one."""
+    why = why or f"the clock's reserve needs the time: {price:.0f} s priced, cut first"
     for i in indices:
         write_entry(room, i, {"status": "cut", "take_sha8": sha8(room / f"T{i:02d}.mp4"), "people": [],
-                              "why": f"the clock's reserve needs the time: {price:.0f} s priced, cut first",
-                              "decided": stamp()})
+                              "why": why, "decided": stamp()})
 
 
 def stamp() -> str:
@@ -377,11 +397,26 @@ def refine(book: Path, number: int, indices: list[int] | None, *, engine=None, d
     cards = {int(c["index"]): c for c in read(room / "prompts.json", [])}
     out = {}
     with episode_clock.timed(book, number, "face_refine", note=" ".join(map(str, indices or [])), within=within):
-        queued = [(time.time(), queue_take(book, number, i, cards[i], engine, loose, detect, embed))
-                  for i in pending(book, number, indices)]
+        queued = queue_within_wall(book, number, pending(book, number, indices), cards, engine, loose, detect, embed)
         for began, work in queued:
             out[work.index] = decide_take(room, book, work, detect, embed, engine, time.time() - began, loose)
+            count_refine(episode_home.home(book, number), work.index)
     return out
+
+
+def queue_within_wall(book: Path, number: int, owed_takes: list[int], cards: dict, engine, loose, detect,
+                      embed) -> list:
+    """Each owed take queued in turn until the wall: the rest keep their faces, said as a CAP
+    line and recorded `cut` in refine.json (a take in flight is never cut)."""
+    began, queued = time.time(), []
+    for k, i in enumerate(owed_takes):
+        if wall_spent(began, time.time()):
+            rest = owed_takes[k:]
+            record_cut(room_of(book, number), rest, 0.0, book, number, why=f"CAP face_refine: the {step_caps.mmss(step_caps.wall_s('face_refine'))} wall")
+            print(step_caps.cap_line("face_refine", k, len(owed_takes), time.time() - began, len(rest)), flush=True)
+            break
+        queued.append((time.time(), queue_take(book, number, i, cards[i], engine, loose, detect, embed)))
+    return queued
 
 
 def main(argv: list[str]) -> int:

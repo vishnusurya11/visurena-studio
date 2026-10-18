@@ -47,6 +47,8 @@ def test_a_take_the_ear_failed_never_wins_on_fit(tmp_path):
     assert kept["similarity"] == 0.71
 
 
-def test_the_split_voice_cure_gets_a_third_round():
+def test_the_split_voice_cure_takes_the_cap_tables_rounds():
+    # 3 since ep21; the owner's cap table (2026-10-18) says 2 revoice rounds + 30 min
     from scripts.episode import step_04_record
-    assert step_04_record.REVOICE_ROUNDS == 3
+    from studio import step_caps
+    assert step_04_record.REVOICE_ROUNDS == step_caps.rounds("voice") == 2

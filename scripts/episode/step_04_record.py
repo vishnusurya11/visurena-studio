@@ -14,7 +14,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home, step_cli  # noqa: E402
+import time  # noqa: E402
+
+from studio import episode_home, step_attempts, step_caps, step_cli  # noqa: E402
 
 STEP_ID = "04"
 NAME = "record"
@@ -29,9 +31,10 @@ def rendered(plan: dict, rows: list[dict]) -> bool:
 
 REVOICED = "speaker_revoiced.json"
 """review/<this>: the rounds of lines said again for a split voice."""
-REVOICE_ROUNDS = 3
-"""ep21 (2026-10-08): round one cured nine of ten pairs; the tenth wanted a
-line round one's cover had not chosen."""
+REVOICE_ROUNDS = step_caps.rounds("voice")
+"""The cap table's revoice rounds (owner 2026-10-18 approved 2 + 30 min; stages.yaml
+`episode.caps.voice`).  ep21 (2026-10-08): round one cured nine of ten pairs; the tenth wanted a
+line round one's cover had not chosen -- the third round that took is now the joined line's."""
 
 
 def split_lines(report: dict, said: set[int] = frozenset()) -> list[int]:
@@ -50,6 +53,12 @@ def split_lines(report: dict, said: set[int] = frozenset()) -> list[int]:
         chosen.append(pick)
         pairs = [p for p in pairs if pick not in p]
     return sorted(int(s[1:]) for s in chosen)
+
+
+def revoice_open(ctx) -> bool:
+    """A revoice round is still allowed: fewer than the cap's rounds taken and its wall unspent
+    (the seconds persist in attempts.json, so a relaunch does not start the clock again)."""
+    return len(rounds(ctx)) < REVOICE_ROUNDS and not step_attempts.spent(ctx.home, step_caps.cap("voice"))
 
 
 def rounds(ctx) -> list[list[int]]:
@@ -72,7 +81,7 @@ def done(ctx) -> bool:
         return False
     report = episode_home.read_json(spread)
     unlisted = any(isinstance(r, dict) and not r.get("ok", True) and "under" not in r for r in report.values())
-    if (unlisted or split_lines(report)) and len(rounds(ctx)) < REVOICE_ROUNDS:
+    if (unlisted or split_lines(report)) and revoice_open(ctx):
         return False            # a split, or a split written before its pairs were kept
     if qc_misheard(ctx):
         return False            # QC heard a line wrong and it has not been said again (ep27)
@@ -117,7 +126,7 @@ def join_candidate(ctx) -> int | None:
     """After REVOICE_ROUNDS, the ONE short line every failing pair runs through,
     if the join has not been tried; else None."""
     spread, sheet = ctx.home / "review" / "speaker_check.json", ctx.home / "audio" / "lines" / "lines.json"
-    if (ctx.home / "review" / JOINED).exists() or len(rounds(ctx)) < REVOICE_ROUNDS             or not (spread.exists() and sheet.exists()):
+    if (ctx.home / "review" / JOINED).exists() or revoice_open(ctx) or not (spread.exists() and sheet.exists()):
         return None
     lines = split_lines(episode_home.read_json(spread))
     secs = {r["index"]: float(r.get("seconds") or 0) for r in episode_home.read_json(sheet)}
@@ -163,19 +172,29 @@ def run(ctx) -> None:
     resay_misheard(ctx)
 
 
+def say_cap(ctx, spread: Path) -> None:
+    """At the cap (rounds or wall) with a split still standing: the CAP line; the door decides."""
+    if spread.exists() and not revoice_open(ctx) and split_lines(episode_home.read_json(spread)):
+        print(step_caps.cap_line("voice", len(rounds(ctx)), REVOICE_ROUNDS,
+                                 step_attempts.seconds(ctx.home, "voice"), 1), flush=True)
+
+
 def revoice(ctx) -> None:
     """A split voice: the covering lines said again on a fresh seed and the
     voice checked again, up to REVOICE_ROUNDS rounds; the door judges the rest."""
     spread = ctx.home / "review" / "speaker_check.json"
-    while spread.exists() and len(taken := rounds(ctx)) < REVOICE_ROUNDS:
-        said = {i for r in taken for i in r}
-        lines = split_lines(episode_home.read_json(spread), said)
+    while spread.exists() and revoice_open(ctx):
+        taken = rounds(ctx)
+        lines = split_lines(episode_home.read_json(spread), {i for r in taken for i in r})
         if not lines:
             return
+        began = time.time()
         ctx.run_script("scripts/episode/say_lines.py", f"--redo={','.join(map(str, lines))}",
                        gpu=GPU, clock="lines")
         episode_home.write_json(ctx.home / "review" / REVOICED, taken + [lines])
         ctx.run_script("scripts/episode/speaker_check.py", clock="speaker_check")
+        step_attempts.spend(ctx.home, "voice", time.time() - began)
+    say_cap(ctx, spread)
     join(ctx)
 
 
