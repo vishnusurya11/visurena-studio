@@ -1440,3 +1440,16 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   episode; a fixed reader plus a base-seed redraw gave back the first, right draw.
 - **Check the tree before the run, not at the launch.** drive.py refuses a dirty tree, and a peer's uncommitted
   package (prism/) and a peer's page hunk held this launch; no session may commit another's paths.
+
+## Jekyll Kawajiri ep01 under the step caps (2026-10-18)
+
+- **A cure with its own ruler garbles the plan the judge passes.** `plan_cures.pace_words` read gaits with its
+  own regex (`runs`, the `walking` of "walking cane") and `figurative_gaits` runs it over the WHOLE plan: climb 1
+  wrote 41 `at a walking pace`, 33 of them glue -- "his black walking at a walking pace cane" (x10), "the
+  pavement runs at a walking pace", "sweat runs at a walking pace down his face", a girl who "run[s] at a
+  walking pace". G-TAKELINT read clean because L23's PACE_MARK did not read the phrase the cure writes. Fix: the
+  cure paces only the judge's gaits (no run, no walking cane/stick/staff), L23 reads `at a walking pace`, and
+  L24 GLUED PACE finds the old glue, cured for $0 by `unglue_pace`. Replayed on the live draft under the whole
+  battery: G-TAKELINT 21 -> clean, two G-AIM rows ('shorter at a walking pace') and a G-PRESENT row gone with it.
+- **Grep the plan for the cure's own phrase after every climb.** A count of the phrase a cure appends, against
+  the gaits the judge reads, is a one-line check that no gate made.

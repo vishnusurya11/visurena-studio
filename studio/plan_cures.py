@@ -114,8 +114,19 @@ def head_fractions(doc: dict) -> dict:
     return doc
 
 
-GAIT = re.compile(r"\b(walks?|walking|climbs?|climbing|rides?|riding|runs?|running|"
-                  r"strides?|striding)\b(?![^.;]*\bpace\b)", re.I)
+GAIT = re.compile(r"\b(walks?|walking(?!\s+(?:stick|sticks|cane|canes|staff|height|pace|speed))|"
+                  r"climbs?|climbing|rides?|riding|strides?|striding)\b(?![^.;]*\bpace\b)", re.I)
+"""The judge's gaits (ro.GAIT): a walking cane is no walk and a run is no walk -- a run paced
+`at a walking pace` glued "sweat runs at a walking pace" across Jekyll Kawajiri ep01's plan."""
+
+
+def unglue_pace(doc: dict) -> dict:
+    """L24: a pace the old cure glued to a run or a walking cane comes off, once (idempotent)."""
+    from studio import episode_ref_official as ro
+    for holder, f in _prose_fields(doc):
+        if holder.get(f):
+            holder[f] = ro.GLUED_PACE.sub(lambda m: m.group(1), holder[f])
+    return doc
 
 
 def pace_words(doc: dict) -> dict:
@@ -1708,6 +1719,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"L8 NO PACE.*\[plan\]"), "figurative_gaits"),
     (re.compile(r"L21 ARRIVAL"), "arrival_ends"),
     (re.compile(r"L23 PACE ON A THING"), "drop_thing_pace"),
+    (re.compile(r"L24 GLUED PACE"), "unglue_pace"),
     (re.compile(r"L3 SLOW"), "strip_slow"),
     (re.compile(r"L9 NO LIMP"), "apply_limp"),
     (re.compile(r"L16 DIALOGUE TAIL"), "holds"),

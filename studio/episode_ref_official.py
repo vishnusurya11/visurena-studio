@@ -1059,7 +1059,7 @@ def life_for(k: int, seg: dict, ctx: dict, used: int) -> str:
 
 
 SLOW = re.compile(r"\bslow(ly)?\b", re.I)
-GAIT = re.compile(r"\b(walks?|walking(?!\s+(?:stick|sticks|height|pace|speed))|walked|limps?|limping|"
+GAIT = re.compile(r"\b(walks?|walking(?!\s+(?:stick|sticks|cane|canes|staff|height|pace|speed))|walked|limps?|limping|"
                   r"limped|climbs?|climbing|climbed|trots?|trotting|rides?|riding|"
                   r"(?<!porch )(?<!stone )(?<!front )(?<!\bthe )steps|stepping|"
                   r"stepped|strides(?!\s+(?:from|behind|of|away))|striding)\b", re.I)
@@ -2132,8 +2132,22 @@ def l22_absent_mouth(text, facts):
             for k, a, b, body in blocks(text) for who in ABSENT_MOUTH.findall(body)]
 
 
-PACE_MARK = re.compile(r"\bat (?:a normal (?:walking pace|pace|trot)|walking pace|normal speed|a trot|"
-                       r"the horse's trot)\b")
+PACE_MARK = re.compile(r"\bat (?:a normal (?:walking pace|pace|trot)|a walking pace|walking pace|normal speed|"
+                       r"a trot|the horse's trot)\b")
+"""`at a walking pace` is the phrase `plan_cures.pace_words` WRITES; without it L23 never saw
+the cure's own glue (Jekyll Kawajiri ep01: "the pavement runs at a walking pace")."""
+
+
+GLUED_PACE = re.compile(r"\b(runs?|running|ran|walking(?= at a walking pace (?:stick|sticks|cane|canes|staff)\b))"
+                        r" at a walking pace\b", re.I)
+"""A pace glued where no walk is: on a run (a run is never at a walking pace, and L8 never
+asks a run for one) or inside a walking cane ("his black walking at a walking pace cane")."""
+
+
+def l24_glued_pace(text, facts):
+    """L24: the cure's pace glued to a run or a walking cane (Jekyll Kawajiri ep01, 2026-10-18)."""
+    return [f"L24 GLUED PACE [Shot {k}]: {m.group(0)!r} -- a pace glued to a run or a walking cane"
+            for k, a, b, body in blocks(text) for m in GLUED_PACE.finditer(body)]
 
 
 def l23_pace_on_a_thing(text, facts):
@@ -2150,7 +2164,7 @@ def l23_pace_on_a_thing(text, facts):
 RULES = (l1_negation, l2_stillness, l3_slow, l4_action, l5_coverage, l6_stamps, l7_pins, l8_pace,
          l9_limp, l10_life, l11_pictures, l12_speakers, l13_task_type, l14_length,
          l15_summary_length, l16_dialogue_tail, l17_cross_cut, l18_banned_prop,
-         l19_crowd, l20_style, l21_arrival, l22_absent_mouth, l23_pace_on_a_thing)
+         l19_crowd, l20_style, l21_arrival, l22_absent_mouth, l23_pace_on_a_thing, l24_glued_pace)
 
 
 def lint(text: str, facts: dict | None = None) -> list[str]:

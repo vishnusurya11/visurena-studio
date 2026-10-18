@@ -290,6 +290,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc = pc.pace_words(pc.figurative_gaits(doc))
         elif name == "drop_thing_pace":
             doc = pc.drop_thing_pace(doc)
+        elif name == "unglue_pace":
+            doc = pc.unglue_pace(doc)
         elif name == "strip_slow":
             doc = pc.strip_slow(doc)
         elif name == "arrival_ends":
