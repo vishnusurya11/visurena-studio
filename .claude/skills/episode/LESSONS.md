@@ -1406,3 +1406,26 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
 - **A proof replay must not render a style the owner retired.** The first replay drew Hellsing ep01 cards; the
   owner stopped it. Replay the book's CURRENT look (the Kawajiri POC cards) or a neutral control, never the
   archived episode.
+
+## A book's look switched under a live series (Jekyll Kawajiri ep01, 2026-10-18)
+
+- **A drawn look can be drawn by Krea2, in prose.** The drawn drawer knew one shape (an SDXL checkpoint, comma
+  tags, a negative); a Krea2 look.json would have posted SDXL keys to a Krea2 graph. `book_look.krea2_t2i`: the
+  card's style, the entity's own words else the row's, the kind's camera, the recap; cfg 1, so no negative. The
+  Krea2 sheets took 10-16 s each; the LOOK reads around them took 87 min (three rounds).
+- **Switching a look is moving pictures aside, never deleting them**: every sheet, place picture and the ep01 card
+  went to `superseded/<old look>_<date>/`; `places.record_master` re-shas a redrawn master and drops its stale
+  variants, so places.json stays. The title card's art (`title/series_base.png`) is shared: move it too, or the new
+  card is the old look re-lettered.
+- **A judge first read in full on a new look reads the words, not the picture.** Grandfathering had kept the
+  must-noun rows light on the Jekyll cast; the first full read refused 5/5 Kawajiri sheets, every refusal a misread:
+  an adjective asked as a noun ('with lean, corded, knuckly pale hands' -> 'lean'), a body part the reader never
+  lists ('face', 'jaw'), a hat band it called present by saying nothing absent, and dossier commentary in a row
+  ('an established respectable identity and household'). Fix the reading (`look_back`, tests first) and rewrite the
+  row to the sheet; the ladder cannot cure a reader.
+- **The sheet ladder's keep-best can keep a worse sheet than it started with.** It ranks by hard-fault count, and
+  on a misreading judge every try ties: round 2 kept a black-haired brute in a felt hat for Jekyll (grey hair and a
+  silk top hat in his row) and a Hyde whose eyes were lost in black shadow. Look at the kept sheet before the
+  episode; a fixed reader plus a base-seed redraw gave back the first, right draw.
+- **Check the tree before the run, not at the launch.** drive.py refuses a dirty tree, and a peer's uncommitted
+  package (prism/) and a peer's page hunk held this launch; no session may commit another's paths.
