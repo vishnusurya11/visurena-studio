@@ -14,9 +14,10 @@ rung's body when it exists, and a test hands in a fake.
 """
 from __future__ import annotations
 
+import time
 from typing import Callable
 
-from studio import judged_gate
+from studio import judged_gate, step_attempts
 from studio.judges import master_eye
 from studio.judges.verdict import Verdict
 from studio.ladder import Ladder, Rung
@@ -97,5 +98,9 @@ def retake_through_take_ladder(ctx, shot: int, v: Verdict) -> None:
     from scripts.episode import step_09_shoot
     from studio import gate_policy, take_ladder
     faults = [f for f in v.faults if f.kind in master_eye.MEASURED]
+    if take_ladder.refuse_spent(ctx, len(faults)):       # the episode's 2 retake rounds: keep the master
+        return
+    began = time.time()
     take_ladder.retake(ctx, [shot], take_ladder.why_of("retake_shot", faults),
                        step_09_shoot.approved(gate_policy.of(ctx.stage, "RENDER")))
+    step_attempts.spend(ctx.home, take_ladder.RETAKES, time.time() - began)

@@ -1091,6 +1091,19 @@ def collect_all(tickets: list[tuple[dict, str]], where, on_take=None,
     return done, lost
 
 
+def first_wall_spent(began: float, now: float, retake: list[int]) -> bool:
+    """The first renders (not a retake pass) have run the `takes` wall: no new render starts."""
+    from studio import step_caps
+    return not retake and now - began >= step_caps.wall_s("takes")
+
+
+def after_wall(lost: list, seconds: float) -> tuple[list, str]:
+    """The takes the wall cancelled are not lost (they keep what exists); the CAP line."""
+    from studio import step_caps
+    kept = [(c, said) for c, said in lost if said != BOUNDARY]
+    return kept, step_caps.cap_line("takes", 1, 1, seconds, len(lost) - len(kept))
+
+
 def worth_resubmitting(said: str) -> bool:
     """A lost take whose cause is the machine's moment: comfy's TRANSIENT
     class, or the engine restarting under the job (EngineLost's 'vanished')."""
@@ -1419,9 +1432,12 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
               f"in {record['render_s']:.0f}s", flush=True)
 
     from studio import boundary
-    home = episode_home.home(book, number)
+    home, began = episode_home.home(book, number), time.time()
     _, lost = collect_twice(jobs, lambda c: wheres[c["index"]], keep, approved,
-                            stop=lambda: boundary.requested(home))
+                            stop=lambda: boundary.requested(home) or first_wall_spent(began, time.time(), retake or []))
+    if first_wall_spent(began, time.time(), retake or []):
+        lost, line = after_wall(lost, time.time() - began)
+        print(line, flush=True)
     print(f"{len(records)} takes -> {sheet}", flush=True)
     if lost:
         # named, not swallowed: the run is incomplete and the next command has to know
