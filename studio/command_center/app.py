@@ -217,7 +217,8 @@ def _live(request: Request, conn: sqlite3.Connection, stage: str, codex: str, un
     p = progress_view.progress(state.library, conn, codex, unit, logs=state.logs, proc_rows=state.procs())
     if not progress_view.show(p, finished):
         return {"live": None}
-    return {"live": p, "live_shape": progress_view.shape(p), "live_valuetext": progress_view.valuetext(p)}
+    return {"live": p, "live_shape": progress_view.shape(p), "live_valuetext": progress_view.valuetext(p),
+            "live_range": progress_view.range_words(p.get("eta") or {})}
 
 
 @router.get("/b/{codex}", response_class=HTMLResponse)

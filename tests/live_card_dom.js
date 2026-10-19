@@ -26,18 +26,20 @@ function node(props) {
   return n;
 }
 
-const finish = node(), stepend = node(), range = node(), win10 = node({ className: 'win' });
+const finish = node(), stepend = node(), range = node(), left = node(), win10 = node({ className: 'win' });
+const fin01 = node({ className: 'fin' });
 const seg10 = node({ className: 'seg st-waiting', kids: { '.win': win10 } });
+const seg01 = node({ className: 'seg st-done', kids: { '.fin': fin01 } });
 const card = node({ id: 'live', dataset: { now: '1000', src: '/api/p.json', partial: '/partials/live', vital: 'live', shape: 'run|02|loop|0' } });
 card.kids = { '[data-k="finish"]': finish, '[data-k="stepend"]': stepend, '[data-k="range"]': range,
-  '.seg[data-id="10"]': seg10 };
+  '[data-k="left"]': left, '.seg[data-id="10"]': seg10, '.seg[data-id="01"]': seg01 };
 
 const timers = [];
 let partial = 'empty';
 const P = { vital: 'live', now: 1000, unit: 'ep01', title: 't', run_started: 900, step_started: 950,
   now_step: { id: '02', name: 'plan', kind: 'loop' }, items: [],
-  eta: { finish: '16:40', step_end: '13:58', range: '15:55–17:50', steps_left: 11, n_runs: 15, basis: 'measured' },
-  steps: [{ id: '10', state: 'waiting', window: '15:10–15:20', will_run: true }] };
+  eta: { finish: '4:40 pm', left: '3h 05m', step_end: '1:58 pm', range: '3:55–5:50 pm', steps_left: 11, n_runs: 15, basis: 'measured' },
+  steps: [{ id: '01', state: 'done', fin: '50m · 3:52 pm' }, { id: '10', state: 'waiting', window: '~18m', will_run: true }] };
 
 const doc = node({ visibilityState: 'visible', title: '' });
 doc.documentElement = node();
@@ -73,9 +75,12 @@ async function run() {
 
   card.dataset.shape = 'run|02|loop|0';
   next(); await drain(); await drain(); await drain();
-  check('a quiet poll patches the episode finish', /episode done ~<b>16:40<\/b>/.test(finish.innerHTML), finish.innerHTML);
-  check('a quiet poll patches the step end', stepend.textContent === '02 plan ends ~13:58', stepend.textContent);
-  check('a quiet poll patches a later window', win10.textContent === '15:10–15:20', win10.textContent);
+  check('a quiet poll patches the episode finish', /^done ~<b>4:40 pm<\/b>/.test(finish.innerHTML), finish.innerHTML);
+  check('a quiet poll patches the step end', stepend.textContent === '02 plan ends ~1:58 pm', stepend.textContent);
+  check('a quiet poll patches a later window', win10.textContent === '~18m', win10.textContent);
+  check('a quiet poll patches the time left', left.textContent === '3h 05m', left.textContent);
+  check('a quiet poll patches a finished step', fin01.textContent === '50m · 3:52 pm', fin01.textContent);
+  check('a quiet poll patches the range', range.textContent === 'range 3:55–5:50 pm · 11 steps to run · 15 runs · measured', range.textContent);
   check('a quiet poll schedules the next', timers.length === 1, timers.length);
 
   card.dataset.shape = 'stale';

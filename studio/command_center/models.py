@@ -209,7 +209,11 @@ class RailStep(BaseModel):
     median_s: float | None = None    # the measured norm the rail's width is proportional to
     retries: int = 0                 # runs of this unit that started the step before this one
     will_run: bool | None = None     # a later step: runs again in this run (eta.will_run); None = not later
-    window: str = ""                 # a later step: "14:05–14:20" (local) or "kept"
+    window: str = ""                 # a later step: "~18m" projected, "kept" (this make) or "—"
+    when: str = ""                   # a later step's Seattle window "5:01–5:19 pm" (the tooltip)
+    end: float | None = None         # this run: when the step ended
+    made: dict[str, float] | None = None   # this make: {secs, end} from timing.jsonl
+    fin: str = ""                    # a finished step: "50m · 3:52 pm" (Seattle)
 
 
 class Sampler(BaseModel):
@@ -251,9 +255,12 @@ class Eta(BaseModel):
     finish_at: float | None = None   # epoch, rounded to five minutes
     lo: float | None = None
     hi: float | None = None
-    finish: str = ""                 # "02:45" (local): the EPISODE's finish, never the step's
-    range: str = ""                  # "02:30–03:10"
-    step_end: str = ""               # "13:58" (local): the running step's projected end; "" past its p90
+    finish: str = ""                 # "6:45 pm" (Seattle): the EPISODE's finish, never the step's
+    finish_raw: float | None = None  # the unrounded finish the time left counts to
+    left_s: float | None = None
+    left: str = ""                   # "3h 05m": the hero, the card's biggest words
+    range: str = ""                  # "6:15–7:15 pm"
+    step_end: str = ""               # "5:01 pm" (Seattle): the running step's projected end; "" past its p90
     steps_left: int = 0              # later steps that will run in this run
     basis: str = "estimate"          # norm | measured | estimate
     n_runs: int = 0
@@ -274,7 +281,8 @@ class Progress(BaseModel):
     now: float
     elapsed_s: float = 0.0
     work_s: float = 0.0
-    ceiling_s: float = 0.0
+    ceiling_s: float = 0.0           # the 5 h rung ceiling (run_budget.EPISODE_CEILING_SECONDS)
+    limit_s: float = 0.0             # the owner's 6 h (run_budget.OWNER_LIMIT_SECONDS): the episode clock's "of"
     steps: list[RailStep] = []
     now_step: NowStep | None = None
     items: list[Item] = []

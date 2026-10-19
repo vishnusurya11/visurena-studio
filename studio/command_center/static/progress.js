@@ -76,8 +76,15 @@
   }
   function finishHtml(e) {            /* _live_hero.html's finish line: the EPISODE's, never the step's */
     if (!e.finish) return '';
-    return 'episode done ~<b>' + e.finish + '</b>' + (e.long ? ' <span class="lv-why">at the earliest</span>' : '') +
+    return 'done ~<b>' + e.finish + '</b>' + (e.long ? ' <span class="lv-why">at the earliest</span>' : '') +
       (e.capped ? ' <span class="lv-why">at the 5 h ceiling</span>' : '');
+  }
+  function rangeText(e) {            /* progress_view.range_words: the range, the steps, the runs */
+    var out = [];
+    if (e.range && !e.long) out.push('range ' + e.range);
+    if (e.finish) out.push(e.steps_left + ' step' + (e.steps_left === 1 ? '' : 's') + ' to run');
+    if (e.n_runs) out.push(e.n_runs + ' runs' + (e.basis ? ' · ' + e.basis : ''));
+    return out.join(' · ');
   }
   function stepEnd(st, e) {           /* _live_hero.html's step line */
     return st.id + ' ' + st.name + ' ' + (e.step_end ? 'ends ~' + e.step_end : (e.long ? 'running long, past every measured full run' : ''));
@@ -93,9 +100,8 @@
     var f = $('finish');
     if (f && e.finish && f.innerHTML !== finishHtml(e)) f.innerHTML = finishHtml(e);
     if (st) text('stepend', stepEnd(st, e));
-    text('range', (e.range && !e.long ? 'range ' + e.range + ' · ' : '') +
-      (e.finish ? e.steps_left + ' step' + (e.steps_left === 1 ? '' : 's') + ' to run · ' : '') +
-      (e.n_runs ? e.n_runs + ' runs · ' + e.basis + ' · ' : ''));
+    if (st && p.vital !== 'done') text('left', e.left || '–');
+    text('range', rangeText(e));
     if (p.last_words) text('words', p.last_words);
     text('why', p.why || '');
     var why = $('why'); if (why && why.parentNode) why.parentNode.hidden = !p.why || p.vital === 'done';
@@ -112,6 +118,7 @@
       }
       if (st && st.id === s.id && st.kind === 'counted' && st.weight_total) seg.style.setProperty('--p', (st.weight_done / st.weight_total).toFixed(4));
       var win = seg.querySelector('.win'); if (win && s.window && win.textContent !== s.window) win.textContent = s.window;
+      var fin = seg.querySelector('.fin'); if (fin && s.fin && fin.textContent !== s.fin) fin.textContent = s.fin;
     });
   }
   function patchSheet(p) {

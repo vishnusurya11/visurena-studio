@@ -40,3 +40,9 @@ def test_a_swap_that_lands_nothing_still_schedules_the_next_poll(report):
 def test_a_quiet_poll_patches_the_episode_finish_the_step_end_and_the_windows(report):
     passed(report, "a quiet poll patches the episode finish", "a quiet poll patches the step end",
            "a quiet poll patches a later window", "a quiet poll schedules the next")
+
+
+def test_a_quiet_poll_patches_the_time_left_the_range_and_the_finished_steps(report):
+    # owner 2026-10-18: "time left ... also display time on finished events"
+    passed(report, "a quiet poll patches the time left", "a quiet poll patches the range",
+           "a quiet poll patches a finished step")

@@ -12,13 +12,13 @@ from __future__ import annotations
 import re
 import sqlite3
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from studio import eta, progress as prog, registry
 from studio.command_center import legacy_progress as lp
 from studio.command_center import library_paths, procs, unit_view, vitals
-from studio.run_budget import EPISODE_CEILING_SECONDS
+from studio.run_budget import EPISODE_CEILING_SECONDS, OWNER_LIMIT_SECONDS
 
 STAGE = "episode"
 COUNTED = ("07", "08", "09")
@@ -96,7 +96,7 @@ def _pair(db_rows: list[dict], run_id: str | None, sid: str) -> tuple[float | No
         if r.get("run_id") == run_id and str(r.get("step_id")) == sid:
             if r.get("event") == "started":
                 began = eta.to_epoch(r.get("event_ts"))
-            elif r.get("event") in ("completed", "failed", "deferred", "escalated"):
+            elif r.get("event") in ("completed", "skipped", "failed", "deferred", "escalated"):
                 ended = eta.to_epoch(r.get("event_ts"))
     return began, ended
 
@@ -119,7 +119,7 @@ def rail(state: dict, db_rows: list[dict], hist: dict, names: dict[str, str], no
         st = RAIL_STATE.get((state["steps"].get(sid) or {}).get("state"), "waiting")
         secs = (ended - began) if began and ended else (now - began if began and st == "running" else None)
         xs = hist.get(sid) or []
-        out.append({"id": sid, "name": name, "state": st, "secs": secs,
+        out.append({"id": sid, "name": name, "state": st, "secs": secs, "end": ended,
                     "median_s": eta.band(xs)[1] if xs else None, "retries": retries(db_rows, state["run"], sid)})
     return out
 
@@ -213,17 +213,114 @@ def step_left(state: dict, hist: dict, book: Path, frames: dict[str, int], now: 
             "basis": eta.confidence(xs), "n": len(xs), "r": eta.SEED}
 
 
+SEATTLE = "America/Los_Angeles"
+
+
+def _nth_sunday(year: int, month: int, n: int) -> float:
+    """00:00 UTC of the month's n-th Sunday, as epoch seconds."""
+    d = datetime(year, month, 1, tzinfo=timezone.utc)
+    return (d + timedelta(days=(6 - d.weekday()) % 7 + 7 * (n - 1))).timestamp()
+
+
+def pacific_offset(epoch: float) -> int:
+    """-7 inside US daylight time (2nd Sunday of March 02:00 PST to 1st Sunday of
+    November 02:00 PDT), else -8: Seattle with no tz database on the box."""
+    year = datetime.fromtimestamp(epoch, timezone.utc).year
+    spring, fall = _nth_sunday(year, 3, 2) + 10 * 3600, _nth_sunday(year, 11, 1) + 9 * 3600
+    return -7 if spring <= epoch < fall else -8
+
+
+def seattle_time(epoch: float) -> datetime:
+    """The moment in Seattle: the tz database when the box has one, else the US rule."""
+    try:
+        from zoneinfo import ZoneInfo
+        return datetime.fromtimestamp(epoch, ZoneInfo(SEATTLE))
+    except Exception:                                  # noqa: BLE001 -- no tzdata on Windows
+        return datetime.fromtimestamp(epoch, timezone(timedelta(hours=pacific_offset(epoch))))
+
+
 def clock(epoch: float | None) -> str:
-    """`02:45` in this machine's local time."""
-    return datetime.fromtimestamp(epoch).strftime("%H:%M") if epoch else ""
+    """`6:45 pm` in Seattle (owner: every time Seattle, 12-hour)."""
+    if not epoch:
+        return ""
+    d = seattle_time(epoch)
+    return f"{d.hour % 12 or 12}:{d.minute:02d} {'am' if d.hour < 12 else 'pm'}"
 
 
-def kept_steps(db_rows: list[dict]) -> set[str]:
-    """Steps some run of this unit finished (completed or skipped)."""
-    return {str(r.get("step_id")) for r in db_rows if r.get("event") in ("completed", "skipped")}
+def clock_range(lo: float | None, hi: float | None) -> str:
+    """`6:15–7:15 pm`, the half of the day said once when both ends share it."""
+    a, b = clock(lo), clock(hi)
+    return f"{a[:-3]}–{b}" if a[-2:] == b[-2:] else f"{a}–{b}"
 
 
-def later_steps(state: dict, hist: dict, names: dict, db_rows: list[dict], unit: str) -> list[tuple]:
+def left_words(secs: float | None) -> str:
+    """`3h 05m` / `42m` / `<1m`: the hero's time left; '' with no finish."""
+    if secs is None:
+        return ""
+    m = int(max(0.0, secs) // 60)
+    return f"{m // 60}h {m % 60:02d}m" if m >= 60 else (f"{m}m" if m else "<1m")
+
+
+# --- this make (the runs on the episode's honest clock) ---
+
+
+STEP_ROW = re.compile(r"step_(\d\d)$")
+
+
+def make_runs(home: Path, run_id: str | None) -> set[str]:
+    """The run ids of this make: clock.jsonl's rows, the open run, and this run."""
+    from studio import run_clock
+    ids = {r.get("run_id") for r in run_clock.rows(home)} | {(run_clock.read_open(home) or {}).get("run_id")}
+    return {i for i in ids | {run_id} if i}
+
+
+def make_start(home: Path, t0: float | None) -> float | None:
+    """When this make began: its first run span, else this run."""
+    from studio import run_clock
+    starts = [a for a, _ in run_clock.spans(home)] + ([t0] if t0 else [])
+    return min(starts) if starts else None
+
+
+def make_steps(rows: list[dict], since: float | None) -> dict[str, dict]:
+    """{step: {secs, end}} from timing.jsonl since the make began: a `step_NN` started
+    row opens a span, the work rows after it stretch its end; spans of a step sum."""
+    spans: dict[str, list[list[float]]] = {}
+    cur = None
+    for r in rows:
+        t0 = eta.to_epoch(r.get("started"))
+        if t0 is None or (since and t0 < since - 5):
+            continue
+        m = STEP_ROW.match(str(r.get("stage") or ""))
+        if m and r.get("event") == "started":
+            cur = [t0, t0]
+            spans.setdefault(m.group(1), []).append(cur)
+        elif cur is not None:
+            cur[1] = max(cur[1], eta.to_epoch(r.get("ended")) or t0)
+    return {sid: {"secs": sum(b - a for a, b in xs), "end": max(b for _, b in xs)} for sid, xs in spans.items()}
+
+
+def finished(s: dict) -> bool:
+    """Done or skipped in this run, or a later step kept from this make."""
+    return s.get("state") in ("done", "skip") or s.get("window") == "kept"
+
+
+def finished_words(s: dict) -> str:
+    """`50m · 3:52 pm`: a finished step's time in this make and its Seattle end."""
+    made = s.get("made")
+    if not finished(s) or not made:
+        return ""
+    return f"{unit_view.span(made['secs']) or '<1m'} · {clock(made['end'])}"
+
+
+def kept_steps(db_rows: list[dict], runs: set[str] | None = None) -> set[str]:
+    """Steps a run of THIS make finished (completed or skipped); an earlier make's
+    finish is not kept (owner 2026-10-18: 07/08 read `kept` with no grid on disk)."""
+    return {str(r.get("step_id")) for r in db_rows if r.get("event") in ("completed", "skipped")
+            and (runs is None or r.get("run_id") in runs)}
+
+
+def later_steps(state: dict, hist: dict, names: dict, db_rows: list[dict], unit: str,
+                runs: set[str] | None = None) -> list[tuple]:
     """(step, will run, full-run history) for each step after the running one (eta.will_run
     over the registry's in:/out:); every later step runs when the registry cannot answer."""
     order = list(names)
@@ -232,7 +329,7 @@ def later_steps(state: dict, hist: dict, names: dict, db_rows: list[dict], unit:
         outs = {s: registry.outputs_of(STAGE, s, unit) for s in order}
     except (KeyError, OSError, ValueError, TypeError):
         ins, outs = {}, {}
-    will = eta.will_run(order, state["step"] or "", kept_steps(db_rows) if ins else set(), ins, outs)
+    will = eta.will_run(order, state["step"] or "", kept_steps(db_rows, runs) if ins else set(), ins, outs)
     return [(s, runs, hist.get(s) or []) for s, runs in will.items()]
 
 
@@ -246,26 +343,65 @@ def finish(state: dict, left: dict, later: list[tuple], now: float, work_s: floa
     p = eta.project(now, left["left"], left["sigma"], later, now + EPISODE_CEILING_SECONDS - work_s)
     out = {**{k: (eta.round_to(p[k]) if p[k] else None) for k in ("finish_at", "lo", "hi")},
            "basis": left["basis"], "n_runs": left["n"], "long": p["long"], "capped": p["capped"],
-           "steps_left": p["steps_left"], "plan": p["steps"], "step_end": clock(p["step_end_at"])}
-    out.update(finish=clock(out["finish_at"]), range=f"{clock(out['lo'])}–{clock(out['hi'])}" if out["lo"] else "")
+           "steps_left": p["steps_left"], "plan": p["steps"], "step_end": clock(p["step_end_at"]),
+           "finish_raw": p["finish_at"]}
+    out.update(finish=clock(out["finish_at"]), range=clock_range(out["lo"], out["hi"]) if out["lo"] else "")
     _cache[key] = (now, out)
     return out
 
 
+def window_words(w: dict) -> str:
+    """A later step on the rail: `~18m` projected, `kept` (finished in this make), or `—`."""
+    if not w.get("will_run"):
+        return "kept"
+    if w.get("start_at") is None or w.get("end_at") is None:
+        return "—"
+    return f"~{left_words(w['end_at'] - w['start_at'])}"
+
+
 def with_windows(steps: list[dict], plan: dict | None) -> list[dict]:
-    """The rail's steps, each later one with its window: `14:05–14:20`, or `kept`."""
+    """The rail's steps, each later one with its words (window_words) and its
+    Seattle `5:01–5:19 pm` for the tooltip."""
     by = {w["id"]: w for w in (plan or {}).get("steps") or []}
     out = []
     for s in steps:
         w = by.get(s["id"])
         if w:
-            s = {**s, "will_run": w["will_run"],
-                 "window": f"{clock(w['start_at'])}–{clock(w['end_at'])}" if w["will_run"] else "kept"}
+            s = {**s, "will_run": w["will_run"], "window": window_words(w),
+                 "when": clock_range(w["start_at"], w["end_at"]) if w["will_run"] and w.get("start_at") else ""}
         out.append(s)
     return out
 
 
+def with_made(steps: list[dict], made: dict[str, dict]) -> list[dict]:
+    """Each finished step with its time in this make and its end: `50m · 3:52 pm`."""
+    out = []
+    for s in steps:
+        m = made.get(s["id"]) or ({"secs": s.get("secs") or 0.0, "end": s["end"]} if s.get("end") else None)
+        m = m if finished(s) else None
+        s = {**s, "made": m} if m else s
+        out.append({**s, "fin": finished_words(s)})
+    return out
+
+
 # --- the card ---
+
+
+def home_timing(home: Path) -> list[dict]:
+    """This episode's timing.jsonl rows, parsed once per mtime."""
+    path = Path(home) / "timing.jsonl"
+    if not path.is_file():
+        return []
+    key = ("timing", str(path), path.stat().st_mtime_ns)
+    if key not in _cache:
+        _cache[key] = lp.jsonl_rows(lp.read_tail(path))
+    return _cache[key]
+
+
+def with_left(e: dict, now: float) -> dict:
+    """The hero's time left from the unrounded finish, fresh every poll (`3h 05m`)."""
+    raw = e.get("finish_raw")
+    return {**e, "left_s": raw - now, "left": left_words(raw - now)} if raw else e
 
 
 def master(library: Path, codex: str, home: Path) -> tuple[str | None, dict | None]:
@@ -333,20 +469,22 @@ def assemble(library, codex, unit, home, conn, db_rows, derived, now, proc_rows,
     tiles = items(state, home, state["step"], v["vital"] in RUNNING, left["r"])
     elapsed = now - state["t0"] if state["t0"] else 0.0
     work = work_before(home, state["t0"]) + elapsed
-    later = later_steps(state, hist, names, db_rows, unit) if v["vital"] in RUNNING else []
+    runs = make_runs(home, state["run"])
+    later = later_steps(state, hist, names, db_rows, unit, runs) if v["vital"] in RUNNING else []
     e = finish(state, left, later, now, work) if v["vital"] in RUNNING else {}
     return card(library, codex, unit, home, state, db_rows, hist, names, derived, v, tiles, e, now, work)
 
 
 def card(library, codex, unit, home, state, db_rows, hist, names, derived, v, tiles, e, now, work) -> dict:
     """The `models.Progress` dict."""
-    step = now_step(state, names, tiles)
+    step, e = now_step(state, names, tiles), with_left(e, now)
     url, qc = master(library, codex, home) if v["vital"] == "done" else (None, None)
+    made = make_steps(home_timing(home), make_start(home, state["t0"]))
     return {"codex": codex, "unit": unit, "run_id": state["run"], "vital": v["vital"], "vital_reason": v["reason"],
             "quiet_s": v["quiet_s"], "budget_s": v["budget_s"], "budget_x": budget_x(v), "run_started": state["t0"],
             "step_started": state["step_t"], "now": now, "elapsed_s": now - state["t0"] if state["t0"] else 0.0,
-            "work_s": work, "ceiling_s": float(EPISODE_CEILING_SECONDS),
-            "steps": with_windows(rail(state, db_rows, hist, names, now), {"steps": e.get("plan")}),
+            "work_s": work, "ceiling_s": float(EPISODE_CEILING_SECONDS), "limit_s": float(OWNER_LIMIT_SECONDS),
+            "steps": with_made(with_windows(rail(state, db_rows, hist, names, now), {"steps": e.get("plan")}), made),
             "now_step": step, "items": tiles,
             "inflight_started": inflight_started(state) if counted(state) else None,
             "media_base": f"/thumb/{codex}/160/episodes/{unit}/", "lib_base": f"/lib/{codex}/episodes/{unit}/",
@@ -393,6 +531,18 @@ def shape(p: dict) -> str:
     step = p.get("now_step") or {}
     group = "run" if p["vital"] in RUNNING else p["vital"]
     return f"{group}|{step.get('id')}|{step.get('kind')}|{len(p.get('items') or [])}"
+
+
+def range_words(e: dict) -> str:
+    """`range 6:15–7:15 pm · 7 steps to run · 9 runs · measured` (progress.js rangeText)."""
+    out = []
+    if e.get("range") and not e.get("long"):
+        out.append(f"range {e['range']}")
+    if e.get("finish"):
+        out.append(f"{e['steps_left']} step{'' if e['steps_left'] == 1 else 's'} to run")
+    if e.get("n_runs"):
+        out.append(f"{e['n_runs']} runs" + (f" · {e['basis']}" if e.get("basis") else ""))
+    return " · ".join(out)
 
 
 def valuetext(p: dict) -> str:

@@ -239,6 +239,10 @@ section.live[data-still] .lv-trace polyline{stroke:var(--line)}
 .lv-why{font-size:var(--t-body);color:var(--ink-2)}
 .lv-range{font-family:var(--f-mono);font-size:var(--t-label);color:var(--ink-2);margin-top:4px}
 .lv-stepend{font-family:var(--f-mono);font-size:var(--t-label);color:var(--ink);margin-top:2px}
+.lv-clock{font-family:var(--f-mono);font-size:var(--t-label);color:var(--ink-2);margin-top:2px}
+.lv-step{margin-top:10px}
+.lv-step .lv-count,.lv-step .lv-in{font-family:var(--f-mono);font-size:var(--t-body);font-weight:500;text-transform:none;letter-spacing:0;color:var(--ink)}
+.lv-step .lv-count small{font-size:var(--t-micro);color:var(--ink-2)}
 .lv-whyline{margin:0 0 10px;padding:6px 10px;border-left:3px solid var(--qc);background:var(--paper-2);font-size:var(--t-body);color:var(--ink)}
 .lv-whyline[hidden]{display:none}
 .lv-sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:5px;margin:0 0 14px;padding:8px;background:var(--paper-2);border:1px solid var(--rule)}
@@ -277,7 +281,9 @@ section.live[data-still] .lv-trace polyline{stroke:var(--line)}
 .lv-rail .dur{font-family:var(--f-mono);font-size:var(--t-micro);color:var(--ink-2);white-space:nowrap}
 /* a later step's projected window (page experts 2026-10-18, A2): when it runs, or kept */
 .lv-rail .win{font-family:var(--f-mono);font-size:var(--t-micro);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}/* a done step is a plain bar: no name, no time -- only the running and failed steps speak (P03.4) */
-.lv-rail .seg:is(.st-done,.st-skip) .lbl small,.lv-rail .seg:is(.st-done,.st-skip) .dur{display:none}
+.lv-rail .seg:is(.st-done,.st-skip) .dur{display:none}
+.lv-rail .seg:has(.fin){min-width:56px}
+.lv-rail .fin{font-family:var(--f-mono);font-size:var(--t-micro);color:var(--ink-2);line-height:1.2}/* a finished step: its time in this make and its Seattle end (owner 2026-10-18) */
 .lv-rail .ck{width:10px;height:10px;flex:none}
 .lv-rail .ck path{fill:none;stroke:var(--ok);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:0}
 .lv-railm{display:none;margin:0 0 10px;font-size:var(--t-body)}

@@ -37,22 +37,23 @@ def test_the_card_renders_without_javascript(board):
     card = _card(_page(board, _drive(time.time() - 3600)))
     big = re.search(r'data-k="big">(.*?)</span></span>', card, re.S).group(1)
     assert re.sub(r"<[^>]+>", "", big) == "1/3"
-    assert "episode done ~<b>" in card and "09 shoot" in card
+    assert 'data-k="finish">done ~<b>' in card and "09 shoot" in card
     assert card.count('role="listitem"') == 3 and re.search(r'title="T\d+ · rendering', card)
 
 
 def test_the_hero_separates_the_episode_finish_from_the_steps_end(board):
     # page experts 2026-10-18 (A1): 'done around' under the step read as the step's end
     card = _card(_page(board, _drive(time.time() - 3600)))
-    assert re.search(r'data-k="stepend">09 shoot ends ~\d\d:\d\d', card)
+    assert re.search(r'data-k="stepend">09 shoot ends ~\d{1,2}:\d\d [ap]m', card)
     assert "episode clock" in card and re.search(r"\d+ steps? to run", card)
 
 
 def test_every_later_step_on_the_rail_says_when_or_kept(board):
-    # page experts 2026-10-18 (A2): no step after the running one is silent
+    # page experts 2026-10-18 (A2): no step after the running one is silent; owner
+    # 2026-10-18: its projected minutes, `kept` only for this make, else a dash
     card = _card(_page(board, _drive(time.time() - 3600)))
     wins = re.findall(r'<span class="win">([^<]*)</span>', card)
-    assert len(wins) == 4 and all(re.fullmatch(r"\d\d:\d\d–\d\d:\d\d|kept", w) for w in wins), wins
+    assert len(wins) == 4 and all(re.fullmatch(r"~(\d+h \d\dm|\d+m|&lt;1m)|kept|—", w) for w in wins), wins
 
 
 def test_the_card_sits_above_the_head(board):
@@ -63,7 +64,7 @@ def test_the_card_sits_above_the_head(board):
 def test_the_hero_is_a_progressbar_with_words(board):
     card = _card(_page(board, _drive(time.time() - 3600)))
     assert 'role="progressbar"' in card
-    assert re.search(r'aria-valuetext="take 1 of 3, episode done around \d\d:\d\d"', card)
+    assert re.search(r'aria-valuetext="take 1 of 3, episode done around \d{1,2}:\d\d [ap]m"', card)
 
 
 def test_the_live_region_holds_no_clock(board):
@@ -85,7 +86,7 @@ def test_a_dead_run_is_one_still_sentence(board):
 
 def test_the_tab_title_is_the_run(board):
     html = _page(board, _drive(time.time() - 3600))
-    assert re.search(r"<title>[●○] 09 shoot 1/3 · ~\d\d:\d\d · ep04</title>", html)
+    assert re.search(r"<title>[●○] 09 shoot 1/3 · ~\d{1,2}:\d\d [ap]m · ep04</title>", html)
 
 
 def test_the_partial_is_the_card_alone(board):
