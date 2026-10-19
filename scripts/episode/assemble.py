@@ -671,6 +671,13 @@ def dialogue_takes(placed: dict, takes: dict) -> set[int]:
             if spoken & set(getattr(takes[i], "shots", None) or [i])}
 
 
+def ladder_kept(take_dir: Path) -> bool:
+    """The take ladder's last terminal kept its best at the cap: the newest take-eye verdict
+    says `keep_best` (owner option A, 2026-10-18)."""
+    eyes = sorted(Path(take_dir).glob("eye_*.json"), key=lambda p: p.stat().st_mtime)
+    return bool(eyes) and episode_home.read_json(eyes[-1]).get("terminal") == "keep_best"
+
+
 def dead_plan(placed: dict, takes: dict, stills: dict, take_dir: Path, heads: dict) -> dict:
     """G-DEAD (studio/dead_footage): the free cut that takes every dead shot it can
     out of the master; what it cannot cure REFUSES the master -- a retake, never a
@@ -679,7 +686,11 @@ def dead_plan(placed: dict, takes: dict, stills: dict, take_dir: Path, heads: di
     order = segments_of(placed, takes)
     records = {i: episode_home.read_json(p) for i, _ in order
                if (p := Path(take_dir) / f"T{i:02d}.dq.json").exists()}
-    states = {i: dead.state_of(i, stills, records.get(i)) for i, _ in order}
+    kept = ladder_kept(Path(take_dir))
+    states = {i: dead.state_of(i, stills, records.get(i), kept) for i, _ in order}
+    for i, _ in order:
+        if states[i] == "flagged":
+            print(dead.flag_line(i, records[i]), flush=True)
     room = {i: clip_seconds(takes[i]) - heads.get(i, 0.0) for i, _ in order if i not in stills}
     plan = dead.cut_plan(order, states, room, dialogue_takes(placed, takes))
     if left := dead.faults(dead.apply(order, plan), states):

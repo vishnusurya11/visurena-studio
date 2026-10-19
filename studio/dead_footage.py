@@ -46,13 +46,30 @@ def voice_only(record: dict) -> bool:
     return bool(failing) and failing <= VOICE_ROWS
 
 
-def state_of(index: int, stills: dict, record: dict | None) -> str:
-    """still | failed | near_dead | alive, for one take of the cut."""
+TRULY_DEAD = frozenset({"frozen-at-start", "frozen-share", "frozen-whole"})
+"""The rows that make a take dead footage whatever the ladder kept (owner option A, 2026-10-18)."""
+
+
+def failing_rows(record: dict) -> list[str]:
+    return [g.get("name") for g in (record or {}).get("gates", []) if g.get("hard") and not g.get("ok")]
+
+
+def state_of(index: int, stills: dict, record: dict | None, kept: bool = False) -> str:
+    """still | failed | flagged | near_dead | alive, for one take of the cut.  `kept`: the take
+    ladder's terminal kept its best at the cap -- a failed take with no frozen row is admitted
+    FLAGGED (owner option A, Jekyll Kawajiri ep01 2026-10-18)."""
     if index in stills:
         return "still"
     if record is not None and not record.get("passed", True) and not voice_only(record):
-        return "failed"
+        return "flagged" if kept and not TRULY_DEAD & set(failing_rows(record)) else "failed"
     return "near_dead" if static_share(record) >= NEAR_DEAD else "alive"
+
+
+def flag_line(index: int, record: dict) -> str:
+    """What the log says of an admitted, flagged take: its failing rows."""
+    rows = [g for g in (record or {}).get("gates", []) if g.get("hard") and not g.get("ok")]
+    return f"FLAGGED T{index:02d}: kept best at the cap -- " + "; ".join(
+        f"{g.get('name')}: {str(g.get('note') or '')[:90]}" for g in rows)
 
 
 def is_dead(state: str, seconds: float) -> bool:
