@@ -64,9 +64,15 @@ def selection(book: Path, number: int) -> list[int]:
     cards = read(room / "prompts.json", [])
     sizes = {int(s["index"]): s.get("size", "") for s in read(home / "plan.json", {}).get("shots", [])}
     dqs = {int(c["index"]): read(room / f"T{int(c['index']):02d}.dq.json", None) for c in cards}
-    from studio.take_ladder import attempts_of
-    taken = {int(c["index"]): attempts_of(room, int(c["index"])) for c in cards}
+    taken = {int(c["index"]): taken_of(home, room, int(c["index"])) for c in cards}
     return fr.selected(cards, sizes, dqs, canvas_height(home), taken)
+
+
+def taken_of(home: Path, room: Path, index: int) -> int:
+    """The take's retakes so far; the episode's retake wall spent counts every take as retaken
+    (warp_gate.RETAKES), so a take is never stranded between seed and refine."""
+    from studio import take_ladder, warp_gate
+    return warp_gate.RETAKES if take_ladder.episode_spent(home) else take_ladder.attempts_of(room, index)
 
 
 def current(doc: dict, room: Path, index: int) -> bool:
@@ -94,6 +100,12 @@ def refined_out(home: Path, index: int) -> bool:
 
 def count_refine(home: Path, index: int) -> None:
     step_attempts.spend(home, refine_key(index))
+
+
+def count_if_worked(home: Path, work) -> None:
+    """A refine round is spent only when a job was queued: no_faces and no_cast cost none."""
+    if work.jobs:
+        count_refine(home, work.index)
 
 
 def wall_spent(began: float, now: float) -> bool:
@@ -400,7 +412,7 @@ def refine(book: Path, number: int, indices: list[int] | None, *, engine=None, d
         queued = queue_within_wall(book, number, pending(book, number, indices), cards, engine, loose, detect, embed)
         for began, work in queued:
             out[work.index] = decide_take(room, book, work, detect, embed, engine, time.time() - began, loose)
-            count_refine(episode_home.home(book, number), work.index)
+            count_if_worked(episode_home.home(book, number), work)
     return out
 
 

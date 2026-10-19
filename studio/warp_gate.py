@@ -15,10 +15,14 @@ POC W, f70-98).  Per take, on the CPU:
 - E(t) = face residual - (2.51 x bg residual + 1.69 x face flow + 1.00), the same
   over the eye mask; S = p90 of E, Se = p90 of the eye's.
 
-FAIL (S > 2.5 or Se > 3.0): a seed retake, at most 2, then the F2 face refine.
-WARN (1.5 < S <= 2.5) and UNMEASURABLE (face tracked in under 45 % of searched
-frames): the F2 face refine.  Fitted on 27 clips with no owner labels; every score
-is logged in the dq record so the cut can be refit on labelled takes.
+FAIL (S > 2.5 only): one seed retake, then the F2 face refine when the face is small
+(a tracked median under 60 px), else the take ships flagged.  EYE (S <= 2.5, Se > 3.0):
+an advisory, never a fail -- all eight ep01 hard fails were Se-only (Se 3.2-5.0, S
+-0.64..1.96) and the seeds cured 0 of 4 (P07, 2026-10-19).  WARN (1.5 < S <= 2.5) and
+UNMEASURABLE (face tracked in under 45 % of searched frames): the F2 face refine, a warn
+only for a small face or S_held > 1.5 (H3 animates on threes; the step pairs inflate S).
+Fitted on 27 clips with no owner labels; every score is logged in the dq record so the
+cut can be refit on labelled takes.
 """
 from __future__ import annotations
 
@@ -39,7 +43,14 @@ BG_K, FLOW_K, BIAS = 2.51, 1.69, 1.00
 """The pooled fit over 27 clips (WARPING.md section 3)."""
 FAIL_S, FAIL_SE, WARN_S = 2.5, 3.0, 1.5
 TRACKED_MIN = 0.45
-RETAKES = 2
+RETAKES = 1
+SMALL_TRACK_PX = 60.0
+"""A face tracked under this many render pixels is the refine's; at or over it F2 adds nothing."""
+HELD_WALL = 1.5
+FACE_W_SMALL = 0.10
+PERIODS = (3, 2, 4)
+HELD_RATIO = 0.25
+"""A cadence is real when the held pairs move under this share of the step pairs."""
 PENALTY = 40.0
 
 
@@ -57,19 +68,25 @@ def score(e: np.ndarray) -> float | None:
 
 
 def verdict(s: float | None, se: float | None, share: float) -> str:
-    """pass / warn / fail / unmeasurable."""
-    if s is None or share < TRACKED_MIN:
+    """pass / warn / eye / fail / unmeasurable.  Only S over its wall fails; an eye-only
+    excess (S <= 2.5, Se > 3.0) is the advisory `eye`."""
+    if share < TRACKED_MIN or (s is None and (se is None or se <= FAIL_SE)):
         return "unmeasurable"
-    if s > FAIL_S or (se is not None and se > FAIL_SE):
+    if s is not None and s > FAIL_S:
         return "fail"
+    if se is not None and se > FAIL_SE:
+        return "eye"
     return "warn" if s > WARN_S else "pass"
 
 
-def cure(state: str, taken: int) -> str:
-    """'seed' while a failing take has retakes left, 'refine' for F2, '' for none."""
-    if state == "fail" and taken < RETAKES:
-        return "seed"
-    return "refine" if state in ("fail", "warn", "unmeasurable") else ""
+def cure(state: str, taken: int, track_px_min: float | None = None) -> str:
+    """'seed' for a fail not yet retaken, 'refine' (F2) for a small face, '' otherwise:
+    a failing take whose smallest tracked face is readable ships flagged."""
+    if state == "fail":
+        if taken < RETAKES:
+            return "seed"
+        return "" if track_px_min is not None and track_px_min >= SMALL_TRACK_PX else "refine"
+    return "refine" if state in ("warn", "unmeasurable") else ""
 
 
 def spans(e: np.ndarray, wall: float = FAIL_S) -> list[list[int]]:
@@ -83,25 +100,91 @@ def spans(e: np.ndarray, wall: float = FAIL_S) -> list[list[int]]:
     return out
 
 
-def judge(rows: dict, share: float, frames: int) -> dict:
-    """The measure the dq record keeps, from the per-frame rows rf, rb, mf, re."""
+def split_pairs(frames: int, period: int, phase: int) -> tuple[list[int], list[int]]:
+    """(held, step) pair indices: with a cadence the picture changes on pair t when
+    (t + 1 - phase) is a multiple of the period."""
+    pairs = range(max(frames - 1, 0))
+    step = [t for t in pairs if period > 1 and (t + 1 - phase) % period == 0]
+    return [t for t in pairs if t not in step], step
+
+
+def cadence(gray: list[np.ndarray]) -> tuple[int, int]:
+    """(period, phase) of the frame repeat, (1, 0) when every pair moves."""
+    d = np.array([np.abs(a.astype(np.float32) - b.astype(np.float32)).mean() for a, b in zip(gray, gray[1:])])
+    best = (HELD_RATIO, 1, 0)
+    for p in PERIODS:
+        for ph in range(p):
+            held, step = split_pairs(len(gray), p, ph)
+            if held and step and d[step].mean() > 0:
+                best = min(best, (d[held].mean() / d[step].mean(), p, ph))
+    return (best[1], best[2]) if best[1] > 1 else (1, 0)
+
+
+def pick(e: np.ndarray, idx: list[int]) -> float | None:
+    """The score over the chosen pairs; None when there are none."""
+    return score(e[idx]) if idx else None
+
+
+def track_stats(tracks: list[list], scale: float) -> list[dict]:
+    """Each track's median face height in render px and its life in detections."""
+    return [{"median_px": round(float(np.median([(b[3] - b[1]) / scale for _, b in tr])), 1), "life": len(tr)}
+            for tr in tracks]
+
+
+def face_width(tracks: list[list]) -> float | None:
+    """The longest track's median face width as a share of the frame."""
+    if not tracks:
+        return None
+    longest = max(tracks, key=len)
+    return round(float(np.median([(b[2] - b[0]) / SIDE for _, b in longest])), 3)
+
+
+def judge(rows: dict, share: float, frames: int, tracks: list[dict] | None = None,
+          cad: tuple[int, int] = (1, 0), face_w: float | None = None) -> dict:
+    """The measure the dq record keeps, from the per-frame rows rf, rb, mf, re.  Under
+    TRACKED_MIN the faces were barely found: S and Se are None, S_raw keeps the number."""
     e = excess(rows["rf"], rows["rb"], rows["mf"])
     ee = excess(rows["re"], rows["rb"], rows["mf"])
     s, se = score(e), score(ee)
     r = lambda v: None if v is None else round(v, 2)
-    return {"state": verdict(s, se, share), "S": r(s), "Se": r(se), "share": round(share, 2),
-            "frames": frames, "spans": spans(e)}
+    seen = share >= TRACKED_MIN
+    held, step = split_pairs(frames, *cad)
+    return {"state": verdict(s, se, share), "S": r(s) if seen else None, "Se": r(se) if seen else None,
+            "S_raw": r(s), "share": round(share, 2), "frames": frames, "spans": spans(e),
+            "period": cad[0], "phase": cad[1], "S_held": r(pick(e, held)), "S_step": r(pick(e, step)),
+            "Se_held": r(pick(ee, held)), "Se_step": r(pick(ee, step)),
+            "frames_eye": int((np.nan_to_num(ee, nan=-np.inf) > FAIL_SE).sum()), "face_w": face_w,
+            "eye_spans": spans(ee, FAIL_SE), "tracks": tracks or []}
+
+
+def warn_routes(m: dict) -> bool:
+    """A warn goes to F2 only for a small face or a bad held score; no cadence log, the old route."""
+    held, width = m.get("S_held"), m.get("face_w")
+    if held is None or width is None:
+        return True
+    return width < FACE_W_SMALL or held > HELD_WALL
+
+
+def smallest_track(m: dict | None) -> float | None:
+    """The smallest tracked median face height (render px) in a warp measure; None unlogged."""
+    heights = [t["median_px"] for t in (m or {}).get("tracks") or []]
+    return min(heights) if heights else None
 
 
 def row(m: dict | None):
-    """The take gate's `warp` row: HARD on a fail; warn and unmeasurable route to F2."""
+    """The take gate's `warp` row: HARD on S over its wall only.  The state is recomputed
+    from the numbers (a stored `fail` of an older gate does not stand); `eye` is advisory."""
     from studio.take_verdict import Gate
     if not m:
         return Gate("warp", None, True, True, "not measured")
-    note = f"{m['state']}: S {m['S']} Se {m['Se']} over {m['share']:.0%} tracked; over the wall {m['spans']}"
-    if m["state"] == "fail":
+    state = verdict(m.get("S"), m.get("Se"), m["share"])
+    show = lambda v: "no score" if v is None or m["share"] < TRACKED_MIN else v
+    note = f"{state}: S {show(m.get('S'))} Se {show(m.get('Se'))} over {m['share']:.0%} tracked; over the wall {m['spans']}"
+    if state == "fail":
         return Gate("warp", m["S"], False, True, f"{note} HARD: the face is redrawn frame to frame", PENALTY)
-    return Gate("warp", m["S"], True, True, note)
+    if state == "eye":
+        return Gate("warp", m["S"], True, False, f"{note} advisory: the eye alone moves (owner label wanted)")
+    return Gate("warp", m.get("S"), True, True, note)
 
 
 # ---- the flow --------------------------------------------------------------------------
@@ -267,4 +350,6 @@ def measure(video: Path, detect=None) -> dict:
         return {"state": "unmeasurable", "S": None, "Se": None, "share": 0.0, "frames": len(gray), "spans": []}
     dets, marks = faces_of(rgb, detect or detector())
     tracks = link(dets)
-    return judge(frame_rows(gray, tracks, marks), tracked_share(tracks, len(gray)), len(gray))
+    stats = track_stats(tracks, SIDE / rgb[0].shape[1])
+    return judge(frame_rows(gray, tracks, marks), tracked_share(tracks, len(gray)), len(gray),
+                 stats, cadence(gray), face_width(tracks))

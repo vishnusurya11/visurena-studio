@@ -42,6 +42,7 @@ from __future__ import annotations
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -690,6 +691,31 @@ def cached(take_dir: Path, index: int, kept: Path, any_code: bool = False) -> di
     return report if report.get("take_sha8") == take_sha8(kept) and code else None
 
 
+def lane_threads(env=None) -> int:
+    """Threads a lane may use (VISURENA_LANE_THREADS, default 2): it runs beside a GPU render."""
+    import os
+    try:
+        n = int((os.environ if env is None else env).get("VISURENA_LANE_THREADS", 2))
+    except ValueError:
+        return 2
+    return n if n > 0 else 2
+
+
+def cap_threads(n: int, torch=None, cv2=None) -> int:
+    """torch and OpenCV each default to every core; cap both at n."""
+    if torch is None:
+        import torch
+    if cv2 is None:
+        import cv2
+    torch.set_num_threads(n)
+    cv2.setNumThreads(n)
+    return n
+
+
+def render_line(index: int, seconds: float) -> str:
+    return f"T{index:02d} measured in {seconds:.0f} s"
+
+
 def main(book_id: str, number: int, indices: list[int], attempts: bool = False, spent: bool = False,
          cpu_only: bool = False) -> None:
     book = episode_home.book_dir(book_id)
@@ -704,12 +730,13 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         # a take gate that measured nothing has passed nothing (audit item 6)
         raise SystemExit(f"episode {number}: no takes to judge under "
                          f"{episode_home.relative(book, take_dir)}")
+    cap_threads(lane_threads())
     embed, inputs, deferred = judge_embedder(cpu_only)
     from studio import gait, warp_gate
     judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker(), "person": gait.yolo(),
               "face": warp_gate.detector()}
     for index in wanted(records, indices):
-        rec = records[index]
+        rec, began = records[index], time.time()
         # THE CURRENT PICTURES, read before panel_board rewrites rec["anchors"]
         pictures = ti.card_pictures(rec, book, number)
         take_cells = cells
@@ -755,6 +782,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
             report["deferred"] = deferred
         episode_home.write_json(take_dir / f"T{index:02d}.dq.json", report)
         print(row(index, v, best.name if attempts else "", len(files)), flush=True)
+        print(render_line(index, time.time() - began), flush=True)
 
 
 if __name__ == "__main__":

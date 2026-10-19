@@ -28,3 +28,25 @@ def test_the_refine_stops_queueing_at_its_wall():
     assert wall == 15 * 60
     assert not cli.wall_spent(began=0.0, now=wall - 1)
     assert cli.wall_spent(began=0.0, now=wall)
+
+
+def test_a_no_faces_result_spends_no_refine_round(tmp_path):
+    home = tmp_path / "ep"
+    work = cli.TakeWork(7, "abc", [], jobs=[], status="no_faces")
+    cli.count_if_worked(home, work)
+    assert step_attempts.count(home, "face_refine.T07") == 0
+
+
+def test_a_take_with_a_job_spends_its_round(tmp_path):
+    home = tmp_path / "ep"
+    cli.count_if_worked(home, cli.TakeWork(7, "abc", [], jobs=[object()]))
+    assert step_attempts.count(home, "face_refine.T07") == 1
+
+
+def test_a_spent_retake_wall_counts_as_the_one_retake_taken(tmp_path, monkeypatch):
+    from studio import take_ladder, warp_gate
+    monkeypatch.setattr(take_ladder, "episode_spent", lambda home: True)
+    monkeypatch.setattr(take_ladder, "attempts_of", lambda room, i: 0)
+    assert cli.taken_of(tmp_path, tmp_path, 3) == warp_gate.RETAKES
+    monkeypatch.setattr(take_ladder, "episode_spent", lambda home: False)
+    assert cli.taken_of(tmp_path, tmp_path, 3) == 0

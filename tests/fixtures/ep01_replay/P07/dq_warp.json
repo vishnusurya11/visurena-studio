@@ -1,0 +1,757 @@
+{
+ "T00": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": -0.96,
+   "Se": 0.49,
+   "share": 0.52,
+   "frames": 107,
+   "spans": []
+  },
+  "face_at_end": 0.21,
+  "warp_gate": {
+   "value": -0.96,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T01": {
+  "passed": false,
+  "warp": {
+   "state": "unmeasurable",
+   "S": 0.8,
+   "Se": 1.78,
+   "share": 0.39,
+   "frames": 141,
+   "spans": [
+    [
+     47,
+     47
+    ],
+    [
+     50,
+     50
+    ],
+    [
+     62,
+     62
+    ]
+   ]
+  },
+  "face_at_end": null,
+  "warp_gate": {
+   "value": 0.8,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": [
+   "gait"
+  ]
+ },
+ "T02": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": -2.3,
+   "Se": -1.22,
+   "share": 1.0,
+   "frames": 158,
+   "spans": []
+  },
+  "face_at_end": null,
+  "warp_gate": {
+   "value": -2.3,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T03": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": 1.16,
+   "Se": 2.26,
+   "share": 1.0,
+   "frames": 141,
+   "spans": [
+    [
+     116,
+     116
+    ],
+    [
+     119,
+     119
+    ]
+   ]
+  },
+  "face_at_end": 0.172,
+  "warp_gate": {
+   "value": 1.16,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T04": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": 0.45,
+   "Se": 0.91,
+   "share": 1.0,
+   "frames": 141,
+   "spans": []
+  },
+  "face_at_end": 0.335,
+  "warp_gate": {
+   "value": 0.45,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T05": {
+  "passed": true,
+  "warp": {
+   "state": "unmeasurable",
+   "S": 0.51,
+   "Se": 3.86,
+   "share": 0.43,
+   "frames": 73,
+   "spans": []
+  },
+  "face_at_end": null,
+  "warp_gate": {
+   "value": 0.51,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T06": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": -1.43,
+   "Se": 0.88,
+   "share": 1.0,
+   "frames": 175,
+   "spans": []
+  },
+  "face_at_end": 0.303,
+  "warp_gate": {
+   "value": -1.43,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T07": {
+  "passed": false,
+  "warp": {
+   "state": "fail",
+   "S": -0.04,
+   "Se": 4.16,
+   "share": 1.0,
+   "frames": 73,
+   "spans": [
+    [
+     4,
+     4
+    ],
+    [
+     9,
+     9
+    ]
+   ]
+  },
+  "face_at_end": 0.207,
+  "warp_gate": {
+   "value": -0.04,
+   "ok": false,
+   "hard": true
+  },
+  "hard_failed": [
+   "warp"
+  ]
+ },
+ "T08": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": -0.89,
+   "Se": 0.05,
+   "share": 0.98,
+   "frames": 175,
+   "spans": []
+  },
+  "face_at_end": 0.313,
+  "warp_gate": {
+   "value": -0.89,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T09": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": -0.86,
+   "Se": 1.77,
+   "share": 1.0,
+   "frames": 192,
+   "spans": []
+  },
+  "face_at_end": 0.147,
+  "warp_gate": {
+   "value": -0.86,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T10": {
+  "passed": false,
+  "warp": {
+   "state": "fail",
+   "S": 0.52,
+   "Se": 3.31,
+   "share": 1.0,
+   "frames": 141,
+   "spans": [
+    [
+     62,
+     62
+    ]
+   ]
+  },
+  "face_at_end": 0.139,
+  "warp_gate": {
+   "value": 0.52,
+   "ok": false,
+   "hard": true
+  },
+  "hard_failed": [
+   "warp"
+  ]
+ },
+ "T11": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": -0.25,
+   "Se": 0.05,
+   "share": 1.0,
+   "frames": 141,
+   "spans": []
+  },
+  "face_at_end": 0.288,
+  "warp_gate": {
+   "value": -0.25,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T12": {
+  "passed": true,
+  "warp": {
+   "state": "unmeasurable",
+   "S": null,
+   "Se": null,
+   "share": 0.0,
+   "frames": 107,
+   "spans": []
+  },
+  "face_at_end": null,
+  "warp_gate": {
+   "value": null,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T13": {
+  "passed": true,
+  "warp": {
+   "state": "warn",
+   "S": 1.92,
+   "Se": 2.43,
+   "share": 1.0,
+   "frames": 209,
+   "spans": [
+    [
+     32,
+     32
+    ],
+    [
+     127,
+     128
+    ],
+    [
+     131,
+     132
+    ],
+    [
+     134,
+     137
+    ],
+    [
+     140,
+     140
+    ],
+    [
+     143,
+     144
+    ],
+    [
+     146,
+     146
+    ],
+    [
+     148,
+     149
+    ]
+   ]
+  },
+  "face_at_end": 0.087,
+  "warp_gate": {
+   "value": 1.92,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T14": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": 0.27,
+   "Se": 1.31,
+   "share": 1.0,
+   "frames": 90,
+   "spans": []
+  },
+  "face_at_end": 0.213,
+  "warp_gate": {
+   "value": 0.27,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T15": {
+  "passed": false,
+  "warp": {
+   "state": "fail",
+   "S": 1.96,
+   "Se": 4.4,
+   "share": 1.0,
+   "frames": 175,
+   "spans": [
+    [
+     4,
+     4
+    ],
+    [
+     44,
+     44
+    ],
+    [
+     47,
+     47
+    ],
+    [
+     50,
+     50
+    ],
+    [
+     53,
+     53
+    ],
+    [
+     56,
+     56
+    ],
+    [
+     59,
+     59
+    ],
+    [
+     116,
+     116
+    ],
+    [
+     119,
+     119
+    ],
+    [
+     122,
+     123
+    ],
+    [
+     125,
+     125
+    ],
+    [
+     128,
+     128
+    ],
+    [
+     131,
+     131
+    ]
+   ]
+  },
+  "face_at_end": 0.12,
+  "warp_gate": {
+   "value": 1.96,
+   "ok": false,
+   "hard": true
+  },
+  "hard_failed": [
+   "warp"
+  ]
+ },
+ "T16": {
+  "passed": false,
+  "warp": {
+   "state": "fail",
+   "S": 0.13,
+   "Se": 4.97,
+   "share": 1.0,
+   "frames": 73,
+   "spans": [
+    [
+     32,
+     32
+    ],
+    [
+     35,
+     35
+    ]
+   ]
+  },
+  "face_at_end": 0.222,
+  "warp_gate": {
+   "value": 0.13,
+   "ok": false,
+   "hard": true
+  },
+  "hard_failed": [
+   "warp"
+  ]
+ },
+ "T17": {
+  "passed": true,
+  "warp": {
+   "state": "unmeasurable",
+   "S": 32.77,
+   "Se": 27.61,
+   "share": 0.14,
+   "frames": 56,
+   "spans": [
+    [
+     0,
+     0
+    ],
+    [
+     2,
+     2
+    ],
+    [
+     7,
+     8
+    ]
+   ]
+  },
+  "face_at_end": null,
+  "warp_gate": {
+   "value": 32.77,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T18": {
+  "passed": true,
+  "warp": {
+   "state": "warn",
+   "S": 1.61,
+   "Se": 2.24,
+   "share": 0.83,
+   "frames": 141,
+   "spans": [
+    [
+     4,
+     4
+    ]
+   ]
+  },
+  "face_at_end": null,
+  "warp_gate": {
+   "value": 1.61,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T19": {
+  "passed": false,
+  "warp": {
+   "state": "fail",
+   "S": 1.88,
+   "Se": 3.22,
+   "share": 1.0,
+   "frames": 124,
+   "spans": [
+    [
+     2,
+     2
+    ],
+    [
+     11,
+     11
+    ],
+    [
+     14,
+     14
+    ],
+    [
+     26,
+     26
+    ],
+    [
+     29,
+     29
+    ],
+    [
+     41,
+     41
+    ],
+    [
+     47,
+     47
+    ]
+   ]
+  },
+  "face_at_end": 0.195,
+  "warp_gate": {
+   "value": 1.88,
+   "ok": false,
+   "hard": true
+  },
+  "hard_failed": [
+   "warp"
+  ]
+ },
+ "T20": {
+  "passed": false,
+  "warp": {
+   "state": "fail",
+   "S": 0.81,
+   "Se": 4.35,
+   "share": 1.0,
+   "frames": 141,
+   "spans": [
+    [
+     23,
+     23
+    ],
+    [
+     44,
+     44
+    ],
+    [
+     59,
+     59
+    ],
+    [
+     113,
+     113
+    ],
+    [
+     116,
+     116
+    ],
+    [
+     122,
+     122
+    ]
+   ]
+  },
+  "face_at_end": 0.159,
+  "warp_gate": {
+   "value": 0.81,
+   "ok": false,
+   "hard": true
+  },
+  "hard_failed": [
+   "warp"
+  ]
+ },
+ "T21": {
+  "passed": false,
+  "warp": {
+   "state": "fail",
+   "S": 0.1,
+   "Se": 3.55,
+   "share": 1.0,
+   "frames": 73,
+   "spans": []
+  },
+  "face_at_end": 0.247,
+  "warp_gate": {
+   "value": 0.1,
+   "ok": false,
+   "hard": true
+  },
+  "hard_failed": [
+   "warp"
+  ]
+ },
+ "T22": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": 0.3,
+   "Se": 0.07,
+   "share": 1.0,
+   "frames": 141,
+   "spans": []
+  },
+  "face_at_end": 0.304,
+  "warp_gate": {
+   "value": 0.3,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T23": {
+  "passed": true,
+  "warp": {
+   "state": "warn",
+   "S": 2.27,
+   "Se": 1.56,
+   "share": 1.0,
+   "frames": 141,
+   "spans": [
+    [
+     5,
+     5
+    ],
+    [
+     14,
+     14
+    ],
+    [
+     23,
+     23
+    ],
+    [
+     53,
+     53
+    ],
+    [
+     56,
+     56
+    ],
+    [
+     65,
+     65
+    ],
+    [
+     74,
+     74
+    ],
+    [
+     77,
+     77
+    ],
+    [
+     95,
+     95
+    ]
+   ]
+  },
+  "face_at_end": 0.14,
+  "warp_gate": {
+   "value": 2.27,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T24": {
+  "passed": false,
+  "warp": {
+   "state": "fail",
+   "S": -0.64,
+   "Se": 3.4,
+   "share": 1.0,
+   "frames": 73,
+   "spans": []
+  },
+  "face_at_end": 0.389,
+  "warp_gate": {
+   "value": -0.64,
+   "ok": false,
+   "hard": true
+  },
+  "hard_failed": [
+   "warp"
+  ]
+ },
+ "T25": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": -0.22,
+   "Se": 0.39,
+   "share": 1.0,
+   "frames": 124,
+   "spans": []
+  },
+  "face_at_end": 0.386,
+  "warp_gate": {
+   "value": -0.22,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T26": {
+  "passed": true,
+  "warp": {
+   "state": "pass",
+   "S": 0.15,
+   "Se": 1.46,
+   "share": 1.0,
+   "frames": 73,
+   "spans": []
+  },
+  "face_at_end": 0.096,
+  "warp_gate": {
+   "value": 0.15,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ },
+ "T27": {
+  "passed": true,
+  "warp": null,
+  "face_at_end": null,
+  "warp_gate": {
+   "value": null,
+   "ok": true,
+   "hard": true
+  },
+  "hard_failed": []
+ }
+}

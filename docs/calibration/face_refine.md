@@ -33,3 +33,25 @@ T18, T22; T03 has no small face): Lab colour of the head and hat, half facenet, 
 position only from "at the LEFT/CENTRE/RIGHT" said of one subject. A travel direction ("walk on
 to the RIGHT") put Utterson on Enfield's face on T22 and is no longer read; hue-only colour put
 Hyde's face on the child on T07 (a black hat has no hue) and Lab replaced it.
+
+## Jekyll ep01 (Kawajiri noir, 2026-10-18): the first real refine.json rows (P07, 2026-10-19)
+
+Two takes refined; six picks ended `no_faces` (T05, T06, T13, T21, T23, T24: 579 s of CPU tracking
+bought nothing, because the tracker finds faces under 60 px and these were bigger). Measures at
+window scale from `takes/r2v/refine.json`:
+
+| take | face | seam | flicker src -> refined | ratio | faces | identity src -> ref |
+|---|---|---|---|---|---|---|
+| T08 | child_of_hyde_incident | 12.44 | 17.44 -> 15.64 | 0.90 | 1 / 1 | 0.222 -> 0.426 |
+| T18 | gabriel_john_utterson | 11.74 | 23.36 -> 17.75 | 0.76 | 1 / 1 | 0.362 -> 0.729 |
+| T18 | richard_enfield | 12.94 | 20.17 -> 14.04 | 0.70 | 1 / 1 | 0.283 -> 0.833 |
+
+- Seam 11.7-12.9 and flicker ratio 0.70-0.90: both inside the walls; **SEAM_MAX stays 18**.
+- Identity gains +0.20 (T08), +0.37 and +0.55 (T18): the refine does what it is for on a face under
+  60 px, and nothing on a face the tracker cannot find (it is already readable).
+- Selection therefore reads the warp measure's `tracks: [{median_px, life}]` (render px), never
+  face-at-end (T08's is 0.31 while its child track is under 60 px). A take is declined only when
+  every planned face is tracked, for >= 80 % of the take, at >= 60 px.
+- Paste order: cut scale, then the one upscale (owner 2026-10-18, 24caaeb), replacing the 2026-10-17
+  "after the 4x" text above. The idle-GPU A/B on T18 (sharpness and facenet identity, before/after
+  the order change) is still owed; never auto-revert on it.

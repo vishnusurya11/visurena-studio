@@ -7,7 +7,7 @@ face's own motion explain.
     E(t) = face residual - (2.51 x bg residual + 1.69 x face flow + 1.00)
     S = p90 of E, Se = p90 over the eye mask
 
-FAIL (S > 2.5 or Se > 3.0): a new seed, at most 2, then the F2 face refine.  WARN
+FAIL (S > 2.5; Se alone is the advisory `eye`): a new seed, one, then the F2 face refine.  WARN
 (1.5 < S <= 2.5) and UNMEASURABLE (the face tracked in under 45 % of frames): F2.
 Tests use synthetic arrays; no video, no detector, no GPU.
 """
@@ -31,7 +31,7 @@ def test_the_score_is_the_p90_of_the_finite_frames():
 
 @pytest.mark.parametrize("s, se, share, state", [
     (2.65, 3.12, 1.0, "fail"),      # kaw W
-    (1.30, 3.20, 1.0, "fail"),      # an eye alone over its wall
+    (1.30, 3.20, 1.0, "eye"),       # an eye alone over its wall: advisory (P07)
     (1.95, 2.0, 1.0, "warn"),       # T22 baseline s1
     (1.30, 1.64, 1.0, "pass"),      # kaw M
     (0.98, -0.9, 1.0, "pass"),      # kaw C
@@ -43,10 +43,10 @@ def test_the_verdict_follows_the_measured_cut(s, se, share, state):
 
 
 @pytest.mark.parametrize("state, taken, cure", [
-    ("fail", 0, "seed"), ("fail", 1, "seed"), ("fail", 2, "refine"),
+    ("fail", 0, "seed"), ("fail", 1, "refine"), ("fail", 2, "refine"),
     ("warn", 0, "refine"), ("unmeasurable", 0, "refine"), ("pass", 0, ""),
 ])
-def test_a_fail_retakes_twice_then_goes_to_the_face_refine(state, taken, cure):
+def test_a_fail_retakes_once_then_goes_to_the_face_refine(state, taken, cure):
     assert wg.cure(state, taken) == cure
 
 
@@ -152,11 +152,11 @@ def test_a_warned_or_unreadable_close_take_goes_to_the_face_refine(state):
     assert not fr.eligible(CARD, ["medium_close"], dq_with("pass"), 768)
 
 
-def test_a_warp_fail_goes_to_the_face_refine_only_after_its_two_retakes():
+def test_a_warp_fail_goes_to_the_face_refine_only_after_its_retake():
     from studio import face_refine as fr
     dq = dq_with("fail", passed=False, hard_warp=True)
-    assert not fr.eligible(CARD, ["medium_close"], dq, 768, taken=1)
-    assert fr.eligible(CARD, ["medium_close"], dq, 768, taken=2)
+    assert not fr.eligible(CARD, ["medium_close"], dq, 768, taken=0)
+    assert fr.eligible(CARD, ["medium_close"], dq, 768, taken=1)
 
 
 def test_a_take_failing_anything_besides_warp_is_still_never_refined():

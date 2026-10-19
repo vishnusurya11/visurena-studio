@@ -153,10 +153,12 @@ def dq_summary(rec: dict, planned: dict) -> dict:
 
 def take_rows(codex: str, unit: str, dq: dict, planned: dict, source: str, version: str,
               content: dict | None = None) -> list[Row]:
-    """The kept take (a pass by default) and every losing attempt (an agent fault)."""
+    """The kept take (a pass by default, marked `shipped-default`: a calibration reads it as no
+label, P07) and every losing attempt (an agent fault)."""
     kept = Row(codex=codex, unit=unit, kind="take", path=take_path(unit, dq["take"]), verdict="pass",
                verdict_by="default", source=source, machine_version=version,
-               machine={"take_dq": dq_summary(dq, planned), "content": content})
+               machine={"take_dq": dq_summary(dq, planned), "content": content,
+                        "label_source": "shipped-default"})     # it went out; nobody judged it
     rows = [kept]
     for att in dq.get("attempts", []):
         stem = Path(att.get("file") or "").stem

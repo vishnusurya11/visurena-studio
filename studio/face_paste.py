@@ -1,6 +1,8 @@
-"""Paste the kept refined face crops into the master, AFTER the 4x upscale, at master
-scale (owner 2026-10-17; F2, docs/audit/2026-10-16_model_tests: pasted into the 768
-take the new detail is averaged away again).
+"""Paste the kept refined face crops into the cut-scale frames, BEFORE the one upscale
+(owner 2026-10-18, commit 24caaeb: the paste runs on the decoded frames, then the denoise and
+the 4x; after the upscale only audio is muxed).  Earlier text (owner 2026-10-17) pasted AFTER
+the 4x, on the F2 evidence that detail pasted into a 768 take averaged away; that order is
+retired and the detail is re-measured by tests/test_face_refine_pastes_at_cut_scale.py.
 
 The geometry follows the cut exactly as assemble made it (`work_r2v/layout.json`):
 the take's head trim, a G-DEAD slow-down, the gutter guard's crop and its scale back

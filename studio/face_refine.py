@@ -4,8 +4,7 @@ lot in wide shots, go ahead"; decision architecture/decisions/2026-10-17-face-re
 A wide or full take draws its faces at 25-40 px of 768: the pixels are not there,
 and no upscaler adds them (docs/audit/2026-10-16_model_tests, F0).  F2 re-renders a
 tracked crop of each face through H3 at denoise 0.45 with ONLY that person's sheet;
-assemble pastes the crop into the master AFTER the 4x upscale (pasted into the 768
-take the new detail averages away again).
+assemble pastes the crop at cut scale, then the one upscale (owner 2026-10-18, 24caaeb).
 
 This module is the pure half: which takes, who each face is, what it costs on the
 episode clock, the crop's prompt, and the gate that keeps a refined crop or falls
@@ -62,29 +61,62 @@ def wants(sizes: list[str], px: float | None) -> bool:
     return any(s in REFINE_SIZES for s in sizes) or (px is not None and px < SMALL_FACE_PX)
 
 
+def warp_measure(dq: dict | None) -> dict:
+    """The warp measure a dq record holds (studio/warp_gate.py); {} unmeasured."""
+    return ((dq or {}).get("measures") or {}).get("warp") or {}
+
+
 def warp_state(dq: dict | None) -> str:
-    """G-WARP's state in a dq record (studio/warp_gate.py), '' unmeasured."""
-    return str((((dq or {}).get("measures") or {}).get("warp") or {}).get("state") or "")
+    """G-WARP's state, recomputed from the logged numbers (a stored `fail` of an older
+    gate does not stand); the stored state when no numbers were kept; '' unmeasured."""
+    from studio import warp_gate
+    m = warp_measure(dq)
+    if "share" not in m:
+        return str(m.get("state") or "")
+    return warp_gate.verdict(m.get("S"), m.get("Se"), m["share"])
+
+
+BARS = ("warp", "gait", "pulse", "frozen-whole", "lip-sync", "lag")
+"""The hard rows F2 may be the cure of: the warp and the motion rows.  A failed identity,
+clones, content, lettering, look or leak row still bars the take (ep01 T01: gait + unmeasurable)."""
 
 
 def passed_but_warp(dq: dict) -> bool:
-    """The dq passed, or its only hard failures are G-WARP's (F2 is the warp's last cure)."""
+    """The dq passed, or every hard failure is a row the face refine may follow."""
     failed = {g.get("name") for g in dq.get("gates", []) if g.get("hard") and not g.get("ok")}
-    return bool(dq.get("passed")) or failed == {"warp"}
+    return bool(dq.get("passed")) or failed <= set(BARS)
+
+
+TRACKED_HIGH = 0.8
+
+
+def readable(card: dict, dq: dict | None) -> bool:
+    """Every planned face is tracked, for most of the take, at SMALL_FACE_PX or more: F2
+    has nothing to add.  MTCNN misses small faces, so fewer tracks than faces proves nothing."""
+    from studio import warp_gate
+    m = warp_measure(dq)
+    tracks = m.get("tracks") or []
+    height = warp_gate.smallest_track(m)
+    return (bool(tracks) and len(tracks) >= len(card.get("faces") or [None]) and m.get("share", 0) >= TRACKED_HIGH
+            and height is not None and height >= SMALL_FACE_PX)
 
 
 def warp_routed(dq: dict, taken: int) -> bool:
-    """G-WARP sends this take to F2: a warn, an unreadable face, or a fail past its retakes."""
+    """G-WARP sends this take to F2: a warn on a small face, an unreadable face, or a fail
+    past its retake whose smallest tracked face is small."""
     from studio import warp_gate
-    return warp_gate.cure(warp_state(dq), taken) == "refine"
+    state, m = warp_state(dq), warp_measure(dq)
+    if state == "warn" and not warp_gate.warn_routes(m):
+        return False
+    return warp_gate.cure(state, taken, warp_gate.smallest_track(m)) == "refine"
 
 
 def eligible(card: dict, sizes: list[str], dq: dict | None, height: int, taken: int = 0) -> bool:
-    """The take shows a planned face, passed its dq (but for G-WARP), and wants the
-    refine by its size or by G-WARP; `taken` is its retakes so far."""
+    """The take shows a planned face that is not already readable, passed its dq (but for
+    the warp rows), and wants the refine by its size or by G-WARP; `taken` is its retakes."""
     if not card.get("faces") or not dq or not passed_but_warp(dq) or any(s in NEVER for s in sizes):
         return False
-    if not dq.get("passed") and not warp_routed(dq, taken):
+    if readable(card, dq) or (not dq.get("passed") and not warp_routed(dq, taken)):
         return False
     return wants(sizes, face_px(dq, height)) or warp_routed(dq, taken)
 
