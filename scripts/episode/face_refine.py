@@ -55,6 +55,14 @@ much like the track's LATEST head as like any other person's present then, and o
 ep01 round 1's eleven re-acquires: the same person 0.48-1.00 against the latest head, another
 person present 0.46-0.89 -- no single line splits them (T07's child 0.48, T01's Utterson 0.68), and
 against the track's FIRST head they overlapped wider (same p5 0.70, other p90 0.80)."""
+SELF_SLACK = 0.15
+SELF_PAIRS = 5
+"""A head must read at least the track's own running reading (the median of its SELF_PAIRS consecutive
+head pairs nearest the moment) less 0.15: at every sample, and for a lost face with nobody else about.
+ep01's bench (9 takes): 520 same-person consecutive pairs read at worst 0.098 under their track's
+reading, nine of ten same-person re-acquires within 0.04; other people against a track's latest head
+p50 0.33 and p90 0.15 under it, so 36 of 416 other-person pairs pass (fix round, 2026-10-19: a lost
+36 px track took a 30 px newcomer on the 0.4 floor alone, asked with no rival)."""
 RIVAL_GAP = face_track.EVERY
 """Another track is a rival at frame t when it holds a face within one sample of t: someone present
 then.  Wider (12), the child's own later piece on ep01 T07 out-read her and she lost her track."""
@@ -182,22 +190,58 @@ def read_frames(path: Path) -> list[np.ndarray]:
 
 
 class Same:
-    """same(track, box, t, others): the head at `box` on frame `t` reads at least as much like the
-    track's latest head as like any rival's (another track with a face near `t`), and over the
-    floor: the check a lost track re-acquires its own face by (Lab colour of the head and hat)."""
+    """same(track, box, t, others): the head at `box` on frame `t` is the lost track's own (Lab colour of
+    the head and hat): it reads at least as much like the track's latest head as like any rival's (another
+    track with a face near `t`) and over the floor -- or, with no rival present, at least as much as the
+    track's heads read like each other less SELF_SLACK (`bar`).  `continues` is that bar for a face found
+    within a sample; `like` is the likeness the tracker's assignment costs by."""
 
     def __init__(self, frames: list[np.ndarray]):
-        self.frames = frames
+        self.frames, self.hists = frames, {}
+
+    def hist(self, t: int, b) -> np.ndarray:
+        """The head's Lab histogram at box `b` on frame `t`, read once."""
+        key = (t, tuple(b))
+        if key not in self.hists:
+            self.hists[key] = face_track.lab_hist(head_of(self.frames[t], b))
+        return self.hists[key]
+
+    def like(self, track: list, b, t: int) -> float:
+        """How much the head at `b` on frame `t` reads like the track's head nearest `t`."""
+        t0, b0 = min(track, key=lambda d: abs(d[0] - t))
+        return face_track.hist_correlation(self.hist(t, b), self.hist(t0, b0))
 
     def likeness(self, track: list, head: np.ndarray, t: int) -> float:
+        """like, for a head crop already cut."""
         t0, b0 = min(track, key=lambda d: abs(d[0] - t))
-        return face_track.hist_similarity(head, head_of(self.frames[t0], b0))
+        return face_track.hist_correlation(face_track.lab_hist(head), self.hist(t0, b0))
+
+    def self_likeness(self, track: list, t: int) -> float | None:
+        """The median likeness of the track's own consecutive heads nearest `t` (SELF_PAIRS of them);
+        None for a track with none (ep01 T07's child, 40 px a sample across a changing street, is
+        two single detections and a weak one before she has a pair)."""
+        pairs = [(u, v) for u, v in zip(track, track[1:]) if v[0] - u[0] <= face_track.EVERY]
+        pairs = sorted(pairs, key=lambda p: abs(p[1][0] - t))[:SELF_PAIRS]
+        if not pairs:
+            return None
+        return float(np.median([face_track.hist_correlation(self.hist(*u), self.hist(*v)) for u, v in pairs]))
+
+    def bar(self, track: list, t: int) -> float:
+        """The least a head must read like the track's: its own reading less SELF_SLACK, never under
+        the floor; the floor alone for a track with no reading of its own."""
+        own = self.self_likeness(track, t)
+        return REACQUIRE_FLOOR if own is None else max(REACQUIRE_FLOOR, own - SELF_SLACK)
+
+    def continues(self, track: list, b, t: int) -> bool:
+        """The head reads at least the track's bar."""
+        return self.like(track, b, t) >= self.bar(track, t)
 
     def __call__(self, track: list, b, t: int, others=()) -> bool:
-        head = head_of(self.frames[t], b)
-        own = self.likeness(track, head, t)
-        rivals = [self.likeness(o, head, t) for o in others if min(abs(u - t) for u, _ in o) <= RIVAL_GAP]
-        return own >= REACQUIRE_FLOOR and own >= max(rivals, default=-1.0)
+        own = self.like(track, b, t)
+        rivals = [self.like(o, b, t) for o in others if min(abs(u - t) for u, _ in o) <= RIVAL_GAP]
+        if not rivals:
+            return own >= self.bar(track, t)
+        return own >= REACQUIRE_FLOOR and own >= max(rivals)
 
 
 def take_tracks(frames: list[np.ndarray], dets: dict, cuts: list[int], same=None) -> tuple[list[list], list[str]]:

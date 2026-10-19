@@ -1,5 +1,5 @@
 {
- "source": "Jekyll ep01 face-blur bench round 1 (2026-10-19 06:38 PDT): docs/audit/2026-10-19_face_blur/bench/room/refine.json (old seam, facenet, faces, change) re-measured on its own crops and windows with the round-2 measures (seam outside the head through the hard feather and the soft head mask, drift, eyes) and the CCIP / clip_vision_h worker (4 take crops, 4 refined crops, the sheet's face window)",
+ "source": "Jekyll ep01 face-blur bench round 1 (2026-10-19 06:38 PDT): docs/audit/2026-10-19_face_blur/bench/room/refine.json (old seam, facenet, faces, change) re-measured on its own crops and windows with the round-2 measures (seam outside the head through the hard feather and the soft head mask, drift, eyes) and the CCIP / clip_vision_h worker (4 take crops, 4 refined crops, the sheet's face window) Fix round (2026-10-19 PM): seam_hard / seam_soft re-read by the production seam read where the paste's mask falls (|grad m|-weighted, studio/face_gate.seam_and_flicker); seam_outside_* keep round 2's first, whole-window values.",
  "rows": [
   {
    "take": "T01",
@@ -9,8 +9,8 @@
    "soft": true,
    "old_seam": 21.5,
    "old_why": "seam 21.5 > 18.0",
-   "seam_hard": 11.81,
-   "seam_soft": 7.32,
+   "seam_hard": 22.02,
+   "seam_soft": 22.1,
    "flick_src": 27.18,
    "flick_soft": 26.02,
    "flick_hard": 26.03,
@@ -25,7 +25,9 @@
    "ccip_src": 0.1544,
    "ccip_ref": 0.052,
    "clip_src": 0.8192,
-   "clip_ref": 0.8761
+   "clip_ref": 0.8761,
+   "seam_outside_hard": 11.81,
+   "seam_outside_soft": 7.32
   },
   {
    "take": "T01",
@@ -35,8 +37,8 @@
    "soft": true,
    "old_seam": 20.06,
    "old_why": "seam 20.1 > 18.0",
-   "seam_hard": 11.12,
-   "seam_soft": 5.59,
+   "seam_hard": 20.07,
+   "seam_soft": 19.75,
    "flick_src": 13.16,
    "flick_soft": 11.32,
    "flick_hard": 11.34,
@@ -51,7 +53,9 @@
    "ccip_src": 0.0996,
    "ccip_ref": 0.0437,
    "clip_src": 0.8081,
-   "clip_ref": 0.8864
+   "clip_ref": 0.8864,
+   "seam_outside_hard": 11.12,
+   "seam_outside_soft": 5.59
   },
   {
    "take": "T05",
@@ -61,8 +65,8 @@
    "soft": false,
    "old_seam": 15.14,
    "old_why": "kept",
-   "seam_hard": 8.35,
-   "seam_soft": 5.09,
+   "seam_hard": 14.85,
+   "seam_soft": 15.3,
    "flick_src": 14.62,
    "flick_soft": 14.16,
    "flick_hard": 14.16,
@@ -77,7 +81,9 @@
    "ccip_src": 0.0412,
    "ccip_ref": 0.0433,
    "clip_src": 0.8446,
-   "clip_ref": 0.8899
+   "clip_ref": 0.8899,
+   "seam_outside_hard": 8.35,
+   "seam_outside_soft": 5.09
   },
   {
    "take": "T06",
@@ -87,8 +93,8 @@
    "soft": false,
    "old_seam": 7.87,
    "old_why": "kept",
-   "seam_hard": 4.29,
-   "seam_soft": 3.11,
+   "seam_hard": 8.15,
+   "seam_soft": 8.73,
    "flick_src": 15.16,
    "flick_soft": 12.26,
    "flick_hard": 12.26,
@@ -103,7 +109,9 @@
    "ccip_src": 0.0393,
    "ccip_ref": 0.021,
    "clip_src": 0.8883,
-   "clip_ref": 0.9005
+   "clip_ref": 0.9005,
+   "seam_outside_hard": 4.29,
+   "seam_outside_soft": 3.11
   },
   {
    "take": "T06",
@@ -113,8 +121,8 @@
    "soft": true,
    "old_seam": 12.76,
    "old_why": "kept",
-   "seam_hard": 6.44,
-   "seam_soft": 0.67,
+   "seam_hard": 11.49,
+   "seam_soft": 9.93,
    "flick_src": 3.37,
    "flick_soft": 2.2,
    "flick_hard": 2.25,
@@ -129,7 +137,9 @@
    "ccip_src": 0.1546,
    "ccip_ref": 0.0645,
    "clip_src": 0.6806,
-   "clip_ref": 0.8048
+   "clip_ref": 0.8048,
+   "seam_outside_hard": 6.44,
+   "seam_outside_soft": 0.67
   },
   {
    "take": "T07",
@@ -139,8 +149,8 @@
    "soft": false,
    "old_seam": 10.79,
    "old_why": "kept",
-   "seam_hard": 6.29,
-   "seam_soft": 4.19,
+   "seam_hard": 11.61,
+   "seam_soft": 12.12,
    "flick_src": 12.76,
    "flick_soft": 8.67,
    "flick_hard": 8.67,
@@ -155,7 +165,9 @@
    "ccip_src": 0.0206,
    "ccip_ref": 0.0109,
    "clip_src": 0.886,
-   "clip_ref": 0.9474
+   "clip_ref": 0.9474,
+   "seam_outside_hard": 6.29,
+   "seam_outside_soft": 4.19
   },
   {
    "take": "T07",
@@ -165,8 +177,8 @@
    "soft": true,
    "old_seam": 23.89,
    "old_why": "seam 23.9 > 18.0",
-   "seam_hard": 13.68,
-   "seam_soft": 8.9,
+   "seam_hard": 23.41,
+   "seam_soft": 25.05,
    "flick_src": 68.77,
    "flick_soft": 55.04,
    "flick_hard": 55.04,
@@ -181,7 +193,9 @@
    "ccip_src": 0.2044,
    "ccip_ref": 0.0596,
    "clip_src": 0.5525,
-   "clip_ref": 0.7704
+   "clip_ref": 0.7704,
+   "seam_outside_hard": 13.68,
+   "seam_outside_soft": 8.9
   },
   {
    "take": "T08",
@@ -191,8 +205,8 @@
    "soft": false,
    "old_seam": 6.19,
    "old_why": "kept",
-   "seam_hard": 3.15,
-   "seam_soft": 2.13,
+   "seam_hard": 6.06,
+   "seam_soft": 6.1,
    "flick_src": 9.3,
    "flick_soft": 7.84,
    "flick_hard": 7.84,
@@ -207,7 +221,9 @@
    "ccip_src": 0.0195,
    "ccip_ref": 0.0191,
    "clip_src": 0.8999,
-   "clip_ref": 0.9318
+   "clip_ref": 0.9318,
+   "seam_outside_hard": 3.15,
+   "seam_outside_soft": 2.13
   },
   {
    "take": "T08",
@@ -217,8 +233,8 @@
    "soft": false,
    "old_seam": 11.94,
    "old_why": "kept",
-   "seam_hard": 6.86,
-   "seam_soft": 4.67,
+   "seam_hard": 12.63,
+   "seam_soft": 12.98,
    "flick_src": 12.74,
    "flick_soft": 12.83,
    "flick_hard": 12.83,
@@ -233,7 +249,9 @@
    "ccip_src": 0.0814,
    "ccip_ref": 0.033,
    "clip_src": 0.7512,
-   "clip_ref": 0.7936
+   "clip_ref": 0.7936,
+   "seam_outside_hard": 6.86,
+   "seam_outside_soft": 4.67
   },
   {
    "take": "T13",
@@ -243,8 +261,8 @@
    "soft": false,
    "old_seam": 8.44,
    "old_why": "kept",
-   "seam_hard": 4.23,
-   "seam_soft": 3.03,
+   "seam_hard": 8.29,
+   "seam_soft": 8.68,
    "flick_src": 5.1,
    "flick_soft": 4.54,
    "flick_hard": 4.54,
@@ -259,7 +277,9 @@
    "ccip_src": 0.0406,
    "ccip_ref": 0.0312,
    "clip_src": 0.8688,
-   "clip_ref": 0.912
+   "clip_ref": 0.912,
+   "seam_outside_hard": 4.23,
+   "seam_outside_soft": 3.03
   },
   {
    "take": "T15",
@@ -269,8 +289,8 @@
    "soft": false,
    "old_seam": 8.82,
    "old_why": "kept",
-   "seam_hard": 4.02,
-   "seam_soft": 2.79,
+   "seam_hard": 8.43,
+   "seam_soft": 8.33,
    "flick_src": 5.83,
    "flick_soft": 4.86,
    "flick_hard": 4.86,
@@ -285,7 +305,9 @@
    "ccip_src": 0.0272,
    "ccip_ref": 0.0249,
    "clip_src": 0.8569,
-   "clip_ref": 0.9011
+   "clip_ref": 0.9011,
+   "seam_outside_hard": 4.02,
+   "seam_outside_soft": 2.79
   },
   {
    "take": "T26",
@@ -295,8 +317,8 @@
    "soft": false,
    "old_seam": 9.0,
    "old_why": "kept",
-   "seam_hard": 5.03,
-   "seam_soft": 3.74,
+   "seam_hard": 7.99,
+   "seam_soft": 8.75,
    "flick_src": 4.93,
    "flick_soft": 4.34,
    "flick_hard": 4.34,
@@ -311,7 +333,9 @@
    "ccip_src": 0.037,
    "ccip_ref": 0.0343,
    "clip_src": 0.8383,
-   "clip_ref": 0.8899
+   "clip_ref": 0.8899,
+   "seam_outside_hard": 5.03,
+   "seam_outside_soft": 3.74
   },
   {
    "take": "T26",
@@ -321,8 +345,8 @@
    "soft": false,
    "old_seam": 14.38,
    "old_why": "kept",
-   "seam_hard": 5.88,
-   "seam_soft": 3.92,
+   "seam_hard": 13.43,
+   "seam_soft": 13.16,
    "flick_src": 5.76,
    "flick_soft": 4.61,
    "flick_hard": 4.61,
@@ -337,7 +361,9 @@
    "ccip_src": 0.095,
    "ccip_ref": 0.06,
    "clip_src": 0.8018,
-   "clip_ref": 0.8361
+   "clip_ref": 0.8361,
+   "seam_outside_hard": 5.88,
+   "seam_outside_soft": 3.92
   },
   {
    "take": "T18",
@@ -347,8 +373,8 @@
    "soft": false,
    "old_seam": 10.78,
    "old_why": "kept",
-   "seam_hard": 6.09,
-   "seam_soft": 3.96,
+   "seam_hard": 10.84,
+   "seam_soft": 11.38,
    "flick_src": 20.55,
    "flick_soft": 17.76,
    "flick_hard": 17.76,
@@ -363,7 +389,9 @@
    "ccip_src": 0.1515,
    "ccip_ref": 0.033,
    "clip_src": 0.8884,
-   "clip_ref": 0.9294
+   "clip_ref": 0.9294,
+   "seam_outside_hard": 6.09,
+   "seam_outside_soft": 3.96
   },
   {
    "take": "T18",
@@ -373,8 +401,8 @@
    "soft": true,
    "old_seam": 15.98,
    "old_why": "kept",
-   "seam_hard": 8.6,
-   "seam_soft": 5.41,
+   "seam_hard": 15.8,
+   "seam_soft": 16.25,
    "flick_src": 17.55,
    "flick_soft": 12.16,
    "flick_hard": 12.16,
@@ -389,7 +417,9 @@
    "ccip_src": 0.1025,
    "ccip_ref": 0.0509,
    "clip_src": 0.8391,
-   "clip_ref": 0.9078
+   "clip_ref": 0.9078,
+   "seam_outside_hard": 8.6,
+   "seam_outside_soft": 5.41
   }
  ]
 }

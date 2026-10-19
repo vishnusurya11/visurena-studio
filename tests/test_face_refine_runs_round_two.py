@@ -77,6 +77,84 @@ def test_a_lost_face_is_reacquired_only_by_a_head_more_like_its_own_than_anyone_
     assert same(dark, box(100, 110, 40), 9, [later]) and cli.RIVAL_GAP == ft.EVERY
 
 
+def newcomer_frames(n=24):
+    """A dark-hatted head at x 100 on frames 0-10; from frame 12 a head 30 px right of it, half dark
+    and half brown (it reads 0.69 like the first: over the 0.4 floor, under the track's own 1.0)."""
+    fr_ = frames(n)
+    for k in range(0, 11):
+        fr_[k][60:160, 60:140] = (20, 20, 20)
+    for k in range(12, n):
+        fr_[k][60:160, 90:170] = (20, 20, 20)
+        fr_[k][60:110, 90:170] = (200, 140, 60)
+    return fr_
+
+
+def test_a_lost_face_with_nobody_else_about_reacquires_only_a_head_as_like_it_as_itself():
+    """The skeptic's case: a lost 36 px track re-acquired a 30 px newcomer 30 px away, asked with no
+    rival, on the floor alone.  ep01's bench (9 takes): against the track's own running reading (the
+    median of its last five consecutive head pairs), 520 same-person consecutive pairs read at worst
+    0.098 under it, nine of ten same-person re-acquires within 0.04; other people p50 0.33 and p90
+    0.15 under it.  So a head must read at least the track's own reading less SELF_SLACK 0.15 (36 of
+    416 other-person pairs pass it, no same-person pair fails it)."""
+    fr_ = newcomer_frames()
+    same = cli.Same(fr_)
+    lost = [(0, box(100, 120, 36)), (3, box(100, 120, 36)), (6, box(100, 120, 36))]
+    newcomer = box(130, 120, 30)
+    assert same.likeness(lost, cli.head_of(fr_[12], newcomer), 12) > cli.REACQUIRE_FLOOR
+    assert not same(lost, newcomer, 12, [])
+    assert cli.SELF_SLACK == 0.15
+
+
+def test_a_lost_face_with_nobody_else_about_reacquires_its_own_head():
+    fr_ = frames(20)
+    for k in (0, 3, 6, 12):
+        fr_[k][60:160, 60:140] = (20, 20, 20)
+    same = cli.Same(fr_)
+    lost = [(0, box(100, 120, 36)), (3, box(100, 120, 36)), (6, box(100, 120, 36))]
+    assert same(lost, box(100, 120, 36), 12, [])
+
+
+def test_a_track_with_no_reading_of_its_own_is_held_to_the_floor():
+    """ep01 T07's child crosses the street 40 px a sample: her single detections have no pair to read
+    themselves by, and a bar of 1.0 cut her out of the take (the fix round's own replay)."""
+    fr_ = newcomer_frames()
+    same = cli.Same(fr_)
+    assert same.self_likeness([(6, box(100, 120, 36))], 12) is None
+    assert same.bar([(6, box(100, 120, 36))], 12) == cli.REACQUIRE_FLOOR
+    assert same([(6, box(100, 120, 36))], box(130, 120, 30), 12, [])
+
+
+def test_the_take_never_hands_a_lost_track_to_a_newcomer():
+    fr_ = newcomer_frames()
+    dets = {t: rows([box(100, 120, 36)]) for t in (0, 3, 6, 9)} | {t: rows([box(130, 120, 30)]) for t in (15, 18, 21)}
+    tracks, _ = cli.take_tracks(fr_, dets, [], cli.Same(fr_))
+    assert sorted(ft.life(t) for t in tracks) == [(0, 9)]                 # the newcomer, 3 hits, is no track
+
+
+def test_a_newcomer_in_the_very_next_sample_never_continues_the_track():
+    """Someone stepping in front: the track's face gone and another head in reach one sample later,
+    so the lost-face check is never asked; the per-sample check (`continues`) still refuses it."""
+    fr_ = newcomer_frames()
+    dets = {t: rows([box(100, 120, 36)]) for t in (0, 3, 6, 9)} | {t: rows([box(130, 120, 30)]) for t in (12, 15, 18, 21)}
+    tracks, _ = cli.take_tracks(fr_, dets, [], cli.Same(fr_))
+    assert sorted(ft.life(t) for t in tracks) == [(0, 9), (12, 21)]
+
+
+def test_a_face_that_keeps_its_head_continues():
+    fr_ = newcomer_frames()
+    same = cli.Same(fr_)
+    track = [(0, box(100, 120, 36)), (3, box(100, 120, 36)), (6, box(100, 120, 36))]
+    assert same.continues(track, box(100, 120, 36), 9) and not same.continues(track, box(130, 120, 30), 12)
+
+
+def test_the_head_check_offers_the_tracker_its_likeness():
+    fr_ = newcomer_frames()
+    same = cli.Same(fr_)
+    track = [(0, box(100, 120, 36)), (3, box(100, 120, 36))]
+    assert same.like(track, box(100, 120, 36), 6) == pytest.approx(1.0, abs=1e-6)
+    assert same.like(track, box(130, 120, 30), 12) < 0.9
+
+
 # ---- the run of one soft face --------------------------------------------------------------------
 
 def test_a_push_in_is_cropped_only_while_its_face_is_soft():

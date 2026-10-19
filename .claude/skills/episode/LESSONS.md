@@ -75,7 +75,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Jekyll Kawajiri ep01 retro (the 13 failures, the five bricks, each package's lessons, what is owed)
 - The framing floor (face-blur fix #3, 2026-10-19: a face that matters is planned big enough for an eye)
 - The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19: why it skipped the blurry shots, T01, the YOLO worker, the pre-filter's median)
-- The face refine, round 2 (2026-10-19: a cel-valid eye score, the soft paste and its seam, CCIP identity, colour re-acquire, no body extension, the grid trim)
+- The face refine, round 2 (2026-10-19: a cel-valid eye score, the soft paste and its seam, CCIP identity, colour re-acquire, no body extension, the grid trim; fix round: the seam where the mask falls, least-cost linking)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

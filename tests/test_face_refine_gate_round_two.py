@@ -7,8 +7,10 @@
   when facenet and clip_vision BOTH fall; with the anime terms unread, facenet alone, as before.
 - Drift: mean |refined - take| inside the face box may not pass 35 (round 1's own faces 11.6-31.6;
   another row's refined face against a take's face, median 48.9).
-- Seam: the paste's change outside the head <= 10 (round 1: 0.41-0.58 x the old band seam, median
-  0.55, so 18 -> 10 leaves every hard-paste verdict as it was).
+- Seam: the level change where the paste's mask falls <= 18, round 1's wall: through the feather it
+  is round 1's band seam again, and the soft mask reads the same crops alike (fix round: the
+  whole-window mean that let the soft paste pass round 1's three read a 13 px face 60 levels off
+  as 2.5).
 - The eye score is logged, never a wall.
 Fixture: tests/fixtures/face_blur_round1_rows.json (the bench's refine.json re-measured)."""
 from __future__ import annotations
@@ -39,9 +41,12 @@ def good() -> fr.Measures:
                        clip_src=0.8, clip_ref=0.85)
 
 
-def test_every_round_one_face_is_kept_with_the_soft_paste_for_the_small_ones():
+def test_the_soft_paste_keeps_every_round_one_face_but_the_three_seams():
+    """The soft mask spreads an edge, it does not hide one: T01 x2 and T07's child read 19.8-25.1."""
     said = {(r["take"], r["who"]): fr.decide(measures(r)) for r in ROWS}
-    assert all(kept for kept, _ in said.values()), {k: why for k, (kept, why) in said.items() if not kept}
+    refused = {k for k, (kept, _) in said.items() if not kept}
+    assert refused == {(r["take"], r["who"]) for r in ROWS if r["old_why"].startswith("seam")}
+    assert all(why.startswith("seam") for k, (kept, why) in said.items() if not kept)
 
 
 def test_the_hard_paste_still_refuses_exactly_round_ones_three_seams():
@@ -87,4 +92,4 @@ def test_the_eye_score_is_logged_never_a_wall():
 
 
 def test_the_walls_are_the_ones_round_one_set():
-    assert (fr.SEAM_MAX, fr.DRIFT_MAX, fr.CCIP_RISE, fr.CLIP_DROP) == (10.0, 35.0, 0.03, 0.05)
+    assert (fr.SEAM_MAX, fr.DRIFT_MAX, fr.CCIP_RISE, fr.CLIP_DROP) == (18.0, 35.0, 0.03, 0.05)

@@ -2,14 +2,13 @@
 the paste does to the take around the head (face-blur round 2, 2026-10-19).
 
 Round 1 refused T01 Utterson (36 px, seam 21.5), T01 Enfield (30 px, 20.1) and T07's child (38 px,
-23.9) on the old wall of 18: their 96 px windows are floored (2.6-3.2 faces wide, not 2.4), the H3
+23.9) on the wall of 18: their 96 px windows are floored (2.6-3.2 faces wide, not 2.4), the H3
 redraw repaints that background (a brick wall for shop panes, the railing erased), and the hard
 8 % feather pasted all of it.  The soft paste (community recipe: a soft feathered mask, no
-sharpening before the paste) keeps the head and fades to the take; the seam is the mean level
-change the paste makes OUTSIDE the head (mask x |refined - take|).  With the hard feather this
-reads 0.50-0.58 x the old feather-band seam on all 15 round-1 rows, so the wall 18 becomes 10 and
-every round-1 hard-paste verdict is unchanged; a really bad seam (a crop off by 60 levels) still
-fails.  Pure numpy."""
+sharpening before the paste) keeps the head and fades to the take.  The seam is read where the
+mask falls (tests/test_face_gate_reads_the_seam_at_any_face_size.py); it reads a level change as
+itself through either mask, so the soft paste hides nothing from it: round 1's three still read
+19.8-25.1 through the soft mask and are refused.  Pure numpy."""
 from __future__ import annotations
 
 import numpy as np
@@ -63,12 +62,13 @@ def test_identical_crops_have_no_seam():
     assert seam == 0.0
 
 
-def test_a_redrawn_background_costs_the_soft_paste_less_than_the_hard_one():
+def test_a_redrawn_background_reads_the_same_through_either_paste():
+    """A level change is a level change: the soft mask spreads the edge, it does not hide it."""
     src = take_like()
     ref = [np.clip(s.astype(int) + 30, 0, 255).astype(np.uint8) for s in src]
     soft, _, _ = fg.seam_and_flicker(src, ref, face=36 / 96, soft=True)
     hard, _, _ = fg.seam_and_flicker(src, ref, face=36 / 96, soft=False)
-    assert soft < hard
+    assert soft == pytest.approx(hard, abs=2.0) == pytest.approx(30.0, abs=2.0)
 
 
 def test_a_really_bad_seam_still_fails_the_soft_paste():
@@ -78,8 +78,8 @@ def test_a_really_bad_seam_still_fails_the_soft_paste():
     assert seam > fr.SEAM_MAX
 
 
-def test_the_seam_wall_is_round_ones_old_wall_in_the_new_units():
-    assert fr.SEAM_MAX == 10.0
+def test_the_seam_wall_is_round_ones_wall():
+    assert fr.SEAM_MAX == 18.0
 
 
 def test_a_kept_soft_track_is_pasted_through_its_soft_mask(tmp_path):

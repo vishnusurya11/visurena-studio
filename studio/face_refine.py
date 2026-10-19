@@ -55,12 +55,14 @@ FLICKER_SLACK = 0.5
 ep01 T00/T22/T19 (docs/calibration/face_refine.md): face-region flicker pasted /
 unpasted 0.81-0.95 on F2, 1.15-1.32 on F3; identity 0.15 -> 0.59 on F2's T00, never
 down by more than 0.02 on either arm."""
-SEAM_MAX = 10.0
-"""The paste's mean level change OUTSIDE the head (studio/face_gate.seam_and_flicker, round 2,
-2026-10-19).  The old wall was 18 on the feather band's difference; on round 1's 15 rows the
-new measure through the same feather reads 0.41-0.58 of it (median 0.55), so 10 refuses exactly
-what 18 refused (T01 x2, T07's child: 11.1-13.7) and keeps the rest (3.1-8.6).  The soft head
-mask of a small face reads 5.6-8.9 on those three (docs/calibration/face_refine.md)."""
+SEAM_MAX = 18.0
+"""The level change between the refined crop and the take where the paste's mask falls
+(studio/face_gate.seam_and_flicker).  Through the hard feather it reads round 1's feather-band
+seam again (the bench's 15 rows, within -1.3 / +0.8), so round 1's wall holds: kept rows 6.1-15.8,
+refused 20.1-23.4.  Through a small face's soft mask the same crops read 6.1-16.3 and 19.8-25.1:
+the soft paste spreads an edge, it does not hide one (docs/calibration/face_refine.md, fix round).
+Round 2's first measure (mask x change averaged over the whole window outside the head, wall 10)
+read a 13 px face 60 levels off as 2.5 and was withdrawn the same day."""
 DRIFT_MAX = 35.0
 """Mean |refined - take| inside the face box (T8mars Parity Stitch's idea, ported): round 1's own
 faces 11.6-31.6 (T07's child, a faceless blob given its face, the top); another row's refined face

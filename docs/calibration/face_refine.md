@@ -110,11 +110,47 @@ right, the paste was wrong. Now a face under 40 px (`face_paste.SOFT_PX` = MIN_S
 through a soft head mask (1 on an ellipse of 0.7 x 1.0 face heights round the head, a smoothstep to 0
 at 1.8x, times the window's own feather; no sharpening anywhere on the paste path), and the seam is
 the paste's mean level change OUTSIDE the head (`face_gate.collateral`). Through the old feather the
-new measure reads 0.41-0.58 of the old on all 15 rows (median 0.55), so **SEAM_MAX 18 -> 10**: every
+new measure reads 0.41-0.58 of the old on all 15 rows (median 0.55), so **SEAM_MAX 18 -> 10 (withdrawn, below)**: every
 hard-paste verdict is unchanged (kept 3.1-8.6, refused 11.1-13.7), and the soft paste takes the three
 refused faces to 5.6-8.9. A crop 60 levels off its take still fails the soft paste
 (tests/test_face_refine_pastes_a_small_face_softly.py). By eye (scratch strip of T01 and T07 at 3x):
 the hard paste cut T07's railing at the box edge; the soft paste keeps it.
+
+**Seam, fix round (2026-10-19 PM; the skeptic's probe).** That measure averaged mask x change over
+EVERY pixel outside the head. A small face's soft mask is ~0 over most of its 96 px window, so the mean
+was diluted: a crop 60 levels off read 2.5 at a 13 px face, 6.3 at 20 px, 14.7 at 30 px; a +80 halo
+right outside the head 2.6 at 13 px. The table's 5.6-8.9 for the three soft faces was that dilution.
+The seam is now |refined - take| weighted by the paste mask's slope |grad m| outside the head
+(`face_gate.edge_weight` / `edge_change`): the change where the paste passes from the crop to the take,
+a ring in head radii for the soft mask, the edge band for the feather. It reads a change D as D at any
+size (tests/test_face_gate_reads_the_seam_at_any_face_size.py: 60 levels at 13-36 px, a halo, a change
+inside the head reads 0), and through the feather it is round 1's band seam again (15 rows, -1.3 / +0.8),
+so **SEAM_MAX is 18 again**. Production gate on round 1's crops with the real CCIP / clip worker
+(`bench/round2/gate_smoke.json`): 12 kept, T01 x2 and T07's child refused on the seam, as in round 1.
+The soft mask reads the same crops alike (6.1-16.3 kept, 19.8-25.1 refused): it spreads an edge, it
+does not hide one; whether it LOOKS cleaner is the eye's, on the GPU arm's strips.
+
+| take | face | px | paste | round-1 band seam | seam, feather | seam, soft mask | seam, paste used | fix-round verdict |
+|---|---|---|---|---|---|---|---|---|
+| T01 | Utterson | 38 | soft | 21.5 | 22.0 | 22.1 | 22.1 | seam 22.1 &gt; 18 |
+| T01 | Enfield | 33 | soft | 20.1 | 20.1 | 19.8 | 19.8 | seam 19.8 &gt; 18 |
+| T05 | Enfield | 101 | feather | 15.1 | 14.8 | 15.3 | 14.8 | kept |
+| T06 | Enfield | 79 | feather | 7.9 | 8.2 | 8.7 | 8.2 | kept |
+| T06 | Hyde | 15 | soft | 12.8 | 11.5 | 9.9 | 9.9 | kept |
+| T07 | Hyde | 59 | feather | 10.8 | 11.6 | 12.1 | 11.6 | kept |
+| T07 | child | 38 | soft | 23.9 | 23.4 | 25.1 | 25.1 | seam 25.1 &gt; 18 |
+| T08 | Hyde | 78 | feather | 6.2 | 6.1 | 6.1 | 6.1 | kept |
+| T08 | child | 50 | feather | 11.9 | 12.6 | 13.0 | 12.6 | kept |
+| T13 | Enfield | 60 | feather | 8.4 | 8.3 | 8.7 | 8.3 | kept |
+| T15 | Enfield | 95 | feather | 8.8 | 8.4 | 8.3 | 8.4 | kept |
+| T26 | Utterson | 69 | feather | 9.0 | 8.0 | 8.8 | 8.0 | kept |
+| T26 | Enfield | 67 | feather | 14.4 | 13.4 | 13.2 | 13.4 | kept |
+| T18 | Utterson | 54 | feather | 10.8 | 10.8 | 11.4 | 10.8 | kept |
+| T18 | Enfield | 39 | soft | 16.0 | 15.8 | 16.2 | 16.2 | kept |
+
+Probe, not built (`bench/round2/seam_match.py`): matching the crop's low frequencies to the take's
+outside the head (R - blur(R - S) x ramp, sigma face/8) reads the three at 16.0-17.9 and lowers every
+kept row 10-48 %: a candidate cleaner blend, to be judged by eye before it is wired.
 
 **Drift** (`face_gate.drift`, mean |refined - take| inside the face box, T8mars Parity Stitch's idea):
 own faces 11.6-31.6 (T07's child, a blob given its face, the top); another row's refined face against a
@@ -143,7 +179,16 @@ takes with the worker's faces down to 0.3 and people): weak faces (0.3-0.6) only
 within one face height; a lost face re-acquires only its own head. Head colour against the track's
 FIRST head overlapped (491 same-person pairs p5 0.70; 275 other p90 0.80); at the 11 real re-acquires
 the same person read 0.48-1.00 against the LATEST head and another person 0.46-0.89, so the rule is
-relative: at least as like its own latest head as any rival within one sample, and >= 0.4. People
+relative: at least as like its own latest head as any rival within one sample, and >= 0.4. Fix round:
+with no rival present, and at every sample, a head must read at least the track's own running reading
+(median of its 5 nearest consecutive head pairs) less **SELF_SLACK 0.15** (`bench/round2/self_step.py`,
+`self_like.py`: 520 same-person consecutive pairs at worst 0.098 under it; nine of ten same-person
+re-acquires within 0.04; other people p50 0.33 and p90 0.15 under it, 36 of 416 pass); a track with no
+pair of its own is held to the floor only (a bar of 1.0 cut T07's child out). Detections go to tracks by
+least total cost (Hungarian: distance from the constant-velocity prediction in reaches, size step in
+SIZE_JUMPs, 1 - head likeness): a nearest-first greedy swapped two faces of 36 / 32 px crossing. The
+stitch no longer counts the lost piece's own original as its rival. Replay on the 9 bench takes:
+identical tracks, +0.4 s. People
 (person_yolov8m-seg, on disk, every 6th frame): a face at 0.100 of the person's height (509 pairs, p10-p90
 0.086-0.164), centre 0.125 down; a body made Utterson's T01 track jump onto Enfield, so bodies never
 lengthen a track and only make far figures (< 24 px, >= 24 frames, no face near): none on these 9
@@ -157,7 +202,9 @@ one track 0-120 (round 1 about 0-105), Enfield 0-57 with a 56-frame crop (73); T
 take on the CPU (T01 8.4 -> 13.6 s, T13 12.3 -> 19.2 s; GPU 0.9 -> 1.8 s), about +1.2 min; the anime
 terms 13 s + 7.5 s a face on the CPU, about +2.3 min, inside the gate while later crops render; drift,
 eyes and the soft seam under 1 s a face; GPU about -0.3 min (crop frames -2 %). Wall clock about
-+1 min (the last take's gate and the worker loads); about +4 min if none of it overlapped.
++1 min (the last take's gate and the worker loads); about +4 min if none of it overlapped. The
+anime worker exits after 120 s idle, so takes gated further apart reload it (12.8 s each): up to
+about +2.5 min more CPU, overlapped with renders. The fix round's tracker adds about 0.05 s a take.
 
 Still owed: the bench's round-2 GPU arm (render with the new runs and soft paste, owner's eye on the
 strips); the 0.4 colour floor, the 24 px body line and DRIFT_MAX 35 are one episode's numbers.

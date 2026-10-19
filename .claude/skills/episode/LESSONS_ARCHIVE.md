@@ -1896,7 +1896,28 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   (shop panes into brick, the railing erased) and the 8 % feather pasted all of it. The fix is the
   paste (a soft head mask under 40 px), and the seam now measures what the paste does outside the
   head; through the old feather it reads 0.41-0.58 of the old band seam on all 15 rows, so the wall
-  moved 18 -> 10 with every verdict unchanged.
+  moved 18 -> 10 with every verdict unchanged. (Withdrawn the same day, next bullet.)
+- **A mean over the window dilutes a small face's seam to nothing.** The round-2 seam averaged
+  mask x change over every pixel outside the head; a small face's soft mask is ~0 over most of its
+  96 px window, so a crop 60 levels off read 2.5 at 13 px and 6.3 at 20 px, a +80 halo 2.6 (the
+  skeptic). The seam is now |refined - take| weighted by the mask's slope outside the head: it reads
+  a change D as D at any size, and via the feather it is round 1's band seam again (15 rows, -1.3 /
+  +0.8), so the wall is 18 again. Through the soft mask round 1's three still read 19.8-25.1: the
+  soft paste spreads an edge, it never hid one; their earlier 5.6-8.9 was the dilution. Matching the
+  crop's low frequencies to the take's outside the head (blur sigma face/8) took them to 16.0-17.9 and
+  every kept row down too: a lever for a later round, judged by eye, not a wall change.
+- **A stitch counted the lost piece as its own rival.** `stitch` asked `same` with the piece's
+  original among the others (`out` held copies), so "at least as like as any rival" read own >= own
+  and only the 0.4 floor stood. Rivals are now the pieces neither `b` nor already part of `a`.
+- **Nearest-first linking swaps two faces of near size crossing**, and a lost track with nobody else
+  present took any head over 0.4 (the skeptic: a 36 px track took a 30 px newcomer, 0 rivals).
+  Detections now go to tracks by least total cost (Hungarian; distance from the constant-velocity
+  prediction, one sample ahead at most; size step; 1 - head likeness), and every head must read at
+  least the track's own running reading (median of its 5 nearest consecutive pairs) less 0.15:
+  520 same-person consecutive pairs on the bench read at worst 0.098 under it, 36 of 416
+  other-person pairs pass it. A track with no pair of its own is held to the floor only: a bar of
+  1.0 cut T07's child (40 px a sample across the street) out of the take. Replay on the 9 bench
+  takes: identical tracks to round 2's, +0.4 s of tracking.
 - **Identity on cel is CCIP's.** facenet read T01 Utterson 0.04 on his own take. CCIP (ONNX,
   imgutils' preprocessing ported; dghs-imgutils pins numpy<2 and is not installed) read the refined
   crops 0.011-0.064 to their own sheet and 0.152-0.324 to the other person's; clip_vision_h

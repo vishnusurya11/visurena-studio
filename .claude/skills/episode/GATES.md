@@ -346,14 +346,14 @@ AND the same staged picture bytes (content-addressed names in its
 scale: it must DIFFER from its source crop (mean |refined - source| >= 0.5, `SAME_MAX`: a refine returning its input
 passes every other wall); **identity**: CCIP distance to the sheet's face window (`studio/anime_id.py`) may not rise > 0.03 nor cross 0.1785 (same character); else facenet AND clip_vision_h must BOTH
 fall (> 0.05) to refuse; anime terms unread -> facenet alone (drop > 0.05); **drift** (mean |refined - take| inside
-the face box) <= 35; **seam** (the paste's mean level change OUTSIDE the head, through the mask the paste uses) <= 10;
+the face box) <= 35; **seam** (|refined - take| weighted by the paste mask's slope outside the head; via the feather, round 1's band seam) <= 18;
 face-region **flicker** pasted <= 1.10 x the take's + 0.5; **faces**: no clone, no loss. The drawn-eye score
 (`studio/face_eye.py`) is logged, never a wall. A broken wall falls back to the unrefined take; every decision and its
 measures in `takes/r2v/refine.json`; a crop pastes only onto the take bytes it was made from (sha8). Walls fitted on
-round 1's 15 ep01 faces, all kept (the calibration doc). **The paste**: at cut scale, before the one
+round 1's 15 ep01 faces (12 kept; T01 x2, T07's child refused on the seam with either paste). **The paste**: at cut scale, before the one
 upscale (24caaeb); a face under 40 px (its window floored at 96 px) through a soft head mask (smoothstep from the
 head's edge to 1.8x, no sharpening), else the 8 % feather. **Tracking** (`studio/face_track.py`): a weak face (0.3-0.6)
-only continues a track; a lost face re-acquires only its own head; bodies make only far figures; the crop is the soft
+only continues a track; detections go to tracks by least cost (motion, size, head colour); a head must read >= the track's own reading - 0.15; bodies make only far figures; the crop is the soft
 span (on < 120 px, off > 150) on H3's grid inside its shot, one frozen side. CLOCK: priced 110 s per face per 192 frames; runs only while
 `leaves_reserve(step, price + 550 s)`, else `REFINE CUT`, status `cut`. **Selection**: no plan size, no face-at-end;
 every take with a planned face but an insert, whose dq lets it ship; each track whose smallest face (running median

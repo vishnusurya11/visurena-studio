@@ -14,7 +14,10 @@ jumps to another person -- a detection joins it only at its own size, and once i
 face it re-acquires only a head `same` reads as its own (Lab colour of the head and hat); a weak
 detection only continues a face (`rescue`); the refine runs where the face is soft, with
 hysteresis (`soft_span`; VideoFaceDetailer's idea); the crop side is frozen per run
-(`frozen_side`); the crop stays inside its shot and on H3's 17k+5 grid (`crop_span`).
+(`frozen_side`); the crop stays inside its shot and on H3's 17k+5 grid (`crop_span`).  Fix round
+(the same day): detections go to tracks by least total cost (`assign`: motion, size, head likeness),
+since nearest-first swapped two faces of near size crossing; a face within a sample still answers the
+head check (`steady`); the stitch never counts a piece as its own rival (`rivals_of`).
 """
 from __future__ import annotations
 
@@ -76,23 +79,78 @@ def same_size(a: Box, b: Box) -> bool:
     return max(ha, hb) / min(ha, hb) <= SIZE_JUMP
 
 
+def steady(same, track: list, b: Box, t: int) -> bool:
+    """A face found within a sample of the track's last still reads as its head, when the check can
+    say (`same.continues`): someone stepping in front of a face is never its next sample."""
+    check = getattr(same, "continues", None)
+    return check is None or bool(check(track, b, t))
+
+
 def fits(track: list, b: Box, t: int, same=None, others=()) -> bool:
-    """`b` at frame `t` can be this track's face: in reach, at its size, and -- once the track
-    has lost its face for a sample or more -- its own head by `same(track, b, t, others)`, the
-    other tracks being the other people it might be."""
+    """`b` at frame `t` can be this track's face: in reach, at its size, its head still (`steady`)
+    and -- once the track has lost its face for a sample or more -- its own head by
+    `same(track, b, t, others)`, the other tracks being the other people it might be."""
     last_t, last = track[-1]
     if near(last, b) > reach(last) or not same_size(last, b):
         return False
-    return t - last_t <= EVERY or same is None or bool(same(track, b, t, others))
+    if t - last_t <= EVERY:
+        return steady(same, track, b, t)
+    return same is None or bool(same(track, b, t, others))
+
+
+def predicted(track: list, t: int) -> Box:
+    """The track's last box carried to frame `t` at its last velocity, at most one sample's step
+    ahead (SORT's constant-velocity idea): two faces crossing keep their own ways."""
+    last_t, last = track[-1]
+    if len(track) < 2 or t <= last_t:
+        return last
+    prev_t, prev = track[-2]
+    k = min(t - last_t, last_t - prev_t) / max(last_t - prev_t, 1)
+    (cx, cy), (px, py) = centre(last), centre(prev)
+    dx, dy = (cx - px) * k, (cy - py) * k
+    return last[0] + dx, last[1] + dy, last[2] + dx, last[3] + dy
+
+
+def cost(track: list, b: Box, t: int, same=None) -> float:
+    """How unlike the track's face `b` at `t` is: its distance from where the track's motion carries
+    it, in reaches; its size step, in SIZE_JUMPs; and, when the head check offers `like`, 1 less how
+    much its head reads like the track's."""
+    last = track[-1][1]
+    step = abs(np.log(max(height(b), 1e-6) / max(height(last), 1e-6))) / np.log(SIZE_JUMP)
+    like = getattr(same, "like", None)
+    return near(predicted(track, t), b) / reach(last) + step + (1.0 - like(track, b, t) if like else 0.0)
+
+
+UNFIT = 1e6
+
+
+def costs(tracks: list[list], live: list[int], t: int, found: list[Box], same=None) -> np.ndarray:
+    """(detections, live tracks) costs; UNFIT where the detection cannot be the track's face (fits)."""
+    m = np.full((len(found), len(live)), UNFIT)
+    for i, b in enumerate(found):
+        for j, k in enumerate(live):
+            if fits(tracks[k], b, t, same, [tracks[o] for o in live if o != k]):
+                m[i, j] = cost(tracks[k], b, t, same)
+    return m
+
+
+def assign(tracks: list[list], live: list[int], t: int, found: list[Box], same=None) -> dict[int, int]:
+    """detection index -> live track, by least total cost over the pairs that fit (the Hungarian
+    assignment): a nearest-first greedy swapped two faces of near size crossing."""
+    from scipy.optimize import linear_sum_assignment
+    if not found or not live:
+        return {}
+    m = costs(tracks, live, t, found, same)
+    rows, cols = linear_sum_assignment(m)
+    return {int(i): live[j] for i, j in zip(rows, cols) if m[i, j] < UNFIT}
 
 
 def extend(tracks: list[list], live: list[int], t: int, found: list[Box], same=None) -> list[int]:
-    """Give each detection at frame `t` to its nearest live track it fits, else a new track."""
-    taken: set[int] = set()
-    for b in sorted(found, key=height, reverse=True):
-        rivals = lambda k: [tracks[j] for j in live if j != k]
-        options = [k for k in live if k not in taken and fits(tracks[k], b, t, same, rivals(k))]
-        k = min(options, key=lambda k: near(tracks[k][-1][1], b)) if options else None
+    """Give the detections at frame `t` to the live tracks they fit (assign), the rest new tracks."""
+    found = sorted(found, key=height, reverse=True)
+    got, taken = assign(tracks, live, t, found, same), set()
+    for i, b in enumerate(found):
+        k = got.get(i)
         if k is None:
             tracks.append([])
             k = len(tracks) - 1
@@ -154,7 +212,9 @@ def holds(track: list, b: Box, t: int, gap: int, same=None, others=()) -> bool:
     if not (a - gap <= t <= z + gap and near(ref, b) <= max(RESCUE_FLOOR, RESCUE_REACH * height(ref))
             and same_size(ref, b)):
         return False
-    return abs(t - t0) <= EVERY or same is None or bool(same(track, b, t, others))
+    if abs(t - t0) <= EVERY:
+        return steady(same, track, b, t)
+    return same is None or bool(same(track, b, t, others))
 
 
 def claimed(tracks: list[list], b: Box, t: int) -> bool:
@@ -238,12 +298,18 @@ def joins(a: list, b: list, same=None, others=()) -> bool:
     return same is None or bool(same(a, b[0][1], b[0][0], others))
 
 
+def rivals_of(a: list, b: list, pieces: list[list]) -> list[list]:
+    """The pieces that are neither `b` nor already part of `a`: the other people `b` might be."""
+    held = set(a)
+    return [o for o in pieces if o is not b and not set(o) <= held]
+
+
 def stitch(tracks: list[list], same=None) -> list[list]:
     """Pieces of one face split by a stretch the detector missed, joined in time
     order (Jekyll ep01 T07: Hyde came back as two pieces 20 frames apart)."""
     out: list[list] = []
     for b in sorted(tracks, key=lambda tr: tr[0][0]):
-        options = [a for a in out if joins(a, b, same, [o for o in out + tracks if o is not a and o is not b])]
+        options = [a for a in out if joins(a, b, same, rivals_of(a, b, tracks))]
         if options:
             a = min(options, key=lambda a: near(a[-1][1], b[0][1]))
             a.extend(b)
@@ -392,17 +458,25 @@ def head_box(b: Box, width: int, height_: int) -> Box:
     return max(0.0, x1), max(0.0, y1), min(float(width), x2), min(float(height_), y2)
 
 
+def lab_hist(img: np.ndarray) -> np.ndarray:
+    """An RGB crop's normalised Lab colour histogram (8 x 6 x 6 bins), flattened."""
+    import cv2
+    lab = cv2.cvtColor(np.ascontiguousarray(img), cv2.COLOR_RGB2LAB)
+    h = cv2.calcHist([lab], [0, 1, 2], None, [8, 6, 6], [0, 256, 0, 256, 0, 256])
+    return cv2.normalize(h, h).flatten()
+
+
+def hist_correlation(a: np.ndarray, b: np.ndarray) -> float:
+    """Correlation of two lab_hist histograms, -1..1."""
+    import cv2
+    return float(cv2.compareHist(a, b, cv2.HISTCMP_CORREL))
+
+
 def hist_similarity(a: np.ndarray, b: np.ndarray) -> float:
     """Lab colour histogram correlation of two RGB crops, -1..1.  Lab, not hue: a
     black hat has no hue, and Hyde's black wideawake is what tells him from
     Enfield's light-brown top hat at 30 px (Jekyll ep01 T07: 0.77 against 0.08)."""
-    import cv2
-    hists = []
-    for img in (a, b):
-        lab = cv2.cvtColor(np.ascontiguousarray(img), cv2.COLOR_RGB2LAB)
-        h = cv2.calcHist([lab], [0, 1, 2], None, [8, 6, 6], [0, 256, 0, 256, 0, 256])
-        hists.append(cv2.normalize(h, h).flatten())
-    return float(cv2.compareHist(hists[0], hists[1], cv2.HISTCMP_CORREL))
+    return hist_correlation(lab_hist(a), lab_hist(b))
 
 
 def loose_detector(device: str = "cpu"):

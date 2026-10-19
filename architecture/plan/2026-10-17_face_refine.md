@@ -30,3 +30,7 @@ in wide shots, go ahead".
 - 2026-10-19 PDT, face-blur round 2: round 1's 15 refined crops re-measured through the new gate with the
   real CCIP / clip worker: all 15 kept (round 1 refused T01 x2 and T07's child on the seam); the walls and
   their evidence in `docs/calibration/face_refine.md`; the GPU arm of round 2 is still owed.
+- 2026-10-19 PM, fix round (skeptic): the seam is read where the paste mask falls (the whole-window mean
+  diluted a small face's to nothing); wall 18 again; round 1's three stay refused with either paste. The
+  tracker links by least cost and holds every head to its own track's reading less 0.15; the stitch no
+  longer counts the piece as its own rival. Bench replay: identical tracks.

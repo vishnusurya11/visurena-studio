@@ -3,9 +3,11 @@ from.  The walls and the decision live in studio/face_refine.py; this module onl
 measures.  `detect` / `embed` are facenet's (studio/measure/faces.embedder) in a run
 and fakes in a test.
 
-- seam: the mean level change the paste makes to the take OUTSIDE the head, at window scale,
-  through the mask the paste uses (round 2, 2026-10-19: the feather or a small face's soft head
-  mask; the old feather-band difference read 1.7-2.0x this on round 1's 15 rows);
+- seam: the level change between the refined crop and the take where the paste's mask falls,
+  outside the head (|grad m|-weighted, at window scale; the feather's edge band or a small face's
+  soft ring).  Through the feather it is round 1's feather-band difference; it reads a change D as
+  D at any face size (fix round 2026-10-19: a mean over the whole window outside the head read a
+  13 px face 60 levels off as 2.5);
 - drift: the mean |refined - take| inside the face box (PLAN_FINAL 1a, T8mars' parity cap);
 - eyes: the drawn-eye score of the take and of the refined crop (studio/face_eye.py), logged;
 - flicker: the face region's frame-to-frame change, the take's own against the
@@ -50,22 +52,36 @@ def shrunk(crop: list[np.ndarray], start: int, span: tuple[int, int], side: int)
     return [cv2.resize(np.ascontiguousarray(crop[k]), (side, side), interpolation=cv2.INTER_AREA) for k in ks]
 
 
-def collateral(src: np.ndarray, ref: np.ndarray, mask: np.ndarray, head: np.ndarray) -> float:
-    """The mean level change pasting `ref` through `mask` makes to `src` outside the head."""
-    moved = np.abs(ref.astype(np.float32) - src.astype(np.float32)).mean(axis=2) * mask[..., 0]
-    return float(moved[~head].mean()) if (~head).any() else 0.0
+def edge_weight(mask: np.ndarray, head: np.ndarray) -> np.ndarray:
+    """(side, side) weights a seam is read by: the paste mask's slope |grad m| outside the head --
+    where the paste passes from the crop to the take, a ring in head radii for a small face's soft
+    mask, the window's edge band for the feather."""
+    gy, gx = np.gradient(np.asarray(mask, np.float32).reshape(head.shape))
+    return np.hypot(gx, gy) * ~head
+
+
+def edge_change(src: np.ndarray, ref: np.ndarray, weight: np.ndarray) -> float:
+    """The mean level change between `ref` and `src`, weighted by `weight` (0 when it is all 0)."""
+    total = float(weight.sum())
+    if total <= 0:
+        return 0.0
+    moved = np.abs(ref.astype(np.float32) - src.astype(np.float32)).mean(axis=2)
+    return float((moved * weight).sum() / total)
 
 
 def seam_and_flicker(src: list[np.ndarray], ref: list[np.ndarray], face: float | None = None,
                      soft: bool = False) -> tuple[float, float, float]:
     """(seam, the take's flicker, the pasted flicker), at window scale; `face` is the face's
-    height as a share of the window (None: the margin's 1 / 2.4), `soft` its soft paste."""
+    height as a share of the window (None: the margin's 1 / 2.4), `soft` its soft paste.  The
+    seam is read where the mask falls (edge_weight), so it reads a level change D as D at any
+    face size: a mean over the whole window outside the head diluted a small face's to nothing."""
     from studio.face_track import MARGIN
     n, side = min(len(src), len(ref)), src[0].shape[0]
     face_px = (face or 1 / MARGIN) * side
     mask, head = face_paste.paste_mask(side, face_px if soft else None), face_paste.head_mask(side, face_px)
+    weight = edge_weight(mask, head)
     pasted = [(r * mask + s * (1 - mask)).astype(np.uint8) for s, r in zip(src[:n], ref[:n])]
-    seam = float(np.mean([collateral(s, r, mask, head) for s, r in zip(src[:n:SEAM_EVERY], ref[:n:SEAM_EVERY])]))
+    seam = float(np.mean([edge_change(s, r, weight) for s, r in zip(src[:n:SEAM_EVERY], ref[:n:SEAM_EVERY])]))
     return seam, face_paste.region_flicker(src[:n]), face_paste.region_flicker(pasted)
 
 
