@@ -21,8 +21,8 @@ brick or a new instance of one, a line here.
 4. **One rule per fact, read by every channel; a number lives in one home** (B3). ep01: a setup
    crowd leaked through 5 channels into 14 takes; the 8.0 s take budget had 4 copies. A freeze
    must hold at EVERY place that renders (first pass, early round, ladder, terminal, master retake,
-   --attempts: list them); a dry check calls those deciders, never a counter (ep01: the early round
-   retook frozen T01). -> ep01 retro, failures 3, 4; A freeze holds.
+   --attempts, takes_r2v: list them); a dry check calls the deciders, never a counter; a round counts
+   on bytes its own run landed. -> ep01 retro, failures 3, 4; A freeze holds.
 5. **A gate that counts cannot see shape; a repair re-stages only what it changed** (B4). ep01:
    a fading body and a floating hand passed every gate; grids 13-17 were redrawn for one figure.
    -> ep01 retro, failure 5.
@@ -73,7 +73,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - A book's look switched under a live series
 - Jekyll Kawajiri ep01 under the step caps
 - GPU when idle, CPU when rendering
-- Gate notes moved out of GATES.md (board states, known gaps, speed arms)
+- Gate notes moved out of GATES.md
 - Jekyll Kawajiri ep01 retro (the 13 failures, the five bricks, each package's lessons, what is owed)
 - The framing floor (face-blur fix #3, 2026-10-19)
 - The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19)

@@ -261,15 +261,31 @@ def early_line(ctx, room: Path, since: float, window: dict | None) -> str:
 
 
 def rung_lines(ctx, room: Path, since: float, window: dict | None) -> list[str]:
-    """still_curable, then route -> batch_for: the batched rung as judged_gate's climb would take it."""
+    """route -> batch_for: the batched rung as judged_gate's climb would take it.  A climb a counter closed
+    (still_curable's own two) takes no rung, and the router's batch is printed beside it all the same, so
+    the line shows what the freeze empties, not only what the counter does (skeptic round, incident 2)."""
     from studio import take_ladder
     verdict, source = recorded_verdict(room)
     head = f"take ladder (take_ladder.route -> batch_for over {source}): "
-    if not take_ladder.still_curable(room, verdict, since, home=ctx.home, window=window):
-        return [head + "batch none (not curable: the terminal answers)", frozen_line(room, verdict, window)]
     routed = take_ladder.route(verdict, room, try_i=take_ladder.rounds_of(room, since) + 1, window=window)
+    if closed := climb_closed(ctx.home, room, since):
+        alone = ", ".join(f"T{i:02d}" for i in take_ladder.renderable(routed, room, [])) or "none"
+        return [head + f"batch none (the climb is closed: {closed}; route -> batch_for alone: {alone})",
+                frozen_line(room, verdict, window)]
     *_, kept, why = take_ladder.batch_for(ctx, take_ladder.BATCH, routed, [], records_of(room), since)
     return [head + batch_word(kept) + (f" ({why})" if why else ""), frozen_line(room, verdict, window)]
+
+
+def climb_closed(home: Path, room: Path, since: float) -> str:
+    """The counter that closes the climb before any rung (take_ladder.still_curable's two), or ''."""
+    from studio import step_attempts, step_caps, take_ladder
+    n = take_ladder.rounds_of(room, since)
+    if n >= take_ladder.ROUNDS_CAP:
+        return f"ladder.json {n}/{take_ladder.ROUNDS_CAP} counted rounds since the retry stamp"
+    if take_ladder.episode_spent(home):
+        return (f"attempts.json retakes {step_attempts.count(home, take_ladder.RETAKES)}/"
+                f"{step_caps.rounds(take_ladder.RETAKES)} spent")
+    return ""
 
 
 def frozen_line(room: Path, verdict, window: dict | None) -> str:

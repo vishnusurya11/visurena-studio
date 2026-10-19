@@ -223,9 +223,12 @@ def test_the_cpu_lane_never_hands_a_frozen_take_to_attempts(ep01):
 # ---- the stale 12:29 round ----------------------------------------------------------------------
 
 def killed_run(ep01, t21: bool = True) -> None:
-    """ladder.json and attempts.json as the 12:29 kill left them; T21 as the 20:14 round rendered it."""
+    """ladder.json, attempts.json and the episode clock as the 12:29 kill left them; T21 as the 20:14 round
+    rendered it."""
     shutil.copy(FIX / "ladder_1229.json", ep01.room / take_ladder.LADDER_FILE)
     shutil.copy(FIX / "attempts_1229.json", ep01.home / "attempts.json")
+    shutil.copy(FIX / "clock_1229.jsonl", ep01.home / "clock.jsonl")
+    shutil.copy(FIX / "clock_1229.open.json", ep01.home / "clock.open.json")
     if t21:
         (ep01.room / "T21.mp4").write_bytes(b"T21 of the 20:14 round")
         os.utime(ep01.room / "T21.mp4", (T21_MTIME, T21_MTIME))

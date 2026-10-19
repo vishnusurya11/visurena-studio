@@ -653,7 +653,7 @@ resume is dead time: the relaunch it causes is not counted by `autopilot.step_gu
   (`take_dq --ceiling-spent`) and a PASSING QC report; a QC fail is measured again.
 - **Repair clock (owner 2026-10-19):** an owner redo of a delivered episode runs on `studio/repair_clock`
   (own cap, `repair` rows, not the 6 h); a redo of 09+ freezes delivered takes past its drive at every
-  render site; an unlanded ladder round is none; a leftover window closes once not owed;
+  render site; a ladder round counts on bytes its own run landed; a leftover window closes once not owed;
   `repair_dry_check.py` first (its batches empty). LESSONS.
 - **SAFETY (closed list, `gate_policy.SAFETY`):** a master over the Short length or with no
   title card; a line not heard; an unjudged or stale take; loudness out of band after the

@@ -20,6 +20,7 @@ asks the context's budget for the round's real cost, not the rung's unit.
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import time
@@ -801,20 +802,47 @@ def rounds_on_file(room: Path) -> list[dict]:
     return json.loads(path.read_text(encoding="utf-8")).get("rounds", []) if path.exists() else []
 
 
+BORN = time.time()
+"""This process's start, as near as its import of the ladder: a round stamped before it was launched by
+another process, whatever its pid says -- Windows hands a dead process's pid to a later one."""
+
+
 def counted(room: Path, rounds: list[dict] | None = None) -> list[dict]:
     """The rounds that count (P08: a round that renders nothing is not a round): bytes landed for it, or
     this process launched it and it is in flight.  INCIDENT 2: the 12:29 round was written at launch and
     the drive was killed before a byte landed; read as a round, it would cap and block the next launch."""
     rounds = rounds_on_file(room) if rounds is None else rounds
-    return [r for r in rounds if r.get("pid") == os.getpid() or landed(room, r)]
+    return [r for n, r in enumerate(rounds) if in_flight(r) or landed(room, r, rounds[n + 1:])]
 
 
-def landed(room: Path, r: dict) -> bool:
-    """A take the round names (its `takes`, else its fault signatures), or an archived draw of one, was
-    written after it launched.  A round naming no take cannot be read and counts, as before."""
-    named = r.get("takes") or [int(k) for k in r.get("faults") or {}]
-    at = float(r.get("at") or 0.0)
-    return not named or any(p.stat().st_mtime >= at for i in named for p in draws_of(room, int(i)))
+def in_flight(r: dict) -> bool:
+    """This process launched the round (its `at` is stamped to a tenth of a second, hence the one-second
+    grace on BORN)."""
+    return r.get("pid") == os.getpid() and float(r.get("at") or 0.0) >= BORN - 1.0
+
+
+def takes_named(r: dict) -> list[int]:
+    """The takes a round renders: its `takes`, else its fault signatures' keys."""
+    return [int(i) for i in (r.get("takes") or r.get("faults") or {})]
+
+
+def landed(room: Path, r: dict, later: list[dict] | tuple = ()) -> bool:
+    """A take the round names, or an archived draw of one, was written inside the round's own window
+    (`window_end`).  A round naming no take cannot be read and counts, as before."""
+    named, at = takes_named(r), float(r.get("at") or 0.0)
+    return not named or any(at <= p.stat().st_mtime < window_end(room, r, i, later)
+                            for i in named for p in draws_of(room, i))
+
+
+def window_end(room: Path, r: dict, index: int, later: list[dict] | tuple) -> float:
+    """When the round's render of take `index` can no longer land: the next round naming the take
+    launched, or the run that launched the round ended (run_clock.span_end), whichever is first.  Skeptic
+    round: an unbounded window let any later write of the take -- the tiny-face draw, the next real
+    round -- revive a round that rendered nothing."""
+    from studio import run_clock
+    run = run_clock.span_end(Path(room).parent.parent, float(r.get("at") or 0.0))
+    nexts = [float(x.get("at") or 0.0) for x in later if index in takes_named(x)]
+    return min(nexts + ([run] if run is not None else []) + [math.inf])
 
 
 def draws_of(room: Path, index: int) -> list[Path]:

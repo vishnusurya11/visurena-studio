@@ -1449,7 +1449,7 @@ def wants_render(c: dict, out: Path, records: dict, retake: list[int] | None, cu
     shot 13 re-rendered T19 and T22 beside it (Jekyll HEL ep01 v2).  A first
     round renders what is not current to its card (`current`, called lazily)."""
     if retake:
-        return c["index"] in retake or not out.exists()
+        return (c["index"] in retake and not refused_frozen(out)) or not out.exists()
     rec = records.get(c["index"])
     return not (rec is not None and rec.get("shots") == c["shots"] and current())
 
@@ -1460,6 +1460,18 @@ def current_to(c: dict, out: Path, book: Path, number: int) -> bool:
     11:18 PDT: P03's reworded UNLETTERED sentence queued all 28 of ep01's takes)."""
     return take_currency.held(c.get("prompt") or "", out, episode_home.home(book, number),
                               pictures=card_pictures(c, book, number), canvas=(W, H))
+
+
+def refused_frozen(out: Path) -> bool:
+    """A named retake of a take the owner's repair froze is refused HERE, where the bytes would change: the
+    backstop under every caller's guard (incident 2, 2026-10-19 12:29 PDT: the early round queued frozen
+    T01).  The tiny-face rung's one draw (`--tiny-face`) is the repair's own work and renders."""
+    if TINY_FACE:
+        return False
+    why = take_currency.frozen(out, Path(out).parent.parent.parent)
+    if why:
+        print(f"  KEPT {Path(out).stem}: the owner's repair froze its {why} bytes; no retake", flush=True)
+    return why is not None
 
 
 def make_room(c: dict, out: Path, records: dict, why: str | None) -> None:

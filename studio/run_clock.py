@@ -131,6 +131,18 @@ def spans(home, repair: bool | None = None) -> list[tuple[float, float]]:
     return out
 
 
+def span_end(home, at: float) -> float | None:
+    """The last moment work launched at `at` can have written a byte: the end of the run whose span holds
+    it plus the one beat a kill loses, never past the next run's start; None when no run holds it (a home
+    this clock never ran in).  take_ladder bounds a round's landing by it (skeptic round, incident 2)."""
+    every = sorted(spans(home))
+    holding = [e for s, e in every if s <= at <= e + BEAT_S]
+    if not holding:
+        return None
+    later = [s for s, _ in every if s > max(holding)]
+    return min([max(holding) + BEAT_S] + later)
+
+
 def union(pairs: list[tuple[float, float]]) -> float:
     """Seconds covered by the spans, each moment counted once."""
     total, reach = 0.0, None

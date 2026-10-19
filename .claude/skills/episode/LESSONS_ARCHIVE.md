@@ -2157,3 +2157,28 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   counter (brick 4: one rule per fact, read by every channel).
 - Tests: `tests/test_a_freeze_holds_at_every_render_site.py` (replay on ep01's T01 dq record, manifest,
   repair.json, ladder.json and attempts.json as the 12:29 kill left them: `tests/fixtures/ep01_replay/repair_rerun/`).
+- **Skeptic round: a later write revived a dead round.** `landed` counted a round when ANY draw of a take it
+  names was written after it launched; it never asked which render wrote the draw. A stale round of T05 then
+  one real round of T05 read as 2 rounds (ROUNDS_CAP after one, and the stale signature back in `progressed`);
+  on ep01 the tiny-face rung's one draw of T01 (the dry check's worst single draw) would have revived the
+  12:29 round. Now a round's draws land only inside its own window, `take_ladder.window_end`: from its launch
+  to the end of the run that launched it (`run_clock.span_end`: the clock row's end, or a killed run's last
+  beat, plus the one beat a kill loses, never past the next run's start) or the launch of the next round
+  naming the same take, whichever is first. On ep01 the 12:29 round sits in the killed run
+  `...20261019191130` (last beat 12:29:31), so its window closed at 12:30:31; the 20:14 round sits in run
+  `...20261019025229` and T21 landed inside it. In flight is THIS process: `pid` AND an `at` no earlier than
+  `take_ladder.BORN` (Windows hands a dead process's pid to a later one).
+- **The backstop where the bytes change.** `takes_r2v.refused_frozen`: a named `--retake` of a take the
+  governing repair froze is refused inside `wants_render` (`KEPT T<nn>: ...; no retake`), under every caller's
+  guard -- a hand-run `step_09_shoot --retake=N` included. `--tiny-face` (the rung's one draw) still renders.
+  So the render sites are eight: the seven above plus takes_r2v itself.
+- **The dry check shows the freeze, not only the counter.** When a counter closes the climb (still_curable's
+  ROUNDS_CAP or attempts.json `retakes`), the rung line names it AND prints the router's own batch: ep01 reads
+  `batch none (the climb is closed: attempts.json retakes 2/2 spent; route -> batch_for alone: none)`; outside
+  the repair the same records read `... alone: T01`.
+- **Left open (outside a repair):** the early round (`take_overlap.early_open` / `early_affordable`) reads
+  ladder.json's rounds and the budget, never `take_ladder.episode_spent` (attempts.json). Inside a repair the
+  freeze covers it; outside, an early round can still queue past the episode's retake cap. Not changed here
+  (the brief: outside a repair the ladder is exactly as before).
+- Tests: `tests/test_a_round_lands_only_inside_its_own_run.py` (ep01's clock.jsonl and clock.open.json as the
+  12:29 kill left them, copied as `clock_1229.*`).
