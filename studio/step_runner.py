@@ -114,7 +114,10 @@ def run_steps(ctx, steps: list) -> str:
         print(f"--- step {step.STEP_ID} ({step.NAME}) | {ctx.label} ---")
         ctx.tracker.event(step.STEP_ID, "started")
         ctx.step_wall = step_wall.open_wall(ctx, step)     # the cap table's wall (owner 2026-10-18)
-        outcome = _run_one(step, ctx)
+        try:
+            outcome = _run_one(step, ctx)
+        finally:
+            step_wall.record_spent(ctx, ctx.step_wall)     # a failed run's time is kept too
         step_wall.close_wall(ctx, ctx.step_wall)
         if outcome != "completed":
             return outcome

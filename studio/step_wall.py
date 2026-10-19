@@ -24,8 +24,13 @@ class StepWall:
     wall_s: float
     started: float
     clock: Callable[[], float] = field(default=time.time)
+    prior: float = 0.0
+    """Seconds earlier runs of this step already spent (a relaunch never resets the wall)."""
 
     def elapsed(self) -> float:
+        return self.prior + self.clock() - self.started
+
+    def this_run(self) -> float:
         return self.clock() - self.started
 
     def spent(self) -> bool:
@@ -56,16 +61,46 @@ def started_row(ctx, step_id: str, at: float) -> None:
         f.write(json.dumps(row) + "\n")
 
 
+def wall_key(step_id: str) -> str:
+    return f"wall.{step_id}"
+
+
+def home_of(ctx):
+    """The episode folder: the context's own, else derived from the book and the number."""
+    home = getattr(ctx, "home", None)
+    if home is not None or getattr(ctx, "stage", "") != step_caps.STAGE or getattr(ctx, "number", None) is None:
+        return home
+    from studio import episode_home
+    return episode_home.home(ctx.book_dir, ctx.number)
+
+
+def prior_seconds(ctx, step_id: str) -> float:
+    """What earlier runs of this step spent this episode (episodes/epNN/attempts.json)."""
+    from studio import step_attempts
+    home = home_of(ctx)
+    return step_attempts.seconds(home, wall_key(step_id)) if home is not None else 0.0
+
+
 def open_wall(ctx, step) -> StepWall:
-    """The step's wall, started, said and written down."""
+    """The step's wall, started from what its earlier runs spent, said and written down."""
     clock = getattr(ctx, "clock", None) or time.time
     wall_s = step_caps.step_wall_s(step.STEP_ID) if getattr(ctx, "stage", "") == step_caps.STAGE else 0.0
-    wall = StepWall(step.STEP_ID, wall_s, clock(), clock)
-    line = f"STEP {step.STEP_ID} start {seattle(wall.started)} ({step.NAME}, wall {step_caps.mmss(wall_s)})"
+    wall = StepWall(step.STEP_ID, wall_s, clock(), clock, prior_seconds(ctx, step.STEP_ID))
+    before = f", {step_caps.mmss(wall.prior)} spent before" if wall.prior else ""
+    line = (f"STEP {step.STEP_ID} start {seattle(wall.started)} "
+            f"({step.NAME}, wall {step_caps.mmss(wall_s)}{before})")
     print(line, flush=True)
     ctx.log(line, step_id=step.STEP_ID)
     started_row(ctx, step.STEP_ID, wall.started)
     return wall
+
+
+def record_spent(ctx, wall: StepWall) -> None:
+    """This run's seconds onto the step's episode total -- on success AND on a failure."""
+    from studio import step_attempts
+    home = home_of(ctx)
+    if home is not None:
+        step_attempts.spend(home, wall_key(wall.step_id), round(wall.this_run(), 1))
 
 
 def close_wall(ctx, wall: StepWall) -> None:

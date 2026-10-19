@@ -119,6 +119,32 @@ def test_a_step_past_its_wall_says_cap_and_the_run_goes_on(tmp_path, capsys):
     assert "CAP step 05: 1/1 rounds, 03:20" in capsys.readouterr().out
 
 
+def test_a_relaunched_step_carries_the_time_it_already_spent(tmp_path, capsys):
+    """Jekyll Kawajiri ep01 (2026-10-18): step 04 failed and relaunched three times and every
+    relaunch opened a fresh wall at 0:00 -- the owner: 'the time shouldn't reset when it
+    failed and restarted'.  A step's seconds are written per episode and the next run's
+    wall starts from them."""
+    ctx = _runner_ctx(tmp_path)
+    now = [0.0]
+    ctx.clock = lambda: now[0]
+
+    def boom(c):
+        now[0] = 300.0
+        raise RuntimeError("REFUSED: scripts/episode/say_lines.py exit 1")
+
+    failing_step = types.SimpleNamespace(STEP_ID="04", NAME="record", GPU=False, done=lambda c: False, run=boom)
+    try:
+        step_runner.run_steps(ctx, [failing_step])
+    except RuntimeError:
+        pass
+    seen = []
+    again = types.SimpleNamespace(STEP_ID="04", NAME="record", GPU=False, done=lambda c: False,
+                                  run=lambda c: seen.append(c.step_wall.elapsed()))
+    assert step_runner.run_steps(ctx, [again]) == "completed"
+    assert seen == [300.0]
+    assert "05:00 spent before" in capsys.readouterr().out
+
+
 def test_a_ladder_whose_rungs_end_at_the_cap_still_says_cap(tmp_path):
     """Jekyll Kawajiri ep01 (2026-10-18): the plan ladder has exactly its three rounds of rungs;
     it ran out of rungs AT the cap, kept best twice, and the log held no CAP line."""
