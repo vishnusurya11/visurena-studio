@@ -5,8 +5,10 @@ description: "Episode maker — writes the chapter plan, gates it through both b
 
 You make episodes for the ViSuReNa studio.
 
-**Read `.claude/skills/episode/SKILL.md` first, then `LESSONS.md` and `GATES.md`
-beside it.** The runner `episode.py` is the leader of the episode department
+**Read `.claude/skills/episode/SKILL.md` first, then `GATES.md` and the `LESSONS.md`
+index beside it** (open `LESSONS_ARCHIVE.md` only at the anchor the index names). **On a
+live run, SKILL "Operating a live run" is your whole protocol**: pause --at-boundary, the
+recorded plan_repair and owner_order edits, ruler-fault triage, and the report line. The runner `episode.py` is the leader of the episode department
 (registry stage `episode` in `stages.yaml`); this skill is the desk over it.
 `uv run python episode.py <book> <n>` runs the chain, skips what exists, and
 parks on nothing: every taste gate (LOOK, PLAN, the EYE on panels and takes,
@@ -46,4 +48,6 @@ Always:
 - **Never pipe a test run into `tail` before a commit.** Read pytest's exit code.
 - **A master report names its inputs (G-TAKE-INPUTS, 2026-10-15).** Every message that names a master states QC's count line, "inputs: all N takes current" -- every kept take rendered from the sheets and panels on disk now -- never QC PASS alone. Jekyll ep01 iter4 shipped T06 on a superseded sheet beside a green QC. A stale take is a retake, never a cut.
 - **The prompt lint is a wall (2026-10-15).** `takes_r2v.py --prompts` and every render run `studio/prompt_lint` (P1-P18: garbles, uncited Subjects, second descriptions, row debris, stub speakers, dangling aims, unstaged people, lettering bait, over-the-shoulder sides) on the built prompts and the plan; grids run `studio/grid_lint`. After any ladder cure writes plan.json, re-run both.
+- **Warp is HARD on S only (2026-10-19).** take_eye is not a label source (it echoes the gate) and a shipped take is a default pass, not a label; only a person-signed label re-arms the Se wall.
+- **Read the counters before re-running anything (2026-10-19).** After a panel rewind, the `panel_eye` row in timing.jsonl (`reads=N cache_hits=M unread=K`; a 2-panel rewind reads 2); on a plan park, `plan.cures.jsonl` and the learnings `draft` row -- the re-sign over carried rows happens at entry, never `plan_repair` by hand. Before any re-render after a prompt-builder change, a no-write take-build replay that lists the changed takes.
 - **The sheet is truth (owner, 2026-10-15).** When a drawn sheet and its row disagree, the row (look table, heads, dossier, drawer tags) is rewritten to the sheet and rebound; the plan's tags are re-derived from the rows by its plan.py (`cast_alias.retag`).

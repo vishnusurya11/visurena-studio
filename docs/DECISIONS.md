@@ -4,6 +4,41 @@ Newest first. Every architectural change gets an entry.
 
 ---
 
+## 2026-10-19 — The Jekyll Kawajiri ep01 retro: 22 decisions taken on the owner's behalf while he slept (for veto)
+
+Decision id: `2026-10-19-kawajiri-retro`
+
+**Ruling (pending the owner's veto):** five bricks under ep01's 13 failures (a round is a change of
+bytes; a gate is as true as its population; one rule per fact; a count cannot see shape; a clock
+survives a kill), built as 15 code packages and one docs package. Decision
+`architecture/decisions/2026-10-19_kawajiri_retro.md`; tracker
+`architecture/plan/2026-10-19_kawajiri_retro.md`; the debate `docs/audit/2026-10-19_kawajiri_retro/`.
+
+- D1 G-WARP FAIL is S > 2.5 only; Se alone is the advisory `eye`; `row()` recomputes the state (41fba62). Evidence: all 8 ep01 fails Se-only, seeds 0 of 4.
+- D2 `warp_gate.RETAKES = 1`: one seed, then refine a small face or ship flagged (41fba62).
+- D3 A round, climb or redraw is spent only when it changed bytes, or a writer call was made (79b8049, 2f1ef00, cc5a631, eb35ea6).
+- D4 A stale flagged plan signature is re-signed over its carried rows with one critic read, no writer round (2f1ef00).
+- D5 The plan critic accepts setup-crowd counts extras >= 1 (2f1ef00).
+- D6 G-DEAD keeps option A; unknown failing rows on a kept take ship flagged high, never fail closed (f2460f2).
+- D7 The face paste stays before the one upscale (owner 2026-10-18); a T18 A/B is owed, never auto-reverted.
+- D8 One anatomy ask on panel_content's existing read plus a DWPose orphan-limb measure; advisory until E1 recall >= 0.6 and precision >= 0.8 (5616782, cc5a631).
+- D9 The hung-step kill needs 1.5 x the step wall AND flat run-tree CPU AND no output growth for 10 min (222be3b).
+- D10 No auto-pause on runtime edits; dirty means runtime code only (9dd9ffb).
+- D11 A step's wall stays the sum of its cap rows; shares are report-only; no cap value moves until one run on the new code (6a81488).
+- D12 The downstream replay is advisory at plan sign until clean on ep01 and one WotW plan (b2782b4).
+- D13 Eval and warp labels made by agents carry `label_source: agent` until the owner labels T07, T10, T16, T20, T21, T24 (5616782, 41fba62).
+- D14 The `lead_day` grid lead in look.json is an experiment, never the default (c152d1b).
+- D15 The UNLETTERED sentence names only the bait nouns the take holds, never a cheque by default (b83eac4).
+- D16 QC is never cut by a timeout; its cap is a CAP line (311bf8e).
+- D17 LESSONS.md is an index of 8 KB or less; LESSONS_ARCHIVE.md keeps every heading and every cited anchor.
+- D18 Voice keeps 8 tries plus a separate 10 min `lines` wall (37eefbb, 6a81488).
+- D19 One model-family-boundary free in step_runner and one in step 03; never a per-read free (dd1e163, 6a81488).
+- D20 One package (P16) owns every doc file.
+- D21 Tracking's one event stream (C1, C2, C5) and the facenet / EasyOCR torch worker are deferred.
+- D22 Docs landed in one P16 commit after the code packages instead of one commit per package, so 15 builders could run in parallel overnight (orchestrator, 2026-10-19, for veto).
+
+---
+
 ## 2026-10-10 — Continuity: character looks on a story timeline; a place is its master (owner rulings, retro of WotW)
 
 Decision id: `2026-10-10-continuity-looks-places`

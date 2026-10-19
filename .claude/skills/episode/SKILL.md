@@ -18,11 +18,15 @@ renders a card mid-run (owner design, 2026-09-30). The owner's
 word outranks anything in this file; when he corrects the work, the correction
 goes here and into memory.
 
-**Read these before you work:**
-- `LESSONS.md` beside this file: every rule below, with the measurement that made it.
-- `GATES.md` beside this file: every gate, what it measures, whether it is hard, and how to run it.
-- `docs/calibration/*.md` in the repo: the measured detail behind the gates.
-- `SCARLET_ARCHIVE.md`: the previous skill, for the other book's route and dated history only.
+**Read by the question you have (D17, 2026-10-19):**
+- What runs next, what caps it, what stops it: "The chain" below (the generated algorithm) and
+  GATES.md "Step caps" (the generated cap and clock tables).
+- What may I do to a live run: "Operating a live run" below.
+- Why a rule exists: `LESSONS.md` beside this file, an index of bricks (8 KB); open
+  `LESSONS_ARCHIVE.md` only at the anchor the index names.
+- What a gate measures, whether it is hard, its outcome at the cap: `GATES.md`.
+- The measured detail behind a gate: `docs/calibration/*.md`. The other book's route:
+  `SCARLET_ARCHIVE.md`.
 
 **Deliverable first.** Every message that produces or changes an output begins
 with the full absolute path of the finished file, on its own line. Keep every
@@ -63,7 +67,7 @@ optional acts are `pause`, `resume`, `retry N`, `park N --why`.
 
 | step | stops on (HARD) | what the autopilot does |
 |---|---|---|
-| 02 plan | the battery; a deferral after the free cures and one guarded rewrite | relaunch ×2 (each relaunch cures the aside for $0 first), then brain triage, then PARK |
+| 02 plan | the battery; tier-1 rows after the climbs (3 writer rounds each, 2 climbs an episode) | a relaunch re-signs a stale flagged signature over the rows it carries (one critic read, no writer round); else relaunch, brain triage, PARK |
 | 05 timeline | the MEASURED speech gap over 6.0 s | one bounded auto-trim; rendered → PARK |
 | 07-08 board, panels | panel gates; EYE_PANELS climbs only on redraw-curable faults | the ladder; `redo 08` when takes wait on panels |
 | 09 shoot | HARD take rows; EYE_TAKES climbs on hard faults | the batched ladder; a hung engine is killed and restarted, twice at most |
@@ -85,10 +89,13 @@ optional acts are `pause`, `resume`, `retry N`, `park N --why`.
    **Landing a fix during an episode (C3_verdict #7, 2026-10-11):** `autopilot.py pause
    --at-boundary --book <codex>`, wait for `paused_at_boundary` in the drive log (one unit:
    a take ~4 min, a grid ~5 min, a plan rung 4-10 min), commit, `resume`. Never kill a
-   drive: 22 of 23 kills over ep19-27 were this, 527 waste-minutes.
+   drive: 22 of 23 kills over ep19-27 were this, 527 waste-minutes. The full protocol is
+   "Operating a live run" below.
    **A spent clock ships the episode flagged** (C3_verdict #5): read the audit sheet; never
    `retry` to buy hours -- a retry no longer resets the clock.
-5. **A terminal is not a pass.** Only the owner waives (`review/waiver.json`).
+5. **A terminal is not a pass.** A judge-signed terminal on an `auto` gate auto-clears the lock
+   and ships flagged (2026-10-01); a hand-waived or unsigned terminal never does. Never write
+   `review/waiver.json` yourself.
 6. **Watch and listen before anything leaves the machine**; the lock needs the sign-off.
 7. **Audio first.** Picture cut to the measured voice. Effects duck under every line
    (6 dB), ambience 3 dB, every cue trimmed 3 dB (`studio/episode_sound`). Every effect
@@ -112,7 +119,8 @@ inputs, so the order is fixed:
 # book takes the dedicated `narrator` voice row (never a cast member); a first-person book
 # declares its "I". Step 02 STOPS without one -- a gate never picks the narrator.
 uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...  # FIRST: takes, grids and content checks read this one bound row
-uv run python scripts/episode/step_02_plan.py <book> <n>          # the writer agent -> plan.json through plan_check; improve x 2, then model_tier, then the terminal; then the PLAN signature
+uv run python scripts/episode/step_02_plan.py <book> <n>          # the writer agent -> plan.json through plan_check; 3 rounds a climb, 2 climbs, then the PLAN signature
+uv run python scripts/episode/downstream_replay.py <book> <n>     # ADVISORY after sign, $0: step 05 packed(), the hold cure, the dry take lint; a RULER row = fix the ruler
 uv run python library/<book>/episodes/epNN/plan.py                 # OR a hand-authored plan beside its plan.json, only through episode_home.write_plan
 uv run python scripts/episode/plan_check.py <book> <n>             # "VERDICT: clean"; CAST BOUND needs every sheet on disk
 #   then sheets, places, lines, respot, timeline (steps 3-7)
@@ -162,8 +170,8 @@ them defaults to 1.
 
 **The runner is the leader; this skill is the desk over it.** One command runs
 the whole chain over one unit, skipping every step whose output exists and
-stopping only on a hard refusal. Drive it with `scripts/episode/drive.py` (above);
-`episode.py` is what the driver runs:
+stopping only on a hard refusal. The autopilot drives it through
+`scripts/episode/drive.py` (above, never by hand); `episode.py` is what the driver runs:
 
     uv run python episode.py <book> <n>        # one episode
     uv run python episode.py <book>            # every episodes/epNN with a plan.json
@@ -191,6 +199,34 @@ The references sheets and voices live in their own department: `uv run python re
 | 13 | publish | `uv run python scripts/episode/step_13_publish.py <book> <n>` | The last mile, unattended (decision 2026-10-05, under the standing hand of 2026-10-01): youtube.json from one guarded structured call, the director's sign-off rendered from measures only, the gated upload, the public flip, the /shorts/ poll -- the public Short URL is the last line printed. |
 <!-- /registry:episode -->
 
+**The algorithm** (generated from `stages.yaml` steps and `caps:` by the same command; a test
+holds it equal; the caps' meanings are GATES.md "Step caps"):
+
+<!-- registry:algorithm -->
+```
+RUN(book, n): the autopilot launches drive.py; you read the disk, never call a step
+  clock    = the union of the episode's run spans, never reset (GATES clock table)
+  counters = attempts.json, per episode: a relaunch, a resume or a retry never resets one
+  FOR each step in order, skipping a step whose outputs are current:
+    log 'STEP <id> start'; run its ladder; a round is a change of bytes
+    pass -> next | cap -> 'CAP <phase>: ...', keep best, sign flagged, next
+    ruler fault -> park; fix the gate test-first; retry N | SAFETY -> park by its name
+01 bind      caps: bind 1/pass, 2 min
+02 plan      caps: plan 3/climb x2, 30 min, gate PLAN
+03 places    caps: places 3/draw, 15 min
+04 record    caps: lines 1/episode, 10 min; voice 2/episode, 30 min
+05 timeline  caps: timeline 1/pass, 2 min
+06 prompts   caps: prompts 1/pass, 2 min
+07 board     caps: grids 1/grid, 30 min
+08 panels    caps: panel_checks 1/round, 30 min; regrid 2/episode, 20 min, gate EYE_PANELS
+09 shoot     caps: takes 1/pass, 120 min; take_dq 1/round, 30 min; take_content 1/round, 20 min; take_eye 1/round, 10 min; strip 1/round, 2 min; retakes 2/episode, 45 min, gate EYE_TAKES; face_refine 1/take, 15 min
+10 edit      caps: assemble 1/pass, 15 min; upscale 1/pass, 15 min
+11 qc        caps: qc 1/episode, 30 min; master_eye 1/episode, 30 min, gate MASTER
+12 deliver   caps: deliver 1/pass, 2 min
+13 publish   caps: publish 1/pass, 10 min
+```
+<!-- /registry:algorithm -->
+
 No step parks on a person (decision `2026-09-24-automate-the-taste-gates`).
 Each taste gate is signed by a judge named in `gates.yaml`: LOOK by `judge:look`
 (`refs/verdict.json`), PLAN by `judge:plan` (`episodes/epNN/plan.verdict.json`),
@@ -205,27 +241,29 @@ See GATES.md "Judges".
 
 ### The tools each step wraps
 
-| # | step | command | its gate |
-|---|---|---|---|
-| 1 | Bind this chapter's cast | `uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...` | stamps `refs.json` with the chapter; must precede the plan; the take, grid and content steps all read this one row |
-| 2 | Plan | a new unit's plan is written by the `episode_writer` agent (step 02) into `library/<book>/episodes/epNN/plan.json`; an existing hand-authored `library/<book>/episodes/epNN/plan.py` regenerates it when run | RULE ONE above |
-| 3 | Sheets and prop sheets | `uv run python scripts/refs/build_pack.py <book> --kind characters --only <a> --only <b>` (repeat the flag; `--kind props` for a key prop) | look at every sheet beside its row; words must match the picture (LESSONS: cast) |
-| 3b | Looks (step 03_04) | once per book `uv run python scripts/refs/looks_table.py <book>` (refs/looks.json); per episode `uv run python scripts/refs/looks.py <book> <n> [--draw]` | LOOK-STATE (`judge:look_state`): hat, hair colour, facial hair HARD on every new look picture; G-LOOK in the plan battery; the step-06 lint refuses a person whose picture and words name two looks |
-| 4 | Places at this episode's hour | `uv run python scripts/refs/places.py <book> <n> [--draw] [--new=<loc>="Its name"]` | every setup's `location`+`view` resolves to a drawn picture (guard test); a first picture is the location's master (refs/places.json); a `place_state` is ONE 2511 edit of it (03_05); G-PLACE in the plan battery; look at each one |
-| 5 | Voices (new speakers only) | `uv run python scripts/cast/cast_voices.py <codex> --only <a>,<b> [--recast]` | pairwise similarity under the wall; at most 4 voices an episode |
-| 6 | Lines | `uv run python scripts/episode/say_lines.py <book> <n> [--redo=i,j]` | every line heard as written (listen gate) |
-| 7 | Timeline | `uv run python scripts/episode/respot.py <book> <n>` then `uv run python scripts/episode/timeline.py <book> <n>` | fingerprinted to the plan AND the measured voice; every reader refuses a stale one |
-| 8 | Grids | `uv run python scripts/episode/grids.py <book> <n> <setup> <cols> <rows> [tag] [--shots=..]` | shot count = cols x rows; the manifest records `inputs` (the exact prompt and every staged picture's bytes) and the prompt version (v2 default) |
-| 9 | Panels | `uv run python scripts/episode/panels.py <book> <n>` | a grid is stale when its prompt or a staged picture would now differ (a rebound row, a redrawn sheet or place, a builder fix); every shot from exactly one grid; a panel is cropped square and written only if its pixels changed, so re-running is safe |
-| 10 | Panel gates + EYE | `uv run python scripts/episode/panel_check.py <book> <n>` and `uv run python scripts/episode/panel_content_check.py <book> <n>`, then a contact sheet of all panels, looked at | both must exit 0; `takes_r2v` refuses without both verdicts. Both gates have passed one man with two hats, a white gutter and an insert that was the place reference copied back |
-| 11 | Takes | `uv run python scripts/episode/takes_r2v.py <book> <n> --from-refs --approved=render` | the take lint; a take is current only to its words AND its pictures |
-| 12 | Take gates + EYE | `uv run python scripts/episode/take_dq.py <book> <n> [idx...] [--attempts]` and `uv run python scripts/episode/take_content_check.py <book> <n>`, then a 5-frame strip of every take, looked at | QC and the upload refuse an unjudged take. `held` fails a person pinned while the set slides; `jump` fails a switch of picture |
-| 13 | Title card | `uv run python scripts/episode/series_title.py <book> <n>` | QC fails a master without one |
-| 14 | Cut | `uv run python scripts/episode/assemble.py <book> <n> --engine=r2v` | kept as `cut/master_iterN.mp4` |
-| 15 | QC | `uv run python scripts/episode/qc.py <book> <n> --engine=r2v` | must say PASS; a silent gap names the shot it is made of |
-| 16 | Publish | write `episodes/epNN/youtube.json`; `youtube_upload.py <book> <n> --engine=r2v --dry-run`, then `--approved`; then `uv run python scripts/publish/youtube_privacy.py <book> <n> public --approved` | the upload refuses failed or unjudged takes; the flip to public re-checks QC (about the uploaded sha8) and every take, as they stand then |
+The first column is the registry step the tool belongs to.
 
-Step 16 inserts the video private, because an unverified API project forces
+| step | tool | command | its gate |
+|---|---|---|---|
+| 01 | Bind this chapter's cast | `uv run python scripts/refs/cast_rows.py <book> <n> <who[=Display:gender]> ...` | stamps `refs.json` with the chapter; must precede the plan; the take, grid and content steps all read this one row |
+| 02 | Plan | a new unit's plan is written by the `episode_writer` agent (step 02) into `library/<book>/episodes/epNN/plan.json`; an existing hand-authored `library/<book>/episodes/epNN/plan.py` regenerates it when run | RULE ONE above |
+| 03 | Sheets and prop sheets | `uv run python scripts/refs/build_pack.py <book> --kind characters --only <a> --only <b>` (repeat the flag; `--kind props` for a key prop) | look at every sheet beside its row; words must match the picture (LESSONS: cast) |
+| 03 | Looks (step 03_04) | once per book `uv run python scripts/refs/looks_table.py <book>` (refs/looks.json); per episode `uv run python scripts/refs/looks.py <book> <n> [--draw]` | LOOK-STATE (`judge:look_state`): hat, hair colour, facial hair HARD on every new look picture; G-LOOK in the plan battery; the step-06 lint refuses a person whose picture and words name two looks |
+| 03 | Places at this episode's hour | `uv run python scripts/refs/places.py <book> <n> [--draw] [--new=<loc>="Its name"]` | every setup's `location`+`view` resolves to a drawn picture (guard test); a first picture is the location's master (refs/places.json); a `place_state` is ONE 2511 edit of it (03_05); G-PLACE in the plan battery; look at each one |
+| 04 | Voices (new speakers only) | `uv run python scripts/cast/cast_voices.py <codex> --only <a>,<b> [--recast]` | pairwise similarity under the wall; at most 4 voices an episode |
+| 04 | Lines | `uv run python scripts/episode/say_lines.py <book> <n> [--redo=i,j]` | every line heard as written (listen gate) |
+| 05 | Timeline | `uv run python scripts/episode/respot.py <book> <n>` then `uv run python scripts/episode/timeline.py <book> <n>` | fingerprinted to the plan AND the measured voice; every reader refuses a stale one |
+| 07 | Grids | `uv run python scripts/episode/grids.py <book> <n> <setup> <cols> <rows> [tag] [--shots=..]` | shot count = cols x rows; the manifest records `inputs` (the exact prompt and every staged picture's bytes) and the prompt version (v2 default) |
+| 08 | Panels | `uv run python scripts/episode/panels.py <book> <n>` | a grid is stale when its prompt or a staged picture would now differ (a rebound row, a redrawn sheet or place, a builder fix); every shot from exactly one grid; a panel is cropped square and written only if its pixels changed, so re-running is safe |
+| 08 | Panel gates + EYE | `uv run python scripts/episode/panel_check.py <book> <n>` and `uv run python scripts/episode/panel_content_check.py <book> <n>`, then a contact sheet of all panels, looked at | both must exit 0; `takes_r2v` refuses without both verdicts. Both gates have passed one man with two hats, a white gutter and an insert that was the place reference copied back |
+| 09 | Takes | `uv run python scripts/episode/takes_r2v.py <book> <n> --from-refs --approved=render` | the take lint; a take is current only to its words AND its pictures |
+| 09 | Take gates + EYE | `uv run python scripts/episode/take_dq.py <book> <n> [idx...] [--attempts]` and `uv run python scripts/episode/take_content_check.py <book> <n>`, then a 5-frame strip of every take, looked at | QC and the upload refuse an unjudged take. `held` fails a person pinned while the set slides; `jump` fails a switch of picture |
+| 10 | Title card | `uv run python scripts/episode/series_title.py <book> <n>` | QC fails a master without one |
+| 10 | Cut | `uv run python scripts/episode/assemble.py <book> <n> --engine=r2v` | kept as `cut/master_iterN.mp4` |
+| 11 | QC | `uv run python scripts/episode/qc.py <book> <n> --engine=r2v` | must say PASS; a silent gap names the shot it is made of |
+| 13 | Publish (only when the owner asks; no `publish/standing.json` = step 13 parks, 2026-10-12) | write `episodes/epNN/youtube.json`; `youtube_upload.py <book> <n> --engine=r2v --dry-run`, then `--approved`; then `uv run python scripts/publish/youtube_privacy.py <book> <n> public --approved` | the upload refuses failed or unjudged takes; the flip to public re-checks QC (about the uploaded sha8) and every take, as they stand then |
+
+The publish row inserts the video private, because an unverified API project forces
 that on `videos.insert`, and then flips it public. **When the owner says
 upload, it goes public.** He corrected the work for making it private once.
 
@@ -264,25 +302,10 @@ and bores a person is refused:
 written under it: `grammar: anime_tv` is set by code from the brief's band, and the
 battery's GRAMMAR row is HARD on it until something is drawn (decision
 `architecture/decisions/2026-10-17_anime_tv_grammar.md`). The frame holds a face large
-enough to read and a CUT changes the size:
-- faces at close / medium close on 55 % of the shots or more (G-FACES); at most 2 wides,
-  4 s each, the opener 5 s (G-WIDE); mediums 7 s (G-MEDIUM); inserts are impacts of
-  1-3 s, a long line split across insert and reaction (G-INSERT);
-- mostly locked (G-LOCKED, 50 %), at most 2 pushes and no amount on a camera head
-  (G-PUSH); a two-person reaction a locked medium two-shot (G-TWO); the payoff line a
-  locked close (G-PAYOFF); over-the-shoulder never tighter than medium close (G-OTS);
-- silhouette, Dutch angle and eye close-up are UNSUPPORTED in words (G-UNSUPPORTED);
-- a cold open of 10 words or fewer with a sound at 0 s (G-COLD); one `act_out` at 35-55 %
-  of the picture, held 1.2 s, the bed turning (G-ACT); narration never captions the frame
-  (G-CAPTION); a silent face after every exchange (G-REACT); 3 holds of 1.2 s or more
-  (G-MA); the dialogue band follows the chapter's own speech (ceiling speech + 8 points,
-  20-35 %);
-- an `inner` line (8 words at most, the speaker's own voice hushed, over his own face,
-  close-mic in assemble) is ADVISORY until the owner has heard it; an optional picture-only
-  `tease` after the button loops to the hook's place; `motif` is the book's recurring image;
-- at most 28 shots (G-SHOTS: `studio/episode_capacity`, 7.65 min a shot, 28 -> 5.65 h; 30 would fit at 5.9 h,
-  capped at 28 until the retake shares are re-priced);
-  every shot is its own take on a grammar plan.
+enough to read and a CUT changes the size: faces at close / medium close on 55 % of the
+shots, few and short wides, mostly locked, a silent face after every exchange, a cold open,
+one act_out, at most 28 shots, every shot its own take. Every wall with its number and its
+replay is the GATES.md grammar table (one home, so the two cannot drift).
 A scratch re-plan is judged beside the live one: `plan_check.py <book> <n> --plan=plan_v3.json`.
 The title card stays at the END of the Short (the G2 bumper was not adopted).
 
@@ -416,8 +439,11 @@ setup the drawer re-dresses it (ep14: two biology classrooms, a mirrored
 Waterloo, an attic that became a street). So the grid holding the setup's
 widest shot is its ANCHOR and is drawn first; its widest cell is cut to the
 room; every sibling grid stages the room; the `inputs` hash covers the staged
-bytes, so a redrawn anchor re-cuts the room and the ladder redraws the siblings
-on it. The prompt says the location "is identical in every panel and never
+bytes, so a redrawn anchor re-cuts the room; the re-cut is compared to the old
+room first (`grid_room.recut_room`, 2026-10-19): a matching place keeps the old
+room bytes and the siblings stay valid, a moved place stales them and the ladder
+redraws them on it. Under a declared atmosphere every figure is drawn solid,
+the haze behind it (`book_look.ATMOSPHERE_GRID`; ep01 shot 2 faded into fog). The prompt says the location "is identical in every panel and never
 changes" again, carries the setup's `geometry` and `landmark`, and a tight grid
 gets the place's first clause plus `Setup.light`. `panel_place` reads every
 loose panel against the room and names its mirror — advisory until calibrated
@@ -528,18 +554,26 @@ that person's sheet (`scripts/episode/face_refine.py`, F2's workflow). The gate 
 sheet does not drop, there is no seam or new flicker, and the face count holds; else the unrefined take. Decisions per
 take: `takes/r2v/refine.json` (`refined`, `unrefined`, `no_faces`, `no_cast`, `cut`). Step 09 queues the refine on the
 GPU lane right behind the renders (a REFINE job: after renders and retakes, before the GPU checks) and refines what
-the ladder left owed once at the end. ~110 s per face per take; the FIRST thing cut for time, never a check. Assemble
-pastes the kept crops into the master inside the master upscale pass, after the 4x (never into the 768 take: the detail
-averages away). On `av3` (the default) the pass runs in the portable python's worker (`studio/master_av3.py`),
+the ladder left owed once at the end. ~110 s per face per take; the FIRST thing cut for time, never a check. The
+refine reads the smallest tracked face height (`measures.warp.tracks`) and declines a take whose every planned face is
+tracked >= 80 % of it at >= 60 px; a `no_faces` pick spends no round. Assemble pastes the kept crops at CUT scale on the
+decoded frames, before the denoise and the one upscale (owner 2026-10-18, 24caaeb); after the upscale only audio is
+muxed. On `av3` (the default) the pass runs in the portable python's worker (`studio/master_av3.py`),
 which rebuilds the paste from its spans: the same geometry, the same frame loop. By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.
 The render is the SaveVideo node's output, by node id (`fr.saved_node`), never the job's first output: on ComfyUI
 v0.41.2 the LoadVideo echoes its input crop first, and a refined crop equal to its source is refused (2026-10-18).
 
-**G-WARP sends a redrawn face back (2026-10-18, main session, for owner veto).** `take_dq` scores every take that
-stages a face for frame-to-frame face redraw (`studio/warp_gate.py`, CPU lane): FAIL is a hard `warp` row, cured by a
-seed retake (the ladder's rounds cap it at 2), then the F2 face refine takes it even with the warp row failed; a WARN
-or an unreadable face goes straight to F2 whatever the shot size. The cut is unlabelled: read `measures.warp` in the
-dq records after each episode and bring the scores to the owner to label.
+**G-WARP is HARD on S only (2026-10-19, retro D1-D2, for owner veto).** `take_dq` scores every take that stages a
+face for frame-to-frame face redraw (`studio/warp_gate.py`, CPU lane). FAIL is S > 2.5: one seed retake, then F2 for a
+face tracked under 60 px, else the take ships kept-best and flagged. An Se-only score is the advisory `eye` (all 8 ep01
+hard fails were Se-only; seeds cured 0 of 4). A WARN goes to F2 only for a small face (face_w < 0.10) or S_held > 1.5.
+The wall has no owner labels: `scripts/episode/warp_labels.py` takes person-signed labels only and re-arms hard Se at
+>= 80 % precision. A `warp_gate.py` edit re-measures every take: land it between episodes.
+
+**A round is a change of bytes (2026-10-19).** A retake rung that renders, trims or cuts a head spends a round; one that
+does none of them prints `NO ROUND` and ends the climb. An unaffordable batch is trimmed to the takes the budget affords,
+worst first. A gait shuffle is cured by the plan's verb (`gait_verb`), never a seed; a cure under 20 % over 4+ tries is
+dropped for its class (`take_ladder.CURE_RATES`).
 
 **Never pin a last frame.** ref2v gives a take its first frame only.
 
@@ -565,8 +599,10 @@ taste gate had ended in a terminal, the plan stopped at paragraph 57 of 69, the
 mix had no sound effects and the shouts were flat. Nobody watched it. So, for
 every episode, before `youtube_upload.py`:
 
-1. Read `learnings.jsonl`: any gate whose last row is a terminal is OPEN. Fix it
-   or ask the owner; never write `review/waiver.json` yourself.
+1. Read `learnings.jsonl`: any gate whose last row is a terminal is OPEN. A
+   judge-signed terminal ships flagged and the owner reads it in
+   `audit/<unit>.html` when he likes; nothing waits on him. Fix what a code fault
+   left open; never write `review/waiver.json` yourself.
 2. Watch the master FULL SIZE and LISTEN to it, start to end. Read every take
    strip. Check the plan's last span against the chapter's last paragraph.
 3. Write `review/director_signoff.md` (Watched / Take strips / Coverage / Flags)
@@ -594,7 +630,7 @@ follows the BOOK's look (photoreal = Krea2, no LoRA, its own refs words).
 
 ## Cut and QC
 
-**G-DEAD (2026-10-13).** Step 10 never builds a master with a still held past 2.5 s, a take that failed the take gate, or two such shots in a row. It first cuts what it can for free (the dead shot out, live non-dialogue neighbours slowed <= 1.5x to cover it; `work_r2v/dead_cuts.json`); what is left refuses the master and the answer is a retake round (move_type), never a flagged ship. A dialogue take is never cut or slowed.
+**G-DEAD (2026-10-13; owner option A 2026-10-18).** Step 10 never builds a master with a still held past 2.5 s, a frozen take, a failed take the ladder never settled, or two such shots in a row. It first cuts what it can for free (the dead shot out, live non-dialogue neighbours slowed <= 1.5x to cover it; `takes/work/dead_cuts.json`). A take the ladder settled keep_best or high at the cap (`fault.evidence.settled`) is ADMITTED, ships flagged, and is listed with its seconds in the master in `takes/work/flagged_takes.json` (the audit sheet and the sign-off show it); frozen rows stay dead. A dialogue take is never cut or slowed.
 
 **Audio first, always.** The picture is cut to the measured voice. Every line
 sits at its shot's start plus the handle, and `episode_timeline.misaligned()`
@@ -614,24 +650,56 @@ never a moving shot's coda.
 - At its cap a step logs `CAP <phase>: r/N rounds, mm:ss, kept best (k advisories)` and moves
   on with its best attempt. Never loop, never defer-and-re-author past the table, never park
   on style. The plan gets two climbs per episode; tier-1-only faults park once.
-- The 6 h episode clock is the outer wall; the caps only stop a runaway step.
+- Counters are per episode in `attempts.json` and a step's seconds survive a relaunch; a
+  killed step is charged from its 60 s heartbeat. A round is a change of bytes.
+- The 6 h episode clock is the outer wall; the caps only stop a runaway step. GATES.md holds
+  the generated cap and clock tables.
 
 ## Resuming
 
-1. Read `episodes/epNN/drive.jsonl` and the last `drive_runNN.log`, and say back where
-   the episode is. Resume with `drive.py`, once.
-2. Check the GPU and ComfyUI's queue before starting a run.
-3. If a job ignores `/interrupt`, restart ComfyUI; see memory
-   `project_comfy_restart`.
+1. Read `episodes/epNN/drive.jsonl` and the last `drive_runNN.log` (one log per launch), and
+   say back where the episode is.
+2. Resume through the autopilot only: `autopilot.py retry N --book <codex>` for a parked
+   episode, `autopilot.py resume --book <codex>` for a paused series. Never launch drive.py.
+3. The autopilot restarts a dead ComfyUI after 2 missed ticks; if a job ignores `/interrupt`,
+   see memory `project_comfy_restart`. Never kill a drive (memory `project_kill_run_tree`
+   is for a run already lost).
 
-Stop a run by killing its process tree by command line, never `uv.exe` alone
-(memory `project_kill_run_tree`).
+## Operating a live run (2026-10-19, Jekyll Kawajiri ep01 retro)
+
+You watch and report; these are the only acts on a live run.
+
+| you want | do | never |
+|---|---|---|
+| land a fix | the failing test, `autopilot.py pause --at-boundary --book <codex>`, wait for `paused_at_boundary` in the drive log, apply the patch file, run the touched tests NOW (the drive is paused), commit by explicit path, `autopilot.py resume`; a commit restarts the loop on the new code | edit a file a running drive will load (every subprocess it starts loads it); run pytest or a plan_check beside a Qwen edit; kill a drive |
+| a plan row is wrong | `plan_repair` (records the cure in `plan.cures.jsonl`); an owner order is a recorded plan edit named `owner_order_<shots>`, judged first as a scratch plan by `plan_check.py <book> <n> --plan=<scratch>.json`; the next entry re-signs over carried rows, no writer round | patch `plan.json` unrecorded; touch a timestamp |
+| a gate accuses correct work | read the MEASURE against the WALL; a wall calibrated on another form is a ruler fault: fix the ruler test-first (cheque/check, packs at 8 s, the 240-word floor), then `retry N` | re-roll a render; raise a wall without its replay |
+| the owner changes an order mid-run | state the pictures it stales ("inputs: 2 of 28 takes stale"), redraw by the registry route only | a tagged one-off redraw the next step 07 supersedes |
+
+- Dirty means runtime code: edits to tests/, docs/, architecture/, library/, logs/, `*.md`
+  and `.claude/skills/` never hold a launch; a runtime edit during a run is logged
+  (`code_dirty_during_run`), never paused for. A park at an older HEAD or on a dirty tree is
+  never the brain's; a `brain:` park clears itself when runtime code lands (2 per episode).
+- After a prompt-builder change, before any re-render: a no-write take-build replay (rebuild
+  the dry prompts, diff against `takes/r2v/shots.json`, list the changed takes).
+- On a plan park read `plan.cures.jsonl` and the learnings `draft` row first; after a panel
+  rewind read the `panel_eye` row in timing.jsonl (`reads=N cache_hits=M unread=K`).
+- After each run read `library/.device/gpu_util.jsonl` (`gpu_ledger.minutes_per_step`:
+  busy / claimed / idle) and `scripts/audit/doc_sync.py` (fix commits with no doc line).
+- **The report line:** the master's full path first, then QC's
+  "inputs: all N takes current", every `CAP` line of the run, the flagged takes with their
+  seconds, then the time left in Seattle time.
 
 ## After every run: improve this skill (owner, 2026-10-08)
 
 Each episode ends with its lessons written here before the next one starts:
-the measurement in LESSONS.md, the rule in this file, a new gate number in
-GATES.md, all in the commit that fixed the fault. Rules learned on ep19-21:
+the measurement in LESSONS_ARCHIVE.md with its brick in the LESSONS.md index,
+the rule in this file, a new gate number in GATES.md, all in the commit that
+fixed the fault (or a `Docs: none (<reason>)` trailer; `scripts/audit/doc_sync.py`
+lists the commits that did neither). An owner ruling that retires a sentence
+adds it to `tests/fixtures/ep01_replay/P16/retired_phrases.json` in its own
+commit. The Jekyll Kawajiri ep01 retro (13 failures, five bricks) is in the
+archive. Rules learned on ep19-21:
 
 - **One ruler.** A judge and the cure for its fault measure the same number the
   same way (`plan_gates.line_seconds`: the voice where a line is recorded). A

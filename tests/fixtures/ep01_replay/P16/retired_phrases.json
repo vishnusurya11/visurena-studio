@@ -1,0 +1,13 @@
+{
+ "about": "Sentences an owner ruling retired (Jekyll Kawajiri ep01 retro, P16). Add a phrase in the SAME commit as the ruling that retires it. Read by tests/test_the_skill_states_no_retired_rule.py.",
+ "files": [".claude/skills/episode/SKILL.md", ".claude/skills/episode/GATES.md", ".claude/skills/episode/LESSONS.md", ".claude/agents/episode.md"],
+ "kept": ["A terminal is not a pass"],
+ "retired": [
+  {"phrase": "Only the owner waives", "ruling": "2026-10-01 no human input at publish: a judge-signed terminal on an auto gate auto-clears"},
+  {"phrase": "after the 4x", "ruling": "owner 2026-10-18 (24caaeb): the face paste is at cut scale, before the one upscale"},
+  {"phrase": "or ask the owner", "ruling": "owner standing order: no input from him in production"},
+  {"phrase": "never a flagged ship", "ruling": "owner option A 2026-10-18 (d726054): G-DEAD admits a ladder keep_best take flagged"},
+  {"phrase": "Resume with `drive.py`", "ruling": "2026-10-06 autopilot: resume is autopilot.py resume / retry N, never drive.py"},
+  {"phrase": "Step 16", "ruling": "the runner has 13 steps; the tools table is numbered by registry step"}
+ ]
+}

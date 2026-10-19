@@ -1,0 +1,18 @@
+{
+ "about": "The 13 failures of Jekyll Kawajiri ep01 (2026-10-18), from docs/audit/2026-10-19_kawajiri_retro/BUILD_PLAN.md section 0 and the 18 area reports; copied here because code and tests never read docs/audit/. Each entry names its brick (B1-B5), the commits that fixed it and the test that pins it. Read by tests/test_every_retro_failure_has_a_lesson.py.",
+ "failures": [
+  {"id": 1, "title": "plan climbs spent on re-signs and voice-measured rows", "brick": "B1", "commits": ["0314238", "ad170a3", "16195b9", "2f1ef00"], "test": "tests/test_a_stale_flagged_signature_is_resigned_over_its_own_rows.py"},
+  {"id": 2, "title": "cheque heard as check eight times", "brick": "B2", "commits": ["2573ebf", "ee07901", "37eefbb"], "test": "tests/test_say_lines_wall_and_ear.py"},
+  {"id": 3, "title": "pair rulers judged a grammar plan", "brick": "B2", "commits": ["5d3dc08", "5c23230", "b2782b4"], "test": "tests/test_a_grammar_plan_holds_cure_grows_no_pair.py"},
+  {"id": 4, "title": "a setup crowd leaked into 14 takes", "brick": "B3", "commits": ["6475f79", "b83eac4", "5616782"], "test": "tests/test_p13_crowd_follows_extras.py"},
+  {"id": 5, "title": "a fading body, a floating hand, siblings 13-17 redrawn", "brick": "B4", "commits": ["c152d1b", "cc5a631", "5616782", "b2782b4"], "test": "tests/test_a_figure_is_drawn_whole_under_haze.py"},
+  {"id": 6, "title": "the panel eye re-read 28 panels for 2 changed", "brick": "B1", "commits": ["80b89f8", "cc5a631"], "test": "tests/test_the_ep01_two_panel_rewind_reads_two_panels.py"},
+  {"id": 7, "title": "an unlabelled Se wall failed 8 takes and two retake rounds rendered nothing", "brick": "B1", "commits": ["41fba62", "79b8049"], "test": "tests/test_a_rung_that_renders_nothing_spends_no_round.py"},
+  {"id": 8, "title": "G-DEAD refused the takes the ladder kept", "brick": "B2", "commits": ["d726054", "f2460f2"], "test": "tests/test_a_still_terminal_does_not_hide_the_other_kept_takes.py"},
+  {"id": 9, "title": "the av3 upscale hung and the clock never charged it", "brick": "B5", "commits": ["24caaeb", "eb35ea6", "20cfd0d", "6a81488"], "test": "tests/test_the_av3_pace_guard.py"},
+  {"id": 10, "title": "the step 03 VL reads ran offloaded to the CPU", "brick": "B5", "commits": ["6572728", "dd1e163", "6a81488"], "test": "tests/test_step_03_frees_once_before_the_vl_reads.py"},
+  {"id": 11, "title": "brain parks, stalls and relaunch churn", "brick": "B5", "commits": ["0be0707", "9dd9ffb", "17b7ae9", "222be3b"], "test": "tests/test_ep01_autopilot_replay.py"},
+  {"id": 12, "title": "the live card rewound and lost a step's history", "brick": "B5", "commits": ["fdf836d", "231bed2"], "test": "tests/test_the_card_keeps_a_steps_history.py"},
+  {"id": 13, "title": "ComfyUI died late and nobody saw it", "brick": "B5", "commits": ["55a8421", "17b7ae9", "222be3b"], "test": "tests/test_autopilot_engine_health.py"}
+ ]
+}

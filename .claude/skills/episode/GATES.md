@@ -32,7 +32,7 @@ missing input, or an unread picture.
 | G-PLACE (decision 2026-10-10) | a setup's place is a member's master or a drawn view: a lookalike new id (0.85), a member with nothing drawn whose room a sibling drew, a framing/hour/state view of a RECURRING place (`continuity_place.place_gate`) | HARD, CODE CURE: rewritten to the member / its master, the state kept in `place_state` |
 | G-LOOK-WORDS | one-face shot prose naming a hair colour the look contradicts (`scripts/refs/continuity_replay.py`) | ADVISORY: refuses nothing (7 on 27 WotW plans) |
 | ONE PER TAKE / TAKE LENGTH | every shot is its own take, inside the 8 s budget | HARD |
-| LISTEN (step 04, `say_lines`) | every line heard word for word (Whisper) and its voice against the design clip (ECAPA; floors 0.70 >= 4 s, 0.65 >= 2 s, 0.60, none under 2 s, lower for a felt delivery); a resume says a failed line on NEW seeds, the reference alternating design / best line from the third try (2026-10-14) | HARD per try; after 8 tries the best try heard right within 0.08 of its floor is kept, flagged keep_best (Jekyll ep01 l15, 2026-10-14) |
+| LISTEN (step 04, `say_lines`) | every line heard word for word (Whisper) and its voice against the design clip (ECAPA; floors 0.70 >= 4 s, 0.65 >= 2 s, 0.60, none under 2 s, lower for a felt delivery); a resume says a failed line on NEW seeds, the reference alternating design / best line from the third try (2026-10-14). A stable wrong transcript (two identical) is first tested for phoneme equality (cmudict): a homophone pair is filed in `cast/ear_lexicon.json` and the same wav re-listened with no render (ep01 l11 "cheque" heard "check" x8) | HARD per try; after 8 tries, or when the `lines` wall is spent, the best rightly heard try is kept, flagged keep_best / keep_best_far; no rightly heard try is the only refusal. A line under 2 s has no similarity floor; speaker_check records its f0 offset from the speaker's register (`short_lines`, advisory, 4 st, uncalibrated) |
 | TIMELINE | `placed.json` is of this plan AND this voice (`episode_home.load_placed`) | HARD |
 | SHEET TEXT | the Scarlet book's paid-sheet check; skipped for sheet books, and a crash is printed, never counted silently | HARD where it applies |
 | G-STORY advisories, G-NAMES, G-RATE, G-MOTION, L8 pace, G-SUNSPLIT, G-LIGHT-SIDE, G-HAT with "bareheaded" | caption-like lines, first hearing of a name, speaking rate, motion wording, a face split under a sun, the light side of a face, a hat clash the picture already resolves | advisory |
@@ -68,7 +68,7 @@ the old grammar the owner replaced. Jekyll ep01 `plan_v3.json`: 0 rows, VERDICT 
 | G-INSERT | an insert 1.0-3.0 s | 39; 5 | HARD |
 | G-PUSH | <= 2 pushes; no AMOUNT on a camera head | 37; 3 | HARD, cured free (`strip_amounts`, `hold_extra_pushes`) |
 | G-LOCKED | >= 0.50 of the cut locked off | 37; 4 | HARD |
-| G-TWO | a reaction with 2+ faces is a locked medium | 7; 0 | HARD |
+| G-TWO | a reaction with 2+ faces is a locked medium | 7; 0 | HARD; cured for $0 (`plan_cures.lock_two_shot`) when the size is medium and only the verb is wrong; a wrong size goes to the writer |
 | G-PAYOFF | a payoff shot with dialogue is a locked close | 8; 1 | HARD |
 | G-OTS | over-the-shoulder at close / extreme close | 4; 0 | HARD, cured free (`ots_medium_close`) |
 | G-UNSUPPORTED | silhouette, black shapes against, Dutch, canted, tilted horizon; extreme close on a face or eyes | 3; 0 | HARD |
@@ -96,6 +96,24 @@ paragraph -- ep12 reached 57 of 69), G-SHOUT (a `!` line is dialogue), G-SOUND
 (`plain`, `light`, `uneasy`, `grave`, `thrilling`); a synonym the bed folds
 (alarm -> thrilling, dread -> grave, ...) is an advisory. ep14's writer wrote
 five words the bed did not know and the episode was refused at assembly.
+
+**2026-10-19 additions (Jekyll Kawajiri ep01 retro, P01/P02):**
+- **G-CROWD-ORPHAN** (HARD, plan_check): a setup whose crowd prose no shot draws (no shot of it
+  wide/full or with extras > 0). Disjoint from G-CROWD (a wide with extras 0), so the cures cannot
+  fight. Cure `clear_orphan_crowds` clears `setup.crowd` and the voice clauses of its ambience.
+  Evidence: ep01 night_door, 14 leaked takes.
+- **G-LIMB** (ADVISORY): a sleeve, hand, arm or leg ENTERS FROM AN EDGE with no body word (body,
+  torso, crouch*, kneel*, knees, shoulders, seated, figure) in frame + at_rest + motion; insert and
+  extreme_close exempt. The cure `body_clause` appends a body clause before the contract
+  (`plan_repair.restored`); the writer is never asked. Evidence: ep01 shot 27's floating hand.
+- **Holds on a grammar plan** (`doc.grammar` set) grow no pair and report no unsplit pair: one shot
+  per take. The take length has one home, `episode_takes.BUDGET`.
+- **The critic's count** (`judges/plan.declared_count`): any `extras=N` (N >= 1) on a shot whose
+  setup stages a crowd is declared (G-CROWD asks >= 1; ep01 shots 1 and 18 were called invented).
+- **Downstream replay** (advisory, $0, read-only): `scripts/episode/downstream_replay.py <codex>
+  <n>` replays step 05 `packed()`, the hold cure and the dry take-prompt lint on the signed plan;
+  a RULER row means a code ruler disagrees with the plan: fix the ruler, not the plan. Not a
+  blocker until clean on ep01 and one WotW plan (D12).
 
 **2026-09-28 addition:** G-SETUP (HARD before anything is rendered, advisory
 after) -- a setup holds at most `MAX_SETUP_SECONDS` = 50 s of projected picture;
@@ -140,6 +158,15 @@ covers only timing inputs, so a reworded frame does not stale it.
   to 48 px or a thin pale run within 120 px, with darker picture on both
   sides; the panel is then cropped square, never stretched, and written only
   when its pixels changed.
+- **Solid figures under haze (2026-10-19, P04):** a grid under sky with a declared atmosphere
+  says `ATMOSPHERE_GRID` (the haze hangs behind the figures; every figure solid, sharp-edged,
+  opaque to the frame edge); a shot saying dissolve / fade / transform is exempt. ep01 shot 2's
+  figure faded into the street. Unmeasured until the GPU-window A/B (3 seeds + 2 fog controls).
+- **A repaired anchor keeps its siblings when the place did not move:** `grid_room.recut_room`
+  re-cuts the room from the repaired cell and compares it (`same_place`: `place.versus`, floor
+  0.5 on profile and wings, not mirrored); a match keeps the old room bytes (touched fresh, so the
+  siblings' manifest inputs hold), else replaces it. ep01 grids 13-17 were redrawn for a figure
+  repair. The floor is advisory until calibrated on real anchor repairs.
 
 ## Take prompts — `takes_r2v.py <book> <n> --from-refs --prompts` ($0, no GPU)
 
@@ -154,6 +181,14 @@ The take lint (`episode_ref_official.check`) runs on every built prompt:
 - mid-sentence fragments.
 
 Run it before any audio or picture exists. **HARD.**
+
+**L28 STYLE-LIGHT** (2026-10-19, `episode_ref_official.l28_style_light`): the style line of a take
+on a night setup (`house_style.is_night`: the NIGHT words in `described` or `place_state`) names
+sun / sunlight / sunshine / daylight / dawn -- a refusal at build; the cure is the setup's own lamp
+(`house_style.light_for`, never a sky source on a night setup). **A crowd has five channels and one
+rule:** the setup's people crowd is drawn only where the shot declares extras > 0 -- lint P13
+cover, grid `crowd_clause`, grid `crowd_block` sheet text, take `crowd_of`, soundscape life.
+`UNLETTERED` names only the bait nouns the take's own text holds.
 
 Staging: a take stages only its setup's declared cast plus the shot's own
 faces (`takes_r2v.staging_candidates`). Candidates used to be every row in
@@ -219,6 +254,25 @@ shots predate `extras` (field unset) declares a crowd by naming people/crowd/
 figures/others in the shot's words (`crowd_declared`). Open: named walk-ons in a
 legacy plan (ep05 s10/s18/s19), a dusk crowd's silhouettes read as copies (s16).
 
+**The panel eye (2026-10-19, P05).** It reads each panel once per input hash (the bytes, the shot
+and setup words, the reference bytes, the SIZE_ASK / CAPTION / DWPose workflow sha, the judge
+version); an Unreadable or TimeoutError is never cached. Its `panel_eye` row in timing.jsonl
+notes `reads=N cache_hits=M unread=K`: a 2-panel rewind reads 2. **orphan_limb / body** rows are
+ADVISORY (calibrated False) until the E1 eval reaches recall >= 0.6 and precision >= 0.8; their
+sources are DWPose (`measure/keypoints.orphan_limbs`, `extra_limbs`) and the content keys `body` /
+`limb_attached` (K9). They are not in REDRAW_CANNOT_CURE: once calibrated they climb seed, then
+reprose, then a flagged terminal with a CAP line. A redraw round that changed no panel byte is
+refunded (`panel_ladder.refund_round`).
+
+**K9 shape keys (2026-10-19, P06; the one content ask, ASK v2).** `body`, `limb_attached`,
+`fog_cover` take ok / fading / floating / cannot_tell (a foreign value is cannot_tell); a single
+vote is an advisory, a kind refuses only if listed in `panel_content.BODY_REFUSES` (empty) on >= 2
+frames; `fog_cover` is logged only. UNCALIBRATED until the local E1 replay
+(`tests/test_the_dq_eval_replay_writes_recall_and_precision.py -m local`) shows recall >= 0.6 and
+precision >= 0.8; then BODY_REFUSES is flipped by hand. The panel row also logs `shape_advisory`,
+`landmarks_seen` and "hour reads night on a day setup (advisory)". A setup crowd counts only on a
+shot with extras > 0 (`crowd_declared`), shared with the take path.
+
 The content reader is read STRICTLY (2026-09-23): a reply cut off inside
 `subjects` is salvaged (the judged fields come first) and one cut before
 them still refuses; `"false"` is false; a subjects string is split into
@@ -232,12 +286,13 @@ stored readings raised no new failure.
 |---|---|---|---|
 | `take_dq.py` | `T<NN>.dq.json` | frozen start and share (frozen-whole: one rule for every look -- the drawn-look relaxations 9ea1304/85ef81c were dropped by the owner, 2026-10-14), cut landing, churn, zoom, face at end, look, pulse, lip-sync lag and WER; **held** (a person pinned while the set slides: lock = 1 - face travel / scenery travel, hard at 0.75 over 100 px, only when the plan keeps the subject in place); **jump** (lowest similarity between consecutive frame signatures, hard below 0.50: a switch of picture, whatever the brightness) | HARD rows as marked in the report. held: ep09 T02 1.01 over 1055 px and T10 1.05 fail; eligible passes top out at -0.42 (n=2 fires against 3 passes: thin). jump: T15's two faults 0.08 and 0.16, every accepted ep08/09 take 0.83 or more |
 | `take_content_check.py` | `T<NN>.content.json` | the panel content rules on 3 frames past the head leak, each read alone | HARD |
+| crowd (take, panel-bound; 2026-10-19, P06) | `T<NN>.content.json` (`take_content.crowd_fault`, `panel_people` from the shot's own `storyboard/panel_content.json` row) | allowed = max(panel row people, faces + extras + shoulder) + 1; an excess >= 2, or a count rising past the base after the first frame, is a `crowd:` fault; a shot that casts nobody gets no slack; a setup crowd counts only on a shot with extras > 0 | HARD. Replays 14/14 on by-eye counts of the ep01 leak takes and 0/28 on the clean finals; VL counts unmeasured (the E1 local replay is owed) |
 | G-MOVE (2026-10-13, Jekyll ep01) | `T<NN>.dq.json` row `camera-move` (`take_zoom.move_row`, off the subject zoom read) | the planned move against the rendered one: a move that plans no scale change (pan, tilt, track, locked, rise) fails past 3.0x either way; a planned push past 3.5x; a pull-back has no wall | HARD. Calibrated on the owner-liked WotW ep01-03 (69 takes): 0 fire (max 2.68x on a pan, 3.29x on a push, pulls to 9.1x liked). Fires on Jekyll ep01 T14 (a tilt rendered as a 4.75x push into a caricature) and WotW ep20 T06 (a 4.26x push). Does NOT fire on Jekyll T13 (2.54x push): WotW pushed further and was liked, so scale cannot call it. Cure: move_type (`overrun` -> locked). The camera record's `scale_curve` now compounds quarter-second steps (it was clamped at 1.25x); its stillness boolean is `still_ok` (was `camera_ok`), still unread |
 | G-PANEL-BOARD (2026-10-13, Jekyll ep01) | `take_dq.panel_board`: a --from-refs take that staged `storyboard/h3/shot_NN.png` is judged with that panel as its one cell at frame 0 | foreign (every other shot's panel and the plates), cut-landing (opens on its panel), drift, coherence off-board, last-vs-cell are MEASURED (they read `not measured (no cell)` on all 27 Jekyll takes) | foreign and last-vs-cell HARD (0 fires in 47 takes; lowest last 0.21 against 0.20); cut-landing and off-board SCORED ADVISORIES on a panel board -- as HARD rows they failed 8 and 11 of WotW ep19's 20 shipped takes (H3 opens on a first-frame panel at similarity -0.18 to 1.00) |
-| G-DEAD (2026-10-13, Jekyll ep01) | `assemble.dead_plan` -> `work_r2v/dead_cuts.json` (`studio/dead_footage`) | no still held past 2.5 s, no take that FAILED the take gate, never a still or failed take beside another, in the master | HARD at step 10. Cure, $0 and clock-free: the dead shot leaves the cut and its live, non-dialogue neighbours cover its seconds, slowed at most 1.5x; a dialogue shot is never cut or slowed. What no cut cures REFUSES the master -> retake (move_type), never a flagged ship. `near_dead` (static share >= 0.45) is reported, never a dead run: owner-liked WotW ep01 opens on two 1.00-static space shots |
+| G-DEAD (2026-10-13, Jekyll ep01; owner option A 2026-10-18, d726054) | `assemble.dead_plan` -> `takes/work/dead_cuts.json` (`studio/dead_footage`) | no still held past 2.5 s, no take that FAILED the take gate and the ladder never settled, never a still or failed take beside another, in the master | HARD at step 10 on frozen rows only (frozen-at-start, frozen-share, frozen-whole), a still over 2.5 s with no cover, and a failed take the ladder never settled. A take the ladder SETTLED keep_best or high (`fault.evidence.settled`, K5, read by `assemble.kept_of` from the newest eye whose sha8 names the current take files) ships FLAGGED and is listed in `takes/work/flagged_takes.json` (K7: take, shot, seconds_in_master, slowed, rows, notes, severity); a failing row not in `dead_footage.KNOWN_FLAG_ROWS` ships flagged at severity high, never fail closed; take-eye clones and identity faults are always high. Cure first, $0 and clock-free: the dead shot leaves the cut, its live non-dialogue neighbours slowed at most 1.5x; a dialogue shot is never cut or slowed. `near_dead` (static share >= 0.45) is reported, never a dead run |
 | G-TAIL (2026-10-11, C1_verdict #7) | `T<NN>.dq.json` row `tail`, `measures.tail` (`take_dq.tail_measure`, `invented_speech.tail_state`) | dialogue takes only: FAIL when the SHIPPED tail (line end + 0.25 s to the placed end) is louder than -45 dB AND (Whisper hears words after the line's last shared word, OR the mouth is open >= 6 frames with >= 2 rises). Exempt: a post-line clause asking for a mouth action (laugh, call, shout, pant, eat, drink, bite, mouth). A guide whose speech end is > 1.0 s off placed.json's line end was overwritten: UNMEASURABLE, never invented. Whisper runs only on a loud tail | HARD. Replay over 204 shipped dialogue takes: fails exactly wotw ep10/T21 ("Moving!") and ep26/T25 (mouth branch, armed on 0 false fails); the laugh ep25/T21 exempt; the 5 overwritten early-Scarlet guides unmeasurable. Cure: ONE reseed (the router's seed; a repeated fault goes to the terminal), then keep_best flagged; never a shorter shot (the voice is the ruler) |
-| G-GAIT (2026-10-14, Jekyll HEL ep01 T03) | `T<NN>.dq.json` row `gait` (`studio/gait.py`: CPU person box, Farneback flow, ground from the bands beside the feet) | only when the plan asks a SUBJECT to walk or run ("travelling two strides at a walking pace" is the camera, never a walker): FAIL a shuffle -- cadence >= 3.0 steps/s (`SHUFFLE_CADENCE`) AND a step under 0.045 body heights (`SHUFFLE_STEP`). Unmeasured: under 2 s with the feet in frame, a walk toward/away from the camera (depth), or no step rhythm | HARD. Replay over 91 walker takes: 20 measurable, fires on Jekyll ep01 T03 only (3.94 steps/s, 0.027 heights a step: legs patter, the body glides); 0 fires on WotW ep01-27 and Scarlet ep01-14 (nearest non-fire WotW ep06 T23 4.04/0.048; liked WotW ep03 T07 3.1/0.052). One positive: a first calibration. Cure: the PLAN's gait verb -- "walks briskly in profile, left to right, a long stride", feet in the picture; a reseed of a mince minces again |
-| G-WARP (2026-10-18, main session from measured evidence, for owner veto) | `T<NN>.dq.json` row `warp`, `measures.warp` (`studio/warp_gate.py`, CPU lane inside `take_dq --cpu-only`, ~20 s a take; the GPU never waits) | every take that stages a face: MTCNN every 2nd frame (min 24 px, prob >= 0.9) linked into tracks by IoU > 0.3 (a swap is a new track, never a fault); Farneback fwd/bwd at 384 px, residual only where they agree (< 1.5 px); E(t) = face residual - (2.51 x bg residual (body excluded) + 1.69 x face flow + 1.00); S = p90 E, Se = p90 over the eye mask. FAIL S > 2.5 or Se > 3.0 (HARD: the ladder's `seed` cure, at most 2 retakes, then F2); WARN 1.5 < S <= 2.5 -> F2; UNMEASURABLE (face tracked on < 45 % of searched frames) -> F2 | HARD on fail. Fitted on 27 clips, NO owner labels: every S/Se/share/span is logged in the dq record to refit on labelled takes. Replication on the Kawajiri POC: C 0.98/-0.89 pass (prototype 0.98/-0.90), W 2.30/3.04 fail (2.65/3.12), M 1.57/2.08 warn (1.30/1.64 pass: the swap between two men reads higher here; M goes to F2, ~100 s) |
+| G-GAIT (2026-10-14, Jekyll HEL ep01 T03) | `T<NN>.dq.json` row `gait` (`studio/gait.py`: CPU person box, Farneback flow, ground from the bands beside the feet) | only when the plan asks a SUBJECT to walk or run ("travelling two strides at a walking pace" is the camera, never a walker): FAIL a shuffle -- cadence >= 3.0 steps/s (`SHUFFLE_CADENCE`) AND a step under 0.045 body heights (`SHUFFLE_STEP`). Unmeasured: under 2 s with the feet in frame, a walk toward/away from the camera (depth), or no step rhythm | HARD. Replay over 91 walker takes: 20 measurable, fires on Jekyll ep01 T03 only (3.94 steps/s, 0.027 heights a step: legs patter, the body glides); 0 fires on WotW ep01-27 and Scarlet ep01-14 (nearest non-fire WotW ep06 T23 4.04/0.048; liked WotW ep03 T07 3.1/0.052). One positive: a first calibration. Cure (`gait.gait_verb`, P08): the PLAN's verb -- the first pace phrase becomes "in profile, a long stride, feet in the picture", the camera head kept, later pace phrases dropped; never a seed (a reseed of a mince minces again); unmeasured gait, feet out of frame and a second identical signature route to '' (advisory) |
+| G-WARP (2026-10-18, main session from measured evidence, for owner veto) | `T<NN>.dq.json` row `warp`, `measures.warp` (`studio/warp_gate.py`, CPU lane inside `take_dq --cpu-only`, ~20 s a take; the GPU never waits) | every take that stages a face: MTCNN every 2nd frame (min 24 px, prob >= 0.9) linked into tracks by IoU > 0.3 (a swap is a new track, never a fault); Farneback fwd/bwd at 384 px, residual only where they agree (< 1.5 px); E(t) = face residual - (2.51 x bg residual (body excluded) + 1.69 x face flow + 1.00); S = p90 E, Se = p90 over the eye mask. **FAIL is S > 2.5 only** (2026-10-19, P07, D1): Se > 3.0 with S <= 2.5 and share >= 0.45 is the advisory state `eye`; `warp_gate.row` recomputes the state from the logged numbers (a stored fail does not stand). WARN 1.5 < S <= 2.5 goes to F2 only if face_w < 0.10 or S_held > 1.5 (on-threes cadence logged: S_held/S_step, period/phase); share < 0.45 records S and Se as None ("no score"), S_raw kept. `measures.warp.tracks` carries [{median_px, life}] in render px | HARD on S fail. Fitted on 27 clips, NO owner labels. **At the cap:** one seed retake (`RETAKES = 1`; seeds cured 0 of 4 Se fails on ep01), then F2 only for a face tracked under 60 px; a readable face ships kept-best, flagged, and listed in flagged_takes.json. ep01: all 8 hard fails (T07 T10 T15 T16 T19 T20 T21 T24) were Se-only (Se 3.2-5.0, S -0.64..1.96). Hard Se re-arms only on person-signed labels (`scripts/episode/warp_labels.py`: >= 80 % precision over >= 5 labels, sustained >= 12 pairs, face_w < 0.10); take_eye is not a label source and a shipped take is a default pass, not a label. Replication on the Kawajiri POC: C 0.98/-0.89 pass (prototype 0.98/-0.90), W 2.30/3.04 fail (2.65/3.12), M 1.57/2.08 warn (1.30/1.64 pass: the swap between two men reads higher here; M goes to F2, ~100 s) |
 | identity (G4.7, sheets in again 2026-10-14) | `T<NN>.dq.json` row `identity` (`take_verdict.identity_report`, facenet against the take's OWN staged sheets) | STRANGER (best cosine < 0.45 on a readable face) and DRIFT (< 0.75 within a segment) | ADVISORY (`take_verdict.TAKE_IDENTITY_HARD = False`): the row is measured, counted and noted ("advisory: STRANGER ..."), and the master eye flags each take with a finding (`master_eye.take_identity`, kind `take_identity`, low, never a climb). From 2026-09-25 (4c5f14c) to 2026-10-14 it read "not measured" on every take: the sheets were never handed in. Replay with sheets (`docs/audit/2026-10-14_jekyll_ep01_hel_v2/identity_replay.*`): it would refuse 23 of 118 shipped WotW ep19-27 face takes and 37 of 97 Scarlet ep08-14 (STRANGER on stylised, turned or small faces; walk-ons) and 2 of 10 Jekyll HEL v1 -- HARD stays off until it is recalibrated on drawn faces |
 | G-LOOK-TAKE (2026-10-10) | `T<NN>.content.json` `look_log` | the hair family changing across the 3 frames, or off the staged look on 2 of them (`take_content.look_log`) | LOG ONLY: its only cure is a re-render (3/21) |
 | `take_frame.row` (letterbox, in `T<NN>.dq.json`) | — | bars at the top AND bottom, each >= 4 % of the height, each either flat (row spread <= 2.0) or ending at an edge (the picture rises >= 12 levels past it) | HARD. ep14 T26: 54/256 rows of bars. ep21 T27/T30: a dark cellar read 3.6-5.3 spread, 1.5-3.3 step, and is NOT a letterbox (2026-10-08) |
@@ -291,7 +346,12 @@ summed count read 6 vs 3: the sharper face was found in more frames), KEPT. A br
 decision and its measures in `takes/r2v/refine.json`. Calibrated on F2 (kept by eye: flicker ratio 0.81-0.95) against
 F3 (refused by eye: 1.15-1.32), three takes: thin. A crop is pasted only onto the take bytes it was made from (sha8).
 CLOCK: priced 110 s per face per 192 frames; runs only while `leaves_reserve(step, price + 550 s)`; else `REFINE CUT`
-logged, `status: cut` recorded, the take ships unrefined.
+logged, `status: cut` recorded, the take ships unrefined. **Selection (2026-10-19, P07):** the refine reads the
+smallest warp track height (`measures.warp.tracks` median_px, render px) and declines a take when every planned face is
+tracked >= 80 % of it at >= 60 px (never face-at-end); a `no_faces` / `no_cast` decision spends no round. A warp, gait,
+pulse, frozen-whole, lip-sync or lag hard fail may follow the refine; identity, clones, content, lettering, look and leak
+still bar it. **The paste** is at cut scale, before the one upscale (owner 2026-10-18, 24caaeb). Calibration
+(`docs/calibration/face_refine.md`): ep01 seam 11.7-12.9, flicker ratio 0.70-0.90; SEAM_MAX stays 18.
 
 ## QC — `qc.py <book> <n> --engine=r2v`
 
@@ -326,6 +386,21 @@ chip ride the same pass as the cut, `book_compilation` conforms every piece to
 its 1536 square, the upload checks only that it is square. A fallback is not a
 fault, but it is never silent: `UPSCALE FALLBACK:` on stderr and its reason in
 the `upscale` row's note on timing.jsonl.
+
+**The upscale never hangs and counts its frames (24caaeb; 2026-10-19, P10).** A failure mid-stream
+kills decoder, encoder and the shot's denoise and surfaces; no frame for 60 s (`STALL_S`) kills
+the pipeline (`CAP upscale: av3 stalled, fell back to rtx4x`; lanczos without RTX). The `upscale`
+cap is a pace budget, not a kill timer: after 600 frames a rolling fps window projects the pass,
+and only a projection past cap + 25 % exits 76 and falls back; a pass that fits is never cut. A
+pass whose emitted frames differ from the expected count raises `ShortPass "N of M"` (exit 77) and
+falls back; a failure prints `CAP upscale: av3 failed at frame N/M (shot S)`. The upscale asks the
+compute router and waits at most 5 min for a busy card before a loud lanczos fallback; asked,
+used and encoder are in `takes/work/upscale_used.json` and the QC report's `upscale` block (a
+fallback is an advisory row). QC has no timeout (D16), runs with gpu=False and 6 torch threads.
+**The edit gate reads the cut G-DEAD made** (`edit_gate.dead_view` over `takes/work/dead_cuts.json`:
+cut shots lose their rows, slowed takes take their new length); loudness and true peak share one
+audio-only (`-vn`) ffmpeg run cached by (path, size, mtime). Open: the edit gate reads the av3
+hqdn3d x4 pixels as off/held (ep01: 7 of 28 segments, mean diff 2.02-2.10 vs about 2.0).
 
 
 ## Publish — `youtube_upload.py`
@@ -362,55 +437,10 @@ The human sign-off is waived by the owner's standing instruction; these are
 not. Dry-run on 2026-09-23: ep09 passes; ep05-ep08, public before the
 content gate existed, would be refused for unjudged or lettered takes.
 
-## Board states — what the Command Center shows (`studio/command_center/views.py`)
+## Moved out of this file (2026-10-19, D17)
 
-Each row is one (department, unit) in `work_orders`; the board shows a state, never
-computes one a runner did not write, except the three marked derived.
-
-| shown | means | who moves it |
-|---|---|---|
-| queued | ready: every `requires` row is done and the first step's inputs exist | a runner takes it |
-| blocked | waits on X (`blocked_on`: a required stage/unit like `refs/04`, or `in: <glob>`) | the tick, when X lands |
-| running | a run holds the lease | the run |
-| stale *(derived for a lapsed lease)* | the run lost its lease, or the disk disagrees with the row (`blocked_on` says which) | an order or a new run |
-| flagged *(derived)* | done, with judge flags (audit rows) that are neither acknowledged nor published | the owner's acknowledge, or the upload |
-| done | finished; a published unit with flags shows done (2026-10-01 ruling), its gate chips kept as the audit trail | -- |
-| deferred / failed / escalated / held | a step handed it back / crashed / asked the owner / a hold parks it | a retry, a fix, the owner, a lift |
-
-`flags` on a row counts the unit's audit rows -- history, not open work: it never
-goes down. Needs you and the inbox read `views.flags_open` (done + flags, not
-acknowledged, not published), the department page and the sidebar dots read the same
-function. Published = a done `publish` row, or the publish record on disk: youtube.json
-AND an upload row with a video id (`backfill.publish_row`); youtube.json alone is a
-draft. The tick settles an episode from that record (`tick.settle_published`): a
-queued/blocked row, or one whose lease ran out, becomes `done` with the uploaded file
-(found by the upload's sha8) as its deliverable.
-
-## Known gaps — not measured yet
-
-- **continuity (2026-10-10):** the relative-identity margin, the same-place
-  band and G-LOOK-PANEL are uncalibrated; the GPU acceptance replay (looks
-  staged in one ep25 and one ep27 grid; the villa and the study reverse as
-  one-hop edits, `scripts/refs/look_replay.py`, `place_replay.py`) is not run.
-  Phase 2: "the panel IS the sheet" (panel vs staged sheet), GeomCons on the
-  master's fixed things, the production designer.
-- **framing:** a medium close drawn as a full figure passes (face 0.112
-  against published 0.101-0.3). It needs a closed-vocabulary FRAMING answer
-  from the content reader, judged against the planned size.
-- **a take against its own panel:** BUILT 2026-10-13 as G-PANEL-BOARD (the staged
-  panel is the cell). Off-board and the opening stay advisory until an owner-judged
-  pinned-panel episode calibrates them; WotW ep01-03 (the liked set) staged no panel.
-- **copies in a crowd:** the reader's lookalike count missed nine identical
-  sappers and two identical hussars; pairwise face embeddings are the fix
-  (YuNet + SFace ONNX via the OpenCV already installed).
-- **OCR:** no library installed; EasyOCR's weights are cached locally. ep08's
-  "NEWSPAPER BOY" is already in the PANEL, so OCR belongs at the panel stage.
-- **two pictures stacked in one frame:** the line score reads 1.00 on ep07
-  S12-S14 and at most 0.748 on 124 clean panels; wall 0.90 is ready to build.
-- **not to build:** a darkness wall (it would fail 39 of 127 accepted takes;
-  the known dark fault is only the second darkest) and same-setup layout
-  correlation (19 accepted pairs above 0.75; one camera position per place is
-  owner decision D4).
+Board states, known gaps and the speed-arm bench rules now live in `LESSONS_ARCHIVE.md`,
+"Gate notes moved out of GATES.md". They are history or bench rules; no step runs them.
 
 ## Judges — the taste gates are signed by code, never by a person (2026-09-24)
 
@@ -427,8 +457,8 @@ test refuses a commit that loses a catch. `fitted_on` is carried on every measur
 | PLAN (episode/02) | `judge:plan@1` | the battery (plan_check, cell gates, G-MOVES, G-STILL, G-SOURCE, G-SPEAKER, G-PACE, G-ACTION, G-PRESENT, G-TALK); the critic lists turn, answer, coverage, threat, spike, claims with spans ×3; code judges (G-HOOK, G-SPIKE, a `nonscene` row foldable) | improve ×2 → model_tier (the reasoning tier) → terminal; no fresh brief (C2_verdict #3, 2026-10-11) | critic fault: best draft signed flagged; battery still refusing: defer (plan.deferred.json, no signature) | the battery refuses; the critic flags |
 | LAYOUT (episode/07) | `grid_layout@1` | a rule: grids ≤ 9, cols × rows = shots, a face alone in a 1x1 when a setup mixes sizes | — | — | deterministic |
 | EYE panels (episode/08) | `judge:panel_eye@1` | stored dq + content rows; hats worn and held; a reference handed back; posture; framing; clones; lettering; invented landmark; repeats; one short size read | redraw grid seed → reprose the frame (timing untouched); cap 2 grids; framing/posture take no rung (no rung ever moved one on ep13: cure them in the prompt) | best panel kept flagged | refuse on calibrated rows; flag on thin rows |
-| EYE takes (episode/09) | `judge:take_eye@1` | dq rows incl. pass-through, rotation, leak, cut vote, lag; content; identity vs sheet; clones | seed → move type → shorter → head cut → re-plan the cell (priced) | a still from the panel on a narration shot (≤2, never adjacent), else best take flagged, high on dialogue/turn/button | refuse where calibrated; "cannot tell" on wides |
-| MASTER (episode/11) | `judge:master_eye@1` | qc hard rows; shadow, faces, board, repeats, story from measures; a 30-frame read; cross-take identity | one retake through the take ladder, then its recut (no free recut: step 11's master is already current) | the rubric flagged with evidence; never waived by a judge | refuse → retake on measured fields; flag on story |
+| EYE takes (episode/09) | `judge:take_eye@1` | dq rows incl. pass-through, rotation, leak, cut vote, lag; content; identity vs sheet; clones | seed → move type → shorter → head cut → re-plan the cell (priced); the router reads `take_ladder.CURE_RATES` (dated): a cure under 20 % over 4+ tries is dropped for its class; gait → `gait_verb`; an S warp → `warp_gate.cure`, an Se-only warp → none; early clones (t <= 0.3 s) → head cut, else one seed on a clean panel | a still from the panel on a narration shot (≤2, never adjacent), else best take flagged, high on dialogue/turn/button; every kept fault stamped `evidence.settled` = still / keep_best / high (K5); dropped cure classes land as one `watch` audit row; a signed eye whose fingerprint names the current takes is kept on step 09 re-entry (no re-judge) | refuse where calibrated; "cannot tell" on wides |
+| MASTER (episode/11) | `judge:master_eye@1` | qc hard rows; shadow, faces, board, repeats, story from measures; a 30-frame read; cross-take identity | one retake through the take ladder, then its recut (no free recut: step 11's master is already current); a rung that changed no take sha8 (nor shots.json sha8) takes no recut and no second eye, books no round, prints `CAP master: retake of Txx changed no take, no recut`; a retake is priced from measured retake seconds, floor 9 min; `review/work/eye_reads.json` keys each frame read (take sha8, frame, slow, plan row, reader, prompt sha) so only misses are read; a flagged take (K7) gets 3 extra frames and a `parts` ask, a vanishing limb is a low advisory `body` fault naming the shot (D8) | the rubric flagged with evidence; never waived by a judge | refuse → retake on measured fields; flag on story |
 
 The owner's eye: `library/<book>/audit/<unit>.html` (`scripts/audit/sheet.py`), every
 flag with its numbers beside the wall and a seeded sample of passes per gate; a finding
@@ -466,7 +496,15 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
   `studio/routed_whisper`: a worker under ComfyUI's embedded python, a render arriving mid-batch
   closes it and the rest goes to the CPU) and the master encode (`studio/video_encoder`: NVENC
   p7 cq = crf + 5 on cuda, x264 on cpu). The VL reads already run on ComfyUI (GPU); facenet and
-  EasyOCR are still CPU (see LESSONS 2026-10-18).
+  EasyOCR stay on the CPU until a torch worker lands (deferred, D21; LESSONS_ARCHIVE "GPU when
+  idle"). **The router reads VRAM first** (2026-10-19, P14): no /free when free_mb >= need, one
+  /free then polls when short; a down engine routes to cpu (`engine unreachable`). A GPU claim
+  needs a living holder (pid liveness, `STALE_S` 10 min, a 60 s heartbeat; a process ignores its
+  own claim; `submit` waits at most 30 s for a foreign claim). **Free at a model-family boundary**
+  (`comfy.free_on_family`, K10), once per boundary, never per read: `step_runner` before a GPU step
+  whose `family:` differs from the last, step 03 once before its VL reads (D19). Under
+  `comfy.row_deadline` a text call's timeout is min(its own, the row's remaining + 60 s); no
+  runner wraps a row in it yet (open).
 - **Renders before ComfyUI checks** (owner, 2026-09-30) still holds: the H3 stack evicts
   the judge, so a ComfyUI read between renders pays two cold loads. The CPU checks are
   not ComfyUI reads.
@@ -483,80 +521,96 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
 Every step has a round cap and a wall. At the cap the step **keeps its best attempt, logs
 `CAP <phase>: r/N rounds, mm:ss, kept best (k advisories)`, and goes on**. It never defers,
 never re-authors past the table, never parks on style. The 6 h episode clock is the outer
-wall (the walls below sum to more than 6 h; no run hits them all).
+wall. The table is GENERATED from `stages.yaml` (`scripts/episode/commands.py --write`; a test
+holds it equal): edit the registry, never this table.
 
+<!-- registry:caps -->
 | step | phase | rounds | per | wall min | gate |
 |---|---|---|---|---|---|
-| 01 | bind | 1 | pass | 2 | |
+| 01 | bind | 1 | pass | 2 |  |
 | 02 | plan | 3 | climb (2 climbs per episode) | 30 | PLAN |
-| 03 | places | 3 | draw | 15 | |
-| 04 | voice | 2 | episode | 30 | |
-| 05 | timeline | 1 | pass | 2 | |
-| 06 | prompts | 1 | pass | 2 | |
-| 07 | grids | 1 | grid | 30 | |
-| 08 | panel_checks | 1 | round | 30 | |
+| 03 | places | 3 | draw | 15 |  |
+| 04 | lines | 1 | episode | 10 |  |
+| 04 | voice | 2 | episode | 30 |  |
+| 05 | timeline | 1 | pass | 2 |  |
+| 06 | prompts | 1 | pass | 2 |  |
+| 07 | grids | 1 | grid | 30 |  |
+| 08 | panel_checks | 1 | round | 30 |  |
 | 08 | regrid | 2 | episode | 20 | EYE_PANELS |
-| 09 | takes | 1 | pass | 120 | |
-| 09 | take_dq | 1 | round | 30 | |
-| 09 | take_content | 1 | round | 20 | |
-| 09 | take_eye | 1 | round | 10 | |
-| 09 | strip | 1 | round | 2 | |
+| 09 | takes | 1 | pass | 120 |  |
+| 09 | take_dq | 1 | round | 30 |  |
+| 09 | take_content | 1 | round | 20 |  |
+| 09 | take_eye | 1 | round | 10 |  |
+| 09 | strip | 1 | round | 2 |  |
 | 09 | retakes | 2 | episode | 45 | EYE_TAKES |
-| 09 | face_refine | 1 | take | 15 | |
-| 10 | assemble | 1 | pass | 15 | |
-| 10 | upscale | 1 | pass | 15 | |
-| 11 | qc | 1 | episode | 30 | |
+| 09 | face_refine | 1 | take | 15 |  |
+| 10 | assemble | 1 | pass | 15 |  |
+| 10 | upscale | 1 | pass | 15 |  |
+| 11 | qc | 1 | episode | 30 |  |
 | 11 | master_eye | 1 | episode | 30 | MASTER |
-| 12 | deliver | 1 | pass | 2 | |
-| 13 | publish | 1 | pass | 10 | |
+| 12 | deliver | 1 | pass | 2 |  |
+| 13 | publish | 1 | pass | 10 |  |
+<!-- /registry:caps -->
 
-- **The plan: two climbs per episode**, each three writer rounds inside 30 min. A refusal on
-  tier-1 faults only (a line a downstream builder repeats) parks **once**: one tier-1
-  re-author per episode, never a second defer. Tier 2 gets the rounds, then the best draft
-  is signed flagged. Tier 3 (voice-measured grammar rows, the G-VARIETY insert count) is
-  advice and never refuses.
-- Caps are per **episode** where the table says so (voice, regrid, retakes, qc, master_eye),
-  so a relaunch, a resume or a drive restart does not reset them.
-- A step logs `STEP <id> start` (Seattle time) on entry, so a killed step is still visible.
+The counters (code as of the Jekyll Kawajiri ep01 retro, 2026-10-19):
+- **Counters are per episode** in `attempts.json` (plan climbs, voice, lines, regrid, retakes
+  with the master-eye retakes inside them, face_refine per take, qc, master_eye): a relaunch,
+  a resume, a retry or a drive restart never resets one. A read-modify-write holds a lock.
+- **The kept wall.** A step's seconds are kept per episode (`wall.<id>`, 4443bf7); the step's
+  wall is the sum of its rows (a climb row once per climb). A live step beats `wall.<id>.live`
+  every 60 s (`step_wall.Heartbeat`) and a killed run is charged from its last beat at the next
+  open; `step_attempts.elapsed` = booked + live. An owner redo (a recorded `work_orders` row,
+  receipt `orders_taken.json`) books to `wall.<id>.order`: the cure cap reads only `wall.<id>`,
+  the 6 h clock counts both.
+- **The 120 min first-render wall** (`takes`): no new first render starts past it, checked
+  between renders; `takes.first` in attempts.json keeps it across launches (b83eac4).
+- **A round is a change of bytes** (K11). A rung returns `RungResult(changed, reason, seconds)`;
+  a rung that rendered, trimmed or cut a head spends a round, one that did none of them prints
+  `NO ROUND <gate> <rung>: <reason>` and ends the climb (read `seconds: 0.0` in attempts.json as
+  a burned cap: ep01 spent 2 empty retake rounds). A plan climb is spent at the entry's first
+  writer call, never at entry; a re-sign is `plan.resign`, never a climb. A redraw that changed
+  no panel byte refunds its regrid round (`panel_ladder.refund_round`). A master rung that
+  changed no take sha8 takes no recut and no second eye.
+- **CAP lines.** A ladder that runs out of rungs AT its cap prints its CAP line too (078b95c);
+  `CAP takes ... -- first renders over the wall`, `CAP lines:`, `CAP master: retake of Txx
+  changed no take, no recut`, `CAP upscale: av3 too slow, fell back to rtx4x`, `CAP upscale: av3
+  failed at frame N/M (shot S)`, `CAP panel_checks`. A step's RuntimeError carries the last
+  REFUSED/CAP line it printed in-process.
+- **02 plan:** 60 min (30 x 2 climbs) including the first draft. Tier 1 (`plan_tags.BUILDER`)
+  parks once; tier 2 gets the three rounds then the best draft is signed flagged; tier 3
+  (voice-measured grammar rows, the G-VARIETY insert count) is advice. A stale flagged signature
+  is re-signed over the rows it carries (same gate ids at no greater count, no tier-1 row, the
+  provenance chain intact) with one critic read and no writer round. A round whose rows were all
+  in the previous round and fell by < 2 sets `desk.stuck`: the remaining rungs write nothing.
+- **04 lines** (K1) is its own wall (10 min), separate from the `voice` revoice rounds: when
+  spent every failing line takes its terminal at once (keep_best / keep_best_far) and `CAP
+  lines:` is printed; a line with no rightly heard try still refuses.
+- **08 panel_checks:** the panel eye's deadline is the wall minus the step's elapsed; unread
+  panels are faults (`unread_for_time`), listed in `storyboard/eye_unread.json`, re-read in the
+  next window before any GPU take, never passed.
+- **09 retakes** count rounds that changed bytes; an unaffordable batch is trimmed to the takes
+  the budget affords, worst first.
+- **10 upscale** is a pace budget, not a kill timer (see QC).
+- Every step logs `STEP <id> start` (Seattle time) on entry. Steps carry a model `family:`
+  (K2); the runner frees ComfyUI once when the family changes (`comfy.free_on_family`).
+  `share_min` is report-only; known: shares exceed the wall on steps 02 (70 vs 60 min) and 12
+  (3 vs 2), pinned in `tests/test_run_budget.py::SHARE_ABOVE_WALL`.
 
-## Speed arms — `scripts/bench/rulers.judge_arm` (bench only, C1_verdict 2026-10-11)
+### The clocks (generated from `studio/run_budget.py` and `stages.yaml`)
 
-| rule | measures | kind |
-|---|---|---|
-| (a) same draw | PSNR(arm, ctl) - PSNR(ctl seed 2, ctl) >= 3 dB on every shot | CLASSIFIES only: under it the arm is a new draw, judged by rulers and eye; no PSNR floor refuses an arm (28 dB refused the shipped 8-step on 6/6) |
-| (b) identity | per shot delta id >= -2 sigma_seed (pooled RMS of seed pairs, recomputed when a seed-2 control lands); dialogue mean >= -0.02 | HARD |
-| (c) banding | mean <= ctl + .005, no shot worse by > .03 | HARD |
-| (d) clones | <= the production take's count on the same shot | HARD |
-| (e) invented speech | tail words where the control's own tail on that seed has none; prompt-asked mouth actions exempt | HARD for dialogue |
+<!-- registry:clock -->
+| clock | value | home | what it stops |
+|---|---|---|---|
+| rung ceiling | 300 min | `run_budget.EPISODE_CEILING_SECONDS` | past it every rung is terminal, signed flagged; firsts still render |
+| owner limit | 360 min | `run_budget.OWNER_LIMIT_SECONDS` | a rescue rung runs only while spent + its price + the firsts owed fit (`Budget.leaves_reserve`) |
+| first-render wall | 120 min | `stages.yaml caps.takes` | no new first render starts past it (between renders); attempts.json `takes.first` keeps it across launches |
+| cheap check | 60 s | `run_budget.CHEAP_CHECK_SECONDS` | a check this cheap always runs, whatever the clock |
+| dark budget | 2 episodes | `run_budget.DARK_EPISODES_REQUIRED` | a share-based cut is allowed only after this many dark (logged, never cutting) episodes |
+<!-- /registry:clock -->
 
-**Arm rule:** a speed arm passes the INVENTED-SPEECH check on S4, D1 and D2 x 2
-seeds, or it is adopted for **narration takes only**. Dialogue stays on the 8-step
-at 12/3 until an arm passes. **Amend (C2_verdict, 2026-10-11):** a speed arm on dialogue
-must also pass on >= 2 shipped takes whose control tail sounds above -45 dB (ep10/T21,
-ep15/T21): its tail words a subset of the control's at the same seed, tail dB within +-6,
-lower-face tail ratio within the control's range, mouth.lag within +-1 frame. CK8 failed
-it on 2026-10-11 (ep10/T21 "keep moving" vs "moving"; ep15/T21 mouth 1.14 vs .94-.97).
-
-**Adopted (2026-10-11 bench):** CK int8 attention on the 8-step BASE for narration takes
-(`takes_r2v.NARRATION_BASE`). Out: G1 (4-step on the authors' grid, lost the S3 frogs).
-
-**Superseded (2026-10-18, main session on measured evidence; owner 2026-10-17 picked Wuli V4 and
-approved Spark):** the take model is routed by PLANNED SIZE, not by lane (`takes_r2v.workflow_for`).
-Close / medium_close / medium / insert -> `WULI_BASE` (Wuli 8-step HQ int8 + Spark); any wide or
-full segment, or no sizes -> `SPARK_BASE` (the CK 8-step with Spark attention); `ROLLBACK_BASE` is
-the CK 8-step. Proof (`docs/audit/2026-10-18_wuli_spark/`), Kawajiri POC C/M/W at the POC seeds,
-Spark (POC) vs Wuli+Spark: content clean 3/3 both; clone pairs 0 both; G-TAIL on the speaking
-close C pass both (tail -76.9 / -90.8 dB, no words); G-WARP S/Se C 0.98/-0.90 vs 0.49/0.30, M
-1.30/1.64 vs 1.46/1.32, W 2.65/3.12 vs **4.13/7.22**; close identity (facenet on a drawn face,
-advisory) 0.531 vs 0.561; every arm fails only frozen-whole, the POC's locked cards. The dialogue
-arm rule above was NOT re-run on the WotW ep10/T21 / ep15/T21 controls: G-TAIL stays HARD on every
-dialogue take and is the net.
-
-**Regrid bar (bench, `scripts/refs/look_replay.tally`, C2_verdict #7):** the denominator is
-face-visible cast panels -- a plan frame `from behind|seen from behind|back to (the )camera|walking
-away` or a wide / extreme_wide / establishing size is exempt; over-the-shoulder is NOT. A
-face-visible panel with no face read is a miss; an empty denominator is unmeasurable, never a pass.
-Replays: C1 ep25 regrid 2/2 PASS, ep25 round 0 0/1 FAIL, ep27 study_table 3/3 PASS.
+The report reads **charged | wall | dead** per step: `step_wall.ledger` / `charged` for the
+first two, `run_clock.dead_gaps` (K4) for the gaps between runs with the reason the drive row
+gives. A share used as a wall fires on normal runs, so shares stay rung prices (D11).
 
 ## The clock, SAFETY and the boundary (C3_verdict, 2026-10-11; decided on the owner's behalf, D1-D12)
 
