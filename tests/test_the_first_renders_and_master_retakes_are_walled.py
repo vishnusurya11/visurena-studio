@@ -31,7 +31,11 @@ def _ctx(tmp_path, said):
 
 def test_a_master_retake_spends_an_episode_round(tmp_path, monkeypatch):
     calls = []
-    monkeypatch.setattr(take_ladder, "retake", lambda *a, **k: calls.append(a))
+    def renders(*a, **k):     # a retake that writes the take: only a round that changed bytes is booked
+        calls.append(a)
+        (tmp_path / "takes" / "r2v").mkdir(parents=True)
+        (tmp_path / "takes" / "r2v" / "T03.mp4").write_bytes(b"new take")
+    monkeypatch.setattr(take_ladder, "retake", renders)
     monkeypatch.setattr("scripts.episode.step_09_shoot.approved", lambda p: "--x")
     monkeypatch.setattr("studio.gate_policy.of", lambda *a: None)
     v = SimpleNamespace(faults=[])

@@ -256,6 +256,19 @@ def streamed(listing: Path, out: Path, width: int, height: int, up: Upscale, fps
     return counted(n, expected_frames)
 
 
+USED_FILE = "upscale_used.json"
+"""Beside the master's scratch file: {asked, used, encoder, fallback}, for the QC report."""
+
+
+def record_used(out: Path, up: Upscale, encoder: str, env=None) -> None:
+    """What was asked (the setting), what ran, and the encoder: QC names them, and a
+    fallback is an advisory there, never silent.  A nested fallback master overwrites it."""
+    asked = (os.environ if env is None else env).get(SETTING, DEFAULT) or DEFAULT
+    used = name_of(up)
+    row = {"asked": asked, "used": used, "encoder": encoder, "fallback": asked != used}
+    Path(out).with_name(USED_FILE).write_text(json.dumps(row), encoding="utf-8")
+
+
 def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
            upscaler: Frame | None = None, wrap: Callable[[Frame], Frame] | None = None,
            cuts: list[int] | None = None, encoder: str = "cpu",
@@ -265,6 +278,7 @@ def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: 
     to every frame BEFORE the upscale (owner 2026-10-18: the upscale is the last picture
     operation, only muxing follows it); `cuts` are the frames each new
     shot starts on (av3's denoise starts fresh there); `expected_frames` is the cut's frame count (K8)."""
+    record_used(out, up, encoder)
     if up.engine == "lanczos":
         if wrap is not None:
             print("FACE REFINE: the lanczos fallback has no frame loop; nothing pasted", file=sys.stderr, flush=True)

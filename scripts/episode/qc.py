@@ -82,6 +82,32 @@ MAX_ERROR_RATE = voice_qc.MAX_ERROR_RATE
 PTS = re.compile(r"pts_time:\s*([0-9.]+)")
 
 
+def limit_threads(n: int = 6) -> None:
+    """torch on the CPU takes every core and starves the render; qc keeps six (owner 2026-10-18)."""
+    try:
+        import torch
+        torch.set_num_threads(n)
+    except ImportError:
+        pass
+
+
+def upscale_block(work: Path) -> dict:
+    """The upscale asked and used and the encoder, off work/upscale_used.json; a fallback
+    (used is not asked) carries an advisory line, flagged, never a fail."""
+    path = Path(work) / "upscale_used.json"
+    if not path.exists():
+        return {"asked": "", "used": "", "encoder": "", "fallback": False, "advisory": "", "recorded": False}
+    row = json.loads(path.read_text(encoding="utf-8"))
+    advisory = f"upscale: asked {row['asked']}, ran {row['used']}" if row.get("fallback") else ""
+    return {**row, "advisory": advisory, "recorded": True}
+
+
+def dead_plan_of(work: Path) -> dict | None:
+    """work/dead_cuts.json (what G-DEAD cut and slowed in this master), or None."""
+    path = Path(work) / "dead_cuts.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
+
 def planned_cuts(placed: dict) -> list[float]:
     return [shot["t_start"] for shot in placed["shots"][1:]]
 
@@ -402,6 +428,7 @@ def load_inputs(book_id: str, number: int, engine: str) -> SimpleNamespace:
 def head_rows(i: SimpleNamespace) -> dict:
     """The file's own measures: bytes, length, card, loudness, cuts, the gaps."""
     lufs, tp, master, placed = integrated(i.master), true_peak(i.master), i.master, i.placed
+    cut_placed, cut_records = edit_gate.dead_view(placed, i.records, dead_plan_of(i.work))   # the cut as made
     return {
         "master": episode_home.relative(i.book, master),
         # WHICH BYTES THIS REPORT MEASURED.  Without it a report can outlive the
@@ -415,9 +442,9 @@ def head_rows(i: SimpleNamespace) -> dict:
         "title_card": title_card_on_disk(i.book, i.number),
         "lufs": lufs, "lufs_ok": LUFS_BAND[0] <= lufs <= LUFS_BAND[1],
         "true_peak": tp, "tp_ok": tp <= TP_CEILING,
-        "planned_cuts": planned_cuts(placed), "seen_cuts": seen_cuts(master),
+        "planned_cuts": planned_cuts(cut_placed), "seen_cuts": seen_cuts(master),
         "missing_cuts": [],          # filled below, once the edit gate has spoken
-        "internal_cuts": internal_cuts(placed, i.records),
+        "internal_cuts": internal_cuts(cut_placed, cut_records),
         "speech_over_gap_db": speech_band(master, i.lines, placed["duration_s"], i.work),
         # THE PICTURE'S END, not the last line's START.  With the start, the final
         # `until - end` is negative and the tail is thrown away by `max()`:
@@ -430,14 +457,16 @@ def head_rows(i: SimpleNamespace) -> dict:
 
 def edit_rows(i: SimpleNamespace, report: dict) -> dict:
     """The edit gate, the cuts it proves, the sound cues and the roll-ups."""
-    report["edit"] = edit_report(i.master, i.placed, i.records, i.book, i.number, i.work)
+    placed, records = edit_gate.dead_view(i.placed, i.records, dead_plan_of(i.work))
+    report["edit"] = edit_report(i.master, placed, records, i.book, i.number, i.work)
     # AFTER the edit gate, because a cut it PROVED frame-exact is present whatever
     # ffmpeg's scene metric saw.  Episode 5 plays five of its six setups in one
     # room, where a real cut between two corners can score under the threshold.
-    report["internal_cut_rows"] = internal_cut_rows(i.placed, i.records, report["seen_cuts"])
+    report["internal_cut_rows"] = internal_cut_rows(placed, records, report["seen_cuts"])
     report["missing_cuts"] = drop_on_grid(
-        missing_cuts(planned_cuts(i.placed), report["seen_cuts"], proven=report["edit"].get("cuts")),
+        missing_cuts(planned_cuts(placed), report["seen_cuts"], proven=report["edit"].get("cuts")),
         report["internal_cut_rows"])
+    report["upscale"] = upscale_block(i.work)
     report["sound"] = episode_sound.presence(i.master, i.episode, i.placed)
     report["takes"] = takes_rollup(i.take_dir)
     report["sheets"] = sheets_rollup(episode_home.boards_dir(i.book, i.number), i.book)
@@ -465,6 +494,7 @@ def measure(book_id: str, number: int, engine: str, listen, spent: bool = False)
 
 
 def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) -> None:
+    limit_threads()
     report = measure(book_id, number, engine, voice_qc.any_transcriber(), spent)
     book, lufs, tp = episode_home.book_dir(book_id), report["lufs"], report["true_peak"]
     placed = episode_home.load_placed(book, number, episode_home.load_plan(book, number))
@@ -488,6 +518,8 @@ def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) ->
         silent = [s["index"] for s in placed["shots"]
                   if not any(l["shot"] == s["index"] for l in lines)]
         print(f"  gap: {gap_owner.owner(placed['shots'], begins, ends, silent).said}")
+    if report["upscale"]["advisory"]:
+        print(f"  ADVISORY {report['upscale']['advisory']} (encoder {report['upscale']['encoder']})")
     edit = report["edit"]
     print(f"edit: {'OK' if edit['ok'] else 'FAIL'}"
           + (f" ({edit.get('note')})" if not edit.get("measured") else

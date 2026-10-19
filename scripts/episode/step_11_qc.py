@@ -29,7 +29,7 @@ from studio.judges import master_eye  # noqa: E402
 
 STEP_ID = "11"
 NAME = "qc"
-GPU = True
+GPU = False
 ENGINE = "r2v"
 GATE = "MASTER"
 WORKFLOW = "image_qwen3vl_caption"

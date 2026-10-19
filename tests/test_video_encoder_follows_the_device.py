@@ -102,3 +102,17 @@ def test_the_episode_master_asks_the_router_and_hands_the_answer_to_the_tail(tmp
 def test_the_tail_defaults_to_the_cpu_encoder():
     import inspect
     assert inspect.signature(_assemble().tail).parameters["encoder"].default == "cpu"
+
+
+# -- the master records what was asked, what ran and which encoder (QC names it) ---------------
+
+def test_a_master_records_the_upscale_asked_used_and_the_encoder(tmp_path, monkeypatch):
+    import json
+    import subprocess
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k: None)
+    monkeypatch.setenv(mu.SETTING, "av3")
+    out = tmp_path / "work" / "scratch.mp4"
+    out.parent.mkdir()
+    mu.master(tmp_path / "l.txt", out, 768, 768, mu.LANCZOS, 24, encoder="cuda")
+    row = json.loads((out.parent / mu.USED_FILE).read_text(encoding="utf-8"))
+    assert row == {"asked": "av3", "used": "lanczos", "encoder": "cuda", "fallback": True}

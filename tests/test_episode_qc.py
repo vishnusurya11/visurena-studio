@@ -46,3 +46,47 @@ def test_a_soft_cut_inside_a_take_run_does_not_fail_the_verdict():
     assert qc.verdict(report) is True
     report["missing_cuts"] = [4.0, 9.0]
     assert qc.verdict(report) is False
+
+
+# -- the report names the upscale and the encoder; a fallback is an advisory --------------------
+
+def test_a_fallback_master_is_named_in_the_qc_report(tmp_path):
+    import json
+    (tmp_path / "upscale_used.json").write_text(json.dumps(
+        {"asked": "av3", "used": "lanczos", "encoder": "cpu", "fallback": True}), encoding="utf-8")
+    block = qc.upscale_block(tmp_path)
+    assert block["used"] == "lanczos" and block["advisory"] == "upscale: asked av3, ran lanczos"
+
+
+def test_a_master_that_ran_as_asked_has_no_advisory(tmp_path):
+    import json
+    (tmp_path / "upscale_used.json").write_text(json.dumps(
+        {"asked": "av3", "used": "av3", "encoder": "cuda", "fallback": False}), encoding="utf-8")
+    assert qc.upscale_block(tmp_path)["advisory"] == "" and qc.upscale_block(tmp_path)["encoder"] == "cuda"
+
+
+def test_a_missing_record_says_it_was_not_recorded(tmp_path):
+    assert qc.upscale_block(tmp_path) == {"asked": "", "used": "", "encoder": "", "fallback": False,
+                                          "advisory": "", "recorded": False}
+
+
+def test_qc_sets_torch_to_six_threads(monkeypatch):
+    seen = []
+    import types
+    monkeypatch.setitem(sys.modules, "torch", types.SimpleNamespace(set_num_threads=seen.append))
+    qc.limit_threads()
+    assert seen == [6]
+
+
+def test_qc_does_not_wait_for_comfyui(tmp_path):
+    """qc.py measures on the CPU (the router claims the card when it is idle), so the step
+    never parks on a busy ComfyUI queue before it."""
+    import types
+    import pytest
+    from scripts.episode import step_11_qc
+    seen = []
+    ctx = types.SimpleNamespace(home=tmp_path, log=lambda *a, **k: None, budget=None,
+                                run_script=lambda script, *a, **k: seen.append((script, k)) or 0)
+    with pytest.raises(SystemExit):
+        step_11_qc.qc_report(ctx, [])           # no report is left by the fake run: it refuses, after the call
+    assert seen and seen[0][0].endswith("qc.py") and seen[0][1]["gpu"] is False

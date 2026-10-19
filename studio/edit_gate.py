@@ -81,6 +81,34 @@ def in_cut(records: list[dict], placed: dict) -> list[dict]:
     return [r for r in records if all(i in here for i in (r.get("shots") or [r["index"]]))]
 
 
+def run_of(r: dict) -> list[int]:
+    return r.get("shots") or [r["index"]]
+
+
+def dead_factors(placed: dict, records: list[dict], plan: dict) -> dict[int, float]:
+    """shot -> the factor G-DEAD gave its take-run (new seconds / placed seconds)."""
+    by = {s["index"]: s["seconds"] for s in placed["shots"]}
+    out = {}
+    for r in records:
+        new, old = (plan.get("seconds") or {}).get(r["index"]), sum(by[i] for i in run_of(r))
+        out.update({i: new / old for i in run_of(r)} if new and old else {})
+    return out
+
+
+def dead_view(placed: dict, records: list[dict], plan: dict | None) -> tuple[dict, list[dict]]:
+    """The timeline and takes the master was CUT from: work/dead_cuts.json (G-DEAD) removed
+    shots and gave their neighbours new seconds, so rows, boundaries and starts follow it."""
+    if not plan or not (plan.get("cut") or plan.get("seconds")):
+        return placed, records
+    gone = {i for r in records if r["index"] in plan.get("cut", []) for i in run_of(r)}
+    factor, shots, t = dead_factors(placed, records, plan), [], 0.0
+    for s in (s for s in placed["shots"] if s["index"] not in gone):
+        seconds = round(s["seconds"] * factor.get(s["index"], 1.0), 6)
+        shots.append({**s, "seconds": seconds, "t_start": round(t, 6)})
+        t += seconds
+    return {**placed, "shots": shots}, [r for r in records if r["index"] not in plan.get("cut", [])]
+
+
 def segment_plan(placed: dict, records: list[dict], fps: int = FPS) -> list[dict]:
     """One row per take-run in cut order: master start frame and frames placed."""
     by = {s["index"]: s for s in placed["shots"]}

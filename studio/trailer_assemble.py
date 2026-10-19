@@ -562,10 +562,18 @@ def true_peak(path: Path) -> float:
     return float(_loudnorm(path)["input_tp"])
 
 
+_loudnorm_cache: dict[tuple, dict] = {}
+"""(path, size, mtime) -> loudnorm's analysis: integrated loudness and true peak share one run."""
+
+
 def _loudnorm(path: Path) -> dict:
-    """loudnorm's analysis of one whole file."""
-    return _measure_loudness(["ffmpeg", "-v", "info", "-i", str(path), "-af",
-                              "loudnorm=print_format=json", "-f", "null", "-"])
+    """loudnorm's analysis of one whole file, audio only (-vn), once per set of bytes."""
+    stat = Path(path).stat()
+    key = (str(path), stat.st_size, stat.st_mtime_ns)
+    if key not in _loudnorm_cache:
+        _loudnorm_cache[key] = _measure_loudness(["ffmpeg", "-v", "info", "-i", str(path), "-vn", "-af",
+                                                  "loudnorm=print_format=json", "-f", "null", "-"])
+    return _loudnorm_cache[key]
 
 
 def astats_of(path: Path) -> dict[str, float]:
