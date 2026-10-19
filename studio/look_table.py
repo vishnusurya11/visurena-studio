@@ -164,7 +164,7 @@ FACIAL = (("beard", r"beard"), ("moustache", r"m(?:ou|u)stach"),
           ("stubble", r"stubble"), ("none", r"shaven|beardless|smooth-cheeked"))
 """Side-whiskers and mutton chops are `sideburns`, never a moustache (Hyde, 2026-10-14):
 an explicit moustache or beard wins; a bare "whiskers" stays a moustache."""
-TOP = (("shirtless", r"shirtless|bare to the waist|naked"), ("dress", r"\bdress\b|gown|frock"),
+TOP = (("shirtless", r"shirtless|bare to the waist|naked"), ("dress", r"\bdress\b|gown|\bfrock\b(?![- ]?coat)"),
        ("uniform", r"uniform|tunic"), ("nightshirt", r"nightshirt|nightgown"),
        ("suit_jacket", r"\bsuit\b|jacket"), ("coat", r"\bcoat\b|overcoat|greatcoat|cape|cloak"),
        ("waistcoat", r"waistcoat"), ("shirt", r"\bshirt|blouse|shirtsleeves"))
@@ -230,8 +230,14 @@ FACIAL_FAMILY = {"sideburns": "beard", "beard": "beard"}
 a bare chin on a sideburns look (`none`) still refuses."""
 
 
-def family(key: str, marker: str) -> str:
+ADVISORY_HEADWEAR = {**HEADWEAR_FAMILY, "bowler": "brimmed"}
+"""The advisory also reads a bowler as a plain hat (Jekyll Kawajiri ep01); a refusal does not,
+and a boater is its own family in both."""
+
+
+def family(key: str, marker: str, advisory: bool = False) -> str:
     """The family LOOK-STATE and G-LOOK-PANEL compare: hair colour and headwear
-    by family, every other marker as itself."""
-    table = {"hair_colour": HAIR_FAMILY, "headwear": HEADWEAR_FAMILY, "facial_hair": FACIAL_FAMILY}.get(key, {})
+    by family, every other marker as itself.  `advisory` widens headwear only."""
+    headwear = ADVISORY_HEADWEAR if advisory else HEADWEAR_FAMILY
+    table = {"hair_colour": HAIR_FAMILY, "headwear": headwear, "facial_hair": FACIAL_FAMILY}.get(key, {})
     return table.get(marker, marker)

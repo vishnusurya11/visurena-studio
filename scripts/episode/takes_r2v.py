@@ -1106,10 +1106,27 @@ def collect_all(tickets: list[tuple[dict, str]], where, on_take=None,
     return done, lost
 
 
-def first_wall_spent(began: float, now: float, retake: list[int]) -> bool:
-    """The first renders (not a retake pass) have run the `takes` wall: no new render starts."""
+def first_wall_spent(began: float, now: float, retake: list[int], prior_s: float = 0.0) -> bool:
+    """The first renders (not a retake pass) have run the `takes` wall: no new render starts.
+    `prior_s` is what earlier launches of this step already spent: a relaunch keeps the wall."""
     from studio import step_caps
-    return not retake and now - began >= step_caps.wall_s("takes")
+    return not retake and prior_s + now - began >= step_caps.wall_s("takes")
+
+
+FIRST_KEY = "takes.first"
+
+
+def prior_first_seconds(home) -> float:
+    """The seconds earlier launches spent on the first renders (attempts.json `takes.first`)."""
+    from studio import step_attempts
+    return step_attempts.seconds(home, FIRST_KEY)
+
+
+def book_first_seconds(home, began: float, now: float, retake: list[int]) -> None:
+    """On exit, this launch's first-render seconds join `takes.first`; a retake pass books none."""
+    from studio import step_attempts
+    if not retake:
+        step_attempts.add_seconds(home, FIRST_KEY, max(0.0, now - began))
 
 
 def after_wall(lost: list, seconds: float) -> tuple[list, str]:
@@ -1450,10 +1467,15 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
 
     from studio import boundary
     home, began = episode_home.home(book, number), time.time()
-    _, lost = collect_twice(jobs, lambda c: wheres[c["index"]], keep, approved,
-                            stop=lambda: boundary.requested(home) or first_wall_spent(began, time.time(), retake or []))
-    if first_wall_spent(began, time.time(), retake or []):
-        lost, line = after_wall(lost, time.time() - began)
+    prior = prior_first_seconds(home)
+    try:
+        _, lost = collect_twice(jobs, lambda c: wheres[c["index"]], keep, approved,
+                                stop=lambda: boundary.requested(home)
+                                or first_wall_spent(began, time.time(), retake or [], prior))
+    finally:
+        book_first_seconds(home, began, time.time(), retake or [])
+    if first_wall_spent(began, time.time(), retake or [], prior):
+        lost, line = after_wall(lost, prior + time.time() - began)
         print(line, flush=True)
     print(f"{len(records)} takes -> {sheet}", flush=True)
     if lost:

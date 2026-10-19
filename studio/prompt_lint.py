@@ -402,11 +402,18 @@ def plan_texts(plan: dict) -> list[str]:
     return [s.get(f) or "" for s in plan.get("shots") or [] for f in PLAN_FIELDS]
 
 
+def crowd_text(shot: dict, setup: dict) -> str:
+    """The crowd this shot may show: its own, and the setup's only when the shot declares
+    extras > 0 (Jekyll ep01: the night door's ring covered 14 extras-0 shots)."""
+    own = shot.get("crowd") or ""
+    return f"{own} {setup.get('crowd') or ''}" if int(shot.get("extras") or 0) > 0 else own
+
+
 def shot_facts(plan: dict, shot: dict, table: dict) -> dict:
     """What P13 needs for one plan shot."""
     setup = (plan.get("setups") or {}).get(shot.get("setup"), {}) or {}
     return {"faces": shot.get("faces") or [], "aliases": table, "extras": shot.get("extras") or 0,
-            "crowd": f"{shot.get('crowd') or ''} {setup.get('crowd') or ''}"}
+            "crowd": crowd_text(shot, setup)}
 
 
 def shot_plan_faults(plan: dict, shot: dict, rows: dict, table: dict) -> list[str]:
@@ -493,7 +500,7 @@ def facts_for(book: Path, rec: dict, plan: dict) -> dict:
             "cast_names": {r["entity_id"]: names_of(r) for r in characters(book)},
             "photoreal": _read(Path(book) / "refs" / "look.json", {"look": "photoreal"}).get("look") == "photoreal",
             "extras": sum(int(s.get("extras") or 0) for s in shots),
-            "crowd": " ".join(f"{s.get('crowd') or ''} {(setups.get(s.get('setup')) or {}).get('crowd') or ''}" for s in shots).strip(),
+            "crowd": " ".join(crowd_text(s, setups.get(s.get("setup")) or {}) for s in shots).strip(),
             "frames": rec.get("frames")}
 
 

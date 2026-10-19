@@ -1064,6 +1064,17 @@ def life_for(k: int, seg: dict, ctx: dict, used: int) -> str:
     return said
 
 
+REST_LEAD = "At the first frame "
+
+
+def rest_before_crowd(parts: list[tuple[str, bool]], seg: dict) -> list[tuple[str, bool]]:
+    """A DECLARED crowd (extras > 0) outranks the at-rest clause: a full block that would drop the
+    life sentence gives up the at-rest geometry instead (ep01 shot 18, three extras, 2026-10-18)."""
+    if int(seg.get("extras") or 0) <= 0:
+        return parts
+    return [(t, w) for t, w in parts if not t.startswith(REST_LEAD)]
+
+
 SLOW = re.compile(r"\bslow(ly)?\b", re.I)
 GAIT = re.compile(r"\b(walks?|walking(?!\s+(?:stick|sticks|cane|canes|staff|height|pace|speed))|walked|limps?|limping|"
                   r"limped|climbs?|climbing|climbed|trots?|trotting|rides?|riding|"
@@ -1604,7 +1615,12 @@ def segment_text(k: int, seg: dict, pic: int, ctx: dict) -> str:
     # charging it to the detail allowance made blocks SHORTER than the 150 floor.
     tail = [(tagged(arrival_clause(seg, ctx.get("names", ())), ctx["faces"]), False)] \
         if ctx.get("no_ends") else []
-    if life := life_for(k, seg, ctx, joined(parts + tail)):
+    life = life_for(k, seg, ctx, joined(parts + tail))
+    if not life and ctx.get("crowd_at") == k - 1:
+        lean = rest_before_crowd(parts, seg)
+        if life := life_for(k, seg, ctx, joined(lean + tail)):
+            parts = lean
+    if life:
         at = next((i for i, (t, _) in enumerate(parts) if "mouth is closed" in t), len(parts))
         parts.insert(at, (life, False))
     head = f"[Shot {k}] {span(int(round(seg['t'])), seg['end'])}."
@@ -1661,12 +1677,30 @@ def summary(frames: int, segs: list[dict], cells: dict, described: str, faces: l
     return (f"{task_types(cells_staged)} One {frames / fps:.2f}-second "
             f"take of {n} shot{'s' if n > 1 else ''} in {where}. "
             f"{runs}. The take carries {who} through {shot_list(range(1, n + 1))} in that order. {audio} "
-            f"{UNLETTERED}")
+            f"{unlettered_for(held_text(described, segs))}")
 
 
-UNLETTERED = "Every sign, plate, cheque and paper in the picture is plain and unlettered."
+def held_text(described: str, segs: list[dict]) -> str:
+    """What the take's own words say it holds: the place and each shot's picture words."""
+    keys = ("frame", "motion", "at_rest", "end_frame", "changed")
+    return " ".join([described or ""] + [str(g.get(k) or "") for g in segs for k in keys])
+
+
+UNLETTERED_BASE = ("sign", "plate", "paper")
+BAIT_EXTRA = ("cheque", "letter", "placard", "newspaper", "card", "note", "ledger")
+"""The nouns that invite lettering (`prompt_lint.BAIT`): the base three are always named, the
+rest only when the take's own text holds one -- the code tree names no book's cheque."""
+UNLETTERED = "Every sign, plate and paper in the picture is plain and unlettered."
 """The take's anti-lettering sentence, affirmative (H3 has no negative input). Jekyll ep01
 iter4 T10 drew "FILED" and "HUB" on the cheque; the grid said it, the take never did."""
+
+
+def unlettered_for(text: str) -> str:
+    """UNLETTERED with every other bait noun `text` holds named before the last: "Every sign, plate,
+    cheque and paper in the picture is plain and unlettered." for a take that shows a cheque."""
+    held = [n for n in BAIT_EXTRA if re.search(rf"(?i)\b{n}s?\b", text)]
+    nouns = [*UNLETTERED_BASE[:-1], *held, UNLETTERED_BASE[-1]]
+    return f"Every {', '.join(nouns[:-1])} and {nouns[-1]} in the picture is plain and unlettered."
 
 
 def soundscape(described: str, crowd: str = "", outdoors: bool = False, life: bool = False) -> str:
@@ -2106,6 +2140,14 @@ def l20_style(text, facts):
     return out
 
 
+def l28_style_light(text, facts):
+    """L28 STYLE-LIGHT: the style line of a take on a NIGHT setup names a sun (Jekyll Kawajiri
+    ep01: "low sun from the west" over the night door, the episode light fallen back)."""
+    line = (sections(text).get("detailed_description") or "").split("\n")[0]
+    hit = house_style.SKY_SOURCE.search(line) if facts.get("night") else None
+    return [f"L28 STYLE-LIGHT: a night setup's style line says {hit.group(0)!r}: {line[:90]!r}"] if hit else []
+
+
 MOVER = re.compile(r"\bthe camera\b|\bcontinues?\b|\b(?:is|are) \w+ing\b|"
                    r"\b(?:comes?|goes?|moves?|runs?|settles?|falls?|rises?)\b", re.I)
 """What a closing sentence may name as moving besides an `ACTION` verb: the camera,
@@ -2170,7 +2212,7 @@ def l23_pace_on_a_thing(text, facts):
 RULES = (l1_negation, l2_stillness, l3_slow, l4_action, l5_coverage, l6_stamps, l7_pins, l8_pace,
          l9_limp, l10_life, l11_pictures, l12_speakers, l13_task_type, l14_length,
          l15_summary_length, l16_dialogue_tail, l17_cross_cut, l18_banned_prop,
-         l19_crowd, l20_style, l21_arrival, l22_absent_mouth, l23_pace_on_a_thing, l24_glued_pace)
+         l19_crowd, l20_style, l21_arrival, l22_absent_mouth, l23_pace_on_a_thing, l24_glued_pace, l28_style_light)
 
 
 def lint(text: str, facts: dict | None = None) -> list[str]:
@@ -2274,6 +2316,11 @@ def advise(text: str, facts: dict | None = None) -> list[str]:
 
 # ---- 3.16  the whole prompt ------------------------------------------------
 
+def night_fact(setup) -> bool:
+    """Whether the take's setup is at night, for L28."""
+    return house_style.is_night(setup)
+
+
 def prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fps=24,
                  has_plate=True, life: dict | None = None, cells_staged: bool = True) -> dict:
     """What the lint needs beyond the text itself.  `life` is what `describe`
@@ -2290,7 +2337,7 @@ def prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fp
             "cells_staged": cells_staged,
             "plate": len(faces) + 1 if has_plate else None, "strip": strip,
             "pins": [(i + 1, s["t"]) for i, s in enumerate(segs)], "lines": lines,
-            "life": life, "watson": lead_tag(faces)}
+            "life": life, "watson": lead_tag(faces), "night": night_fact(setup)}
 
 
 BLOCK_HEAD = re.compile(r"(\[Shot \d+\] From \d\d:\d\d to \d\d:\d\d\.)")

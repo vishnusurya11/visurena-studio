@@ -166,7 +166,7 @@ def light() -> str:
 
 def stills(setup=None) -> str:
     """The style line for a DRAWN sheet or board; with a setup, under ITS light."""
-    return STILLS.format(where=_where, light=light_for(setup))
+    return STILLS.format(where=_where, light=light_for(setup, rendered=False))
 
 
 def adopt_look(look: str) -> None:
@@ -265,7 +265,7 @@ COMPOUNDS = ("bracket", "jet", "lamp", "flame", "light", "slab", "fire")
 """A source noun's own second word: "gas bracket", "window light", "coal fire"."""
 
 SKIP_WORDS = ("a", "an", "the", "one", "two", "its", "his", "her", "of", "and", "in", "on", "at",
-              "left", "right", "near", "far", "only", "same",
+              "left", "right", "near", "nearest", "far", "only", "same",
               # verbs and pointers: every ep08 take read "1894, is gaslight" and
               # "that lamp" before these were here (audit 2026-09-22, item 17)
               "is", "was", "are", "were", "be", "that", "this", "these", "those", "which",
@@ -281,6 +281,9 @@ here follows a preposition of place, not a possessive."""
 
 LIGHT_ADJECTIVES = ("low", "level", "raking", "slanting", "sidelong")
 """The DIRECTIONS words that are adjectives: they prefix a sky source ("low sun")."""
+
+GAS_PARTS = ("lamp", "light", "flame")
+"""A gas lamp is a lamp: the one compound whose first word is no adjective to keep."""
 
 FIXED_STYLE_WORDS = 6
 """What `STILLS` / `LIVE` add around the place and the light."""
@@ -298,8 +301,11 @@ def is_lit(clause: str) -> bool:
 
 
 def lit_clause(described: str) -> str:
-    """The first clause of a setup's `described` that names its light."""
-    return next((c for c in clauses(described) if is_lit(c)), "")
+    """The first clause of a setup's `described` that names its light, a DIRECTED one before a
+    glint ("gleaming window glass" lit the Sunday street while "low sun falls from the left" sat
+    two clauses on: Jekyll Kawajiri ep01, 2026-10-18)."""
+    lit = [c for c in clauses(described) if is_lit(c)]
+    return next((c for c in lit if DIRECTIONS.search(c)), lit[0] if lit else "")
 
 
 WINDOWS = re.compile(r"^windows?$", re.I)
@@ -384,37 +390,65 @@ def shorter(phrase: str) -> str:
     """The phrase without its adjective: "morning sun" -> "sun", "deep shadow"
     -> "shadow".  A compound noun ("gas bracket") keeps both words."""
     words = phrase.split()
-    if len(words) == 2 and words[1] not in COMPOUNDS:
+    if len(words) == 2 and (words[1] not in COMPOUNDS or words[0] == "gas" and words[1] in GAS_PARTS):
         return words[1]
     return phrase
 
 
-def fit(source: str, direction: str, black: str, where: str) -> str:
-    """The phrase in the words the style wall leaves after the place: the
-    source's adjective goes first, then the black's; past that, nothing."""
-    budget = MAX_STYLE_WORDS - FIXED_STYLE_WORDS - len(where.split()) - len(_atmosphere.split())
-    for src, blk in ((source, black), (shorter(source), black), (shorter(source), shorter(black))):
-        said = compose(src, direction, blk)
-        if len(said.split()) <= budget:
+def budget(where: str, setup=None, rendered: bool = True) -> int:
+    """The words the wall leaves the light, for the branch that PRINTS the line: a rendered take
+    with a look spends the look's own words (not six), and the atmosphere only where `live`
+    says it (under the sky); a drawn sheet's STILLS line has neither."""
+    from studio.book_look import under_sky
+    fixed = len(_look.split()) if rendered and _look else FIXED_STYLE_WORDS
+    air = len(_atmosphere.split()) if rendered and _atmosphere and under_sky(setup) else 0
+    return MAX_STYLE_WORDS - fixed - len(where.split()) - air
+
+
+def fit(source: str, direction: str, black: str, where: str, setup=None, rendered: bool = True) -> str:
+    """The phrase in the words the style wall leaves after the place: the source's adjective
+    goes first, then the black's, then the direction; past that, nothing."""
+    room = budget(where, setup, rendered)
+    short = shorter(source)
+    for src, way, blk in ((source, direction, black), (short, direction, black),
+                          (short, direction, shorter(black)), (short, "", shorter(black))):
+        said = compose(src, way, blk)
+        if len(said.split()) <= room:
             return said
     return ""
 
 
-def light_for(setup) -> str:
+def sentence_of(described: str, clause: str) -> str:
+    """The sentence of `described` that holds `clause` ("..., throwing hard yellow light down
+    from the upper right": the lamp is named a clause before)."""
+    return next((s for s in re.split(r"[;.]", described or "") if clause and clause in s), "")
+
+
+def sky_free_light() -> str:
+    """The episode light for a NIGHT setup that names no source: its sun and daylight words go
+    (`lamplight` stands in), because a sun on a street at three in the morning is a fault."""
+    if not SKY_SOURCE.search(_light):
+        return _light
+    return f"lamplight, {black_of(_light)}" if black_of(_light) else "lamplight"
+
+
+def light_for(setup, rendered: bool = True) -> str:
     """The setup's own light phrase -- its source, its direction and a black --
     with the episode `light` as the fallback for a setup that names no source,
-    or whose phrase would fail the vocabulary or the style wall."""
+    or whose phrase would fail the vocabulary or the style wall.  A NIGHT setup never falls
+    back to a sky source: it keeps its lamp, bare if the wall leaves no room for more."""
     described = getattr(setup, "described", "") or ""
-    clause = lit_clause(described)
-    source = source_of(clause)
+    clause, night = lit_clause(described), is_night(setup)
+    source = source_of(clause) or source_of(sentence_of(described, clause)) or (night and source_of(described))
     if not source:
-        return _light
-    region = described[described.find(clause):]
-    black = black_of(region)
+        return sky_free_light() if night else _light
+    black = black_of(described[described.find(clause):]) if clause else ""
     if len(black.split()) < 2:
         black = black_of(_light) or black
-    phrase = fit(source, direction_of(clause, source), black, _where)
-    return phrase if phrase and not light_faults(phrase) else _light
+    phrase = fit(source, direction_of(clause, source), black, _where, setup, rendered)
+    if phrase and not light_faults(phrase):
+        return phrase
+    return compose(shorter(source), "", shorter(black)) if night else _light
 
 
 # ---- the validators -------------------------------------------------------------
@@ -492,7 +526,15 @@ def style_faults(where: str, light: str) -> list[str]:
     return []
 
 
+SKY_SOURCE = re.compile(r"\b(?:sun|sunlight|sunshine|daylight|dawn)\b", re.I)
+"""What may not light a night setup (L28)."""
+
 NIGHT = re.compile(r"\b(?:night|midnight|o'clock of a (?:black )?(?:\w+ )?morning)\b", re.I)
+def is_night(setup) -> bool:
+    """A setup `described` or `place_state` puts at night."""
+    return bool(NIGHT.search(f"{getattr(setup, 'described', '')} {getattr(setup, 'place_state', '')}"))
+
+
 DAYLIT = re.compile(r"\b(?:daylight|sunlight)\b", re.I)
 """A night setup lit by daylight (Jekyll Kawajiri ep01, 2026-10-18): the light cure appended
 'Grey daylight through the window' to a street at three in the morning."""

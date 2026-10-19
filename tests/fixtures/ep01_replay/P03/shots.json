@@ -1,0 +1,1153 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "night_door",
+    "lane": "narration",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/edward_hyde/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_00.png"
+    ],
+    "faces": [
+      "edward_hyde"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.166667,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 82101,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Hyde in <Picture 1>: Coarse, unkempt black hair; clean-shaven, pale smooth cheeks; thin lips curled in a wide, cold grin; soft black felt wideawake hat, low flat crown, wide floppy brim. A small, slight, sinister young man of about twenty-five, adult in build but a head shorter than other men, narrow-shouldered and pale, with lean, corded, knuckly pale hands. Wearing: knee-length black double-breasted coat, white shirt. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in a small London by-street at night. [Shot 1] runs from 00:00 to 00:04. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, low sun from the west.\n[Shot 1] From 00:00 to 00:04. The shot opens on a medium close shot on <Subject 1> at the blistered door in its recess, his lean, corded, knuckly pale hands turning a key in the bright brass keyhole plate under the yellow kerb lamp. The camera is on the top door step at chest height, a pace from the door; the kerb gas lamp light comes from the LEFT. At the first frame the focus of the picture is <Subject 1>'s knuckly pale hand on a key in the bright brass keyhole plate at the CENTRE of the frame. His face under the wide floppy brim sits in the TOP half. The camera pulls back from the hand on the brass keyhole plate, widening to show <Subject 1>'s face under the hat brim across the whole shot as his knuckly pale hand turns the key in the lock, from 00:00 to 00:02. At 00:02 the door swings inward into the dark as his shoulder leans against it, and the lean continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his knuckly pale hand turns the key in the lock. By 00:04 the camera is pulling back through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 4.45,
+    "render_s": 66.0,
+    "waited_s": 42.2,
+    "rel_path": "episodes/ep01/takes/r2v/T00.mp4"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "street_day",
+    "lane": "narration",
+    "sizes": [
+      "wide"
+    ],
+    "workflow": "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_01.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson",
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.5,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82001,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mr. Enfield in <Picture 2>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a small London by-street on a Sunday afternoon. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, gleaming window, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a wide across the bright Sunday by-street as <Subject 1> and <Subject 2> walk east along the far pavement toward the blistered door under its blind gable. The camera is on the far pavement at head height, a dozen paces behind the walkers; low sun from the LEFT. At the first frame the focus of the picture is the two walkers on the far pavement in the BOTTOM half at the LEFT third, <Subject 1> nearer and taller, <Subject 2> a step ahead and smaller with his black walking cane. The blistered door and its blind gable stand at the RIGHT third. The camera tracks beside the two walkers as they walk at a walking pace east toward the blistered door across the whole shot as <Subject 2> swings his black walking cane, from 00:00 to 00:02. At 00:02 <Subject 1>'s long black overcoat swings at his knees with each stride at a walking pace, and the swing continues to the last frame of the shot. Behind them two distant figures in Sunday dress strolling at the far end of the street, from 00:00 to 00:05. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his long black overcoat swings at his knees with each stride at a walking pace. By 00:05 the camera is tracking through the last frame, with the two walkers now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 81.3,
+    "waited_s": 82.3,
+    "rel_path": "episodes/ep01/takes/r2v/T01.mp4"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "street_day",
+    "lane": "narration",
+    "sizes": [
+      "close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_02.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 82204,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a small London by-street on a Sunday afternoon. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, gleaming window, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a close shot of <Subject 1> walking on the far pavement, the sunlit shop fronts behind him. The camera is beside him on the pavement at eye height, two paces off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height, lank grey hair white at the sides falling to his collar under the black bowler hat. A gleaming brass shop handle sits at the LEFT edge in sunlight; a green painted shutter fills the RIGHT third behind his shoulder, its edge in black shadow. His black overcoat and shoulders are solid. The camera pushes in toward <Subject 1>'s gaunt, rugged, unsmiling face across the whole shot as <Subject 1>'s eyes turn toward the RIGHT edge as he walks at a walking pace, from 00:00 to 00:03. At 00:03 sunlight runs across his cheek and along the brim of his bowler, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his eyes turn toward the RIGHT edge as he walks at a walking pace. By 00:06 the camera is pushing in through the last frame, with <Subject 1>'s gaunt face now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "not current to its card",
+    "measured_seconds": 6.58,
+    "render_s": 91.3,
+    "waited_s": 91.3,
+    "rel_path": "episodes/ep01/takes/r2v/T02.mp4"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "friction",
+    "setup": "street_day",
+    "lane": "dialogue",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_03.png"
+    ],
+    "faces": [
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l03.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.375,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82003,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a small London by-street on a Sunday afternoon. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, gleaming window, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> lifting his black walking cane to point across the street. The camera is on the far pavement at chest height, two paces in front of him; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s heavy jaw and lined face at the LEFT third, his head a third of the frame's height, his black-gloved hand raising the black walking cane toward the RIGHT edge. Behind him a bright shop front with polished brasses fills the BOTTOM half; the blistered door stands small at the RIGHT third across the street. The camera keeps a locked-off frame across the whole shot as <Subject 1> lifts his black walking cane and points it across the street, from 00:00 to 00:05. <Subject 1> (S1), on screen, with a clipped English voice at an even pace, says: <d>[English] Did you ever remark that door? It holds a very odd story.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his head turns toward the LEFT edge, then the cane tip hovers toward the door, and the movement continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame, and <Subject 1> at the LEFT third, cane raised and pointing to the RIGHT third where the blistered door stands small, the shop brasses in the BOTTOM half.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 80.9,
+    "waited_s": 80.9,
+    "rel_path": "episodes/ep01/takes/r2v/T03.mp4"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "friction",
+    "setup": "street_day",
+    "lane": "dialogue",
+    "sizes": [
+      "close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_04.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l04.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.166667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82105,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a small London by-street on a Sunday afternoon. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, gleaming window, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a close shot of <Subject 1> turning to answer, the sunlit by-street behind him. The camera is on the far pavement at eye height, a pace and a half off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height, the black bowler hat with a pale grey band at the TOP edge. A row of cream shutters stands behind him at the LEFT third; black shadow from a doorway fills the RIGHT edge. The camera keeps a locked-off frame across the whole shot as <Subject 1>'s brows lift, from 00:00 to 00:02. <Subject 1> (S1), on screen, with a clipped English voice at an even pace, says: <d>[English] Indeed? And what was that?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, he turns his face toward the RIGHT edge. At 00:04 his hand tightens on the lapel of his overcoat, and the movement continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame, with <Subject 1>'s face now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 5.87,
+    "render_s": 78.7,
+    "waited_s": 79.4,
+    "rel_path": "episodes/ep01/takes/r2v/T04.mp4"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "reaction",
+    "setup": "street_day",
+    "lane": "narration",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_05.png"
+    ],
+    "faces": [
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.333333,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 82106,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in a small London by-street on a Sunday afternoon. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, gleaming window, black shadow.\n[Shot 1] From 00:00 to 00:03. The shot opens on a medium close shot on <Subject 1> gazing across the street at the blistered door, his cane lowering. The camera is on the far pavement at chest height, beside him; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s lined face at the LEFT third, his head a third of the frame's height, his eyes on the street. The blistered door in its shadowed recess stands across the street at the RIGHT third under the blind gable reaching the TOP edge. His black walking cane angles across the BOTTOM half. The camera pushes in toward the blistered door across the street across the whole shot as <Subject 1> gazes across at the door, from 00:00 to 00:02. At 00:02 the cane tip comes down toward the flagstones in his gloved hand, and the movement continues to the last frame of the shot. By 00:03 the camera is pushing in through the last frame, with the blistered door now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 3.04,
+    "render_s": 68.1,
+    "waited_s": 68.7,
+    "rel_path": "episodes/ep01/takes/r2v/T05.mp4"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "transition",
+    "setup": "night_corner",
+    "lane": "narration",
+    "sizes": [
+      "full"
+    ],
+    "workflow": "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "refs/characters/edward_hyde/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_06.png"
+    ],
+    "faces": [
+      "richard_enfield",
+      "edward_hyde"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82006,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mr. Hyde in <Picture 2>: Coarse, unkempt black hair; clean-shaven, pale smooth cheeks; thin lips curled in a wide, cold grin; soft black felt wideawake hat, low flat crown, wide floppy brim. A small, slight, sinister young man of about twenty-five, adult in build but a head shorter than other men, narrow-shouldered and pale, with lean, corded, knuckly pale hands. Wearing: knee-length black double-breasted coat, white shirt. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a crossroads of two narrow London streets at three o'clock of a black winter morning. Tall soot-dark brick terraces line both streets. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, low sun from the west.\n[Shot 1] From 00:00 to 00:07. The shot opens on a full shot of <Subject 1> walking under the corner gas lamp at three in the morning, <Subject 2> small far down the eastward street. The camera is in the eastward street at knee height, ten paces from the corner; the corner lamp light comes from the upper RIGHT. At the first frame the focus of the picture is the wet shining cobbles in the BOTTOM quarter where <Subject 1>'s boots stride at a walking pace, his figure at the LEFT third, two thirds of the frame's height. The corner gas lamp stands at the RIGHT third reaching the TOP edge. The camera tilts up from the wet cobbles to the corner gas lamp burning above <Subject 1> across the whole shot as he walks at a walking pace under the lamps swinging his black walking cane, from 00:00 to 00:04. At 00:04 far down the street <Subject 2> stumps along eastward, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he walks at a walking pace under the lamps swinging his black walking cane. By 00:07 the camera is tilting up through the last frame, with the camera tilts up now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 98.9,
+    "waited_s": 99.3,
+    "rel_path": "episodes/ep01/takes/r2v/T06.mp4"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "night_corner",
+    "lane": "narration",
+    "sizes": [
+      "insert"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/edward_hyde/sheet_front.png",
+      "refs/characters/child_of_hyde_incident/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_07.png"
+    ],
+    "faces": [
+      "edward_hyde",
+      "child_of_hyde_incident"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.666667,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 82007,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Hyde in <Picture 1>: Coarse, unkempt black hair; clean-shaven, pale smooth cheeks; thin lips curled in a wide, cold grin; soft black felt wideawake hat, low flat crown, wide floppy brim. A small, slight, sinister young man of about twenty-five, adult in build but a head shorter than other men, narrow-shouldered and pale, with lean, corded, knuckly pale hands. Wearing: knee-length black double-breasted coat, white shirt. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the child in <Picture 2>: Fair hair in two plaits; smooth-cheeked, blue eyes; small soft grey woollen bonnet. A small girl of about nine, thin and quick, in a plain grey pinafore dress over a dark-red long-sleeved blouse, and black boots. Wearing: plain grey pinafore dress over a dark-red long-sleeved blouse, and black boots. <Picture 2> defines this girl alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in a crossroads of two narrow London streets at three o'clock of a black winter morning. Tall soot-dark brick terraces line both streets. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (<Subject 2> in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of <Subject 2> and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, low sun from the west.\n[Shot 1] From 00:00 to 00:03. The shot opens on an insert at cobble height as <Subject 1>'s black boots stump east along the wet cobbles and <Subject 2> runs in down the cross street toward the corner, her small black boots flying; only that object and what touches it is in frame. The camera is on the cobbles at boot height by the drain grating; the corner lamp light comes from the upper RIGHT. At the first frame the focus of the picture is <Subject 1>'s black boots striding at a walking pace on the wet cobbles at the RIGHT third, the hem of the knee-length black double-breasted coat above them. The iron drain grating at the corner sits at the CENTRE in the BOTTOM half. The camera rises above the drain grating, looking down over the wet cobbles of the corner across the whole shot as <Subject 1>'s black boots stump east toward the drain grating, from 00:00 to 00:02. At 00:02 <Subject 2> runs in down the cross street from the LEFT edge, her small black boots reaching the corner, and the reach continues to the last frame of the shot. By 00:03 the camera is rising through the last frame, with two pairs of boots tangled now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 3.04,
+    "render_s": 59.6,
+    "waited_s": 58.5,
+    "rel_path": "episodes/ep01/takes/r2v/T07.mp4"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "spike",
+    "setup": "night_corner",
+    "lane": "narration",
+    "sizes": [
+      "full"
+    ],
+    "workflow": "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/edward_hyde/sheet_front.png",
+      "refs/characters/child_of_hyde_incident/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_08.png"
+    ],
+    "faces": [
+      "edward_hyde",
+      "child_of_hyde_incident"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.458333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82008,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Hyde in <Picture 1>: Coarse, unkempt black hair; clean-shaven, pale smooth cheeks; thin lips curled in a wide, cold grin; soft black felt wideawake hat, low flat crown, wide floppy brim. A small, slight, sinister young man of about twenty-five, adult in build but a head shorter than other men, narrow-shouldered and pale, with lean, corded, knuckly pale hands. Wearing: knee-length black double-breasted coat, white shirt. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the child in <Picture 2>: Fair hair in two plaits; smooth-cheeked, blue eyes; small soft grey woollen bonnet. A small girl of about nine, thin and quick, in a plain grey pinafore dress over a dark-red long-sleeved blouse, and black boots. Wearing: plain grey pinafore dress over a dark-red long-sleeved blouse, and black boots. <Picture 2> defines this girl alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a crossroads of two narrow London streets at three o'clock of a black winter morning. Tall soot-dark brick terraces line both streets. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (<Subject 2> in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of <Subject 2> and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, low sun from the west.\n[Shot 1] From 00:00 to 00:07. The shot opens on a full shot at the lamp-lit corner as <Subject 1> tramples over <Subject 2> on the wet cobbles. The camera is across the junction at waist height, eight paces off; the corner lamp light comes from the upper RIGHT. At the first frame the focus of the picture is <Subject 1> at the CENTRE, half the frame's height, one boot lifted over <Subject 2> on the wet cobbles, who lies in the BOTTOM third. The corner gas lamp post stands in the foreground at the RIGHT third, its yellow light falling across them. The dark terrace wall with shuttered windows fills the LEFT edge. The camera tilts up from the man to the cobbles, across the whole shot as <Subject 1> tramples calmly over <Subject 2>'s body, his boots coming down on her pinafore, from 00:00 to 00:04. At 00:04 <Subject 2> writhes and screams on the wet cobbles, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he tramples calmly over <Subject 2>'s body. By 00:07 the camera is tilting up through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 94.2,
+    "waited_s": 94.8,
+    "rel_path": "episodes/ep01/takes/r2v/T08.mp4"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "night_corner",
+    "lane": "narration",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "refs/characters/edward_hyde/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_09.png"
+    ],
+    "faces": [
+      "richard_enfield",
+      "edward_hyde"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.208333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 82009,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mr. Hyde in <Picture 2>: Coarse, unkempt black hair; clean-shaven, pale smooth cheeks; thin lips curled in a wide, cold grin; soft black felt wideawake hat, low flat crown, wide floppy brim. A small, slight, sinister young man of about twenty-five, adult in build but a head shorter than other men, narrow-shouldered and pale, with lean, corded, knuckly pale hands. Wearing: knee-length black double-breasted coat, white shirt. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in a crossroads of two narrow London streets at three o'clock of a black winter morning. Tall soot-dark brick terraces line both streets. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, low sun from the west.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot at the corner as <Subject 1> grips the collar of <Subject 2> under the gas lamp. The camera is at the corner at chest height, two paces off; the corner lamp light comes from the upper RIGHT. At the first frame the focus of the picture is <Subject 1>'s black-gloved fist on <Subject 2>'s coat collar at the CENTRE. <Subject 1>'s lined face sits at the LEFT third, his head a third of the frame's height; <Subject 2>'s pale face at the RIGHT third is lower, his head a quarter of the frame's height under the wide floppy brim. The lamp glow fills the TOP edge. The camera pulls back from the collar, widening to show both faces under the lamp glow across the whole shot as <Subject 1>'s black-gloved fist twists <Subject 2>'s coat collar, from 00:00 to 00:03. At 00:03 <Subject 2> turns his pale face up toward him with a cold grin. At 00:05 sweat runs down <Subject 1>'s lined face, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:07 while his black-gloved fist twists <Subject 2>'s coat collar. By 00:08 the camera is pulling back through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 109.1,
+    "waited_s": 109.6,
+    "rel_path": "episodes/ep01/takes/r2v/T09.mp4"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "friction",
+    "setup": "night_door",
+    "lane": "narration",
+    "sizes": [
+      "medium"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "refs/characters/edward_hyde/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_10.png"
+    ],
+    "faces": [
+      "richard_enfield",
+      "edward_hyde"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.416667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82111,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mr. Hyde in <Picture 2>: Coarse, unkempt black hair; clean-shaven, pale smooth cheeks; thin lips curled in a wide, cold grin; soft black felt wideawake hat, low flat crown, wide floppy brim. A small, slight, sinister young man of about twenty-five, adult in build but a head shorter than other men, narrow-shouldered and pale, with lean, corded, knuckly pale hands. Wearing: knee-length black double-breasted coat, white shirt. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a small London by-street at night. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, low sun from the west.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium two-shot by the kerb gas lamp as <Subject 1> keeps <Subject 2> by the arm before the blistered door. The camera is on the cobbles at head height, four paces off; the kerb gas lamp light comes from the LEFT. At the first frame the focus of the picture is the two men at the CENTRE: <Subject 1> at the LEFT third, his head a quarter of the frame's height, his gloved hand on <Subject 2>'s sleeve; <Subject 2> at the RIGHT third, a head shorter, his pale face under the wide floppy brim. The kerb gas lamp stands at the LEFT edge; the blistered door in its dark recess fills the TOP RIGHT behind them. The camera keeps a locked-off frame across the whole shot as <Subject 1> leans in and jabs a finger at <Subject 2>'s chest, from 00:00 to 00:02. At 00:02 <Subject 2> tilts his head back with a sneer as the lamp flame wavers above them, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he leans in and jabs a finger at <Subject 2>'s chest. By 00:05 the action of that shot continues through the last frame, with <Subject 1> leaning now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 5.87,
+    "render_s": 80.1,
+    "waited_s": 80.6,
+    "rel_path": "episodes/ep01/takes/r2v/T10.mp4"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "friction",
+    "setup": "night_door",
+    "lane": "dialogue",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/edward_hyde/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_11.png"
+    ],
+    "faces": [
+      "edward_hyde"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l10.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.333333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82112,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Hyde in <Picture 1>: Coarse, unkempt black hair; clean-shaven, pale smooth cheeks; thin lips curled in a wide, cold grin; soft black felt wideawake hat, low flat crown, wide floppy brim. A small, slight, sinister young man of about twenty-five, adult in build but a head shorter than other men, narrow-shouldered and pale, with lean, corded, knuckly pale hands. Wearing: knee-length black double-breasted coat, white shirt. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a small London by-street at night. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, low sun from the west.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> speaking under the kerb lamp, the blistered door behind him. The camera is a low angle from chest height, two paces off; the kerb gas lamp light comes from the LEFT. At the first frame the focus of the picture is <Subject 1>'s pale face at the CENTRE, his head a third of the frame's height, the wide floppy brim of the soft black felt wideawake hat at the TOP. The blistered door panels fill the RIGHT third in shadow; yellow lamp glow falls along the LEFT edge onto his cheek. The camera keeps a locked-off frame across the whole shot as <Subject 1> lifts his chin and speaks with a cold grin, from 00:00 to 00:05. <Subject 1> (S1), on screen, with a clipped English voice at an even pace, says: <d>[English] No gentleman but wishes to avoid a scene. Name your figure.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his knuckly pale hand spreads open at his chest, then the lamp flame flickers across his pale cheek, and the movement continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame, with <Subject 1>'s grinning face now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 5.87,
+    "render_s": 74.7,
+    "waited_s": 75.3,
+    "rel_path": "episodes/ep01/takes/r2v/T11.mp4"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "act_out",
+    "setup": "night_door",
+    "lane": "narration",
+    "sizes": [
+      "insert"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/edward_hyde/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_12.png"
+    ],
+    "faces": [
+      "edward_hyde"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.666667,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 82012,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Hyde in <Picture 1>: Coarse, unkempt black hair; clean-shaven, pale smooth cheeks; thin lips curled in a wide, cold grin; soft black felt wideawake hat, low flat crown, wide floppy brim. A small, slight, sinister young man of about twenty-five, adult in build but a head shorter than other men, narrow-shouldered and pale, with lean, corded, knuckly pale hands. Wearing: knee-length black double-breasted coat, white shirt. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in a small London by-street at night. [Shot 1] runs from 00:00 to 00:04. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, low sun from the west.\n[Shot 1] From 00:00 to 00:04. The shot opens on an insert on <Subject 1>'s knuckly pale hand holding out ten gold sovereigns and a cheque folded edge-on under the kerb lamp; only that object and what touches it is in frame. The camera is at waist height, a pace off; the kerb gas lamp light comes from the LEFT. At the first frame the focus of the picture is the knuckly pale hand at the CENTRE, palm up, ten gold sovereigns heaped in it and a cheque folded edge-on, its plain cream back outward, pinched between two fingers. The black cuff of the knee-length black double-breasted coat reaches in from the RIGHT edge. The stained door step sits dark in the BOTTOM third; lamplight glints on the gold from the LEFT. The camera tracks sideways to the right, past the hand, across the whole shot as the knuckly hand tips the gold sovereigns forward, from 00:00 to 00:02. At 00:02 the coins slide and chink across the palm toward the LEFT edge, and the movement continues to the last frame of the shot. By 00:04 the camera is tracking through the last frame, with gold sovereigns sliding off the pale palm now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 4.45,
+    "render_s": 62.4,
+    "waited_s": 63.0,
+    "rel_path": "episodes/ep01/takes/r2v/T12.mp4"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "setup",
+    "setup": "door_step_day",
+    "lane": "narration",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_13.png"
+    ],
+    "faces": [
+      "richard_enfield",
+      "gabriel_john_utterson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.958333,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 82013,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mr. Utterson in <Picture 2>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the pavement directly before the sinister door on the by-street. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot over the near shoulder and back of the head of <Subject 2> toward <Subject 1> speaking on the pavement before the blistered door. The camera is on the pavement at shoulder height behind <Subject 2>; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s lined face at the CENTRE, his head a third of the frame's height. <Subject 2>'s black shoulder and the back of his bowler fill the RIGHT third in the foreground. The blistered door in its shadowed recess stands at the LEFT third behind <Subject 1>, the blind plaster wall at the TOP edge. The camera keeps over <Subject 2>'s shoulder across the whole shot as <Subject 1> speaks and taps his black walking cane on the flagstones, from 00:00 to 00:04. At 00:04 he tips his head toward the door at the LEFT third, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:08 while he speaks and taps his black walking cane on the flagstones. By 00:08 the action of that shot continues through the last frame, and <Subject 1> at the CENTRE, head tipped toward the door at the LEFT third, cane on the flagstones, <Subject 2>'s shoulder at the RIGHT third.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.7,
+    "render_s": 121.3,
+    "waited_s": 121.8,
+    "rel_path": "episodes/ep01/takes/r2v/T13.mp4"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "friction",
+    "setup": "door_step_day",
+    "lane": "narration",
+    "sizes": [
+      "close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_14.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.208333,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 82014,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in the pavement directly before the sinister door on the by-street. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadow.\n[Shot 1] From 00:00 to 00:03. The shot opens on a close shot of <Subject 1> weighing his question before the door. The camera is on the pavement at eye height, a pace and a half off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height. The stained door panels stand behind him at the LEFT third in shadow; a sunlit strip of shop fronts stands at the RIGHT edge; the blind plaster wall fills the TOP edge. The camera pulls back from <Subject 1>'s gaunt face, widening to show the stained door panels behind him across the whole shot as <Subject 1>'s eyes narrow, from 00:00 to 00:01. At 00:01 he turns his head toward the door at the LEFT. At 00:02 his hand lifts to the front of his overcoat, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his eyes narrow. By 00:03 the camera is pulling back through the last frame, and the action continues with it, and <Subject 1>'s face at the CENTRE turned toward the LEFT third, eyes narrowed, his hand at his coat front in the BOTTOM third, the stained door panels at the LEFT third.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 3.75,
+    "render_s": 55.0,
+    "waited_s": 55.5,
+    "rel_path": "episodes/ep01/takes/r2v/T14.mp4"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "friction",
+    "setup": "door_step_day",
+    "lane": "narration",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_15.png"
+    ],
+    "faces": [
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.541667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82015,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the pavement directly before the sinister door on the by-street. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot on <Subject 1> answering, the court entry behind him. The camera is on the pavement at chest height, two paces off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s lined face at the RIGHT third, his head a third of the frame's height. The black slot of the court entry stands at the LEFT edge; the blistered door frame fills the LEFT third; sunlit flagstones stretch across the BOTTOM quarter under his black walking cane. The camera keeps a locked-off frame across the whole shot as <Subject 1> shakes his head, from 00:00 to 00:02. At 00:02 he lifts his black walking cane and plants it on the flagstones. At 00:05 the corner of his mouth lifts in a dry smile, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he shakes his head. By 00:07 the action of that shot continues through the last frame, and <Subject 1> at the RIGHT third smiling drily, cane planted on the flagstones, the door frame and court slot at the LEFT.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 96.9,
+    "waited_s": 101.9,
+    "rel_path": "episodes/ep01/takes/r2v/T15.mp4"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "reaction",
+    "setup": "door_step_day",
+    "lane": "narration",
+    "sizes": [
+      "close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_16.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.5,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 82016,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in the pavement directly before the sinister door on the by-street. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadow.\n[Shot 1] From 00:00 to 00:03. The shot opens on a close shot of <Subject 1> looking up at the blind wall above the door. The camera is on the pavement at eye height, a pace off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height, lifted toward the TOP edge. The discoloured plaster of the blind wall fills the LEFT third behind him; a bar of sunlight crosses the RIGHT edge on the white buttons of his overcoat. The camera pulls back from <Subject 1>'s gaunt face, widening to show the discoloured plaster of the blind wall behind him across the whole shot as <Subject 1>'s gaze lifts to the blind wall, from 00:00 to 00:02. At 00:02 his jaw sets, and the movement continues to the last frame of the shot. By 00:03 the camera is pulling back through the last frame, with <Subject 1>'s face now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 3.04,
+    "render_s": 66.4,
+    "waited_s": 62.6,
+    "rel_path": "episodes/ep01/takes/r2v/T16.mp4"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "transition",
+    "setup": "door_step_day",
+    "lane": "narration",
+    "sizes": [
+      "insert"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_17.png"
+    ],
+    "faces": [
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.0,
+    "frames": 56,
+    "seconds": 2.33,
+    "steps": 8,
+    "seed": 82017,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 2.33-second take of 1 shot in the pavement directly before the sinister door on the by-street. [Shot 1] runs from 00:00 to 00:02. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadow.\n[Shot 1] From 00:00 to 00:02. The shot opens on an insert on the brass keyhole plate rubbed bright on the blistered door as <Subject 1>'s black walking cane tip comes down beside it; only that object and what touches it is in frame. The camera is at the door at waist height, close; low sun from the LEFT. At the first frame the focus of the picture is the bright brass keyhole plate at the CENTRE on the stained brown panel. Knife-scored mouldings stretch along the LEFT third; black match-streaks mark the BOTTOM third; the black cane tip sits at the RIGHT edge; the lower edge of the blind plaster wall shows at the TOP edge. The camera tracks sideways to the right, past the stained panel, across the whole shot as the black walking cane tip lowers beside the keyhole, from 00:00 to 00:02. By 00:02 the camera is tracking through the last frame, and the action continues with it, and the bright brass keyhole plate at the CENTRE on the stained brown panel, the black cane tip tapping beside it at the RIGHT third, knife-scored mouldings at the LEFT third, match-streaks in the BOTTOM third.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 2.33,
+    "render_s": 101.2,
+    "waited_s": 101.8,
+    "rel_path": "episodes/ep01/takes/r2v/T17.mp4"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "transition",
+    "setup": "walk_on_day",
+    "lane": "narration",
+    "sizes": [
+      "wide"
+    ],
+    "workflow": "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_18.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson",
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.25,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82018,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mr. Enfield in <Picture 2>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a wide down the broad Sunday street as <Subject 1> and <Subject 2> walk at a walking pace east past the gas lamp on the near pavement. The camera is on the near pavement at head height behind the gas lamp; low sun from the LEFT. At the first frame the focus of the picture is the two walkers in the BOTTOM half at the CENTRE, <Subject 1> nearer and taller, <Subject 2> a step ahead and smaller. The gas lamp stands at the LEFT third the full height of the frame. Grey terraces fill the RIGHT third; plane trees shrink toward the CENTRE; pale sky fills the TOP quarter. The camera rises above the two walkers, looking down over the broad street and its plane trees across the whole shot as <Subject 1> walks with his head bowed, from 00:00 to 00:02. At 00:02 <Subject 2> swings his cane a step ahead of him, and the swing continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he walks with his head bowed. By 00:05 the camera is rising through the last frame, and the action continues with it, and a high view of the broad street, the two walkers small at the CENTRE on the near pavement, long shadows across the flagstones, the lamp top at the LEFT third.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 76.3,
+    "waited_s": 76.8,
+    "rel_path": "episodes/ep01/takes/r2v/T18.mp4"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "turn",
+    "setup": "walk_on_day",
+    "lane": "dialogue",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_19.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson",
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l16.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.75,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 82120,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mr. Enfield in <Picture 2>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot over the near shoulder and back of the head of <Subject 2> toward <Subject 1> as he stops and turns to him on the pavement. The camera is on the pavement at shoulder height behind <Subject 2>; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s gaunt face at the CENTRE, his head a third of the frame's height. <Subject 2>'s mid-grey shoulder and the back of his dove-grey top hat fill the LEFT third in the foreground. Grey terraces and black railings stand behind <Subject 1> at the RIGHT third. The camera keeps over <Subject 2>'s shoulder across the whole shot as <Subject 1> stops and turns to face <Subject 2>, from 00:00 to 00:04. <Subject 1> (S1), on screen, with a clipped English voice at an even pace, says: <d>[English] I want to ask the name of that man who walked over the child.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, <Subject 1> lifts his hand toward <Subject 2> as he asks, and the lift continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame, and <Subject 1> at the CENTRE facing the camera, hand raised, <Subject 2>'s shoulder at the LEFT third, the terraces at the RIGHT third.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 5.16,
+    "render_s": 72.0,
+    "waited_s": 72.5,
+    "rel_path": "episodes/ep01/takes/r2v/T19.mp4"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "answer",
+    "setup": "walk_on_day",
+    "lane": "dialogue",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_20.png"
+    ],
+    "faces": [
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l17.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.541667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82121,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> giving the name on the sunlit pavement. The camera is on the pavement at chest height, two paces off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s heavy jaw and lined face at the CENTRE, his head a third of the frame's height. His black-gloved hand grips the cane head in the BOTTOM third. A bare plane tree stands behind him at the LEFT third; grey terrace railings stretch along the RIGHT edge. The camera keeps a locked-off frame across the whole shot as <Subject 1> grimaces as he speaks, from 00:00 to 00:03. <Subject 1> (S1), on screen, with a clipped English voice at an even pace, says: <d>[English] It was a man of the name of Hyde.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his gloved hand grips the cane head. At 00:04 he glances back over his shoulder toward the RIGHT edge, and the movement continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame, with <Subject 1> now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 5.87,
+    "render_s": 74.4,
+    "waited_s": 75.5,
+    "rel_path": "episodes/ep01/takes/r2v/T20.mp4"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "reaction",
+    "setup": "walk_on_day",
+    "lane": "narration",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_21.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.708333,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 82223,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in a broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on a medium close shot on <Subject 1> taking in the name in silence. The camera is on the pavement at chest height, two paces off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s gaunt, rugged, unsmiling face at the CENTRE, his head a third of the frame's height. The six white buttons of his overcoat run down the BOTTOM third; a black iron railing crosses behind him at the LEFT third; long tree shadows stretch along the RIGHT edge. The camera tilts up from the gaunt to the rugged, across the whole shot as <Subject 1> lowers his head under the bowler brim, from 00:00 to 00:02. At 00:02 his eyes close for a breath, and the movement continues to the last frame of the shot. By 00:03 the camera is tilting up through the last frame, and the action continues with it, and <Subject 1> at the CENTRE, head lowered under the bowler brim, eyes shut, his chest risen under the six white buttons in the BOTTOM third, the railing at the LEFT third.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "batched_cures: warp",
+    "measured_seconds": 3.04,
+    "render_s": 45.3,
+    "waited_s": 46.6,
+    "rel_path": "episodes/ep01/takes/r2v/T21.mp4"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "payoff",
+    "setup": "walk_on_day",
+    "lane": "dialogue",
+    "sizes": [
+      "close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_22.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l18.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.625,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82123,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a close shot of <Subject 1> confessing what he knows. The camera is on the pavement at eye height, a pace off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s gaunt face at the CENTRE, his head half the frame's height, lank grey hair white at the sides under the black bowler hat. A grey stone terrace fills the RIGHT third behind him; sunlight falls from the LEFT edge onto his cheekbone. The camera keeps a locked-off frame across the whole shot as <Subject 1> turns his face toward the RIGHT edge, from 00:00 to 00:04. <Subject 1> (S1), on screen, with a clipped English voice at an even pace, says: <d>[English] I do not ask the other party's name. I know it already.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his brows draw down, then his hand lifts to his coat front, and the lift continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame, with <Subject 1>'s face now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 5.87,
+    "render_s": 74.4,
+    "waited_s": 75.0,
+    "rel_path": "episodes/ep01/takes/r2v/T22.mp4"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "friction",
+    "setup": "walk_on_day",
+    "lane": "dialogue",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_23.png"
+    ],
+    "faces": [
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l19.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.625,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82124,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> answering with sullen force. The camera is on the pavement at chest height, two paces off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s heavy jaw at the CENTRE, his head a third of the frame's height. His black walking cane angles across the BOTTOM third in his gloved hand. The gas lamp post stands behind him at the LEFT third; grey terraces recede at the RIGHT third. The camera keeps a locked-off frame across the whole shot as <Subject 1>'s heavy jaw tightens, from 00:00 to 00:04. <Subject 1> (S1), on screen, with a clipped English voice at an even pace, says: <d>[English] He has the key still. I saw him use it not a week ago.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, he jabs his cane back toward the west, then his lined face flushes, and the movement continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame, with <Subject 1> now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 5.87,
+    "render_s": 78.2,
+    "waited_s": 90.4,
+    "rel_path": "episodes/ep01/takes/r2v/T23.mp4"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "reaction",
+    "setup": "walk_on_day",
+    "lane": "narration",
+    "sizes": [
+      "medium_close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_24.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.708333,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 82226,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in a broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on a medium close shot on <Subject 1> sighing deeply beside the gas lamp post. The camera is on the pavement at chest height, two paces off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s gaunt, rugged, unsmiling face at the CENTRE, his head a third of the frame's height under the black bowler hat. The gas lamp post rises behind him at the LEFT third; a bare plane tree and grey terraces stand at the RIGHT third; his hand rests at his coat front in the BOTTOM third. The camera tilts up from the gaunt to the rugged, across the whole shot as <Subject 1>'s shoulders rise and fall in a deep sigh, from 00:00 to 00:02. At 00:02 he turns his face toward the RIGHT edge, and the turn continues to the last frame of the shot. By 00:03 the camera is tilting up through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "batched_cures: warp",
+    "measured_seconds": 3.04,
+    "render_s": 58.3,
+    "waited_s": 49.4,
+    "rel_path": "episodes/ep01/takes/r2v/T24.mp4"
+  },
+  {
+    "index": 25,
+    "shots": [
+      25
+    ],
+    "section": "runout",
+    "setup": "walk_on_day",
+    "lane": "dialogue",
+    "sizes": [
+      "close"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_25.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l20.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.708333,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 82126,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a close shot of <Subject 1> accepting the bargain. The camera is on the pavement at eye height, a pace off; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height. The pale grey band of his bowler crosses the TOP edge; a sunlit black railing stretches behind him at the LEFT third; grey stone fills the RIGHT third. The camera keeps a locked-off frame across the whole shot as <Subject 1> nods once as he speaks, from 00:00 to 00:02. <Subject 1> (S1), on screen, with a clipped English voice at an even pace, says: <d>[English] With all my heart, Richard.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, the corner of his unsmiling mouth softens. At 00:04 his hand reaches forward toward the BOTTOM RIGHT, and the reach continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame, with <Subject 1>'s face now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 5.16,
+    "render_s": 75.2,
+    "waited_s": 75.8,
+    "rel_path": "episodes/ep01/takes/r2v/T25.mp4"
+  },
+  {
+    "index": 26,
+    "shots": [
+      26
+    ],
+    "section": "reaction",
+    "setup": "walk_on_day_2",
+    "lane": "narration",
+    "sizes": [
+      "medium"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/gabriel_john_utterson/sheet_front.png",
+      "refs/characters/richard_enfield/sheet_front.png",
+      "episodes/ep01/storyboard/h3/shot_26.png"
+    ],
+    "faces": [
+      "gabriel_john_utterson",
+      "richard_enfield"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.708333,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 82127,
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mr. Enfield in <Picture 2>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in a broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on a medium two-shot on the near pavement as <Subject 1> and <Subject 2> shake hands under the gas lamp. The camera is on the pavement at head height, four paces off; low sun from the LEFT. At the first frame the focus of the picture is their two hands meeting at the CENTRE. <Subject 1> stands at the LEFT third, taller, his head a quarter of the frame's height; <Subject 2> stands at the RIGHT third, his head a fifth of the frame's height. The gas lamp post rises behind them at the LEFT edge; plane trees recede at the TOP RIGHT. The camera keeps a locked-off frame on the two men across the whole shot as <Subject 1>'s hand clasps <Subject 2>'s black-gloved hand, from 00:00 to 00:02. At 00:02 <Subject 2> lifts his chin toward <Subject 1>, and the lift continues to the last frame of the shot. By 00:03 the action of that shot continues through the last frame, with the two men now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 3.04,
+    "render_s": 49.9,
+    "waited_s": 50.7,
+    "rel_path": "episodes/ep01/takes/r2v/T26.mp4"
+  },
+  {
+    "index": 27,
+    "shots": [
+      27
+    ],
+    "section": "button",
+    "setup": "door_step_day",
+    "lane": "narration",
+    "sizes": [
+      "medium"
+    ],
+    "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+    "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+    "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep01/storyboard/h3/shot_27.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.875,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82128,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the pavement directly before the sinister door on the by-street. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot on the blistered door in its recess as a ragged tramp crouched on its top step strikes a match on its stained panel. The camera is on the pavement at head height, three paces from the steps; low sun from the LEFT. At the first frame the focus of the picture is a ragged tramp crouched whole in the door recess at the CENTRE, his patched brown coat, his knees and his boots on the top step, a battered cap pulled low, his raised arm striking a match on the stained door panel beside the bright brass keyhole plate. Three worn stone steps fill the BOTTOM third; the blind plaster wall fills the TOP third above the door. The camera pulls back from the crouching tramp, widening to show the whole door and its blind wall across the whole shot as the tramp drags the match along the panel, from 00:00 to 00:04. At 00:04 the flame flares and smokes beside the keyhole, and the movement continues to the last frame of the shot. By 00:07 the camera is pulling back through the last frame, and the action continues with it, and the whole blistered door at the CENTRE under the blind plaster wall, a fresh black streak on the panel, the match flame at the RIGHT third, the steps in the BOTTOM third.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "not current to its card",
+    "measured_seconds": 7.29,
+    "render_s": 91.7,
+    "waited_s": 92.7,
+    "rel_path": "episodes/ep01/takes/r2v/T27.mp4"
+  }
+]

@@ -137,9 +137,10 @@ def route_ok(shots: list[Shot]) -> bool:
     return True
 
 
-def cell(seg, shot: int, sub: int, path: float | None) -> dict:
-    """One drawable panel: the picture half of a shot or sub-shot, plus its place."""
-    return {"shot": shot, "sub": sub, "frame": seg.frame, "motion": seg.motion, "path": path,
+def cell(seg, shot: int, sub: int, path: float | None, extras: int | None = None) -> dict:
+    """One drawable panel: the picture half of a shot or sub-shot, plus its place.  `extras` is
+    the SHOT's count (a cut has none of its own): the setup's crowd is drawn only above zero."""
+    return {"extras": int(getattr(seg, "extras", 0) or 0) if extras is None else extras,"shot": shot, "sub": sub, "frame": seg.frame, "motion": seg.motion, "path": path,
             "faces": list(seg.faces), "size": seg.size, "camera": seg.camera, "at_rest": seg.at_rest,
             "end_frame": seg.end, "changed": seg.changed, "crowd": seg.crowd}
 
@@ -152,7 +153,7 @@ def segments(shots: list[Shot], setup: str) -> list[dict]:
             continue
         out.append(cell(shot, shot.index, 0, shot.path))
         for k, cut in enumerate(shot.cuts, start=1):
-            out.append(cell(cut, shot.index, k, cut.path if cut.path is not None else shot.path))
+            out.append(cell(cut, shot.index, k, cut.path if cut.path is not None else shot.path, shot.extras))
     return out
 
 
@@ -1196,12 +1197,26 @@ def people(crowd: str) -> bool:
     return bool(PEOPLE.search(crowd or ""))
 
 
-def crowd_block(setup: Setup) -> str:
+def declares_crowd(seg: dict) -> bool:
+    """A panel that may show the setup's crowd: its shot declares extras > 0.  A segment with no
+    `extras` key at all is a legacy hand-built one and keeps the crowd (the plan's cells carry it).
+    Extras are PEOPLE: a setup crowd that is moths or horses (`people`) needs no count."""
+    return "extras" not in seg or int(seg.get("extras") or 0) > 0
+
+
+def crowd_block(setup: Setup, segs: list[dict] | None = None) -> str:
     """The sheet-level half of the owner's "background folks having regular work"
-    -- stated only where the setup's crowd is people."""
+    -- stated only where the setup's crowd is people, and some panel of the sheet declares it
+    (extras > 0, or a crowd of its own): ep01's night door drew strangers into extras-0 shots.
+    On a sheet that mixes panels with and without it, "every panel" becomes "the panels below
+    that name them", so the extras-0 panels beside a declared one stay empty."""
     if not people(setup.crowd):
         return ""
-    return ("This is a public place in a working city and people fill it in every panel. The people behind "
+    holds = [declares_crowd(g) or bool(g.get("crowd")) for g in segs or []]
+    if segs is not None and not any(holds):
+        return ""
+    where = "every panel" if all(holds) else "the panels below that name them"
+    return (f"This is a public place in a working city and people fill it in {where}. The people behind "
             "the action are different people in different postures in every panel, a fresh group drawn for "
             "each panel. They are busy with their own business, their eyes on their own work. "
             # ep16 (2026-10-01): the grids filled the exodus crowds with COPIES
@@ -1219,7 +1234,7 @@ def crowd_clause(seg: dict, setup: Setup) -> str:
     ONCE, and closed once: the crowd's own full stop is stripped so the clause
     cannot print ".," (32 times across episode 9), and a frame that already
     carries the crowd sentence is not told it a second time."""
-    crowd = (seg.get("crowd") or setup.crowd or "").strip().rstrip(". ")
+    crowd = (seg.get("crowd") or (setup.crowd if declares_crowd(seg) or not people(setup.crowd) else "") or "").strip().rstrip(". ")
     # A CROWD IS PART OF THE PLACE, so it needs a panel wide enough to hold a
     # place -- the same ladder `places_the_plate` uses, for the reason stated
     # there: below it you are looking at a person, not at a place.  This used to
@@ -1485,7 +1500,7 @@ def prompt(segs: list[dict], setup: Setup, physical: dict[str, str], previous: b
               order_block(len(segs), ladder, setup, alts),
               references_block(setup, physical, props or []), setup.described, geometry_block(setup),
               wardrobe_block(setup, physical), props_block(props or []),
-              crowd_block(setup), panels_block(segs, route, setup),
+              crowd_block(setup, segs), panels_block(segs, route, setup),
               style_line(setup), wordless_law(props or []))
     return "\n\n".join(f"{head}\n{body}" for head, body in zip(BLOCKS, bodies) if body)
 
@@ -1514,7 +1529,7 @@ def single(seg: dict, setup: Setup, physical: dict[str, str], aspect: str = "9:1
               # the crowd needs room here for the same reason `crowd_clause` does:
               # a panel redrawn alone is still a panel, and a medium close on one
               # man's head has no street in it to fill with people
-              crowd_block(setup) if seg.get("size") in WIDE_ENOUGH else "",
+              crowd_block(setup, [seg]) if seg.get("size") in WIDE_ENOUGH else "",
               single_picture(seg, setup),
               style_line(setup), CONSTRAINTS)
     return "\n\n".join(f"{head}\n{body}" for head, body in zip(heads, bodies) if body)
@@ -1572,7 +1587,7 @@ def end_single(seg: dict, setup: Setup, physical: dict[str, str], aspect: str = 
     heads = ("FRAME", "REFERENCES", "LOCATION", "GEOMETRY", "WARDROBE", "BACKGROUND LIFE",
              "THE PICTURE", "STYLE", "CONSTRAINTS")
     bodies = (single_block(cv.words(aspect)), f"{start}\n{later}", setup.described,
-              geometry_block(setup), wardrobe_block(setup, physical), crowd_block(setup),
+              geometry_block(setup), wardrobe_block(setup, physical), crowd_block(setup, [seg]),
               f"The same frame as Image 1, one action later: {changed}.", style_line(setup), END_CONSTRAINTS)
     return "\n\n".join(f"{head}\n{body}" for head, body in zip(heads, bodies) if body)
 

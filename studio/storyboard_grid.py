@@ -192,10 +192,13 @@ def _one_picture(text: str) -> str:
 
 def _who_v2(who: list[str], extras: int) -> str:
     """Who is in it: the named, else the declared unnamed, else the place alone."""
+    noun = "person" if extras == 1 else "people"
+    if who and extras:
+        return f"In it: {'; '.join(who)}; and {extras} unnamed distant {noun}, none of them a named person."
     if who:
         return f"In it: {'; '.join(who)}."
     if extras:
-        return f"In it: {extras} unnamed {'person' if extras == 1 else 'people'}, none of them a named person."
+        return f"In it: {extras} unnamed {noun}, none of them a named person."
     return "It is a picture of the place alone: ground, growth, sky and built things."
 
 

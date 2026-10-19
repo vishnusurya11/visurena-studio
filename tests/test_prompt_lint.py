@@ -304,9 +304,13 @@ def test_plan_p11_and_p13():
 def test_plan_p13_covered_by_extras_or_setup_crowd():
     shot = {"frame": "Wide as a ragged tramp strikes a match", "extras": 1}
     assert pl.plan_faults(plan_of(**shot), ROWS) == []
-    plan = plan_of(frame="Wide as a ragged tramp strikes a match")
+    plan = plan_of(frame="Wide as a ragged tramp strikes a match", extras=1)
     plan["setups"]["s"]["crowd"] = "two tramps"
     assert pl.plan_faults(plan, ROWS) == []
+    # the setup's crowd covers a shot only when that shot declares extras (ep01 retro, P03)
+    plan = plan_of(frame="Wide as a ragged tramp strikes a match")
+    plan["setups"]["s"]["crowd"] = "two tramps"
+    assert "P13" in rules(pl.plan_faults(plan, ROWS))
 
 
 def test_plan_p17_over_the_shoulder():
