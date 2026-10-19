@@ -65,16 +65,41 @@ same Spark attention.  Owner 2026-10-17: "I like the face fix and quality update
 T22 wide warp excess +2.4/+3.3 against about -0.6), equal on close and medium: close sizes only."""
 WULI_SIZES = frozenset({"insert", "extreme_close", "close", "medium_close", "medium"})
 """The planned sizes a Wuli take may hold; one wide or full segment sends the take to Spark."""
+WIDE_DETAIL_BASE = SPARK_BASE + "_wide15_visurena"
+"""SPARK_BASE with 15 steps (sampler and Spark's warm-up counter) and the second turbo LoRA at
+0.4, not 0.7; beta already (face-blur PLAN fix #4, docs/audit/2026-10-19_face_blur/
+prevent_at_render.md D: H3 quality drops below about 15 steps, the turbo LoRA at 8-10 keeps
+texture loss, and a 25-60 px wide face is the first thing lost).  Unmeasured: OFF by default."""
+WIDE_DETAIL_STEPS = 15
 MODELS = {WULI_BASE: "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
           SPARK_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention",
+          WIDE_DETAIL_BASE: "MiniMax-H3 ref2va Singularity, 15-step + Ref2V LoRA 1.0/0.4 + Spark-H3 attention",
           ROLLBACK_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + CK attention"}
+
+
+def wide_detail_on(environ) -> bool:
+    """TAKE_WIDE_DETAIL=1 sends wide/full takes to WIDE_DETAIL_BASE.  OFF until the GPU bench
+    (arm A3, ep01 T01/T06) shows eye sharpness up and flicker not; ep01 measured its wide/full
+    sampling at 206 s for 4 takes, so ON costs about +3 min per episode (+6 with retakes)."""
+    return environ.get("TAKE_WIDE_DETAIL", "0") == "1"
+
+
+WIDE_DETAIL = wide_detail_on(os.environ)
 
 
 def workflow_for(card: dict) -> str:
     """The graph a take renders on, by its planned sizes (main session 2026-10-18):
-    every segment close..medium -> Wuli; any wide/full, or no sizes known -> Spark."""
+    every segment close..medium -> Wuli; no sizes known -> Spark; any wide/full -> Spark,
+    or the 15-step wide graph when WIDE_DETAIL is on."""
     sizes = card.get("sizes") or []
-    return WULI_BASE if sizes and set(sizes) <= WULI_SIZES else SPARK_BASE
+    if sizes and set(sizes) <= WULI_SIZES:
+        return WULI_BASE
+    return WIDE_DETAIL_BASE if sizes and WIDE_DETAIL else SPARK_BASE
+
+
+def steps_for(base: str) -> int:
+    """The sampler steps a graph is injected with: its Spark warm-up counter holds the same."""
+    return WIDE_DETAIL_STEPS if base == WIDE_DETAIL_BASE else STEPS
 
 
 def card_workflow(card: dict) -> str:
@@ -84,7 +109,7 @@ def card_workflow(card: dict) -> str:
 
 def by_model(jobs: list[tuple[dict, dict]]) -> list[tuple[dict, dict]]:
     """The run's takes grouped by graph, Wuli first, so each model loads once."""
-    order = (WULI_BASE, SPARK_BASE)
+    order = (WULI_BASE, SPARK_BASE, WIDE_DETAIL_BASE)
     rank = {name: k for k, name in enumerate(order)}
     return sorted(jobs, key=lambda job: rank.get(workflow_for(job[0]), len(order)))
 
@@ -617,7 +642,7 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
             "refs": [ref_name(book, p) for p in refs], "faces": faces, "ref_image_size": REF_IMAGE_SIZE,
             "anchors": anchors, "audio": [(p.name, a) for p, a in voice] or "silence",
             "width": W, "height": H, "fps": FPS, "placed_seconds": take["seconds"], "frames": take["frames"],
-            "seconds": round(take["frames"] / FPS, 2), "steps": STEPS,
+            "seconds": round(take["frames"] / FPS, 2), "steps": steps_for(workflow_for(route)),
             "seed": SEED_BASE + number * 1000 + first.index + 7919 * first.take, "prompt": prompt}
 
 
@@ -955,8 +980,9 @@ def card_pictures(c: dict, book: Path, number: int) -> list[Path]:
 
 def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") -> dict:
     boards = episode_home.boards_dir(book, number)
-    template, inject = load_workflow(base or workflow_for(c))
-    values = {"prompt": c["prompt"], "width": W, "height": H, "frames": c["frames"], "steps": STEPS,
+    graph_name = base or workflow_for(c)
+    template, inject = load_workflow(graph_name)
+    values = {"prompt": c["prompt"], "width": W, "height": H, "frames": c["frames"], "steps": steps_for(graph_name),
               "seed": c["seed"], "ref_image_size": c["ref_image_size"],
               "filename_prefix": f"ep_take_{c['index']:02d}"}
     paths = ref_paths(c, book, number)

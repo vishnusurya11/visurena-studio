@@ -493,7 +493,10 @@ with any wide or full segment, or a card with no sizes, renders on the Singulari
 with the turbo LoRA x2 (1.0/0.7) and Spark attention (`SPARK_BASE`): Wuli's line work boils on a
 small face (G-WARP S 4.13 / Se 7.22 on the Kawajiri W wide, against 2.65 / 3.12 on Spark).
 The run queues each model's takes together (`by_model`), so each loads once. Rollback:
-`ROLLBACK_BASE` (the CK 8-step) for every take. **H3 obeys direction, not amount.** It follows the cell and the
+`ROLLBACK_BASE` (the CK 8-step) for every take. `TAKE_WIDE_DETAIL=1` (OFF; face-blur fix #4,
+2026-10-19) sends wide/full takes to `WIDE_DETAIL_BASE`: Spark at 15 steps, second LoRA 0.4,
+about +3 min an episode on ep01's four wides; it stays off until bench arm A3 (T01, T06) shows
+eye sharpness up and flicker not. **H3 obeys direction, not amount.** It follows the cell and the
 camera verb; amounts, angles and negations are ignored.
 
 **Camera.**

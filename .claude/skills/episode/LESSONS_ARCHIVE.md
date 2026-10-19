@@ -1420,6 +1420,15 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
 - **A proof replay must not render a style the owner retired.** The first replay drew Hellsing ep01 cards; the
   owner stopped it. Replay the book's CURRENT look (the Kawajiri POC cards) or a neutral control, never the
   archived episode.
+- **A wide face is one token; more steps is the cheapest lever, and it waits for its bench** (2026-10-19,
+  face-blur PLAN fix #4). H3 draws a 768 take on a 24x24 grid of 32 px tokens, so a 25-60 px wide face is one
+  or two tokens and the 8-step distilled sampler loses its eye first (prevent_at_render.md, section D).
+  `takes_r2v.WIDE_DETAIL_BASE` is a NEW file beside Spark: steps 8 -> 15 in both the sampler and Spark's
+  warm-up counter (its run boundary is `steps`; a mismatch splits one sampling into two runs), second turbo
+  LoRA 0.7 -> 0.4, beta unchanged. Price from ep01's phases.jsonl: the four wide/full takes (T01, T06, T08,
+  T18) sampled 45 + 59 + 58 + 44 = 206 s at 8 steps, so 15 steps add about 180 s an episode, about 6 min
+  with a retake each. Behind `TAKE_WIDE_DETAIL=1`, OFF: a lighter LoRA may also loosen the camera the turbo
+  LoRA pinned, so the bench (A3) reads eye sharpness, flicker and G-WARP before it turns on.
 
 ## A book's look switched under a live series (Jekyll Kawajiri ep01, 2026-10-18)
 
