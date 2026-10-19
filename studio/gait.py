@@ -62,6 +62,23 @@ THINGS = re.compile(r"\b(?:sand|water|fire|flame|light|lamplight|glint|rain|swea
                     r"runs?\b", re.I)
 
 
+VERB = "in profile, a long stride, feet in the picture"
+"""The plan's cure for a shuffle (LESSONS): the walker framed so the gate can read his feet."""
+PACE = re.compile(r"\s*\b(?:at a (?:\w+ )?walking pace|a walking pace)\b", re.I)
+
+
+def gait_verb(motion: str) -> str:
+    """The motion with its FIRST pace phrase rewritten to VERB and later ones dropped; the camera
+    head and every other clause stay.  No pace phrase: the verb is added as a clause (Jekyll ep01 T01)."""
+    seen = []
+
+    def swap(_m) -> str:
+        seen.append(1)
+        return "" if len(seen) > 1 else " " + VERB
+    out = " ".join(PACE.sub(swap, motion or "").split()).replace(" ;", ";")
+    return out if seen else out.rstrip(" .") + f"; the walker goes {VERB}."
+
+
 def walks(motion: str) -> bool:
     """Whether the plan asks a subject to walk or run (the camera's own travel is not a walker)."""
     text = THINGS.sub(" ", CAMERA.sub(" ", motion or ""))

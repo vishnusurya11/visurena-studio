@@ -185,10 +185,24 @@ def timed_judge(ctx, read):
         return read()
 
 
+def signed_for(ctx, room: Path) -> Path | None:
+    """The eye verdict already signed for EXACTLY these takes' bytes (every sha8 equal to the verdict's
+    files) and not older than the owner's retry stamp; else None.  Re-entry keeps it: no eye read, no
+    duplicate audit row (ep01: the eye re-read 28 panels for 2 changed)."""
+    takes = takes_of(room)
+    if not takes or reset_since_verdict(ctx, takes) or not eye_verdict.passed(room, takes):
+        return None
+    return eye_verdict.path(room, eye_verdict.fingerprint(takes))
+
+
 def judge_takes(ctx, flag: str) -> Path:
     """The EYE_TAKES row: the take eye over the kept takes, the take ladder
-    under the ceiling, a still or keep_best at the end; signed in the judge's name."""
+    under the ceiling, a still or keep_best at the end; signed in the judge's name.
+    A verdict already signed for these bytes stands (signed_for)."""
     room = ctx.home / TAKES
+    if kept := signed_for(ctx, room):
+        print(f"EYE_TAKES: the signed verdict {kept.name} names these takes; kept, not re-judged", flush=True)
+        return kept
     plan = episode_home.load_plan(ctx.book_dir, ctx.number)
     return judged_gate.clear(
         ctx, GATE,

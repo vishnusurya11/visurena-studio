@@ -122,7 +122,7 @@ def test_a_take_that_passed_its_dq_is_refined_on_the_gpu_after_the_renders(tmp_p
 
 
 def test_a_take_with_a_dq_cure_is_retaken_not_refined(tmp_path):
-    w = World(tmp_path, faults={0: ["gait"]})
+    w = World(tmp_path, faults={0: ["rotation"]})
     w.shoot(Refines({0: 110.0, 1: 110.0}), early=True)
     refined = {int(a) for args in w.refines() for a in args if a.isdigit()}
     assert 0 not in refined and 1 in refined

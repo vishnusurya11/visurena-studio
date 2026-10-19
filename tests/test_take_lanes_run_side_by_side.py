@@ -114,32 +114,32 @@ def test_every_check_beside_a_render_is_cpu_only(tmp_path):
 
 
 def test_a_dq_fault_queues_its_retake_right_behind_the_first_renders(tmp_path):
-    w = World(tmp_path, faults={1: ["gait"]})
+    w = World(tmp_path, faults={1: ["rotation"]})
     w.shoot(early=True)
     first, retake = w.renders()
     assert not any(a.startswith("--retake") for a in first)
-    assert "--retake=1" in retake and any(a.startswith("--why=batched_cures: gait") for a in retake)
+    assert "--retake=1" in retake and any(a.startswith("--why=batched_cures: rotation") for a in retake)
     rounds = json.loads((w.room / take_ladder.LADDER_FILE).read_text())["rounds"]
-    assert len(rounds) == 1 and rounds[0]["early"] and rounds[0]["faults"] == {"1": ["gait"]}
+    assert len(rounds) == 1 and rounds[0]["early"] and rounds[0]["faults"] == {"1": ["rotation"]}
 
 
 def test_the_early_round_leaves_its_learning_like_any_rung(tmp_path):
-    w = World(tmp_path, faults={1: ["gait"]})
+    w = World(tmp_path, faults={1: ["rotation"]})
     learned = []
     w.shoot(w.ctx(learn=learned.append), early=True)
     assert [(l.gate, l.action, l.measured) for l in learned] == [("EYE_TAKES", "early_cures", 1)]
-    assert "gait" in learned[0].note
+    assert "rotation" in learned[0].note
 
 
 def test_a_retaken_take_is_checked_with_its_attempts(tmp_path):
-    w = World(tmp_path, faults={1: ["gait"]})
+    w = World(tmp_path, faults={1: ["rotation"]})
     w.shoot(early=True)
     again = [args for args in w.checks() if "1" in args and "--attempts" in args]
     assert again, w.checks()
 
 
 def test_the_early_round_is_one_round_however_many_jobs_carry_it(tmp_path):
-    w = World(tmp_path, faults={0: ["gait"], 2: ["gait"]})
+    w = World(tmp_path, faults={0: ["rotation"], 2: ["rotation"]})
     w.shoot(early=True)
     retaken = sorted(int(v) for args in w.renders()[1:] for a in args if a.startswith("--retake=")
                      for v in a.split("=", 1)[1].split(","))

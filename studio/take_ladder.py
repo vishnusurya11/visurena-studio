@@ -24,7 +24,7 @@ import re
 import time
 from pathlib import Path
 
-from studio import episode_home, episode_ref_official as ro, judged_gate, plan_gates, stillness, step_attempts, step_caps, take_leak
+from studio import audit_rows, episode_home, episode_ref_official as ro, gait, judged_gate, plan_gates, stillness, step_attempts, step_caps, take_leak, warp_gate
 from studio.judges import take_eye
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
@@ -86,11 +86,74 @@ def panel_clean(room: Path, index: int) -> bool:
     return any(r.get("shot") == index and r.get("passed") for r in rows if isinstance(r, dict))
 
 
-def cure_of(faults: list[Fault], panel_clean: bool = False) -> str:
+CURE_RATES_AS_OF = "2026-10-19"
+CURE_RATES = {("warp_se", "seed"): (0, 4), ("lag", "shorter_take"): (0, 15),
+              ("content", "replan_cell"): (3, 21), ("motion", "move_type"): (9, 10)}
+"""(hits, tries) per (fault class, cure), measured: warp_se = a warp over the Se wall alone (Jekyll ep01
+T21/T24 reseeds: 0 of 4 drawn after the stale-input retake); lag shorter_take 0/15 and content replan
+3/21 (ep13-ep21); move_type 89-100 % on frozen/held (9 of 10 kept as the floor).  Dated: a constant
+outlives its world, so the date is read by whoever refits it."""
+DEAD_BELOW, DEAD_TRIES = 0.20, 4
+
+
+def dead(cls: str, cure: str) -> bool:
+    """A (class, cure) under 20 % over 4+ tries is dropped for its class."""
+    hits, tries = CURE_RATES.get((cls, cure), (0, 0))
+    return tries >= DEAD_TRIES and hits / tries < DEAD_BELOW
+
+
+def warp_scores(fault: Fault) -> tuple[float | None, float | None]:
+    """(S, Se) of a warp fault: S is the row's value, Se is read from its note."""
+    se = re.search(r"\bSe (-?[\d.]+)", fault.note or "")
+    s = fault.evidence.get("value")
+    return (None if s is None else float(s)), (float(se.group(1)) if se else None)
+
+
+def warp_f2(taken: int) -> str:
+    """warp_gate's cure for a failing take (K6: today's two-argument form is the shim)."""
+    try:
+        return warp_gate.cure("fail", taken, None)
+    except TypeError:
+        return warp_gate.cure("fail", taken)
+
+
+def warp_cure(faults: list[Fault], taken: int) -> str:
+    """'seed' for a warp over the S wall not yet retaken; '' for an Se-only warp (its seed is dead) and
+    for what warp_gate sends to F2 (refine is not a take render)."""
+    own = [f for f in faults if f.kind == "warp"]
+    s, _se = warp_scores(own[0])
+    if s is not None and s <= warp_gate.FAIL_S and dead("warp_se", "seed"):
+        return ""
+    if all(f.evidence.get("repeated") for f in own):
+        return ""
+    return "seed" if warp_f2(taken) == "seed" else ""
+
+
+def gait_cure(faults: list[Fault]) -> str:
+    """'gait_verb' for a measured shuffle; '' for one not measured (feet out of frame: advisory) or
+    one whose identical signature already came back."""
+    own = [f for f in faults if f.kind == "gait"]
+    if any("not measured" in f.note or "unmeasured" in f.note for f in own):
+        return ""
+    return "" if all(f.evidence.get("repeated") for f in own) else "gait_verb"
+
+
+EARLY_S = 0.3
+
+
+def early_clones(faults: list[Fault]) -> bool:
+    """Every clone row lies in the first 0.3 s: the second face is the opening frames, a head cut."""
+    times = [f.evidence.get("t") for f in faults if f.kind == "clones"]
+    return bool(times) and all(t is not None and float(t) <= EARLY_S for t in times)
+
+
+def cure_of(faults: list[Fault], panel_clean: bool = False, taken: int = 0) -> str:
     """One cure for one take, from what its faults measure as curable.
     '' means no render buys anything: the terminal answers.  A content fault
     on a take whose panel passed content is render-borne: one seed."""
     kinds = {f.kind for f in faults}
+    if kinds == {"clones"} and early_clones(faults):
+        return "head_cut"                         # free: heads.json, tried before any render
     if panel_clean and kinds <= {"content", "clones"}:
         kinds = kinds - {"content", "clones"} | {"render-content"}
     if kinds & MOVABLE:
@@ -100,6 +163,10 @@ def cure_of(faults: list[Fault], panel_clean: bool = False) -> str:
     if "leak" in kinds and kinds - {"leak"} <= INPUT_BORNE and any(
             f.evidence.get("covers") for f in faults if f.kind == "leak"):
         return "head_cut"                         # free: heads.json
+    if "gait" in kinds:
+        return gait_cure(faults)
+    if "warp" in kinds:
+        return warp_cure(faults, taken)
     if kinds <= INPUT_BORNE or kinds & NEVER_SEED:
         return ""                                 # an uncovered leak has no render cure
     if all(f.evidence.get("repeated") for f in faults):
@@ -120,7 +187,7 @@ def route(verdict: Verdict, room: Path, try_i: int = 1) -> dict[str, dict[int, l
         kinds = {f.kind for f in fs}
         if try_i >= 2 and not progressed(room, i, sorted(kinds)) and not kinds <= FROZEN:
             continue        # a frozen take gets its second move type: G-DEAD never ships it (2026-10-14)
-        if cure := cure_of(fs, panel_clean=panel_clean(room, i)):
+        if cure := cure_of(fs, panel_clean=panel_clean(room, i), taken=attempts_of(room, i)):
             out.setdefault(cure, {})[i] = fs
         if cure != "head_cut" and any(f.kind == "leak" and f.evidence.get("covers") for f in fs):
             # FREE and independent of the render cure: ep24 T02 shipped at 0 with
@@ -131,7 +198,7 @@ def route(verdict: Verdict, room: Path, try_i: int = 1) -> dict[str, dict[int, l
 
 def renders_of(routed: dict[str, dict[int, list[Fault]]]) -> list[int]:
     """The takes a batched round actually re-renders."""
-    return sorted({i for cure in ("move_type", "seed") for i in routed.get(cure, {})})
+    return sorted({i for cure in ("move_type", "seed", "gait_verb") for i in routed.get(cure, {})})
 
 
 def signatures(verdict: Verdict) -> dict[str, list[str]]:
@@ -365,6 +432,20 @@ def move_type(doc: dict, index: int, faults: list[Fault]) -> dict:
     return doc
 
 
+def gait_edit(doc: dict, index: int) -> dict:
+    """The shot's pace phrase becomes the plan's verb; the camera head stays (studio.gait.gait_verb)."""
+    shot = shot_doc(doc, index)
+    shot["motion"] = gait.gait_verb(shot["motion"])
+    return doc
+
+
+def plan_cure(doc: dict, index: int, faults: list[Fault]) -> dict:
+    """The plan edit of an early or batched render cure: the plan's verb for a gait take, else its move."""
+    if any(f.kind == "gait" for f in faults) and not any(f.kind in CAUSE_OF for f in faults):
+        return gait_edit(doc, index)
+    return move_type(doc, index, faults)
+
+
 def built_for(record: dict) -> float:
     """The length a take was BUILT FOR: its record's placed seconds.  The file
     is frames_for(placed + HANDLE) long, so its measured seconds always exceed
@@ -509,7 +590,8 @@ def terminal(home: Path, plan, verdict: Verdict, order: list[int], cap: int = ST
     """The terminal rung over every take still faulted: a still from the
     passed panel on a narration shot with a HARD fault (cap, never
     adjacent); keep_best flagged high on a dialogue, turn or button shot or
-    a third still; keep_best flagged otherwise.  Never a park, never a drop."""
+    a third still; keep_best flagged otherwise.  Never a park, never a drop.
+    Every fault carries evidence['settled'] = still | keep_best | high (K5)."""
     by: dict[int, list[Fault]] = {}
     for f in verdict.faults:
         by.setdefault(index_of(f.where), []).append(f)
@@ -519,16 +601,88 @@ def terminal(home: Path, plan, verdict: Verdict, order: list[int], cap: int = ST
         stilled = stilled or outcome == "still"
         panel = f"storyboard/shot_{index:02d}.png" if outcome == "still" else ""
         faults += [f.model_copy(update={"severity": "high" if outcome == "high" else f.severity,
-                                        "evidence": {**f.evidence, **({"still": panel} if panel else {})}})
+                                        "evidence": {**f.evidence, "settled": outcome,
+                                                     **({"still": panel} if panel else {})}})
                    for f in own]
     return verdict.model_copy(update={"faults": faults, "terminal": "still" if stilled else "keep_best"})
 
 
-def terminal_for(ctx, plan):
-    """The `terminal` callable judged_gate.clear takes, over this episode."""
+def dropped_class(fault: Fault) -> str:
+    """The cure class the ladder dropped for this fault: an Se-only warp (its seed is dead) or a kind
+    the board owns; '' for a fault with a live cure."""
+    if fault.kind == "warp":
+        s, _se = warp_scores(fault)
+        return "warp_se" if s is not None and s <= warp_gate.FAIL_S and dead("warp_se", "seed") else ""
+    return fault.kind if fault.kind in INPUT_BORNE else ""
+
+
+def scores_of(fault: Fault) -> dict:
+    if fault.kind == "warp":
+        s, se = warp_scores(fault)
+        return {"S": s, "Se": se}
+    return {"value": fault.evidence.get("value")}
+
+
+def watch_rows(faults: list[Fault]) -> list[dict]:
+    """(take, class, scores) for every kept fault whose cure class was dropped: the owner's watch list."""
+    rows = [{"take": f.where, "class": dropped_class(f), "scores": scores_of(f)} for f in faults]
+    return [r for r in rows if r["class"]]
+
+
+def name_watch_list(ctx, verdict: Verdict) -> None:
+    """One audit row of the watch list; none when no take was kept with a dropped class."""
+    if rows := watch_rows(verdict.faults):
+        audit_rows.append(ctx.book_dir, {"unit": ctx.unit, "gate": GATE, "judge": verdict.signer, "terminal": "watch",
+                                         "faults": [{"kind": "watch", **r} for r in rows]})
+
+
+def swap_in(room: Path, index: int, best: Path, scored: dict) -> str:
+    """The best draw becomes T<nn>.mp4; the last draw is archived beside the others, nothing lost."""
+    current = Path(room) / f"T{index:02d}.mp4"
+    n = 1
+    while (archive := Path(room) / "attempts" / f"T{index:02d}_fail{n}.mp4").exists():
+        n += 1
+    last, won = scored[current], scored[best]
+    current.replace(archive)
+    best.replace(current)
+    if dq := won.get("dq"):
+        current.with_suffix(".dq.json").write_text(json.dumps(dq, indent=1), encoding="utf-8")
+    return (f"BEST DRAW T{index:02d}: restored (hard {won['hard']}, Se {won.get('Se')}) over the last draw "
+            f"(hard {last['hard']}, Se {last.get('Se')}); the last draw is {archive.name}")
+
+
+def best_draw(room: Path, index: int, runner) -> str:
+    """The draw with the fewest hard rows, then the lowest Se, restored to T<nn>.mp4; a tie keeps the
+    current take.  `runner(path)` measures one draw: {'hard': n, 'Se': x, 'dq': optional record}."""
+    current = Path(room) / f"T{index:02d}.mp4"
+    draws = sorted((Path(room) / "attempts").glob(f"T{index:02d}_fail*.mp4"))
+    if not draws:
+        return ""
+    scored = {p: runner(p) for p in [current, *draws]}
+    inf = float("inf")
+    best = min(scored, key=lambda p: (scored[p]["hard"], inf if scored[p].get("Se") is None else scored[p]["Se"],
+                                      p != current))
+    return "" if best == current else swap_in(room, index, best, scored)
+
+
+def keep_best_draws(ctx, verdict: Verdict, runner) -> None:
+    """Each faulted take keeps its best measured draw, said and logged."""
+    for index in sorted({index_of(f.where) for f in verdict.faults}):
+        if line := best_draw(Path(ctx.home) / TAKES, index, runner):
+            print(line, flush=True)
+            ctx.log(line, level="WARNING")
+
+
+def terminal_for(ctx, plan, draws=None):
+    """The `terminal` callable judged_gate.clear takes, over this episode.  `draws` is the injected
+    per-draw dq+warp runner (no GPU here); without it the last draw stands."""
     def end(verdict: Verdict) -> Verdict:
+        if draws:
+            keep_best_draws(ctx, verdict, draws)
         order = [take_eye.index_of(t) for t in sorted((ctx.home / TAKES).glob("T??.mp4"))]
-        return terminal(ctx.home, plan, verdict, order)
+        settled = terminal(ctx.home, plan, verdict, order)
+        name_watch_list(ctx, settled)
+        return settled
     return end
 
 
@@ -599,6 +753,7 @@ def under_cap(room: Path, wanted: dict[int, list[Fault]]) -> dict[int, list[Faul
     return {i: fs for i, fs in wanted.items() if attempts_of(room, i) < MAX_TAKE_ATTEMPTS}
 
 
+GATE = "EYE_TAKES"
 RETAKES = "retakes"
 """The cap-table row (and attempts.json key) of the episode's retake rounds."""
 
@@ -637,14 +792,24 @@ def still_curable(room: Path, verdict: Verdict, since: float = 0.0, home: Path |
     return bool(route(verdict, room, try_i=rounds_of(room, since) + 1))
 
 
-def head_cuts(ctx, wanted: dict[int, list[Fault]]) -> None:
-    """The leak measured is the head cut: heads.json through take_leak.write_head, no GPU."""
-    spoken = dialogue_shots(ctx.home)
+def head_cuts(ctx, wanted: dict[int, list[Fault]]) -> list[int]:
+    """The leak measured is the head cut: heads.json through take_leak.write_head, no GPU.
+    The takes whose head was written (a cut that covers the shot); a dialogue take is never cut."""
+    spoken, written = dialogue_shots(ctx.home), []
     for index in wanted:
         if index in spoken:
             continue        # its wav is anchored in the take's first frames (ep24 T02)
         dq = take_eye.read_json(ctx.home / TAKES / f"T{index:02d}.dq.json") or {}
-        take_leak.write_head(ctx.home, index, (dq.get("measures") or {}).get("leak"))
+        if take_leak.write_head(ctx.home, index, (dq.get("measures") or {}).get("leak")):
+            written.append(index)
+    return written
+
+
+def uncut_clones(routed: dict, written: list[int]) -> dict[int, list[Fault]]:
+    """Clone takes routed to a head cut that no covering head could be written for: they fall back to
+    the one seed a clean panel is owed."""
+    return {i: fs for i, fs in routed.get("head_cut", {}).items()
+            if i not in written and all(f.kind == "clones" for f in fs)}
 
 
 def dialogue_shots(home: Path) -> set[int]:
@@ -717,6 +882,84 @@ def retake(ctx, indices: list[int], why: str, flag: str, trims: list[int] | None
              *[str(i) for i in every])
 
 
+def wall() -> float:
+    return time.time()
+
+
+def renderable(routed: dict, room: Path, written: list[int]) -> dict[int, list[Fault]]:
+    """Every take this round would render: its move, seed or gait cure, and the early clones no head
+    could be cut for (one seed, on a panel that passed content)."""
+    out = {**routed.get("move_type", {}), **routed.get("seed", {}), **routed.get("gait_verb", {})}
+    return out | {i: fs for i, fs in uncut_clones(routed, written).items() if panel_clean(room, i)}
+
+
+def trimmed(ctx, routed: dict, renders: dict, records: dict) -> tuple[dict, list[int]]:
+    """The plan doc with the lag takes' timeline trims applied (free); a take whose length changed under
+    it joins `renders` to be rendered at its placed length.  The trimmed takes."""
+    doc, trims = json.loads((Path(ctx.home) / "plan.json").read_text(encoding="utf-8")), []
+    for index, faults in routed.get("timeline_trim", {}).items():
+        doc, action = shorten(doc, index, placed_seconds(ctx.home, index), built_for(records.get(index, {})))
+        if action == "restore":
+            renders[index] = faults
+        elif action == "shorten":
+            trims.append(index)
+    return doc, trims
+
+
+def affordable_subset(ctx, rung: Rung, renders: dict) -> dict[int, list[Fault]]:
+    """The takes the budget pays for, worst (most faults) first: a big batch is trimmed, not refused."""
+    order = sorted(renders, key=lambda i: (-len(renders[i]), i))
+    n = len(order)
+    while n and not can_afford(ctx, rung, n):
+        n -= 1
+    return {i: renders[i] for i in order[:n]}
+
+
+def batch_of(ctx, rung: Rung, renders: dict, room: Path, since: float) -> tuple[dict, str]:
+    """(the renders this round takes, why it takes fewer or none): the cap, the spent episode and the
+    price each say one reason instead of returning in silence."""
+    if not renders:
+        return {}, "no renders"
+    if rounds_of(room, since) >= ROUNDS_CAP:
+        return {}, "ROUNDS_CAP"
+    if refuse_spent(ctx, len(renders)):
+        return {}, "refuse_spent"
+    kept = affordable_subset(ctx, rung, renders)
+    if kept:
+        return kept, f"{len(kept)} of {len(renders)} takes afforded" if len(kept) < len(renders) else ""
+    return {}, f"unaffordable: {cost(rung, 1):.0f} s for one take, budget {ctx.budget.headroom():.0f} s"
+
+
+def write_edits(ctx, doc: dict, routed: dict, kept: dict, trims: list[int]) -> None:
+    """The plan edits of the takes that WILL render (a dropped take keeps its plan), written once."""
+    edited = False
+    for index, faults in routed.get("move_type", {}).items():
+        if index in kept:
+            doc, edited = move_type(doc, index, faults), True
+    for index in routed.get("gait_verb", {}):
+        if index in kept:
+            doc, edited = gait_edit(doc, index), True
+    if trims or edited:
+        episode_home.write_plan(Path(ctx.home) / "plan.json", doc)
+    if trims:                                           # free: re-placed now, re-MEASURED after the renders
+        ctx.run_script("scripts/episode/timeline.py", clock="timeline")
+
+
+def render_round(ctx, rung: Rung, kept: dict, trims: list[int], flag: str, verdict: Verdict, room: Path) -> float:
+    """ONE batched retake of `kept` (its round counted in the room's book); its wall seconds."""
+    why = why_of(rung.name, [f for fs in kept.values() for f in fs])
+    count_round(room, why, signatures(verdict))
+    began = wall()
+    retake(ctx, sorted(kept), why, flag, trims=trims)
+    return wall() - began
+
+
+def remeasure_trims(ctx, trims: list[int]) -> None:
+    """No render round: the trims still re-measure."""
+    if trims:
+        measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *[str(i) for i in sorted(trims)])
+
+
 def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judged_gate.Rungs:
     """The priced ladder and how a rung is taken for this episode."""
     records = records or {}
@@ -724,36 +967,21 @@ def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judge
     room = Path(ctx.home) / TAKES
     since = run_budget.clock_reset_epoch(ctx.home)       # a retry's fresh rounds
 
-    def take(rung: Rung, _try: int, verdict: Verdict) -> None:
-        """ONE batched round: free cures first (no render, no round), then the
-        union of renderable cures in a single retake."""
+    def take(rung: Rung, _try: int, verdict: Verdict) -> judged_gate.RungResult:
+        """ONE batched round: free cures first (no render, no round), then the union of renderable
+        cures in a single retake.  K11: changed only when bytes changed or a render ran."""
         routed = route(verdict, room, try_i=max(_try + 1, rounds_of(room, since) + 1))
         if not routed:
-            return
-        if leaks := routed.get("head_cut"):
-            head_cuts(ctx, leaks)                       # free: heads.json
-        renders = dict(routed.get("move_type", {})) | dict(routed.get("seed", {}))
-        path = Path(ctx.home) / "plan.json"
-        doc, trims = json.loads(path.read_text(encoding="utf-8")), []
-        for index, faults in routed.get("timeline_trim", {}).items():
-            doc, action = shorten(doc, index, placed_seconds(ctx.home, index),
-                                  built_for(records.get(index, {})))
-            if action == "restore":                     # length changed under it: render at the placed length
-                renders[index] = faults
-            elif action == "shorten":
-                trims.append(index)
-        for index, faults in routed.get("move_type", {}).items():
-            doc = move_type(doc, index, faults)         # a seed-routed take keeps its plan
-        if trims or routed.get("move_type"):
-            episode_home.write_plan(path, doc)
-        if trims:                                       # free: re-placed now, re-MEASURED after the
-            ctx.run_script("scripts/episode/timeline.py", clock="timeline")   # renders (one window)
-        if not renders or rounds_of(room, since) >= ROUNDS_CAP or refuse_spent(ctx, len(renders))                 or not can_afford(ctx, rung, len(renders)):
-            if trims:                                   # no render round: the trims still re-measure
-                measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json",
-                         *[str(i) for i in sorted(trims)])
-            return
-        why = why_of(rung.name, [f for fs in renders.values() for f in fs])
-        count_round(room, why, signatures(verdict))
-        retake(ctx, sorted(renders), why, flag, trims=trims)
+            return judged_gate.RungResult(False, "not routed")
+        written = head_cuts(ctx, routed.get("head_cut", {}))
+        renders = renderable(routed, room, written)
+        doc, trims = trimmed(ctx, routed, renders, records)
+        kept, why = batch_of(ctx, rung, renders, room, since)
+        write_edits(ctx, doc, routed, kept, trims)
+        free = f"head cut {len(written)}, trimmed {len(trims)}"
+        if not kept:
+            remeasure_trims(ctx, trims)
+            return judged_gate.RungResult(bool(written or trims), f"{free}; {why}")
+        seconds = render_round(ctx, rung, kept, trims, flag, verdict, room)
+        return judged_gate.RungResult(True, f"rendered {len(kept)} of {len(renders)}; {free}", seconds)
     return judged_gate.Rungs(LADDER, take, curable=lambda v: still_curable(room, v, since, home=ctx.home))

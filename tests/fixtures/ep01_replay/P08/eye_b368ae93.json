@@ -1,0 +1,191 @@
+{
+ "sha8": "b368ae93",
+ "verdict": "flagged",
+ "note": "gait at T01: shuffle: 4.1 steps/s, 0.030 heights a step over 0.12 heights/s HARD: the feet slide; warp at T07: fail: S -0.04 Se 4.16 over 100% tracked; over the wall [[4, 4], [9, 9]] HARD: the face is redrawn frame to frame; clones at T08: two faces read as one man (facenet 0.943); clones at T08: two faces read as one man (facenet 0.931); clones at T08: two faces read as one man (facenet 0.893); clones at T08: two faces read as one man (facenet 0.793); warp at T10: fail: S 0.52 Se 3.31 over 100% tracked; over the wall [[62, 62]] HARD: the face is redrawn frame to frame; warp at T15: fail: S 1.96 Se 4.4 over 100% tracked; over the wall [[4, 4], [44, 44], [47, 47], [50, 50], [53, 53], [56, 56], [59, 59], [116, 116], [119, 119], [122, 123], [125, 125], [128, 128], [131, 131]] HARD: the face is redrawn frame to frame; warp at T16: fail: S 0.13 Se 4.97 over 100% tracked; over the wall [[32, 32], [35, 35]] HARD: the face is redrawn frame to frame; warp at T19: fail: S 1.88 Se 3.22 over 100% tracked; over the wall [[2, 2], [11, 11], [14, 14], [26, 26], [29, 29], [41, 41], [47, 47]] HARD: the face is redrawn frame to frame; warp at T20: fail: S 0.81 Se 4.35 over 100% tracked; over the wall [[23, 23], [44, 44], [59, 59], [113, 113], [116, 116], [122, 122]] HARD: the face is redrawn frame to frame; warp at T21: fail: S 0.1 Se 3.55 over 100% tracked; over the wall [] HARD: the face is redrawn frame to frame; warp at T24: fail: S -0.64 Se 3.4 over 100% tracked; over the wall [] HARD: the face is redrawn frame to frame -> keep_best",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4",
+  "T25.mp4",
+  "T26.mp4",
+  "T27.mp4"
+ ],
+ "signed_at": "2026-10-19T05:49:27Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "gait",
+   "where": "T01",
+   "evidence": {
+    "value": 0.03,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "normal",
+   "note": "shuffle: 4.1 steps/s, 0.030 heights a step over 0.12 heights/s HARD: the feet slide"
+  },
+  {
+   "kind": "warp",
+   "where": "T07",
+   "evidence": {
+    "value": -0.04,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "normal",
+   "note": "fail: S -0.04 Se 4.16 over 100% tracked; over the wall [[4, 4], [9, 9]] HARD: the face is redrawn frame to frame"
+  },
+  {
+   "kind": "clones",
+   "where": "T08",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.943,
+    "by": "facenet",
+    "frame": 0
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.943)"
+  },
+  {
+   "kind": "clones",
+   "where": "T08",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.931,
+    "by": "facenet",
+    "frame": 1
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.931)"
+  },
+  {
+   "kind": "clones",
+   "where": "T08",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.893,
+    "by": "facenet",
+    "frame": 2
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.893)"
+  },
+  {
+   "kind": "clones",
+   "where": "T08",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.793,
+    "by": "facenet",
+    "frame": 4
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.793)"
+  },
+  {
+   "kind": "warp",
+   "where": "T10",
+   "evidence": {
+    "value": 0.52,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "normal",
+   "note": "fail: S 0.52 Se 3.31 over 100% tracked; over the wall [[62, 62]] HARD: the face is redrawn frame to frame"
+  },
+  {
+   "kind": "warp",
+   "where": "T15",
+   "evidence": {
+    "value": 1.96,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "normal",
+   "note": "fail: S 1.96 Se 4.4 over 100% tracked; over the wall [[4, 4], [44, 44], [47, 47], [50, 50], [53, 53], [56, 56], [59, 59], [116, 116], [119, 119], [122, 123], [125, 125], [128, 128], [131, 131]] HARD: the face is redrawn frame to frame"
+  },
+  {
+   "kind": "warp",
+   "where": "T16",
+   "evidence": {
+    "value": 0.13,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "normal",
+   "note": "fail: S 0.13 Se 4.97 over 100% tracked; over the wall [[32, 32], [35, 35]] HARD: the face is redrawn frame to frame"
+  },
+  {
+   "kind": "warp",
+   "where": "T19",
+   "evidence": {
+    "value": 1.88,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "fail: S 1.88 Se 3.22 over 100% tracked; over the wall [[2, 2], [11, 11], [14, 14], [26, 26], [29, 29], [41, 41], [47, 47]] HARD: the face is redrawn frame to frame"
+  },
+  {
+   "kind": "warp",
+   "where": "T20",
+   "evidence": {
+    "value": 0.81,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "fail: S 0.81 Se 4.35 over 100% tracked; over the wall [[23, 23], [44, 44], [59, 59], [113, 113], [116, 116], [122, 122]] HARD: the face is redrawn frame to frame"
+  },
+  {
+   "kind": "warp",
+   "where": "T21",
+   "evidence": {
+    "value": 0.1,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "normal",
+   "note": "fail: S 0.1 Se 3.55 over 100% tracked; over the wall [] HARD: the face is redrawn frame to frame"
+  },
+  {
+   "kind": "warp",
+   "where": "T24",
+   "evidence": {
+    "value": -0.64,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "normal",
+   "note": "fail: S -0.64 Se 3.4 over 100% tracked; over the wall [] HARD: the face is redrawn frame to frame"
+  }
+ ],
+ "terminal": "keep_best"
+}

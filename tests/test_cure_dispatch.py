@@ -71,3 +71,60 @@ def test_every_pre_existing_mapping_is_kept():
     }
     for row, want in rows.items():
         assert pc.cure_for(row) == want, (row, pc.cure_for(row))
+
+
+# ---- take-ladder cure dispatch (P08 item 4, cure rates dated 2026-10-19) --------------------
+
+from studio import take_ladder as tl  # noqa: E402
+from studio.judges.verdict import Fault  # noqa: E402
+
+
+def warp(s: float, se: float, **ev) -> Fault:
+    return Fault(kind="warp", where="T21", evidence={"value": s, **ev}, note=f"fail: S {s} Se {se} over 100% tracked")
+
+
+def test_an_se_only_warp_routes_to_nothing_its_seed_cure_is_dead():
+    assert tl.dead("warp_se", "seed")                              # 0 of 4: under 20 % over 4+ tries
+    assert tl.cure_of([warp(-0.64, 3.55)]) == ""
+
+
+def test_a_warp_over_the_s_wall_routes_to_a_seed():
+    assert tl.cure_of([warp(3.0, 1.0)]) == "seed"
+
+
+def test_a_warp_that_was_already_retaken_goes_to_f2_not_a_render():
+    assert tl.cure_of([warp(3.0, 1.0)], taken=2) == ""
+
+
+def test_a_live_class_is_not_dropped():
+    assert not tl.dead("motion", "move_type") and not tl.dead("nothing", "seed")
+
+
+def test_clones_on_a_clean_panel_route_to_one_seed():
+    clones = [Fault(kind="clones", where="T08", evidence={"frame": 4})]
+    assert tl.cure_of(clones, panel_clean=True) == "seed"
+    assert tl.cure_of(clones, panel_clean=False) == ""
+
+
+def test_clones_in_the_first_third_of_a_second_route_to_head_cut_first():
+    early = [Fault(kind="clones", where="T08", evidence={"t": 0.1}), Fault(kind="clones", where="T08", evidence={"t": 0.25})]
+    assert tl.cure_of(early, panel_clean=True) == "head_cut"
+    late = early + [Fault(kind="clones", where="T08", evidence={"t": 2.0})]
+    assert tl.cure_of(late, panel_clean=True) == "seed"
+
+
+def test_route_passes_the_takes_attempts_to_the_warp_cure(tmp_path):
+    from studio.judges.verdict import Verdict
+    room = tmp_path / "takes" / "r2v"
+    (room / "attempts").mkdir(parents=True)
+    v = Verdict(judge="take_eye", version="1", passed=False, confidence=1.0, reads=1, faults=[warp(3.0, 1.0)])
+    assert tl.route(v, room) == {"seed": {21: v.faults}}
+    for n in (1, 2):
+        (room / "attempts" / f"T21_fail{n}.mp4").write_bytes(b"x")
+    assert tl.route(v, room) == {}
+
+
+def test_an_early_clone_head_cut_with_no_head_falls_back_to_a_seed(tmp_path):
+    f = {8: [Fault(kind="clones", where="T08", evidence={"t": 0.1})]}
+    assert tl.uncut_clones({"head_cut": f}, written=[]) == f
+    assert tl.uncut_clones({"head_cut": f}, written=[8]) == {}

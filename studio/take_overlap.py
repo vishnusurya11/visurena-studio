@@ -41,7 +41,9 @@ REFINE_SCRIPT = "scripts/episode/face_refine.py"
 POLL_S = 5.0
 CPU_TRIES = 2
 WAIT_CAP = 7200.0
-RENDER_CURES = ("move_type", "seed")
+RENDER_CURES = ("move_type", "gait_verb", "seed")
+PLAN_CURES = ("move_type", "gait_verb")
+"""The render cures that edit the plan first (a gait take is given the plan's verb, P08)."""
 
 
 class Refines:
@@ -174,7 +176,7 @@ def cure_plan(home: Path, moves: dict[int, list[Fault]]) -> None:
     path = Path(home) / "plan.json"
     doc = json.loads(path.read_text(encoding="utf-8"))
     for index, faults in moves.items():
-        doc = take_ladder.move_type(doc, index, faults)
+        doc = take_ladder.plan_cure(doc, index, faults)
     episode_home.write_plan(path, doc)
 
 
@@ -283,7 +285,7 @@ class Shop:
         early round in ladder.json at LAUNCH, so a pause never strands one."""
         early = {i: self.cures.pop(i) for i in job.takes if i in self.cures}
         if early:
-            cure_plan(self.ctx.home, {i: fs for i, (cure, fs) in early.items() if cure == "move_type"})
+            cure_plan(self.ctx.home, {i: fs for i, (cure, fs) in early.items() if cure in PLAN_CURES})
             join_early(self.room, job.why, {str(i): sorted({f.kind for f in fs}) for i, (_, fs) in early.items()},
                        self.since)
             self.learn(job)

@@ -87,7 +87,7 @@ def early_of(faults: dict[str, list[str]]) -> frozenset[int]:
     out = set()
     for take, kinds in faults.items():
         dq = [Fault(kind=k, where=f"T{int(take):02d}") for k in kinds if k not in EYE_BORNE]
-        if dq and take_ladder.cure_of(dq) in ("move_type", "seed"):
+        if dq and take_ladder.cure_of(dq) in ("move_type", "gait_verb", "seed"):
             out.add(int(take))
     return frozenset(out)
 

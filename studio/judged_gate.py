@@ -28,9 +28,20 @@ from studio.judges.verdict import Verdict
 from studio.ladder import Ladder, Rung
 from studio.learnings import Learning
 
+
+@dataclass
+class RungResult:
+    """What one rung did (K11): `changed` is True when a take's bytes changed (a render, a trim, a
+    head cut) or a render was queued; `reason` says why when nothing did; `seconds` is the round's
+    wall clock.  Only a changed round is spent (retro B1; Jekyll ep01: two empty rounds at 0.0 s)."""
+    changed: bool
+    reason: str = ""
+    seconds: float = 0.0
+
+
 Judge = Callable[[], Verdict]
 Sign = Callable[[Verdict], Path]
-Take = Callable[[Rung, int, Verdict], None]
+Take = Callable[[Rung, int, Verdict], "RungResult | None"]
 Terminal = Callable[[Verdict], Verdict | None]
 
 LADDERS = "ladders"
@@ -159,6 +170,20 @@ def spend_round(ctx, gate: str, seconds: float) -> None:
         step_attempts.spend(home, cap.name, seconds=max(0.0, seconds))
 
 
+def idle(result, gate: str, rung: Rung) -> bool:
+    """A take that changed nothing is no round: its reason is said once and the climb ends.
+    `None` (the plan and panel ladders) keeps its old meaning: a round."""
+    if not isinstance(result, RungResult) or result.changed:
+        return False
+    print(f"NO ROUND {gate} {rung.name}: {result.reason or 'nothing changed'}", flush=True)
+    return True
+
+
+def round_seconds(result, elapsed: float) -> float:
+    """The round's wall clock: what the rung timed, else what the climb saw."""
+    return max(elapsed, result.seconds) if isinstance(result, RungResult) else elapsed
+
+
 def climbed(ctx, gate: str, judge: Judge, rungs: Rungs, terminal: str) -> tuple[Verdict, list[str]]:
     """The verdict as it stands, then after every rung taken; the rungs taken."""
     verdict, taken = valid(judge(), gate), []
@@ -171,9 +196,11 @@ def climbed(ctx, gate: str, judge: Judge, rungs: Rungs, terminal: str) -> tuple[
             break
         boundary.check(getattr(ctx, "home", None), f"{gate} before rung {rung.name} #{i + 1}")
         started = ctx.budget.clock()
-        rungs.take(rung, i, verdict)
+        result = rungs.take(rung, i, verdict)
+        if idle(result, gate, rung):
+            break
         taken.append(rung.name)
-        spend_round(ctx, gate, ctx.budget.clock() - started)
+        spend_round(ctx, gate, round_seconds(result, ctx.budget.clock() - started))
         ctx.learn(Learning(step=step_of(ctx), gate=gate, measured=len(verdict.faults),
                            action=rung.name, attempt=len(taken), note=verdict.summary(),
                            seconds=ctx.budget.clock() - started))
