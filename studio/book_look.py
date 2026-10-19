@@ -56,8 +56,20 @@ def atmosphere(book) -> str:
     return str(declared(book).get("atmosphere", "") or "").strip().rstrip(".").strip()
 
 
-ATMOSPHERE_GRID = " The air is thick with {atmosphere} in every frame, softening the far distance."
-"""The grid's atmosphere sentence: said as what the air holds, never as a blur asked for."""
+ATMOSPHERE_AIR = " The air is thick with {atmosphere} in every frame, softening the far distance."
+SOLID_FIGURES = (" The haze hangs behind the figures; every figure stays solid, sharp-edged and opaque"
+                 " to the frame edge.")
+ATMOSPHERE_GRID = ATMOSPHERE_AIR + SOLID_FIGURES
+"""The grid's atmosphere sentence: said as what the air holds, never as a blur asked for, and
+the haze BEHIND the figures (Jekyll ep01 shot 2, 2026-10-18: the body faded into the fog)."""
+
+DISSOLVING = re.compile(r"\b(?:dissolv\w*|fad(?:e|es|ed|ing)|transform\w*)\b", re.I)
+
+
+def dissolving(prose) -> bool:
+    """A shot whose prose says a figure dissolves, fades or transforms: the solid clause
+    would fight it, so that grid keeps the air sentence alone."""
+    return bool(DISSOLVING.search(prose or ""))
 
 
 DRAWN_GRID = ("DRAWN IN EXACTLY THE LOOK OF <image{{n}}>, copied from it and not invented: {lead} "
@@ -92,15 +104,26 @@ INTERIOR = re.compile(r"\b(?:room|rooms|bar|laboratory|corridor|chamber|cab|inte
 by the fire read as a place).  Its own list, so the take prompt's place word is untouched."""
 
 
-def grid_style(book, setup=None) -> str:
+def lead_for(book, setup=None) -> str:
+    """The look's lead; a DAY setup reads the optional `lead_day` when the book files one
+    (experimental, never the default -- a night lead drew a day square as dusk)."""
+    from studio.take_look import is_daylight
+    said = declared(book)
+    day = setup is not None and is_daylight(getattr(setup, "described", ""), getattr(setup, "outdoors", False))
+    return str((said.get("lead_day") if day and said.get("lead_day") else said.get("lead", "")) or "")
+
+
+def grid_style(book, setup=None, prose="") -> str:
     """The grid's style template in the book's look; '' keeps the house line.  The
-    atmosphere sentence is said only for a setup under the sky (`under_sky`)."""
+    atmosphere sentence is said only for a setup under the sky (`under_sky`); its
+    solid-figure clause is dropped for a grid whose `prose` dissolves a figure."""
     if not look_name(book):
         return ""
-    lead = declared(book).get("lead", "").strip().replace("{", "{{").replace("}", "}}")
+    lead = lead_for(book, setup).strip().replace("{", "{{").replace("}", "}}")
     air = atmosphere(book).replace("{", "{{").replace("}", "}}") if under_sky(setup) else ""
     line = (PHOTO_GRID if photoreal(book) else DRAWN_GRID).format(lead=lead)
-    return line + (ATMOSPHERE_GRID.format(atmosphere=air) if air else "")
+    said = ATMOSPHERE_AIR if dissolving(prose) else ATMOSPHERE_GRID
+    return line + (said.format(atmosphere=air) if air else "")
 
 
 def grid_medium(book) -> str:

@@ -108,3 +108,32 @@ def cut_room(grid: Path, row: dict, anchor: int, out: Path) -> Path:
     out.parent.mkdir(parents=True, exist_ok=True)
     panel.crop((left, top, left + side, top + side)).resize((SIDE, SIDE), Image.LANCZOS).save(out)
     return out
+
+
+PLACE_FLOOR = 0.5
+"""How well a re-cut room's background must agree with the old room's (studio.measure.place
+`prof_same` and `wings_same`) for the place to count as the same.  ep06's same-place wides
+measured +0.63..+0.84; a mirror or a re-dressed room reads below zero."""
+
+
+def same_place(new: Path, old: Path) -> bool:
+    """The re-cut room is the old room's place: agreeing backgrounds, and not its mirror."""
+    from studio.measure import place
+    read = place.versus(place.load(new), place.load(old))
+    return min(read["prof_same"], read["wings_same"]) >= PLACE_FLOOR and not place.mirrored(read)
+
+
+def recut_room(grid: Path, row: dict, anchor: int, out: Path) -> bool:
+    """Re-cut the room from the (repaired) anchor cell.  A place that matches the old room keeps
+    the OLD bytes -- touched fresh -- so the siblings' manifests, which hash them, stay valid
+    (Jekyll ep01 2026-10-18: one repaired cell restaged grids 13-17).  Else the new room
+    replaces it and the siblings follow.  True when the old room was kept."""
+    out = Path(out)
+    candidate = cut_room(grid, row, anchor, out.with_name(f"{out.stem}.recut.png"))
+    kept = out.exists() and same_place(candidate, out)
+    if kept:
+        candidate.unlink()
+        out.touch()
+    else:
+        candidate.replace(out)
+    return kept

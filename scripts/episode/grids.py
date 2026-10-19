@@ -71,10 +71,10 @@ PHOTO_NEGATIVE = ("text, caption, subtitles, watermark, signature, blurry, moder
 "beard on the narrator").  A book files its own words as `negative` in refs/look.json."""
 
 
-def look_for(book: Path, setup=None) -> dict:
+def look_for(book: Path, setup=None, prose: str = "") -> dict:
     """The grid prompt's look kwargs: {} keeps the house style (book_look.grid_style);
-    the book's atmosphere only for a setup under the sky."""
-    style = book_look.grid_style(book, setup)
+    the book's atmosphere only for a setup under the sky, solid figures unless a shot dissolves."""
+    style = book_look.grid_style(book, setup, prose)
     return {"style": style, "medium": book_look.grid_medium(book)} if style else {}
 
 
@@ -457,7 +457,7 @@ def built(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
     here = ep.setups[shots[0].setup]
     text = compose(version, blocks, cols, rows, (place_slots, here.described), cast, style_slot, props,
                    room=room_slot, geometry=place_words(here), light=getattr(here, "light", "") or "",
-                   **look_for(book, here))
+                   **look_for(book, here, " ".join(body_of(s) for s in shots)))
     return text, slots, cast
 
 

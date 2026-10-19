@@ -90,7 +90,7 @@ def room_wanted(ctx, rows: list[dict], row: dict, shots: list[dict]) -> bool:
 
 def cut_room(ctx, row: dict, shots: list[dict]) -> None:
     anchor = grid_room.anchor_shot(shots, row["setup"])
-    grid_room.cut_room(grid_path(ctx, row), row, anchor, grid_room.room_path(ctx.home, row["setup"]))
+    grid_room.recut_room(grid_path(ctx, row), row, anchor, grid_room.room_path(ctx.home, row["setup"]))
 
 
 def rendered(ctx) -> bool:
