@@ -54,7 +54,10 @@ def test_unknown_tier_is_loud():
 def test_resolve_tier_returns_provider_and_model():
     resolved = llm.resolve_tier("workhorse")
     assert resolved["model"]
-    assert "api_key_env" in resolved["provider_config"]
+    # DECISIONS 2026-10-07: every tier runs on the Claude Agent SDK under the
+    # subscription, so the provider carries a billing mode, not an API key env.
+    assert resolved["provider"] == "claude-sdk"
+    assert resolved["provider_config"]["billing"] == "subscription"
 
 
 # --- structured() contract ---
@@ -158,7 +161,8 @@ def test_invalid_shape_output_is_retried():
 
 def test_resolve_tier_carries_params():
     resolved = llm.resolve_tier("workhorse")
-    assert resolved["params"].get("reasoning_effort") == "none"  # Luna quirk, in config
+    # Model quirks live in models.yaml; on claude-sdk (DECISIONS 2026-10-07) the knob is `effort`.
+    assert resolved["params"].get("effort") == "low"
 
 
 def test_model_kwargs_includes_params():

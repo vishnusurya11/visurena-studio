@@ -100,7 +100,7 @@ class TestTier:
         from studio.llm import resolve_tier
         resolved = resolve_tier(canon.TIER)
         assert canon.TIER == "canon"
-        assert resolved["params"].get("reasoning_effort") == "high"
+        assert resolved["params"].get("effort") == "high"  # claude-sdk knob, DECISIONS 2026-10-07
 
 
 class TestAsk:
