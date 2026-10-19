@@ -454,9 +454,9 @@ def flagged_line(rows: list[dict]) -> str:
 
 
 def flagged_reason(library: Path, codex: str, unit: str) -> str:
-    """The inbox reason of a flagged unit, with its flagged takes (work_r2v/flagged_takes.json, K7)."""
+    """The inbox reason of a flagged unit, with its flagged takes (takes/work/flagged_takes.json, K7)."""
     book = library_paths.book_folder(library, codex)
-    rows = lp_json(book / "episodes" / unit / "work_r2v" / "flagged_takes.json") if book else None
+    rows = lp_json(book / "episodes" / unit / "takes" / "work" / "flagged_takes.json") if book else None
     line = flagged_line([r for r in rows if isinstance(r, dict)] if isinstance(rows, list) else [])
     return f"{FLAGGED_REASON} · {line}" if line else FLAGGED_REASON
 

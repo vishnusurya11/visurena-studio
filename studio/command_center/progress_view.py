@@ -409,8 +409,8 @@ def with_made(steps: list[dict], made: dict[str, dict]) -> list[dict]:
 
 
 def flagged_takes(home: Path) -> list[dict]:
-    """work_r2v/flagged_takes.json (contract K7), [] while step 09 has not written it."""
-    rows = lp.cached_json(Path(home) / "work_r2v" / "flagged_takes.json")
+    """takes/work/flagged_takes.json (contract K7), [] while step 09 has not written it."""
+    rows = lp.cached_json(Path(home) / "takes" / "work" / "flagged_takes.json")
     return [r for r in rows if isinstance(r, dict)] if isinstance(rows, list) else []
 
 

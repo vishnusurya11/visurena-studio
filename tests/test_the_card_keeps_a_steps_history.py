@@ -87,8 +87,9 @@ def test_a_band_past_the_hard_stop_is_said_so():
 
 
 def test_the_flagged_takes_are_read_from_the_k7_file(tmp_path):
-    (tmp_path / "work_r2v").mkdir()
-    (tmp_path / "work_r2v" / "flagged_takes.json").write_text(
+    # assemble writes it to episode_home.work_dir: takes/work/ (work_r2v is a retired room)
+    (tmp_path / "takes" / "work").mkdir(parents=True)
+    (tmp_path / "takes" / "work" / "flagged_takes.json").write_text(
         json.dumps([{"take": "T07", "shot": 7, "seconds_in_master": 2.0, "severity": "high"}]), encoding="utf-8")
     assert [r["take"] for r in pv.flagged_takes(tmp_path)] == ["T07"]
     assert pv.flagged_takes(tmp_path / "nope") == []

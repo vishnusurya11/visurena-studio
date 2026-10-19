@@ -1,6 +1,6 @@
 """The inbox row of a unit that shipped with flags says how many takes ship flagged and for how
 many seconds of the master (Jekyll Kawajiri ep01: 9 flagged takes shipped and the owner's only
-line was `shipped with flags, not acknowledged`).  Reads work_r2v/flagged_takes.json (K7).  $0."""
+line was `shipped with flags, not acknowledged`).  Reads takes/work/flagged_takes.json (K7), where assemble writes it.  $0."""
 from __future__ import annotations
 
 import json
@@ -11,7 +11,7 @@ CODEX = "20260827135504"
 
 
 def _library(tmp_path, rows):
-    room = tmp_path / f"{CODEX}_a-book" / "episodes" / "ep01" / "work_r2v"
+    room = tmp_path / f"{CODEX}_a-book" / "episodes" / "ep01" / "takes" / "work"
     room.mkdir(parents=True)
     if rows is not None:
         (room / "flagged_takes.json").write_text(json.dumps(rows), encoding="utf-8")
