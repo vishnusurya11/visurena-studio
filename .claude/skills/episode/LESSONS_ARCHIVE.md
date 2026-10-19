@@ -1604,6 +1604,17 @@ away` or a wide / extreme_wide / establishing size is exempt; over-the-shoulder 
 face-visible panel with no face read is a miss; an empty denominator is unmeasurable, never a pass.
 Replays: C1 ep25 regrid 2/2 PASS, ep25 round 0 0/1 FAIL, ep27 study_table 3/3 PASS.
 
+- **G-WARP (moved 2026-10-19, face-blur round 2, to keep the mandatory read in budget).** ep01:
+  all 8 hard fails (T07 T10 T15 T16 T19 T20 T21 T24) were Se-only (Se 3.2-5.0, S -0.64..1.96).
+  Replication on the Kawajiri POC: C 0.98/-0.89 pass (prototype 0.98/-0.90), W 2.30/3.04 fail
+  (2.65/3.12), M 1.57/2.08 warn (1.30/1.64 pass: the swap between two men reads higher here; M goes
+  to F2, ~100 s).
+- **identity (G4.7) (moved 2026-10-19).** From 2026-09-25 (4c5f14c) to 2026-10-14 it read "not
+  measured" on every take: the sheets were never handed in. Replay with sheets
+  (`docs/audit/2026-10-14_jekyll_ep01_hel_v2/identity_replay.*`): it would refuse 23 of 118 shipped
+  WotW ep19-27 face takes and 37 of 97 Scarlet ep08-14 (STRANGER on stylised, turned or small
+  faces; walk-ons) and 2 of 10 Jekyll HEL v1.
+
 ## Jekyll Kawajiri ep01 retro (2026-10-19; 15 code packages P01-P15, docs P16)
 
 The run: `episodes/ep01/cut/master_iter1.mp4`, 2026-10-18 22:54 PDT, 3,348 frames, QC passed with
@@ -1870,3 +1881,51 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   writes a `none_found` that stands); a clock cut over a stale `no_faces` row keeps its refund.
 - Tests: `tests/test_face_refine_judges_a_push_in_by_its_smallest_face.py`, `tests/test_face_refine_reaches_every_soft_face.py`, `tests/test_face_track_holds_the_crop_still.py`,
   `tests/test_face_detect_finds_anime_faces.py`.
+
+## The face refine, round 2 (face-blur round 2, 2026-10-19)
+
+- **A measure fitted on one style reads nothing on another.** Round 1's eye sharpness (Laplacian
+  variance of the eye band) scored every refine 0.6-0.77x its take, the owner-liked old F2 crops
+  too: cel inking holds less high-frequency energy than a take's smear and hatching. The drawn-eye
+  score (`studio/face_eye.py`: compact dark pupils in the eye band, written before round 1's
+  numbers were read) ranks the refine above the take on the owner's three named faces (T13, T26
+  x2, T06 Enfield) and on 7 of the 8 the bench read by eye (T01 Enfield is the miss); the
+  Laplacian ranked 2 of 8. Logged, never a wall: one episode, no owner labels.
+- **The seam refused faces the eye liked, and the measure was right.** T01 x2 and T07's child
+  (30-38 px) sit in 96 px windows floored 2.6-3.2 faces wide; the redraw repainted the background
+  (shop panes into brick, the railing erased) and the 8 % feather pasted all of it. The fix is the
+  paste (a soft head mask under 40 px), and the seam now measures what the paste does outside the
+  head; through the old feather it reads 0.41-0.58 of the old band seam on all 15 rows, so the wall
+  moved 18 -> 10 with every verdict unchanged.
+- **Identity on cel is CCIP's.** facenet read T01 Utterson 0.04 on his own take. CCIP (ONNX,
+  imgutils' preprocessing ported; dghs-imgutils pins numpy<2 and is not installed) read the refined
+  crops 0.011-0.064 to their own sheet and 0.152-0.324 to the other person's; clip_vision_h
+  overlapped (0.770 own vs 0.852 another's). CCIP rules; facenet and clip refuse only together.
+- **Colour re-acquire: against the latest head, relative, one sample wide.** Against a track's
+  FIRST head the Lab colour overlapped (same p5 0.70, other p90 0.80); at the eleven real
+  re-acquires the same person read 0.48-1.00 and another 0.46-0.89, so no line splits them. The
+  rule is relative (at least as like its own latest head as any rival present, >= 0.4), and a rival
+  is someone within one sample: 12 frames wide, the child's own later piece out-read her on T07.
+- **A body never lengthens a face track.** A body-estimated face (0.100 x the person's height,
+  p10-p90 0.086-0.164) moved Utterson's T01 track onto Enfield 60 px below; weak faces alone gave
+  T06's Hyde his frames 0-17. Bodies make only far figures (< 24 px, >= 1 s, no face near): none
+  on ep01's 9 takes; the two 13-frame ones were T07's child from behind and an unnamed figure.
+- **The grid may trim, a little.** H3 renders 17k+5 frames; a life a few frames over the grid is
+  trimmed at its fades (<= 8 frames and a quarter of the life) instead of rendering 16 more; T07's
+  10-frame child kept 22. With the hysteresis span (on < 120, off > 150 px) the 9 bench takes'
+  matched crops went 1,707 -> 1,673 frames.
+- **Moved here from GATES.md (2026-10-17 gate):** Kawajiri POC W (2026-10-18): change 12.3 (the old
+  echo 0.0), identity 0.33 -> 0.32 (Hyde's sheet; Utterson's and Enfield's read -0.02-0.23 on the
+  same crops), faces 1/1 (the old summed count read 6 vs 3: the sharper face was found in more
+  frames), KEPT. Calibrated on F2 (kept by eye: flicker ratio 0.81-0.95) against F3 (refused by
+  eye: 1.15-1.32), three takes. ep01 10-18 rows: seam 11.7-12.9, flicker ratio 0.70-0.90. ep01 T01
+  had no row on the 10-18 run because only `warp` might fail and T01 failed `gait`.
+- **Moved here from SKILL.md:** the tracker samples every 3rd frame, cuts tracks at hard cuts,
+  median-smooths the centre over 21 frames and the size over 51 (ComfyUI-H3-FaceRefine's ideas);
+  denoise 0.45 at 60 px, +0.05 per halving, 0.40-0.55; ep01: 11 takes, 1,512 s priced; a
+  `no_faces` row of the old 60 px wall is owed a new look, its jobless round refunded.
+- Tests: `tests/test_face_track_keeps_its_subject.py`, `tests/test_face_track_falls_back_on_the_body.py`,
+  `tests/test_face_refine_pastes_a_small_face_softly.py`, `tests/test_face_refine_reads_a_drawn_eye.py`,
+  `tests/test_face_refine_reads_anime_identity.py`, `tests/test_face_refine_gate_round_two.py`,
+  `tests/test_face_refine_runs_round_two.py`, `tests/test_face_detect_answers_weak_faces_and_bodies.py`
+  (fixture `tests/fixtures/face_blur_round1_rows.json`).

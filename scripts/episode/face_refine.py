@@ -5,12 +5,15 @@ architecture/decisions/2026-10-17-face-refine.md; every soft face, 2026-10-19).
     uv run python scripts/episode/face_refine.py <codex_id> <n> [take ...] [--within=takes]
 
 For each take with a planned face that its dq lets ship (studio/face_refine.selected):
-every face is tracked (face_yolov8m.pt in a worker, MTCNN behind it; studio/face_detect.py),
-each track whose smallest face is under 120 px matched to the take's staged cast by
-identity against the sheets and the plan's side, and each person's crop re-rendered
-through H3 with ONLY that person's sheet at a denoise that follows the face's size
-(studio/face_refine.WORKFLOW, denoise_for).  Each refined crop is gated -- identity
-against the sheet, seam, flicker, face count -- and the decision per take lands in
+every face is tracked (face_yolov8m.pt in a worker, MTCNN behind it; studio/face_detect.py;
+weak faces only continue a track, a far figure the face model misses comes from its body,
+a lost face re-acquires only its own head), each track whose smallest face is under 120 px
+matched to the take's staged cast by identity against the sheets and the plan's side, and
+each person's crop -- its soft span with hysteresis, on H3's grid inside its shot, one frozen
+side -- re-rendered through H3 with ONLY that person's sheet at a denoise that follows the
+face's size (studio/face_refine.WORKFLOW, denoise_for).  Each refined crop is gated --
+identity against the sheet (facenet, and CCIP + clip_vision_h in a worker,
+studio/anime_id.py), seam, flicker, drift, face count; drawn eyes logged -- and the decision per take lands in
 takes/r2v/refine.json (`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`,
 `cut`); a refused crop falls back to the unrefined take.  Assemble pastes the kept crops
 at cut scale, then the one upscale (studio/face_paste.py).
@@ -27,14 +30,14 @@ import shutil
 import subprocess
 import sys
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import numpy as np  # noqa: E402
 
-from studio import episode_clock, episode_home, face_detect, face_gate, face_track, face_refine as fr  # noqa: E402
+from studio import episode_clock, episode_home, face_detect, face_gate, face_paste, face_track, face_refine as fr  # noqa: E402
 from studio import step_attempts, step_caps  # noqa: E402
 from studio.face_paste import sha8  # noqa: E402
 
@@ -42,7 +45,19 @@ TAKES = Path("takes") / "r2v"
 DOC = "refine.json"
 OUT = "refine"
 GATE_SAMPLES = 6
+ID_SAMPLES = 4
+"""Crops per side the anime identity terms read (round 1's calibration: 4 + 4 and the sheet;
+1.2 s of GPU or 7.5 s of CPU a face)."""
 SIDE = 768
+REACQUIRE_FLOOR = 0.4
+"""A lost face is re-acquired only by a head whose Lab colour (hist_similarity) reads at least as
+much like the track's LATEST head as like any other person's present then, and over this floor.
+ep01 round 1's eleven re-acquires: the same person 0.48-1.00 against the latest head, another
+person present 0.46-0.89 -- no single line splits them (T07's child 0.48, T01's Utterson 0.68), and
+against the track's FIRST head they overlapped wider (same p5 0.70, other p90 0.80)."""
+RIVAL_GAP = face_track.EVERY
+"""Another track is a rival at frame t when it holds a face within one sample of t: someone present
+then.  Wider (12), the child's own later piece on ep01 T07 out-read her and she lost her track."""
 
 
 # ---- what is owed --------------------------------------------------------------------
@@ -166,12 +181,42 @@ def read_frames(path: Path) -> list[np.ndarray]:
     return out
 
 
+class Same:
+    """same(track, box, t, others): the head at `box` on frame `t` reads at least as much like the
+    track's latest head as like any rival's (another track with a face near `t`), and over the
+    floor: the check a lost track re-acquires its own face by (Lab colour of the head and hat)."""
+
+    def __init__(self, frames: list[np.ndarray]):
+        self.frames = frames
+
+    def likeness(self, track: list, head: np.ndarray, t: int) -> float:
+        t0, b0 = min(track, key=lambda d: abs(d[0] - t))
+        return face_track.hist_similarity(head, head_of(self.frames[t0], b0))
+
+    def __call__(self, track: list, b, t: int, others=()) -> bool:
+        head = head_of(self.frames[t], b)
+        own = self.likeness(track, head, t)
+        rivals = [self.likeness(o, head, t) for o in others if min(abs(u - t) for u, _ in o) <= RIVAL_GAP]
+        return own >= REACQUIRE_FLOOR and own >= max(rivals, default=-1.0)
+
+
+def take_tracks(frames: list[np.ndarray], dets: dict, cuts: list[int], same=None) -> tuple[list[list], list[str]]:
+    """(tracks, their sources): strong faces linked, weak faces continuing them, missed stretches
+    stitched, cut at the hard cuts; then far figures from bodies alone.  A body never lengthens a
+    face track (ep01 T01: a body-estimated face moved Utterson's track onto Enfield; weak faces
+    alone gave T06's Hyde his frames 0-17)."""
+    h, w = frames[0].shape[:2]
+    strong, weak = face_track.by_strength(dets, face_detect.CONF)
+    bodies = face_track.body_faces(face_track.persons_of(dets), w, h)
+    faces = face_track.rescue(face_track.link(strong, same=same), weak, same=same)
+    faces = face_track.keep(face_track.split(face_track.stitch(faces, same), cuts))
+    far = face_track.keep(face_track.split(face_track.body_only(bodies, faces), cuts))
+    return faces + far, ["face"] * len(faces) + ["body"] * len(far)
+
+
 def tracks_of(frames: list[np.ndarray], dets: dict) -> list[list]:
-    """Every face's track over the take (detections on every EVERY-th frame), its missed
-    stretches stitched, cut at the take's hard cuts, a detector flicker dropped."""
-    boxes = {int(t): [tuple(f["box"]) for f in found] for t, found in dets.items()}
-    joined = face_track.stitch(face_track.link(boxes))
-    return face_track.keep(face_track.split(joined, cut_frames(frames)))
+    """Every face's track over the take (take_tracks at the take's own hard cuts)."""
+    return take_tracks(frames, dets, cut_frames(frames), Same(frames))[0]
 
 
 def cut_frames(frames: list[np.ndarray]) -> list[int]:
@@ -181,13 +226,14 @@ def cut_frames(frames: list[np.ndarray]) -> list[int]:
     return [c for c in scene_cuts(frames) if 0 < c < len(frames)]
 
 
-def soft_tracks(work, tracks: list[list]) -> list[list]:
-    """The tracks the refine works on (smallest face under SMALL_FACE_PX); when there are
-    none the take's status says why: no face found, or every face already reads."""
-    soft = face_track.small(tracks, fr.SMALL_FACE_PX)
-    if not soft:
+def soft_tracks(work, tracks: list[list], sources: list[str] | None = None) -> tuple[list[list], list[str]]:
+    """The tracks the refine works on (smallest face under SMALL_FACE_PX) and their sources; when
+    there are none the take's status says why: no face found, or every face already reads."""
+    sources = sources or ["face"] * len(tracks)
+    keep = [k for k, tr in enumerate(tracks) if face_track.track_px(tr) < fr.SMALL_FACE_PX]
+    if not keep:
         work.status = "all_readable" if tracks else "none_found"
-    return soft
+    return [tracks[k] for k in keep], [sources[k] for k in keep]
 
 
 def head_of(rgb: np.ndarray, box) -> np.ndarray:
@@ -209,17 +255,32 @@ def band_face(rgb: np.ndarray):
     return cx - side / 2, y2 - side, cx + side / 2, y2
 
 
-def sheet_face(book: Path, sheet: str, detect, embed, loose=None):
-    """(face vector, head crop) of the largest face on a sheet -- facenet, else the
-    loose detector, else the head band's face; (None, None) unread."""
+def sheet_box(book: Path, sheet: str, detect, loose=None):
+    """(the sheet's pixels, its largest face box) -- facenet, else the loose detector, else the
+    head band's face; the box is None when the sheet holds no figure."""
     from PIL import Image
     from studio.measure import faces
     rgb = np.asarray(Image.open(Path(book) / sheet).convert("RGB"))
     found = detect(rgb) or (loose(rgb) if loose else [])     # a drawn child's face can need the loose one
-    box = faces.largest(found)["box"] if found else band_face(rgb)
+    return rgb, (faces.largest(found)["box"] if found else band_face(rgb))
+
+
+def sheet_face(book: Path, sheet: str, detect, embed, loose=None):
+    """(face vector, head crop) of the largest face on a sheet; (None, None) unread."""
+    rgb, box = sheet_box(book, sheet, detect, loose)
     if box is None:
         return None, None
     return embed(rgb, box), head_of(rgb, box)
+
+
+def sheet_window(rgb: np.ndarray, box) -> np.ndarray:
+    """The sheet cut the way a take's window is cut round its face (face_track.windows): what the
+    anime identity terms compare the crops with."""
+    side = int(min(face_track.height(box) * face_track.MARGIN, rgb.shape[0], rgb.shape[1]))
+    cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2 - 0.05 * side
+    x = int(np.clip(cx - side / 2, 0, rgb.shape[1] - side))
+    y = int(np.clip(cy - side / 2, 0, rgb.shape[0] - side))
+    return rgb[y:y + side, x:x + side]
 
 
 def identity(track: list, frames, sheet, embed) -> float:
@@ -311,6 +372,11 @@ class Job:
     """The graph's SaveVideo node: the only output that is the render."""
     denoise: float = fr.DENOISE
     face_px: float = 0.0
+    life: tuple | None = None
+    """The frames the crop is pasted over (the soft span inside the crop); None = the track's life."""
+    soft: bool = False
+    source: str = "face"
+    lost: int = 0
 
 
 @dataclass
@@ -320,6 +386,30 @@ class TakeWork:
     frames: list
     jobs: list = field(default_factory=list)
     status: str = "refined"
+    cuts: list = field(default_factory=list)
+
+
+@dataclass(frozen=True)
+class Run:
+    """One soft face's crop: its frames, the life it is pasted over, its frozen windows."""
+    start: int
+    frames: int
+    life: tuple
+    side: int
+    windows: list
+    face_px: float
+    soft: bool
+
+
+def run_of(track: list, frames: int, width: int, height_: int, cuts: list[int]) -> Run:
+    """The face's soft span (hysteresis), on H3's grid inside its shot, one side for the run."""
+    span = face_track.soft_span(track, frames, fr.SMALL_FACE_PX) or face_track.life(track)
+    start, n = face_track.crop_span(span, frames, cuts)
+    life = (max(span[0], start), min(span[1], start + n - 1))
+    boxes = face_track.fill(track, frames)
+    side = face_track.frozen_side(boxes, life, width, height_)
+    px = round(float(np.median(boxes[life[0]:life[1] + 1, 3] - boxes[life[0]:life[1] + 1, 1])), 1)
+    return Run(start, n, life, side, face_track.windows(boxes, width, height_, side), px, face_paste.soft(px))
 
 
 def queue_take(book: Path, number: int, index: int, card: dict, engine, loose, detect, embed, find) -> TakeWork:
@@ -327,7 +417,8 @@ def queue_take(book: Path, number: int, index: int, card: dict, engine, loose, d
     room = room_of(book, number)
     take = room / f"T{index:02d}.mp4"
     work = TakeWork(index, sha8(take), read_frames(take))
-    tracks = soft_tracks(work, tracks_of(work.frames, find(take, work.frames)))
+    work.cuts = cut_frames(work.frames)
+    tracks, sources = soft_tracks(work, *take_tracks(work.frames, find(take, work.frames), work.cuts, Same(work.frames)))
     if not tracks:
         return work
     refs = [str(r) for r in card.get("refs", [])]
@@ -335,29 +426,34 @@ def queue_take(book: Path, number: int, index: int, card: dict, engine, loose, d
     if not matched:
         work.status = "no_cast"
     for k, person in sorted(matched.items()):
-        work.jobs.append(queue_person(room, book, card, work, k, person, tracks[k], engine))
+        work.jobs.append(queue_person(room, book, card, work, k, person, tracks[k], engine, sources[k]))
     return work
 
 
-def queue_person(room: Path, book: Path, card: dict, work: TakeWork, k: int, person, track, engine) -> Job:
+def queue_person(room: Path, book: Path, card: dict, work: TakeWork, k: int, person, track, engine,
+                 source: str = "face") -> Job:
     h, w = work.frames[0].shape[:2]
-    wins = face_track.windows(face_track.fill(track, len(work.frames)), w, h)
-    start, n = face_track.crop_span(face_track.life(track), len(work.frames))
+    run = run_of(track, len(work.frames), w, h, work.cuts)
     out = room / OUT
     out.mkdir(parents=True, exist_ok=True)
     stem = f"T{work.index:02d}_p{k}"
-    crop = write_video(crop_frames(work.frames, wins, start, n), out / f"{stem}_src.mp4")
+    crop = write_video(crop_frames(work.frames, run.windows, run.start, run.frames), out / f"{stem}_src.mp4")
     names = {"crop": engine.stage(crop), "sheet": engine.stage(Path(book) / person.sheet),
-             "audio": engine.stage(silence(n / 24, out / f"{stem}_guide.wav"))}
-    px = round(float(np.median([face_track.height(b) for _, b in track])), 1)
-    graph = graph_for(person, card["prompt"], n, take_seed(room, card, work.index) + person.k, names,
-                      f"face_refine/{stem}_{work.sha}", fr.denoise_for(px))
-    job = Job(k, person, track, wins, start, n, engine.submit(graph), save=fr.saved_node(graph),
-              denoise=fr.denoise_for(px), face_px=px)
-    episode_home.write_json(out / f"{stem}.json", {"windows": [list(v) for v in wins],
-                                                    "life": list(face_track.life(track)), "start": start,
-                                                    "frames": n, "who": person.who, "denoise": job.denoise})
+             "audio": engine.stage(silence(run.frames / 24, out / f"{stem}_guide.wav"))}
+    graph = graph_for(person, card["prompt"], run.frames, take_seed(room, card, work.index) + person.k, names,
+                      f"face_refine/{stem}_{work.sha}", fr.denoise_for(run.face_px))
+    job = Job(k, person, track, run.windows, run.start, run.frames, engine.submit(graph), save=fr.saved_node(graph),
+              denoise=fr.denoise_for(run.face_px), face_px=run.face_px, life=run.life, soft=run.soft, source=source,
+              lost=face_track.lost(track))
+    episode_home.write_json(out / f"{stem}.json", track_doc(job, run))
     return job
+
+
+def track_doc(job: Job, run: Run) -> dict:
+    """The track file assemble pastes from (studio/face_paste.kept_tracks)."""
+    return {"windows": [list(v) for v in run.windows], "life": list(run.life), "start": run.start,
+            "frames": run.frames, "who": job.person.who, "denoise": job.denoise, "face_px": run.face_px,
+            "side": run.side, "soft": run.soft, "source": job.source, "lost": job.lost}
 
 
 # ---- collecting and gating ------------------------------------------------------------
@@ -376,29 +472,49 @@ def sampled(seq: list, n: int = GATE_SAMPLES) -> list:
     return [seq[int(i)] for i in np.linspace(0, len(seq) - 1, min(n, len(seq)))] if seq else []
 
 
-def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None) -> dict:
-    """The person's measures, the decision and the row refine.json keeps."""
+def to768(crops: list[np.ndarray]) -> list[np.ndarray]:
     import cv2
-    life, side = face_track.life(job.track), face_track.side_of(job.windows)
+    return [cv2.resize(np.ascontiguousarray(f), (SIDE, SIDE), interpolation=cv2.INTER_LANCZOS4) for f in crops]
+
+
+def anime_terms(anime, book: Path, job: Job, src_w: list, ref768: list, detect, loose=None) -> dict:
+    """CCIP and clip_vision_h of the sheet's face window against ID_SAMPLES take and refined crops;
+    every term None when no reader runs or the sheet holds no figure."""
+    unread = dict.fromkeys(("ccip_src", "ccip_ref", "clip_src", "clip_ref"))
+    if anime is None:
+        return unread
+    rgb, box = sheet_box(book, job.person.sheet, detect, loose)
+    said = anime(sheet_window(rgb, box) if box is not None else None, to768(sampled(src_w, ID_SAMPLES)),
+                 sampled(ref768, ID_SAMPLES))
+    return said or unread
+
+
+def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None, anime=None) -> dict:
+    """The person's measures, the decision and the row refine.json keeps."""
+    life, side = job.life or face_track.life(job.track), face_track.side_of(job.windows)
     refined = read_frames(job.out)
     src_w = face_gate.at_side(face_gate.windows_of(work.frames, job.windows, life), side)
     ref_w = face_gate.shrunk(refined, job.start, life, side)
-    src768 = [cv2.resize(np.ascontiguousarray(f), (SIDE, SIDE), interpolation=cv2.INTER_LANCZOS4) for f in sampled(src_w)]
-    ref768 = sampled([refined[t - job.start] for t in range(life[0], life[1] + 1) if 0 <= t - job.start < len(refined)])
+    ref768 = [refined[t - job.start] for t in range(life[0], life[1] + 1) if 0 <= t - job.start < len(refined)]
     vec, _ = sheet_face(book, job.person.sheet, detect, embed, loose)
     stem = f"T{work.index:02d}_p{job.k}"
     moved = face_gate.change(sampled(read_frames(job.out.with_name(f"{stem}_src.mp4"))), sampled(refined))
-    m = face_gate.measure(src_w, ref_w, src768, ref768, vec, detect, embed, moved)
+    m = face_gate.measure(src_w, ref_w, to768(sampled(src_w)), sampled(ref768), vec, detect, embed, moved,
+                          job.face_px / side, job.soft)
+    boxes = face_gate.face_boxes(face_track.fill(job.track, len(work.frames)), job.windows, life, side)
+    m = replace(m, **face_gate.extras(src_w, ref_w, boxes), **anime_terms(anime, book, job, src_w, ref768, detect, loose))
     kept, why = fr.decide(m)
     return {"who": job.person.who, "crop": f"{OUT}/{stem}.mp4", "track": f"{OUT}/{stem}.json", "kept": kept,
-            "why": why, "measures": m.__dict__, "frames": job.frames, "denoise": job.denoise, "face_px": job.face_px}
+            "why": why, "measures": m.__dict__, "frames": job.frames, "denoise": job.denoise, "face_px": job.face_px,
+            "soft": job.soft, "source": job.source, "lost": job.lost}
 
 
-def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, seconds: float, loose=None) -> dict:
+def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, seconds: float, loose=None,
+                anime=None) -> dict:
     people = []
     for job in work.jobs:
         collect(room, work, job, engine)
-        people.append(gate_job(book, work, job, detect, embed, loose))
+        people.append(gate_job(book, work, job, detect, embed, loose, anime))
     status = work.status if not people else ("refined" if any(p["kept"] for p in people) else "unrefined")
     entry = {"status": status, "take_sha8": work.sha, "people": people, "decided": stamp(),
              "gpu_s_priced": round(fr.price(len(work.jobs), len(work.frames)), 1), "seconds": round(seconds, 1)}
@@ -441,10 +557,12 @@ def frame_finder(loose):
 
 
 def refine(book: Path, number: int, indices: list[int] | None, *, engine=None, detect=None, loose=None,
-           embed=None, find=None, within: str = "") -> dict:
+           embed=None, find=None, within: str = "", anime=None) -> dict:
     """Queue every owed take's crops as it is tracked, then gate each take in order."""
     if detect is None:
+        from studio import anime_id
         loose, detect, embed, find = detectors()
+        anime = anime or anime_id.Reader()
     find, engine, room = find or frame_finder(loose), engine or Comfy(), room_of(book, number)
     cards = {int(c["index"]): c for c in read(room / "prompts.json", [])}
     out = {}
@@ -452,8 +570,9 @@ def refine(book: Path, number: int, indices: list[int] | None, *, engine=None, d
         queued = queue_within_wall(book, number, pending(book, number, indices), cards, engine,
                                    (loose, detect, embed, find))
         for began, work in queued:
-            out[work.index] = decide_take(room, book, work, detect, embed, engine, time.time() - began, loose)
+            out[work.index] = decide_take(room, book, work, detect, embed, engine, time.time() - began, loose, anime)
             count_if_worked(episode_home.home(book, number), work)
+    getattr(anime, "close", lambda: None)()
     return out
 
 

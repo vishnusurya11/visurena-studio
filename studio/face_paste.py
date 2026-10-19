@@ -24,6 +24,18 @@ FADE = 4
 """Frames over which a track's paste fades in and out at the ends of its life."""
 FEATHER_SHARE = 0.083
 """Feather width as a share of the pasted side (F2 at master scale: 24 px of 288)."""
+SOFT_PX = 40.0
+"""A face under this many take pixels is pasted through the soft head mask: its window is floored
+at face_track.MIN_SIDE (96 / 2.4 = 40), so it holds more background than its margin, and the H3
+redraw repaints that background (round 1: T01's shop panes became brick, T07's railing went;
+docs/audit/2026-10-19_face_blur/bench).  The community recipe: a soft feathered mask, no
+sharpening before the paste."""
+HEAD_RADII = (0.7, 1.0)
+"""The head the soft mask keeps whole, in face heights (x, y): face, hair and hat crown."""
+HEAD_LIFT = 0.15
+"""The head's centre sits this many face heights above the face's (the hat)."""
+SOFT_OUT = 1.8
+"""The soft mask falls from 1 at the head's edge to 0 at 1.8 head radii (smoothstep)."""
 
 
 @dataclass(frozen=True)
@@ -32,6 +44,7 @@ class Track:
     life: tuple[int, int]    # first and last take frame the face is seen
     start: int               # the take frame the refined crop's frame 0 is
     crop: str                # the refined crop video
+    face: float | None = None  # a soft track's face height as a share of its window; None = the feather
 
 
 @dataclass(frozen=True)
@@ -80,6 +93,43 @@ def feather(side: int, f: int) -> np.ndarray:
     if side > 2 * f:
         m[f:-f, f:-f] = 1.0
     return cv2.GaussianBlur(m, (0, 0), max(f / 2, 0.5))[..., None]
+
+
+def soft(face_px: float | None) -> bool:
+    """A face pasted through the soft head mask (SOFT_PX)."""
+    return face_px is not None and face_px < SOFT_PX
+
+
+def head_shape(side: int, face: float) -> tuple[float, float, float, float]:
+    """(cx, cy, rx, ry) of the head in a window of `side` holding a face `face` px high: the face
+    sits at 0.55 of the side (studio/face_track.windows), the head's centre HEAD_LIFT above it."""
+    return side / 2, 0.55 * side - HEAD_LIFT * face, HEAD_RADII[0] * face, HEAD_RADII[1] * face
+
+
+def head_radius(side: int, face: float) -> np.ndarray:
+    """Every pixel's elliptic radius from the head's centre, 1 on the head's edge."""
+    cx, cy, rx, ry = head_shape(side, face)
+    yy, xx = np.mgrid[0:side, 0:side].astype(np.float32)
+    return np.sqrt(((xx - cx) / max(rx, 1e-6)) ** 2 + ((yy - cy) / max(ry, 1e-6)) ** 2)
+
+
+def head_mask(side: int, face: float) -> np.ndarray:
+    """(side, side) bool: inside the head."""
+    return head_radius(side, face) <= 1.0
+
+
+def soft_mask(side: int, face: float) -> np.ndarray:
+    """(side, side, 1) float: 1 on the head, a smoothstep down to 0 at SOFT_OUT head radii, held
+    to the window's own feather so its edge is always 0."""
+    t = np.clip((head_radius(side, face) - 1.0) / (SOFT_OUT - 1.0), 0.0, 1.0)
+    m = (1.0 - t * t * (3.0 - 2.0 * t))[..., None]
+    return (m * feather(side, max(4, round(side * FEATHER_SHARE)))).astype(np.float32)
+
+
+def paste_mask(side: int, face: float | None) -> np.ndarray:
+    """The mask a crop of `side` px is pasted through: the soft head mask for a soft track's face
+    (`face` px high at this side), else the feather."""
+    return soft_mask(side, face) if face else feather(side, max(4, round(side * FEATHER_SHARE)))
 
 
 def blend(frame: np.ndarray, patch: np.ndarray, x: int, y: int, mask: np.ndarray, alpha: float) -> None:
@@ -153,7 +203,7 @@ class Paster:
                 continue
             x, y, s = to_master(track.windows[t], span.guard, *self.size, self.factor)
             patch = cv2.resize(np.ascontiguousarray(patch), (s, s), interpolation=cv2.INTER_AREA)
-            blend(out, patch, x, y, feather(s, max(4, round(s * FEATHER_SHARE))), alpha)
+            blend(out, patch, x, y, paste_mask(s, track.face * s if track.face else None), alpha)
 
     def reader(self, crop: str):
         if crop not in self.readers:
@@ -172,6 +222,11 @@ def sha8(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:8] if Path(path).exists() else ""
 
 
+def face_share(doc: dict) -> float | None:
+    """A soft track's face height over its frozen side; None (the feather) for a hard or old one."""
+    return float(doc["face_px"]) / float(doc["side"]) if doc.get("soft") and doc.get("side") else None
+
+
 def kept_tracks(entry: dict, room: Path) -> tuple:
     """The Track of every person the gate kept in one take's refine entry."""
     out = []
@@ -179,7 +234,7 @@ def kept_tracks(entry: dict, room: Path) -> tuple:
         if p.get("kept"):
             doc = json.loads((Path(room) / p["track"]).read_text(encoding="utf-8"))
             out.append(Track([tuple(w) for w in doc["windows"]], tuple(doc["life"]), int(doc["start"]),
-                             str(Path(room) / p["crop"])))
+                             str(Path(room) / p["crop"]), face_share(doc)))
     return tuple(out)
 
 

@@ -69,13 +69,14 @@ def test_the_crop_span_is_on_h3s_grid_and_inside_the_take():
 
 
 def test_a_span_at_the_tail_slides_back_inside_the_take():
-    a, n = ft.crop_span((150, 191), 192)
-    assert a + n == 192 and a <= 150
+    a, n = ft.crop_span((140, 191), 192)
+    assert a + n == 192 and a <= 140
 
 
 def test_a_span_longer_than_an_off_grid_take_shrinks_onto_the_grid():
+    """The frames the grid cannot hold are trimmed from both ends of the life, where the paste fades."""
     a, n = ft.crop_span((0, 99), 100)
-    assert (a, n) == (0, 90)
+    assert (a, n) == (5, 90)
 
 
 def test_colour_histograms_tell_a_black_hat_from_a_brown_one():

@@ -82,7 +82,7 @@ def test_an_error_answer_raises():
 def test_the_worker_runs_isolated_on_the_weights_on_disk(tmp_path):
     argv = fd.worker_argv(Path("py.exe"), Path("w.pt"), "cpu")
     assert argv[:2] == ["py.exe", "-I"] and argv[2].endswith("face_detect_worker.py")
-    assert argv[3:] == ["w.pt", "cpu", str(fd.CONF), str(fd.THREADS)]
+    assert argv[3:] == ["w.pt", "cpu", str(fd.LOW_CONF), str(fd.THREADS)]   # weak faces too, round 2
     assert fd.weights_path(Path("C:/portable")).parts[-4:] == ("models", "ultralytics", "bbox", "face_yolov8m.pt")
 
 

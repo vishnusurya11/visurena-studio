@@ -8,6 +8,13 @@ A track's boxes are interpolated over its life and held at its ends; the centre 
 median-smoothed over 21 frames and the size over 51 (ComfyUI-H3-FaceRefine, Carasibana,
 MIT: the ideas ported, nothing installed), so the window sits still and follows a
 push-in slowly without ever pumping.
+
+Round 2 (2026-10-19, docs/audit/2026-10-19_face_blur/PLAN_FINAL.md section 1a): a track never
+jumps to another person -- a detection joins it only at its own size, and once it has LOST its
+face it re-acquires only a head `same` reads as its own (Lab colour of the head and hat); a weak
+detection only continues a face (`rescue`); the refine runs where the face is soft, with
+hysteresis (`soft_span`; VideoFaceDetailer's idea); the crop side is frozen per run
+(`frozen_side`); the crop stays inside its shot and on H3's 17k+5 grid (`crop_span`).
 """
 from __future__ import annotations
 
@@ -59,11 +66,32 @@ def reach(b: Box) -> float:
     return max(JUMP_FLOOR, JUMP_FACES * height(b))
 
 
-def extend(tracks: list[list], live: list[int], t: int, found: list[Box]) -> list[int]:
-    """Give each detection at frame `t` to its nearest live track in reach, else a new track."""
+SIZE_JUMP = 1.5
+"""A face at more than 1.5x (or under 1/1.5) the track's last height is another person's
+(ep01 T01: Utterson 36 px beside Enfield's top hat; a push-in grows a few % per sample)."""
+
+
+def same_size(a: Box, b: Box) -> bool:
+    ha, hb = max(height(a), 1e-6), max(height(b), 1e-6)
+    return max(ha, hb) / min(ha, hb) <= SIZE_JUMP
+
+
+def fits(track: list, b: Box, t: int, same=None, others=()) -> bool:
+    """`b` at frame `t` can be this track's face: in reach, at its size, and -- once the track
+    has lost its face for a sample or more -- its own head by `same(track, b, t, others)`, the
+    other tracks being the other people it might be."""
+    last_t, last = track[-1]
+    if near(last, b) > reach(last) or not same_size(last, b):
+        return False
+    return t - last_t <= EVERY or same is None or bool(same(track, b, t, others))
+
+
+def extend(tracks: list[list], live: list[int], t: int, found: list[Box], same=None) -> list[int]:
+    """Give each detection at frame `t` to its nearest live track it fits, else a new track."""
     taken: set[int] = set()
     for b in sorted(found, key=height, reverse=True):
-        options = [k for k in live if k not in taken and near(tracks[k][-1][1], b) <= reach(tracks[k][-1][1])]
+        rivals = lambda k: [tracks[j] for j in live if j != k]
+        options = [k for k in live if k not in taken and fits(tracks[k], b, t, same, rivals(k))]
         k = min(options, key=lambda k: near(tracks[k][-1][1], b)) if options else None
         if k is None:
             tracks.append([])
@@ -73,13 +101,77 @@ def extend(tracks: list[list], live: list[int], t: int, found: list[Box]) -> lis
     return sorted(taken)
 
 
-def link(dets: dict[int, list[Box]], gap: int = GAP) -> list[list[tuple[int, Box]]]:
+def link(dets: dict[int, list[Box]], gap: int = GAP, same=None) -> list[list[tuple[int, Box]]]:
     """Detections by frame -> tracks of (frame, box); a track unseen for `gap` frames ends."""
     tracks: list[list] = []
     for t in sorted(dets):
         live = [k for k, tr in enumerate(tracks) if t - tr[-1][0] <= gap]
-        extend(tracks, live, t, list(dets[t]))
+        extend(tracks, live, t, list(dets[t]), same)
     return tracks
+
+
+def lost(track: list, every: int = EVERY) -> int:
+    """Sampled frames inside the track's life where its face was not found."""
+    a, b = life(track)
+    return max((b - a) // every + 1 - len({t for t, _ in track}), 0)
+
+
+def by_strength(found: dict, line: float) -> tuple[dict, dict]:
+    """{frame: [{"box", "score"}]} -> (strong face boxes by frame, weak face boxes by frame);
+    a person row (`kind: person`) is no face."""
+    strong, weak = {}, {}
+    for t, rows in found.items():
+        faces = [r for r in rows if r.get("kind", "face") == "face"]
+        strong[int(t)] = [tuple(r["box"]) for r in faces if float(r.get("score", 1.0)) >= line]
+        if low := [tuple(r["box"]) for r in faces if float(r.get("score", 1.0)) < line]:
+            weak[int(t)] = low
+    return strong, weak
+
+
+def persons_of(found: dict) -> dict[int, list[Box]]:
+    """The person boxes of each frame that has any (the detector worker's `kind: person` rows)."""
+    out = {int(t): [tuple(r["box"]) for r in rows if r.get("kind") == "person"] for t, rows in found.items()}
+    return {t: boxes for t, boxes in out.items() if boxes}
+
+
+def nearest(track: list, t: int) -> Box:
+    """The track's detection nearest in time to frame `t`."""
+    return min(track, key=lambda d: abs(d[0] - t))[1]
+
+
+RESCUE_REACH = 1.0
+RESCUE_FLOOR = 12.0
+"""A weak or body face may sit at most one face height (12 px at least) from the track's nearest
+face: weaker evidence, a shorter reach than a detection's 2x (ep01 T01: Enfield's body face, 70 px
+below Utterson's last 46 px one, joined Utterson's track under the 2x reach)."""
+
+
+def holds(track: list, b: Box, t: int, gap: int, same=None, others=()) -> bool:
+    """A weak `b` at `t` continues the track: within `gap` of its life, within a face of its nearest
+    face, at its size, and -- more than a sample from that face -- its own head by `same`."""
+    a, z = life(track)
+    t0, ref = min(track, key=lambda d: abs(d[0] - t))
+    if not (a - gap <= t <= z + gap and near(ref, b) <= max(RESCUE_FLOOR, RESCUE_REACH * height(ref))
+            and same_size(ref, b)):
+        return False
+    return abs(t - t0) <= EVERY or same is None or bool(same(track, b, t, others))
+
+
+def claimed(tracks: list[list], b: Box, t: int) -> bool:
+    """Some track already holds a face at frame `t` in reach of `b`: `b` is that face."""
+    return any(u == t and near(c, b) <= reach(c) for tr in tracks for u, c in tr)
+
+
+def rescue(tracks: list[list], weak: dict[int, list[Box]], gap: int = GAP, same=None) -> list[list]:
+    """A weak detection continues a track it fits (ByteTrack's idea): in the track's life or
+    within `gap` of its ends, never a new face, never a face another track holds at that frame
+    (ep01 T07: the child's two pieces); read forward, then back, so a track grows both ways."""
+    for t in sorted(weak) + sorted(weak, reverse=True):
+        for b in (b for b in weak[t] if not claimed(tracks, b, t)):
+            options = [tr for tr in tracks if holds(sorted(tr), b, t, gap, same, [o for o in tracks if o is not tr])]
+            if options:
+                min(options, key=lambda tr: near(nearest(tr, t), b)).append((t, b))
+    return [sorted(tr, key=lambda d: d[0]) for tr in tracks]
 
 
 def keep(tracks: list[list], hits: int = MIN_HITS) -> list[list]:
@@ -96,19 +188,62 @@ STITCH_FACES = 3.0
 STITCH_FLOOR = 80.0
 
 
-def joins(a: list, b: list) -> bool:
-    """`b` picks up where `a` lost its face: after it, soon, and near where it was."""
+BODY_FACE = 0.100
+BODY_FACE_Y = 0.125
+"""A person's face from its box, by ep01's own geometry (9 round-1 takes, 509 people holding one
+detected face): height 0.100 of the person's (p10-p90 0.086-0.164), centre 0.125 down from its
+top, centred across it."""
+BODY_ONLY_PX = 24.0
+"""A track from bodies alone is a face only when it is this small: the face model reads ep01's
+cel faces from about 13 px, so a bigger faceless person is turned away or cropped (T15, T18)."""
+BODY_MIN_FRAMES = 24
+"""...and only when it lives a second or more: ep01's two 13-frame body tracks (T07 and T08,
+frames 0-12) were T07's child seen from behind and an unnamed figure."""
+EDGE_PX = 2.0
+
+
+def body_face(p: Box) -> Box:
+    """The face box a person's box holds."""
+    h = p[3] - p[1]
+    cx, cy, f = (p[0] + p[2]) / 2, p[1] + BODY_FACE_Y * h, BODY_FACE * h
+    return cx - f / 2, cy - f / 2, cx + f / 2, cy + f / 2
+
+
+def body_faces(persons: dict[int, list[Box]], width: int, height_: int) -> dict[int, list[Box]]:
+    """Each frame's people as face boxes; a person cut by the frame's top or foot gives none."""
+    out = {t: [body_face(p) for p in boxes if p[1] > EDGE_PX and p[3] < height_ - EDGE_PX]
+           for t, boxes in persons.items()}
+    return {t: faces for t, faces in out.items() if faces}
+
+
+def meets(body: list, face: list, gap: int = GAP) -> bool:
+    """A face track comes near the body track somewhere in their shared time."""
+    a, z = life(face)
+    return any(a - gap <= t <= z + gap and near(nearest(face, t), b) <= reach(b) for t, b in body)
+
+
+def body_only(bodies: dict[int, list[Box]], faces: list[list]) -> list[list]:
+    """Tracks of body faces no face track ever comes near, seen MIN_HITS times, under BODY_ONLY_PX."""
+    tracks = [tr for tr in keep(link(bodies)) if life(tr)[1] - life(tr)[0] + 1 >= BODY_MIN_FRAMES]
+    return [tr for tr in tracks if track_px(tr) < BODY_ONLY_PX and not any(meets(tr, f) for f in faces)]
+
+
+def joins(a: list, b: list, same=None, others=()) -> bool:
+    """`b` picks up where `a` lost its face: after it, soon, near where it was, at its size,
+    and (when `same` is given) `a`'s own head."""
     gap = b[0][0] - a[-1][0]
     room = max(STITCH_FLOOR, STITCH_FACES * height(a[-1][1]))
-    return 0 < gap <= STITCH_GAP and near(a[-1][1], b[0][1]) <= room
+    if not (0 < gap <= STITCH_GAP and near(a[-1][1], b[0][1]) <= room and same_size(a[-1][1], b[0][1])):
+        return False
+    return same is None or bool(same(a, b[0][1], b[0][0], others))
 
 
-def stitch(tracks: list[list]) -> list[list]:
+def stitch(tracks: list[list], same=None) -> list[list]:
     """Pieces of one face split by a stretch the detector missed, joined in time
     order (Jekyll ep01 T07: Hyde came back as two pieces 20 frames apart)."""
     out: list[list] = []
     for b in sorted(tracks, key=lambda tr: tr[0][0]):
-        options = [a for a in out if joins(a, b)]
+        options = [a for a in out if joins(a, b, same, [o for o in out + tracks if o is not a and o is not b])]
         if options:
             a = min(options, key=lambda a: near(a[-1][1], b[0][1]))
             a.extend(b)
@@ -146,6 +281,31 @@ def track_px(track: list) -> float:
     return float(running_median(heights, max(SIZE_SMOOTH // EVERY, 1)).min())
 
 
+HYSTERESIS = 1.25
+"""The refine switches on under SMALL_FACE_PX and off only over 1.25x it (150 px for 120):
+a face that zooms past the wall never toggles the refine (VideoFaceDetailer's size gate)."""
+
+
+def heights_over(track: list, frames: int) -> np.ndarray:
+    """The track's face height on every frame: detections through track_px's running median,
+    interpolated over the life, held at its ends."""
+    at = [t for t, _ in track]
+    h = running_median(np.array([height(b) for _, b in track], float), max(SIZE_SMOOTH // EVERY, 1))
+    return np.interp(range(frames), at, h)
+
+
+def soft_span(track: list, frames: int, on: float = 120.0, off: float | None = None) -> tuple[int, int] | None:
+    """(first, last) frame of the life where the face is soft: on under `on`, off over `off`
+    (on x HYSTERESIS); None when it never reads soft."""
+    off, h, state, soft = off or on * HYSTERESIS, heights_over(track, frames), False, []
+    a, b = life(track)
+    for t in range(a, min(b, frames - 1) + 1):
+        state = h[t] < on if not state else h[t] <= off
+        if state:
+            soft.append(t)
+    return (soft[0], soft[-1]) if soft else None
+
+
 def small(tracks: list[list], px: float) -> list[list]:
     """The tracks whose smallest face (track_px) is under `px`: a readable face is left alone."""
     return [tr for tr in tracks if track_px(tr) < px]
@@ -170,14 +330,21 @@ def fill(track: list, frames: int, smooth: int = SMOOTH) -> np.ndarray:
     return np.stack([cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2], 1)
 
 
-def windows(boxes: np.ndarray, width: int, height_: int) -> list[tuple[int, int, int]]:
-    """A square (x, y, side) per frame round the face, the side its smoothed height times
-    the margin: a steady face keeps one side, a push-in grows its window slowly."""
+def frozen_side(boxes: np.ndarray, span: tuple[int, int], width: int, height_: int) -> int:
+    """One crop side for the run (VideoFaceDetailer's frozen crop size): the biggest smoothed
+    face over the span times the margin, at least MIN_SIDE, inside the frame."""
+    h = boxes[span[0]:span[1] + 1, 3] - boxes[span[0]:span[1] + 1, 1]
+    return int(min(max(MIN_SIDE, float(h.max()) * MARGIN), width, height_))
+
+
+def windows(boxes: np.ndarray, width: int, height_: int, side: int | None = None) -> list[tuple[int, int, int]]:
+    """A square (x, y, side) per frame round the face: `side` frozen for the run, else the
+    smoothed height times the margin (a push-in grows its window slowly)."""
     out = []
     for x1, y1, x2, y2 in boxes:
-        side = min(int(max(MIN_SIDE, (y2 - y1) * MARGIN)), width, height_)
-        cx, cy = (x1 + x2) / 2, (y1 + y2) / 2 - 0.05 * side
-        out.append((int(np.clip(cx - side / 2, 0, width - side)), int(np.clip(cy - side / 2, 0, height_ - side)), side))
+        s = side or min(int(max(MIN_SIDE, (y2 - y1) * MARGIN)), width, height_)
+        cx, cy = (x1 + x2) / 2, (y1 + y2) / 2 - 0.05 * s
+        out.append((int(np.clip(cx - s / 2, 0, width - s)), int(np.clip(cy - s / 2, 0, height_ - s)), s))
     return out
 
 
@@ -186,12 +353,35 @@ def side_of(wins: list) -> int:
     return int(np.median([s for _, _, s in wins]))
 
 
-def crop_span(span: tuple[int, int], frames: int) -> tuple[int, int]:
-    """(first frame, count) of the crop clip: the life on H3's frame grid, inside the take."""
-    n = h3.legal_frames(span[1] - span[0] + 1)
-    while n > frames:
+TRIM_MAX = 8
+"""Frames of a life the grid may trim rather than render 17 more (two fades of face_paste.FADE),
+and never more than a quarter of the life (ep01 T07's child lived 10 frames)."""
+
+
+def grid_frames(count: int) -> int:
+    """H3's 17k+5 count for a life of `count` frames: the one just over it, or the one under
+    it when that trims at most TRIM_MAX frames and a quarter of the life (the paste's fades)."""
+    up = h3.legal_frames(count)
+    down = up - h3.FRAME_MODULUS
+    return down if down >= h3.FRAME_REMAINDER and count - down <= min(TRIM_MAX, count // 4) else up
+
+
+def shot_of(span: tuple[int, int], frames: int, cuts) -> tuple[int, int]:
+    """[first, end) frames of the shot holding the span: the take cut at its hard cuts."""
+    lo = max([c for c in cuts if c <= span[0]], default=0)
+    hi = min([c for c in cuts if c > span[1]], default=frames)
+    return lo, min(hi, frames)
+
+
+def crop_span(span: tuple[int, int], frames: int, cuts=()) -> tuple[int, int]:
+    """(first frame, count) of the crop clip: the life on H3's frame grid, inside its shot,
+    a trim split between both ends of the life."""
+    lo, hi = shot_of(span, frames, cuts)
+    n = grid_frames(span[1] - span[0] + 1)
+    while n > hi - lo and n > h3.FRAME_REMAINDER:
         n -= h3.FRAME_MODULUS
-    return max(0, min(span[0], frames - n)), n
+    first = span[0] + max(0, (span[1] - span[0] + 1 - n) // 2)
+    return max(lo, min(first, hi - n)), n
 
 
 def head_box(b: Box, width: int, height_: int) -> Box:

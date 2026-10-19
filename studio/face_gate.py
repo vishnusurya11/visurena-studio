@@ -3,8 +3,11 @@ from.  The walls and the decision live in studio/face_refine.py; this module onl
 measures.  `detect` / `embed` are facenet's (studio/measure/faces.embedder) in a run
 and fakes in a test.
 
-- seam: the level difference in the feather band, at window scale, where the paste
-  meets the take;
+- seam: the mean level change the paste makes to the take OUTSIDE the head, at window scale,
+  through the mask the paste uses (round 2, 2026-10-19: the feather or a small face's soft head
+  mask; the old feather-band difference read 1.7-2.0x this on round 1's 15 rows);
+- drift: the mean |refined - take| inside the face box (PLAN_FINAL 1a, T8mars' parity cap);
+- eyes: the drawn-eye score of the take and of the refined crop (studio/face_eye.py), logged;
 - flicker: the face region's frame-to-frame change, the take's own against the
   pasted result (F2 0.81-0.95 of the take's, F3's boiling noise 1.15-1.32);
 - faces: the most faces any one 768 crop shows -- centre inside the window's core,
@@ -47,14 +50,38 @@ def shrunk(crop: list[np.ndarray], start: int, span: tuple[int, int], side: int)
     return [cv2.resize(np.ascontiguousarray(crop[k]), (side, side), interpolation=cv2.INTER_AREA) for k in ks]
 
 
-def seam_and_flicker(src: list[np.ndarray], ref: list[np.ndarray]) -> tuple[float, float, float]:
-    """(seam, the take's flicker, the pasted flicker), at window scale."""
+def collateral(src: np.ndarray, ref: np.ndarray, mask: np.ndarray, head: np.ndarray) -> float:
+    """The mean level change pasting `ref` through `mask` makes to `src` outside the head."""
+    moved = np.abs(ref.astype(np.float32) - src.astype(np.float32)).mean(axis=2) * mask[..., 0]
+    return float(moved[~head].mean()) if (~head).any() else 0.0
+
+
+def seam_and_flicker(src: list[np.ndarray], ref: list[np.ndarray], face: float | None = None,
+                     soft: bool = False) -> tuple[float, float, float]:
+    """(seam, the take's flicker, the pasted flicker), at window scale; `face` is the face's
+    height as a share of the window (None: the margin's 1 / 2.4), `soft` its soft paste."""
+    from studio.face_track import MARGIN
     n, side = min(len(src), len(ref)), src[0].shape[0]
-    f = max(2, round(side * face_paste.FEATHER_SHARE))
-    mask = face_paste.feather(side, f)
+    face_px = (face or 1 / MARGIN) * side
+    mask, head = face_paste.paste_mask(side, face_px if soft else None), face_paste.head_mask(side, face_px)
     pasted = [(r * mask + s * (1 - mask)).astype(np.uint8) for s, r in zip(src[:n], ref[:n])]
-    seam = float(np.mean([face_paste.ring_diff(s, r, f) for s, r in zip(src[:n:SEAM_EVERY], ref[:n:SEAM_EVERY])]))
+    seam = float(np.mean([collateral(s, r, mask, head) for s, r in zip(src[:n:SEAM_EVERY], ref[:n:SEAM_EVERY])]))
     return seam, face_paste.region_flicker(src[:n]), face_paste.region_flicker(pasted)
+
+
+DRIFT_EVERY = 4
+
+
+def drift(src: list[np.ndarray], ref: list[np.ndarray], boxes: list) -> float | None:
+    """Mean |refined - take| per pixel inside each frame's face box (window coordinates)."""
+    vals = []
+    for s, r, b in list(zip(src, ref, boxes))[::DRIFT_EVERY]:
+        x1, y1, x2, y2 = (int(round(v)) for v in b)
+        x1, y1 = max(x1, 0), max(y1, 0)
+        a, c = s[y1:y2, x1:x2].astype(np.float32), r[y1:y2, x1:x2].astype(np.float32)
+        if a.size and a.shape == c.shape:
+            vals.append(float(np.abs(c - a).mean()))
+    return float(np.mean(vals)) if vals else None
 
 
 EDGE = 0.15
@@ -128,11 +155,34 @@ def faces_and_identity(src768, ref768, sheet_vec, detect, embed):
     return cs, cr, ids, idr
 
 
-def measure(src_w, ref_w, src768, ref768, sheet_vec, detect, embed, moved: float | None = None) -> face_refine.Measures:
+def measure(src_w, ref_w, src768, ref768, sheet_vec, detect, embed, moved: float | None = None,
+            face: float | None = None, soft: bool = False) -> face_refine.Measures:
     """Every measure the decision reads, for one person's refined crop; `moved` is
-    the refined crop's change from the crop it was rendered from."""
-    seam, f_src, f_ref = seam_and_flicker(src_w, ref_w)
+    the refined crop's change from the crop it was rendered from; `face` the face's
+    share of the window and `soft` its soft paste (seam_and_flicker)."""
+    seam, f_src, f_ref = seam_and_flicker(src_w, ref_w, face, soft)
     cs, cr, ids, idr = faces_and_identity(src768, ref768, sheet_vec, detect, embed)
     return face_refine.Measures(id_src=ids, id_ref=idr, seam=round(seam, 2), flick_src=round(f_src, 3),
                                 flick_ref=round(f_ref, 3), faces_src=cs, faces_ref=cr,
                                 change=None if moved is None else round(moved, 2))
+
+
+def face_boxes(boxes, wins: list, life: tuple[int, int], side: int) -> list:
+    """The track's smoothed face box on each frame of its life, in its window's coordinates at `side`."""
+    out = []
+    for t in range(life[0], life[1] + 1):
+        x, y, s = wins[t]
+        k = side / s
+        b = boxes[t]
+        out.append(((b[0] - x) * k, (b[1] - y) * k, (b[2] - x) * k, (b[3] - y) * k))
+    return out
+
+
+def extras(src_w: list, ref_w: list, boxes: list) -> dict:
+    """The logged measures beside the walls: drift inside the face box, the drawn-eye scores."""
+    from studio import face_eye
+    n = min(len(src_w), len(ref_w), len(boxes))
+    d = drift(src_w[:n], ref_w[:n], boxes[:n])
+    e_src, e_ref = face_eye.track_eyes(src_w[:n:2], boxes[:n:2]), face_eye.track_eyes(ref_w[:n:2], boxes[:n:2])
+    r = lambda v: None if v is None else round(v, 2)
+    return {"drift": r(d), "eye_src": r(e_src), "eye_ref": r(e_ref)}

@@ -15,6 +15,10 @@ in wide shots, go ahead".
 - [x] wiring + docs: `take_schedule.REFINE`, `take_overlap.Refines` + `Shop.order_refine`,
       `step_09_shoot.refine_rest`, `master_upscale.master(wrap=)`, `assemble` layout.json +
       `face_paste_wrap`; the F2 manifest in comfy_studio; page, README, stages.yaml, skill, DECISIONS
+- [x] face-blur round 2 (2026-10-19, `docs/audit/2026-10-19_face_blur/PLAN_FINAL.md` 1a-3): tracker ports
+      (lost-subject guard, weak faces, body far figures, hysteresis span, frozen side, 17k+5 grid inside the
+      shot), the soft paste and its seam, CCIP + clip_vision_h identity (`studio/anime_id*.py`), drift, the
+      drawn-eye score (`studio/face_eye.py`)
 - [ ] proof clips: T00, T22 (T06) shipped vs refined at master scale under
       `docs/audit/2026-10-16_model_tests/faces/step_proof/` (waits on the shared ComfyUI queue)
 
@@ -23,3 +27,6 @@ in wide shots, go ahead".
 - 2026-10-17 09:00-10:30 PDT: built test-first; calibrated the gate on F2/F3
   (`docs/calibration/face_refine.md`); dry-ran selection/tracking/matching on ep01 (T00 2 faces, T03 none
   small, T06 2, T07 3, T18 2, T22 2); queued the 11 crop renders on the shared queue behind a 32-take bench.
+- 2026-10-19 PDT, face-blur round 2: round 1's 15 refined crops re-measured through the new gate with the
+  real CCIP / clip worker: all 15 kept (round 1 refused T01 x2 and T07's child on the seam); the walls and
+  their evidence in `docs/calibration/face_refine.md`; the GPU arm of round 2 is still owed.

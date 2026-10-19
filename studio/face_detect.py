@@ -22,12 +22,16 @@ from typing import Callable
 from studio.face_track import EVERY
 
 CONF = 0.6
-"""Mirror of studio/face_detect_worker.CONF (that file runs under another python)."""
+"""Mirror of studio/face_detect_worker.CONF (that file runs under another python): the strong line."""
+LOW_CONF = 0.3
+"""The worker answers faces down to this; under CONF a face only continues a track (round 2)."""
 THREADS = 4
 """Torch CPU threads: the take_dq lane runs beside it."""
 YOLO_GB = 1.5
 """YOLOv8m at 768 with its CUDA context, and room."""
 WEIGHTS = Path("ComfyUI") / "models" / "ultralytics" / "bbox" / "face_yolov8m.pt"
+PERSONS = Path("ComfyUI") / "models" / "ultralytics" / "segm" / "person_yolov8m-seg.pt"
+"""Bingsu/adetailer (Apache-2.0), on disk since 2025-12: the body fallback's people."""
 Dets = dict[int, list[dict]]
 
 
@@ -38,9 +42,13 @@ def weights_path(root: Path | None = None) -> Path:
     return Path(root) / WEIGHTS
 
 
-def worker_argv(python: Path, weights: Path, device: str) -> list[str]:
+def person_path(root: Path | None = None) -> Path:
+    return weights_path(root).parents[4] / PERSONS
+
+
+def worker_argv(python: Path, weights: Path, device: str, persons: Path | None = None) -> list[str]:
     return [str(python), "-I", str(Path(__file__).with_name("face_detect_worker.py")), str(weights), device,
-            str(CONF), str(THREADS)]
+            str(LOW_CONF), str(THREADS)] + ([str(persons)] if persons else [])
 
 
 def worker_env(device: str, env=None) -> dict:
@@ -52,7 +60,8 @@ def worker_env(device: str, env=None) -> dict:
 def spawn(device: str) -> subprocess.Popen:
     from studio import master_upscale
     python = master_upscale.av3_paths()[0]
-    return subprocess.Popen(worker_argv(python, weights_path(), device), stdin=subprocess.PIPE,
+    people = person_path() if person_path().exists() else None
+    return subprocess.Popen(worker_argv(python, weights_path(), device, people), stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, text=True, encoding="utf-8", env=worker_env(device))
 
 

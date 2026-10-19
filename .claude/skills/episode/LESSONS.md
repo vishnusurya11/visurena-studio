@@ -16,7 +16,8 @@ brick or a new instance of one, a line here.
    labels is advisory, a HARD row states its outcome at the cap, and a ruler written for one plan
    form never judges another: replay every downstream gate on a new form, no write, before the
    launch. ep01: an Se wall fitted on 27 unlabelled clips failed 8 takes; pair rulers refused a
-   grammar plan. -> ep01 retro, failures 2, 3, 7, 8; Jekyll Kawajiri ep01 under the step caps.
+   grammar plan; a photo sharpness measure scored every cel refine down. -> ep01 retro, failures
+   2, 3, 7, 8; Jekyll Kawajiri ep01 under the step caps; The face refine, round 2.
 4. **One rule per fact, read by every channel; a number lives in one home** (B3). ep01: a setup
    crowd leaked through 5 channels into 14 takes; the 8.0 s take budget had 4 copies. -> ep01
    retro, failures 3, 4.
@@ -74,6 +75,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Jekyll Kawajiri ep01 retro (the 13 failures, the five bricks, each package's lessons, what is owed)
 - The framing floor (face-blur fix #3, 2026-10-19: a face that matters is planned big enough for an eye)
 - The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19: why it skipped the blurry shots, T01, the YOLO worker, the pre-filter's median)
+- The face refine, round 2 (2026-10-19: a cel-valid eye score, the soft paste and its seam, CCIP identity, colour re-acquire, no body extension, the grid trim)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

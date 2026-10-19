@@ -49,14 +49,28 @@ MATCH_FLOOR = 0.0
 """A track whose best person scores under this is left unrefined (a stranger, an extra)."""
 
 ID_DROP = 0.05
-SEAM_MAX = 18.0
 FLICKER_RATIO = 1.10
 FLICKER_SLACK = 0.5
 """The gate's walls; calibrated on F2 (kept by eye) against F3 (refused by eye) on
 ep01 T00/T22/T19 (docs/calibration/face_refine.md): face-region flicker pasted /
-unpasted 0.81-0.95 on F2, 1.15-1.32 on F3; seam 7.3-9.2 on F2 (F3 2.0-2.7: the
-seam wall guards a regression, it does not separate these two); identity 0.15 ->
-0.59 on F2's T00, never down by more than 0.02 on either arm."""
+unpasted 0.81-0.95 on F2, 1.15-1.32 on F3; identity 0.15 -> 0.59 on F2's T00, never
+down by more than 0.02 on either arm."""
+SEAM_MAX = 10.0
+"""The paste's mean level change OUTSIDE the head (studio/face_gate.seam_and_flicker, round 2,
+2026-10-19).  The old wall was 18 on the feather band's difference; on round 1's 15 rows the
+new measure through the same feather reads 0.41-0.58 of it (median 0.55), so 10 refuses exactly
+what 18 refused (T01 x2, T07's child: 11.1-13.7) and keeps the rest (3.1-8.6).  The soft head
+mask of a small face reads 5.6-8.9 on those three (docs/calibration/face_refine.md)."""
+DRIFT_MAX = 35.0
+"""Mean |refined - take| inside the face box (T8mars Parity Stitch's idea, ported): round 1's own
+faces 11.6-31.6 (T07's child, a faceless blob given its face, the top); another row's refined face
+against a take's face (64 px regions, 210 pairs) reads from 23.9, p5 32.4, median 48.9."""
+CCIP_RISE = 0.03
+CLIP_DROP = 0.05
+"""The anime identity walls (PLAN_FINAL section 3): CCIP distance to the sheet may not rise by
+more than 0.03 nor cross the same-character line (studio/anime_id.SAME_CHARACTER); clip_vision_h
+cosine may not fall by more than 0.05.  Round 1: CCIP fell or held on all 15 faces (refined
+0.011-0.064 to the own sheet, 0.152-0.324 to the other person's); clip rose on all 15."""
 
 
 # ---- selection -----------------------------------------------------------------------
@@ -295,10 +309,12 @@ def saved_node(graph: dict) -> str:
 @dataclass(frozen=True)
 class Measures:
     """One refined crop against the take it came from, at window scale.
-    id_*: facenet cosine to the sheet at the crop's face (None unread); seam: mean
-    level difference in the feather band; flick_*: frame-to-frame difference of the
-    face region; faces_*: the most faces any one sampled crop shows (inside the
-    window, overlaps merged); change: mean |refined - source crop| per pixel."""
+    id_*: facenet cosine to the sheet at the crop's face (None unread); seam: the paste's mean
+    level change outside the head; flick_*: frame-to-frame difference of the face region;
+    faces_*: the most faces any one sampled crop shows (inside the window, overlaps merged);
+    change: mean |refined - source crop| per pixel; drift: the same inside the face box;
+    eye_*: the drawn-eye score (logged); ccip_*: CCIP distance to the sheet; clip_*: clip_vision_h
+    cosine to the sheet (None unread)."""
     id_src: float | None
     id_ref: float | None
     seam: float
@@ -307,6 +323,13 @@ class Measures:
     faces_src: int
     faces_ref: int
     change: float | None = None
+    drift: float | None = None
+    eye_src: float | None = None
+    eye_ref: float | None = None
+    ccip_src: float | None = None
+    ccip_ref: float | None = None
+    clip_src: float | None = None
+    clip_ref: float | None = None
 
 
 def face_refusal(src: int, ref: int) -> str:
@@ -317,13 +340,44 @@ def face_refusal(src: int, ref: int) -> str:
     return ""
 
 
+def facenet_fell(m: Measures) -> bool:
+    return m.id_src is not None and (m.id_ref is None or m.id_ref < m.id_src - ID_DROP)
+
+
+def clip_fell(m: Measures) -> bool:
+    return m.clip_src is not None and m.clip_ref is not None and m.clip_ref < m.clip_src - CLIP_DROP
+
+
+def ccip_refusal(m: Measures) -> str:
+    """The refined face moved away from its sheet by CCIP, or became another character; '' else."""
+    from studio.anime_id import SAME_CHARACTER
+    if m.ccip_src is None or m.ccip_ref is None:
+        return ""
+    if m.ccip_ref > m.ccip_src + CCIP_RISE or m.ccip_src < SAME_CHARACTER <= m.ccip_ref:
+        return f"ccip {m.ccip_ref:.3f} vs {m.ccip_src:.3f} (+{CCIP_RISE}, same-character {SAME_CHARACTER:.3f})"
+    return ""
+
+
+def identity_refusal(m: Measures) -> str:
+    """CCIP rules when read (anime-trained); else facenet and clip must BOTH fall to refuse, and
+    with clip unread facenet alone decides, as before round 2."""
+    if said := ccip_refusal(m):
+        return said
+    if facenet_fell(m) and (m.clip_src is None or clip_fell(m)):
+        clip = "" if m.clip_src is None else f"; clip {m.clip_ref:.3f} < {m.clip_src:.3f} - {CLIP_DROP}"
+        return f"identity {m.id_ref} < {m.id_src} - {ID_DROP}{clip}"
+    return ""
+
+
 def refusals(m: Measures) -> list[str]:
     """Every wall the refined crop breaks, named with its numbers."""
     out = []
     if m.change is not None and m.change < SAME_MAX:
         out.append(f"the refined crop is its source (change {m.change:.2f} < {SAME_MAX})")
-    if m.id_src is not None and (m.id_ref is None or m.id_ref < m.id_src - ID_DROP):
-        out.append(f"identity {m.id_ref} < {m.id_src} - {ID_DROP}")
+    if said := identity_refusal(m):
+        out.append(said)
+    if m.drift is not None and m.drift > DRIFT_MAX:
+        out.append(f"drift {m.drift:.1f} > {DRIFT_MAX}")
     if m.seam > SEAM_MAX:
         out.append(f"seam {m.seam:.1f} > {SEAM_MAX}")
     if m.flick_ref > m.flick_src * FLICKER_RATIO + FLICKER_SLACK:

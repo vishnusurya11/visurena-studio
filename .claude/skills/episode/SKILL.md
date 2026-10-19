@@ -554,28 +554,19 @@ same-length reseeds and passed both (WER 0.11, tail -48 dB) on its first shorter
 (coda 1.5 -> 0.75 s).
 
 **Soft faces are refined (09_07, owner 2026-10-17: "I like face improvements a lot in wide shots, go ahead";
-widened 2026-10-19: "why our fix skipped those shots? fix that").** Every take with a planned face (never an insert)
-whose dq lets it ship (no hard row outside warp/gait/pulse/frozen-whole/lip-sync/lag, no warp seed retake owed) is
-tracked: `face_yolov8m.pt` every 3rd frame in a worker under the embedded python (`studio/face_detect.py`, GPU when
-idle, CPU while rendering, MTCNN if the worker fails), tracks cut at hard cuts, the crop centre median-smoothed over 21
-frames and its size over 51 (ComfyUI-H3-FaceRefine's ideas, ported). Each track whose smallest face (running median) is
-under 120 px is matched to the take's staged cast (facenet + the Lab colour of head and hat + the plan's
-"at the LEFT/CENTRE/RIGHT"), and its crop re-rendered through H3 with ONLY that person's sheet at a denoise that follows
-the face: 0.45 at 60 px, +0.05 per halving, inside 0.40-0.55 (`fr.denoise_for`; F2's workflow, never edited). The plan
-size is not read, nor face-at-end. The gate keeps a crop only when identity to the sheet does not drop, there is no seam
-or new flicker, and the face count holds; else the unrefined take. Decisions per take: `takes/r2v/refine.json`
-(`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`, `cut`; a `no_faces` row of the old 60 px wall is
-owed a new look, its jobless round refunded). Step 09 queues the refine on the
-GPU lane right behind the renders (a REFINE job: after renders and retakes, before the GPU checks) and refines what
-the ladder left owed once at the end. ~110 s per face per take (ep01: 11 takes, 1,512 s priced); the FIRST thing cut
-for time, never a check. A take whose every planned face the warp gate tracked >= 80 % of it at >= 120 px AT ITS
-SMALLEST (each track's `min_px`, never its median: a push-in reads big there) is declined before tracking; a record
-with medians only goes to the tracker. Priced per face not already readable (`fr.soft_faces`); `none_found` / `all_readable` spend no round. Assemble pastes the kept crops at CUT scale on the
-decoded frames, before the denoise and the one upscale (owner 2026-10-18, 24caaeb); after the upscale only audio is
-muxed. On `av3` (the default) the pass runs in the portable python's worker (`studio/master_av3.py`),
-which rebuilds the paste from its spans: the same geometry, the same frame loop. By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.
-The render is the SaveVideo node's output, by node id (`fr.saved_node`), never the job's first output: on ComfyUI
-v0.41.2 the LoadVideo echoes its input crop first, and a refined crop equal to its source is refused (2026-10-18).
+widened 2026-10-19: "fix that"; round 2 the same day).** Every take with a planned face (never an insert) whose dq lets
+it ship is tracked (`face_yolov8m.pt` in a worker under the embedded python, `studio/face_detect.py`; GPU when idle,
+CPU while rendering, MTCNN if the worker fails; `studio/face_track.py`). Each face whose smallest height is under
+120 px is matched to the staged cast (facenet + the Lab colour of head and hat + the plan's "at the SIDE") and its
+soft span re-rendered through H3 with ONLY that person's sheet at a denoise that follows the face (F2's workflow,
+never edited). The gate (GATES.md, FACE REFINE GATE) reads identity by CCIP and clip_vision_h beside facenet
+(`studio/anime_id.py`), drift, seam, flicker and the face count; the drawn-eye score is logged. Decisions per take:
+`takes/r2v/refine.json` (`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`, `cut`). Step 09 queues it on
+the GPU lane right behind the renders and refines what the ladder left owed once at the end; ~110 s per face per take,
+the FIRST thing cut for time, never a check. Assemble pastes the kept crops at CUT scale before the one upscale (owner
+2026-10-18, 24caaeb; a face under 40 px through a soft head mask); on `av3` the portable python's worker rebuilds the
+paste from its spans. The render is the SaveVideo node's output by node id (`fr.saved_node`): v0.41.2 echoes the
+LoadVideo input first. By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.
 
 **G-WARP is HARD on S only (2026-10-19, retro D1-D2, for owner veto).** `take_dq` scores every take that stages a
 face for frame-to-frame face redraw (`studio/warp_gate.py`, CPU lane). FAIL is S > 2.5: one seed retake, then F2 for a
