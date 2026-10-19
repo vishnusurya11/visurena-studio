@@ -174,11 +174,7 @@ def panel_digest(board: Path) -> str:
 
 def refund_round(home: Path, key: str = REGRID) -> None:
     """Give back one round of `key` (its seconds stay: the time was spent)."""
-    with step_attempts._locked(home):
-        doc = step_attempts.read(home)
-        row = doc.get(key) or {"rounds": 0, "seconds": 0.0}
-        doc[key] = {**row, "rounds": max(0, int(row.get("rounds", 0)) - 1)}
-        step_attempts._write(home, doc)
+    step_attempts.refund(home, key)
 
 
 def _ladder_path(home: Path) -> Path:

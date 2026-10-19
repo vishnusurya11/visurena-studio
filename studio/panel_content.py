@@ -291,7 +291,7 @@ def look_advisories(seen: Seen, markers) -> list[str]:
     said, out = " ".join(seen.subjects).lower(), []
     for key in ("hair_colour",) + LOOK_KEYS:
         want, got = markers[0].get(key, ""), seen_marker(key, said)
-        if want and got and lt.family(key, got) != lt.family(key, want):
+        if want and got and lt.family(key, got, advisory=True) != lt.family(key, want, advisory=True):
             out.append(f"look: {key} reads {got!r}, the staged look is {want!r}")
     return out
 

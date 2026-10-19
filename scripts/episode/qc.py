@@ -151,11 +151,21 @@ def window(master: Path, at: float, seconds: float, out: Path) -> Path:
     return out
 
 
+def pcm_of(clip: Path) -> bytes:
+    """The clip's samples as 16-bit PCM bytes: the key of the ear's cache."""
+    import soundfile
+    return soundfile.read(str(clip), dtype="int16")[0].tobytes()
+
+
+HEARD_CACHE = "heard_cache.json"
+"""work/heard_cache.json: what the ear heard in each master window, listened to once."""
+
+
 def heard_on_master(master: Path, lines: list[dict], work: Path, listen) -> list[dict]:
     out = []
     for line in lines:
         clip = window(master, line["at"], line["seconds"], work / f"qc_l{line['index']:02d}.wav")
-        heard = listen(clip)
+        heard = voice_qc.heard_on_master(pcm_of(clip), lambda clip=clip: listen(clip), work / HEARD_CACHE)
         rate = voice_qc.error_rate(heard, line["text"])
         out.append({"index": line["index"], "heard": heard, "error_rate": round(rate, 3),
                     "passed": rate <= MAX_ERROR_RATE})

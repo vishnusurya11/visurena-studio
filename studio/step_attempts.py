@@ -95,6 +95,15 @@ def spend(home: Path, key: str, seconds: float = 0.0) -> int:
     return row["rounds"]
 
 
+def refund(home: Path, key: str) -> None:
+    """Give back one round of `key` (never below zero); its seconds stay: the time was spent."""
+    with _locked(home):
+        doc = read(home)
+        row = doc.get(key) or {"rounds": 0, "seconds": 0.0}
+        doc[key] = {**row, "rounds": max(0, int(row.get("rounds", 0)) - 1)}
+        _write(home, doc)
+
+
 def add_seconds(home: Path, key: str, seconds: float) -> None:
     """Seconds onto `key` with no round (a folded heartbeat is time, not an attempt)."""
     with _locked(home):
