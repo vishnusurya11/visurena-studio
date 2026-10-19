@@ -270,3 +270,13 @@ def test_the_expected_count_rides_the_job_and_the_fallback(tmp_path, monkeypatch
     mu.av3_master(tmp_path / "l.txt", tmp_path / "o.mp4", 768, 768, mu.CHOICES["av3"], 24, None, None, [5], "cuda",
                   expected_frames=3348)
     assert calls[0][1]["expected_frames"] == 3348
+
+
+def test_the_ep01_frame_counts_replay():
+    """R12, ffmpeg frame counts of the stored Jekyll ep01 parts (main 3235, card 107, chip 6): the
+    master holds 3,348 frames; the dead pass emitted 3,259 and now names it instead of exiting 0."""
+    main, card, chip = 3235, 107, 6
+    assert mu.counted(main + card + chip, 3348) == 3348
+    with pytest.raises(mu.ShortPass) as short:
+        mu.counted(3259, main + card + chip)
+    assert str(short.value) == "3259 of 3348"
