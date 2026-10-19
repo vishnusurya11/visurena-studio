@@ -23,8 +23,18 @@ TOKEN = 4
 """A cast-id part or a plan word shorter than this cannot be matched inside a string."""
 
 
+READERS: dict = {}
+"""The reader per device (gpu flag), built once per process."""
+
+
 def default_reader(gpu: bool = False):
-    """EasyOCR, English, built on first use; the GPU is left to the renders."""
+    """EasyOCR, English, built on first use per device; the GPU is left to the renders."""
+    if gpu not in READERS:
+        READERS[gpu] = build_reader(gpu)
+    return READERS[gpu]
+
+
+def build_reader(gpu: bool = False):
     import easyocr
     engine = easyocr.Reader(["en"], gpu=gpu, verbose=False)
     return lambda path: engine.readtext(str(path))

@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -43,6 +44,8 @@ GPU = True
 ANCHOR = "wide_establishing"
 MARK = Path("storyboard") / "cells_from_picture.json"
 PLAN_CHECK = "scripts/episode/plan_check.py"
+FREE = None
+"""The family-boundary free for tests; None is comfy.free_on_family (K10)."""
 READ = None
 """A picture reader for tests; None is the local vision model (picture_read.read)."""
 CHECK = None
@@ -240,12 +243,32 @@ def apply(ctx, plan: Path, doc: dict, readings: dict) -> bool:
     return True
 
 
+def free_for_vl() -> None:
+    """The one /free of the Qwen3-VL reads: whatever family is staged leaves before
+    the first read (ep01: 285 s against 54 s with another family resident)."""
+    from studio import comfy
+    (FREE or comfy.free_on_family)("vl")
+
+
+def read_places(ctx, doc: dict) -> dict:
+    """Every setup's picture read after ONE free (never one per read), each read timed
+    with the device it ran on (the VL model runs in ComfyUI, on the card)."""
+    pictures_by_setup = by_setup(ctx.book_dir, doc)
+    if pictures_by_setup:
+        free_for_vl()
+    read, out = READ or picture_read.read, {}
+    for name, path in pictures_by_setup.items():
+        began = time.time()
+        out[name] = read(path)
+        ctx.log(f"  03_03 VQA {name}: {time.time() - began:.1f} s device=cuda", step_id=STEP_ID)
+    return out
+
+
 def write_cells(ctx) -> None:
     """03_03: every setup's picture read, the cells rewritten, the marker stamped."""
     plan = ctx.home / "plan.json"
     doc = episode_home.read_json(plan)
-    read = READ or picture_read.read
-    readings = {name: read(path) for name, path in by_setup(ctx.book_dir, doc).items()}
+    readings = read_places(ctx, doc)
     kept = apply(ctx, plan, doc, {k: v for k, v in readings.items() if v}) if any(readings.values()) else False
     for name, things in readings.items():
         ctx.log(f"  {name}: {len(things)} fixed things read" + ("" if things else " (unreadable: the writer's cells stand)"),

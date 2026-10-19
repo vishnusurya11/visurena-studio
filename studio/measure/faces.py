@@ -89,7 +89,18 @@ def _crop(rgb: np.ndarray, box) -> np.ndarray:
     return np.asarray(Image.fromarray(rgb[y1:y2, x1:x2]).resize((FACE_SIDE, FACE_SIDE)))
 
 
+EMBEDDERS: dict = {}
+"""(detect, embed) per device, built once per process: the weights load in seconds."""
+
+
 def embedder(device: str = "cpu"):
+    """The process's (detect, embed) for `device`, built on first use."""
+    if device not in EMBEDDERS:
+        EMBEDDERS[device] = build_embedder(device)
+    return EMBEDDERS[device]
+
+
+def build_embedder(device: str = "cpu"):
     """(detect, embed) from facenet-pytorch: MTCNN boxes + five landmarks, and
     VGGFace2 unit vectors.  Weights: MTCNN in the package, the resnet cached
     under the user's torch checkpoints."""

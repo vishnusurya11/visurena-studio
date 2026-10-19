@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
 import time
 import urllib.request
@@ -153,6 +154,34 @@ def already_queued(queue: dict, prefix: str) -> str | None:
     return None
 
 
+CLAIM_WAIT_S = 30.0
+"""The longest a submission waits for another process's GPU claim (av3 master, whisper)."""
+CLAIM_POLL_S = 2.0
+
+
+def foreign_claims(own_pid: int) -> list[dict]:
+    """The live GPU claims held by processes other than this one."""
+    from studio import compute_device
+    return compute_device.live_claims(own_pid=own_pid)
+
+
+def wait_foreign_claims(cap_s: float = CLAIM_WAIT_S, claims=foreign_claims, sleep=time.sleep,
+                        now=time.time) -> bool:
+    """Wait up to `cap_s` for foreign live claims to clear; True when one still holds
+    the card at the cap.  Never waits for this pid's own claim.  A probe failure waits for nothing."""
+    give_up = now() + cap_s
+    while True:
+        try:
+            held = claims(os.getpid())
+        except Exception:
+            return False
+        if not held:
+            return False
+        if now() >= give_up:
+            return True
+        sleep(CLAIM_POLL_S)
+
+
 def submit(workflow: dict, timeout: float = 180.0) -> str:
     """Queue a filled-in workflow and return its prompt id.
 
@@ -162,6 +191,7 @@ def submit(workflow: dict, timeout: float = 180.0) -> str:
     on WotW ep04 (2026-09-19): take 11 was queued SEVEN times and take 01 twice
     behind a 694 s take, ~45 min of GPU spent rendering the same seed.  So a
     timeout here asks the queue whether the job landed instead of re-POSTing."""
+    wait_foreign_claims()
     body = json.dumps({"prompt": workflow}).encode("utf-8")
     request = urllib.request.Request(
         f"{HOST}/prompt", data=body, headers={"Content-Type": "application/json"})
@@ -313,17 +343,23 @@ def _get_once(path: str, timeout: float = 5.0) -> dict:
         return json.loads(response.read())
 
 
+def queue_counts_strict(fetch=None) -> tuple[int, int]:
+    """(running, pending) off /queue; an engine that cannot be reached RAISES, so the
+    device router reads a down engine as down, not as an idle one."""
+    queue = (fetch or _get_once)("/queue")
+    return len(queue.get("queue_running", [])), len(queue.get("queue_pending", []))
+
+
 def queue_counts(fetch=None) -> tuple[int, int]:
     """(running, pending) off /queue.  An engine that cannot be reached holds
     no queue -- a restart empties it -- and the stage itself will meet the
     restart; an engine that ANSWERS with an error is not absent, and raises."""
     try:
-        queue = (fetch or _get_once)("/queue")
+        return queue_counts_strict(fetch)
     except UNREACHABLE as failure:
         if not down(failure):
             raise
         return 0, 0
-    return len(queue.get("queue_running", [])), len(queue.get("queue_pending", []))
 
 
 def busy(fetch=None) -> bool:
@@ -420,27 +456,83 @@ def keep_loaded(prompt: dict) -> dict:
     return prompt
 
 
+KEEP_DEPTH = 0
+"""How many `model_kept()` batches are open: only the outermost frees."""
+
+
 @contextmanager
 def model_kept():
-    """A batch of reads that loads its model once; it begins AND ends with
-    /free, so the VL model never sits beside H3 (speed plan #6).  ep14
+    """A batch of reads that loads its model once; the OUTERMOST batch begins AND
+    ends with /free, so the VL model never sits beside H3 (speed plan #6).  ep14
     (2026-09-29): the first read after a render round hung 600 s twice with H3
-    still staged -- 5.5 GB of 24 free, the VL model loading half on the CPU."""
-    global KEEP_LOADED
-    free_models()
+    still staged -- 5.5 GB of 24 free, the VL model loading half on the CPU.
+    Nested batches free nothing: the inner exit must not unload the outer's model."""
+    global KEEP_LOADED, KEEP_DEPTH
+    if KEEP_DEPTH == 0:
+        free_models()
+    KEEP_DEPTH += 1
     KEEP_LOADED = True
     try:
         yield
     finally:
-        KEEP_LOADED = False
+        KEEP_DEPTH -= 1
+        if KEEP_DEPTH == 0:
+            KEEP_LOADED = False
+            free_models()
+
+
+LAST_FAMILY: str | None = None
+"""The model family the engine last ran for this process (K10)."""
+
+
+def free_on_family(family: str) -> bool:
+    """Free the engine's models when the GPU family changes (krea -> vl -> h3);
+    True when it freed.  Best effort, never raises; a blank family changes nothing."""
+    global LAST_FAMILY
+    if not family or family == LAST_FAMILY:
+        return False
+    LAST_FAMILY = family                 # the first call frees too: another process may have staged models
+    try:
         free_models()
+    except Exception:
+        return False
+    return True
+
+
+ROW_DEADLINE: float | None = None
+"""Epoch seconds when the current step row's cap ends, or None (set by the runner)."""
+ROW_GRACE_S = 60.0
+
+
+@contextmanager
+def row_deadline(at: float | None):
+    """Text calls inside the block may not outlive the row's cap by more than ROW_GRACE_S."""
+    global ROW_DEADLINE
+    before, ROW_DEADLINE = ROW_DEADLINE, at
+    try:
+        yield
+    finally:
+        ROW_DEADLINE = before
+
+
+def text_timeout(timeout: float, applies: bool = True) -> float:
+    """min(the call's timeout, the row's remaining time + grace); renders pass applies=False."""
+    if not applies or ROW_DEADLINE is None:
+        return timeout
+    return max(1.0, min(timeout, ROW_DEADLINE - time.time() + ROW_GRACE_S))
 
 
 def run_text(name: str, values: dict[str, Any], timeout: float = 600.0) -> str:
-    """Fill in a text-producing workflow (a VLM caption), run it, and return the text."""
+    """Fill in a text-producing workflow (a VLM caption), run it, and return the text.
+    A call that outlives its (row-capped) timeout interrupts the engine, then raises."""
     template, inject = load_workflow(name)
     prompt = apply_inject(template, inject, values)
-    record = wait_record(submit(keep_loaded(prompt) if KEEP_LOADED else prompt), timeout=timeout)
+    try:
+        record = wait_record(submit(keep_loaded(prompt) if KEEP_LOADED else prompt),
+                             timeout=text_timeout(timeout))
+    except StillRunning:
+        reachable(interrupt)
+        raise
     return "\n".join(texts_of(record))
 
 

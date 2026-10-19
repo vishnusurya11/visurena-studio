@@ -9,6 +9,7 @@ with its reason.  Every probe is injected: no test reaches ComfyUI or nvidia-smi
 from __future__ import annotations
 
 import json
+import os
 import time
 
 from studio import compute_device as cd
@@ -71,10 +72,32 @@ def test_a_live_gpu_claim_routes_to_cpu():
     assert device == "cpu" and "av3 master" in seen[0].reason
 
 
-def test_the_engine_is_asked_to_free_its_models_only_when_its_queue_is_empty():
-    box = Box()
-    routed(box)
+def test_no_free_when_vram_enough():
+    box = Box(free=20000)
+    assert routed(box)[0] == "cuda" and box.freed == 0
+
+
+def test_one_free_when_short():
+    box = Box(free=1000)
+    routed(box, need_gb=4.0)
     assert box.freed == 1
+
+
+def test_a_busy_queue_never_frees():
+    box = Box(queues=[(1, 0)], free=1000)
+    routed(box)
+    assert box.freed == 0
+
+
+def test_a_down_engine_gives_a_cpu_decision_with_that_reason():
+    def down():
+        raise ConnectionError("refused")
+    probe = Box().probe()
+    probe = cd.Probe(queue=down, free_mb=probe.free_mb, free_models=probe.free_models,
+                     claims=probe.claims, sleep=probe.sleep, env={})
+    seen = []
+    assert cd.device_for("x", 1, probe=probe, log=seen.append) == "cpu"
+    assert seen[0].reason == "engine unreachable"
 
 
 def test_too_little_vram_after_the_free_routes_to_cpu():
@@ -149,3 +172,39 @@ def test_decisions_are_appended_to_the_log_file(tmp_path):
     cd.write_decision(cd.Decision("encode", "cpu", "render running"), path)
     rows = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines()]
     assert [r["device"] for r in rows] == ["cuda", "cpu"] and rows[0]["job"] == "whisper"
+
+
+# -- claim liveness ---------------------------------------------------------------------
+
+def put(folder, name, pid, at):
+    (folder / f"{name}.json").write_text(json.dumps({"job": name, "pid": pid, "at": at}), encoding="utf-8")
+
+
+def test_dead_pid_claim_ignored(tmp_path):
+    put(tmp_path, "gone", 111, time.time())
+    put(tmp_path, "alive", 222, time.time())
+    live = cd.live_claims(root=tmp_path, alive=lambda pid: pid == 222)
+    assert [c["job"] for c in live] == ["alive"]
+
+
+def test_own_pid_claim_ignored(tmp_path):
+    put(tmp_path, "mine", 333, time.time())
+    put(tmp_path, "theirs", 444, time.time())
+    live = cd.live_claims(root=tmp_path, own_pid=333, alive=lambda pid: True)
+    assert [c["job"] for c in live] == ["theirs"]
+
+
+def test_stale_heartbeat_dropped(tmp_path):
+    put(tmp_path, "silent", 555, 1000.0)
+    assert cd.live_claims(root=tmp_path, now=1000.0 + cd.STALE_S + 1, alive=lambda pid: True) == []
+    assert cd.STALE_S == 600.0
+
+
+def test_a_beat_refreshes_the_claim_time(tmp_path):
+    put(tmp_path, "held", 666, 1000.0)
+    cd.beat(tmp_path / "held.json", now=5000.0)
+    assert json.loads((tmp_path / "held.json").read_text(encoding="utf-8"))["at"] == 5000.0
+
+
+def test_a_missing_pid_is_not_alive():
+    assert cd.pid_alive(os.getpid()) is True and cd.pid_alive(0) is False
