@@ -133,7 +133,10 @@ def test_the_json_is_small_and_fast(board):
         took.append(time.perf_counter() - t)
     size = len(models.Progress.model_validate(body).model_dump_json(exclude_none=True))
     assert size < 6 * 1024, size
-    assert sorted(took)[2] < 0.030, took
+    # Measured 2026-10-19: median 7.8 ms alone, so the old 30 ms wall only failed inside the
+    # 13-minute full suite (CPU/ffmpeg load, baseline_suite.txt).  100 ms is still ~13x the warm
+    # cost and far under an uncached walk of the run's files.
+    assert sorted(took)[2] < 0.100, took
 
 
 def test_the_route_answers_the_model(board):
