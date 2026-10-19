@@ -665,6 +665,30 @@ def best_draw(room: Path, index: int, runner) -> str:
     return "" if best == current else swap_in(room, index, best, scored)
 
 
+HARD_UNKNOWN = 999
+SE_IN_NOTE = re.compile(r"Se (-?\d+(?:\.\d+)?)")
+
+
+def recorded_draw(path: Path) -> dict:
+    """One draw measured from what take_dq already recorded for it: T<nn>.dq.json `attempts` names each
+    render by its bytes.  {'hard': failed hard rows, 'Se': the warp note's Se}; a draw the record does
+    not name has no measure and cannot win."""
+    path = Path(path)
+    dq = path.parent.parent / f"{path.stem.split('_')[0]}.dq.json" if path.parent.name == "attempts"         else path.with_suffix(".dq.json")
+    try:
+        rows = json.loads(dq.read_text(encoding="utf-8")).get("attempts") or []
+    except (OSError, ValueError):
+        rows = []
+    size = path.stat().st_size
+    row = next((r for r in rows if r.get("bytes") == size), None)
+    if row is None:
+        return {"hard": HARD_UNKNOWN, "Se": None}
+    gates = row.get("gates") or []
+    found = next((SE_IN_NOTE.search(g.get("note") or "") for g in gates if g.get("name") == "warp"), None)
+    return {"hard": sum(1 for g in gates if g.get("hard") and not g.get("ok")),
+            "Se": float(found.group(1)) if found else None}
+
+
 def keep_best_draws(ctx, verdict: Verdict, runner) -> None:
     """Each faulted take keeps its best measured draw, said and logged."""
     for index in sorted({index_of(f.where) for f in verdict.faults}):

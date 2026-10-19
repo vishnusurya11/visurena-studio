@@ -164,6 +164,20 @@ def sample_shares(samples: int):
     return SAMPLE_AT if samples == len(SAMPLE_AT) else tuple(np.linspace(0.02, 0.98, samples))
 
 
+def sample_second(k: int, seconds: float, samples: int) -> float:
+    """The second of the take that sample `k` of `samples` is read at."""
+    return float(sample_shares(samples)[k]) * seconds
+
+
+def take_seconds(video: Path) -> float:
+    """The take's length in seconds from its own frame count and rate; 0.0 when unreadable."""
+    import cv2
+    cap = cv2.VideoCapture(str(video))
+    n, fps = cap.get(cv2.CAP_PROP_FRAME_COUNT), cap.get(cv2.CAP_PROP_FPS)
+    cap.release()
+    return float(n / fps) if n and fps else 0.0
+
+
 def sample_frames(video: Path, samples: int) -> list[np.ndarray]:
     """`samples` RGB frames spread evenly through the take."""
     import cv2

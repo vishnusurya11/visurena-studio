@@ -179,10 +179,14 @@ def judge(takes: list[Path], *, plan=None, reader: Reader | None = None,
                    confidence=confidence(readable, reads), reads=reads)
 
 
-def clones_by(embed, detect=None) -> Clones:
+SAMPLES = 8                      # identity_gate.observe's default frames per take
+
+
+def clones_by(embed, detect=None, seconds=None) -> Clones:
     """Clone pairs per sampled frame through `measure.faces` (C5): every face
     observed, then `clone_pairs` within each frame.  `detect` defaults to the
-    facenet detector, built on the first take; no test reaches it."""
+    facenet detector, built on the first take; no test reaches it.  Each pair carries `t`, the
+    second of its frame (`seconds(take)` is the take's length), which the ladder's head_cut reads."""
     def read(take: Path) -> list | None:
         from studio import identity_gate
         from studio.measure import faces
@@ -191,7 +195,9 @@ def clones_by(embed, detect=None) -> Clones:
         by_frame: dict[int, list[dict]] = {}
         for f in identity_gate.observe(take, [], {}, detect=det, embed=embed, bank={}):
             by_frame.setdefault(f.k, []).append({"h": f.h, "vec": f.vec, "sig": None})
-        return [p | {"frame": k} for k, fs in by_frame.items() for p in faces.clone_pairs(fs)]
+        length = (seconds or faces.take_seconds)(take)
+        return [p | {"frame": k, "t": faces.sample_second(k, length, SAMPLES)}
+                for k, fs in by_frame.items() for p in faces.clone_pairs(fs)]
     return read
 
 

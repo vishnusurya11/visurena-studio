@@ -209,7 +209,7 @@ def judge_takes(ctx, flag: str) -> Path:
         judge=lambda: timed_judge(ctx, lambda: take_eye.judge(takes_of(room), plan=plan, clones=CLONES)),
         sign=lambda v: eye_verdict.sign_verdict(room, takes_of(room), v),
         ladder=take_ladder.rungs(ctx, plan, flag, records_of(room)),
-        terminal=take_ladder.terminal_for(ctx, plan))
+        terminal=take_ladder.terminal_for(ctx, plan, draws=take_ladder.recorded_draw))
 
 
 def round_zero(room: Path) -> bool:
