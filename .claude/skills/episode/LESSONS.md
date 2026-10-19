@@ -19,8 +19,10 @@ brick or a new instance of one, a line here.
    grammar plan; a photo sharpness measure scored every cel refine down. -> ep01 retro, failures
    2, 3, 7, 8; Jekyll Kawajiri ep01 under the step caps; The face refine, round 2.
 4. **One rule per fact, read by every channel; a number lives in one home** (B3). ep01: a setup
-   crowd leaked through 5 channels into 14 takes; the 8.0 s take budget had 4 copies. -> ep01
-   retro, failures 3, 4.
+   crowd leaked through 5 channels into 14 takes; the 8.0 s take budget had 4 copies. A freeze
+   must hold at EVERY place that renders (first pass, early round, ladder, terminal, master retake,
+   --attempts: list them); a dry check calls those deciders, never a counter (ep01: the early round
+   retook frozen T01). -> ep01 retro, failures 3, 4; A freeze holds.
 5. **A gate that counts cannot see shape; a repair re-stages only what it changed** (B4). ep01:
    a fading body and a floating hand passed every gate; grids 13-17 were redrawn for one figure.
    -> ep01 retro, failure 5.
@@ -73,12 +75,13 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - GPU when idle, CPU when rendering
 - Gate notes moved out of GATES.md (board states, known gaps, speed arms)
 - Jekyll Kawajiri ep01 retro (the 13 failures, the five bricks, each package's lessons, what is owed)
-- The framing floor (face-blur fix #3, 2026-10-19: a face that matters is planned big enough for an eye)
-- The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19: why it skipped the blurry shots, T01, the YOLO worker, the pre-filter's median)
-- The face refine, round 2 (2026-10-19: a cel-valid eye score, the soft paste and its seam, CCIP identity, colour re-acquire, no body extension, the grid trim; fix round: the seam where the mask falls, least-cost linking)
+- The framing floor (face-blur fix #3, 2026-10-19)
+- The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19)
+- The face refine, round 2 (2026-10-19, + fix round)
 - The tiny-face rung (09_08, 2026-10-19)
-- An owner's repair runs on its own clock (owner ruling 2026-10-19; with the rung's no-worse bar and the whole-scale landing)
+- An owner's repair runs on its own clock (owner ruling 2026-10-19)
 - A repair re-renders nothing it was handed (2026-10-19, + fix round)
+- A freeze holds at every place that renders (incident 2)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

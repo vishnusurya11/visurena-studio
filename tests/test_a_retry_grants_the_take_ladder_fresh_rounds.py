@@ -38,6 +38,6 @@ def test_a_capped_room_is_curable_again_after_a_reset(tmp_path, monkeypatch):
     now = time.time()
     room = _room_with_rounds(tmp_path, [now - 7200, now - 3600])
     verdict = type("V", (), {"faults": []})()
-    monkeypatch.setattr(tl, "route", lambda v, r, try_i=1: {"seed": {2: []}})
+    monkeypatch.setattr(tl, "route", lambda v, r, try_i=1, **k: {"seed": {2: []}})
     assert tl.still_curable(room, verdict) is False                       # the cap, as before
     assert tl.still_curable(room, verdict, since=now - 100) is True       # a fresh attempt's rounds

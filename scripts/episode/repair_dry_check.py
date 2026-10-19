@@ -12,8 +12,12 @@ It reports:
     the delivered or measured bytes) or `render` (and why) -- a launch is right only when this says 0 --
     and the same pass on a relaunch after the drive ends (the closed repair row governs);
   - the terminal's best-draw swaps: a take an archived draw beats is KEPT when frozen, else it SWAPS;
-  - the dq / content / eye passes, the retake ladder's rounds, the refine owed and the tiny-face rung,
-    each priced against the repair cap (and against the episode's own clock, for contrast);
+  - the dq / content / eye passes, the refine owed and the tiny-face rung, each priced against the repair
+    cap (and against the episode's own clock, for contrast);
+  - the batch the early round and the batched rung would render, each asked of its own decider
+    (take_overlap.early_cures, take_ladder.still_curable / route / batch_for) on the episode's records
+    under the window -- never inferred from a counter (incident 2, 2026-10-19 12:29 PDT) -- and the
+    ladder.json rounds the next launch counts;
   - what steps 10-13 would do.
 
 INCIDENT 2026-10-19 11:18 PDT: RERUN.md said "every take is current" without reading the files; the
@@ -209,8 +213,93 @@ def checks_lines(home: Path) -> list[str]:
             f"measuring code ({code}) -- the others re-measure (a check, never a render)",
             f"content: {len(content)}/{len(takes)} verdicts no older than their take",
             f"eye: a signed verdict for these bytes {'stands' if s09.signed_for(ctx, room) else 'is re-read (the retry stamp or new bytes)'}",
-            f"retake ladder: {step_attempts.count(home, take_ladder.RETAKES)}/{step_caps.rounds(take_ladder.RETAKES)} "
-            f"episode rounds -> {'spent: no ladder render' if take_ladder.episode_spent(home) else 'rounds left: a failing take can retake'}"]
+            f"retake cap: {step_attempts.count(home, take_ladder.RETAKES)}/{step_caps.rounds(take_ladder.RETAKES)} "
+            f"episode rounds in attempts.json (a counter: what renders is the deciders' batch below)"]
+
+
+# ---- the ladder's own deciders (incident 2, 2026-10-19 12:29 PDT) --------------------------------
+
+def ladder_lines(home: Path, window: dict | None) -> list[str]:
+    """The early round and the batched rung, each asked of the very function step 09 asks, on the
+    episode's records under `window`: the dry check said "spent: no ladder render" off a counter while
+    the early round queued frozen T01.  Nothing is written."""
+    room, since = Path(home) / TAKES, run_budget.clock_reset_epoch(home)
+    ctx = SimpleNamespace(home=Path(home), budget=budget_of(home, window)[0])
+    return [rounds_line(room, since), early_line(ctx, room, since, window)] + rung_lines(ctx, room, since, window)
+
+
+def measured_takes(room: Path) -> list[int]:
+    """The takes with a dq record: what step 09's CPU lane hands the early round."""
+    return sorted(int(t.stem[1:3]) for t in Path(room).glob("T??.mp4") if t.with_suffix(".dq.json").exists())
+
+
+def batch_word(batch: dict) -> str:
+    """`batch none`, or `batch T01, T07` with each early cure named."""
+    named = [f"T{i:02d}" + (f" ({c[0]})" if isinstance(c, tuple) else "") for i, c in sorted(batch.items())]
+    return "batch " + (", ".join(named) or "none")
+
+
+def rounds_line(room: Path, since: float) -> str:
+    """ladder.json as the next launch counts it (take_ladder.counted): a round no byte landed for is none."""
+    from studio import take_ladder
+    rounds = take_ladder.rounds_on_file(room)
+    live = take_ladder.counted(room, rounds)
+    void = [f"{r.get('why')} ({', '.join(f'T{int(i):02d}' for i in r.get('takes') or r.get('faults') or {})}): "
+            f"landed nothing, not counted" for r in rounds if r not in live]
+    return (f"ladder.json: {len(rounds)} round(s) on file, {len(live)} counted, "
+            f"{take_ladder.rounds_of(room, since)} since the retry stamp; uncounted: {'; '.join(void) or 'none'}")
+
+
+def early_line(ctx, room: Path, since: float, window: dict | None) -> str:
+    """take_overlap.early_cures over every measured take, then early_affordable: the round the CPU lane queues."""
+    from studio import take_overlap
+    takes = measured_takes(room)
+    cures = take_overlap.early_cures(room, takes, since, window=window)
+    paid = "" if not cures else ("; affordable" if take_overlap.early_affordable(ctx, len(cures))
+                                 else "; unaffordable: not queued")
+    return f"early round (take_overlap.early_cures over {len(takes)} dq record(s)): {batch_word(cures)}{paid}"
+
+
+def rung_lines(ctx, room: Path, since: float, window: dict | None) -> list[str]:
+    """still_curable, then route -> batch_for: the batched rung as judged_gate's climb would take it."""
+    from studio import take_ladder
+    verdict, source = recorded_verdict(room)
+    head = f"take ladder (take_ladder.route -> batch_for over {source}): "
+    if not take_ladder.still_curable(room, verdict, since, home=ctx.home, window=window):
+        return [head + "batch none (not curable: the terminal answers)", frozen_line(room, verdict, window)]
+    routed = take_ladder.route(verdict, room, try_i=take_ladder.rounds_of(room, since) + 1, window=window)
+    *_, kept, why = take_ladder.batch_for(ctx, take_ladder.BATCH, routed, [], records_of(room), since)
+    return [head + batch_word(kept) + (f" ({why})" if why else ""), frozen_line(room, verdict, window)]
+
+
+def frozen_line(room: Path, verdict, window: dict | None) -> str:
+    """The faulted takes the repair froze: in no batch, kept flagged at the terminal."""
+    from studio import take_ladder
+    kinds: dict[int, set[str]] = {}
+    for f in verdict.faults:
+        kinds.setdefault(take_ladder.index_of(f.where), set()).add(f.kind)
+    named = [f"T{i:02d} ({', '.join(sorted(k))})" for i, k in sorted(kinds.items())
+             if take_ladder.frozen_here(room, i, window)]
+    return f"frozen and faulted (no cure batch; the terminal keeps them, keep_best flagged): {', '.join(named) or 'none'}"
+
+
+def recorded_verdict(room: Path):
+    """(the verdict the ladder would climb on, where it came from): the eye signed for these bytes when one
+    is, else the dq rows alone (the next launch re-reads the eye; its dq rows are these)."""
+    from studio import eye_verdict, take_overlap
+    from studio.judges.verdict import Fault, Verdict
+    takes = sorted(Path(room).glob("T??.mp4"))
+    doc = eye_verdict.current(room, takes) if takes else None
+    if doc and isinstance(doc.get("faults"), list):
+        faults = [Fault(**f) for f in doc["faults"]]
+        return (Verdict(judge="take_eye", version="1", passed=not faults, faults=faults, confidence=1.0,
+                        reads=len(takes)), f"the signed eye_{doc.get('sha8')}.json")
+    return take_overlap.dq_verdict(room, measured_takes(room)), "the dq rows (no eye signed for these bytes)"
+
+
+def records_of(room: Path) -> dict[int, dict]:
+    path = Path(room) / "shots.json"
+    return {r["index"]: r for r in episode_home.read_json(path)} if path.exists() else {}
 
 
 def rung_price(book: Path, number: int, home: Path, owed: dict[int, float]) -> tuple[float, str]:
@@ -276,7 +365,7 @@ def report(conn, codex: str, number: int, steps: list[str]) -> list[str]:
              order_line(conn, home, steps, redo, pending), "", count_line(rows)]
     lines += [f"  T{i:02d} {state:7} {why}" for i, (state, why) in sorted(rows.items())]
     lines += [relaunch_line(render_rows(codex, number, home, closed_form(window)) if window else rows)]
-    return lines + [""] + checks_lines(home) + swap_block(home, window) + [""] + \
+    return lines + [""] + checks_lines(home) + ladder_lines(home, window) + swap_block(home, window) + [""] + \
         refine_lines(codex, number, home, window) + [""] + downstream_lines(codex, number, home)
 
 

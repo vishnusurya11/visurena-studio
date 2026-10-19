@@ -20,6 +20,7 @@ asks the context's budget for the round's real cost, not the rung's unit.
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from pathlib import Path
@@ -174,14 +175,34 @@ def cure_of(faults: list[Fault], panel_clean: bool = False, taken: int = 0) -> s
     return "seed"
 
 
-def route(verdict: Verdict, room: Path, try_i: int = 1) -> dict[str, dict[int, list[Fault]]]:
-    """cure -> {take index -> its faults}, capped and (on the second try)
-    limited to takes whose fault signature progressed."""
+GOVERNING = "governing"
+"""`window=GOVERNING`: the repair that governs on disk (take_currency.governing); a dict or None is a
+window handed in (the dry check prices the window a launch would run on)."""
+
+
+def frozen_here(room: Path, index: int, window=GOVERNING) -> str | None:
+    """Why the repair froze this take's bytes (take_currency.frozen_in), else None."""
+    from studio import take_currency
+    home = Path(room).parent.parent
+    window = take_currency.governing(home) if window == GOVERNING else window
+    return take_currency.frozen_in(window, Path(room) / f"T{index:02d}.mp4", home)
+
+
+def curable_faults(verdict: Verdict, room: Path, window=GOVERNING) -> dict[int, list[Fault]]:
+    """take -> its faults, less every take the repair froze.  INCIDENT 2 (2026-10-19 12:29 PDT): the
+    early round retook frozen T01 for its gait row; a frozen take is in no cure batch, the terminal
+    answers it (keep_best, flagged)."""
     by: dict[int, list[Fault]] = {}
     for f in verdict.faults:
         by.setdefault(index_of(f.where), []).append(f)
+    return {i: fs for i, fs in by.items() if not frozen_here(room, i, window)}
+
+
+def route(verdict: Verdict, room: Path, try_i: int = 1, window=GOVERNING) -> dict[str, dict[int, list[Fault]]]:
+    """cure -> {take index -> its faults}, capped and (on the second try)
+    limited to takes whose fault signature progressed; a frozen take routes nowhere."""
     out: dict[str, dict[int, list[Fault]]] = {}
-    for i, fs in sorted(by.items()):
+    for i, fs in sorted(curable_faults(verdict, room, window).items()):
         if attempts_of(room, i) >= MAX_TAKE_ATTEMPTS:
             continue
         kinds = {f.kind for f in fs}
@@ -213,10 +234,7 @@ def progressed(room: Path, index: int, kinds_now: list[str]) -> bool:
     an identical signature after its own cure is structural -- the judge or
     the input, never the seed -- and goes to the terminal (the calibrator's
     circuit-breaker, 2026-09-30)."""
-    path = Path(room) / LADDER_FILE
-    if not path.exists():
-        return True
-    rounds = json.loads(path.read_text(encoding="utf-8")).get("rounds", [])
+    rounds = counted(room)
     prev = next((r["faults"].get(str(index)) for r in reversed(rounds) if str(index) in r.get("faults", {})), None)
     return prev is None or set(kinds_now) != set(prev) or len(kinds_now) < len(prev)
 
@@ -569,9 +587,12 @@ def still_for(home: Path, index: int, faults: list[Fault]) -> Path | None:
 
 
 def settle_take(home: Path, plan, index: int, faults: list[Fault], order: list[int], cap: int) -> str:
-    """One take's terminal: `still` (and its row written), `high` or `keep_best`."""
+    """One take's terminal: `still` (and its row written), `high` or `keep_best`; a take the repair froze
+    is kept flagged, never held as a still (the cut keeps the delivered take, incident 2)."""
     if shot_kind(plan, index) != "narration":
         return "high"
+    if frozen_here(Path(home) / TAKES, index):
+        return "keep_best"
     panel = still_for(home, index, faults)
     # A HELD PANEL IS NEVER WORSE THAN BLACK BARS: ep14 T20 (2026-09-29) came back
     # letterboxed on every seed, the two stills were spent, and keep_best kept the bars.
@@ -712,11 +733,10 @@ def keep_best_draws(ctx, verdict: Verdict, runner) -> None:
             ctx.log(line, level="WARNING")
 
 
-def kept_frozen(home: Path, index: int) -> str:
+def kept_frozen(home: Path, index: int, what: str = "no best-draw swap") -> str:
     """The line for a take whose bytes the governing repair froze (take_currency.frozen), else ''."""
-    from studio import take_currency
-    why = take_currency.frozen(Path(home) / TAKES / f"T{index:02d}.mp4", Path(home))
-    return f"KEPT T{index:02d}: the owner's repair froze its {why} bytes; no best-draw swap" if why else ""
+    why = frozen_here(Path(home) / TAKES, index)
+    return f"KEPT T{index:02d}: the owner's repair froze its {why} bytes; {what}" if why else ""
 
 
 def terminal_for(ctx, plan, draws=None):
@@ -772,21 +792,50 @@ def rounds_of(room: Path, since: float = 0.0) -> int:
     same file); with `since`, only the rounds taken after that epoch -- the
     owner's retry stamps the clock and the rounds before it are an earlier
     attempt's (2026-10-07: 'use the five-hour limit')."""
+    return sum(1 for r in counted(room) if float(r.get("at") or 0.0) >= since)
+
+
+def rounds_on_file(room: Path) -> list[dict]:
+    """Every round ladder.json records, counted or not."""
     path = Path(room) / LADDER_FILE
-    if not path.exists():
-        return 0
-    rounds = json.loads(path.read_text(encoding="utf-8")).get("rounds", [])
-    return sum(1 for r in rounds if float(r.get("at") or 0.0) >= since)
+    return json.loads(path.read_text(encoding="utf-8")).get("rounds", []) if path.exists() else []
 
 
-def count_round(room: Path, why: str, sigs: dict[str, list[str]] | None = None) -> None:
+def counted(room: Path, rounds: list[dict] | None = None) -> list[dict]:
+    """The rounds that count (P08: a round that renders nothing is not a round): bytes landed for it, or
+    this process launched it and it is in flight.  INCIDENT 2: the 12:29 round was written at launch and
+    the drive was killed before a byte landed; read as a round, it would cap and block the next launch."""
+    rounds = rounds_on_file(room) if rounds is None else rounds
+    return [r for r in rounds if r.get("pid") == os.getpid() or landed(room, r)]
+
+
+def landed(room: Path, r: dict) -> bool:
+    """A take the round names (its `takes`, else its fault signatures), or an archived draw of one, was
+    written after it launched.  A round naming no take cannot be read and counts, as before."""
+    named = r.get("takes") or [int(k) for k in r.get("faults") or {}]
+    at = float(r.get("at") or 0.0)
+    return not named or any(p.stat().st_mtime >= at for i in named for p in draws_of(room, int(i)))
+
+
+def draws_of(room: Path, index: int) -> list[Path]:
+    """The kept take on disk and every archived draw of it."""
+    kept = Path(room) / f"T{index:02d}.mp4"
+    return ([kept] if kept.exists() else []) + sorted((Path(room) / "attempts").glob(f"T{index:02d}_fail*.mp4"))
+
+
+def new_round(why: str, takes: list[int], sigs: dict[str, list[str]] | None = None) -> dict:
+    """A round as it is launched: its process, so `counted` knows it is in flight, and the takes it renders."""
+    return ({"why": why, "at": round(time.time(), 1), "pid": os.getpid(), "takes": sorted(takes)}
+            | ({"faults": sigs} if sigs else {}))
+
+
+def count_round(room: Path, why: str, sigs: dict[str, list[str]] | None = None,
+                takes: list[int] | None = None) -> None:
     """One round in the room's book, with each take's fault signature when
     given: `progressed` reads them back to break a circling cure."""
-    import time
     path = Path(room) / LADDER_FILE
     doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-    doc.setdefault("rounds", []).append({"why": why, "at": round(time.time(), 1)}
-                                        | ({"faults": sigs} if sigs else {}))
+    doc.setdefault("rounds", []).append(new_round(why, takes or [], sigs))
     path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
 
 
@@ -827,7 +876,8 @@ def refuse_spent(ctx, advisories: int) -> bool:
     return True
 
 
-def still_curable(room: Path, verdict: Verdict, since: float = 0.0, home: Path | None = None) -> bool:
+def still_curable(room: Path, verdict: Verdict, since: float = 0.0, home: Path | None = None,
+                  window=GOVERNING) -> bool:
     """May the climb take another round?  Not past the cap (rounds since the
     clock reset), and only while the router still has a cure to assign:
     capped takes, unprogressed signatures and input-borne kinds all route to
@@ -835,7 +885,7 @@ def still_curable(room: Path, verdict: Verdict, since: float = 0.0, home: Path |
     those, not another render."""
     if rounds_of(room, since) >= ROUNDS_CAP or (home is not None and episode_spent(home)):
         return False
-    return bool(route(verdict, room, try_i=rounds_of(room, since) + 1))
+    return bool(route(verdict, room, try_i=rounds_of(room, since) + 1, window=window))
 
 
 def head_cuts(ctx, wanted: dict[int, list[Fault]]) -> list[int]:
@@ -918,14 +968,26 @@ def retake(ctx, indices: list[int], why: str, flag: str, trims: list[int] | None
     from studio import take_overlap
     take_overlap.shoot(ctx, ["--from-refs", "--no-ends", flag], retake=(list(indices), why), attempts=True)
     every = round_takes(Path(ctx.home) / TAKES, indices)
-    if late := [str(i) for i in take_overlap.unmeasured(Path(ctx.home) / TAKES, every)]:
-        measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *late, "--attempts")
+    if late := take_overlap.unmeasured(Path(ctx.home) / TAKES, every):
+        measure_late(ctx, late)
     if trims:
         # no --attempts: a trim renders nothing, so there is nothing to archive
         measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json",
                  *[str(i) for i in sorted(trims)])
     measured(ctx, "scripts/episode/take_content_check.py", "take_content", ".content.json",
              *[str(i) for i in every])
+
+
+def measure_late(ctx, late: list[int]) -> None:
+    """take_dq over the takes a round left unmeasured: `--attempts` ranks the archived draws of each and
+    keeps the best as T<nn>.mp4 -- never over a take the repair froze, which is checked alone (incident 2).
+    The guard lives here: take_dq.py is measuring code, and an edit there re-measures every take."""
+    room = Path(ctx.home) / TAKES
+    frozen = [i for i in late if frozen_here(room, i)]
+    if ranked := [str(i) for i in late if i not in frozen]:
+        measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *ranked, "--attempts")
+    if frozen:
+        measured(ctx, "scripts/episode/take_dq.py", "take_dq", ".dq.json", *map(str, frozen))
 
 
 def wall() -> float:
@@ -976,6 +1038,16 @@ def batch_of(ctx, rung: Rung, renders: dict, room: Path, since: float) -> tuple[
     return {}, f"unaffordable: {cost(rung, 1):.0f} s for one take, budget {ctx.budget.headroom():.0f} s"
 
 
+def batch_for(ctx, rung: Rung, routed: dict, written: list[int], records: dict, since: float) -> tuple:
+    """(renders, plan doc, trims, the batch this round renders, why fewer): the batched rung's decision
+    after its free head cuts, nothing written -- the dry check asks this very function."""
+    room = Path(ctx.home) / TAKES
+    renders = renderable(routed, room, written)
+    doc, trims = trimmed(ctx, routed, renders, records)
+    kept, why = batch_of(ctx, rung, renders, room, since)
+    return renders, doc, trims, kept, why
+
+
 def write_edits(ctx, doc: dict, routed: dict, kept: dict, trims: list[int]) -> None:
     """The plan edits of the takes that WILL render (a dropped take keeps its plan), written once."""
     edited = False
@@ -994,7 +1066,7 @@ def write_edits(ctx, doc: dict, routed: dict, kept: dict, trims: list[int]) -> N
 def render_round(ctx, rung: Rung, kept: dict, trims: list[int], flag: str, verdict: Verdict, room: Path) -> float:
     """ONE batched retake of `kept` (its round counted in the room's book); its wall seconds."""
     why = why_of(rung.name, [f for fs in kept.values() for f in fs])
-    count_round(room, why, signatures(verdict))
+    count_round(room, why, signatures(verdict), takes=sorted(kept))
     began = wall()
     retake(ctx, sorted(kept), why, flag, trims=trims)
     return wall() - began
@@ -1020,9 +1092,7 @@ def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judge
         if not routed:
             return judged_gate.RungResult(False, "not routed")
         written = head_cuts(ctx, routed.get("head_cut", {}))
-        renders = renderable(routed, room, written)
-        doc, trims = trimmed(ctx, routed, renders, records)
-        kept, why = batch_of(ctx, rung, renders, room, since)
+        renders, doc, trims, kept, why = batch_for(ctx, rung, routed, written, records, since)
         write_edits(ctx, doc, routed, kept, trims)
         free = f"head cut {len(written)}, trimmed {len(trims)}"
         if not kept:

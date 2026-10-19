@@ -14,7 +14,7 @@ def _room(home):
 
 
 def _curable(monkeypatch):
-    monkeypatch.setattr(tl, "route", lambda v, r, try_i=1: {"seed": {2: []}})
+    monkeypatch.setattr(tl, "route", lambda v, r, try_i=1, **k: {"seed": {2: []}})
     return type("V", (), {"faults": []})()
 
 

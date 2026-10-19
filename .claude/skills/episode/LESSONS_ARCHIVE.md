@@ -2110,3 +2110,50 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   that opened it. Ask what reads the state after the step completes, the drive ends and the autopilot relaunches.
 - Tests: `tests/test_the_freeze_outlives_the_repair_drive.py` (ep01's T00 pair after the drive, T21's two draws
   at the terminal), `tests/test_a_repair_window_holds_until_it_redelivers.py`, `tests/test_the_repair_dry_check.py`.
+
+## A freeze holds at every place that renders (incident 2, 2026-10-19 12:29 PDT, Jekyll HEL ep01)
+
+- **What happened.** The owner's repair rerun of ep01 on 52e90bc (all 28 delivered takes frozen; the dry check
+  said `step 09 renders 0` and `retake ladder: 2/2 episode rounds -> spent: no ladder render`) was killed by the
+  main session's guard on `queueing 1 takes in one go: T01` (`episodes/ep01/drive_run03.log`). Step 09's CPU
+  lane measured the 28 frozen takes, `take_overlap.early_cures` routed T01's gait row (`shuffle: 4.1 steps/s,
+  0.030 heights a step ... HARD: the feet slide`) to the plan's verb, and the EARLY round queued a retake of
+  frozen T01. ladder.json gained `{"why": "batched_cures: gait", "faults": {"1": ["gait"]}, "early": true}`
+  at 12:29:28. T01 was restored by hand (sha a4b22b62).
+- **Why.** The freeze was wired at two of the places that render or replace a take: the first pass
+  (`takes_r2v.wants_render` over `take_currency.held`) and the terminal's best-draw swap
+  (`take_ladder.kept_frozen`). The early round never asked; it does not read the episode's retake cap either,
+  so the dry check's "spent: no ladder render" -- a counter -- said nothing about it.
+- **Every place in steps 09-12 that renders or replaces a take, and how each holds the freeze now:**
+  1. first pass: `takes_r2v.wants_render` over `take_currency.held` (7cdb216, 52e90bc);
+  2. early round: `take_overlap.early_cures` -> `take_ladder.route`, which skips a frozen take
+     (`take_ladder.curable_faults`);
+  3. batched rung: `take_ladder.rungs().take` -> `route` -> `batch_for`; the climb's `still_curable` asks
+     `route` too, so frozen faults alone are not curable and the terminal answers at once;
+  4. terminal: `keep_best_draws` keeps a frozen take's bytes (`kept_frozen`), and `settle_take` returns
+     `keep_best` for it, never a still from the panel (the cut keeps the delivered take);
+  5. take_dq `--attempts` (keeps the best-scored draw as `T<nn>.mp4`): a frozen take is checked alone, from
+     `take_ladder.measure_late` (a round's late checks) and `take_overlap.ranked` (the CPU lane). The guard sits
+     in the callers because take_dq.py is measuring code: editing it re-measures every take;
+  6. step 11's master retake: `master_ladder.refuse_frozen` (`KEPT T<nn>: ...; no master retake`);
+  7. the face refine (09_07) and the tiny-face rung's one draw (09_08) are the repair's own work and keep it.
+  The ladder still JUDGES a frozen take and signs it keep_best, flagged. Outside a repair every site is exactly
+  as before (pinned on T01's real dq row: gait_verb, a batch of T01, a still for a hard narration take).
+- **The stale round.** It was written at launch (`join_early`) and the drive died before a byte landed: no
+  T01.mp4 or attempts/T01_fail*.mp4 is newer than 12:29:28. Under P08 a round that renders nothing is not a
+  round. `take_ladder.counted`: a round counts when a take it names, or an archived draw of one, was written
+  after it launched (`landed`), or this process launched it (`pid`: in flight). New rounds record `pid` and
+  `takes`; a round naming no take counts as before. On ep01: the 20:14 round (T21, T24) counts (T21.mp4 landed
+  at 20:15); the 12:29 round does not. It caps nothing (0 rounds since the retry stamp), its signature blocks no
+  later cure of T01 (`progressed`), `early_taken` is empty, and `join_early` never folds into it. It unblocks
+  nothing either: T01 stays frozen, and attempts.json's `retakes` 2/2 still closes the climb.
+- **The dry check calls the deciders.** `repair_dry_check.ladder_lines`: ladder.json as `counted` reads it,
+  `take_overlap.early_cures` over every measured take under the window (then `early_affordable`), and
+  `take_ladder.still_curable` / `route` / `batch_for` over the signed eye for these bytes (else the dq rows),
+  with the frozen faulted takes named. On ep01: `early round ...: batch none`, `take ladder ...: batch none
+  (not curable: the terminal answers)`, `uncounted: batched_cures: gait (T01): landed nothing`.
+- **Lesson.** A freeze must hold at EVERY place that renders: first pass, early round, ladder rung, terminal,
+  master retake, `--attempts`; list them before calling it done. A dry check calls the deciders, never reads a
+  counter (brick 4: one rule per fact, read by every channel).
+- Tests: `tests/test_a_freeze_holds_at_every_render_site.py` (replay on ep01's T01 dq record, manifest,
+  repair.json, ladder.json and attempts.json as the 12:29 kill left them: `tests/fixtures/ep01_replay/repair_rerun/`).

@@ -141,6 +141,18 @@ def flag(v: Verdict) -> Verdict:
     return v
 
 
+def refuse_frozen(ctx, shot: int) -> bool:
+    """The take the governing repair froze is never retaken from the master (incident 2, 2026-10-19):
+    its KEPT line is said and the master stays flagged."""
+    from studio import take_ladder
+    line = take_ladder.kept_frozen(ctx.home, shot, "no master retake")
+    if line:
+        print(line, flush=True)
+        if hasattr(ctx, "log"):
+            ctx.log(line, level="WARNING")
+    return bool(line)
+
+
 def retake_through_take_ladder(ctx, shot: int, v: Verdict) -> bool:
     """One round of the take ladder over the named shot, under the render flag
     the RENDER row earns; True when it changed the take or shots.json (then the master
@@ -149,6 +161,8 @@ def retake_through_take_ladder(ctx, shot: int, v: Verdict) -> bool:
     from scripts.episode import step_09_shoot
     from studio import gate_policy, take_ladder
     faults = [f for f in v.faults if f.kind in master_eye.MEASURED]
+    if refuse_frozen(ctx, shot):                         # an owner's repair froze the delivered take
+        return False
     if take_ladder.refuse_spent(ctx, len(faults)):       # the episode's 2 retake rounds: keep the master
         return False
     began, before = time.time(), fingerprint(ctx.home, shot)

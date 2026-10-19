@@ -110,9 +110,11 @@ def landed(room: Path, code: str, any_code: bool = False, skip: set[int] = froze
 # ---- the early round ---------------------------------------------------------------
 
 def last_round(room: Path) -> dict:
+    """The latest round that counts (take_ladder.counted): a round no byte landed for is not one."""
     doc = read_doc(Path(room) / take_ladder.LADDER_FILE)
     rounds = (doc or {}).get("rounds") or [] if isinstance(doc, dict) else []
-    return rounds[-1] if rounds else {}
+    live = take_ladder.counted(room, rounds)
+    return live[-1] if live else {}
 
 
 def early_open(room: Path, since: float = 0.0) -> bool:
@@ -129,16 +131,25 @@ def early_taken(room: Path, since: float = 0.0) -> set[int]:
 
 
 def join_early(room: Path, why: str, sigs: dict[str, list[str]], since: float = 0.0) -> None:
-    """Open the early round in ladder.json, or fold this job into it."""
+    """Open the early round in ladder.json, or fold this job into it -- never into a round that counts
+    for nothing (incident 2: the 12:29 round a killed drive left)."""
     path = Path(room) / take_ladder.LADDER_FILE
     doc = read_doc(path) if path.exists() else {}
     rounds = doc.setdefault("rounds", [])
-    if take_ladder.rounds_of(room, since) == 0:
-        rounds.append({"why": why, "at": round(time.time(), 1), "faults": {}, "early": True})
-    rounds[-1]["faults"].update(sigs)
-    if why not in rounds[-1]["why"]:
-        rounds[-1]["why"] += f"; {why}"
+    live = [r for r in take_ladder.counted(room, rounds) if float(r.get("at") or 0.0) >= since]
+    if not live:
+        rounds.append(take_ladder.new_round(why, [], {}) | {"faults": {}, "early": True})
+        live = rounds[-1:]
+    fold(live[-1], why, sigs)
     path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+
+
+def fold(row: dict, why: str, sigs: dict[str, list[str]]) -> None:
+    """This job's takes, signatures and reason, into the open early round."""
+    row.setdefault("faults", {}).update(sigs)
+    row["takes"] = sorted(set(row.get("takes") or []) | {int(k) for k in sigs})
+    if why not in row["why"]:
+        row["why"] += f"; {why}"
 
 
 def dq_verdict(room: Path, indices: list[int]) -> Verdict:
@@ -151,11 +162,14 @@ def dq_verdict(room: Path, indices: list[int]) -> Verdict:
                    confidence=1.0, reads=len(indices))
 
 
-def early_cures(room: Path, indices: list[int], since: float = 0.0) -> dict[int, tuple[str, list[Fault]]]:
-    """take -> (cure, faults) for the render cures the dq rows alone order."""
+def early_cures(room: Path, indices: list[int], since: float = 0.0,
+                window=take_ladder.GOVERNING) -> dict[int, tuple[str, list[Fault]]]:
+    """take -> (cure, faults) for the render cures the dq rows alone order; a take the repair froze is
+    never one (take_ladder.route skips it)."""
     if not indices or not early_open(room, since):
         return {}
-    routed, taken = take_ladder.route(dq_verdict(room, indices), room, try_i=1), early_taken(room, since)
+    routed = take_ladder.route(dq_verdict(room, indices), room, try_i=1, window=window)
+    taken = early_taken(room, since)
     return {i: (cure, fs) for cure in RENDER_CURES for i, fs in routed.get(cure, {}).items() if i not in taken}
 
 
@@ -315,7 +329,7 @@ class Shop:
         ready = landed(self.room, self.code, "--ceiling-spent" in self.check_flags, self.gave_up())
         if not ready:
             return
-        attempts = [i for i in ready if self.attempts or i in self.retaken]
+        attempts = ranked(self.room, ready, self.attempts, self.retaken)
         plain = [i for i in ready if i not in attempts]
         takes, flag = (plain, ()) if plain else (attempts, ("--attempts",))
         args = (*map(str, takes), "--cpu-only", *flag, *self.check_flags)
@@ -373,6 +387,12 @@ class Shop:
             return
         self.queue = enqueue(self.queue, Job(REFINE, tuple(sorted(owed)), "face refine"))
         self.ctx.log(f"CPU lane: face refine owed on {sorted(owed)} ({price:.0f} s) -- queued behind the renders")
+
+
+def ranked(room: Path, ready: list[int], every: bool, retaken: set[int]) -> list[int]:
+    """The landed takes take_dq checks with `--attempts` (a retake's): never one an owner's repair froze,
+    whose archived draws must not displace it (incident 2, 2026-10-19)."""
+    return [i for i in ready if (every or i in retaken) and not take_ladder.frozen_here(room, i)]
 
 
 def unmeasured(room: Path, indices: list[int], code: str | None = None) -> list[int]:
