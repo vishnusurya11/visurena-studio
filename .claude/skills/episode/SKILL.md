@@ -553,17 +553,23 @@ is never cut: the voice is the ruler. Jekyll ep01 v2 T14 failed WER 0.56 + tail 
 same-length reseeds and passed both (WER 0.11, tail -48 dB) on its first shorter take
 (coda 1.5 -> 0.75 s).
 
-**Wide-shot faces are refined (09_07, owner 2026-10-17: "I like face improvements a lot in wide shots, go ahead").**
-A wide or full take, or one whose face-at-end is under 60 render px (never an insert), that PASSED its dq gets every
-small face tracked (`studio/face_track.py`), each track matched to the take's staged cast (facenet + the Lab colour of
-head and hat + the plan's "at the LEFT/CENTRE/RIGHT"), and each crop re-rendered through H3 at denoise 0.45 with ONLY
-that person's sheet (`scripts/episode/face_refine.py`, F2's workflow). The gate keeps a crop only when identity to the
-sheet does not drop, there is no seam or new flicker, and the face count holds; else the unrefined take. Decisions per
-take: `takes/r2v/refine.json` (`refined`, `unrefined`, `no_faces`, `no_cast`, `cut`). Step 09 queues the refine on the
+**Soft faces are refined (09_07, owner 2026-10-17: "I like face improvements a lot in wide shots, go ahead";
+widened 2026-10-19: "why our fix skipped those shots? fix that").** Every take with a planned face (never an insert)
+whose dq lets it ship (no hard row outside warp/gait/pulse/frozen-whole/lip-sync/lag, no warp seed retake owed) is
+tracked: `face_yolov8m.pt` every 3rd frame in a worker under the embedded python (`studio/face_detect.py`, GPU when
+idle, CPU while rendering, MTCNN if the worker fails), tracks cut at hard cuts, the crop centre median-smoothed over 21
+frames and its size over 51 (ComfyUI-H3-FaceRefine's ideas, ported). Each track whose smallest face (running median) is
+under 120 px is matched to the take's staged cast (facenet + the Lab colour of head and hat + the plan's
+"at the LEFT/CENTRE/RIGHT"), and its crop re-rendered through H3 with ONLY that person's sheet at a denoise that follows
+the face: 0.45 at 60 px, +0.05 per halving, inside 0.40-0.55 (`fr.denoise_for`; F2's workflow, never edited). The plan
+size is not read, nor face-at-end. The gate keeps a crop only when identity to the sheet does not drop, there is no seam
+or new flicker, and the face count holds; else the unrefined take. Decisions per take: `takes/r2v/refine.json`
+(`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`, `cut`; a `no_faces` row of the old 60 px wall is
+owed a new look, its jobless round refunded). Step 09 queues the refine on the
 GPU lane right behind the renders (a REFINE job: after renders and retakes, before the GPU checks) and refines what
-the ladder left owed once at the end. ~110 s per face per take; the FIRST thing cut for time, never a check. The
-refine reads the smallest tracked face height (`measures.warp.tracks`) and declines a take whose every planned face is
-tracked >= 80 % of it at >= 60 px; a `no_faces` pick spends no round. Assemble pastes the kept crops at CUT scale on the
+the ladder left owed once at the end. ~110 s per face per take (ep01: 11 takes, 1,512 s priced); the FIRST thing cut
+for time, never a check. A take whose every planned face the warp gate tracked >= 80 % of it at >= 120 px is declined
+before tracking; `none_found` / `all_readable` spend no round. Assemble pastes the kept crops at CUT scale on the
 decoded frames, before the denoise and the one upscale (owner 2026-10-18, 24caaeb); after the upscale only audio is
 muxed. On `av3` (the default) the pass runs in the portable python's worker (`studio/master_av3.py`),
 which rebuilds the paste from its spans: the same geometry, the same frame loop. By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.

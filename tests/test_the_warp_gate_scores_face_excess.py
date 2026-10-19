@@ -145,30 +145,30 @@ def dq_with(state, passed=True, hard_warp=False):
 CARD = {"index": 3, "faces": ["hyde"]}
 
 
-@pytest.mark.parametrize("state", ["warn", "unmeasurable"])
-def test_a_warned_or_unreadable_close_take_goes_to_the_face_refine(state):
+@pytest.mark.parametrize("state", ["warn", "unmeasurable", "pass"])
+def test_a_close_take_goes_to_the_face_refine_whatever_its_warp_state(state):
+    """Since 2026-10-19 the refine's tracker decides by the face it finds, not by the warp state."""
     from studio import face_refine as fr
-    assert fr.eligible(CARD, ["medium_close"], dq_with(state), 768)
-    assert not fr.eligible(CARD, ["medium_close"], dq_with("pass"), 768)
+    assert fr.eligible(CARD, ["medium_close"], dq_with(state))
 
 
 def test_a_warp_fail_goes_to_the_face_refine_only_after_its_retake():
     from studio import face_refine as fr
     dq = dq_with("fail", passed=False, hard_warp=True)
-    assert not fr.eligible(CARD, ["medium_close"], dq, 768, taken=0)
-    assert fr.eligible(CARD, ["medium_close"], dq, 768, taken=1)
+    assert not fr.eligible(CARD, ["medium_close"], dq, taken=0)
+    assert fr.eligible(CARD, ["medium_close"], dq, taken=1)
 
 
 def test_a_take_failing_anything_besides_warp_is_still_never_refined():
     from studio import face_refine as fr
     dq = dq_with("fail", passed=False, hard_warp=True)
     dq["gates"].append({"name": "leak", "value": 1.0, "ok": False, "hard": True})
-    assert not fr.eligible(CARD, ["wide"], dq, 768, taken=2)
+    assert not fr.eligible(CARD, ["wide"], dq, taken=2)
 
 
 def test_an_insert_is_never_refined_whatever_its_warp():
     from studio import face_refine as fr
-    assert not fr.eligible(CARD, ["insert"], dq_with("warn"), 768)
+    assert not fr.eligible(CARD, ["insert"], dq_with("warn"))
 
 
 # ---- the take gate's row (scripts/episode/take_dq.py) -------------------------------------

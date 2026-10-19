@@ -1,11 +1,13 @@
-"""One crop track per face in a take, for the wide-shot face refine (studio/face_refine.py).
+"""One crop track per face in a take, for the face refine (studio/face_refine.py).
 
-Detections (MTCNN every few frames, loosened for 25-40 px faces) are linked frame
-to frame by nearness; a track ends when its face is gone too long, so a person who
-walks out never hands his window to the man beside him (F2 T22 drifted from
-Utterson to Enfield).  A track's boxes are interpolated over its life and held at
-its ends, smoothed, and framed by a window of ONE size (the median face times the
-margin) -- the crop H3 re-renders is a steady close-up, never a zoom.
+Detections (the anime-trained face_yolov8m.pt every few frames, studio/face_detect.py;
+MTCNN when its worker fails) are linked frame to frame by nearness; a track ends when
+its face is gone too long, so a person who walks out never hands his window to the man
+beside him (F2 T22 drifted from Utterson to Enfield), and it is cut at a hard cut.
+A track's boxes are interpolated over its life and held at its ends; the centre is
+median-smoothed over 21 frames and the size over 51 (ComfyUI-H3-FaceRefine, Carasibana,
+MIT: the ideas ported, nothing installed), so the window sits still and follows a
+push-in slowly without ever pumping.
 """
 from __future__ import annotations
 
@@ -13,13 +15,17 @@ import numpy as np
 
 from studio import h3
 
-EVERY = 4
-"""Detect on every 4th frame (F2: 18 s of CPU for a 192-frame take)."""
+EVERY = 3
+"""Detect on every 3rd frame and interpolate between (YOLO on CPU: about a third of a take's
+frames; MTCNN read every 4th, 18 s of CPU for a 192-frame take)."""
 GAP = 12
 MIN_HITS = 4
 JUMP_FACES = 2.0
 JUMP_FLOOR = 48.0
 SMOOTH = 9
+CENTRE_SMOOTH = 21
+SIZE_SMOOTH = 51
+"""Running-median windows in frames (ComfyUI-H3-FaceRefine: centre over 21, size over 51)."""
 MARGIN = 2.4
 MIN_SIDE = 96
 
@@ -111,30 +117,73 @@ def stitch(tracks: list[list]) -> list[list]:
     return out
 
 
+def split(tracks: list[list], cuts: list[int]) -> list[list]:
+    """Each track cut at every hard cut (the first frame of a new shot): a face on both
+    sides of a cut is two faces to the crop, never one window swimming across."""
+    out: list[list] = []
+    for tr in tracks:
+        piece: list = []
+        for t, b in tr:
+            if piece and any(piece[-1][0] < c <= t for c in cuts):
+                out.append(piece)
+                piece = []
+            piece.append((t, b))
+        out.append(piece)
+    return out
+
+
+def running_median(a: np.ndarray, n: int) -> np.ndarray:
+    """Each value the median of the `n` around it, the window shrinking at the ends (never padded)."""
+    a, k = np.asarray(a, float), max(int(n), 1) // 2
+    return np.array([np.median(a[max(0, i - k):i + k + 1]) for i in range(len(a))])
+
+
+def track_px(track: list) -> float:
+    """The track's smallest face height after a running median over SIZE_SMOOTH frames of
+    detections: a push-in is judged by its small start, a one-frame detector dip is not the
+    face (ep01 T09 sampled 255, 162 and 119 px: a 162 px close-up)."""
+    heights = np.array([height(b) for _, b in track], float)
+    return float(running_median(heights, max(SIZE_SMOOTH // EVERY, 1)).min())
+
+
 def small(tracks: list[list], px: float) -> list[list]:
-    """The tracks whose face is under `px` (median height): a readable face is left alone."""
-    return [tr for tr in tracks if np.median([height(b) for _, b in tr]) < px]
+    """The tracks whose smallest face (track_px) is under `px`: a readable face is left alone."""
+    return [tr for tr in tracks if track_px(tr) < px]
+
+
+def box_mean(a: np.ndarray, n: int) -> np.ndarray:
+    """A centred moving average over `n` frames, the ends held."""
+    pad = np.pad(np.asarray(a, float), (n // 2, n // 2), mode="edge")
+    return np.convolve(pad, np.ones(n) / n, mode="valid")
 
 
 def fill(track: list, frames: int, smooth: int = SMOOTH) -> np.ndarray:
-    """(frames, 4) boxes: interpolated inside the life, held outside, box-filtered."""
+    """(frames, 4) boxes: interpolated inside the life, held outside; then (smooth > 1) the
+    centre median-smoothed over CENTRE_SMOOTH, the size over SIZE_SMOOTH, both box-filtered."""
     at = [t for t, _ in track]
     arr = np.array([b for _, b in track], float)
     full = np.stack([np.interp(range(frames), at, arr[:, k]) for k in range(4)], 1)
     if smooth <= 1:
         return full
-    pad = np.pad(full, ((smooth // 2, smooth // 2), (0, 0)), mode="edge")
-    return np.stack([np.convolve(pad[:, k], np.ones(smooth) / smooth, mode="valid") for k in range(4)], 1)
+    cx, cy = (box_mean(running_median((full[:, k] + full[:, k + 2]) / 2, CENTRE_SMOOTH), smooth) for k in (0, 1))
+    w, h = (box_mean(running_median(full[:, k + 2] - full[:, k], SIZE_SMOOTH), smooth) for k in (0, 1))
+    return np.stack([cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2], 1)
 
 
 def windows(boxes: np.ndarray, width: int, height_: int) -> list[tuple[int, int, int]]:
-    """A square (x, y, side) per frame round the face, one side for the whole track."""
-    side = min(int(max(MIN_SIDE, np.median(boxes[:, 3] - boxes[:, 1]) * MARGIN)), width, height_)
+    """A square (x, y, side) per frame round the face, the side its smoothed height times
+    the margin: a steady face keeps one side, a push-in grows its window slowly."""
     out = []
     for x1, y1, x2, y2 in boxes:
+        side = min(int(max(MIN_SIDE, (y2 - y1) * MARGIN)), width, height_)
         cx, cy = (x1 + x2) / 2, (y1 + y2) / 2 - 0.05 * side
         out.append((int(np.clip(cx - side / 2, 0, width - side)), int(np.clip(cy - side / 2, 0, height_ - side)), side))
     return out
+
+
+def side_of(wins: list) -> int:
+    """The track's common window side (the median): the gate measures every frame at it."""
+    return int(np.median([s for _, _, s in wins]))
 
 
 def crop_span(span: tuple[int, int], frames: int) -> tuple[int, int]:

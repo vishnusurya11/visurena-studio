@@ -32,6 +32,14 @@ def windows_of(take: list[np.ndarray], wins: list, span: tuple[int, int]) -> lis
     return out
 
 
+def at_side(crops: list[np.ndarray], side: int) -> list[np.ndarray]:
+    """Window crops of a growing window (a push-in) brought to one side, so seam and flicker
+    compare frames of one size."""
+    import cv2
+    return [c if c.shape[0] == side else cv2.resize(np.ascontiguousarray(c), (side, side), interpolation=cv2.INTER_AREA)
+            for c in crops]
+
+
 def shrunk(crop: list[np.ndarray], start: int, span: tuple[int, int], side: int) -> list[np.ndarray]:
     """The refined crop's frames over the life, shrunk to the window's side."""
     import cv2

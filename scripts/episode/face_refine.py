@@ -1,17 +1,19 @@
 #!/usr/bin/env python
-"""Step 09_07 -- the wide-shot face refine (owner 2026-10-17; decision
-architecture/decisions/2026-10-17-face-refine.md).
+"""Step 09_07 -- the face refine (owner 2026-10-17; decision
+architecture/decisions/2026-10-17-face-refine.md; every soft face, 2026-10-19).
 
     uv run python scripts/episode/face_refine.py <codex_id> <n> [take ...] [--within=takes]
 
-For each wide or full take (or one whose face is under 60 px) that passed take DQ:
-every face is tracked, each track matched to the take's staged cast by identity
-against the sheets and the plan's side, and each person's crop re-rendered through
-H3 at denoise 0.45 with ONLY that person's sheet (studio/face_refine.WORKFLOW).  Each
-refined crop is gated -- identity against the sheet, seam, flicker, face count -- and
-the decision per take lands in takes/r2v/refine.json; a refused crop falls back to
-the unrefined take.  Assemble pastes the kept crops into the master after the 4x
-upscale (studio/face_paste.py).
+For each take with a planned face that its dq lets ship (studio/face_refine.selected):
+every face is tracked (face_yolov8m.pt in a worker, MTCNN behind it; studio/face_detect.py),
+each track whose smallest face is under 120 px matched to the take's staged cast by
+identity against the sheets and the plan's side, and each person's crop re-rendered
+through H3 with ONLY that person's sheet at a denoise that follows the face's size
+(studio/face_refine.WORKFLOW, denoise_for).  Each refined crop is gated -- identity
+against the sheet, seam, flicker, face count -- and the decision per take lands in
+takes/r2v/refine.json (`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`,
+`cut`); a refused crop falls back to the unrefined take.  Assemble pastes the kept crops
+at cut scale, then the one upscale (studio/face_paste.py).
 
 Step 09 runs it inside its two lanes, right after a take passes its dq, and once
 more after the ladder for any take still owed one.  Pipelined: a take's crops are
@@ -32,7 +34,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import numpy as np  # noqa: E402
 
-from studio import episode_clock, episode_home, face_gate, face_track, face_refine as fr  # noqa: E402
+from studio import episode_clock, episode_home, face_detect, face_gate, face_track, face_refine as fr  # noqa: E402
 from studio import step_attempts, step_caps  # noqa: E402
 from studio.face_paste import sha8  # noqa: E402
 
@@ -53,11 +55,6 @@ def read(path: Path, default):
     return json.loads(Path(path).read_text(encoding="utf-8")) if Path(path).exists() else default
 
 
-def canvas_height(home: Path) -> int:
-    from studio import canvas
-    return canvas.size(read(home / "plan.json", {}).get("aspect") or canvas.DEFAULT)[1]
-
-
 def selection(book: Path, number: int) -> list[int]:
     """The takes the refine works on (studio/face_refine.selected), from the files."""
     home, room = episode_home.home(book, number), room_of(book, number)
@@ -65,7 +62,7 @@ def selection(book: Path, number: int) -> list[int]:
     sizes = {int(s["index"]): s.get("size", "") for s in read(home / "plan.json", {}).get("shots", [])}
     dqs = {int(c["index"]): read(room / f"T{int(c['index']):02d}.dq.json", None) for c in cards}
     taken = {int(c["index"]): taken_of(home, room, int(c["index"])) for c in cards}
-    return fr.selected(cards, sizes, dqs, canvas_height(home), taken)
+    return fr.selected(cards, sizes, dqs, taken)
 
 
 def taken_of(home: Path, room: Path, index: int) -> int:
@@ -75,10 +72,19 @@ def taken_of(home: Path, room: Path, index: int) -> int:
     return warp_gate.RETAKES if take_ladder.episode_spent(home) else take_ladder.attempts_of(room, index)
 
 
+STALE = ("no_faces",)
+"""A decision under the 60 px wall (before 2026-10-19): `no_faces` meant no face UNDER 60 px, and
+its round was spent with no job (fixed by P07, 41fba62).  Jekyll ep01 T05 T06 T13 T21 T23 T24."""
+
+
+def status_of(doc: dict, index: int) -> str | None:
+    return (doc.get(f"T{index:02d}") or {}).get("status")
+
+
 def current(doc: dict, room: Path, index: int) -> bool:
-    """A decision exists for exactly these take bytes (a cut is still owed)."""
+    """A decision exists for exactly these take bytes (a cut or a stale row is still owed)."""
     entry = doc.get(f"T{index:02d}") or {}
-    return entry.get("status") not in (None, "cut") and entry.get("take_sha8") == sha8(room / f"T{index:02d}.mp4")
+    return entry.get("status") not in (None, "cut", *STALE) and entry.get("take_sha8") == sha8(room / f"T{index:02d}.mp4")
 
 
 def pending(book: Path, number: int, among: list[int] | None = None) -> list[int]:
@@ -86,16 +92,18 @@ def pending(book: Path, number: int, among: list[int] | None = None) -> list[int
     room, home = room_of(book, number), episode_home.home(book, number)
     doc = read(room / DOC, {})
     return [i for i in selection(book, number) if (among is None or i in among) and not current(doc, room, i)
-            and not refined_out(home, i)]
+            and not refined_out(home, i, status_of(doc, i))]
 
 
 def refine_key(index: int) -> str:
     return f"face_refine.T{index:02d}"
 
 
-def refined_out(home: Path, index: int) -> bool:
-    """The take has had its refines (owner 2026-10-18: 1 per take, persisted in attempts.json)."""
-    return step_attempts.count(home, refine_key(index)) >= step_caps.rounds("face_refine")
+def refined_out(home: Path, index: int, status: str | None = None) -> bool:
+    """The take has had its refines (owner 2026-10-18: 1 per take, persisted in attempts.json);
+    a STALE row's jobless round is refunded until the first new decision replaces the row."""
+    spent = step_attempts.count(home, refine_key(index)) - (1 if status in STALE else 0)
+    return spent >= step_caps.rounds("face_refine")
 
 
 def count_refine(home: Path, index: int) -> None:
@@ -103,7 +111,7 @@ def count_refine(home: Path, index: int) -> None:
 
 
 def count_if_worked(home: Path, work) -> None:
-    """A refine round is spent only when a job was queued: no_faces and no_cast cost none."""
+    """A refine round is spent only when a job was queued: none_found, all_readable and no_cast cost none."""
     if work.jobs:
         count_refine(home, work.index)
 
@@ -154,11 +162,28 @@ def read_frames(path: Path) -> list[np.ndarray]:
     return out
 
 
-def tracks_of(frames: list[np.ndarray], loose) -> list[list]:
-    """Every small face's track over the take (detected every EVERY frames), its
-    missed stretches stitched; a face big enough to read is left alone."""
-    dets = {t: [tuple(f["box"]) for f in loose(frames[t])] for t in range(0, len(frames), face_track.EVERY)}
-    return face_track.small(face_track.keep(face_track.stitch(face_track.link(dets))), fr.SMALL_FACE_PX)
+def tracks_of(frames: list[np.ndarray], dets: dict) -> list[list]:
+    """Every face's track over the take (detections on every EVERY-th frame), its missed
+    stretches stitched, cut at the take's hard cuts, a detector flicker dropped."""
+    boxes = {int(t): [tuple(f["box"]) for f in found] for t, found in dets.items()}
+    joined = face_track.stitch(face_track.link(boxes))
+    return face_track.keep(face_track.split(joined, cut_frames(frames)))
+
+
+def cut_frames(frames: list[np.ndarray]) -> list[int]:
+    """The first frame of every new shot inside the take (PySceneDetect's adaptive detector,
+    studio/measure/cuts.py, the cut handling ComfyUI-H3-FaceRefine uses)."""
+    from studio.measure.cuts import scene_cuts
+    return [c for c in scene_cuts(frames) if 0 < c < len(frames)]
+
+
+def soft_tracks(work, tracks: list[list]) -> list[list]:
+    """The tracks the refine works on (smallest face under SMALL_FACE_PX); when there are
+    none the take's status says why: no face found, or every face already reads."""
+    soft = face_track.small(tracks, fr.SMALL_FACE_PX)
+    if not soft:
+        work.status = "all_readable" if tracks else "none_found"
+    return soft
 
 
 def head_of(rgb: np.ndarray, box) -> np.ndarray:
@@ -257,11 +282,13 @@ def take_seed(room: Path, card: dict, index: int) -> int:
     return int((graph.get("12") or {}).get("inputs", {}).get("noise_seed") or card.get("seed") or 0)
 
 
-def graph_for(person, prompt: str, frames: int, seed: int, names: dict, prefix: str) -> dict:
+def graph_for(person, prompt: str, frames: int, seed: int, names: dict, prefix: str,
+              denoise: float = fr.DENOISE) -> dict:
+    """F2's graph filled through its manifest; the workflow JSON itself is never edited."""
     from studio import comfy
     template, inject = comfy.load_workflow(fr.WORKFLOW)
     values = {"prompt": fr.crop_prompt(person, fr.style_line(prompt), frames / 24), "frames": frames,
-              "seed": seed, "denoise": fr.DENOISE, "sheet": names["sheet"], "crop_video": names["crop"],
+              "seed": seed, "denoise": denoise, "sheet": names["sheet"], "crop_video": names["crop"],
               "guide_audio": names["audio"], "filename_prefix": prefix}
     return comfy.apply_inject(template, inject, values)
 
@@ -278,6 +305,8 @@ class Job:
     out: Path | None = None
     save: str = ""
     """The graph's SaveVideo node: the only output that is the render."""
+    denoise: float = fr.DENOISE
+    face_px: float = 0.0
 
 
 @dataclass
@@ -289,14 +318,13 @@ class TakeWork:
     status: str = "refined"
 
 
-def queue_take(book: Path, number: int, index: int, card: dict, engine, loose, detect, embed) -> TakeWork:
-    """Track, match, write each person's crop, and queue its render (no waiting)."""
+def queue_take(book: Path, number: int, index: int, card: dict, engine, loose, detect, embed, find) -> TakeWork:
+    """Track, match, write each soft face's crop, and queue its render (no waiting)."""
     room = room_of(book, number)
     take = room / f"T{index:02d}.mp4"
     work = TakeWork(index, sha8(take), read_frames(take))
-    tracks = tracks_of(work.frames, loose)
+    tracks = soft_tracks(work, tracks_of(work.frames, find(take, work.frames)))
     if not tracks:
-        work.status = "no_faces"
         return work
     refs = [str(r) for r in card.get("refs", [])]
     matched = match(card["prompt"], fr.cast_of(card["prompt"], refs), tracks, work.frames, book, detect, embed, loose)
@@ -317,12 +345,14 @@ def queue_person(room: Path, book: Path, card: dict, work: TakeWork, k: int, per
     crop = write_video(crop_frames(work.frames, wins, start, n), out / f"{stem}_src.mp4")
     names = {"crop": engine.stage(crop), "sheet": engine.stage(Path(book) / person.sheet),
              "audio": engine.stage(silence(n / 24, out / f"{stem}_guide.wav"))}
-    seed = take_seed(room, card, work.index) + person.k
-    graph = graph_for(person, card["prompt"], n, seed, names, f"face_refine/{stem}_{work.sha}")
-    job = Job(k, person, track, wins, start, n, engine.submit(graph), save=fr.saved_node(graph))
+    px = round(float(np.median([face_track.height(b) for _, b in track])), 1)
+    graph = graph_for(person, card["prompt"], n, take_seed(room, card, work.index) + person.k, names,
+                      f"face_refine/{stem}_{work.sha}", fr.denoise_for(px))
+    job = Job(k, person, track, wins, start, n, engine.submit(graph), save=fr.saved_node(graph),
+              denoise=fr.denoise_for(px), face_px=px)
     episode_home.write_json(out / f"{stem}.json", {"windows": [list(v) for v in wins],
                                                     "life": list(face_track.life(track)), "start": start,
-                                                    "frames": n, "who": person.who})
+                                                    "frames": n, "who": person.who, "denoise": job.denoise})
     return job
 
 
@@ -345,9 +375,9 @@ def sampled(seq: list, n: int = GATE_SAMPLES) -> list:
 def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None) -> dict:
     """The person's measures, the decision and the row refine.json keeps."""
     import cv2
-    life, side = face_track.life(job.track), job.windows[0][2]
+    life, side = face_track.life(job.track), face_track.side_of(job.windows)
     refined = read_frames(job.out)
-    src_w = face_gate.windows_of(work.frames, job.windows, life)
+    src_w = face_gate.at_side(face_gate.windows_of(work.frames, job.windows, life), side)
     ref_w = face_gate.shrunk(refined, job.start, life, side)
     src768 = [cv2.resize(np.ascontiguousarray(f), (SIDE, SIDE), interpolation=cv2.INTER_LANCZOS4) for f in sampled(src_w)]
     ref768 = sampled([refined[t - job.start] for t in range(life[0], life[1] + 1) if 0 <= t - job.start < len(refined)])
@@ -357,7 +387,7 @@ def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None) ->
     m = face_gate.measure(src_w, ref_w, src768, ref768, vec, detect, embed, moved)
     kept, why = fr.decide(m)
     return {"who": job.person.who, "crop": f"{OUT}/{stem}.mp4", "track": f"{OUT}/{stem}.json", "kept": kept,
-            "why": why, "measures": m.__dict__, "frames": job.frames}
+            "why": why, "measures": m.__dict__, "frames": job.frames, "denoise": job.denoise, "face_px": job.face_px}
 
 
 def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, seconds: float, loose=None) -> dict:
@@ -394,32 +424,39 @@ class Comfy:
 
 
 def detectors():
-    """(loose detector for tracking, facenet detect, facenet embed), CPU."""
+    """(MTCNN loose detector, facenet detect, facenet embed, the YOLO finder with MTCNN behind it)."""
     from studio.measure import faces
     detect, embed = faces.embedder()
-    return face_track.loose_detector(), detect, embed
+    loose = face_track.loose_detector()
+    return loose, detect, embed, face_detect.Finder(loose)
+
+
+def frame_finder(loose):
+    """A finder reading frames with one frame detector (a test's fake, or MTCNN alone)."""
+    return lambda take, frames: face_detect.by_frames(frames, loose)
 
 
 def refine(book: Path, number: int, indices: list[int] | None, *, engine=None, detect=None, loose=None,
-           embed=None, within: str = "") -> dict:
+           embed=None, find=None, within: str = "") -> dict:
     """Queue every owed take's crops as it is tracked, then gate each take in order."""
     if detect is None:
-        loose, detect, embed = detectors()
-    engine, room = engine or Comfy(), room_of(book, number)
+        loose, detect, embed, find = detectors()
+    find, engine, room = find or frame_finder(loose), engine or Comfy(), room_of(book, number)
     cards = {int(c["index"]): c for c in read(room / "prompts.json", [])}
     out = {}
     with episode_clock.timed(book, number, "face_refine", note=" ".join(map(str, indices or [])), within=within):
-        queued = queue_within_wall(book, number, pending(book, number, indices), cards, engine, loose, detect, embed)
+        queued = queue_within_wall(book, number, pending(book, number, indices), cards, engine,
+                                   (loose, detect, embed, find))
         for began, work in queued:
             out[work.index] = decide_take(room, book, work, detect, embed, engine, time.time() - began, loose)
             count_if_worked(episode_home.home(book, number), work)
     return out
 
 
-def queue_within_wall(book: Path, number: int, owed_takes: list[int], cards: dict, engine, loose, detect,
-                      embed) -> list:
+def queue_within_wall(book: Path, number: int, owed_takes: list[int], cards: dict, engine, readers) -> list:
     """Each owed take queued in turn until the wall: the rest keep their faces, said as a CAP
-    line and recorded `cut` in refine.json (a take in flight is never cut)."""
+    line and recorded `cut` in refine.json (a take in flight is never cut).  The detector
+    worker is closed once the last take is tracked.  `readers` = (loose, detect, embed, find)."""
     began, queued = time.time(), []
     for k, i in enumerate(owed_takes):
         if wall_spent(began, time.time()):
@@ -427,7 +464,8 @@ def queue_within_wall(book: Path, number: int, owed_takes: list[int], cards: dic
             record_cut(room_of(book, number), rest, 0.0, book, number, why=f"CAP face_refine: the {step_caps.mmss(step_caps.wall_s('face_refine'))} wall")
             print(step_caps.cap_line("face_refine", k, len(owed_takes), time.time() - began, len(rest)), flush=True)
             break
-        queued.append((time.time(), queue_take(book, number, i, cards[i], engine, loose, detect, embed)))
+        queued.append((time.time(), queue_take(book, number, i, cards[i], engine, *readers)))
+    getattr(readers[3], "close", lambda: None)()
     return queued
 
 

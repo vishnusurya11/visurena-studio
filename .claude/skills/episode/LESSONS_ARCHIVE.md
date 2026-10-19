@@ -1823,3 +1823,34 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   writer round for pixels it cannot see (cap every loop). The writer is told the floor in the
   brief (`grammar_rules.face_floor_px`, `face_px_by_size`) and in its skill.
 - Tests: `tests/test_the_face_floor.py`.
+
+## The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19)
+
+- **Why it skipped the blurry shots.** Jekyll ep01 refined 2 of 28 takes. Six picks ended
+  `no_faces` (T05 T06 T13 T21 T23 T24): the tracker FOUND their faces, then threw away every track
+  at 60 px or more as readable, and a 60-110 px face of 768 draws a 5-10 px eye. Medium and
+  medium_close takes were never picks unless G-WARP routed them, and the size read was face-at-end
+  (T06 pushes in from 60 px; its last frame read 233). A status that joins two causes ("no face"
+  and "every face is big") hid the cause for a whole episode: split it (`none_found`,
+  `all_readable`).
+- **T01 (15 px faces) had no row at all**, not even a round in attempts.json: it was never
+  pending. The 2026-10-18 run's `passed_but_warp` let only `warp` fail, and T01 failed `gait`.
+  P07 widened it to the motion rows; a rule that silently declines leaves no trace, so the replay
+  test now pins T01 in the picks.
+- **The rule now.** No plan size, no face-at-end: the refine's tracker reads every faced take but
+  an insert, and each track whose smallest face (running median over 51 frames) is under 120 px is
+  refined. ep01 replay: T01 T05 T06 T08 T10 T13 T15 T18 T20 T23 T26 (11; close-ups skipped);
+  1,512 s priced, about 19 min more GPU than the 10-18 run. A warp FAIL still waits for its one
+  seed retake; identity, clones, content, lettering, look and leak still bar.
+- **The detector.** face_yolov8m.pt (already on disk) in a worker under the embedded python, every
+  3rd frame at 768: 3.4 s to start, 10-19 s a take on 4 CPU threads, T01's 15 px faces found. MTCNN
+  cost about 96 s a take on the 10-18 run and missed far figures. GPU only when ComfyUI is idle;
+  the refine queues its own renders, so after the first take it is the CPU.
+- **Ported, not installed (ComfyUI-H3-FaceRefine, MIT).** Centre median 21 frames, size 51, tracks
+  cut at PySceneDetect cuts, the window follows the smoothed size (the gate measures every frame at
+  the median side), denoise by face size: 0.45 at 60 px, +0.05 per halving, 0.40-0.55 (to
+  calibrate on the bench). The keep/decline walls are unchanged.
+- **Stale rows.** A `no_faces` row of the 60 px wall is owed a new look and its jobless round is
+  refunded until the first new decision; ep01 therefore re-tracks its six.
+- Tests: `tests/test_face_refine_reaches_every_soft_face.py`, `tests/test_face_track_holds_the_crop_still.py`,
+  `tests/test_face_detect_finds_anime_faces.py`.

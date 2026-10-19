@@ -22,6 +22,15 @@ def test_the_take_is_cut_to_its_windows_over_the_life():
     assert len(got) == 4 and got[0].shape == (30, 30, 3) and got[0][0, 0, 0] == 2
 
 
+def test_windows_that_follow_a_push_in_are_measured_at_one_side():
+    """The window grows with its face (studio/face_track.windows): seam and flicker compare
+    frames of one size, the track's median side."""
+    take = [np.full((200, 200, 3), 9, np.uint8) for _ in range(4)]
+    crops = fg.windows_of(take, [(0, 0, 40), (0, 0, 50), (0, 0, 60), (0, 0, 70)], (0, 3))
+    got = fg.at_side(crops, 55)
+    assert {g.shape for g in got} == {(55, 55, 3)} and got[0][0, 0, 0] == 9
+
+
 def test_the_refined_crop_is_shrunk_to_the_window_frame_by_frame():
     crop = [np.full((768, 768, 3), k, np.uint8) for k in range(8)]
     got = fg.shrunk(crop, start=2, span=(3, 5), side=30)

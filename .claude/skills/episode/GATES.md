@@ -344,7 +344,7 @@ AND the same staged picture bytes (content-addressed names in its
 `graph.json`).
 
 **FACE REFINE GATE (2026-10-17, owner approved; `studio/face_refine.decide`, measures `studio/face_gate.py`,
-calibration `docs/calibration/face_refine.md`).** Per refined face crop of a wide/full or small-faced take, at window
+calibration `docs/calibration/face_refine.md`).** Per refined face crop of a soft face (tracked under 120 px), at window
 scale and on the 768 crops: the refined crop must DIFFER from the crop it was rendered from (mean |refined - source|
 >= 0.5 per pixel, `SAME_MAX`; first wall: a refine that returns its input passes every other one); identity (facenet
 cosine to the person's sheet at the crop's face -- the detected one, else the box the window was cut round; the sheet's
@@ -357,11 +357,16 @@ summed count read 6 vs 3: the sharper face was found in more frames), KEPT. A br
 decision and its measures in `takes/r2v/refine.json`. Calibrated on F2 (kept by eye: flicker ratio 0.81-0.95) against
 F3 (refused by eye: 1.15-1.32), three takes: thin. A crop is pasted only onto the take bytes it was made from (sha8).
 CLOCK: priced 110 s per face per 192 frames; runs only while `leaves_reserve(step, price + 550 s)`; else `REFINE CUT`
-logged, `status: cut` recorded, the take ships unrefined. **Selection (2026-10-19, P07):** the refine reads the
-smallest warp track height (`measures.warp.tracks` median_px, render px) and declines a take when every planned face is
-tracked >= 80 % of it at >= 60 px (never face-at-end); a `no_faces` / `no_cast` decision spends no round. A warp, gait,
-pulse, frozen-whole, lip-sync or lag hard fail may follow the refine; identity, clones, content, lettering, look and leak
-still bar it. **The paste** is at cut scale, before the one upscale (owner 2026-10-18, 24caaeb). Calibration
+logged, `status: cut` recorded, the take ships unrefined. **Selection (2026-10-19, every soft face; owner "fix
+that"):** no plan size and no face-at-end is read. The refine's tracker (`face_yolov8m.pt`, `studio/face_detect.py`;
+MTCNN behind it) runs on every take with a planned face but an insert; each track whose smallest face (running median
+over 51 frames) is under `SMALL_FACE_PX` 120 is refined (a 60-110 px face draws a 5-10 px eye; ep01 replay: T01 T05 T06
+T08 T10 T13 T15 T18 T20 T23 T26, close-ups skipped). A take whose every planned face the warp gate tracked >= 80 % of it
+at >= 120 px is declined before tracking. Denoise `fr.denoise_for`: 0.45 at 60 px, +0.05 per halving, 0.40-0.55.
+`none_found` / `all_readable` / `no_cast` spend no round; a `no_faces` row of the old 60 px wall is owed a new look.
+A warp, gait, pulse, frozen-whole, lip-sync or lag hard fail may follow the refine (a warp FAIL after its one seed
+retake); identity, clones, content, lettering, look and leak still bar it. ep01 T01 had no row because the 2026-10-18
+run let only `warp` fail and T01 failed `gait` (P07 widened it; pinned by tests/test_face_refine_reaches_every_soft_face.py). **The paste** is at cut scale, before the one upscale (owner 2026-10-18, 24caaeb). Calibration
 (`docs/calibration/face_refine.md`): ep01 seam 11.7-12.9, flicker ratio 0.70-0.90; SEAM_MAX stays 18.
 
 ## QC — `qc.py <book> <n> --engine=r2v`

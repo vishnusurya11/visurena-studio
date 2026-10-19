@@ -55,3 +55,19 @@ window scale from `takes/r2v/refine.json`:
 - Paste order: cut scale, then the one upscale (owner 2026-10-18, 24caaeb), replacing the 2026-10-17
   "after the 4x" text above. The idle-GPU A/B on T18 (sharpness and facenet identity, before/after
   the order change) is still owed; never auto-revert on it.
+
+## Every soft face (2026-10-19, face-blur fixes #1-#2; owner: "fix that")
+
+The 60 px wall above declined faces of 60-110 px, whose eye is 5-10 px: the mush the owner named on
+ep01 (docs/audit/2026-10-19_face_blur/pipeline_audit.md section 2). Now:
+
+- **Wall** `SMALL_FACE_PX` 120, read per track as its smallest face after a running median over 51
+  frames; no plan size, no face-at-end. ep01 replay (fixture of the audit's face_yolov8m samples):
+  T01 T05 T06 T08 T10 T13 T15 T18 T20 T23 T26, 1,512 s priced (T08 and T18 were 363 s of it).
+- **Denoise** `denoise_for(px)` = 0.45 + 0.05 x log2(60 / px), held to 0.40-0.55: 0.45 stays the
+  point the owner kept (T08 55 px, T18 41 px); 30 px reads 0.50, 120 px 0.40. Uncalibrated beyond
+  that point: the bench's arm A2 measures it. Every refine.json person row carries `denoise` and
+  `face_px` so it can be refit.
+- **Walls unchanged** (identity, seam, flicker, faces, change). The window now follows the face's
+  smoothed size, so seam and flicker are measured with every window brought to the track's median
+  side (`face_gate.at_side`).

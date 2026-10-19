@@ -15,7 +15,7 @@ import pytest
 from PIL import Image
 
 from scripts.episode import face_refine as cli
-from studio import episode_home, face_refine as fr
+from studio import episode_home, face_detect as fd, face_refine as fr
 
 FRAMES = 22   # on H3's grid (22 % 17 == 5)
 
@@ -95,34 +95,43 @@ def test_a_wide_take_is_pending_until_refined(tmp_path):
     assert cli.pending(w.book, 1) == [0]
 
 
-def test_a_closer_take_with_a_readable_face_is_not(tmp_path):
-    w = Room(tmp_path, size="medium_close")
+def test_a_take_the_warp_gate_tracked_readable_is_not(tmp_path):
+    w = Room(tmp_path, size="wide")
     dq = json.loads((w.room / "T00.dq.json").read_text())
-    dq["gates"][0]["value"] = 0.2
+    dq["measures"] = {"warp": {"S": 0.1, "Se": 0.1, "share": 1.0, "tracks": [{"median_px": 150.0, "life": 22}]}}
     (w.room / "T00.dq.json").write_text(json.dumps(dq))
     assert cli.pending(w.book, 1) == []
 
 
-def test_a_take_that_failed_its_dq_is_never_refined(tmp_path):
+def test_a_closer_take_is_pending_too_the_tracker_decides(tmp_path):
+    assert cli.pending(Room(tmp_path, size="medium_close").book, 1) == [0]
+
+
+def test_a_take_that_failed_a_hard_row_outside_the_bars_is_never_refined(tmp_path):
     w = Room(tmp_path, passed=False)
+    dq = json.loads((w.room / "T00.dq.json").read_text())
+    dq["gates"].append({"name": "identity", "value": 0.1, "ok": False, "hard": True})
+    (w.room / "T00.dq.json").write_text(json.dumps(dq))
     assert cli.pending(w.book, 1) == []
 
 
 def test_every_face_is_tracked_and_matched_to_the_staged_person(tmp_path):
     w = Room(tmp_path)
     frames = cli.read_frames(w.room / "T00.mp4")
-    tracks = cli.tracks_of(frames, detect_one)
+    tracks = cli.tracks_of(frames, fd.by_frames(frames, detect_one))
     assert len(tracks) == 1
     cast = fr.cast_of(PROMPT, ["refs/characters/mr_a/sheet_front.png"])
     got = cli.match(PROMPT, cast, tracks, frames, w.book, detect_one, embed)
     assert {k: p.who for k, p in got.items()} == {0: "mr_a"}
 
 
-def test_the_crop_renders_with_only_its_persons_sheet_at_045(tmp_path):
+def test_the_crop_renders_with_only_its_persons_sheet_at_its_faces_denoise(tmp_path):
     w, engine = Room(tmp_path), Engine(tmp_path)
     run(w, engine)
     g = engine.graphs[0]
-    assert g["9"]["inputs"]["denoise"] == fr.DENOISE
+    assert g["9"]["inputs"]["denoise"] == pytest.approx(fr.denoise_for(0.04 * 768), abs=0.002)
+    person = json.loads((w.room / "refine.json").read_text())["T00"]["people"][0]
+    assert person["denoise"] == g["9"]["inputs"]["denoise"] and person["face_px"] == pytest.approx(30.7, abs=0.1)
     assert g["18"]["inputs"]["image"] == "sheet_front.png" and g["8"]["inputs"]["length"] == FRAMES
     assert "Mr. A" in g["8"]["inputs"]["prompt"] and g["12"]["inputs"]["noise_seed"] == 8
 
@@ -166,7 +175,30 @@ def test_a_take_with_no_face_found_is_recorded_and_not_rendered(tmp_path):
     w, engine = Room(tmp_path), Engine(tmp_path)
     cli.refine(w.book, 1, None, engine=engine, detect=lambda rgb: [], loose=lambda rgb: [], embed=embed, within="")
     assert engine.graphs == []
-    assert json.loads((w.room / "refine.json").read_text())["T00"]["status"] == "no_faces"
+    assert json.loads((w.room / "refine.json").read_text())["T00"]["status"] == "none_found"
+
+
+def test_a_take_whose_every_face_reads_is_recorded_and_not_rendered(tmp_path):
+    w, engine = Room(tmp_path), Engine(tmp_path)
+    big = lambda rgb: [{"box": [300.0, 200.0, 460.0, 360.0], "score": 0.9}]
+    cli.refine(w.book, 1, None, engine=engine, detect=big, loose=big, embed=embed, within="")
+    assert engine.graphs == []
+    assert json.loads((w.room / "refine.json").read_text())["T00"]["status"] == "all_readable"
+
+
+def test_the_finder_is_asked_for_the_take_and_closed_after(tmp_path):
+    w, seen = Room(tmp_path), []
+
+    class Find:
+        def __call__(self, take, frames):
+            seen.append(take.name)
+            return fd.by_frames(frames, detect_one)
+
+        def close(self):
+            seen.append("closed")
+    cli.refine(w.book, 1, None, engine=Engine(tmp_path), detect=detect_one, loose=detect_one, embed=embed,
+               find=Find(), within="")
+    assert seen == ["T00.mp4", "closed"]
 
 
 def test_a_cut_is_recorded_with_its_price(tmp_path):

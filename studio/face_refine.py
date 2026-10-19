@@ -1,9 +1,11 @@
-"""The wide-shot face refine: policy (owner 2026-10-17, "I like face improvements a
-lot in wide shots, go ahead"; decision architecture/decisions/2026-10-17-face-refine.md).
+"""The face refine: policy (owner 2026-10-17, "I like face improvements a lot in wide
+shots, go ahead"; decision architecture/decisions/2026-10-17-face-refine.md; widened to
+every soft face 2026-10-19, owner: "why our fix skipped those shots? fix that").
 
-A wide or full take draws its faces at 25-40 px of 768: the pixels are not there,
-and no upscaler adds them (docs/audit/2026-10-16_model_tests, F0).  F2 re-renders a
-tracked crop of each face through H3 at denoise 0.45 with ONLY that person's sheet;
+A face under ~120 px of 768 draws its eye in 5-10 px, under one H3 token (32 px): the
+pixels are not there, and no upscaler adds them (docs/audit/2026-10-16_model_tests, F0;
+docs/audit/2026-10-19_face_blur/PLAN.md).  F2 re-renders a tracked crop of each soft
+face through H3 with ONLY that person's sheet, at a denoise that follows the face's size;
 assemble pastes the crop at cut scale, then the one upscale (owner 2026-10-18, 24caaeb).
 
 This module is the pure half: which takes, who each face is, what it costs on the
@@ -13,16 +15,28 @@ back to the unrefined take.  No file, no GPU, no model.
 from __future__ import annotations
 
 import itertools
+import math
 import re
 from dataclasses import dataclass
 
 WORKFLOW = "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_facecrop_v2v_mickmumpitz"
-"""F2's graph (comfy_studio, 2026-10-16): the narration take stack + H3InjectVideoLatent."""
+"""F2's graph (comfy_studio, 2026-10-16): the narration take stack + H3InjectVideoLatent.
+Never edited: the denoise is one of its inputs."""
 DENOISE = 0.45
-REFINE_SIZES = ("wide", "full")
+"""F2 at a 60 px face: T08 (55 px) and T18 (41 px) kept by the gate and liked by the owner."""
+DENOISE_AT_PX = 60.0
+DENOISE_PER_HALVING = 0.05
+DENOISE_BAND = (0.40, 0.55)
+"""ComfyUI-H3-FaceRefine (Carasibana, MIT) scales its denoise by face size: a smaller face
+is magnified more into the crop and wants more redraw; a high denoise drifts the head.
+Ours: +0.05 per halving of the face from the 0.45 point, held inside 0.40-0.55 (the
+research plan's band to calibrate, docs/audit/2026-10-19_face_blur/PLAN.md arm A2)."""
 NEVER = ("insert",)
-SMALL_FACE_PX = 60.0
-"""A face under this many render pixels gets the refine at any planned size."""
+SMALL_FACE_PX = 120.0
+"""A face tracked under this many render pixels is soft, at any planned size: a 60-110 px
+face of 768 draws a 5-10 px eye, the mush the owner saw on ep01 T05/T06/T13/T15
+(docs/audit/2026-10-19_face_blur/pipeline_audit.md section 2).  It was 60 until
+2026-10-19: six picks ended `no_faces` because their faces were 60-110 px."""
 
 SECONDS_PER_FACE = 110.0
 REF_FRAMES = 192
@@ -47,18 +61,19 @@ seam wall guards a regression, it does not separate these two); identity 0.15 ->
 
 # ---- selection -----------------------------------------------------------------------
 
-def face_px(dq: dict | None, height: int) -> float | None:
-    """take_dq's face-at-end share, in render pixels; None when unmeasured."""
-    row = next((g for g in (dq or {}).get("gates", []) if g.get("name") == "face-at-end"), None)
-    value = (row or {}).get("value")
-    return None if value is None else float(value) * height
+def soft(px: float | None) -> bool:
+    """A tracked face too small to draw its eye; None (no face found) is not soft."""
+    return px is not None and px < SMALL_FACE_PX
 
 
-def wants(sizes: list[str], px: float | None) -> bool:
-    """A wide or full shot always; any other shot but an insert when its face is small."""
-    if any(s in NEVER for s in sizes):
-        return False
-    return any(s in REFINE_SIZES for s in sizes) or (px is not None and px < SMALL_FACE_PX)
+def denoise_for(px: float | None) -> float:
+    """F2's denoise for a face of `px` render pixels: DENOISE at DENOISE_AT_PX, a little
+    more for a smaller face, a little less for a bigger one, inside DENOISE_BAND."""
+    if not px or px <= 0:
+        return DENOISE
+    lo, hi = DENOISE_BAND
+    value = DENOISE + DENOISE_PER_HALVING * math.log2(DENOISE_AT_PX / px)
+    return round(min(max(value, lo), hi), 3)
 
 
 def warp_measure(dq: dict | None) -> dict:
@@ -91,8 +106,9 @@ TRACKED_HIGH = 0.8
 
 
 def readable(card: dict, dq: dict | None) -> bool:
-    """Every planned face is tracked, for most of the take, at SMALL_FACE_PX or more: F2
-    has nothing to add.  MTCNN misses small faces, so fewer tracks than faces proves nothing."""
+    """Every planned face is tracked by the warp gate, for most of the take, at SMALL_FACE_PX
+    or more: the tracker need not run.  MTCNN misses small faces, so fewer tracks than faces
+    proves nothing."""
     from studio import warp_gate
     m = warp_measure(dq)
     tracks = m.get("tracks") or []
@@ -101,34 +117,30 @@ def readable(card: dict, dq: dict | None) -> bool:
             and height is not None and height >= SMALL_FACE_PX)
 
 
-def warp_routed(dq: dict, taken: int) -> bool:
-    """G-WARP sends this take to F2: a warn on a small face, an unreadable face, or a fail
-    past its retake whose smallest tracked face is small."""
+def retake_owed(dq: dict, taken: int) -> bool:
+    """G-WARP's one seed retake comes first: the refine would be spent on bytes the retake replaces."""
     from studio import warp_gate
-    state, m = warp_state(dq), warp_measure(dq)
-    if state == "warn" and not warp_gate.warn_routes(m):
+    m = warp_measure(dq)
+    return warp_gate.cure(warp_state(dq), taken, warp_gate.smallest_track(m)) == "seed"
+
+
+def eligible(card: dict, sizes: list[str], dq: dict | None, taken: int = 0) -> bool:
+    """A take the tracker looks at: a planned face not already readable, no insert, no hard
+    failure outside BARS, no warp retake owed.  The plan size is not read (ep01 T26 is a
+    medium with a 64 px face) and neither is face-at-end (T06 pushes in from 60 px)."""
+    if not card.get("faces") or not dq or any(s in NEVER for s in sizes):
         return False
-    return warp_gate.cure(state, taken, warp_gate.smallest_track(m)) == "refine"
+    return passed_but_warp(dq) and not retake_owed(dq, taken) and not readable(card, dq)
 
 
-def eligible(card: dict, sizes: list[str], dq: dict | None, height: int, taken: int = 0) -> bool:
-    """The take shows a planned face that is not already readable, passed its dq (but for
-    the warp rows), and wants the refine by its size or by G-WARP; `taken` is its retakes."""
-    if not card.get("faces") or not dq or not passed_but_warp(dq) or any(s in NEVER for s in sizes):
-        return False
-    if readable(card, dq) or (not dq.get("passed") and not warp_routed(dq, taken)):
-        return False
-    return wants(sizes, face_px(dq, height)) or warp_routed(dq, taken)
-
-
-def selected(cards: list[dict], sizes: dict[int, str], dqs: dict[int, dict], height: int,
+def selected(cards: list[dict], sizes: dict[int, str], dqs: dict[int, dict],
              taken: dict[int, int] | None = None) -> list[int]:
-    """The take indices the refine works on, in take order."""
+    """The take indices the refine tracks, in take order; each track under SMALL_FACE_PX is refined."""
     out = []
     for c in cards:
         i = int(c["index"])
         shot_sizes = [sizes[s] for s in c.get("shots") or [c["index"]] if s in sizes]
-        if eligible(c, shot_sizes, dqs.get(i), height, (taken or {}).get(i, 0)):
+        if eligible(c, shot_sizes, dqs.get(i), (taken or {}).get(i, 0)):
             out.append(i)
     return sorted(out)
 

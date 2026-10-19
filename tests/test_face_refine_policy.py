@@ -22,41 +22,28 @@ def dq(passed=True, face=None):
 
 # ---- selection -----------------------------------------------------------------------
 
-def test_a_face_at_end_share_is_read_in_render_pixels():
-    assert fr.face_px(dq(face=0.05), H) == pytest.approx(38.4)
-
-
-def test_an_unmeasured_face_has_no_pixels():
-    assert fr.face_px(dq(face=None), H) is None and fr.face_px({}, H) is None
-
-
-def test_a_wide_or_full_shot_wants_the_refine_whatever_its_face_measured():
-    assert fr.wants(["wide"], 200.0) and fr.wants(["full"], None)
-
-
-def test_a_closer_shot_wants_it_only_under_sixty_pixels():
-    assert fr.wants(["medium"], 56.0) and not fr.wants(["medium"], 61.0)
-    assert not fr.wants(["medium_close"], None)
-
-
-def test_an_insert_never_wants_it():
-    assert not fr.wants(["insert"], 20.0)
-
-
-def test_a_take_is_selected_only_with_faces_and_a_passed_dq():
+def test_every_planned_size_but_an_insert_is_tracked():
+    """The tracker decides by the face it finds (2026-10-19); the plan size never gates."""
     card = {"index": 0, "shots": [0], "faces": ["utterson"]}
-    assert fr.eligible(card, ["wide"], dq(), H)
-    assert not fr.eligible(card, ["wide"], dq(passed=False), H)
-    assert not fr.eligible(card | {"faces": []}, ["wide"], dq(), H)
-    assert not fr.eligible(card, ["wide"], None, H)
+    assert all(fr.eligible(card, [size], dq()) for size in ("wide", "full", "medium", "medium_close", "close"))
+    assert not fr.eligible(card, ["insert"], dq())
+
+
+def test_a_take_is_selected_only_with_faces_and_a_dq_that_lets_it_ship():
+    card = {"index": 0, "shots": [0], "faces": ["utterson"]}
+    barred = dq(passed=False) | {"gates": [{"name": "identity", "ok": False, "hard": True}]}
+    assert fr.eligible(card, ["wide"], dq())
+    assert not fr.eligible(card, ["wide"], barred)
+    assert not fr.eligible(card | {"faces": []}, ["wide"], dq())
+    assert not fr.eligible(card, ["wide"], None)
 
 
 def test_selection_reads_every_shot_of_the_take():
     cards = [{"index": 0, "shots": [0], "faces": ["a"]}, {"index": 1, "shots": [1, 2], "faces": ["a"]},
              {"index": 3, "shots": [3], "faces": ["a"]}]
-    sizes = {0: "wide", 1: "medium", 2: "full", 3: "medium_close"}
+    sizes = {0: "wide", 1: "medium", 2: "insert", 3: "medium_close"}
     dqs = {0: dq(), 1: dq(), 3: dq(face=0.2)}
-    assert fr.selected(cards, sizes, dqs, H) == [0, 1]
+    assert fr.selected(cards, sizes, dqs) == [0, 3]
 
 
 # ---- the clock -----------------------------------------------------------------------
