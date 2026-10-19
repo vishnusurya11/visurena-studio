@@ -1822,6 +1822,12 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
 - **Why advisory.** It is a projection, not a measurement of the take; a wall would send the
   writer round for pixels it cannot see (cap every loop). The writer is told the floor in the
   brief (`grammar_rules.face_floor_px`, `face_px_by_size`) and in its skill.
+- **One step per shot is a ladder-wide count, not a per-call one.** The first build capped the step
+  inside one `cure()` call, but every rung (improve, model_tier, resume) edits the plan already
+  cured, so a wide stepped to full on the first draft stepped again to medium on the next rung (the
+  skeptic's replay: 'a fifth of the frame's height' -> 'two thirds' -> 'cut at the waist'). The cure
+  now reads the plan the rung edited: a size the writer kept is never stepped again; a size the
+  writer chose anew (put back to wide, or a new shot) gets its one step.
 - Tests: `tests/test_the_face_floor.py`.
 
 ## The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19)

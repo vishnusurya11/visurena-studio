@@ -390,7 +390,7 @@ class Desk:
         # stays inside the try-less path: a scrub bug surfaces as write_plan's
         # loud SystemExit, never a silent skip.  Then F11: the rest of the
         # mechanical table, which (unlike the scrub) never raises.
-        doc = self.floor_cured(self.limb_cured(plan_cures.ghost_limbs(episode.model_dump(), self._names())))
+        doc = self.floor_cured(self.limb_cured(plan_cures.ghost_limbs(episode.model_dump(), self._names())), previous)
         episode_home.write_plan(self.plan, doc)
         mechanical_cures(self.plan, Path(self.ctx.book_dir), self.ctx.number, say=self._say)
 
@@ -403,13 +403,14 @@ class Desk:
             self._say(f"G-LIMB cure skipped, the writer's draft kept: {str(why)[:160]}")
             return doc
 
-    def floor_cured(self, doc: dict) -> dict:
+    def floor_cured(self, doc: dict, previous: dict | None = None) -> dict:
         """G-FACE-FLOOR's free cure on EVERY fresh draft: a wide or full whose face matters steps one
-        size closer when the grammar lets it (face_floor); each move is said.  Advisory, so no battery
-        row routes to it and it never calls the writer; a cure bug keeps the draft as written."""
+        size closer when the grammar lets it (face_floor); each move is said.  A size the rung kept
+        from `previous` is not stepped again (one step per shot across the ladder).  Advisory, so no
+        battery row routes to it and it never calls the writer; a cure bug keeps the draft as written."""
         from studio import face_floor
         try:
-            cured, moved = face_floor.cure(json.loads(json.dumps(doc)))
+            cured, moved = face_floor.cure(json.loads(json.dumps(doc)), previous)
         except Exception as why:                  # noqa: BLE001 -- the draft stands as written
             self._say(f"G-FACE-FLOOR cure skipped, the writer's draft kept: {str(why)[:160]}")
             return doc

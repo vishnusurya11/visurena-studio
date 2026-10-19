@@ -38,6 +38,17 @@ def shot(doc: dict, index: int) -> dict:
     return next(s for s in doc["shots"] if s["index"] == index)
 
 
+def later_wide(doc: dict) -> dict:
+    """ep01 shot 23 (a walk_on_day dialogue shot) made a later wide told in his own voice,
+    its at_rest carrying a person fraction the cure replaces (the skeptic's case)."""
+    s = shot(doc, 23)
+    s.update(size="wide", frame="Wide down the street as " + s["frame"][len("Medium close on "):],
+             at_rest="THE FOCUS OF THE PICTURE IS the man about town at the CENTRE on the near pavement, "
+                     "his figure a fifth of the frame's height.")
+    doc["lines"] = [dict(l, kind="tale") if l["shot"] == 23 else l for l in doc["lines"]]
+    return doc
+
+
 def bare_full(doc: dict) -> dict:
     """ep01 shot 6 (Enfield telling his tale under the lamp) without the boots:
     a full whose face matters and whose staging a medium can hold."""
@@ -124,6 +135,27 @@ def test_a_wide_steps_once_to_full_never_twice():
     assert "two thirds of the frame's height" in got["at_rest"] and len(moved) == 1
 
 
+def test_a_shot_the_cure_already_stepped_is_never_stepped_again_by_a_later_rung():
+    first, moved = ff.cure(later_wide(ep01()))
+    assert shot(first, 23)["size"] == "full" and len(moved) == 1
+    again, moved_again = ff.cure(copy.deepcopy(first), previous=first)   # an improve rung kept the full
+    assert moved_again == [] and shot(again, 23)["size"] == "full"
+    assert shot(again, 23)["at_rest"] == shot(first, 23)["at_rest"]
+
+
+def test_a_writer_that_puts_the_wide_back_gets_one_step_from_its_own_size():
+    first, _ = ff.cure(later_wide(ep01()))
+    redrawn, moved = ff.cure(later_wide(ep01()), previous=first)         # the rung wrote the wide again
+    assert shot(redrawn, 23)["size"] == "full" and len(moved) == 1
+
+
+def test_the_size_word_is_rewritten_only_where_it_is_the_frames_size():
+    compound = "Full-length view of the man under the lamp."
+    assert ff.new_frame(compound, "medium") == compound
+    assert ff.new_frame("A wide shot of the street at noon.", "full") == "Full shot of the street at noon."
+    assert ff.new_frame("Wide on the door.", "full") == "Full shot on the door."
+
+
 def test_a_step_that_would_break_the_staging_or_the_grammar_is_refused_with_its_reason():
     doc = ep01()
     assert "body" in ff.blocker(doc, shot(doc, 6))            # the boots stride in a medium's cut
@@ -192,6 +224,25 @@ def test_a_fresh_writer_draft_gets_the_floor_cure_and_says_what_moved(tmp_path):
     desk.write(None)
     assert shot(json.loads(desk.plan.read_text(encoding="utf-8")), 6)["size"] == "medium"
     assert any("G-FACE-FLOOR shot 6" in m for m in desk.ctx.said)
+
+
+class KeepWriter:
+    """Writes ep01 with shot 23 a later wide; an improve rung hands the plan back as it got it."""
+
+    def write(self, brief, refusals=None, previous=None, _agent=None, **kw):
+        return Episode.model_validate(previous if previous is not None else later_wide(ep01()))
+
+
+def test_every_rung_of_the_ladder_leaves_a_shot_one_step_from_the_writers_size(tmp_path):
+    from studio import plan_ladder
+    from tests.test_a_climb_that_moves_no_row_stops import Ctx
+    desk = plan_ladder.Desk(Ctx(tmp_path), tmp_path / "plan.json", writer=KeepWriter())
+    desk.brief = {}
+    desk.write(None)
+    desk.write(["a refusal"], previous=desk.refused_plan())             # improve
+    desk.write(["a refusal"], previous=desk.refused_plan())             # model_tier
+    assert shot(json.loads(desk.plan.read_text(encoding="utf-8")), 23)["size"] == "full"
+    assert sum("G-FACE-FLOOR shot 23" in m for m in desk.ctx.said) == 1
 
 
 def test_a_floor_cure_that_raises_keeps_the_draft(tmp_path, monkeypatch):

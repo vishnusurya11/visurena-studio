@@ -107,16 +107,14 @@ five words the bed did not know and the episode was refused at assembly.
   extreme_close exempt. The cure `body_clause` appends a body clause before the contract
   (`plan_repair.restored`) AND on every fresh writer draft (`Desk.limb_cured`); the writer is never asked. Evidence: ep01 shot 27's floating hand.
 - **G-FACE-FLOOR** (ADVISORY, face-blur fix #3, `studio/face_floor.py`): a faced shot whose size projects a
-  face under 96 px on the 768 take (3 tokens; under it H3 cannot draw an eye). Projection = ep01's measured
-  median smallest face per size: wide 28, full 67, medium 82, medium_close 152, close 266
-  (`tests/fixtures/ep01_face_heights.json`). Cure (`Desk.floor_cured`, every fresh writer draft, $0): a wide or
-  full whose face MATTERS (a line by someone in it, or a reaction) steps ONE size closer, wide -> full ->
-  medium, frame size word and at_rest scale rewritten, unless it is establishing (cut opener, its setup's
-  first shot, or it carries the setup geometry), has sub-shots, stages the body below the waist (for a
-  medium), moves in a way the new size does not take (`move_rebalance.LEGAL`, `plan_gates.CAP`), or would
-  orphan its setup's crowd. Every faced shot still under the floor prints with why it was left: a guaranteed
-  face-refine candidate (`face_floor.refine_candidates`). Never a refusal, never a writer call. ep01 as
-  shipped: 0 moved; listed 1, 18 (establishing), 6 (boots), 8 (no line of its own), 10, 26 (mediums).
+  face under 96 px on the 768 take (3 tokens: no eye). Projection = ep01's measured median smallest face:
+  wide 28, full 67, medium 82, medium_close 152, close 266 (`tests/fixtures/ep01_face_heights.json`).
+  Cure (`Desk.floor_cured`, every writer draft, $0): a wide or full whose face MATTERS (own line, or a
+  reaction) steps ONE size closer, frame word and at_rest scale rewritten; ONE step per shot across the
+  ladder (a size a rung kept from the plan it edited is not stepped again). Never an establishing wide,
+  sub-shots, a below-waist staging (for a medium), an illegal move (`move_rebalance.LEGAL`,
+  `plan_gates.CAP`) or a crowd orphan. Every faced shot left under the floor prints why: a size-projected
+  refine candidate (`face_floor.refine_candidates`). Never a refusal or writer call. ep01: 0 moved.
 - **Holds on a grammar plan** (`doc.grammar` set) grow no pair and report no unsplit pair: one shot
   per take. The take length has one home, `episode_takes.BUDGET`.
 - **The critic's count** (`judges/plan.declared_count`): any `extras=N` (N >= 1) on a shot whose

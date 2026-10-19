@@ -15,7 +15,8 @@ THE CURE (`cure`) is free and deterministic: a wide or full shot whose face MATT
 line in the voice of someone in it, or a reaction) steps ONE size closer, wide -> full ->
 medium, with its frame's size word and its at_rest scale rewritten -- the drawer obeys the
 at_rest's fraction, not the size word (picture_gates G-SIZE, ep10: 7 of 7) -- unless the
-step breaks the staging or a grammar rule (`blocker`).  Establishing wides, inserts and
+step breaks the staging or a grammar rule (`blocker`).  One step per shot across the whole
+plan ladder: a size a rung kept from the plan it edited is never stepped again.  Establishing wides, inserts and
 back views are never touched.  `advisories` lists every faced shot still under the floor:
 each is a guaranteed face-refine candidate.  Advice only: it never refuses a plan and never
 calls the writer (cap every loop).  $0, microseconds.
@@ -37,7 +38,9 @@ FLOOR_PX = 96
 STEP = {"wide": "full", "full": "medium"}
 """One notch closer.  A medium two-shot is the grammar's reaction size (G-TWO), so the
 ladder stops there; a medium under the floor is left to the face refine."""
-LEAD = re.compile(r"^\s*(?:wide|full)(?:[- ]shot)?\b", re.I)
+LEAD = re.compile(r"^\s*(?:an?\s+)?(?:wide|full)(?:[- ]shot)?\b(?!-)", re.I)
+"""The frame's opening size word ('Wide on', 'A wide shot of', 'Full shot of'); never the
+first half of a compound ('Full-length view' is left as written)."""
 NEW_LEAD = {"full": "Full shot", "medium": "Medium shot"}
 SCALE = {"full": "two thirds of the frame's height",
          "medium": "cut at the waist, the head a quarter of the frame's height"}
@@ -157,14 +160,27 @@ def step(shot: dict) -> str:
             f"{FACE_PX[old]} px -> {FACE_PX[new]} px on a {TAKE_PX} take, against the {FLOOR_PX} px floor")
 
 
-def cure(doc: dict) -> tuple[dict, list[str]]:
-    """One pass: every steppable shot the grammar lets step moves ONE notch.  (doc, moved rows)."""
-    moved = [step(s) for s in cut(doc) if steppable(doc, s) and not blocker(doc, s)]
+def sizes_kept(doc: dict, previous: dict | None) -> set[int]:
+    """The shots whose size the writer kept from the plan it edited (none on a first draft)."""
+    before = {s["index"]: s.get("size") for s in (previous or {}).get("shots") or []}
+    return {s["index"] for s in doc["shots"] if s["index"] in before and before[s["index"]] == s.get("size")}
+
+
+def cure(doc: dict, previous: dict | None = None) -> tuple[dict, list[str]]:
+    """One pass: every steppable shot the grammar lets step moves ONE notch.  (doc, moved rows).
+
+    The cure acts only on a size the writer has just chosen: a shot whose size an improve,
+    model_tier or resume rung kept from `previous` (the plan it edited, cured already) is
+    never stepped again -- one step per shot across the whole ladder, not per call."""
+    kept = sizes_kept(doc, previous)
+    moved = [step(s) for s in cut(doc) if s["index"] not in kept and steppable(doc, s) and not blocker(doc, s)]
     return doc, moved
 
 
 def refine_candidates(doc: dict) -> list[int]:
-    """Every faced shot projected under the floor: the face refine's guaranteed takes."""
+    """Every faced shot whose SIZE projects under the floor: the face refine's guaranteed takes.
+    A size projection, not a measurement: a faced insert or a small over-the-shoulder face is
+    left to the refine's own tracker (ep01 T07 49 px, T13 60 px)."""
     return [s["index"] for s in cut(doc) if faced(s) and (projected_px(s["size"]) or 0) < FLOOR_PX]
 
 
