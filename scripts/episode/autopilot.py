@@ -132,6 +132,14 @@ def core_next_unit(chapters: list[int], uploads: list[dict], parked: list[dict],
     return importlib.import_module("studio.autopilot").next_unit(chapters, uploads, parked, last)
 
 
+def core_failed_sha(drive_rows: list[dict]) -> str | None:
+    return importlib.import_module("studio.autopilot").failed_sha(drive_rows)
+
+
+def episode_drive_dirty(porcelain: str) -> bool:
+    return importlib.import_module("studio.episode_drive").dirty(porcelain)
+
+
 def uploads_of(book: Path) -> list[dict]:
     """uploads.jsonl's chapter rows; the book video's rows are another unit."""
     return importlib.import_module("studio.autopilot").episode_rows(rows_of(Path(book) / "uploads.jsonl"))
@@ -149,8 +157,57 @@ def brain_prompt(core, book: Path, n: int, packet: dict) -> str:
     home = home_of(book, n)
     faults, learnings = brain_evidence(home)
     tail = " | ".join(str(packet.get(k, "")) for k in ("reason", "last_line") if packet.get(k))
+    tail = "\n".join([tail, *evidence_lines(packet)])
     return core.brief(packet.get("home", f"episodes/ep{n:02d}"), tail, faults, learnings,
                       float(packet.get("media_spent_usd") or 0.0), allowed_orders())
+
+
+REFUSAL = re.compile(r"REFUSED|CAP |FLAGGED|G-[A-Z]+|Traceback")
+REFUSALS = 12
+
+
+def evidence_lines(packet: dict) -> list[str]:
+    """The brief's facts beyond the last line: which commit failed, where HEAD is
+    now, the commits between, the refusals and the log's tail (P13: the brain saw
+    only the wrapper's REFUSED line and parked three episodes on it)."""
+    lines = [f"failed_sha={packet.get('failed_sha')} head={packet.get('head')}"]
+    lines += [f"commit since: {c}" for c in packet.get("commits_since") or []]
+    lines += [f"refusal: {r}" for r in packet.get("refusals") or []]
+    if packet.get("log_tail"):
+        lines += ["log tail:", str(packet["log_tail"])]
+    return lines
+
+
+def run_logs(home: Path) -> list[Path]:
+    """Every launch's drive log, oldest first (drive.py numbers them, so the name sorts)."""
+    return sorted(Path(home).glob("drive_run*.log"))
+
+
+def refusal_lines(home: Path) -> list[str]:
+    """The last REFUSALS lines of any launch log that look like a refusal, newest last."""
+    found: list[str] = []
+    for path in reversed(run_logs(home)):
+        text = path.read_text(encoding="utf-8", errors="replace").splitlines()
+        found = [scrub(ln.strip()) for ln in text if REFUSAL.search(ln)] + found
+        if len(found) >= REFUSALS:
+            break
+    return found[-REFUSALS:]
+
+
+def packet_extras(home: Path, n: int) -> dict:
+    """What the brain is told on top of the derived packet: the log's tail and
+    the refusal lines, read from this episode's logs."""
+    return {"log_tail": log_tail_of(home), "refusals": refusal_lines(home)}
+
+
+def commits_since(deps: "Deps", failed: str | None, head: str) -> list[str]:
+    """`git log --oneline failed..HEAD`, newest first, at most ten."""
+    if not failed or failed == head:
+        return []
+    try:
+        return deps.git("log", "--oneline", f"{failed}..{head}").strip().splitlines()[:10]
+    except Exception:                                          # noqa: BLE001 -- a stale sha must not lose the brief
+        return []
 
 
 def verdict_doc(verdict: Any, meta: Any) -> dict:
@@ -488,16 +545,18 @@ def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
     attempts = brain_attempts_of(home)
     verdict = current_verdict(attempts, ends)
     from studio import run_budget
+    porcelain = deps.git("status", "--porcelain")
     return signals_of({
         "drive_rows": drive_rows, "exit_code": ends[-1].get("code") if ends else None,
         "lock": read_json(deps.root / "gpu.lock"), "proc_alive": deps.engine.drive_alive(rows, codex, n),
         "uploads_rows": uploads_of(book), "parked_rows": rows_of(paths_of(book).parked),
         "home_files": sorted(p.name for p in home.iterdir()) if home.exists() else [],
-        "log_tail": log_tail_of(home), "porcelain": deps.git("status", "--porcelain"),
+        "log_tail": log_tail_of(home), "porcelain": porcelain,
         "engine_up": bool(deps.engine.alive(ENGINE_URL)), "clock_spent_s": run_budget.spent_before(home),
         "brain_attempts": len(attempts), "brain_verdict": verdict,
         "paused": is_paused(book, series),
-        "head_sha": deps.git("rev-parse", "HEAD").strip(), "media_spent_usd": deps.spent_usd(codex, n)})
+        "head_sha": deps.git("rev-parse", "HEAD").strip(), "media_spent_usd": deps.spent_usd(codex, n),
+        "failed_sha": core_failed_sha(drive_rows), "code_dirty": episode_drive_dirty(porcelain)})
 
 
 # ---- the actions ---------------------------------------------------------------
@@ -511,8 +570,15 @@ def relaunch_allowed(step: str) -> int:
     return sum(c.rounds for c in step_caps.table().values() if c.step == step) + 1
 
 
-def step_guard(book: Path, n: int, tail: str, deps: Deps) -> str | None:
+UNCOUNTED = ("boundary_resume", "head_moved")
+"""Relaunches no step answers for: a boundary stop resumed, and a failure a newer
+commit may have fixed (P13)."""
+
+
+def step_guard(book: Path, n: int, tail: str, deps: Deps, why: str = "relaunch") -> str | None:
     """Count a relaunch against the step the last log names; 'step_cap' once it is past its cap."""
+    if why in UNCOUNTED:
+        return None
     found = STEP_IN_TAIL.findall(tail or "")
     if not found:
         return None
@@ -637,6 +703,13 @@ def complete(book: Path, series: dict, parked: list[dict], uploads: list[dict], 
     return {"action": "complete", "state": "COMPLETE"}
 
 
+def brain_packet(book: Path, n: int, derived, signals, deps: Deps) -> dict:
+    """The derived packet plus the log's tail, the refusals and the commits since the failure."""
+    packet = {**dict(derived.packet or {}), **packet_extras(home_of(book, n), n)}
+    packet["commits_since"] = commits_since(deps, getattr(signals, "failed_sha", None), packet.get("head") or "")
+    return packet
+
+
 def brain(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
     """One brain attempt; the verdict FILE and git are trusted, never the prose."""
     home = home_of(book, n)
@@ -644,27 +717,30 @@ def brain(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
     heartbeat(deps, -1, "BRAIN_RUNNING", n)
     event(book, {"event": "brain", "episode": n, "attempt": attempt.name, "reason": str(derived.reason)})
     try:
-        doc = deps.brain(book, codex, n, dict(derived.packet or {}), attempt)
+        doc = deps.brain(book, codex, n, brain_packet(book, n, derived, signals, deps), attempt)
     except Exception as why:                                   # the leash: a dead brain is an attempt
         doc = {"verdict": "error", "why": scrub(repr(why))}
     if not attempt.exists():
         write_atomic(attempt, doc)
-    return judge_verdict(book, codex, n, read_json(attempt, {}), deps)
+    return judge_verdict(book, codex, n, read_json(attempt, {}), deps, getattr(signals, "failed_sha", None))
 
 
-def judge_verdict(book: Path, codex: str, n: int, verdict: dict, deps: Deps) -> dict:
-    """relaunch only on a clean tree at the commit the file names; park parks."""
+def judge_verdict(book: Path, codex: str, n: int, verdict: dict, deps: Deps, failed_sha: str | None = None) -> dict:
+    """relaunch only on a clean tree at the commit the file names; park only on a
+    clean tree whose HEAD is the commit that failed (P13: a park on a dirty tree
+    or on code a fix has since replaced is a false park)."""
     said, head = str(verdict.get("verdict")), deps.git("rev-parse", "HEAD").strip()
     from studio import episode_drive
     clean = not episode_drive.dirty(deps.git("status", "--porcelain"))
-    if said == "park":
+    same_head = not failed_sha or head.startswith(failed_sha) or failed_sha.startswith(head)
+    if said == "park" and clean and same_head:
         return park(book, codex, n, f"brain: {verdict.get('why', '')}", verdict, deps)
     if said == "relaunch" and clean and str(verdict.get("commit")) == head:
         event(book, {"event": "brain_relaunch", "episode": n, "commit": head[:8]})
         return {"action": "brain_relaunch", "state": "IDLE"}
     if said in ("retry", "cure") and clean:
         return triage_action(book, codex, n, said, verdict, deps)
-    event(book, {"event": "brain_rejected", "episode": n, "verdict": said, "clean": clean})
+    event(book, {"event": "brain_rejected", "episode": n, "verdict": said, "clean": clean, "same_head": same_head})
     return {"action": "brain_rejected", "state": "NEEDS_BRAIN"}
 
 
@@ -676,16 +752,38 @@ def triage_action(book: Path, codex: str, n: int, said: str, verdict: dict, deps
     return {"action": f"brain_{said}", "state": "IDLE"}
 
 
+def open_wait(book: Path) -> dict | None:
+    """The wait_tree row still open (no tree_clear after it), or None."""
+    marks = [r for r in rows_of(paths_of(book).events) if r.get("event") in ("wait_tree", "tree_told", "tree_clear")]
+    if not marks or marks[-1].get("event") == "tree_clear":
+        return None
+    opened = [r for r in marks if r.get("event") == "wait_tree"]
+    return opened[-1] if opened else None
+
+
+def told_since(book: Path, wait: dict) -> bool:
+    """A tree_told row written at or after this wait opened."""
+    told = [r for r in rows_of(paths_of(book).events) if r.get("event") == "tree_told"]
+    return any(when(t.get("ts", "")) >= when(wait.get("ts", "")) for t in told)
+
+
 def wait_tree(book: Path, deps: Deps) -> dict:
-    """The one deliberate wait: the owner's own edit; told once after six hours."""
-    waits = [r for r in rows_of(paths_of(book).events) if r.get("event") in ("wait_tree", "tree_told")]
-    if not waits or waits[-1].get("event") == "tree_told":
+    """The one deliberate wait: the owner's own edit; told once after six hours,
+    counted from THIS wait (tree_clear closes the last one, P13)."""
+    wait, held = open_wait(book), {"action": "wait_tree", "state": "WAIT_TREE"}
+    if wait is None:
         event(book, {"event": "wait_tree", "since": deps.now()})
-        return {"action": "wait_tree", "state": "WAIT_TREE"}
-    if deps.now() - float(waits[-1].get("since", deps.now())) >= TREE_TOLD_S:
+    elif deps.now() - float(wait.get("since", deps.now())) >= TREE_TOLD_S and not told_since(book, wait):
         event(book, {"event": "tree_told"})
         deps.notify("tree dirty for 6 h, autopilot waiting; commit or stash the code")
-    return {"action": "wait_tree", "state": "WAIT_TREE"}
+    return held
+
+
+def note_tree_clear(book: Path, deps: Deps) -> None:
+    """The tree no longer holds the series: close the open wait, with its length."""
+    wait = open_wait(book)
+    if wait is not None:
+        event(book, {"event": "tree_clear", "waited_s": round(deps.now() - float(wait.get("since", deps.now())))})
 
 
 def cure(book: Path, codex: str, n: int, derived, deps: Deps) -> dict:
@@ -704,7 +802,7 @@ def act_idle(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> di
         return {"action": "wait", "state": "RUNNING"}
     if (other := other_unit_running(deps, codex, n, deps.procs())) is not None:
         return {"action": "wait", "state": "IDLE", "other": other, "reason": f"ep{other:02d} runs"}
-    if signals.drive_rows and step_guard(book, n, signals.log_tail, deps):
+    if signals.drive_rows and step_guard(book, n, signals.log_tail, deps, str(derived.reason)):
         return park(book, codex, n, "step_cap", {"tail": signals.log_tail[-800:]}, deps)
     return launch(book, codex, n, deps, "relaunch" if signals.drive_rows else "launch")
 
@@ -782,6 +880,8 @@ def tick(book: Path, codex: str, deps: Deps, tick_no: int = 0) -> dict:
         if signals.paused:
             derived = SimpleNamespace(state="PAUSED", reason="paused", order=None, packet={})
         done = act(book, codex, n, derived, signals, deps)
+        if done["state"] != "WAIT_TREE":
+            note_tree_clear(book, deps)
         done["brain_attempts"] = len(brain_attempts_of(home_of(book, n)))
     doc = status_doc(book, codex, n, derived, signals, series, done, deps)
     write_atomic(p.status, doc)

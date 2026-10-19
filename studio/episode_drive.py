@@ -63,11 +63,27 @@ def error_class(log: str) -> str | None:
     return None
 
 
+NOT_RUNTIME = re.compile(r"^(tests|docs|architecture|library|logs)/|^\.claude/skills/|\.md$")
+"""A path no run reads: the tests, the reports, the skills, the books and the
+notes (P13, Jekyll ep01: a docs/skill/test edit held 25 launches at WAIT_TREE)."""
+
+
+def runtime_path(path: str) -> bool:
+    """Whether a repo-relative path is code or config a run executes."""
+    return not NOT_RUNTIME.search(path.strip().strip('"').replace("\\", "/"))
+
+
 def dirty(porcelain: str) -> bool:
-    """A tracked change or an untracked file outside library/ and docs/ (the
-    books and the reports are not the code; a peer's untracked audit folder
-    held the Jekyll series at WAIT_TREE, 2026-10-12)."""
-    return any(line.strip() and not re.match(r"^\?\? (library|docs)/", line) for line in porcelain.splitlines())
+    """A tracked change or an untracked file that a run reads; the books, the
+    reports, the tests, the skills and the notes are not the code (a peer's
+    untracked audit folder held the Jekyll series at WAIT_TREE, 2026-10-12)."""
+    return any(line.strip() and runtime_path(line[3:] if len(line) > 3 else line) for line in porcelain.splitlines())
+
+
+def last_step(log: str) -> str | None:
+    """The id of the last `STEP <id> start` line a run printed: the step it was in."""
+    found = re.findall(r"^STEP (\S+) start", log, flags=re.MULTILINE)
+    return found[-1] if found else None
 
 
 def first_sha(ledger_text: str) -> str | None:

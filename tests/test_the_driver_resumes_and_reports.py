@@ -117,4 +117,5 @@ def test_an_untracked_report_is_not_the_tree():
     WAIT_TREE; a report runs no code. Untracked code still blocks."""
     assert not drive.dirty("?? docs/audit/2026-10-12_board_review/01_bugs.md\n")
     assert drive.dirty("?? studio/new_module.py\n")
-    assert drive.dirty(" M docs/DECISIONS.md\n")
+    assert not drive.dirty(" M docs/DECISIONS.md\n")      # P13 2026-10-19: a tracked doc edit is no code either
+    assert drive.dirty(" M studio/stages.yaml\n")

@@ -87,7 +87,16 @@ def run_row(n: int, sha: str, text: str) -> dict:
     row = {"event": "run", "n": n, "sha": sha, "outcome": episode_drive.outcome(text)}
     if error := episode_drive.error_class(text):
         row["error"] = error
+    if step := episode_drive.last_step(text):
+        row["step"] = step                      # P13: where the run stopped, for the brain and the card
     return row
+
+
+def first_log_number(home: Path) -> int:
+    """The number of this launch's first run log: one past the logs already there,
+    so a launch never overwrites an earlier one (Jekyll ep01: twelve launches left
+    one 8 KB log).  Two digits keep sorted(...)[-1] the newest."""
+    return len(list(home.glob("drive_run*.log"))) + 1
 
 
 def run_once(codex: str, number: int, log: Path, label: str) -> str:
@@ -131,7 +140,7 @@ def main(codex: str, number: int) -> int:
                        f"(exit {baked.returncode}); fix the card, not the episode")
                 return 2
             notify(f"{label}: WARNING cards still missing for {still}; this episode's own card is on disk")
-    sha, runs = git("rev-parse", "HEAD").strip(), iter(range(1, 1000))
+    sha, runs = git("rev-parse", "HEAD").strip(), iter(range(first_log_number(home), 1000))
     log = home / "drive.jsonl"
     began = episode_drive.first_sha(log.read_text(encoding="utf-8")) if log.exists() else None
     if began and began != sha:

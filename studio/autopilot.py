@@ -72,6 +72,8 @@ class Signals:
     paused: bool                        # series.json paused or the STOP file
     head_sha: str | None                # git rev-parse HEAD
     media_spent_usd: float              # spend.unit_spent
+    failed_sha: str | None = None       # the commit the last drive row names (P13)
+    code_dirty: bool = False            # a runtime file is modified or untracked (P13)
 
 
 @dataclass
@@ -127,6 +129,22 @@ def crashed(drive_rows: list[dict]) -> bool:
         if row.get("event") == "start":
             return True
     return False
+
+
+def failed_sha(drive_rows: list[dict]) -> str | None:
+    """The commit the newest ledger row that names one ran on: the code a
+    failure was caused BY, which is not the code HEAD holds now (P13)."""
+    shas = [str(r["sha"]) for r in drive_rows if r.get("sha")]
+    return shas[-1] if shas else None
+
+
+def head_moved(s: Signals) -> bool:
+    """The failure belongs to a commit that is no longer HEAD: a fix landed since."""
+    return bool(s.failed_sha and s.head_sha and s.failed_sha != s.head_sha)
+
+
+def tree_dirty(s: Signals) -> bool:
+    return bool(s.code_dirty) or episode_drive.dirty(s.porcelain)
 
 
 def last_line(tail: str) -> str:
@@ -254,13 +272,14 @@ def packet(s: Signals, n: int, reason: str) -> dict:
             "exit_code": exit_code(s), "drive_row": {k: run[k] for k in ("n", "sha", "outcome") if k in run},
             "last_line": last_line(s.log_tail), "home_files": sorted(s.home_files),
             "brain_attempts": s.brain_attempts, "clock_spent_s": s.clock_spent_s,
-            "media_spent_usd": s.media_spent_usd, "crashes": crashes(s.drive_rows)}
+            "media_spent_usd": s.media_spent_usd, "crashes": crashes(s.drive_rows),
+            "failed_sha": s.failed_sha, "head": s.head_sha}
 
 
 def _idle(s: Signals, n: int, reason: str, order=None) -> Derived:
     """A launch is wanted: the one deliberate wait is the owner's own dirty
     tree (a brain that commits his WIP is worse than a pause)."""
-    if episode_drive.dirty(s.porcelain):
+    if tree_dirty(s):
         return Derived(State.WAIT_TREE, "tree_dirty", None, packet(s, n, reason))
     if not s.engine_up:
         reason += " (engine down)"
@@ -268,7 +287,13 @@ def _idle(s: Signals, n: int, reason: str, order=None) -> Derived:
 
 
 def _brain(s: Signals, n: int, reason: str) -> Derived:
-    """The brain is asked at most BRAIN_ATTEMPTS times; then the episode parks."""
+    """The brain is asked at most BRAIN_ATTEMPTS times; then the episode parks.
+    Never on a dirty tree (wait) or on a failure a newer commit may have fixed
+    (one relaunch per new HEAD): Jekyll ep01 parked three episodes that way (P13)."""
+    if tree_dirty(s):
+        return Derived(State.WAIT_TREE, "tree_dirty", None, packet(s, n, reason))
+    if head_moved(s):
+        return _idle(s, n, "head_moved")
     if s.brain_attempts >= BRAIN_ATTEMPTS:
         return Derived(State.PARKED, "brain_exhausted", None, packet(s, n, reason))
     return Derived(State.NEEDS_BRAIN, reason, None, packet(s, n, reason))
@@ -286,7 +311,7 @@ def _verdict(s: Signals, n: int) -> Derived:
         return _idle(s, n, f"brain_{said}")
     if said != "relaunch":
         return _brain(s, n, f"brain: {said or 'no verdict'}")
-    if episode_drive.dirty(s.porcelain):
+    if tree_dirty(s):
         return Derived(State.WAIT_TREE, "tree_dirty", None, packet(s, n, "brain_relaunch"))
     if v.get("commit") != s.head_sha:
         return _brain(s, n, "brain: head is not the verdict's commit")
@@ -309,7 +334,7 @@ def _answer(s: Signals, n: int, kind: str, reason: str, order) -> Derived:
     ledger's stop count, then the brain reads the stop."""
     if kind == "completed":
         return _brain(s, n, "no_upload_row")
-    if kind == "wait" and reason == "tree_dirty" and not episode_drive.dirty(s.porcelain):
+    if kind == "wait" and reason == "tree_dirty" and not tree_dirty(s):
         # the end row is history; the tree is read every tick (2026-10-18: an hour on a clean tree)
         return _idle(s, n, "tree_clean")
     if kind == "wait":
