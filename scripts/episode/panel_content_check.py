@@ -98,9 +98,12 @@ def row_for(book: Path, shot, setup, path: Path) -> dict:
     look = pc.look_advisories(seen, cast_refs.look_markers(book, list(shot.faces or []), setup))  # G-LOOK-PANEL, advisory
     if land := pc.landform_advisory(seen, pc.flat_place(book, setup.location)):   # J5: hills, advisory
         look = [*look, land]
+    if late := pc.hour_advisory(seen, setup.described):           # a day shot read at night (retro P06)
+        look = [*look, late]
     return {"shot": shot.index, "passed": not got, "faults": got, "look_advisory": look, "people": seen.people,
             "lookalikes": seen.lookalikes, "hour": seen.hour, "landform": seen.landform,
-            "text": seen.text, "subjects": seen.subjects, **fields}
+            "text": seen.text, "subjects": seen.subjects, "landmarks_seen": pc.landmarks_seen(seen),
+            **pc.shape_fields(seen), **fields}
 
 
 def main(book_id: str, number: int, only: list[int] | None = None) -> int:

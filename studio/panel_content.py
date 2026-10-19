@@ -54,7 +54,17 @@ class Seen:
     hour: str = "night"
     subjects: list[str] = field(default_factory=list)
     posture: str = ""
+    body: str = ""
+    limb_attached: str = ""
+    fog_cover: str = ""
 
+
+ASK_VERSION = "2"
+"""One bump for the K9 shape keys (retro 2026-10-19): the ask's text is the vlm
+cache key, so a changed ask re-reads every picture exactly once."""
+
+SHAPE_VALUES = ("ok", "fading", "floating", "cannot_tell")
+SHAPE_KEYS = ("body", "limb_attached", "fog_cover")
 
 ASK = (
     "Describe this picture by ANSWERING EACH QUESTION with one of the allowed "
@@ -68,8 +78,14 @@ ASK = (
     '"hour": the time of day the LIGHT says, one of ' + ", ".join(HOURS) + ".\n"
     '"posture": what the MAIN person in the picture is doing with his body, one of '
     + ", ".join(POSTURES) + ".\n"
+    '"body": is the MAIN person drawn whole, or does the body fade away or '
+    "dissolve into fog or darkness before the frame edge, one of " + ", ".join(SHAPE_VALUES) + ".\n"
+    '"limb_attached": is every visible hand or arm joined to a body in the picture, '
+    "or does one float or end in a hard cut with no body, one of " + ", ".join(SHAPE_VALUES) + ".\n"
+    '"fog_cover": does fog or haze hide part of a figure, one of ' + ", ".join(SHAPE_VALUES) + ".\n"
     '"subjects": a list of the things in the picture, each a short plain noun '
-    "phrase, everything you can name, including anything unexpected."
+    "phrase, everything you can name, including anything unexpected.\n"
+    f"(ask v{ASK_VERSION})"
 )
 
 
@@ -189,8 +205,10 @@ def stem(word: str) -> str:
     return word
 
 
-def people_fault(seen: Seen, planned: int, crowd: bool) -> bool:
-    """More faces than the shot casts, or a crowd made of one repeated person."""
+def people_fault(seen: Seen, planned: int, crowd: bool, count: bool = True) -> bool:
+    """More faces than the shot casts, or a crowd made of one repeated person.
+    `count=False` leaves the figure count to a caller that judges it against
+    the shot's own panel (take_content.crowd_fault)."""
     # Lookalikes are counted AMONG the people. ep10 shot 13 read 0 people and
     # 2 lookalikes: two tripods the book asks for, not a copied person.
     # A DECLARED CROWD IS NOT A CLONE FARM: era dress reads as "copies" (ep14
@@ -201,7 +219,7 @@ def people_fault(seen: Seen, planned: int, crowd: bool) -> bool:
         return seen.lookalikes >= 3
     if min(seen.lookalikes, seen.people):
         return True
-    return seen.people > planned
+    return count and seen.people > planned
 
 BEARDS = ("beard", "moustache", "mustache", "whiskers", "goatee", "stubble")
 """Facial hair a reader may name. A cast row that says clean-shaven and a
@@ -338,7 +356,7 @@ def landform_agrees(banned: str, seen: "Seen") -> bool:
 
 def faults(seen: Seen, frame: str, planned: int, crowd: bool,
            flat: bool, night: bool, banned=(), physical: str = "",
-           size: str = "", extras: int = 0, markers=None) -> list[str]:
+           size: str = "", extras: int = 0, markers=None, count: bool = True) -> list[str]:
     """Every way this picture disagrees with the shot that asked for it.
 
     `frame` is kept for the caller's own reporting; it is NOT used to decide
@@ -355,7 +373,7 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     # one prose exemption left is an INSERT on something worn -- a collar stud
     # at a throat holds a person by necessity -- and it reads whole words now.
     worn = not planned and size == "insert" and worn_by_someone(frame)
-    if people_fault(seen, planned + extras + shoulder_figure(frame), crowd or worn):
+    if people_fault(seen, planned + extras + shoulder_figure(frame), crowd or worn, count):
         out.append(f"{seen.people} figure(s) for {planned + extras} declared ({planned} cast + "
                    f"{extras} extras), {seen.lookalikes} of them copies of another")
     if missing_cast(seen, planned, size, frame):
@@ -386,12 +404,17 @@ GROUP = re.compile(r"\b(?:people|crowd|figures|others)\b", re.I)
 
 
 def crowd_declared(shot, setup) -> bool:
-    """The setup's crowd field; or, for a shot whose plan predates `extras`
+    """The setup's crowd field, on a shot that declares extras > 0; or, for a
+    shot whose plan predates `extras`
     (the field is unset, not 0), a group its own words name (J5: five ep05
     panels refused for the 'band of people' and the 'wedge of figures' asked)."""
+    declared = "extras" in getattr(shot, "model_fields_set", {"extras"})
+    # A SETUP CROWD IS NOT EVERY SHOT'S CROWD (ep01: 14 extras-0 takes leaked
+    # strangers through a True here).  Where the plan states extras, the shot's
+    # own count decides; only a plan that predates the field keeps the setup's.
     if (getattr(setup, "crowd", "") or "").strip():
-        return True
-    if "extras" in getattr(shot, "model_fields_set", {"extras"}):
+        return not declared or getattr(shot, "extras", 0) > 0
+    if declared:
         return False
     return bool(GROUP.search(f"{getattr(shot, 'frame', '')} {getattr(shot, 'at_rest', '')}"))
 
@@ -404,6 +427,80 @@ def judged_at_night(described: str) -> bool:
     there is what it asked (J5: four ep05 dusk panels, every one so)."""
     from studio.panel_dq import at_night
     return at_night(described) and not DAYLIGHT.search(described or "")
+
+
+BODY_REFUSES: frozenset = frozenset()
+"""The shape kinds allowed to refuse.  EMPTY until the E1 eval (the local replay
+of tests/fixtures/dq_eval/kawajiri_ep01) writes recall >= 0.6 and precision >= 0.8
+for a kind (`calibrated`); until then every shape read is an advisory."""
+
+SHAPE_VOTES = {"body": "fading", "limb_attached": "floating", "fog_cover": "fading"}
+"""The one answer of each key that counts as a vote for a fault."""
+
+NEVER_REFUSES = ("fog_cover",)
+"""Fog on a figure is a look the book asks for; it is logged, never refused."""
+
+VOTES_TO_REFUSE = 2
+"""A single vote is advisory: one read of one frame is a coin the VL tosses."""
+
+
+def calibrated(recall: float, precision: float) -> bool:
+    """A kind may refuse only at recall >= 0.6 and precision >= 0.8 on E1."""
+    return recall >= 0.6 and precision >= 0.8
+
+
+def eval_scores(truth: list[bool], flagged: list[bool]) -> dict:
+    """Recall and precision of one detector over labelled items."""
+    tp = sum(t and f for t, f in zip(truth, flagged))
+    fp = sum(f and not t for t, f in zip(truth, flagged))
+    fn = sum(t and not f for t, f in zip(truth, flagged))
+    return {"recall": tp / (tp + fn) if tp + fn else 0.0, "precision": tp / (tp + fp) if tp + fp else 0.0,
+            "tp": tp, "fp": fp, "fn": fn, "n": len(truth)}
+
+
+def shape_read(reads: list[Seen], refusing=None) -> tuple[list[str], list[str]]:
+    """(faults, advisories) for the K9 shape keys over a picture's reads: a kind
+    refuses on two or more votes when calibrated, else every vote is advisory."""
+    refusing = BODY_REFUSES if refusing is None else refusing
+    faults_, notes = [], []
+    for key, bad in SHAPE_VOTES.items():
+        votes = sum(getattr(r, key) == bad for r in reads)
+        if not votes:
+            continue
+        if key in refusing and key not in NEVER_REFUSES and votes >= VOTES_TO_REFUSE:
+            faults_.append(f"{key}: reads {bad!r} on {votes} of {len(reads)} frames")
+        else:
+            why = "one vote" if votes < VOTES_TO_REFUSE else "not calibrated"
+            notes.append(f"{key} reads {bad!r} on {votes} of {len(reads)} frames (advisory: {why})")
+    return faults_, notes
+
+
+def shape_fields(seen: Seen) -> dict:
+    """A panel row's K9 fields: the raw answers P05 reads, and the advisories
+    its single read raises."""
+    return {"body": seen.body, "limb_attached": seen.limb_attached,
+            "shape_advisory": shape_read([seen], refusing=frozenset())[1]}
+
+
+LANDMARKS = ("lamp", "door", "steps", "gate", "bridge", "tower", "church", "arch", "railings", "chimney")
+"""Nouns that place a picture on the street the plan names; logged on the row
+as `landmarks_seen` so a later gate has data (retro 2026-10-19, no prompt edit)."""
+
+
+def landmarks_seen(seen: Seen) -> list[str]:
+    """The subjects the reader listed that carry a landmark noun, as listed."""
+    return [s for s in seen.subjects if {stem(w) for w in WORD.findall(s.lower())} & {stem(m) for m in LANDMARKS}]
+
+
+def hour_advisory(seen: Seen, described: str) -> str | None:
+    """A DAY setup read as night: logged on the row, never a fault -- the wall
+    for the hour is the night direction only (`faults`)."""
+    if seen.landform == "indoors" or not (described or "").strip() or judged_at_night(described):
+        return None
+    from studio.panel_dq import at_night
+    if at_night(described) or seen.hour != "night":
+        return None
+    return "the hour reads 'night' on a day setup (advisory)"
 
 
 def judge_staged(seen: Seen, shot, setup, flat: bool, banned=(), physical="", markers=None) -> list[str]:
@@ -502,9 +599,19 @@ def parse(said: str) -> Seen:
             hour=str(got["hour"]).lower().strip(),
             subjects=subject_list(got.get("subjects")),
             posture=str(got.get("posture") or "").lower().strip(),
+            **{k: shape_value(got.get(k)) for k in SHAPE_KEYS},
         )
     except (TypeError, ValueError) as bad:
         raise Unreadable(str(bad)) from bad
+
+
+def shape_value(raw) -> str:
+    """One shape answer in the closed vocabulary: '' when the reader gave none
+    (the keys are optional), `cannot_tell` for a value outside it."""
+    if raw is None or raw == "":
+        return ""
+    said = raw.lower().strip() if isinstance(raw, str) else ""
+    return said if said in SHAPE_VALUES else "cannot_tell"
 
 
 def _loads(text: str):

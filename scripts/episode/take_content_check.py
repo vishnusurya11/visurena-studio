@@ -78,7 +78,7 @@ def with_twins(row: dict, twins: list[str]) -> dict:
     return {**row, "faults": list(row.get("faults") or []) + twins, "passed": False}
 
 
-def verdict_for(book: Path, shot, setup, reads: list[pc.Seen]) -> dict:
+def verdict_for(book: Path, shot, setup, reads: list[pc.Seen], panel_people: int | None = None) -> dict:
     from studio import cast_refs
     markers = cast_refs.look_markers(book, list(shot.faces or []), setup)
     got = tc.take_faults(
@@ -86,10 +86,19 @@ def verdict_for(book: Path, shot, setup, reads: list[pc.Seen]) -> dict:
         flat=pc.flat_place(book, setup.location), night=pc.judged_at_night(setup.described),
         physical=[pc_row(book, w) for w in (shot.faces or [])],
         frame=pc.stage_text(shot, setup), banned=pc.banned_subjects(book),
-        size=shot.size, extras=getattr(shot, "extras", 0), markers=markers)
+        size=shot.size, extras=getattr(shot, "extras", 0), markers=markers, panel_people=panel_people)
     whole = tc.busiest(reads)
     return {"passed": not got, "faults": got, "look_log": tc.look_log(reads, markers), "people": whole.people,
-            "lookalikes": whole.lookalikes, "hour": whole.hour, "text": whole.text}
+            "lookalikes": whole.lookalikes, "hour": whole.hour, "text": whole.text,
+            "panel_people": panel_people, "shape_advisory": pc.shape_read(reads)[1]}
+
+
+def panel_people_of(book: Path, number: int, shot_index: int) -> int | None:
+    """The people the shot's own panel read held (storyboard/panel_content.json),
+    or None when no row exists: the take is then judged on the plan's count."""
+    path = episode_home.home(book, number) / "storyboard" / "panel_content.json"
+    rows = episode_home.read_json(path) if path.exists() else []
+    return next((r.get("people") for r in rows if r.get("shot") == shot_index), None)
 
 
 def pc_row(book: Path, who: str) -> str:
@@ -106,7 +115,7 @@ def judge_take(book: Path, ep, record: dict, take_dir: Path, work: Path) -> dict
         reads = read_take(video, float(record.get("seconds") or 4.0), work)
     except (pc.Unreadable, ValueError) as why:
         return {"passed": False, "faults": [f"unread: {str(why)[:120]}"]}
-    row = verdict_for(book, shot, ep.setups[shot.setup], reads)
+    row = verdict_for(book, shot, ep.setups[shot.setup], reads, panel_people_of(book, ep.number, shot.index))
     return with_twins(row, twin_faults_for(shot, reads, work, video.stem))
 
 

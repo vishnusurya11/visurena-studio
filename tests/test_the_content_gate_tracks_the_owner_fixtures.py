@@ -32,9 +32,13 @@ FIXTURE = Path(__file__).parent / "fixtures" / "content_gate" / "wotw_owner_fixt
 PANELS = json.loads(FIXTURE.read_text(encoding="utf-8"))["panels"]
 
 STILL_REFUSED = {"ep05/s10", "ep05/s16", "ep05/s18", "ep05/s19", "ep05/s21", "ep05/s25",
-                 "ep07/s03", "ep07/s04", "ep07/s05", "ep07/s09"}
+                 "ep07/s03", "ep07/s04", "ep07/s05", "ep07/s09",
+                 "ep09/s04"}
 """Refused after the fix: every TRUE fault, plus four false refusals logged open
-(named walk-ons in a legacy plan, a crowd's silhouettes read as copies)."""
+(named walk-ons in a legacy plan, a crowd's silhouettes read as copies)
+and ep09/s04 (2026-10-19, P06): a wide of nine sappers on an extras-0 shot -- the plan
+declared its crowd only on the setup, which no longer stands the count down; G-CROWD
+refuses such a plan before drawing."""
 
 
 def shot_of(row: dict) -> SimpleNamespace:
@@ -146,4 +150,9 @@ def test_a_plan_that_declares_extras_is_held_to_them():
 
 
 def test_a_declared_setup_crowd_is_a_crowd():
-    assert pc.crowd_declared(legacy("the narrator", declared=True), SimpleNamespace(crowd="passengers"))
+    """Only on a shot that declares extras > 0 (retro 2026-10-19, P06: a setup's
+    crowd no longer stands the count down on every extras-0 shot of the setup)."""
+    shot = legacy("the narrator", declared=True)
+    assert not pc.crowd_declared(shot, SimpleNamespace(crowd="passengers"))
+    shot.extras = 2
+    assert pc.crowd_declared(shot, SimpleNamespace(crowd="passengers"))

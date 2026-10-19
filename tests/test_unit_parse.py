@@ -356,3 +356,17 @@ def test_the_step_bar_says_a_dead_run_has_no_end():
     assert seg["wall"] == "no end (run died)"
     live = unit_view.step_band([chip], row, events, [], NOW, PDT, live_run="dead")[0]
     assert live["wall"].endswith("…")
+
+
+@pytest.mark.parametrize("note", [
+    "crowd: 3 figure(s) in the take, the shot's panel and plan allow 2",
+    "crowd: the count rises to 2 past 1 (an unplanned figure walks in)",
+    "body: reads 'fading' on 2 of 3 frames",
+    "limb_attached: reads 'floating' on 2 of 3 frames",
+])
+def test_the_content_gates_new_fault_lines_parse_without_raising(note):
+    """P06 (retro 2026-10-19): the crowd and shape lines ride a take's content
+    row into the unit page; like any line the grammar does not know, each comes
+    back as one raw row carrying its text."""
+    faults, _ = up.split_note(note)
+    assert len(faults) == 1 and note.split(":")[0] in (faults[0]["text"] + faults[0]["kind"] + faults[0]["where"])

@@ -100,17 +100,42 @@ def look_log(reads: list[Seen], markers) -> list[str]:
     return out
 
 
+CROWD_SLACK = 1
+"""One figure past the shot's own base may be the reader's count or a walk-on's
+shoulder; two is another person in the take."""
+
+
+def crowd_fault(reads: list[Seen], declared: int, panel_people: int | None) -> str | None:
+    """The take's figures against ITS OWN panel (retro 2026-10-19, ep01: a setup's
+    crowd stood the count down on 14 extras-0 takes).  The base is the larger of
+    the panel row's people and the shot's declared faces + extras + shoulder; an
+    excess of two, or a count that RISES past the base after the first frame,
+    is a crowd fault."""
+    base = max(panel_people or 0, declared)
+    slack = CROWD_SLACK if base else 0          # a shot that casts nobody has no one to miscount
+    counts = [r.people for r in reads]
+    if (peak := max(counts)) - base > slack:
+        return f"crowd: {peak} figure(s) in the take, the shot's panel and plan allow {base + slack}"
+    if peak > base and counts[-1] > counts[0]:
+        return f"crowd: the count rises to {counts[-1]} past {base} (an unplanned figure walks in)"
+    return None
+
+
 def take_faults(reads: list[Seen], planned: int, crowd: bool, flat: bool,
                 night: bool, physical: str, frame: str, banned=(),
-                size: str = "", extras: int = 0, markers=None) -> list[str]:
+                size: str = "", extras: int = 0, markers=None,
+                panel_people: int | None = None) -> list[str]:
     """Every way this take disagrees with the shot that asked for it -- judged
-    by the same rules as its panel: the shot's size and its declared extras."""
+    by the same rules as its panel: the shot's size and its declared extras --
+    and its figures by the shot's OWN panel (`crowd_fault`), not the setup's."""
     seen = busiest(reads)
     out = faults(seen, frame=frame, planned=planned, crowd=crowd, flat=flat,
                  night=night, banned=banned, physical=physical, size=size, extras=extras,
-                 markers=markers)
+                 markers=markers, count=False)
+    declared = planned + extras + pc.shoulder_figure(frame)
+    out += [f for f in [crowd_fault(reads, declared, panel_people)] if f]
     out += [f"{h} where the row says otherwise" for h in drifted(seen, physical, markers)]
-    return out
+    return out + pc.shape_read(reads)[0]
 
 
 # ---- the second vote: framing and action, named in a closed vocabulary --------

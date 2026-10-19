@@ -1,0 +1,901 @@
+{
+ "book": "the-strange-case-of-dr-jekyll-and-mr-hyde",
+ "episode": 1,
+ "label_source": "agent",
+ "label_protocol": "label_source: agent (owner may veto any row). Panels: body = fading when the figure's torso or coat dissolves into fog or flat dark before the frame edge; limb_attached = floating when a hand or arm ends in a hard cut with no body in frame and the shot declares no extra at the edge; otherwise ok. Takes: crowd_leak = true when 3 frames sampled at studio.frames.frame_times show a human figure beyond the shot's faces + declared extras (+1 shoulder); the pre-19:00 attempts are the leak population (prompt 6475f79 fixed the prompt, not the gate). Images are JPEG copies (panels 1024 px q85, take frames 512 px q85) of the named ep01 files; positives are few (2 panels, 14 takes): recall is an estimate.",
+ "plan": {
+  "shots": [
+   {
+    "index": 0,
+    "setup": "night_door",
+    "faces": 1,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 1,
+    "setup": "street_day",
+    "faces": 2,
+    "extras": 2,
+    "size": "wide"
+   },
+   {
+    "index": 2,
+    "setup": "street_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "close"
+   },
+   {
+    "index": 3,
+    "setup": "street_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 4,
+    "setup": "street_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "close"
+   },
+   {
+    "index": 5,
+    "setup": "street_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 6,
+    "setup": "night_corner",
+    "faces": 2,
+    "extras": 0,
+    "size": "full"
+   },
+   {
+    "index": 7,
+    "setup": "night_corner",
+    "faces": 2,
+    "extras": 0,
+    "size": "insert"
+   },
+   {
+    "index": 8,
+    "setup": "night_corner",
+    "faces": 2,
+    "extras": 0,
+    "size": "full"
+   },
+   {
+    "index": 9,
+    "setup": "night_corner",
+    "faces": 2,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 10,
+    "setup": "night_door",
+    "faces": 2,
+    "extras": 0,
+    "size": "medium"
+   },
+   {
+    "index": 11,
+    "setup": "night_door",
+    "faces": 1,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 12,
+    "setup": "night_door",
+    "faces": 1,
+    "extras": 0,
+    "size": "insert"
+   },
+   {
+    "index": 13,
+    "setup": "door_step_day",
+    "faces": 2,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 14,
+    "setup": "door_step_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "close"
+   },
+   {
+    "index": 15,
+    "setup": "door_step_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 16,
+    "setup": "door_step_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "close"
+   },
+   {
+    "index": 17,
+    "setup": "door_step_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "insert"
+   },
+   {
+    "index": 18,
+    "setup": "walk_on_day",
+    "faces": 2,
+    "extras": 3,
+    "size": "wide"
+   },
+   {
+    "index": 19,
+    "setup": "walk_on_day",
+    "faces": 2,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 20,
+    "setup": "walk_on_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 21,
+    "setup": "walk_on_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 22,
+    "setup": "walk_on_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "close"
+   },
+   {
+    "index": 23,
+    "setup": "walk_on_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 24,
+    "setup": "walk_on_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "medium_close"
+   },
+   {
+    "index": 25,
+    "setup": "walk_on_day",
+    "faces": 1,
+    "extras": 0,
+    "size": "close"
+   },
+   {
+    "index": 26,
+    "setup": "walk_on_day_2",
+    "faces": 2,
+    "extras": 0,
+    "size": "medium"
+   },
+   {
+    "index": 27,
+    "setup": "door_step_day",
+    "faces": 0,
+    "extras": 1,
+    "size": "medium"
+   }
+  ],
+  "setups": {
+   "night_corner": {
+    "crowd": "",
+    "described": "A crossroads of two narrow London streets at three o'clock of a black winter morning. Tall soot-dark brick terraces line both streets, every window shuttered and dark. Cast-iron gas lamps stand at intervals along each kerb, their flames burning yellow; the nearest lamp stands on the corner itself, throwing hard yellow light down from the upper right onto the wet cobbles and long black shadows toward the lower left. The cross street runs away downhill between its own row of lamps. Granite kerbstones, black iron railings before the basement areas, and an iron drain grating at the corner complete the junction. A black night sky hangs above the rooftops. Lamplight glows through the window at the LEFT, deep shadow."
+   },
+   "night_door": {
+    "crowd": "five townsfolk in shawls and nightcaps, the child's family and the doctor, shouting and pressing in a ring by the kerb lamp",
+    "described": "A small London by-street at night, its row of shop fronts closed behind freshly painted shutters with polished brass rails. Two doors from the corner the row breaks at the entry of a court, and there a two-storey block thrusts its gable forward: a blind upper wall of discoloured plaster above a single blistered, stained door set in a shallow recess with three worn stone steps. Knife scratches score the door mouldings and black match-streaks mark its panels; the keyhole plate shines bright brass. A gas lamp on the kerb throws yellow light from the left across the door and the steps, casting black shadows into the recess at the right."
+   },
+   "street_day": {
+    "crowd": "two distant figures in Sunday dress strolling at the far end of the street",
+    "described": "A small London by-street on a Sunday afternoon, clean and bright against its dingy neighbourhood. Shop fronts with freshly painted green and cream shutters, polished brass handles and gleaming window glass run along both sides. Two doors from the corner on the left-hand side the row breaks at the entry of a court, where a sinister two-storey block thrusts its gable forward: a blind forehead of discoloured plaster above a single blistered, stained door in a shallow recess with three worn steps. Low afternoon sun falls from the left along the street, lighting the shop brasses and throwing the recess into black shadow."
+   },
+   "door_step_day": {
+    "crowd": "",
+    "described": "The pavement directly before the sinister door on the by-street, seen close. The door is blistered and stained dark brown, its lower panels streaked black where matches have been struck, its mouldings scored by knife cuts; a brass keyhole plate at its right edge is rubbed bright. Three worn stone steps lead up into the shallow recess. Above, the blind gable wall of discoloured plaster rises to the eaves, and to the right a narrow court entry opens in shadow. Low afternoon sun falls from the left across the flagstones and casts the recess and the court into deep black shadow."
+   },
+   "walk_on_day": {
+    "crowd": "three distant Sunday walkers on the far pavement, strolling",
+    "described": "A broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements; their front steps are whitened and their brass bell pulls shine. Shallow stone steps rise to each panelled front door. Plane trees stand at intervals along the kerb, their bare branches black against a pale sky. A single cast-iron gas lamp stands on the near kerb. Low afternoon sun falls from the left down the length of the street, laying long blue-black shadows from the trees and railings across the flagstones toward the right."
+   },
+   "walk_on_day_2": {
+    "crowd": "three distant Sunday walkers on the far pavement, strolling",
+    "described": "A broad London street beyond the by-street on a Sunday afternoon. Grey stone terraces with tall sash windows and black iron railings line both pavements; their front steps are whitened and their brass bell pulls shine. Shallow stone steps rise to each panelled front door. Plane trees stand at intervals along the kerb, their bare branches black against a pale sky. A single cast-iron gas lamp stands on the near kerb. Low afternoon sun falls from the left down the length of the street, laying long blue-black shadows from the trees and railings across the flagstones toward the right."
+   }
+  }
+ },
+ "panel_people": {
+  "0": 1,
+  "1": 2,
+  "2": 1,
+  "3": 1,
+  "4": 1,
+  "5": 1,
+  "6": 2,
+  "7": 2,
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 1,
+  "12": 1,
+  "13": 2,
+  "14": 1,
+  "15": 1,
+  "16": 1,
+  "17": 1,
+  "18": 2,
+  "19": 2,
+  "20": 1,
+  "21": 1,
+  "22": 1,
+  "23": 1,
+  "24": 1,
+  "25": 1,
+  "26": 2,
+  "27": 1
+ },
+ "panels": [
+  {
+   "file": "panels/s02_prefix_fading.jpg",
+   "shot": 2,
+   "body": "fading",
+   "limb_attached": "ok",
+   "note": "storyboard/superseded/ep01_grid_street_day_1x1_s02.png (17:36): coat and shoulders dissolve into black fog along the bottom third"
+  },
+  {
+   "file": "panels/s27_prefix_floating.jpg",
+   "shot": 27,
+   "body": "ok",
+   "limb_attached": "floating",
+   "note": "storyboard/superseded/ep01_grid_door_step_day_1x1_c.png (17:38): a sleeve and hand holding a match end in a hard cut mid-wall, no body"
+  },
+  {
+   "file": "panels/s02_intermediate_s02o_v1.jpg",
+   "shot": 2,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "superseded s02o_v1 (19:27): a whole figure; labelled clean by eye"
+  },
+  {
+   "file": "panels/s27_intermediate_c27o_v1.jpg",
+   "shot": 27,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "superseded c27o_v1 (19:27): a man crouched at the door, whole; labelled clean by eye"
+  },
+  {
+   "file": "panels/s00_clean.jpg",
+   "shot": 0,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_00.png)"
+  },
+  {
+   "file": "panels/s01_clean.jpg",
+   "shot": 1,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_01.png)"
+  },
+  {
+   "file": "panels/s03_clean.jpg",
+   "shot": 3,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_03.png)"
+  },
+  {
+   "file": "panels/s04_clean.jpg",
+   "shot": 4,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_04.png)"
+  },
+  {
+   "file": "panels/s05_clean.jpg",
+   "shot": 5,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_05.png)"
+  },
+  {
+   "file": "panels/s06_clean.jpg",
+   "shot": 6,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_06.png)"
+  },
+  {
+   "file": "panels/s07_clean.jpg",
+   "shot": 7,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_07.png)"
+  },
+  {
+   "file": "panels/s08_clean.jpg",
+   "shot": 8,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_08.png)"
+  },
+  {
+   "file": "panels/s09_clean.jpg",
+   "shot": 9,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_09.png)"
+  },
+  {
+   "file": "panels/s10_clean.jpg",
+   "shot": 10,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_10.png)"
+  },
+  {
+   "file": "panels/s11_clean.jpg",
+   "shot": 11,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_11.png)"
+  },
+  {
+   "file": "panels/s13_clean.jpg",
+   "shot": 13,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_13.png)"
+  },
+  {
+   "file": "panels/s14_clean.jpg",
+   "shot": 14,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_14.png)"
+  },
+  {
+   "file": "panels/s15_clean.jpg",
+   "shot": 15,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_15.png)"
+  },
+  {
+   "file": "panels/s17_clean.jpg",
+   "shot": 17,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_17.png)"
+  },
+  {
+   "file": "panels/s18_clean.jpg",
+   "shot": 18,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_18.png)"
+  },
+  {
+   "file": "panels/s19_clean.jpg",
+   "shot": 19,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_19.png)"
+  },
+  {
+   "file": "panels/s21_clean.jpg",
+   "shot": 21,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_21.png)"
+  },
+  {
+   "file": "panels/s24_clean.jpg",
+   "shot": 24,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_24.png)"
+  },
+  {
+   "file": "panels/s26_clean.jpg",
+   "shot": 26,
+   "body": "ok",
+   "limb_attached": "ok",
+   "note": "shipped panel of the final ep01 (storyboard/shot_26.png)"
+  }
+ ],
+ "takes": [
+  {
+   "take": 0,
+   "shot": 0,
+   "source": "takes/r2v/attempts/T00_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T00_prefix_0.jpg",
+    "takes/T00_prefix_1.jpg",
+    "takes/T00_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    1,
+    5,
+    7
+   ]
+  },
+  {
+   "take": 2,
+   "shot": 2,
+   "source": "takes/r2v/attempts/T02_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T02_prefix_0.jpg",
+    "takes/T02_prefix_1.jpg",
+    "takes/T02_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    1,
+    2,
+    2
+   ]
+  },
+  {
+   "take": 4,
+   "shot": 4,
+   "source": "takes/r2v/attempts/T04_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T04_prefix_0.jpg",
+    "takes/T04_prefix_1.jpg",
+    "takes/T04_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "take": 5,
+   "shot": 5,
+   "source": "takes/r2v/attempts/T05_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T05_prefix_0.jpg",
+    "takes/T05_prefix_1.jpg",
+    "takes/T05_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    3,
+    3,
+    2
+   ]
+  },
+  {
+   "take": 10,
+   "shot": 10,
+   "source": "takes/r2v/attempts/T10_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T10_prefix_0.jpg",
+    "takes/T10_prefix_1.jpg",
+    "takes/T10_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    4,
+    6,
+    7
+   ]
+  },
+  {
+   "take": 11,
+   "shot": 11,
+   "source": "takes/r2v/attempts/T11_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T11_prefix_0.jpg",
+    "takes/T11_prefix_1.jpg",
+    "takes/T11_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    1,
+    3,
+    6
+   ]
+  },
+  {
+   "take": 19,
+   "shot": 19,
+   "source": "takes/r2v/attempts/T19_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T19_prefix_0.jpg",
+    "takes/T19_prefix_1.jpg",
+    "takes/T19_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    5,
+    5,
+    5
+   ]
+  },
+  {
+   "take": 20,
+   "shot": 20,
+   "source": "takes/r2v/attempts/T20_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T20_prefix_0.jpg",
+    "takes/T20_prefix_1.jpg",
+    "takes/T20_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    1,
+    3,
+    3
+   ]
+  },
+  {
+   "take": 21,
+   "shot": 21,
+   "source": "takes/r2v/attempts/T21_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T21_prefix_0.jpg",
+    "takes/T21_prefix_1.jpg",
+    "takes/T21_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    4,
+    5,
+    5
+   ]
+  },
+  {
+   "take": 22,
+   "shot": 22,
+   "source": "takes/r2v/attempts/T22_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T22_prefix_0.jpg",
+    "takes/T22_prefix_1.jpg",
+    "takes/T22_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    3,
+    4,
+    4
+   ]
+  },
+  {
+   "take": 23,
+   "shot": 23,
+   "source": "takes/r2v/attempts/T23_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T23_prefix_0.jpg",
+    "takes/T23_prefix_1.jpg",
+    "takes/T23_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    2,
+    3,
+    3
+   ]
+  },
+  {
+   "take": 24,
+   "shot": 24,
+   "source": "takes/r2v/attempts/T24_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T24_prefix_0.jpg",
+    "takes/T24_prefix_1.jpg",
+    "takes/T24_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "take": 25,
+   "shot": 25,
+   "source": "takes/r2v/attempts/T25_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T25_prefix_0.jpg",
+    "takes/T25_prefix_1.jpg",
+    "takes/T25_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    1,
+    2,
+    5
+   ]
+  },
+  {
+   "take": 26,
+   "shot": 26,
+   "source": "takes/r2v/attempts/T26_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T26_prefix_0.jpg",
+    "takes/T26_prefix_1.jpg",
+    "takes/T26_prefix_2.jpg"
+   ],
+   "crowd_leak": true,
+   "note": "extra figures beyond the shot's faces on an extras-0 shot, seen by eye",
+   "eye_people": [
+    4,
+    4,
+    4
+   ]
+  },
+  {
+   "take": 27,
+   "shot": 27,
+   "source": "takes/r2v/attempts/T27_fail1.mp4 (rendered 18:xx, before the 19:00 prompt fix)",
+   "frames": [
+    "takes/T27_prefix_0.jpg",
+    "takes/T27_prefix_1.jpg",
+    "takes/T27_prefix_2.jpg"
+   ],
+   "crowd_leak": false,
+   "note": "extras 1 declared: the one arm entering from the frame edge is the declared extra",
+   "eye_people": [
+    1,
+    1,
+    1
+   ]
+  },
+  {
+   "take": 1,
+   "shot": 1,
+   "source": "takes/r2v/T01.mp4 (final)",
+   "frames": [
+    "takes/T01_final_0.jpg",
+    "takes/T01_final_1.jpg",
+    "takes/T01_final_2.jpg"
+   ],
+   "crowd_leak": false,
+   "note": "final take whose content.json people equals its panel's"
+  },
+  {
+   "take": 3,
+   "shot": 3,
+   "source": "takes/r2v/T03.mp4 (final)",
+   "frames": [
+    "takes/T03_final_0.jpg",
+    "takes/T03_final_1.jpg",
+    "takes/T03_final_2.jpg"
+   ],
+   "crowd_leak": false,
+   "note": "final take whose content.json people equals its panel's"
+  },
+  {
+   "take": 6,
+   "shot": 6,
+   "source": "takes/r2v/T06.mp4 (final)",
+   "frames": [
+    "takes/T06_final_0.jpg",
+    "takes/T06_final_1.jpg",
+    "takes/T06_final_2.jpg"
+   ],
+   "crowd_leak": false,
+   "note": "final take whose content.json people equals its panel's"
+  },
+  {
+   "take": 7,
+   "shot": 7,
+   "source": "takes/r2v/T07.mp4 (final)",
+   "frames": [
+    "takes/T07_final_0.jpg",
+    "takes/T07_final_1.jpg",
+    "takes/T07_final_2.jpg"
+   ],
+   "crowd_leak": false,
+   "note": "final take whose content.json people equals its panel's"
+  },
+  {
+   "take": 8,
+   "shot": 8,
+   "source": "takes/r2v/T08.mp4 (final)",
+   "frames": [
+    "takes/T08_final_0.jpg",
+    "takes/T08_final_1.jpg",
+    "takes/T08_final_2.jpg"
+   ],
+   "crowd_leak": false,
+   "note": "final take whose content.json people equals its panel's"
+  },
+  {
+   "take": 9,
+   "shot": 9,
+   "source": "takes/r2v/T09.mp4 (final)",
+   "frames": [
+    "takes/T09_final_0.jpg",
+    "takes/T09_final_1.jpg",
+    "takes/T09_final_2.jpg"
+   ],
+   "crowd_leak": false,
+   "note": "final take whose content.json people equals its panel's"
+  },
+  {
+   "take": 12,
+   "shot": 12,
+   "source": "takes/r2v/T12.mp4 (final)",
+   "frames": [
+    "takes/T12_final_0.jpg",
+    "takes/T12_final_1.jpg",
+    "takes/T12_final_2.jpg"
+   ],
+   "crowd_leak": false,
+   "note": "final take whose content.json people equals its panel's"
+  },
+  {
+   "take": 13,
+   "shot": 13,
+   "source": "takes/r2v/T13.mp4 (final)",
+   "frames": [
+    "takes/T13_final_0.jpg",
+    "takes/T13_final_1.jpg",
+    "takes/T13_final_2.jpg"
+   ],
+   "crowd_leak": false,
+   "note": "final take whose content.json people equals its panel's"
+  }
+ ],
+ "final_takes": [
+  {
+   "take": 0,
+   "people": 1
+  },
+  {
+   "take": 1,
+   "people": 3
+  },
+  {
+   "take": 2,
+   "people": 1
+  },
+  {
+   "take": 3,
+   "people": 1
+  },
+  {
+   "take": 4,
+   "people": 1
+  },
+  {
+   "take": 5,
+   "people": 1
+  },
+  {
+   "take": 6,
+   "people": 2
+  },
+  {
+   "take": 7,
+   "people": 2
+  },
+  {
+   "take": 8,
+   "people": 2
+  },
+  {
+   "take": 9,
+   "people": 2
+  },
+  {
+   "take": 10,
+   "people": 2
+  },
+  {
+   "take": 11,
+   "people": 1
+  },
+  {
+   "take": 12,
+   "people": 1
+  },
+  {
+   "take": 13,
+   "people": 2
+  },
+  {
+   "take": 14,
+   "people": 1
+  },
+  {
+   "take": 15,
+   "people": 1
+  },
+  {
+   "take": 16,
+   "people": 1
+  },
+  {
+   "take": 17,
+   "people": 0
+  },
+  {
+   "take": 18,
+   "people": 2
+  },
+  {
+   "take": 19,
+   "people": 2
+  },
+  {
+   "take": 20,
+   "people": 1
+  },
+  {
+   "take": 21,
+   "people": 1
+  },
+  {
+   "take": 22,
+   "people": 1
+  },
+  {
+   "take": 23,
+   "people": 1
+  },
+  {
+   "take": 24,
+   "people": 1
+  },
+  {
+   "take": 25,
+   "people": 1
+  },
+  {
+   "take": 26,
+   "people": 2
+  },
+  {
+   "take": 27,
+   "people": 1
+  }
+ ],
+ "final_takes_note": "people = the max read in the final (post-19:00) take's content.json; all 28 passed the owner's eye as crowd-clean",
+ "eye_people_note": "agent's by-eye count of human figures per sampled frame of the pre-fix takes (the rule's input on the leak population; the VL's own counts come from the local replay)"
+}
