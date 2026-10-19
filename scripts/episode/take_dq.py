@@ -368,6 +368,30 @@ def landmarker():
         return None
 
 
+def load_vision_judges() -> tuple:
+    """(the person detector, the face detector): the two models a measure loads on the CPU lane."""
+    from studio import gait, warp_gate
+    return gait.yolo(), warp_gate.detector()
+
+
+class Judges:
+    """The heavy judges (threads capped, embedder, FaceMesh, yolo, face detector), loaded on the
+    first take that misses the verdict cache.  ep01: the serial passes that measured nothing took
+    32.4, 33.4 and 15.0 s because every model loaded before the cache was asked."""
+
+    def __init__(self, home: Path, cpu_only: bool):
+        self.home, self.cpu_only, self.loaded = home, cpu_only, None
+
+    def get(self) -> tuple[dict, list[str]]:
+        if self.loaded is None:
+            cap_threads(lane_threads())
+            embed, inputs, deferred = judge_embedder(self.cpu_only)
+            person, face = load_vision_judges()
+            self.loaded = ({"home": self.home, "embed": embed, "inputs": inputs, "landmarker": landmarker(),
+                            "person": person, "face": face}, deferred)
+        return self.loaded
+
+
 def voice_of(composite: Path, dialogue: bool):
     """The per-frame envelope of the wav that drove a dialogue take."""
     from studio.measure import mouth
@@ -730,11 +754,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         # a take gate that measured nothing has passed nothing (audit item 6)
         raise SystemExit(f"episode {number}: no takes to judge under "
                          f"{episode_home.relative(book, take_dir)}")
-    cap_threads(lane_threads())
-    embed, inputs, deferred = judge_embedder(cpu_only)
-    from studio import gait, warp_gate
-    judges = {"home": home, "embed": embed, "inputs": inputs, "landmarker": landmarker(), "person": gait.yolo(),
-              "face": warp_gate.detector()}
+    lazy = Judges(home, cpu_only)
     for index in wanted(records, indices):
         rec, began = records[index], time.time()
         # THE CURRENT PICTURES, read before panel_board rewrites rec["anchors"]
@@ -758,6 +778,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
             episode_home.write_json(take_dir / f"T{index:02d}.dq.json", hit)   # a fresh mtime for mtime readers
             print(f"T{index:02d} cached ({hit.get('score', '?')}/100, bytes unchanged)", flush=True)
             continue
+        judges, deferred = lazy.get()           # a pass of cache hits never gets here
         files = episode_home.attempts_of(take_dir, index) if attempts else [book / rec["rel_path"]]
         inputs = {f: ti.check(f, pictures) for f in files}       # G-TAKE-INPUTS, before any swap
         if attempts:
