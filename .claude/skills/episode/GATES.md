@@ -363,6 +363,13 @@ readable (`fr.soft_faces`). Denoise `fr.denoise_for`: 0.45 at 60 px, +0.05 per h
 `all_readable` / `no_cast` spend no round; a `no_faces` row of the old 60 px wall is owed a new look. A warp, gait,
 pulse, frozen-whole, lip-sync or lag hard fail may follow the refine (a warp FAIL after its one seed retake);
 identity, clones, content, lettering, look and leak still bar it. History: LESSONS_ARCHIVE.md.
+A failed anime-worker ask (its 120 s idle exit) starts one fresh worker.
+
+**TINY-FACE RUNG (09_08, 2026-10-19, `scripts/episode/tiny_face.py`).** A take whose refine refused (seam or drift,
+current bytes) a planned face (shot face or speaker) of 20-40 px at its smallest (`min_px`), on the Spark graph
+(wide/full), square episode, no still: ONE draw on the 1024 graph (`takes_r2v --tiny-face`, a retake's seed and
+inputs, scaled to the canvas); kept only if take_dq, take_content and the eye pass it, then refined again; else the
+old take, verdicts and row return. 1 per take (face_refine row); seconds on the retakes wall; 1.75x a take, cut first.
 
 ## QC — `qc.py <book> <n> --engine=r2v`
 

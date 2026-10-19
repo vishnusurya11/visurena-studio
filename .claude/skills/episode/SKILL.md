@@ -566,7 +566,7 @@ the GPU lane right behind the renders and refines what the ladder left owed once
 the FIRST thing cut for time, never a check. Assemble pastes the kept crops at CUT scale before the one upscale (owner
 2026-10-18, 24caaeb; a face under 40 px through a soft head mask); on `av3` the portable python's worker rebuilds the
 paste from its spans. The render is the SaveVideo node's output by node id (`fr.saved_node`): v0.41.2 echoes the
-LoadVideo input first. By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.
+LoadVideo input first. A refused 20-40 px face earns one 1024 draw (09_08). By hand: `face_refine.py <book> <n>`.
 
 **G-WARP is HARD on S only (2026-10-19, retro D1-D2, for owner veto).** `take_dq` scores every take that stages a
 face for frame-to-frame face redraw (`studio/warp_gate.py`, CPU lane). FAIL is S > 2.5: one seed retake, then F2 for a

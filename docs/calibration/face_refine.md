@@ -208,3 +208,20 @@ about +2.5 min more CPU, overlapped with renders. The fix round's tracker adds a
 
 Still owed: the bench's round-2 GPU arm (render with the new runs and soft paste, owner's eye on the
 strips); the 0.4 colour floor, the 24 px body line and DRIFT_MAX 35 are one episode's numbers.
+
+## Tiny-face rung (2026-10-19, face-blur round 2 builder; `scripts/episode/tiny_face.py`)
+
+The refine's seam and drift refusals of a planned 20-40 px face (smallest tracked height, `min_px`) on a Spark
+take of a square episode earn ONE 1024x1024 draw of the take (bench arm A3c). The draw is kept only when take_dq,
+take_content and the take eye pass it; then it is refined again. Replayed on the bench's own refine rows:
+
+| take | face | min / median px | refine | planned | graph | rung |
+|---|---|---|---|---|---|---|
+| T01 | Utterson | 36 / 37.9 | seam 19.1 > 18 | shot 1 face | Spark (wide) | yes |
+| T01 | Enfield | 30 / 33.0 | seam 19.1 > 18 | shot 1 face | Spark (wide) | yes (same draw) |
+| T07 | child | 38 / 39.3 | drift 43.3, seam 27.4 | shot 7 face | Wuli (insert) | no: no 1024 Wuli graph; an insert's subject is the boots |
+| T06 | Hyde | 11 / 13.5 | kept | shot 6 face | Spark (full) | no: kept, and under the 20 px floor |
+
+The 20 px floor: A3c drew T06's 10-11 px Hyde with no face either way (eye 0 -> 0). The 40 px line is the soft
+paste's own (`face_paste.SOFT_PX`). Uncalibrated: a 1024 draw has been judged by no gate yet. The first rung rows
+(the eye verdict, take_dq's warp and flicker rows, the refine of the new bytes) are its calibration set.

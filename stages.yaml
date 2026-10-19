@@ -924,6 +924,15 @@ stages:
               (scripts/episode/face_refine.py); gated on identity, seam, flicker
               and face count, else the unrefined take; takes/r2v/refine.json. A
               GPU job behind renders and retakes; the first thing cut for time.
+          - id: "09_08"
+            name: tiny_face
+            desc: >-
+              TINY-FACE RUNG (face-blur round 2, 2026-10-19): a take whose refine
+              refused (seam or drift) a planned 20-40 px face, on the Spark graph of a
+              square episode, draws ONCE on the 1024 graph (takes_r2v --tiny-face,
+              scaled back to the canvas; scripts/episode/tiny_face.py); kept only if
+              take_dq, take_content and the take eye pass it, then refined again;
+              else the old take returns. One per take; retakes wall; cut first.
 
       - id: "10"
         name: edit

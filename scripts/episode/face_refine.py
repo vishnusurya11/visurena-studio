@@ -126,8 +126,10 @@ def refund_of(entry: dict | None) -> int:
 
 def refined_out(home: Path, index: int, refund: int = 0) -> bool:
     """The take has had its refines (owner 2026-10-18: 1 per take, persisted in attempts.json);
-    a STALE row's jobless round is refunded until the first decision that is not a cut replaces it."""
-    return step_attempts.count(home, refine_key(index)) - refund >= step_caps.rounds("face_refine")
+    a STALE row's jobless round is refunded until the first decision that is not a cut replaces it,
+    and the tiny-face rung's one draw (scripts/episode/tiny_face.py) buys its new bytes one more."""
+    granted = step_attempts.count(home, f"tiny_face.T{index:02d}")
+    return step_attempts.count(home, refine_key(index)) - refund - granted >= step_caps.rounds("face_refine")
 
 
 def count_refine(home: Path, index: int) -> None:
@@ -550,7 +552,7 @@ def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None, an
     kept, why = fr.decide(m)
     return {"who": job.person.who, "crop": f"{OUT}/{stem}.mp4", "track": f"{OUT}/{stem}.json", "kept": kept,
             "why": why, "measures": m.__dict__, "frames": job.frames, "denoise": job.denoise, "face_px": job.face_px,
-            "soft": job.soft, "source": job.source, "lost": job.lost}
+            "min_px": round(face_track.track_px(job.track), 1), "soft": job.soft, "source": job.source, "lost": job.lost}
 
 
 def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, seconds: float, loose=None,

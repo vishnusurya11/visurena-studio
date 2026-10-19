@@ -1950,3 +1950,50 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   `tests/test_face_refine_reads_anime_identity.py`, `tests/test_face_refine_gate_round_two.py`,
   `tests/test_face_refine_runs_round_two.py`, `tests/test_face_detect_answers_weak_faces_and_bodies.py`
   (fixture `tests/fixtures/face_blur_round1_rows.json`).
+
+## The tiny-face rung (09_08, face-blur round 2 builder, 2026-10-19)
+
+- **Why.** The refine refused ep01 T01's two faces (Utterson 36 px, Enfield 30 px at their smallest; seam 19.1
+  against 18) and T07's child (38 px; drift 43.3, seam 27.4): H3 repainted the background round a small face and the
+  paste showed it. All three refusals were right by eye. Under about 40 px nothing else gives such a face an eye. The
+  bench's 1024x1024 draw of T01 (arm A3c: the Spark take graph, nothing else changed) was the only arm that drew both
+  with clean ink lines and a readable eye (cel eye 44 -> 55, 57 -> 80; CCIP 0.128 -> 0.106, 0.100 -> 0.071).
+  It also re-composed the scene (the background couple became two women), and flicker rose on 3 of its 4 faces
+  (only T06's 11 px Hyde past the gate's wall). So it is never trusted: every draw is judged by every take gate.
+- **The rule** (`scripts/episode/tiny_face.py`). The refine refused the face on a seam or drift wall, on the take's
+  CURRENT bytes. The face is 20-40 px at its smallest (`min_px` on every refine row from now; else the row's
+  `face_px`). Under 20 px a 4/3 draw still gives no face: A3c drew T06's Hyde with no face. The person is planned
+  on the take: a face of its shots, or a speaker of a non-narration line in them. The take renders on the Spark
+  graph (any wide or full shot), because the 1024 file is that graph and Wuli was never benched at 1024. The episode
+  is square, the only canvas measured. No live still holds the take.
+- **Replay on the bench's ep01 rows** (`tests/fixtures/ep01_replay/tiny_face/refine.json`): T01 qualifies for both
+  faces. T07's child is refused and planned (shot 7's faces), but T07 is an insert at cobble height: it renders on
+  Wuli, and its subject is the boots, not her face. So it does NOT earn the rung. T06's Hyde (13.5 px median, 11
+  smallest, a far silhouette) was kept, and is under the floor anyway.
+- **The pass.** ONE batched draw (`takes_r2v --tiny-face --retake=... --why=tiny_face: ...`). It takes the
+  retake's next seed, the same staged sheets, panel and audio, and the 1024 graph. It lands scaled (lanczos, CRF
+  10, sound copied) to the episode canvas; graph.json carries `scaled_to`, so currency reads the canvas the take
+  is. Then `take_dq` (every row, G-WARP and flicker included; never `--attempts`, which ranks by score and would
+  swap the old take back on a number that reads no face), `take_content_check` (crowd, extras) and the take eye on
+  that take (dq + content + clones).
+  - **Passed:** kept. Step 09 signs the eye again, walls the inputs and refines the new bytes; the draw buys
+    `refined_out` one more round. A refusal there falls back to the unrefined 1024 draw.
+  - **Failed:** the old take, its graph (`episode_home.swap_in`), its dq/content verdicts and its shots.json row
+    come back. The draw is archived as `attempts/T<nn>_failN.mp4`. Its dq row is not in the restored record, so
+    `recorded_draw` reads it HARD_UNKNOWN and it never wins a later keep_best.
+  - **Render died:** every take it left missing is given back before the refusal is raised.
+- **Caps.** One draw per take per episode: the cap table's face_refine row, 1 per take, counted as attempts.json
+  `tiny_face.T<nn>` and spent before the render. Its seconds are booked to the `retakes` wall, with no round.
+  It is priced COLD_S + 1.75 x TAKE_S per take + the refine of its faces again (ep01 T01: 300 + 464 + 220 = 984 s
+  priced), and cut before the clock's reserve like the refine (`TINY FACE CUT`).
+  - Measured GPU per qualifying take: 163-201 s render + about 74 s per face refined again, about 5-6 min.
+    ep01 has one such take.
+- **With it.** The anime identity reader starts a dead worker afresh once before it gives up (BENCH_R2 finding 1:
+  the 120 s idle exit raced T13's request after a 136 s render, and 6 of 15 faces were gated on facenet alone).
+  Step 10 now re-cuts when `refine.json` is newer than the master: a refine decided after the cut (a rerun from
+  step 09's refine) otherwise reached no picture.
+- **Owed.** The rung's own evidence is one take (T01) on one seed, and no draw has yet been judged by the gates.
+  Portrait episodes are not drawn (a 4/3 portrait canvas is 1.8 MP, unmeasured).
+- Tests: `tests/test_the_tiny_face_rung.py`, `tests/test_the_tiny_face_rung_closes_step_09.py`,
+  `tests/test_a_tiny_face_draw_is_delivered_at_the_episode_canvas.py`,
+  `tests/test_anime_reader_restarts_a_dead_worker.py`.

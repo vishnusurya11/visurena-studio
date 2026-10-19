@@ -112,7 +112,12 @@ def staged_images(take: Path) -> set[str]:
 
 
 def recorded_canvas(take: Path) -> tuple[int, int] | None:
-    """The width and height this take actually rendered at, off its own graph."""
+    """The width and height this take IS, off its own graph: the canvas a draw was scaled to
+    (`scaled_to`: the tiny-face rung renders at 1024 and lands at the episode's canvas), else
+    the size its render node drew."""
+    scaled = (read_graph(take) or {}).get("scaled_to")
+    if isinstance(scaled, list) and len(scaled) == 2:
+        return (int(scaled[0]), int(scaled[1]))
     for node in nodes_of(take):
         inputs = node.get("inputs", {})
         if isinstance(inputs.get("width"), int) and isinstance(inputs.get("height"), int):

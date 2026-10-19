@@ -2,9 +2,10 @@
 worker under ComfyUI's embedded python (studio/anime_id_worker.py) reads CCIP and clip_vision_h
 for the sheet's face against the take's crops and the refined ones.  Facenet is a photo model:
 it read ep01 T01 Utterson at 0.04 on his own take (docs/audit/2026-10-19_face_blur/bench), so a
-cel face needs a term trained on drawn characters.  A worker that will not start or answers an
-error leaves the terms unread (None) for that crop and every later one, said in the log; the
-gate then reads facenet alone, as before.
+cel face needs a term trained on drawn characters.  A worker that fails an ask (its 120 s idle
+exit races the request) is started afresh once; one that will not start or fails again leaves
+the terms unread (None) for that crop and every later one, said in the log; the gate then reads
+facenet alone, as before.
 """
 from __future__ import annotations
 
@@ -115,13 +116,24 @@ class Reader:
             return None
         try:
             with tempfile.TemporaryDirectory() as folder:
-                ccip, clip = self.ready()(write_crops(Path(folder), sheet, src, ref))
+                ccip, clip = self.ask(write_crops(Path(folder), sheet, src, ref))
             return {k: round(v, 4) for k, v in terms(ccip, clip, len(src)).items()}
         except Exception as failed:
             print(f"ANIME ID -> unread: the worker failed ({failed}); facenet alone reads identity", flush=True)
             self.broken = True
             self.close()
             return None
+
+    def ask(self, paths: list[Path]) -> tuple[np.ndarray, np.ndarray]:
+        """One ask; a worker that failed it is started afresh ONCE and asked again.  Its 120 s idle
+        exit races the next request (BENCH_R2 finding 1: ep01 T13 read "the worker died" after a
+        136 s render), so one fresh 12.8 s load answers it; a second failure raises."""
+        try:
+            return self.ready()(paths)
+        except Exception as died:
+            print(f"ANIME ID -> restart: {died}; one fresh worker", flush=True)
+            self.close()
+            return self.ready()(paths)
 
     def ready(self):
         """The live worker; a GPU one that sees a render arrive is swapped for a CPU one."""

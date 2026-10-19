@@ -136,6 +136,14 @@ def test_the_crop_renders_with_only_its_persons_sheet_at_its_faces_denoise(tmp_p
     assert "Mr. A" in g["8"]["inputs"]["prompt"] and g["12"]["inputs"]["noise_seed"] == 8
 
 
+def test_every_person_row_carries_its_smallest_tracked_face(tmp_path):
+    """The tiny-face rung reads `min_px` (face_track.track_px), the face at its smallest."""
+    w, engine = Room(tmp_path), Engine(tmp_path)
+    run(w, engine)
+    person = json.loads((w.room / "refine.json").read_text())["T00"]["people"][0]
+    assert 0 < person["min_px"] <= person["face_px"] + 0.5
+
+
 def test_a_faithful_refine_is_kept_and_recorded_beside_the_takes(tmp_path):
     w = Room(tmp_path)
     run(w, Engine(tmp_path))

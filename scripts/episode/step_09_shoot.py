@@ -16,6 +16,9 @@ take_strip.py.  A take that passes its dq and is wide, full or small-faced is
 owed a FACE REFINE (09_07, owner 2026-10-17): its face crops re-render on the GPU
 lane right behind the renders (studio/take_overlap.Refines), and whatever the
 ladder leaves owed is refined once after it -- the first thing cut for time.
+A take whose refine refused a planned 20-40 px face then draws ONCE on the
+1024 graph (09_08, scripts/episode/tiny_face.py), kept only if every take gate
+passes it.
 Then the EYE_TAKES row: `judge:take_eye@1` reads the kept takes and signs
 takes/r2v/eye_<sha8>.json -- pass, or flagged at the take ladder's terminal
 rung (keep_best, or a still from the passed panel); it climbs seed -> move
@@ -297,6 +300,19 @@ def refine_rest(ctx) -> None:
     ctx.run_script(REFINE, *map(str, sorted(owed)), gpu=True)
 
 
+def tiny_face_rung(ctx, flag: str) -> None:
+    """09_08 after the refine: a take whose refine refused a planned 20-40 px face draws once on the
+    1024 graph (scripts/episode/tiny_face.py); a kept draw changed bytes, so the eye signs again,
+    its inputs are walled and its new bytes refined.  Never a loop: one pass, one draw per take."""
+    from scripts.episode import tiny_face
+    judge = lambda take: take_eye.judge([take], plan=episode_home.load_plan(ctx.book_dir, ctx.number),  # noqa: E731
+                                        clones=CLONES)
+    if tiny_face.rung(ctx, flag, judge, tuple(dq_flags(ctx))):
+        judge_takes(ctx, flag)
+        inputs_wall(ctx)
+        refine_rest(ctx)
+
+
 def run(ctx) -> None:
     if why := panel_refusals(ctx.home):
         raise SystemExit("REFUSED: the takes wait on the panels: " + "; ".join(why))
@@ -325,6 +341,7 @@ def run(ctx) -> None:
     judge_takes(ctx, flag)
     inputs_wall(ctx)
     refine_rest(ctx)
+    tiny_face_rung(ctx, flag)
 
 
 if __name__ == "__main__":

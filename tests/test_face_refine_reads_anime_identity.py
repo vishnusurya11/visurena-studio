@@ -151,10 +151,12 @@ def test_a_render_that_arrives_moves_a_gpu_reader_to_the_cpu():
 
 
 def test_a_failed_reader_leaves_the_terms_unread_and_never_starts_again():
+    """One fresh start answers a dead worker (tests/test_anime_reader_restarts_a_dead_worker.py);
+    a fresh one that fails too ends the reader for the run."""
     read, started = reader(fail=True)
     crop = np.zeros((8, 8, 3), np.uint8)
     assert read(crop, [crop], [crop]) is None and read(crop, [crop], [crop]) is None
-    assert len(started) == 1 and started[0].closed
+    assert len(started) == 2 and all(w.closed for w in started)
 
 
 def test_no_sheet_crop_leaves_the_terms_unread():

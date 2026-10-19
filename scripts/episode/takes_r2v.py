@@ -71,9 +71,18 @@ WIDE_DETAIL_BASE = SPARK_BASE + "_wide15_visurena"
 prevent_at_render.md D: H3 quality drops below about 15 steps, the turbo LoRA at 8-10 keeps
 texture loss, and a 25-60 px wide face is the first thing lost).  Unmeasured: OFF by default."""
 WIDE_DETAIL_STEPS = 15
+TINY_FACE_BASE = SPARK_BASE + "_sq1024_visurena"
+"""SPARK_BASE at 1024x1024, nothing else changed (8 steps, euler/beta, LoRA 1.0/0.7): the tiny-face
+rung's one draw (scripts/episode/tiny_face.py).  Face-blur round 2 arm A3c on ep01 T01: the only arm
+that gave both 30-36 px faces clean ink lines and a readable eye; 163-201 s, 1.73-1.76x a 768 draw."""
+TINY_FACE_CANVAS = (1024, 1024)
+TINY_FACE = False
+"""`--tiny-face`: the retaken takes render on TINY_FACE_BASE at TINY_FACE_CANVAS and land scaled to the
+episode's canvas."""
 MODELS = {WULI_BASE: "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
           SPARK_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention",
           WIDE_DETAIL_BASE: "MiniMax-H3 ref2va Singularity, 15-step + Ref2V LoRA 1.0/0.4 + Spark-H3 attention",
+          TINY_FACE_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention, 1024x1024",
           ROLLBACK_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + CK attention"}
 
 
@@ -105,6 +114,42 @@ def steps_for(base: str) -> int:
 def card_workflow(card: dict) -> str:
     """What the card's record says it rendered on."""
     return workflow_for(card) + " + anchors"
+
+
+def render_plan(retaken: bool) -> tuple[str, tuple[int, int] | None]:
+    """(graph, render canvas) of one card: a take the tiny-face pass retakes renders on the 1024
+    graph; any other card on its own graph at the episode's canvas ('' and None)."""
+    return (TINY_FACE_BASE, TINY_FACE_CANVAS) if TINY_FACE and retaken else ("", None)
+
+
+def mark_tiny(c: dict, base: str, size: tuple[int, int]) -> None:
+    """The card records the graph and the size the draw rendered at (shots.json carries it)."""
+    c["workflow"], c["model"], c["render_canvas"] = base + " + anchors", MODELS[base], list(size)
+
+
+def recorded(graph: dict, size: tuple[int, int] | None) -> dict:
+    """The graph written beside the take: a draw scaled to the episode's canvas says so
+    (`scaled_to`, read by take_currency.recorded_canvas); the submitted graph never carries it."""
+    return {**graph, "scaled_to": [W, H]} if size else graph
+
+
+def off_canvas(c: dict) -> bool:
+    """The card rendered at another size than the episode's canvas: its video is scaled on landing."""
+    size = c.get("render_canvas")
+    return bool(size) and tuple(size) != (W, H)
+
+
+def fit_argv(src: Path, dst: Path, w: int, h: int) -> list[str]:
+    """ffmpeg: the draw scaled (lanczos) to w x h at the take graph's own CRF 10, its sound copied."""
+    return ["ffmpeg", "-y", "-v", "error", "-i", str(src), "-vf", f"scale={w}:{h}:flags=lanczos",
+            "-c:v", "libx264", "-crf", "10", "-pix_fmt", "yuv420p", "-c:a", "copy", str(dst)]
+
+
+def fit_canvas(path: Path) -> None:
+    """The landed draw rewritten in place at the episode's canvas."""
+    tmp = path.with_name(path.stem + "_fit.mp4")
+    subprocess.run(fit_argv(path, tmp, W, H), check=True)
+    tmp.replace(path)
 
 
 def by_model(jobs: list[tuple[dict, dict]]) -> list[tuple[dict, dict]]:
@@ -978,11 +1023,13 @@ def card_pictures(c: dict, book: Path, number: int) -> list[Path]:
     return ref_paths(c, book, number) + [sq.cells_in(boards) / name for name, _ in c["anchors"]]
 
 
-def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "") -> dict:
+def graph_for(c: dict, book: Path, number: int, take_dir: Path, base: str = "",
+              size: tuple[int, int] | None = None) -> dict:
     boards = episode_home.boards_dir(book, number)
     graph_name = base or workflow_for(c)
     template, inject = load_workflow(graph_name)
-    values = {"prompt": c["prompt"], "width": W, "height": H, "frames": c["frames"], "steps": steps_for(graph_name),
+    w, h = size or (W, H)
+    values = {"prompt": c["prompt"], "width": w, "height": h, "frames": c["frames"], "steps": steps_for(graph_name),
               "seed": c["seed"], "ref_image_size": c["ref_image_size"],
               "filename_prefix": f"ep_take_{c['index']:02d}"}
     paths = ref_paths(c, book, number)
@@ -1072,6 +1119,8 @@ def collect(c: dict, prompt_id: str, out: Path) -> dict:
     out.parent.mkdir(parents=True, exist_ok=True)
     episode_home.keep_aside(out, c["index"])       # never written over (Jekyll ep01 v2)
     out.write_bytes(video.read_bytes())
+    if off_canvas(c):
+        fit_canvas(out)                            # a tiny-face 1024 draw lands at the episode's canvas
     retire_verdicts(out)
     phases_of(out, c, record)
     waited = round(time.time() - began, 1)
@@ -1476,8 +1525,11 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
         if not wants_render(c, out, records, retake, current):
             continue
         make_room(c, out, records, why if retake and c["index"] in retake else None)
-        graph = graph_for(c, book, number, take_dir)
-        episode_home.write_json(out.with_suffix(".graph.json"), graph)  # the exact graph this take ran with
+        base, size = render_plan(bool(retake) and c["index"] in retake)
+        if size:
+            mark_tiny(c, base, size)
+        graph = graph_for(c, book, number, take_dir, base, size)
+        episode_home.write_json(out.with_suffix(".graph.json"), recorded(graph, size))  # the exact graph this take ran with
         jobs.append((c, graph))
         wheres[c["index"]] = out
     jobs = by_model(jobs)      # Wuli's takes, then Spark's: each model loads once (2026-10-18)
@@ -1530,10 +1582,17 @@ def _set_from_refs(argv: list[str]) -> None:
     FROM_REFS = "--from-refs" in argv
 
 
+def _set_tiny_face(argv: list[str]) -> None:
+    """`--tiny-face`: the retaken takes are the tiny-face rung's draws (see `TINY_FACE`)."""
+    global TINY_FACE
+    TINY_FACE = "--tiny-face" in argv
+
+
 if __name__ == "__main__":
     _set_no_ends(sys.argv)
     _set_from_refs(sys.argv)
     _set_pin_panel(sys.argv)
+    _set_tiny_face(sys.argv)
     number = episode_arg(sys.argv)
     retake, why = retake_list(sys.argv), retake_why(sys.argv)
     if refused := retake_refusal(retake, why, "--last" in sys.argv):
