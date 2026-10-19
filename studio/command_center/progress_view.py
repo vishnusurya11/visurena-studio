@@ -15,7 +15,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from studio import eta, progress as prog, registry
+from studio import eta, progress as prog, registry, run_fold
 from studio.command_center import legacy_progress as lp
 from studio.command_center import loops, workgrid
 from studio.command_center import library_paths, procs, unit_view, vitals
@@ -265,9 +265,6 @@ def left_words(secs: float | None) -> str:
 # --- this make (the runs on the episode's honest clock) ---
 
 
-STEP_ROW = re.compile(r"step_(\d\d)$")
-
-
 def make_runs(home: Path, run_id: str | None) -> set[str]:
     """The run ids of this make: clock.jsonl's rows, the open run, and this run."""
     from studio import run_clock
@@ -283,21 +280,9 @@ def make_start(home: Path, t0: float | None) -> float | None:
 
 
 def make_steps(rows: list[dict], since: float | None) -> dict[str, dict]:
-    """{step: {secs, end}} from timing.jsonl since the make began: a `step_NN` started
-    row opens a span, the work rows after it stretch its end; spans of a step sum."""
-    spans: dict[str, list[list[float]]] = {}
-    cur = None
-    for r in rows:
-        t0 = eta.to_epoch(r.get("started"))
-        if t0 is None or (since and t0 < since - 5):
-            continue
-        m = STEP_ROW.match(str(r.get("stage") or ""))
-        if m and r.get("event") == "started":
-            cur = [t0, t0]
-            spans.setdefault(m.group(1), []).append(cur)
-        elif cur is not None:
-            cur[1] = max(cur[1], eta.to_epoch(r.get("ended")) or t0)
-    return {sid: {"secs": sum(b - a for a, b in xs), "end": max(b for _, b in xs)} for sid, xs in spans.items()}
+    """{step: {secs, end}} from timing.jsonl since the make began: studio.run_fold, the one
+    reader (spans from the step markers, a negative row adds nothing)."""
+    return {sid: {"secs": t["secs"], "end": t["end"]} for sid, t in run_fold.totals(rows, since).items()}
 
 
 def finished(s: dict) -> bool:
@@ -311,6 +296,27 @@ def finished_words(s: dict) -> str:
     if not finished(s) or not made:
         return ""
     return f"{unit_view.span(made['secs']) or '<1m'} · {clock(made['end'])}"
+
+
+def earlier_words(secs: float, redo: bool) -> str:
+    """`done earlier 58m` / `done earlier 39m · redo pending`: a step the card did not see run."""
+    return f"done earlier {unit_view.span(secs) or '<1m'}" + (" · redo pending" if redo else "")
+
+
+def with_history(steps: list[dict], folded: dict[str, dict], kept: set[str]) -> list[dict]:
+    """A waiting step with spans in any run of the episode keeps its history (`done` when a
+    run of this make finished it and nothing reruns it, else `earlier`); `waiting` is left to
+    a step with no events at all (the 19:28 rewind blanked 08 and 09)."""
+    out = []
+    for s in steps:
+        t = folded.get(s["id"])
+        if s.get("state") != "waiting" or not t:
+            out.append(s)
+            continue
+        redo = bool(s["will_run"]) if s.get("will_run") is not None else s["id"] not in kept
+        out.append({**s, "state": "earlier" if redo else "done",
+                    "fin": s.get("fin") or earlier_words(t["secs"], redo)})
+    return out
 
 
 def kept_steps(db_rows: list[dict], runs: set[str] | None = None) -> set[str]:
@@ -397,6 +403,60 @@ def with_made(steps: list[dict], made: dict[str, dict]) -> list[dict]:
         s = {**s, "made": m} if m else s
         out.append({**s, "fin": finished_words(s)})
     return out
+
+
+# --- the debt lines (owed units, the 6 h hard stop, flagged seconds, fixes waiting) ---
+
+
+def flagged_takes(home: Path) -> list[dict]:
+    """work_r2v/flagged_takes.json (contract K7), [] while step 09 has not written it."""
+    rows = lp.cached_json(Path(home) / "work_r2v" / "flagged_takes.json")
+    return [r for r in rows if isinstance(r, dict)] if isinstance(rows, list) else []
+
+
+def running_sha(home: Path) -> str | None:
+    """The commit the newest launch started on: drive.jsonl's last `start` row."""
+    starts = [r for r in lp.jsonl_rows(lp.read_tail(Path(home) / "drive.jsonl")) if r.get("event") == "start"]
+    return starts[-1].get("sha") if starts else None
+
+
+def commits_after(sha: str) -> int:
+    """Commits on HEAD after `sha` (git rev-list --count); 0 when git cannot say."""
+    import subprocess
+    try:
+        out = subprocess.run(["git", "rev-list", "--count", f"{sha}..HEAD"], cwd=Path(__file__).resolve().parents[2],
+                             capture_output=True, text=True, timeout=5, check=True).stdout
+        return int(out.strip() or 0)
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return 0
+
+
+def fixes_waiting(home: Path, now: float, count=commits_after) -> int:
+    """Fixes committed since the running sha, held a minute per sha."""
+    sha = running_sha(home)
+    if not sha:
+        return 0
+    hit = _cache.get(("fixes", sha))
+    if hit and now - hit[0] < HISTORY_TTL:
+        return hit[1]
+    _cache[("fixes", sha)] = (now, count(sha))
+    return _cache[("fixes", sha)][1]
+
+
+def owed_words(n: int, owed: dict | None) -> str:
+    """`3 takes owed · ~40m (24m–1h05m)`: the owed units and their band."""
+    if not n or owed is None:
+        return ""
+    lo, mid, hi = (left_words(owed[k]) for k in ("lo_s", "mid_s", "hi_s"))
+    return f"{n} take{'' if n == 1 else 's'} owed · ~{mid} ({lo}–{hi})" + (
+        " · past the hard stop" if owed.get("over") else "")
+
+
+def debt_text(n_owed: int, owed: dict | None, flagged: list[dict], fixes: int, work_s: float, clock_fn) -> str:
+    """The card's debt line: owed band, the 6 h hard stop, flagged seconds, fixes waiting."""
+    stop = eta.hard_stop_words((owed or {}).get("hard_stop_at") or 0.0, work_s, clock_fn) if owed else ""
+    parts = [owed_words(n_owed, owed), stop, eta.flagged_words(flagged), eta.fixes_words(fixes)]
+    return " · ".join(p for p in parts if p)
 
 
 # --- the card ---
@@ -494,10 +554,21 @@ def assemble(library, codex, unit, home, conn, db_rows, derived, now, proc_rows,
     runs = make_runs(home, state["run"])
     later = later_steps(state, hist, names, db_rows, unit, runs) if v["vital"] in RUNNING else []
     e = finish(state, left, later, now, work, rework(conn, now)) if v["vital"] in RUNNING else {}
-    return card(library, codex, unit, home, state, db_rows, hist, names, derived, v, tiles, e, now, work)
+    debt = debt_of(state, tiles, frames, home, now, work)
+    return card(library, codex, unit, home, state, db_rows, hist, names, derived, v, tiles, e, now, work, debt)
 
 
-def card(library, codex, unit, home, state, db_rows, hist, names, derived, v, tiles, e, now, work) -> dict:
+def debt_of(state: dict, tiles: list[dict], frames: dict[str, int], home: Path, now: float, work: float) -> str:
+    """The debt line: the takes still owed (only step 09's waiting tiles), the 6 h hard stop,
+    the flagged takes that ship and the fixes waiting."""
+    owed_frames = [frames.get(t["id"], 0) or 192 for t in tiles if t["state"] in ("waiting", "rendering", "failed")
+                   and state["step"] == "09" and counted(state)]
+    done = [((state["done"][i] or [None])[-1], frames.get(i, 0)) for i in state["fresh"]]
+    owed = eta.owed_eta(owed_frames, [(s, f) for s, f in done if s], now, work, cold_paid=bool(state["done"]))
+    return debt_text(len(owed_frames), owed, flagged_takes(home), fixes_waiting(home, now), work, clock)
+
+
+def card(library, codex, unit, home, state, db_rows, hist, names, derived, v, tiles, e, now, work, debt: str = "") -> dict:
     """The `models.Progress` dict."""
     step, e = now_step(state, names, tiles), with_left(e, now)
     url, qc = master(library, codex, home) if v["vital"] == "done" else (None, None)
@@ -505,11 +576,14 @@ def card(library, codex, unit, home, state, db_rows, hist, names, derived, v, ti
     made = make_steps(home_timing(home), since)
     looped = loops.loops_text(loops.attempts(db_rows, make_runs(home, state["run"])),
                               loops.borrowed(home_timing(home), since), clock)
+    looped = " · ".join(x for x in (looped, debt) if x)
     return {"codex": codex, "unit": unit, "run_id": state["run"], "vital": v["vital"], "vital_reason": v["reason"],
             "quiet_s": v["quiet_s"], "budget_s": v["budget_s"], "budget_x": budget_x(v), "run_started": state["t0"],
             "step_started": state["step_t"], "now": now, "elapsed_s": now - state["t0"] if state["t0"] else 0.0,
             "work_s": work, "ceiling_s": float(EPISODE_CEILING_SECONDS), "limit_s": float(OWNER_LIMIT_SECONDS),
-            "steps": with_made(with_windows(rail(state, db_rows, hist, names, now), {"steps": e.get("plan")}), made),
+            "steps": with_history(with_made(with_windows(rail(state, db_rows, hist, names, now),
+                                                         {"steps": e.get("plan")}), made),
+                                  run_fold.totals(home_timing(home)), kept_steps(db_rows, make_runs(home, state["run"]))),
             "now_step": step, "items": tiles,
             "inflight_started": inflight_started(state) if counted(state) else None,
             "media_base": f"/thumb/{codex}/160/episodes/{unit}/", "lib_base": f"/lib/{codex}/episodes/{unit}/",

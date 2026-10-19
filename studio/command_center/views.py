@@ -445,11 +445,35 @@ def open_flag_keys(conn: sqlite3.Connection) -> set[tuple[str, str, str]]:
     return {flag_key(r) for r in rows if not acked(r, notes) and not shipped(conn, r, done_publish)}
 
 
+def flagged_line(rows: list[dict]) -> str:
+    """`2 flagged takes / 5.5 s`: the takes that ship flagged and their seconds in the master."""
+    if not rows:
+        return ""
+    secs = sum(float(r.get("seconds_in_master") or 0.0) for r in rows)
+    return f"{len(rows)} flagged take{'' if len(rows) == 1 else 's'} / {secs:.1f} s"
+
+
+def flagged_reason(library: Path, codex: str, unit: str) -> str:
+    """The inbox reason of a flagged unit, with its flagged takes (work_r2v/flagged_takes.json, K7)."""
+    book = library_paths.book_folder(library, codex)
+    rows = lp_json(book / "episodes" / unit / "work_r2v" / "flagged_takes.json") if book else None
+    line = flagged_line([r for r in rows if isinstance(r, dict)] if isinstance(rows, list) else [])
+    return f"{FLAGGED_REASON} · {line}" if line else FLAGGED_REASON
+
+
+def lp_json(path: Path):
+    """A JSON file's content, None when missing or not JSON."""
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
 def flagged_unacknowledged(conn: sqlite3.Connection) -> list[dict]:
     """The done rows whose flags are open (flags_open), each with its reason
     and its non-pass gates; an open row shows all its flags, so its view needs no conn."""
     keys = open_flag_keys(conn)
-    return [{**row_view(r), "reason": FLAGGED_REASON,
+    return [{**row_view(r), "reason": flagged_reason(episode_home.LIBRARY, r["codex_id"], r["unit"]),
              "gates": non_pass_gates(json.loads(r["verdicts"] or "{}"))}
             for r in flagged_rows(conn) if flag_key(dict(r)) in keys]
 

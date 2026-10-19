@@ -153,3 +153,49 @@ def is_current(built: str, take: Path, pictures: list | None = None,
         return True
     from studio.comfy import staged_name
     return {staged_name(p) for p in pictures} <= staged_images(take)
+
+
+# --- unit currency: a take is stale when ITS OWN inputs differ (early cutoff) ---
+
+INPUT_ORDER = ("prompt", "pictures", "canvas")
+"""The inputs a take is rendered from, in the order the first difference is named."""
+
+
+def recorded_inputs(take: Path) -> dict | None:
+    """What this take ran with, off its own graph: prompt, staged picture names (content
+    addressed), canvas; None when nobody can show it (no graph, or the stub)."""
+    if provenance_unknown(take):
+        return None
+    return {"prompt": (recorded_prompt(take) or "").strip(),
+            "pictures": sorted(staged_images(take)), "canvas": recorded_canvas(take)}
+
+
+def _normal(key: str, value):
+    """One input as it is compared: prompt words trimmed, pictures sorted, canvas a tuple."""
+    if key == "prompt":
+        return (value or "").strip()
+    return tuple(value) if key == "canvas" and value else (sorted(value or []) if key == "pictures" else value)
+
+
+def first_difference(recorded: dict | None, now: dict) -> str | None:
+    """The first input that differs (`prompt`, `pictures`, `canvas`), `unknown` for an
+    unprovable record, None when every input is the same bytes and words."""
+    if recorded is None:
+        return "unknown"
+    return next((k for k in INPUT_ORDER if _normal(k, recorded.get(k)) != _normal(k, now.get(k))), None)
+
+
+def currency(recorded: dict[str, dict | None], now: dict[str, dict]) -> dict[str, str | None]:
+    """{take: first differing input | unknown | None}: each take against ITS OWN inputs only, so
+    a redrawn grid whose panels came back byte-equal stales nothing after it (RUNLOG row 43)."""
+    return {take: first_difference(recorded.get(take), inputs) for take, inputs in now.items()}
+
+
+def stale_count(cur: dict[str, str | None]) -> int:
+    """How many takes really differ; an unknown one is unproven, not stale."""
+    return sum(1 for why in cur.values() if why and why != "unknown")
+
+
+def verdict_current(report: dict | None, sha8: str) -> bool:
+    """A dq/eye verdict counts only when the bytes it names are the file now."""
+    return bool(report) and report.get("take_sha8") == sha8

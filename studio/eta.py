@@ -339,3 +339,53 @@ def project(now: float, running_left: float | None, running_sigma: float,
             "hi": min(t + sd, ceiling_at), "capped": t + sd > ceiling_at, "long": running_left is None,
             "step_end_at": now + running_left if running_left is not None else None,
             "steps_left": sum(1 for s in steps if s["will_run"])}
+
+
+# --- owed units: charge only what is still to do (Jekyll Kawajiri ep01, 2026-10-19) ---
+
+OWED_LO, OWED_HI = 0.6, 1.5
+"""Until per-take seconds are measured the owed time is a band: 60 % to 150 % of the prior."""
+HARD_STOP_S = 6 * 3600.0
+"""The owner's <= 6 h of machine work per episode (memory: five-hour episode)."""
+
+
+def owed_eta(owed_frames: list[int], done: list[tuple[float, int]], now: float, work_s: float,
+             cold_paid: bool = True, limit_s: float = HARD_STOP_S) -> dict:
+    """The seconds the owed takes still cost as a band, and the 6 h hard stop: `done` is the
+    run's [(secs, frames)] landings, `owed_frames` only the units to check, fix or redo."""
+    t = take_remaining(done, owed_frames, cold_paid=cold_paid)
+    measured = t["basis"] == "measured"
+    lo = max(0.0, t["secs"] - t["spread"]) if measured else t["secs"] * OWED_LO
+    hi = t["secs"] + t["spread"] if measured else t["secs"] * OWED_HI
+    stop = now + max(0.0, limit_s - work_s)
+    return {"lo_s": lo, "mid_s": t["secs"], "hi_s": hi, "basis": "measured" if measured else "estimate",
+            "hard_stop_at": stop, "over": bool(owed_frames) and now + hi > stop}
+
+
+def left_for_step(step_left: float | None, owed: dict | None) -> float | None:
+    """The time left: the owed units' median when unit state exists, else the step-level guess."""
+    return owed["mid_s"] if owed is not None else step_left
+
+
+def _hours(secs: float) -> str:
+    m = int(max(0.0, secs) // 60)
+    return f"{m // 60}h{m % 60:02d}"
+
+
+def hard_stop_words(stop_at: float, work_s: float, clock) -> str:
+    """`hard stop 9:40 pm · 5h00 of 6h used`: the 6 h line as a time of day."""
+    return f"hard stop {clock(stop_at)} · {_hours(work_s)} of {int(HARD_STOP_S // 3600)}h used"
+
+
+def flagged_words(rows: list[dict]) -> str:
+    """`2 flagged takes ship, 5.5 s total` from work_r2v/flagged_takes.json (contract K7)."""
+    if not rows:
+        return ""
+    secs = sum(float(r.get("seconds_in_master") or 0.0) for r in rows)
+    n = len(rows)
+    return f"{n} flagged take{' ships' if n == 1 else 's ship'}, {secs:.1f} s total"
+
+
+def fixes_words(n: int) -> str:
+    """`4 fixes waiting for the next pause`: commits on master after the running sha."""
+    return f"{n} fix{'' if n == 1 else 'es'} waiting for the next pause" if n > 0 else ""

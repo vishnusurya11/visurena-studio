@@ -246,7 +246,7 @@ section.live[data-still] .lv-trace polyline{stroke:var(--line)}
 .lv-whyline{margin:0 0 10px;padding:6px 10px;border-left:3px solid var(--qc);background:var(--paper-2);font-size:var(--t-body);color:var(--ink)}
 .lv-whyline[hidden]{display:none}
 /* the loops line (timeline debate 2026-10-18, D1): relaunches and a step's work for an earlier step */
-.lv-loops{margin:0 0 10px;font-family:var(--f-mono);font-size:var(--t-label);color:var(--ink-2)}
+.lv-loops{margin:0 0 10px;font-family:var(--f-mono);font-size:var(--t-label);color:var(--ink-2);overflow-wrap:anywhere;min-width:0}
 .lv-loops[hidden]{display:none}
 /* the work grid (timeline debate 2026-10-18, D3): a shot per row, a round per cell */
 .lv-work{margin:0 0 12px}
@@ -282,6 +282,9 @@ section.live[data-still] .lv-trace polyline{stroke:var(--line)}
 /* the fill is a transform, not a width: it stays on the compositor (P02.8) */
 .lv-rail i::before{content:"";position:absolute;inset:0;transform-origin:left center;transform:scaleX(var(--p));background:var(--think);transition:transform var(--d4) var(--ease-out),background-color var(--d2) var(--ease-std)}
 .lv-rail .st-done i::before{transform:none;background:var(--ok)}
+/* a step an earlier run finished, redo pending (P15): dashed, never the done green */
+.lv-rail .st-earlier i{background:transparent;outline:1px dashed var(--ctl-line);outline-offset:-1px}
+.lv-rail .st-earlier i::before{transform:none;background:transparent}
 .lv-rail .st-skip i::before{transform:none;background:color-mix(in srgb,var(--ok) 40%,var(--rule))}
 .lv-rail .st-fail i::before,.lv-rail .st-refused i::before{transform:none;background:var(--accent)}
 .lv-rail .st-deferred i::before,.lv-rail .st-escalated i::before{transform:none;background:var(--qc)}
@@ -297,14 +300,14 @@ section.live[data-still] .lv-trace polyline{stroke:var(--line)}
 .lv-rail .win{font-family:var(--f-mono);font-size:var(--t-micro);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}/* a done step is a plain bar: no name, no time -- only the running and failed steps speak (P03.4) */
 .lv-rail .seg:is(.st-done,.st-skip) .dur{display:none}
 .lv-rail .seg:has(.fin){min-width:56px}
-.lv-rail .fin{font-family:var(--f-mono);font-size:var(--t-micro);color:var(--ink-2);line-height:1.2}/* a finished step: its time in this make and its Seattle end (owner 2026-10-18) */
+.lv-rail .fin{font-family:var(--f-mono);font-size:var(--t-micro);color:var(--ink-2);line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}/* a finished step: its time in this make and its Seattle end (owner 2026-10-18) */
 .lv-rail .ck{width:10px;height:10px;flex:none}
 .lv-rail .ck path{fill:none;stroke:var(--ok);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:0}
 .lv-railm{display:none;margin:0 0 10px;font-size:var(--t-body)}
 .lv-railm summary{cursor:pointer;font-family:var(--f-mono);font-size:var(--t-label);color:var(--ink-2)}
 .lv-railm ul{list-style:none;margin:6px 0 0;padding:0}
-.lv-railm li{padding:2px 0;border-bottom:1px solid var(--rule)} .lv-railm li span{color:var(--ink-2);font-size:var(--t-label)}
-.lv-railm li.st-running b{color:var(--think)} .lv-railm li.st-done b{color:var(--ok)}
+.lv-railm li{padding:2px 0;border-bottom:1px solid var(--rule)} .lv-railm li span{color:var(--ink-2);font-size:var(--t-label);overflow-wrap:anywhere}
+.lv-railm li.st-running b{color:var(--think)} .lv-railm li.st-done b{color:var(--ok)} .lv-railm li.st-earlier b{color:var(--ink-2)}
 .lv-ladder{display:flex;flex-wrap:wrap;gap:6px 18px;margin:2px 0 6px;font-size:var(--t-label)}
 .lv-gate{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px}
 .lv-gate .eyebrow{color:var(--ink-2);margin-right:2px}

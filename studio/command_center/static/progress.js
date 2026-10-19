@@ -122,7 +122,9 @@
       }
       if (st && st.id === s.id && st.kind === 'counted' && st.weight_total) seg.style.setProperty('--p', (st.weight_done / st.weight_total).toFixed(4));
       var win = seg.querySelector('.win'); if (win && s.window && win.textContent !== s.window) win.textContent = s.window;
-      var fin = seg.querySelector('.fin'); if (fin && s.fin && fin.textContent !== s.fin) fin.textContent = s.fin;
+      var fin = seg.querySelector('.fin');
+      if (!fin && s.fin) { fin = document.createElement('span'); fin.className = 'fin'; seg.appendChild(fin); }
+      if (fin && s.fin && fin.textContent !== s.fin) fin.textContent = s.fin;
     });
   }
   function patchSheet(p) {
