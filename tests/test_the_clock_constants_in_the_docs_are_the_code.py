@@ -41,3 +41,8 @@ def test_the_first_render_wall_is_the_takes_cap():
 def test_the_cheap_check_and_dark_episodes_are_the_code():
     assert f"| {int(run_budget.CHEAP_CHECK_SECONDS)} s |" in row("cheap check")
     assert f"| {run_budget.DARK_EPISODES_REQUIRED} episodes |" in row("dark budget")
+
+
+def test_the_repair_cap_is_repair_clocks():
+    from studio import repair_clock
+    assert f"| {int(repair_clock.cap_for(['09']) // 60)} min for a redo of 09 |" in row("repair cap")

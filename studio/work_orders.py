@@ -261,6 +261,18 @@ def recorded(home, step_id: str) -> bool:
     return step_id in _taken(home)
 
 
+def owner_receipts(conn: sqlite3.Connection, home) -> dict[str, int]:
+    """{step_id: order_id} of the receipted redos the OWNER wrote (studio_cli redo, the board), not
+    an autopilot cure: what opens a delivered episode's repair window (studio/repair_clock)."""
+    taken = _taken(home)
+    if not taken:
+        return {}
+    marks = ",".join("?" * len(taken))
+    owners = {row[0] for row in conn.execute(
+        f"SELECT id FROM orders WHERE \"by\" = 'owner' AND id IN ({marks})", [int(v) for v in taken.values()])}
+    return {step: int(oid) for step, oid in taken.items() if int(oid) in owners}
+
+
 def clear_taken(home, step_id: str) -> None:
     """The redone step completed: its allowance is spent."""
     left = {k: v for k, v in _taken(home).items() if k != step_id}

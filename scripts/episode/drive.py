@@ -134,6 +134,19 @@ def finish_report(home: Path) -> None:
         print(f"[drive] finish report failed: {why}", flush=True)
 
 
+def end_row(home: Path, code: int, sha: str) -> dict:
+    """The `end` ledger row.  An owner's repair window ends with its drive (owner ruling 2026-10-19):
+    it is closed here, the row carries it, and `clock_spent` reads the repair's own cap; any other
+    drive reads the episode's clock, as before (the clock_loop backstop)."""
+    from studio import repair_clock, run_budget
+    closed = repair_clock.close(home)
+    spent = (closed["spent_s"] >= closed["cap_s"] if closed
+             else run_budget.spent_before(home) >= run_budget.EPISODE_CEILING_SECONDS)
+    row = {"event": "end", "code": code, "sha": sha, "clock_spent": spent,
+           "paused_at_boundary": code == episode_drive.PAUSED}
+    return {**row, "repair": closed} if closed else row
+
+
 def main(codex: str, number: int) -> int:
     label = f"{codex} ep{number:02d}"
     if episode_drive.dirty(git("status", "--porcelain")):
@@ -170,11 +183,8 @@ def main(codex: str, number: int) -> int:
         text = run_once(codex, number, home / f"drive_run{n:02d}.log", label)
         ledger(home, run_row(n, sha, text))
         return text
-    from studio import run_budget
     code = episode_drive.drive(run, lambda text: notify(f"{label}: {text}"))
-    spent = run_budget.spent_before(home) >= run_budget.EPISODE_CEILING_SECONDS
-    ledger(home, {"event": "end", "code": code, "sha": sha, "clock_spent": spent,   # the clock_loop backstop
-                  "paused_at_boundary": code == episode_drive.PAUSED})
+    ledger(home, end_row(home, code, sha))                 # closes a repair window; the clock_loop backstop
     finish_report(home)
     return code
 

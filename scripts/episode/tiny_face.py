@@ -17,9 +17,11 @@ A take earns ONE re-render on that graph (takes_r2v `--tiny-face`, TINY_FACE_BAS
   - the episode is square (1024x1024 is the only canvas the bench measured), and no still holds it.
 The draw is a normal retake (its next seed, the same staged sheets, panel and audio), scaled back to
 the episode's canvas on landing; then take_dq (G-WARP, flicker and every row), take_content (crowd,
-extras) and the take eye judge it.  It is kept only when the eye passes it, then refined again (the
-draw buys the take one more refine); else the old take, its graph, verdicts and record come back
-(keep_best) and the draw is archived.  One draw per take per episode (the cap table's face_refine
+extras) and the take eye judge it.  It is kept when it is NO WORSE than the take it replaces -- its
+hard faults are a subset of the old take's failing hard rows (dq, content, the eye's record: ep01 T01
+already fails gait) -- then refined again (the draw buys the take one more refine); a draw that adds
+a hard fault gives the old take, its graph, verdicts and record back (keep_best) and is archived.
+One draw per take per episode (the cap table's face_refine
 row, 1 per take, counted as attempts.json `tiny_face.T<nn>`), its seconds booked to the `retakes`
 wall, priced 1.75x a take and cut before the clock's reserve like the refine.  Never a loop: one
 pass after step 09's refine.
@@ -140,14 +142,44 @@ def refused(ctx, takes: int, faces: int) -> str:
     return ""
 
 
+# ---- the bar: no worse than the take it replaces ---------------------------------------------------
+
+def hard_kinds(faults) -> set[str]:
+    """The kinds of the HARD faults (a low one is an advisory or a second vote), Fault or dict."""
+    rows = [f if isinstance(f, dict) else f.model_dump() for f in faults]
+    return {f["kind"] for f in rows if f.get("severity", "normal") != "low"}
+
+
+def eye_hard(room: Path, index: int) -> set[str]:
+    """The hard faults the take eye's newest record names at this take (clones live only there)."""
+    eyes = sorted(Path(room).glob("eye_*.json"), key=lambda p: p.stat().st_mtime) if Path(room).is_dir() else []
+    faults = read(eyes[-1], {}).get("faults") or [] if eyes else []
+    return hard_kinds([f for f in faults if f.get("where") == f"T{index:02d}"])
+
+
+def old_hard(room: Path, index: int, texts: dict) -> set[str]:
+    """The hard rows the old take already fails: its dq and content verdicts, and the take eye's record."""
+    from studio.judges import take_eye
+    dq, content = (json.loads(texts.get(s) or "{}") for s in (".dq.json", ".content.json"))
+    faults = take_eye.dq_faults(index, dq) + take_eye.content_faults(index, content)
+    return hard_kinds(faults) | eye_hard(room, index)
+
+
+def no_worse(verdict, was: set[str]) -> bool:
+    """The draw adds no hard fault the old take did not already fail (ep01 T01 already fails gait):
+    a clean draw always, else only the old take's own failing rows (ship review, skeptic minor 1)."""
+    return hard_kinds(verdict.faults) <= set(was)
+
+
 # ---- the old take, kept aside and given back ------------------------------------------------------
 
 def snapshot(room: Path, index: int) -> dict:
-    """What a failed draw must give back: where the old take goes, its verdicts, its record."""
+    """What a failed draw must give back: where the old take goes, its verdicts, its record; and the
+    hard rows the old take already fails, the bar its draw is kept against."""
     stem = room / f"T{index:02d}"
     texts = {s: p.read_text(encoding="utf-8") for s in (".dq.json", ".content.json") if (p := stem.with_suffix(s)).exists()}
     rows = read(room / "shots.json", [])
-    return {"fail": episode_home.next_fail(room, index), "texts": texts,
+    return {"fail": episode_home.next_fail(room, index), "texts": texts, "was": old_hard(room, index, texts),
             "row": next((r for r in rows if int(r["index"]) == index), None)}
 
 
@@ -201,18 +233,26 @@ def measure(ctx, indices: list[int], checks: tuple[str, ...] = ()) -> None:
     take_ladder.measured(ctx, CONTENT, "take_content", ".content.json", *named)
 
 
+def kept_line(i: int, verdict, was: set[str]) -> str:
+    """The log line of a kept draw: passed outright, or no worse than the take it replaced."""
+    if verdict.passed:
+        return f"TINY FACE T{i:02d}: the 1024 draw passed every take gate; kept, refined next"
+    fails = ", ".join(sorted(hard_kinds(verdict.faults))) or "advisories only"
+    return f"TINY FACE T{i:02d}: the 1024 draw is no worse ({fails}, as the old take failed {sorted(was)}); kept, refined next"
+
+
 def settle(ctx, saved: dict[int, dict], judge) -> list[int]:
-    """Each draw the take eye passes is kept; any other gives its old take back (keep_best)."""
+    """Each draw no worse than its old take is kept; any other gives its old take back (keep_best)."""
     room, kept = Path(ctx.home) / TAKES, []
     for i, snap in sorted(saved.items()):
-        verdict = judge(room / f"T{i:02d}.mp4")
-        if verdict.passed:
+        verdict, was = judge(room / f"T{i:02d}.mp4"), set(snap.get("was") or ())
+        if no_worse(verdict, was):
             kept.append(i)
-            say(ctx, f"TINY FACE T{i:02d}: the 1024 draw passed every take gate; kept, refined next")
+            say(ctx, kept_line(i, verdict, was))
             continue
         restore(room, i, snap)
-        kinds = ", ".join(sorted({f.kind for f in verdict.faults}))
-        say(ctx, f"TINY FACE T{i:02d}: the 1024 draw failed ({kinds}); the old take stays (keep_best)")
+        kinds = ", ".join(sorted(hard_kinds(verdict.faults) - was))
+        say(ctx, f"TINY FACE T{i:02d}: the 1024 draw adds {kinds}; the old take stays (keep_best)")
     return kept
 
 

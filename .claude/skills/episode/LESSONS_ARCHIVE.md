@@ -1997,3 +1997,50 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
 - Tests: `tests/test_the_tiny_face_rung.py`, `tests/test_the_tiny_face_rung_closes_step_09.py`,
   `tests/test_a_tiny_face_draw_is_delivered_at_the_episode_canvas.py`,
   `tests/test_anime_reader_restarts_a_dead_worker.py`.
+
+## An owner's repair runs on its own clock (owner ruling 2026-10-19, "Own repair clock")
+
+- **Why.** Jekyll HEL ep01 was delivered at 21,673 s on its clock (6.02 h). The owner then ordered a face repair
+  (the refine round 2 and the tiny-face rung). Every launch charged the context's budget with the 21,673 s
+  (`episode_run.context` -> `budget.charge(spent_before)`), so `leaves_reserve("09", 2,786 s)` could never hold:
+  the refine logged `REFINE CUT`, the rung `TINY FACE CUT`, and a rerun would have re-cut the same faces into
+  master_iter2 (docs/audit/2026-10-19_face_blur/RERUN.md section 0). The owner chose "Own repair clock" from the
+  options: a repair of a DELIVERED episode is charged and logged apart; the 6 h stays intact for normal runs.
+- **The rule** (`studio/repair_clock.py`). After the runner takes the owner's orders (`step_runner` calls
+  `ctx.after_orders()`), an OWNER redo receipt (`work_orders.owner_receipts`: the K12 receipt whose order row is
+  `by` owner -- an autopilot cure is not one) naming a step of an episode whose `manifest.json` exists opens
+  `repair.json` (opened at the run's own start). The context swaps its budget for the repair's: the episode's
+  shares under the 5 h ceiling, limited by the cap, charged with the repair-tagged run spans since the window
+  opened. The run's live file and row carry `repair: true` (`run_clock.tag_repair`): `run_clock.spent` (the
+  episode's 6 h) skips them, `run_clock.repair_spent` counts them. A relaunch inside the drive continues the open
+  window (the receipt clears when 09 completes); `drive.end_row` closes it into `repair.jsonl` and its
+  `clock_spent` reads the repair's cap. The finish line prints both: `charged 6.02 h | wall .. | dead .. | repair
+  X h of a 2.38 h cap`.
+- **The cap, and why that number.** The clock's own price for the work the order makes owed: the earliest redone
+  step's share and every later step's (each priced as its first), plus the judges' pool (a repair re-signs its
+  eyes): a redo of 09 = (105 + 6 + 20 + 3 + 3) / 300 x 18,000 + 360 = 8,580 s (2.38 h), never past the owner's
+  6 h. ep01's expected repair is the refine (2,236 s priced) + the rung (984 s priced) + cut, upscale, QC and the
+  master eye (30-40 min measured: wall.10 290 s, wall.11 949 s), about 5,000-5,600 s: 1.5x headroom, and a
+  runaway stops at 2.38 h, not 6. It binds as the owner's limit binds a normal run: every rung and costly check is
+  priced against it (`leaves_reserve`, `checks_cut`); the owed steps still run. `CAP repair: ...` is said once,
+  before the first step that starts on a spent repair clock.
+- **What did not change.** A launch with no owner order, with only an autopilot cure, or on an undelivered episode
+  is charged with the episode's spent hours exactly as before (pinned: ep01's 21,673 s still cuts the refine).
+  `retry` still never resets anything (C3_verdict #4).
+- **With it (ship review of the tiny-face rung, skeptic minors 1-2).**
+  - *The no-worse bar.* "Kept only when the draw passes every gate" threw away a draw of a take that already
+    failed a hard row: ep01 T01 fails gait ("the feet slide") on every attempt, so its 1024 draw could never be
+    kept even with both faces drawn. Now the draw is kept when its hard faults (severity not low) are a subset of
+    the old take's failing hard rows: its dq hard rows, its content faults and the take eye's newest record at
+    that take (`tiny_face.old_hard`, read at the snapshot, before the render). A draw adding any hard fault gives
+    the old take back. Replayed on T01's real `T01.dq.json`, `T01.content.json` and `eye_b368ae93.json`
+    (`tests/fixtures/ep01_replay/tiny_face/`): the old take's bar is {gait}; a draw failing gait alone is kept, a
+    draw adding a HARD warp is not, a new low framing vote is no new hard fault.
+  - *The whole-scale landing.* `collect` wrote the 1024 bytes as `T<nn>.mp4` and scaled them in place; an ffmpeg
+    failure left a 1024 take under a graph that says `scaled_to` the canvas, so currency read it current. Now
+    ffmpeg writes beside the take and only a finished file replaces it (`takes_r2v.fit_into`); a failed scale gives
+    the old take and its graph back (`give_back`, from `make_room`'s `DISPLACED`) and is a lost take named for
+    the retake ("could not be scaled ... the old take stays").
+- Tests: `tests/test_an_owner_repair_runs_on_its_own_clock.py`,
+  `tests/test_a_tiny_face_draw_no_worse_than_its_take_is_kept.py`,
+  `tests/test_a_draw_whose_scale_fails_never_claims_the_canvas.py`.

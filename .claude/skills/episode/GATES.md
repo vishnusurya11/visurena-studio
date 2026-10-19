@@ -368,8 +368,9 @@ A failed anime-worker ask (its 120 s idle exit) starts one fresh worker.
 **TINY-FACE RUNG (09_08, 2026-10-19, `scripts/episode/tiny_face.py`).** A take whose refine refused (seam or drift,
 current bytes) a planned face (shot face or speaker) of 20-40 px at its smallest (`min_px`), on the Spark graph
 (wide/full), square episode, no still: ONE draw on the 1024 graph (`takes_r2v --tiny-face`, a retake's seed and
-inputs, scaled to the canvas); kept only if take_dq, take_content and the eye pass it, then refined again; else the
-old take, verdicts and row return. 1 per take (face_refine row); seconds on the retakes wall; 1.75x a take, cut first.
+inputs, landed scaled to the canvas or not at all); judged by take_dq, take_content and the eye, KEPT when no worse:
+its hard faults a subset of the old take's (ep01 T01 already fails gait), then refined again; else the old take,
+verdicts and row return. 1 per take (face_refine row); seconds on the retakes wall; 1.75x a take, cut first.
 
 ## QC — `qc.py <book> <n> --engine=r2v`
 
@@ -625,6 +626,7 @@ The counters (code as of the Jekyll Kawajiri ep01 retro, 2026-10-19):
 | rung ceiling | 300 min | `run_budget.EPISODE_CEILING_SECONDS` | past it every rung is terminal, signed flagged; firsts still render |
 | owner limit | 360 min | `run_budget.OWNER_LIMIT_SECONDS` | a rescue rung runs only while spent + its price + the firsts owed fit (`Budget.leaves_reserve`) |
 | first-render wall | 120 min | `stages.yaml caps.takes` | no new first render starts past it (between renders); attempts.json `takes.first` keeps it across launches |
+| repair cap | 143 min for a redo of 09 | `repair_clock.cap_for` | an owner redo of a delivered episode: its own clock from its start; rungs and costly checks priced on it |
 | cheap check | 60 s | `run_budget.CHEAP_CHECK_SECONDS` | a check this cheap always runs, whatever the clock |
 | dark budget | 2 episodes | `run_budget.DARK_EPISODES_REQUIRED` | a share-based cut is allowed only after this many dark (logged, never cutting) episodes |
 <!-- /registry:clock -->
@@ -649,6 +651,8 @@ resume is dead time: the relaunch it causes is not counted by `autopilot.step_gu
   a refusal is the ceiling's terminal (`rungs_closed`), never a park; an unpriced rung passes.
   Past the ceiling a verdict on the SAME bytes stands under moved code: a take's dq report
   (`take_dq --ceiling-spent`) and a PASSING QC report; a QC fail is measured again.
+- **Repair clock (owner 2026-10-19):** an owner redo of a delivered episode (manifest on disk) runs on
+  `studio/repair_clock`: charged from its start, capped, rows tagged `repair`, never in the 6 h. LESSONS.
 - **SAFETY (closed list, `gate_policy.SAFETY`):** a master over the Short length or with no
   title card; a line not heard; an unjudged or stale take; loudness out of band after the
   leveller; a plan BUILDER line; money; publish auth; GPU lost. Only these stop a spent-clock

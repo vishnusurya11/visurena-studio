@@ -102,6 +102,14 @@ def _orders_taken(ctx) -> list:
     return rows
 
 
+def _hooked(ctx, name: str, *args) -> None:
+    """A context that keeps a clock of its own is told: `after_orders` once the owner's orders are
+    taken (the episode's repair window, studio/repair_clock), `before_step` before each step runs."""
+    hook = getattr(ctx, name, None)
+    if callable(hook):
+        hook(*args)
+
+
 def _wants_redo(step, ctx) -> bool:
     return step.STEP_ID in work_orders.redo_steps(ctx.conn, ctx.codex_id, ctx.stage, ctx.unit or "book")
 
@@ -183,6 +191,7 @@ def run_steps(ctx, steps: list) -> str:
     judge set it aside.  Raises on failure.  The word is an Outcome: it also names the step that
     ended the run (P13's drive.jsonl row)."""
     _orders_taken(ctx)
+    _hooked(ctx, "after_orders")
     family, last = "", ""
     for step in steps:
         if getattr(step, "GPU", False) and ctx.held():
@@ -194,6 +203,7 @@ def run_steps(ctx, steps: list) -> str:
         if boundary.requested(getattr(ctx, "home", None)):
             return Outcome(_paused(step, ctx, f"before step {step.STEP_ID}", started=False), step.STEP_ID)
         print(f"--- step {step.STEP_ID} ({step.NAME}) | {ctx.label} ---")
+        _hooked(ctx, "before_step", step.STEP_ID)
         ctx.tracker.event(step.STEP_ID, "started")
         ctx.step_wall = step_wall.open_wall(ctx, step)     # the cap table's wall (owner 2026-10-18)
         try:

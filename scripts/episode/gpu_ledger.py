@@ -117,12 +117,13 @@ def time_line(charged_s: float, wall_s: float, dead_s: float) -> str:
 
 def finish_line(home) -> str:
     """The drive's finish line for an episode folder: the run clock's charge, the first-start to
-    last-end wall, and the dead gaps between runs (K4)."""
-    from studio import run_clock
+    last-end wall, and the dead gaps between runs (K4); an owner's repair (studio/repair_clock)
+    adds its own hours against its cap, never into the episode's charge."""
+    from studio import repair_clock, run_clock
     spans = run_clock.spans(home)
     wall = max(e for _, e in spans) - min(s for s, _ in spans) if spans else 0.0
     dead = sum(g["seconds"] for g in run_clock.dead_gaps(home))
-    return time_line(run_clock.spent(home), wall, dead)
+    return time_line(run_clock.spent(home), wall, dead) + repair_clock.finish_part(home)
 
 
 def step_spans(home) -> list[tuple[str, float, float]]:

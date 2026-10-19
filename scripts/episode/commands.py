@@ -17,7 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from studio import registry, run_budget, step_caps  # noqa: E402
+from studio import registry, repair_clock, run_budget, step_caps  # noqa: E402
 
 SKILL = ROOT / ".claude" / "skills" / "episode" / "SKILL.md"
 GATES = ROOT / ".claude" / "skills" / "episode" / "GATES.md"
@@ -98,6 +98,8 @@ def clock_rows() -> list[tuple[str, str, str, str]]:
          "a rescue rung runs only while spent + its price + the firsts owed fit (`Budget.leaves_reserve`)"),
         ("first-render wall", f"{minutes(step_caps.wall_s('takes'))} min", "stages.yaml caps.takes",
          "no new first render starts past it (between renders); attempts.json `takes.first` keeps it across launches"),
+        ("repair cap", f"{minutes(repair_clock.cap_for(['09']))} min for a redo of 09", "repair_clock.cap_for",
+         "an owner redo of a delivered episode: its own clock from its start; rungs and costly checks priced on it"),
         ("cheap check", f"{int(run_budget.CHEAP_CHECK_SECONDS)} s", "run_budget.CHEAP_CHECK_SECONDS",
          "a check this cheap always runs, whatever the clock"),
         ("dark budget", f"{run_budget.DARK_EPISODES_REQUIRED} episodes", "run_budget.DARK_EPISODES_REQUIRED",

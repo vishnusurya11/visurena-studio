@@ -145,11 +145,41 @@ def fit_argv(src: Path, dst: Path, w: int, h: int) -> list[str]:
             "-c:v", "libx264", "-crf", "10", "-pix_fmt", "yuv420p", "-c:a", "copy", str(dst)]
 
 
-def fit_canvas(path: Path) -> None:
-    """The landed draw rewritten in place at the episode's canvas."""
-    tmp = path.with_name(path.stem + "_fit.mp4")
-    subprocess.run(fit_argv(path, tmp, W, H), check=True)
-    tmp.replace(path)
+def fit_into(src: Path, out: Path) -> None:
+    """`src` scaled to the episode's canvas and landed at `out` WHOLE: ffmpeg writes beside the take and
+    only a finished file replaces it, so a failed scale never leaves a draw claiming the canvas."""
+    tmp = out.with_name(out.stem + "_fit.mp4")
+    try:
+        subprocess.run(fit_argv(src, tmp, W, H), check=True)
+    except (OSError, subprocess.SubprocessError):
+        tmp.unlink(missing_ok=True)
+        raise
+    tmp.replace(out)
+
+
+DISPLACED: dict[int, Path] = {}
+"""take index -> where make_room put the take a render replaces: what a failed scale gives back."""
+
+
+def give_back(out: Path, index: int) -> None:
+    """The take a draw replaced back as `out` with its own graph (episode_home.swap_in); with none,
+    the draw's graph goes too, so nothing on disk names a canvas the take is not at."""
+    old = DISPLACED.get(index)
+    if old is not None and Path(old).exists():
+        episode_home.swap_in(out.parent, index, Path(old))
+    else:
+        out.with_suffix(".graph.json").unlink(missing_ok=True)
+
+
+def land_scaled(c: dict, video: Path, out: Path) -> None:
+    """A draw rendered off the canvas lands scaled, or not at all: a failed scale gives the old take
+    back and is a lost take (skeptic minor 2, 2026-10-19), named for the retake."""
+    try:
+        fit_into(video, out)
+    except (OSError, subprocess.SubprocessError) as why:
+        give_back(out, c["index"])
+        raise RuntimeError(f"T{c['index']:02d}: the {'x'.join(map(str, c['render_canvas']))} draw could not be "
+                           f"scaled to the canvas ({type(why).__name__}); the old take stays") from why
 
 
 def by_model(jobs: list[tuple[dict, dict]]) -> list[tuple[dict, dict]]:
@@ -1118,9 +1148,10 @@ def collect(c: dict, prompt_id: str, out: Path) -> dict:
         raise RuntimeError(f"take {c['index']} produced no video: {made}")
     out.parent.mkdir(parents=True, exist_ok=True)
     episode_home.keep_aside(out, c["index"])       # never written over (Jekyll ep01 v2)
-    out.write_bytes(video.read_bytes())
     if off_canvas(c):
-        fit_canvas(out)                            # a tiny-face 1024 draw lands at the episode's canvas
+        land_scaled(c, video, out)                 # a tiny-face 1024 draw lands at the episode's canvas
+    else:
+        out.write_bytes(video.read_bytes())
     retire_verdicts(out)
     phases_of(out, c, record)
     waited = round(time.time() - began, 1)
@@ -1428,7 +1459,7 @@ def make_room(c: dict, out: Path, records: dict, why: str | None) -> None:
     written over), and a named retake (`why` not None) or a take with a record
     renders on its NEXT seed -- a stale re-render had reset `tries` and repeated
     try 0's seed (Jekyll HEL ep01 v2)."""
-    episode_home.displace(out, c["index"])
+    DISPLACED[c["index"]] = episode_home.displace(out, c["index"])
     if why is not None or c["index"] in records:
         mark_retake(c, records.get(c["index"], {}).get("tries", 0) + 1, STALE_WHY if why is None else why)
 

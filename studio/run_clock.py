@@ -13,6 +13,11 @@ What the ceiling is charged with is the UNION of the run spans (overlapping
 or nested runs count once), plus the legacy timing.jsonl rows that ended
 before the first run row (episodes begun before this clock existed).  Times
 are epoch seconds; timing.jsonl's stamps are naive local ISO.
+
+A run inside an owner's repair window (studio/repair_clock, owner ruling
+2026-10-19) is tagged `repair` on its live file and its row: it counts toward
+the repair's own clock (`repair_spent`), never toward the episode's 6 h
+(`spent`); wall and dead time still read every run.
 """
 from __future__ import annotations
 
@@ -60,7 +65,8 @@ def rows(home) -> list[dict]:
 
 def _append(home, run: dict, ended: float, how: str) -> dict:
     row = {"run_id": run.get("run_id"), "pid": run.get("pid"), "started": float(run["started"]),
-           "ended": float(ended), "seconds": round(float(ended) - float(run["started"]), 3), "how": how}
+           "ended": float(ended), "seconds": round(float(ended) - float(run["started"]), 3), "how": how,
+           **({"repair": True} if run.get("repair") else {})}
     with (Path(home) / CLOCK).open("a", encoding="utf-8") as f:
         f.write(json.dumps(row) + "\n")
     return row
@@ -93,6 +99,13 @@ def beat(home, run_id: str, now: Now = time.time) -> None:
         _write_atomic(Path(home) / OPEN, {**run, "last_beat": now()})
 
 
+def tag_repair(home, run_id: str) -> None:
+    """This run belongs to an owner's repair window: its live file (and so its row) says `repair`."""
+    run = read_open(home)
+    if run is not None and run.get("run_id") == run_id:
+        _write_atomic(Path(home) / OPEN, {**run, "repair": True})
+
+
 def close_run(home, how: str = "closed", now: Now = time.time) -> dict | None:
     """A clean exit: the run row is closed now and the live file goes."""
     run = read_open(home)
@@ -103,11 +116,17 @@ def close_run(home, how: str = "closed", now: Now = time.time) -> dict | None:
     return row
 
 
-def spans(home) -> list[tuple[float, float]]:
-    """(started, ended) of every run: closed rows, and a live or orphan file to its last beat."""
-    out = [(float(r["started"]), float(r["ended"])) for r in rows(home) if "started" in r and "ended" in r]
+def _kept(run: dict, repair: bool | None) -> bool:
+    return repair is None or bool(run.get("repair")) == repair
+
+
+def spans(home, repair: bool | None = None) -> list[tuple[float, float]]:
+    """(started, ended) of every run: closed rows, and a live or orphan file to its last beat.
+    `repair` True keeps only the repair window's runs, False only the episode's, None every one."""
+    out = [(float(r["started"]), float(r["ended"])) for r in rows(home)
+           if "started" in r and "ended" in r and _kept(r, repair)]
     run = read_open(home)
-    if run is not None:
+    if run is not None and _kept(run, repair):
         out.append((float(run["started"]), float(run.get("last_beat") or run["started"])))
     return out
 
@@ -156,9 +175,10 @@ def legacy_seconds(home, until: float | None, since: float = 0.0) -> float:
 
 def spent_before(home, t0: float | None = None, since: float = 0.0) -> float:
     """Seconds the episode spent before `t0` (all of it when None) and after
-    `since`: the legacy rows before the first run, plus the union of the runs."""
+    `since`: the legacy rows before the first run, plus the union of the runs
+    (a repair window's runs are its own clock's, never the episode's)."""
     every = spans(home)
-    pairs = [(max(s, since), e if t0 is None else min(e, t0)) for s, e in every]
+    pairs = [(max(s, since), e if t0 is None else min(e, t0)) for s, e in spans(home, repair=False)]
     pairs = [(s, e) for s, e in pairs if e > s]
     cuts = [x for x in (min((s for s, _ in every), default=None), t0) if x is not None]
     return legacy_seconds(home, min(cuts) if cuts else None, since) + union(pairs)
@@ -166,6 +186,12 @@ def spent_before(home, t0: float | None = None, since: float = 0.0) -> float:
 
 def spent(home) -> float:
     return spent_before(home, None)
+
+
+def repair_spent(home, since: float = 0.0) -> float:
+    """Seconds the repair-tagged runs spent from `since` on: a repair window's own clock."""
+    pairs = [(max(s, since), e) for s, e in spans(home, repair=True)]
+    return union([(s, e) for s, e in pairs if e > s])
 
 
 class Heartbeat:
