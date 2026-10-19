@@ -147,6 +147,17 @@ def end_row(home: Path, code: int, sha: str) -> dict:
     return {**row, "repair": closed} if closed else row
 
 
+def leftover_window(home: Path, conn=None, say=None) -> dict | None:
+    """Before the first run: a repair window a killed drive left open, that no owner receipt backs, is
+    closed and said (repair_clock.close_unbacked; ship review minor 1, incident 2026-10-19 11:18 PDT)."""
+    from studio import db, repair_clock
+    closed = repair_clock.close_unbacked(conn if conn is not None else db.get_connection(), home)
+    if closed:
+        (say or notify)(f"closed a leftover repair window (orders {closed['orders']}, "
+                        f"{closed['spent_s']:.0f} s spent): {repair_clock.UNBACKED}")
+    return closed
+
+
 def main(codex: str, number: int) -> int:
     label = f"{codex} ep{number:02d}"
     if episode_drive.dirty(git("status", "--porcelain")):
@@ -177,6 +188,8 @@ def main(codex: str, number: int) -> int:
         notify(f"{label}: WARNING code moved mid-episode: started on {began[:8]}, "
                f"resuming on {sha[:8]}; fix bugs after the ship, not during it")
     ledger(home, {"event": "start", "sha": sha})
+    if closed := leftover_window(home, say=lambda text: notify(f"{label}: {text}")):
+        ledger(home, {"event": "repair_closed", "repair": closed})
 
     def run() -> str:
         n = next(runs)

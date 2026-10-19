@@ -659,8 +659,8 @@ never a moving shot's coda.
   killed step is charged from its 60 s heartbeat. A round is a change of bytes.
 - The 6 h episode clock is the outer wall; the caps only stop a runaway step. GATES.md holds
   the generated cap and clock tables.
-- An owner redo of a delivered episode runs on its own capped clock (GATES.md): write the
-  redo order first, then `retry N` and `resume`.
+- An owner redo of a delivered episode (GATES.md): `repair_dry_check.py` (0 renders),
+  the redo order, `retry N`, `resume`.
 
 ## Resuming
 

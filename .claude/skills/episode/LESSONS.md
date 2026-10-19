@@ -78,6 +78,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - The face refine, round 2 (2026-10-19: a cel-valid eye score, the soft paste and its seam, CCIP identity, colour re-acquire, no body extension, the grid trim; fix round: the seam where the mask falls, least-cost linking)
 - The tiny-face rung (09_08, 2026-10-19)
 - An owner's repair runs on its own clock (owner ruling 2026-10-19; with the rung's no-worse bar and the whole-scale landing)
+- A repair re-renders nothing it was handed (2026-10-19)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

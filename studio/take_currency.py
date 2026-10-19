@@ -160,6 +160,66 @@ def is_current(built: str, take: Path, pictures: list | None = None,
     return {staged_name(p) for p in pictures} <= staged_images(take)
 
 
+# --- a repair freezes what it was handed (incident 2026-10-19 11:18 PDT) ---------------------
+
+FREEZE_FROM = "09"
+"""The takes' own step: a repair redoing it or a later step repairs the takes' faces, the cut or the QC,
+never their inputs, so it never re-renders a delivered take over moved prompt code."""
+
+
+def sha8_of(path: Path) -> str:
+    """The first eight hex digits of the file's sha256 (take_dq.take_sha8's rule)."""
+    import hashlib
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:8]
+
+
+def delivered_sha8(home: Path, take: Path) -> str | None:
+    """The take's bytes as step 12 delivered them: its row in the episode's manifest.json."""
+    path, tail = Path(home) / "manifest.json", "/".join(Path(take).parts[-3:])
+    try:
+        rows = json.loads(path.read_text(encoding="utf-8")).get("inputs") or []
+    except (ValueError, OSError):
+        return None
+    return next((r.get("sha8") for r in rows if str(r.get("path", "")).endswith(tail)), None)
+
+
+def measured_sha8(take: Path) -> str | None:
+    """The bytes the take's own dq record measured (`take_sha8`), or None."""
+    try:
+        return json.loads(Path(take).with_suffix(".dq.json").read_text(encoding="utf-8")).get("take_sha8")
+    except (ValueError, OSError, AttributeError):
+        return None
+
+
+def frozen(take: Path, home: Path) -> str | None:
+    """Why this take is current for a repair's render pass -- `delivered` (its bytes are the manifest's)
+    or `measured` (its dq record's) -- inside the episode's open repair window; None otherwise (a normal
+    run: today's rule, exactly)."""
+    from studio import repair_clock
+    return frozen_in(repair_clock.read(home), take, home)
+
+
+def frozen_in(window: dict | None, take: Path, home: Path) -> str | None:
+    """`frozen` under a given window (the dry check prices a window not yet opened): an owner's repair
+    of a delivered episode that redoes step 09 or later freezes the bytes a record names."""
+    from studio import repair_clock
+    take = Path(take)
+    if window is None or not repair_clock.delivered(home) or not take.exists():
+        return None
+    if min(window.get("steps") or ["00"]) < FREEZE_FROM:
+        return None
+    sha = sha8_of(take)
+    return next((why for why, got in (("delivered", delivered_sha8(home, take)),
+                                      ("measured", measured_sha8(take))) if got == sha), None)
+
+
+def held(built: str, take: Path, home: Path, pictures: list | None = None,
+         canvas: tuple[int, int] | None = None) -> bool:
+    """Current to its card (`is_current`), or frozen by the owner's repair (`frozen`): the one question
+    step 09 and takes_r2v ask before a render."""
+    return is_current(built, take, pictures, canvas) or frozen(take, home) is not None
+
+
 # --- unit currency: a take is stale when ITS OWN inputs differ (early cutoff) ---
 
 INPUT_ORDER = ("prompt", "pictures", "canvas")

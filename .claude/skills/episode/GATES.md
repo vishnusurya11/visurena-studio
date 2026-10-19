@@ -651,8 +651,9 @@ resume is dead time: the relaunch it causes is not counted by `autopilot.step_gu
   a refusal is the ceiling's terminal (`rungs_closed`), never a park; an unpriced rung passes.
   Past the ceiling a verdict on the SAME bytes stands under moved code: a take's dq report
   (`take_dq --ceiling-spent`) and a PASSING QC report; a QC fail is measured again.
-- **Repair clock (owner 2026-10-19):** an owner redo of a delivered episode (manifest on disk) runs on
-  `studio/repair_clock`: charged from its start, capped, rows tagged `repair`, never in the 6 h. LESSONS.
+- **Repair clock (owner 2026-10-19):** an owner redo of a delivered episode runs on `studio/repair_clock`
+  (own cap and `repair` rows, never the 6 h); a redo of 09+ freezes delivered takes (`take_currency.frozen`);
+  an unbacked leftover window closes at drive start; `repair_dry_check.py` says 0 renders first. LESSONS.
 - **SAFETY (closed list, `gate_policy.SAFETY`):** a master over the Short length or with no
   title card; a line not heard; an unjudged or stale take; loudness out of band after the
   leveller; a plan BUILDER line; money; publish auth; GPU lost. Only these stop a spent-clock

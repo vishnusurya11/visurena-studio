@@ -12,7 +12,9 @@ budget with that and cut the refine and the tiny-face rung before they could run
 A window opens when the runner has taken the owner's orders and an OWNER redo receipt (K12,
 work_orders.owner_receipts; an autopilot cure is not one) names a step of an episode whose
 manifest.json exists.  It lasts until its drive ends (drive.py closes it), so a relaunch inside
-the drive continues it.  Its budget is charged with the repair-tagged run spans since it opened
+the drive continues it.  A window a killed drive left open is closed at the next drive's start unless
+the owner's receipts still back every order it names (`close_unbacked`; incident 2026-10-19 11:18 PDT).
+Inside it, a redo of 09 or later re-renders no delivered take (take_currency.frozen).  Its budget is charged with the repair-tagged run spans since it opened
 (run_clock.repair_spent), never with the episode's earlier hours, and its limit is the cap.
 
 THE CAP (never unlimited): the clock's own price for the work the order makes owed -- the share of
@@ -110,16 +112,37 @@ def cap_line(home, window: dict) -> str:
             f"every rung and costly check is cut, the owed steps run")
 
 
-def close(home, now=time.time) -> dict | None:
-    """The drive ended: the window's row goes to repair.jsonl and the window closes; None when none."""
+def close(home, now=time.time, why: str = "") -> dict | None:
+    """The drive ended: the window's row goes to repair.jsonl and the window closes; None when none.
+    `why` names a close that is not its drive's end (`closed_by`)."""
     window = read(home)
     if window is None:
         return None
     row = {**window, "closed_at": float(now()), "spent_s": round(spent(home, window), 1)}
+    row |= {"closed_by": why} if why else {}
     with (Path(home) / LOG).open("a", encoding="utf-8") as f:
         f.write(json.dumps(row) + "\n")
     (Path(home) / WINDOW).unlink(missing_ok=True)
     return row
+
+
+UNBACKED = "drive start: no owner receipt backs it (a drive that never reached its end left it open)"
+
+
+def backed(conn, home, window: dict) -> bool:
+    """Every order the window names is an OWNER redo still receipted beside the episode (K12)."""
+    receipts = work_orders.owner_receipts(conn, home)
+    orders = {k: int(v) for k, v in (window.get("orders") or {}).items()}
+    return bool(orders) and all(receipts.get(step) == oid for step, oid in orders.items())
+
+
+def close_unbacked(conn, home, now=time.time) -> dict | None:
+    """At a drive's start (ship review minor 1, incident 2026-10-19): a leftover window no owner receipt
+    backs is closed into repair.jsonl, never reused; a backed one is the same owed order and holds."""
+    window = read(home)
+    if window is None or backed(conn, home, window):
+        return None
+    return close(home, now, UNBACKED)
 
 
 def history(home) -> list[dict]:

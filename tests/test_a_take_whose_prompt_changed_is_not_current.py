@@ -107,6 +107,10 @@ def test_the_runner_asks_whether_the_prompt_is_still_the_one_it_would_send():
     spec.loader.exec_module(tkr)
     body = inspect.getsource(tkr.main)
     skip = body[body.index("for c in built"):body.index("graph = graph_for(")]
-    assert "is_current" in skip, (
+    # the question moved into current_to (incident 2026-10-19 11:18 PDT): is_current, or a delivered
+    # take frozen by the owner's repair -- take_currency.held asks is_current first
+    from studio import take_currency
+    assert "current_to" in skip and "take_currency.held(" in inspect.getsource(tkr.current_to)
+    assert "is_current(" in inspect.getsource(take_currency.held), (
         "a take is kept on its shot grouping and the file existing; a rewritten "
         "prompt is then never sent to the GPU and DQ repeats the old numbers")

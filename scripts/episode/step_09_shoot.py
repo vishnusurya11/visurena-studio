@@ -95,13 +95,14 @@ def card_pictures(c: dict, book: Path, number: int) -> list[Path]:
 
 def stale_takes(ctx) -> list[int]:
     """Takes that are not the take their card in prompts.json would render now.
-    ep12: shot 16 was re-planned and the runner skipped step 09 on existence."""
+    ep12: shot 16 was re-planned and the runner skipped step 09 on existence.  Inside an owner's
+    repair a delivered take is frozen (take_currency.held; incident 2026-10-19 11:18)."""
     path = ctx.home / TAKES / "prompts.json"
     cards = episode_home.read_json(path) if path.exists() else []
     return [int(c["index"]) for c in cards
-            if not take_currency.is_current(c.get("prompt") or "", ctx.home / TAKES / f"T{int(c['index']):02d}.mp4",
-                                            pictures=card_pictures(c, ctx.book_dir, ctx.number),
-                                            canvas=episode_canvas(ctx))]
+            if not take_currency.held(c.get("prompt") or "", ctx.home / TAKES / f"T{int(c['index']):02d}.mp4",
+                                      ctx.home, pictures=card_pictures(c, ctx.book_dir, ctx.number),
+                                      canvas=episode_canvas(ctx))]
 
 
 def episode_canvas(ctx) -> tuple[int, int]:

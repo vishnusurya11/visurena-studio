@@ -1454,6 +1454,14 @@ def wants_render(c: dict, out: Path, records: dict, retake: list[int] | None, cu
     return not (rec is not None and rec.get("shots") == c["shots"] and current())
 
 
+def current_to(c: dict, out: Path, book: Path, number: int) -> bool:
+    """The take on disk is the one this card renders now (words, pictures, canvas) -- or, inside an
+    owner's repair of the delivered episode, the delivered or measured bytes (incident 2026-10-19
+    11:18 PDT: P03's reworded UNLETTERED sentence queued all 28 of ep01's takes)."""
+    return take_currency.held(c.get("prompt") or "", out, episode_home.home(book, number),
+                              pictures=card_pictures(c, book, number), canvas=(W, H))
+
+
 def make_room(c: dict, out: Path, records: dict, why: str | None) -> None:
     """Before a render: the take on disk and its graph go to attempts/ (never
     written over), and a named retake (`why` not None) or a take with a record
@@ -1551,8 +1559,7 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
         # rewrote seven shots and the prop filter dropped a dome from the rest, so all
         # 28 prompts changed while the grouping did not -- every take would have been
         # kept, the fix reaching no picture while DQ repeated the old numbers.
-        current = (lambda c=c, out=out: take_currency.is_current(
-            c.get("prompt") or "", out, pictures=card_pictures(c, book, number), canvas=(W, H)))
+        current = (lambda c=c, out=out: current_to(c, out, book, number))
         if not wants_render(c, out, records, retake, current):
             continue
         make_room(c, out, records, why if retake and c["index"] in retake else None)
