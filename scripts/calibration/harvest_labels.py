@@ -151,14 +151,35 @@ def dq_summary(rec: dict, planned: dict) -> dict:
             "planned": planned}
 
 
+GATE_CLASS = {"warp": "blur_warp", "frozen-whole": "frozen_share", "frozen-share": "frozen_share",
+              "pulse": "pulse", "lag": "lip_lag", "face-at-end": "face_out", "coherence off-board": "off_board",
+              "cut-vote": "cut_early", "frozen-at-start": "frozen_start", "foreign": "foreign_picture"}
+"""A failed gate's name -> the casebook class it speaks for; a gate with no class is `unknown`."""
+
+
+def failed_gates(dq: dict) -> list[dict]:
+    """The gates that failed, hard ones first (the order the take was refused in)."""
+    return sorted((g for g in dq.get("gates", []) if not g.get("ok", True)), key=lambda g: not g.get("hard"))
+
+
+def kept_row(codex: str, unit: str, dq: dict, planned: dict, source: str, version: str, content) -> Row:
+    """The shipped take with its settled state: a pass only when its gates passed; a kept-best that went
+    out over failed gates is a flagged fault row (never a pass), and no metric counts it (C5)."""
+    bad, summary = failed_gates(dq), {"take_dq": dq_summary(dq, planned), "content": content}
+    flagged = dq.get("passed") is False
+    machine = summary | ({"label_source": "shipped-flagged", "flagged": True, "faults": [g["name"] for g in bad]}
+                         if flagged else {"label_source": "shipped-default"})
+    cls = GATE_CLASS.get(bad[0]["name"], "unknown") if bad else "unknown"
+    return Row(codex=codex, unit=unit, kind="take", path=take_path(unit, dq["take"]),
+               verdict="fault" if flagged else "pass", fault_class=cls if flagged else None,
+               verdict_by="default", source=source, machine_version=version, machine=machine)
+
+
 def take_rows(codex: str, unit: str, dq: dict, planned: dict, source: str, version: str,
               content: dict | None = None) -> list[Row]:
-    """The kept take (a pass by default, marked `shipped-default`: a calibration reads it as no
-label, P07) and every losing attempt (an agent fault)."""
-    kept = Row(codex=codex, unit=unit, kind="take", path=take_path(unit, dq["take"]), verdict="pass",
-               verdict_by="default", source=source, machine_version=version,
-               machine={"take_dq": dq_summary(dq, planned), "content": content,
-                        "label_source": "shipped-default"})     # it went out; nobody judged it
+    """The kept take (kept_row: a pass marked `shipped-default`, or a flagged fault) and every
+losing attempt (an agent fault)."""
+    kept = kept_row(codex, unit, dq, planned, source, version, content)
     rows = [kept]
     for att in dq.get("attempts", []):
         stem = Path(att.get("file") or "").stem

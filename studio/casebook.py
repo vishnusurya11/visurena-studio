@@ -117,9 +117,14 @@ def weight(row: Row) -> float:
     return WEIGHTS[row.verdict_by]
 
 
+def is_shipped(row: Row) -> bool:
+    """A kept take that went out: its state is the gate's own, so it is nobody's label."""
+    return str(row.machine.get("label_source", "")).startswith("shipped-flagged")
+
+
 def counted(row: Row) -> bool:
-    """Unverified candidates stay out of every metric."""
-    return row.verdict_by != "unverified"
+    """Unverified candidates and a flagged shipped take (the gate grading itself) stay out of every metric."""
+    return row.verdict_by != "unverified" and not is_shipped(row)
 
 
 def read_rows(path: Path) -> list[Row]:

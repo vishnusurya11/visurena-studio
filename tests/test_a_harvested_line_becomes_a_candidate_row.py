@@ -45,7 +45,8 @@ def test_a_stored_dq_record_becomes_a_kept_row_and_attempt_rows():
     rows = hl.take_rows(CODEX, "ep02", dq, planned, "episodes/ep02/takes/r2v/T05.dq.json", "git:0000000")
     by_path = {r.path: r for r in rows}
     kept = by_path["episodes/ep02/takes/r2v/T05.mp4"]
-    assert kept.verdict == "pass" and kept.verdict_by == "default"
+    assert kept.verdict_by == "default" and kept.machine["flagged"] is True      # its record says passed: false
+    assert kept.verdict == "fault"      # a kept-best shipped over failed gates is no pass (C5)
     assert kept.machine["take_dq"]["score"] == 60.0 and kept.machine["take_dq"]["planned"]["size"] == "close"
     lost = by_path["episodes/ep02/takes/r2v/attempts/T05_fail1.mp4"]
     assert lost.verdict == "fault" and lost.verdict_by == "agent" and lost.fault_class == "unknown"
