@@ -18,7 +18,7 @@ import re
 import sys
 from contextlib import contextmanager
 
-from studio import boundary, comfy, registry, step_caps, step_wall, work_orders
+from studio import boundary, comfy, registry, run_budget, step_caps, step_wall, work_orders
 from studio.deferral import Deferred
 from studio.escalate import Escalation
 
@@ -166,6 +166,18 @@ def _run_one(step, ctx) -> str:
     return "completed"
 
 
+def _dark_row(step, ctx) -> None:
+    """P12: what the budget would have said of this step, written and never acted on."""
+    budget, home = getattr(ctx, "budget", None), step_wall.home_of(ctx)
+    if budget is None or home is None:
+        return
+    row = run_budget.step_dark_row(budget, step.STEP_ID, ctx.step_wall.this_run())
+    try:
+        run_budget.append_dark(home, row) if row is not None else None
+    except OSError:                                    # a watcher's row never fails the step
+        pass
+
+
 def run_steps(ctx, steps: list) -> str:
     """'completed'; 'escalated' when a step parked the unit; 'deferred' when a
     judge set it aside.  Raises on failure.  The word is an Outcome: it also names the step that
@@ -186,9 +198,11 @@ def run_steps(ctx, steps: list) -> str:
         ctx.step_wall = step_wall.open_wall(ctx, step)     # the cap table's wall (owner 2026-10-18)
         try:
             family = _free_family(step, ctx, family)         # best effort; the time is this step's
-            outcome = _run_one(step, ctx)
+            with comfy.row_deadline(step_wall.deadline_of(ctx.step_wall)):   # P14: a text call stays in the row
+                outcome = _run_one(step, ctx)
         finally:
             step_wall.record_spent(ctx, ctx.step_wall)     # a failed run's time is kept too
+            _dark_row(step, ctx)
         step_wall.close_wall(ctx, ctx.step_wall)
         last = step.STEP_ID
         if outcome != "completed":

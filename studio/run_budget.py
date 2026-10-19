@@ -233,6 +233,14 @@ def dark_row(budget: "Budget", step: str, seconds: float) -> dict:
             "would_cut": not budget.can_afford(step, seconds)}
 
 
+def step_dark_row(budget: "Budget", step: str, seconds: float) -> dict | None:
+    """A finished step against its allowance, as a dark row; None when the step holds no share."""
+    if step not in budget.shares:
+        return None
+    left = budget.allowance(step) - seconds
+    return {"step": step, "seconds": round(seconds, 1), "remaining": round(left, 1), "would_cut": left < 0}
+
+
 def append_dark(home, row: dict) -> None:
     import json
     from pathlib import Path

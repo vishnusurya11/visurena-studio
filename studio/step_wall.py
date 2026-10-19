@@ -41,6 +41,12 @@ class StepWall:
         return self.wall_s > 0 and self.elapsed() >= self.wall_s
 
 
+def deadline_of(wall: StepWall) -> float | None:
+    """The epoch second this step's wall ends at, or None (no wall, or already spent: the CAP line speaks)."""
+    left = wall.wall_s - wall.elapsed()
+    return wall.clock() + left if wall.wall_s > 0 and left > 0 else None
+
+
 def seattle(epoch: float) -> str:
     """HH:MM:SS PDT/PST: the owner reads every time in Seattle's."""
     try:

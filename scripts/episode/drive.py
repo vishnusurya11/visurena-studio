@@ -125,6 +125,15 @@ def run_once(codex: str, number: int, log: Path, label: str) -> str:
     return log.read_text(encoding="utf-8", errors="replace")
 
 
+def finish_report(home: Path) -> None:
+    """The 'charged | wall | dead' line and the GPU minutes per step; printed, never fatal (P12, P13)."""
+    try:
+        from scripts.episode import gpu_ledger
+        notify(gpu_ledger.finish_report(home, gpu_ledger.read_rows()))
+    except Exception as why:                            # noqa: BLE001 -- a report never changes the exit
+        print(f"[drive] finish report failed: {why}", flush=True)
+
+
 def main(codex: str, number: int) -> int:
     label = f"{codex} ep{number:02d}"
     if episode_drive.dirty(git("status", "--porcelain")):
@@ -166,6 +175,7 @@ def main(codex: str, number: int) -> int:
     spent = run_budget.spent_before(home) >= run_budget.EPISODE_CEILING_SECONDS
     ledger(home, {"event": "end", "code": code, "sha": sha, "clock_spent": spent,   # the clock_loop backstop
                   "paused_at_boundary": code == episode_drive.PAUSED})
+    finish_report(home)
     return code
 
 

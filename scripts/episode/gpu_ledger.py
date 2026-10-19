@@ -115,6 +115,47 @@ def time_line(charged_s: float, wall_s: float, dead_s: float) -> str:
     return f"charged {charged_s / 3600:.2f} h | wall {wall_s / 3600:.2f} h | dead {dead_s / 3600:.2f} h"
 
 
+def finish_line(home) -> str:
+    """The drive's finish line for an episode folder: the run clock's charge, the first-start to
+    last-end wall, and the dead gaps between runs (K4)."""
+    from studio import run_clock
+    spans = run_clock.spans(home)
+    wall = max(e for _, e in spans) - min(s for s, _ in spans) if spans else 0.0
+    dead = sum(g["seconds"] for g in run_clock.dead_gaps(home))
+    return time_line(run_clock.spent(home), wall, dead)
+
+
+def step_spans(home) -> list[tuple[str, float, float]]:
+    """(step id, start, end) epoch seconds of every timed step row in the folder's timing.jsonl."""
+    from datetime import datetime
+    path, out = Path(home) / "timing.jsonl", []
+    for line in (path.read_text(encoding="utf-8").splitlines() if path.exists() else []):
+        try:
+            row = json.loads(line)
+            if str(row.get("stage", "")).startswith("step_") and row.get("seconds"):
+                end = datetime.fromisoformat(row["ended"]).timestamp()
+                out.append((row["stage"][5:], end - float(row["seconds"]), end))
+        except (ValueError, KeyError, TypeError):
+            continue
+    return out
+
+
+def finish_report(home, rows: list[dict] | None = None) -> str:
+    """finish_line, then busy/claimed/idle minutes per step when the GPU ledger's rows are given."""
+    lines = [finish_line(home)]
+    per = minutes_per_step(rows, step_spans(home)) if rows else {}
+    lines += [f"  step {s}: busy {m['busy']} | claimed {m['claimed']} | idle {m['idle']} min" for s, m in per.items()]
+    return "\n".join(lines)
+
+
+def read_rows(path: Path = LEDGER) -> list[dict]:
+    """The sampler's rows; a missing or broken file is no rows (the line still prints)."""
+    try:
+        return [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
+    except (OSError, ValueError):
+        return []
+
+
 # ---- the real probes ----------------------------------------------------------------
 
 def smi_probe(run_cmd=subprocess.run) -> dict:

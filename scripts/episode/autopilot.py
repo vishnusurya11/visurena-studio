@@ -614,9 +614,16 @@ UNCOUNTED = ("boundary_resume", "head_moved")
 commit may have fixed (P13)."""
 
 
+def resumed_by_owner(book: Path) -> bool:
+    """The owner's `resume` is newer than the last launch: the relaunch ends a pause, dead time (P13)."""
+    names = [r.get("event") for r in rows_of(paths_of(book).events)]
+    last = lambda *w: max((i for i, e in enumerate(names) if e in w), default=-1)  # noqa: E731
+    return last("resume") > last("launch", "relaunch")
+
+
 def step_guard(book: Path, n: int, tail: str, deps: Deps, why: str = "relaunch") -> str | None:
     """Count a relaunch against the step the last log names; 'step_cap' once it is past its cap."""
-    if why in UNCOUNTED:
+    if why in UNCOUNTED or resumed_by_owner(book):
         return None
     found = STEP_IN_TAIL.findall(tail or "")
     if not found:
