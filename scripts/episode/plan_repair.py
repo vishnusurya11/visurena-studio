@@ -305,11 +305,15 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
         elif name == "row_words":
             own = [r for r in rows if pc.cure_for(r) == "row_words"]
             uncured += cure_row_rows(book, own)
+        elif name == "body_clause":
+            doc = pc.body_clause(doc)
+        elif name == "clear_orphan_crowds":
+            doc = pc.clear_orphan_crowds(doc)
         elif name == "clamp_beds":
             doc = pc.clamp_beds(doc)
         elif name == "strip_amounts":                  # the anime-TV grammar (2026-10-17)
             doc = pc.strip_amounts(doc)
-        elif name in ("hold_extra_pushes", "ots_medium_close"):
+        elif name in ("hold_extra_pushes", "ots_medium_close", "lock_two_shot"):
             own = [r for r in rows if pc.cure_for(r) == name]
             doc = getattr(pc, name)(doc, shot_indices(own))
         elif name in ("continuity_looks", "continuity_places", "continuity_beards"):
@@ -340,7 +344,7 @@ def micro_targets(doc: dict, rate: float) -> list[tuple[int, tuple]]:
         shot = pc.insertion_shot(doc, hole, rate)
         if shot is not None:
             out.append((shot, hole))
-    _, unsplit = pc.holds_and_unsplit(json.loads(json.dumps(doc)), rate)
+    _, unsplit = pc.holds_and_unsplit(json.loads(json.dumps(doc)), rate)   # [] on a grammar plan
     for pair in unsplit:
         target = pc.pair_insertion_shot(doc, pair, rate)
         if target is not None and target[0] not in [t[0] for t in out]:
@@ -485,7 +489,7 @@ def restored(doc: dict) -> dict:
     judges it: ep21 (2026-10-08) deferred on a 17-word style line, the restore
     validated the raw draft first and refused, and the cure that fixes it in
     one line never ran -- the climb started over from nothing."""
-    for cure in (pc.trim_style, pc.button_beat):
+    for cure in (pc.trim_style, pc.button_beat, pc.body_clause):
         try:
             doc = cure(doc)
         except Exception:               # a cure never turns a restore into a crash

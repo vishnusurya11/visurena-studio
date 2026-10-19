@@ -18,6 +18,8 @@ from typing import Callable
 
 from pydantic import BaseModel
 
+from studio.episode_takes import BUDGET as TAKE_BUDGET_S   # ONE home for the take length
+
 # ---- the single repairs ----------------------------------------------------------
 
 def merge_silent_tail(doc: dict) -> dict:
@@ -295,7 +297,7 @@ def edge_cases(doc: dict) -> dict:
 
 
 MAX_BEAT_S, MAX_CODA_S = 1.5, 4.0
-HOLE_WALL_S, TAKE_BUDGET_S, SETUP_CAP_S = 6.0, 8.0, 50.0
+HOLE_WALL_S, SETUP_CAP_S = 6.0, 50.0
 
 
 HANDLE_S = 0.25
@@ -462,11 +464,12 @@ def _grow_pairs(doc: dict, rate: float) -> list[tuple[int, int]]:
     the micro-line path (speech splits a take without opening silence)."""
     shots = doc.get("shots") or []
     voiced = {l["shot"] for l in doc.get("lines") or []}
+    from studio.plan_gates import PAIR_FLOOR_S
     unsplit, secs = [], _shot_secs(doc, rate)
     for a, b in zip(shots, shots[1:]):
         if a.get("setup") != b.get("setup"):
             continue
-        need = TAKE_BUDGET_S + 0.3 - (secs[a["index"]] + secs[b["index"]])
+        need = PAIR_FLOOR_S - (secs[a["index"]] + secs[b["index"]])
         if need <= 0:
             continue
         need, blocked = _grow_pair(doc, rate, a, b, voiced, need)
@@ -497,7 +500,8 @@ def holds_and_unsplit(doc: dict, rate: float = 3.0) -> tuple[dict, list[tuple[in
     voiced = {line["shot"] for line in doc.get("lines") or []}
 
     # 1. ONE PER TAKE: consecutive pairs under the budget grow past it
-    unsplit = _grow_pairs(doc, rate)
+    # (a grammar plan is one shot per take: no pair to grow, none to report)
+    unsplit = [] if doc.get("grammar") else _grow_pairs(doc, rate)
 
     # 2. the band floor: pre-turn codas rise until the projection clears 120
     def projection() -> float:
@@ -1769,6 +1773,9 @@ CURES[:0] = [   # the anime-TV grammar (2026-10-17), ahead of every older patter
     (re.compile(r"G-PUSH shot \d+: the camera head names an amount"), "strip_amounts"),
     (re.compile(r"G-PUSH shot \d+: a push past"), "hold_extra_pushes"),
     (re.compile(r"G-OTS shot"), "ots_medium_close"),
+    (re.compile(r"G-LIMB shot"), "body_clause"),
+    (re.compile(r"G-CROWD-ORPHAN setup"), "clear_orphan_crowds"),
+    (re.compile(r"G-TWO shot \d+: .*measured medium/\w+ against medium/locked"), "lock_two_shot"),   # a wrong SIZE is the writer's
 ]
 """Fault-text patterns -> cure names, most specific first.  A row matching
 nothing is CREATIVE and goes back to the writer, one field at a time."""
@@ -1792,6 +1799,15 @@ def hold_extra_pushes(doc: dict, indices: list[int]) -> dict:
             _, sep, rest = (s.get("motion") or "").partition(";")
             s["motion"] = f"{LOCKED} across the whole shot{sep}{rest}"
     return doc
+
+
+def lock_two_shot(doc: dict, indices: list[int]) -> dict:
+    """G-TWO: a medium two-person reaction holds a locked-off frame; the pan that named a
+    target goes with its aim (Jekyll ep01 shot 26 survived five writer rounds on the verb
+    alone).  A wrong size is the writer's call, so only a medium is touched."""
+    medium = [s["index"] for s in doc.get("shots") or []
+              if s.get("index") in indices and s.get("size") == "medium"]
+    return hold_extra_pushes(doc, medium)
 
 
 OTS_CLOSE = re.compile(r"^(?:Extreme close|Close)\b", re.I)
@@ -1827,6 +1843,43 @@ def close_crowds(doc: dict) -> dict:
     for s in doc.get("shots") or []:
         if s.get("size") in ("close", "medium_close", "big_close") and s.get("crowd"):
             s["crowd"] = ""
+    return doc
+
+
+VOICE_WORDS = re.compile(r"\b(?:shout\w*|scream\w*|cr(?:y|ies|ying)|yell\w*|voices?|murmur\w*|chatter\w*|babbl\w*|"
+                         r"jeer\w*|laugh\w*|crowds?|townsfolk|women|men|children|people|neighbou?rs?)\b", re.I)
+"""Person-voice words of an ambience clause: a crowd's sound, with no crowd drawn, is a stranger heard."""
+
+
+def clear_orphan_crowds(doc: dict) -> dict:
+    """G-CROWD-ORPHAN: a setup staging a crowd no shot draws loses the crowd and the voice
+    clauses of its ambience.  A setup with a wide/full shot or extras is G-CROWD's, untouched."""
+    from types import SimpleNamespace
+    from studio import plan_gates
+    shots = [SimpleNamespace(setup=s.get("setup"), size=s.get("size"), extras=s.get("extras") or 0)
+             for s in doc.get("shots") or []]
+    stub = SimpleNamespace(setups={n: SimpleNamespace(crowd=u.get("crowd")) for n, u in (doc.get("setups") or {}).items()},
+                           shots=shots)
+    for row in plan_gates.orphan_crowd_faults(stub):
+        setup = doc["setups"][row.split()[2].rstrip(":")]
+        setup["crowd"] = ""
+        clauses = [c for c in str(setup.get("ambience") or "").split(",") if not VOICE_WORDS.search(c)]
+        setup["ambience"] = ",".join(clauses).strip()
+    return doc
+
+
+BODY_CLAUSE = " The figure it belongs to is whole at the CENTRE, head and shoulders in the frame."
+"""G-LIMB's cure: the part gets its body in the same cell (a part with no body is drawn floating)."""
+
+
+def body_clause(doc: dict) -> dict:
+    """G-LIMB: a limb entering from an edge with no body word in the cell gets BODY_CLAUSE appended to
+    its at_rest, once (the clause is itself a body word).  Inserts and extreme closes are exempt."""
+    from studio import plan_gates
+    for s in doc.get("shots") or []:
+        cell = " ".join(str(s.get(k) or "") for k in ("frame", "at_rest", "motion"))
+        if plan_gates.limb_hit(s.get("size") or "", cell):
+            s["at_rest"] = (s.get("at_rest") or "").rstrip() + BODY_CLAUSE
     return doc
 
 
@@ -2082,7 +2135,7 @@ def split_setup(doc: dict, rate: float = 3.0) -> dict:
         rows = carried.get(s["index"], [])
         spoken = sum(line_seconds(l.get("text") or "", rate) for l in rows)
         return 2 * HANDLE + spoken + BREATH * max(len(rows) - 1, 0) + float(s.get("beat_s") or 0) + float(s.get("coda_s") or 0)
-    spent, part = {}, {}
+    spent, part, chain = {}, {}, {}
     for s in shots:
         name = s.get("setup")
         if name not in setups:
@@ -2090,11 +2143,27 @@ def split_setup(doc: dict, rate: float = 3.0) -> dict:
         k = part.get(name, 1)
         key = name if k == 1 else f"{name}_{k}"
         if spent.get(key, 0.0) + seconds(s) > MAX_SETUP_SECONDS + 1e-6 and spent.get(key, 0.0) > 0:
+            chain[f"{name}_{k + 1}"] = key
             k += 1; part[name] = k; key = f"{name}_{k}"
             setups.setdefault(key, dict(setups[name]))
         spent[key] = spent.get(key, 0.0) + seconds(s)
         s["setup"] = key
-    return {**doc, "setups": setups, "shots": shots}
+    return _fold_lone_parts({**doc, "setups": setups, "shots": shots}, chain)
+
+
+def _fold_lone_parts(doc: dict, chain: dict[str, str]) -> dict:
+    """A part split_setup left with ONE shot (Jekyll ep01 walk_on_day_2: a second place master
+    and anchor for 2.7 s) takes the last shot of the part before it, which keeps two or more.
+    The lone shot spilled because it did not fit that part, so a merge back is never inside
+    SETUP_CAP_S; the two-shot part is (each is a take, <= TAKE_BUDGET_S)."""
+    def owned(key):
+        return [s for s in doc["shots"] if s["setup"] == key]
+    for key, prev in chain.items():
+        before = owned(prev)
+        if len(owned(key)) == 1 and len(before) >= 3:
+            before[-1]["setup"] = key
+    doc["setups"] = {k: v for k, v in doc["setups"].items() if k not in chain or owned(k)}
+    return doc
 
 
 NARRATOR_LIKE = re.compile(r"^(the_)?(first_person_)?narrator$")

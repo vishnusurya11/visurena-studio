@@ -28,6 +28,7 @@ from pathlib import Path
 from studio import story_layer
 from studio.episode_ref_official import AMOUNT, camera_clause
 from studio.episode_seq_board import HOLDS, TRAVEL
+from studio.episode_takes import BUDGET as _TAKE_BUDGET_S
 from studio.episode_spec import BANNED_PROPS, MAX_SETUP_SECONDS, Episode, Line, Setup, Shot
 
 
@@ -556,6 +557,48 @@ def close_crowd_faults(episode) -> list[str]:
     return [fault("G-CROWD-CLOSE", f"shot {s.index}", f"a {s.size} shot carries a crowd", 1, 0)
             for s in episode.shots
             if s.size in CLOSE_SIZES and (getattr(s, "crowd", "") or "").strip()]
+
+
+def orphan_crowd_faults(episode) -> list[str]:
+    """G-CROWD-ORPHAN (Jekyll Kawajiri ep01, 2026-10-18): a setup stages a crowd no shot of
+    it draws -- none is wide/full (G-CROWD's) and none declares extras -- yet the crowd
+    leaked into 14 takes and the ambience.  Disjoint from G-CROWD, so the cures never fight."""
+    out = []
+    for name, setup in episode.setups.items():
+        crowd = (getattr(setup, "crowd", "") or "").strip()
+        own = [s for s in episode.shots if s.setup == name]
+        if crowd and own and not any(s.size in ("wide", "full") or getattr(s, "extras", 0) for s in own):
+            out.append(fault("G-CROWD-ORPHAN", f"setup {name}",
+                             f"stages {crowd[:60]!r} but none of its {len(own)} shots is wide or declares extras",
+                             0, ">= 1 wide or extras shot"))
+    return out
+
+
+LIMB_EDGE = re.compile(
+    r"\b(?:sleeve|cuff|hand|arm|leg|foot|boot)s?\b[^.;]{0,70}?\b(?:reach\w*|enter\w*|com(?:e|es|ing)|poke\w*|"
+    r"thrust\w*|extend\w*|stick\w*)\b[^.;]{0,30}?\bfrom the (?:left|right|top|bottom)(?: (?:left|right))? edge", re.I)
+"""A part of a person that ENTERS from a frame edge (Jekyll ep01 shot 27: 'sleeve reaches in from the RIGHT edge')."""
+BODY_WORD = re.compile(r"\b(?:body|torso|crouch\w*|kneel\w*|knees|shoulders?|seated|sitting|figure)\b", re.I)
+"""A word that says the person the part belongs to is in the cell."""
+LIMB_EXEMPT = ("insert", "extreme_close")
+"""The hand IS the subject there."""
+
+
+def limb_hit(size: str, cell: str) -> str:
+    """The limb phrase entering from an edge with no body in the cell, or ''."""
+    if size in LIMB_EXEMPT or BODY_WORD.search(cell):
+        return ""
+    hit = LIMB_EDGE.search(cell)
+    return hit.group(0) if hit else ""
+
+
+def limb_faults(episode) -> list[str]:
+    """G-LIMB, ADVISORY (Jekyll Kawajiri ep01 shot 27, a floating hand that passed every check):
+    a sleeve, hand, arm or leg entering from an edge, with no body word in the cell.
+    plan_cures.body_clause cures it before the contract; the writer is never asked."""
+    return [fault("G-LIMB", f"shot {s.index}", f"{hit!r} enters from an edge with no body in the cell", 0, "a body word")
+            for s in episode.shots
+            if (hit := limb_hit(s.size, " ".join(str(getattr(s, k, "") or "") for k in ("frame", "at_rest", "motion"))))]
 
 
 # ---- G-STAGE and G-FACE-KIND: a machine or creature shows only as its card -------
@@ -1090,9 +1133,9 @@ def wordless_tail(episode: Episode) -> float:
     return sum(episode.shot_seconds(shot) for shot in after) - spoken
 
 
-PAIR_FLOOR_S = 8.3
-"""What ONE PER TAKE needs of a pair to cut it into two takes (take budget 8.0
-plus the cures' 0.3 margin; plan_cures.TAKE_BUDGET_S)."""
+PAIR_FLOOR_S = _TAKE_BUDGET_S + 0.3
+"""What ONE PER TAKE needs of a pair to cut it into two takes (the take budget,
+episode_takes.BUDGET, plus the cures' 0.3 margin; plan_cures.TAKE_BUDGET_S is the same home)."""
 
 
 def tail_limit(spoken_button: float, wordless_after: int) -> float:

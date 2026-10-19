@@ -102,13 +102,6 @@ def projected(episode, rate: float, voice: bool = True) -> list[dict]:
     return out
 
 
-def packed_shots(episode, rate: float) -> list[tuple[int, ...]]:
-    """Runs of shots the take packer would put into ONE take (ep12 shot 21: a
-    1.7 s reaction packed after a 5.5 s dialogue shot, an internal cut the
-    model had to place).  One shot per take is the rule since episode 4."""
-    return [tuple(run) for run in tk.groups(projected(episode, rate)) if len(run) > 1]
-
-
 def take_lint_gate(book: Path, episode, number: int, rate: float) -> int:
     """G-TAKELINT, HARD: episode_ref_official's REAL lint on take cards
     dry-built from the projection (takes_r2v.dry_faults), each fault remapped
@@ -365,6 +358,12 @@ def main(book_id: str, number: int, plan: str = "plan.json") -> int:
     print("G-CROWD      :", cf or "clean"); hard += len(cf)
     for f in cf:
         print("   ", f[:170])
+    co = plan_gates.orphan_crowd_faults(ep)
+    print("G-CROWD-ORPHAN:", co or "clean"); hard += len(co)
+    for f in co:
+        print("   ", f[:170])
+    for n in plan_gates.limb_faults(ep):          # G-LIMB: advisory, cured before the contract (plan_repair.restored)
+        print("  advisory:", n[:170])
     af = plan_gates.article_faults(ep)
     print("G-ARTICLE    :", len(af) or "clean"); hard += len(af)
     for f in af:

@@ -44,26 +44,14 @@ def test_a_shot_longer_than_a_take_is_reported_with_its_seconds():
     assert long[0][1] > 8.0
 
 
-def test_a_short_shot_that_packs_into_its_neighbours_take_is_named():
-    """ep12 shot 21: a 1.7 s silent reaction packed into T20 with shot 20 (5.5 s),
-    so one take carried an internal cut the model had to place -- the thing
-    one-shot-per-take was written to avoid. The plan check names it first."""
+def test_the_dead_packer_is_gone_and_the_one_per_take_row_reads_the_takes_own_budget():
+    """`packed_shots` called the packer with the legacy 8 s budget (dead code since 5c23230
+    pointed every caller at `episode_takes.budget_for`); the ONE PER TAKE row is the live one."""
     import plan_check
 
-    class Shot:
-        def __init__(self, index, setup, beat, coda):
-            self.index, self.setup, self.beat_s, self.coda_s, self.cuts = index, setup, beat, coda, []
-
-    class Line:
-        def __init__(self, shot, words):
-            self.shot, self.text = shot, " ".join(["w"] * words)
-
-    class Ep:
-        shots = [Shot(20, "canyon", 0.6, 0.0), Shot(21, "canyon", 1.2, 0.0), Shot(22, "canyon", 1.0, 0.3)]
-        lines = [Line(20, 10), Line(22, 12)]
-
-    packed = plan_check.packed_shots(Ep(), rate=2.86)
-    assert packed == [(20, 21)]
+    src = inspect.getsource(plan_check)
+    assert not hasattr(plan_check, "packed_shots")
+    assert "tk.budget_for(ep)" in src and "ONE PER TAKE" in src
 
 
 def test_the_take_lint_runs_on_the_dry_built_cards_not_on_raw_fields():
