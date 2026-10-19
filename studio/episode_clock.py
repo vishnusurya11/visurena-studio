@@ -51,19 +51,28 @@ def path(book: Path, number: int) -> Path:
 
 
 def stamp(book: Path, number: int, stage: str, started: float, ended: float,
-          ok: bool = True, note: str = "", within: str = "", net_of: float = 0.0) -> dict:
+          ok: bool = True, note: str = "", within: str = "", net_of: float = 0.0,
+          device: str = "") -> dict:
     """Record one stage run. Append-only; a retry is another row.
 
     `within` names the stage this run happened INSIDE (the master's upscale runs
     inside assemble, 2026-10-14); the outer row is then stamped `net_of` it, so
-    every reader that sums `seconds` counts that time once."""
+    every reader that sums `seconds` counts that time once.  A row never goes negative
+    (ep01 held -421.1 s): `seconds` is max(0, gross - nested), the rest is `overlap_s`.
+    `t0`/`t1` are the epoch ends; `device` says where it ran (cpu / gpu), blank when unknown."""
+    gross = ended - started
     row = {"stage": stage, "started": datetime.fromtimestamp(started).isoformat(timespec="seconds"),
            "ended": datetime.fromtimestamp(ended).isoformat(timespec="seconds"),
-           "seconds": round(ended - started - net_of, 1), "ok": ok, "note": note}
+           "seconds": round(max(0.0, gross - net_of), 1), "ok": ok, "note": note,
+           "t0": started, "t1": ended}
+    if device:
+        row["device"] = device
     if within:
         row["within"] = within
     if net_of:
         row["net_of_s"] = round(net_of, 1)
+        row["gross_s"] = round(gross, 1)
+        row["overlap_s"] = round(max(0.0, net_of - gross), 1)
     p = path(book, number)
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("a", encoding="utf-8") as f:

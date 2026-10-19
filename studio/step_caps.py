@@ -25,12 +25,17 @@ class Cap:
     wall_s: float
     gate: str = ""
     climbs: int = 1
+    read: str = ""
+    """`step` declares the row has no reader of its own: it is only summed into the step wall."""
+    share_min: float = 0.0
+    """Report-only: the row's priced share of the episode, in minutes (never a wall)."""
 
 
 def _cap(name: str, row: dict) -> Cap:
     return Cap(name=name, step=str(row["step"]), rounds=int(row["rounds"]), per=str(row.get("per", "pass")),
                wall_s=float(row["wall_min"]) * 60, gate=str(row.get("gate", "")),
-               climbs=int(row.get("climbs", 1)))
+               climbs=int(row.get("climbs", 1)), read=str(row.get("read", "")),
+               share_min=float(row.get("share_min", 0.0)))
 
 
 def table(stage: str = STAGE, path: Path = registry.PATH) -> dict[str, Cap]:
@@ -55,6 +60,19 @@ def step_wall_s(step_id: str, stage: str = STAGE) -> float:
     """A step's wall: the sum of its rows' walls, a climb row once per climb; 0 for no row."""
     return sum(c.wall_s * (c.climbs if c.per == "climb" else 1)
                for c in table(stage).values() if c.step == step_id)
+
+
+def family(step_id: str, stage: str = STAGE) -> str:
+    """The model family a step loads (K2): text, image, vl, tts, video or none (unknown: none)."""
+    for entry in registry.steps(stage):
+        if entry["id"] == step_id:
+            return str(entry.get("family", "none"))
+    return "none"
+
+
+def share_min(step_id: str, stage: str = STAGE) -> float:
+    """Report-only: a step's rows' share_min summed; the step wall never reads it."""
+    return sum(c.share_min for c in table(stage).values() if c.step == step_id)
 
 
 def for_gate(gate: str, stage: str = STAGE) -> Cap | None:

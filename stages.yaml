@@ -558,32 +558,34 @@ stages:
     #   climbs   climbs per episode (the plan's defer-and-re-author), persisted
     # The 6 h episode clock (studio/run_budget) stays the outer wall.
     caps:
-      bind:         { step: "01", rounds: 1, per: pass,    wall_min: 2 }
+      bind:         { step: "01", rounds: 1, per: pass,    wall_min: 2, read: step }
       plan:         { step: "02", rounds: 3, per: climb,   wall_min: 30, gate: PLAN, climbs: 2 }
       places:       { step: "03", rounds: 3, per: draw,    wall_min: 15 }
+      lines:        { step: "04", rounds: 1, per: episode, wall_min: 10, read: step }
       voice:        { step: "04", rounds: 2, per: episode, wall_min: 30 }
-      timeline:     { step: "05", rounds: 1, per: pass,    wall_min: 2 }
-      prompts:      { step: "06", rounds: 1, per: pass,    wall_min: 2 }
-      grids:        { step: "07", rounds: 1, per: grid,    wall_min: 30 }
-      panel_checks: { step: "08", rounds: 1, per: round,   wall_min: 30 }
+      timeline:     { step: "05", rounds: 1, per: pass,    wall_min: 2, read: step }
+      prompts:      { step: "06", rounds: 1, per: pass,    wall_min: 2, read: step }
+      grids:        { step: "07", rounds: 1, per: grid,    wall_min: 30, read: step }
+      panel_checks: { step: "08", rounds: 1, per: round,   wall_min: 30, read: step }
       regrid:       { step: "08", rounds: 2, per: episode, wall_min: 20, gate: EYE_PANELS }
       takes:        { step: "09", rounds: 1, per: pass,    wall_min: 120 }
-      take_dq:      { step: "09", rounds: 1, per: round,   wall_min: 30 }
-      take_content: { step: "09", rounds: 1, per: round,   wall_min: 20 }
-      take_eye:     { step: "09", rounds: 1, per: round,   wall_min: 10 }
-      strip:        { step: "09", rounds: 1, per: round,   wall_min: 2 }
+      take_dq:      { step: "09", rounds: 1, per: round,   wall_min: 30, read: step }
+      take_content: { step: "09", rounds: 1, per: round,   wall_min: 20, read: step }
+      take_eye:     { step: "09", rounds: 1, per: round,   wall_min: 10, read: step }
+      strip:        { step: "09", rounds: 1, per: round,   wall_min: 2, read: step }
       retakes:      { step: "09", rounds: 2, per: episode, wall_min: 45, gate: EYE_TAKES }
       face_refine:  { step: "09", rounds: 1, per: take,    wall_min: 15 }
-      assemble:     { step: "10", rounds: 1, per: pass,    wall_min: 15 }
-      upscale:      { step: "10", rounds: 1, per: pass,    wall_min: 15 }
-      qc:           { step: "11", rounds: 1, per: episode, wall_min: 30 }
+      assemble:     { step: "10", rounds: 1, per: pass,    wall_min: 15, read: step }
+      upscale:      { step: "10", rounds: 1, per: pass,    wall_min: 15, read: step }
+      qc:           { step: "11", rounds: 1, per: episode, wall_min: 30, read: step }
       master_eye:   { step: "11", rounds: 1, per: episode, wall_min: 30, gate: MASTER }
-      deliver:      { step: "12", rounds: 1, per: pass,    wall_min: 2 }
-      publish:      { step: "13", rounds: 1, per: pass,    wall_min: 10 }
+      deliver:      { step: "12", rounds: 1, per: pass,    wall_min: 2, read: step }
+      publish:      { step: "13", rounds: 1, per: pass,    wall_min: 10, read: step }
     steps:
       - id: "01"
         name: bind
         script: step_01_bind                      # WRAP scripts/refs/cast_rows.py (chapter stamp)
+        family: none                       # the model family the step loads (K2): text image vl tts video none
         in:
           - analysis/scenes.json
           - refs/refs.json
@@ -606,6 +608,7 @@ stages:
       - id: "02"
         name: plan
         script: step_02_plan                      # WRAP plan_check; the writer is new
+        family: text                       # the model family the step loads (K2): text image vl tts video none
         in:
           - analysis/scenes.json
           - analysis/characters/*.json
@@ -656,6 +659,7 @@ stages:
       - id: "03"
         name: places
         script: step_03_places                    # WRAP scripts/refs/places.py
+        family: image                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/plan.json
           - analysis/locations/*.json
@@ -711,6 +715,7 @@ stages:
       - id: "04"
         name: record
         script: step_04_record                    # WRAP say_lines + speaker_check
+        family: tts                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/plan.json
           - cast/*/voice/design.wav
@@ -738,6 +743,7 @@ stages:
       - id: "05"
         name: timeline
         script: step_05_timeline                  # WRAP respot + timeline
+        family: none                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/plan.json
           - episodes/{unit}/audio/lines/lines.json
@@ -761,6 +767,7 @@ stages:
       - id: "06"
         name: prompts
         script: step_06_prompts                   # WRAP takes_r2v --prompts + no_last_frame
+        family: none                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/plan.json
           - episodes/{unit}/audio/lines/lines.json
@@ -775,6 +782,7 @@ stages:
       - id: "07"
         name: board
         script: step_07_board                     # WRAP grids
+        family: image                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/plan.json
           - refs/characters/*/sheet.png
@@ -803,6 +811,7 @@ stages:
       - id: "08"
         name: panels
         script: step_08_panels                    # WRAP panels + panel_check + panel_content_check
+        family: vl                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/plan.json
           - episodes/{unit}/storyboard/grids/*.png
@@ -854,6 +863,7 @@ stages:
       - id: "09"
         name: shoot
         script: step_09_shoot                     # WRAP takes_r2v render, take_dq, take_content_check, take_strip
+        family: video                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/storyboard/shot_*.png
           - episodes/{unit}/storyboard/eye_*.json
@@ -918,6 +928,7 @@ stages:
       - id: "10"
         name: edit
         script: step_10_edit                      # WRAP series_title + assemble (+ trailer metre for the bed)
+        family: none                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/takes/r2v/T??.mp4
           - episodes/{unit}/takes/r2v/eye_*.json
@@ -968,6 +979,7 @@ stages:
       - id: "11"
         name: qc
         script: step_11_qc                        # WRAP qc + eye_review + dossier
+        family: vl                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/cut/master_r2v.mp4
           - episodes/{unit}/plan.json
@@ -1014,6 +1026,7 @@ stages:
       - id: "12"
         name: deliver
         script: step_12_deliver                   # MISSING (trailer step 10 is the model, without the external subprocess)
+        family: none                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/cut/master_r2v.mp4
           - episodes/{unit}/qc_r2v.json
@@ -1032,6 +1045,7 @@ stages:
       - id: "13"
         name: publish
         script: step_13_publish
+        family: none                       # the model family the step loads (K2): text image vl tts video none
         in:
           - episodes/{unit}/manifest.json
           - episodes/{unit}/cut/master_r2v.mp4

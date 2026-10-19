@@ -197,3 +197,45 @@ def running(home, run_id: str, every: float = BEAT_S):
         heart.stop.set()
         heart.thread.join(timeout=5)
         close_run(home)
+
+
+def _merged(pairs: list[tuple[float, float]]) -> list[tuple[float, float]]:
+    """The spans with overlaps and nests folded together, in time order."""
+    out: list[list[float]] = []
+    for start, end in sorted(pairs):
+        if out and start <= out[-1][1]:
+            out[-1][1] = max(out[-1][1], end)
+        else:
+            out.append([start, end])
+    return [(a, b) for a, b in out]
+
+
+def _drive_events(home) -> list[tuple[float, str]]:
+    """(epoch, word) of drive.jsonl's `run` rows -- the outcome a launch ended with -- else its `end`."""
+    path, out = Path(home) / "drive.jsonl", []
+    if not path.exists():
+        return out
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            row = json.loads(line)
+            at = datetime.fromisoformat(row["ts"]).timestamp()
+        except (ValueError, KeyError, TypeError):
+            continue
+        word = row.get("outcome") if row.get("event") == "run" else None
+        if word:
+            out.append((at, f"{word} ({row['error']})" if row.get("error") else str(word)))
+    return out
+
+
+def _reason(events: list[tuple[float, str]], start: float, slack: float = 120.0) -> str:
+    """The outcome the drive wrote last at or just after the gap opened."""
+    near = [(at, word) for at, word in events if start - slack <= at <= start + slack]
+    return min(near, key=lambda e: abs(e[0] - start))[1] if near else "unknown"
+
+
+def dead_gaps(home) -> list[dict]:
+    """Contract K4: the gaps between runs, [{start, end, seconds, reason}], reason from drive.jsonl."""
+    merged, events = _merged(spans(home)), _drive_events(home)
+    return [{"start": a_end, "end": b_start, "seconds": round(b_start - a_end, 1),
+             "reason": _reason(events, a_end)}
+            for (_, a_end), (b_start, _) in zip(merged, merged[1:]) if b_start > a_end]

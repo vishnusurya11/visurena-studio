@@ -149,6 +149,11 @@ class Budget:
         total_left = self.ceiling - (now - self.t0)
         return min(self.allowance(step) - in_step, total_left)
 
+    def deadline(self, step: str, granularity: float = 0.0) -> float:
+        """The clock reading at which `step` should stop starting calls: what it may still use,
+        less the longest call in flight that is never cut (the measured granularity)."""
+        return self.clock() + max(0.0, self.remaining(step) - granularity)
+
     def can_afford(self, step: str, seconds: float) -> bool:
         return self.remaining(step) >= seconds
 
@@ -211,3 +216,35 @@ def spent_before(home) -> float:
     `Budget.charge` is charged with at context creation."""
     from studio import run_clock
     return run_clock.spent(home)
+
+
+DARK_EPISODES_REQUIRED = 2
+"""The budget only watches (writes `would_cut`) until this many episodes ran dark (P12, owner 2026-10-19)."""
+DARK_LOG = "budget.jsonl"
+
+
+def cuts_allowed(dark_episodes: int) -> bool:
+    return dark_episodes >= DARK_EPISODES_REQUIRED
+
+
+def dark_row(budget: "Budget", step: str, seconds: float) -> dict:
+    """What the budget would have said of a call of `seconds`: nothing is cut by it."""
+    return {"step": step, "seconds": round(seconds, 1), "remaining": round(budget.remaining(step), 1),
+            "would_cut": not budget.can_afford(step, seconds)}
+
+
+def append_dark(home, row: dict) -> None:
+    import json
+    from pathlib import Path
+    path = Path(home) / DARK_LOG
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(row) + "\n")
+
+
+def read_dark(home) -> list[dict]:
+    import json
+    from pathlib import Path
+    path = Path(home) / DARK_LOG
+    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+    return [json.loads(l) for l in lines if l.strip()]

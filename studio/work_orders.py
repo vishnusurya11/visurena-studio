@@ -235,3 +235,40 @@ def clear_redo(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str, s
         return
     rest = sorted(steps - {step_id})
     db.upsert_work_order(conn, codex_id, stage, unit, redo=json.dumps(rest) if rest else None)
+
+
+TAKEN_FILE = "orders_taken.json"
+"""The unit's receipt of redo orders taken from the orders table: {step_id: order_id}."""
+
+
+def _taken(home) -> dict:
+    path = Path(home) / TAKEN_FILE
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def note_taken(home, step_id: str, order_id: int) -> None:
+    """A redo order the runner took, written beside the episode (the only proof of an order)."""
+    path = Path(home) / TAKEN_FILE
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({**_taken(home), step_id: int(order_id)}), encoding="utf-8")
+
+
+def recorded(home, step_id: str) -> bool:
+    """Contract K12: True only when a taken redo order row names the step; a bare flag is no order."""
+    return step_id in _taken(home)
+
+
+def clear_taken(home, step_id: str) -> None:
+    """The redone step completed: its allowance is spent."""
+    left = {k: v for k, v in _taken(home).items() if k != step_id}
+    (Path(home) / TAKEN_FILE).write_text(json.dumps(left), encoding="utf-8")
+
+
+def note_redos_taken(home, rows) -> None:
+    """Every taken `redo` row onto the receipt (home None: nothing to write)."""
+    for row in rows:
+        if row["kind"] == "redo" and row["step_id"] and home is not None:
+            note_taken(home, row["step_id"], row["id"])
