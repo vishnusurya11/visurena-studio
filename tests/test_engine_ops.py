@@ -106,10 +106,10 @@ def test_restart_launches_from_the_portable_folder_then_waits_for_the_engine():
     def wait():
         waited.append(True)
         return True
-    assert eo.restart(launch=lambda cmd, cwd: launched.append((cmd, cwd)), wait=wait, root=Path("E:/p"))
+    assert eo.restart(launch=lambda cmd, cwd: launched.append((cmd, cwd)), wait=wait, root=Path("E:/p"), rows=lambda: [])
     assert len(launched) == 1 and launched[0][1] == Path("E:/p") and launched[0][0][1:3] == ["-s", "ComfyUI/main.py"]
     assert waited == [True]
-    assert not eo.restart(launch=lambda cmd, cwd: None, wait=lambda: False, root=Path("E:/p"))
+    assert not eo.restart(launch=lambda cmd, cwd: None, wait=lambda: False, root=Path("E:/p"), rows=lambda: [])
 
 
 def test_wait_alive_polls_until_system_stats_answers_or_time_runs_out():

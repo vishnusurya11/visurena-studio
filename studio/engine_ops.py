@@ -169,9 +169,19 @@ def wait_alive(base_url: str = HOST, seconds: float = READY_SECONDS, poll: float
         sleep(poll)
 
 
+def _live_rows() -> list[ProcInfo]:
+    from studio.command_center.procs import list_processes
+    return list_processes()
+
+
 def restart(launch: Callable[[list[str], Path], None] = _launch, wait: Callable[[], bool] = wait_alive,
-            root: Path | str | None = None) -> bool:
-    """Relaunch the engine from its folder and wait for it; True when it answers."""
+            root: Path | str | None = None, rows: Callable[[], list[ProcInfo]] = _live_rows,
+            kill: Callable[[int], None] = _terminate) -> bool:
+    """An engine process already starting is waited on, never stacked (2026-10-18: three
+    main.py on one HDD); one that never answers is killed, then ONE launch is waited on."""
+    if (live := engine_rows(rows())) and wait():
+        return True
+    kill_engine(live, kill)
     cmd, cwd = engine_command(root)
     launch(cmd, cwd)
     return wait()
