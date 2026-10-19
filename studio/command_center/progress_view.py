@@ -15,7 +15,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from studio import eta, progress as prog, registry, run_fold
+from studio import eta, git_ahead, progress as prog, registry, run_fold
 from studio.command_center import legacy_progress as lp
 from studio.command_center import loops, workgrid
 from studio.command_center import library_paths, procs, unit_view, vitals
@@ -310,7 +310,7 @@ def with_history(steps: list[dict], folded: dict[str, dict], kept: set[str]) -> 
     out = []
     for s in steps:
         t = folded.get(s["id"])
-        if s.get("state") != "waiting" or not t:
+        if s.get("state") != "waiting" or not t or t["secs"] <= 0:
             out.append(s)
             continue
         redo = bool(s["will_run"]) if s.get("will_run") is not None else s["id"] not in kept
@@ -420,18 +420,7 @@ def running_sha(home: Path) -> str | None:
     return starts[-1].get("sha") if starts else None
 
 
-def commits_after(sha: str) -> int:
-    """Commits on HEAD after `sha` (git rev-list --count); 0 when git cannot say."""
-    import subprocess
-    try:
-        out = subprocess.run(["git", "rev-list", "--count", f"{sha}..HEAD"], cwd=Path(__file__).resolve().parents[2],
-                             capture_output=True, text=True, timeout=5, check=True).stdout
-        return int(out.strip() or 0)
-    except (OSError, ValueError, subprocess.SubprocessError):
-        return 0
-
-
-def fixes_waiting(home: Path, now: float, count=commits_after) -> int:
+def fixes_waiting(home: Path, now: float, count=git_ahead.commits_after) -> int:
     """Fixes committed since the running sha, held a minute per sha."""
     sha = running_sha(home)
     if not sha:

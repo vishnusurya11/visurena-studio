@@ -111,3 +111,21 @@ def test_the_whole_card_keeps_history_for_a_step_the_newest_run_never_touched(bo
     assert "waiting" not in {got[i]["state"] for i in ("03", "07", "08")}
     assert all(got[i]["fin"] for i in ("03", "07", "08"))
     assert "03" in got and got["01"]["state"] != "earlier"
+
+
+def test_a_marker_with_no_work_is_not_history():
+    """ep01 totals() returns steps 12 and 13 with 0 s: a never-run step reads waiting."""
+    folded = {"12": {"secs": 0.0, "end": 1.0, "n": 1}, "08": {"secs": 2340.0, "end": 2.0, "n": 1}}
+    got = _by(pv.with_history(_rail("08", "12"), folded, kept=set()))
+    assert got["12"]["state"] == "waiting" and not got["12"].get("fin")
+    assert got["08"]["state"] == "earlier"
+
+
+def test_the_ep01_ledger_gives_no_history_to_steps_12_and_13():
+    got = _by(pv.with_history(_rail("12", "13"), _folded(), kept=set()))
+    assert got["12"]["state"] == "waiting" and got["13"]["state"] == "waiting"
+
+
+def test_the_web_package_names_no_subprocess():
+    text = Path(pv.__file__).read_text(encoding="utf-8")
+    assert "subprocess" not in text
