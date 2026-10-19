@@ -456,6 +456,17 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
   deferred leak) run only when no render is queued AND the CPU lane is idle -- never
   between renders, one VL load; then the strip, the eye, round 2. The CPU rows are
   stamped `within: "takes"` so the clock sums the wall once.
+- **GPU when idle, CPU when rendering** (owner 2026-10-18; `studio/compute_device.py`). Every
+  heavy NON-render job asks `device_for(job, need_gb)`: "cuda" only when the ComfyUI queue is
+  empty twice 2 s apart, no GPU claim of ours is live (`claim()`: the av3 master pass, the
+  whisper worker) and `need_gb` is free on nvidia-smi after a POST /free sent only on an empty
+  queue; else "cpu", today's path byte for byte. Any probe failure is "cpu". Every decision is
+  a `DEVICE <job> -> <device>: <reason>` line and a row of `library/.device/decisions.jsonl`.
+  `VISURENA_DEVICE=cpu` is the kill switch. Wired: whisper (`voice_qc.any_transcriber` ->
+  `studio/routed_whisper`: a worker under ComfyUI's embedded python, a render arriving mid-batch
+  closes it and the rest goes to the CPU) and the master encode (`studio/video_encoder`: NVENC
+  p7 cq = crf + 5 on cuda, x264 on cpu). The VL reads already run on ComfyUI (GPU); facenet and
+  EasyOCR are still CPU (see LESSONS 2026-10-18).
 - **Renders before ComfyUI checks** (owner, 2026-09-30) still holds: the H3 stack evicts
   the judge, so a ComfyUI read between renders pays two cold loads. The CPU checks are
   not ComfyUI reads.

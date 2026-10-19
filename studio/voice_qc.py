@@ -458,9 +458,17 @@ def _texts(comfy, workflow: str, values: dict) -> list[str]:
     return comfy.texts_of(record)
 
 
-def any_transcriber() -> Callable[[Path], str]:
-    """Local whisper when importable, ComfyUI's otherwise."""
+def cpu_transcriber() -> Callable[[Path], str]:
+    """Local whisper when importable, ComfyUI's otherwise: the ear before the router."""
     try:
         return transcriber()
     except NoTranscriber:
         return comfy_transcriber()
+
+
+def any_transcriber() -> Callable[[Path], str]:
+    """The ear the device router picks (owner 2026-10-18: GPU when idle, CPU when
+    rendering): the CPU ear above, unchanged, or the GPU worker with it behind
+    (studio/routed_whisper)."""
+    from studio import routed_whisper
+    return routed_whisper.routed(cpu_transcriber)

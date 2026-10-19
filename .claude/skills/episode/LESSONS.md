@@ -1475,3 +1475,26 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
 - **A setup's crowd is a shot's, not the setup's.** The night door's ring of townsfolk was pasted into every
   non-insert take of the setup, extras 0 or not; Hyde alone at 3 a.m. got a crowd walking in (owner
   2026-10-18: the setup crowd rides only a shot with extras > 0).
+
+## GPU when idle, CPU when rendering (owner 2026-10-18; the device router)
+
+- **Measure where a check's minutes go before moving it.** The step-08 panel eye (445-1076 s a pass)
+  and take_content (1,273 s) read through ComfyUI's Qwen3_VQA node: the VL model is ALREADY a GPU job,
+  and its wall is the queue behind renders plus a cold load. What runs on the CPU in the repo venv is
+  facenet (MTCNN + InceptionResnetV1, the panel eye's faces and take_eye's clones, ~100-150 s a pass),
+  EasyOCR (`gpu=False`), whisper and the x264 encodes. Those are what the router can move.
+- **Whisper, measured on Jekyll ep01's 22 line clips (scratch copies, idle GPU, 22:14 PDT):** CPU
+  large-v3-turbo fp32 in the repo venv 7.7 s load + 498.2 s; the GPU worker under the embedded python
+  fp16 11.2 s load + 8.9 s. All 22 transcripts identical (WER apart 0.00); the pair is the fixture
+  `tests/fixtures/compute_device/whisper_cpu_vs_gpu.json`. The CPU number was taken beside another
+  project's jobs, so it is an upper bound; the ratio is still ~50x.
+- **The master encode, measured on a Jekyll ep01 take (96 frames lanczos to 3072):** x264 slow crf 14
+  7.6-8.0 s, 22.1 MB, SSIM 0.99691; NVENC p7 hq vbr fullres two-pass cq 14 0.99800 at 48.7 MB, cq 17
+  0.99758 / 34.8 MB / 3.9 s, cq 19 0.99714 / 27.6 MB / 4.1 s. cq 19 matches crf 14's SSIM at 1.25x the
+  bytes, so `CQ_OFFSET = 5`. The av3 pass is encode-bound, so the encode is where its minutes are.
+- **The embedded python and the venv are both CPython 3.12** and the venv carries facenet_pytorch and
+  easyocr: a worker under the embedded python that APPENDS the venv's site-packages (embedded torch
+  first) is the route to facenet/EasyOCR on CUDA without installing anything. Not built yet.
+- **An uncommitted edit is live for every subprocess a running drive starts** (assemble.py, qc.py and
+  the av3 worker are fresh processes). Write the wiring as patch scripts and apply it once the run
+  that would load it is gone, or behind a default that keeps today's path.
