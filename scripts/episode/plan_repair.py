@@ -338,9 +338,8 @@ def micro_targets(doc: dict, rate: float) -> list[tuple[int, tuple]]:
     """(shot, hole) for every residual projected hole an insertion can bridge,
     then for every ONE PER TAKE pair no hole headroom lets split."""
     from studio import speech_gap
-    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
     out = []
-    for hole in speech_gap.over_wall(pc._projection(doc, rate), wall):
+    for hole in speech_gap.holes(pc._projection(doc, rate), speech_gap.HOLE_SLACK_S):
         shot = pc.insertion_shot(doc, hole, rate)
         if shot is not None:
             out.append((shot, hole))

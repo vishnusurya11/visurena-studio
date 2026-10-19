@@ -504,8 +504,8 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
   own claim; `submit` waits at most 30 s for a foreign claim). **Free at a model-family boundary**
   (`comfy.free_on_family`, K10), once per boundary, never per read: `step_runner` before a GPU step
   whose `family:` differs from the last, step 03 once before its VL reads (D19). Under
-  `comfy.row_deadline` a text call's timeout is min(its own, the row's remaining + 60 s); no
-  runner wraps a row in it yet (open).
+  `comfy.row_deadline` a text call's timeout is min(its own, the row's remaining + 60 s);
+  `step_runner` wraps every step that has wall left in it (`step_wall.deadline_of`).
 - **Renders before ComfyUI checks** (owner, 2026-09-30) still holds: the H3 stack evicts
   the judge, so a ComfyUI read between renders pays two cold loads. The CPU checks are
   not ComfyUI reads.
@@ -613,7 +613,9 @@ The counters (code as of the Jekyll Kawajiri ep01 retro, 2026-10-19):
 
 The report reads **charged | wall | dead** per step: `step_wall.ledger` / `charged` for the
 first two, `run_clock.dead_gaps` (K4) for the gaps between runs with the reason the drive row
-gives. A share used as a wall fires on normal runs, so shares stay rung prices (D11).
+gives; `drive.py` prints it at the end (`gpu_ledger.finish_report`: the line, then busy / claimed /
+idle minutes per step), and the runner writes a dark `budget.jsonl` row per step. A manual pause then
+resume is dead time: the relaunch it causes is not counted by `autopilot.step_guard`. A share used as a wall fires on normal runs, so shares stay rung prices (D11).
 
 ## The clock, SAFETY and the boundary (C3_verdict, 2026-10-11; decided on the owner's behalf, D1-D12)
 

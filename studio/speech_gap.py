@@ -24,6 +24,16 @@ the narrator's rate error never enters a hole.  0.5 s is 10x the observed
 error and aligns with the holds cure's existing HOLE_WALL_S - 0.5 target."""
 
 
+HOLE_WALL_S = MAX_GAP_S - HOLE_MARGIN_S
+"""The ONE hole ruler: the wall the plan's cures AIM at (5.5 s).  The plan battery, the cures and
+step 05's hold cure all read it; none subtracts the margin itself."""
+
+HOLE_SLACK_S = 0.05
+"""How far over HOLE_WALL_S the G-HOLE gate lets a hole stand: the projected-vs-measured error
+(0.04 s on ep17/ep18).  Jekyll ep01: the hold cure trimmed to 5.5 and the re-time's frame rounding
+landed 5.53, which the gate refused -- the cure's own work, 0.03 s over a margin that is 0.5 s wide."""
+
+
 def gaps(lines: list[dict], until: float) -> list[tuple[float, float]]:
     """(start, end) of every hole between the placed lines, the tail included."""
     ordered = sorted(lines, key=lambda line: line["at"])
@@ -55,6 +65,11 @@ def over_wall(placed: dict, wall: float) -> list[tuple[float, float, list[int]]]
                  if s["t_start"] < end and s["t_end"] > start]
         out.append((start, end, shots))
     return out
+
+
+def holes(placed: dict, slack: float = 0.0) -> list[tuple[float, float, list[int]]]:
+    """Every hole over the one ruler: HOLE_WALL_S for a cure's aim, plus HOLE_SLACK_S for the gate."""
+    return over_wall(placed, HOLE_WALL_S + slack)
 
 
 def refusal(placed: dict) -> str | None:

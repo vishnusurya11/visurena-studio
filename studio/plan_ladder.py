@@ -390,9 +390,18 @@ class Desk:
         # stays inside the try-less path: a scrub bug surfaces as write_plan's
         # loud SystemExit, never a silent skip.  Then F11: the rest of the
         # mechanical table, which (unlike the scrub) never raises.
-        doc = plan_cures.ghost_limbs(episode.model_dump(), self._names())
+        doc = self.limb_cured(plan_cures.ghost_limbs(episode.model_dump(), self._names()))
         episode_home.write_plan(self.plan, doc)
         mechanical_cures(self.plan, Path(self.ctx.book_dir), self.ctx.number, say=self._say)
+
+    def limb_cured(self, doc: dict) -> dict:
+        """G-LIMB's free cure on EVERY fresh draft (it ran only on a restore: the gate is advisory, so no
+        battery row ever routed a draft to it); a cure bug keeps the draft as written."""
+        try:
+            return plan_cures.body_clause(json.loads(json.dumps(doc)))
+        except Exception as why:                  # noqa: BLE001 -- the draft stands as written
+            self._say(f"G-LIMB cure skipped, the writer's draft kept: {str(why)[:160]}")
+            return doc
 
     def first_writer_call(self) -> None:
         """The entry's first writer call (a draft or a rung) spends its climb, once (D3)."""
@@ -442,9 +451,13 @@ class Desk:
         write_json_atomic(self.climb_path(), {
             "best": best, "drafts": [{"doc": doc, "verdict": v.model_dump() if v else None} for doc, v in self.drafts],
             "refusals": self.refusals, "rungs_done": self.rungs_done, "escalated": self.agent is not None,
-            "began": getattr(self, "began", None),
+            "began": getattr(self, "began", None), "prev_keys": self.baseline(),
             "plan_sha8": plan_verdict.plan_sha8(self.plan) if self.plan.exists() else "",
             "code_sha8": code_sha8()})
+
+    def baseline(self) -> dict | None:
+        """The stuck rule's baseline (the round before) as the checkpoint keeps it."""
+        return None if self.prev_keys is None else {"battery": self.prev_keys[0], "keys": dict(self.prev_keys[1])}
 
     def retire_climb(self) -> None:
         self.climb_path().unlink(missing_ok=True)
@@ -460,6 +473,8 @@ class Desk:
         doc = json.loads(path.read_text(encoding="utf-8"))
         self.refusals, self.rungs_done = list(doc.get("refusals") or []), int(doc.get("rungs_done") or 0)
         self.began = doc.get("began")             # an older checkpoint has none: the wall starts now
+        base = doc.get("prev_keys")               # an older checkpoint has none: the first round sets it
+        self.prev_keys = (bool(base["battery"]), dict(base["keys"])) if base else None
         if doc.get("escalated"):
             self.escalate()
         same = bool(doc.get("code_sha8")) and doc.get("code_sha8") == code_sha8()
@@ -527,12 +542,12 @@ class Desk:
 
     def moved_no_row(self, verdict: Verdict) -> bool:
         """The round just judged shows no more than the round before: every id was there and the count
-        fell by less than 2.  Battery rows are weighed against battery rows, a critic's against a critic's."""
+        did not fall (a fall of one row is progress).  Battery rows are weighed against battery rows, a critic's against a critic's."""
         keys, before = (is_battery(verdict), row_keys(verdict)), self.prev_keys
         self.prev_keys = keys
         if before is None or before[0] != keys[0] or not keys[1]:
             return False
-        return set(keys[1]) <= set(before[1]) and sum(before[1].values()) - sum(keys[1].values()) < 2
+        return set(keys[1]) <= set(before[1]) and sum(before[1].values()) - sum(keys[1].values()) < 1
 
     def terminal(self, verdict: Verdict) -> Verdict:
         """By cause: no draft ever passed the battery -> defer; else the best

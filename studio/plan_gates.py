@@ -1907,11 +1907,10 @@ def hole_faults(episode: Episode, rate: float) -> list[str]:
     speech' are load-bearing -- the cure table routes them to the holds cure.
     ep18 shipped a plan projecting a 12.5 s hole only timeline.py could refuse."""
     from studio import speech_gap
-    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
     return [fault("G-HOLE", f"shots {ids[0]}-{ids[-1]}" if ids else "plan",
                   f"projected hole in speech from {start:.2f} s",
-                  round(end - start, 2), round(wall, 2))
-            for start, end, ids in speech_gap.over_wall(projected_place(episode, rate), wall)]
+                  round(end - start, 2), round(speech_gap.HOLE_WALL_S, 2))
+            for start, end, ids in speech_gap.holes(projected_place(episode, rate), speech_gap.HOLE_SLACK_S)]
 
 
 def advisories(episode: Episode, earlier_lines: list[str] | None = None, rate: float | None = None) -> list[str]:

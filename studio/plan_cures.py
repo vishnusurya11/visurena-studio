@@ -409,10 +409,10 @@ def _close_projected_holes(doc: dict, rate: float) -> dict:
     passes, each re-measuring (replaces the approximate step 3b that missed
     beat_s, the 2xHANDLE seam, and voiced-to-voiced holes)."""
     from studio import speech_gap
-    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
+    wall = speech_gap.HOLE_WALL_S
     floors = _floors(doc)
     for _ in range(8):
-        holes = speech_gap.over_wall(_projection(doc, rate), wall)
+        holes = speech_gap.holes(_projection(doc, rate))
         if not sum(_shave(_hole_slots(doc, ids), (end - start) - wall, floors)
                    for start, end, ids in holes):
             break
@@ -428,7 +428,7 @@ def _headroom(doc: dict, rate: float, shot_index: int) -> float:
     shot = next((s for s in placed["shots"] if s["index"] == shot_index), None)
     if shot is None:
         return 0.0
-    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
+    wall = speech_gap.HOLE_WALL_S
     t = shot["t_end"] - 1e-6
     for a, b in speech_gap.gaps(placed["lines"], placed.get("duration_s", 0.0)):
         if a <= t < b:
@@ -734,10 +734,10 @@ def trim_measured_holes(doc: dict, placed: dict) -> int:
     hole (the margin below the 6.0 wall gives the once-only re-time headroom),
     respects every floor.  0 shaved = nothing trimmable: the step refuses."""
     from studio import speech_gap
-    wall = speech_gap.MAX_GAP_S - speech_gap.HOLE_MARGIN_S
+    wall = speech_gap.HOLE_WALL_S
     floors = _floors(doc)
     return sum(_shave(_hole_slots(doc, ids), (end - start) - wall, floors)
-               for start, end, ids in speech_gap.over_wall(placed, wall))
+               for start, end, ids in speech_gap.holes(placed))
 
 
 RUNTIME_MARGIN_S = 0.5
