@@ -91,7 +91,7 @@ def test_the_resume_edits_the_best_draft_with_every_refusal(ctx, monkeypatch):
     with pytest.raises(Deferred):
         step.run(ctx)
     assert writer.previous[0]["title"] == "A", "the resume edits the best draft, not the last"
-    assert set(LINES["A"] + LINES["B"]) <= set(writer.refusals[0])
+    assert writer.refusals[0] == LINES["A"], "the best draft's CURRENT rows, not the climb's history (P01)"
     assert len(writer.previous) == 2, "one improve left, then model_tier: the done rung is not re-run"
 
 

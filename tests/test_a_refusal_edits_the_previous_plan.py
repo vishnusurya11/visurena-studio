@@ -134,7 +134,7 @@ def test_a_deferred_draft_is_resumed_under_its_own_refusals_by_the_reasoner(tmp_
     desk.brief = {}
     assert desk.resume() is True
     assert writer.previous == [canned_plan(3)]
-    assert writer.refusals == [["G-LIGHT setup 'room': no light direction", "VERDICT      : REFUSED"]]
+    assert writer.refusals == [["G-LIGHT setup 'room': no light direction"]]       # the header is no row (P01)
     assert _tier(writer.agents[0]) == plan_ladder.MODEL_TIER_NAME
     assert plan.exists()
 

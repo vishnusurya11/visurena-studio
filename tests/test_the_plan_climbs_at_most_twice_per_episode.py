@@ -105,3 +105,69 @@ def test_a_climb_resumed_from_its_checkpoint_is_not_a_new_climb(tmp_path):
     s02.climb_ladder(ctx, resumed)
     assert step_attempts.count(tmp_path, s02.CLIMBS) == 1
     assert resumed.battery_terminal == plan_ladder.DEFER
+
+
+# ---- a climb is spent at the entry's first writer call (D3, Jekyll ep01 Kawajiri 2026-10-19) ----
+
+FIX = Path(__file__).parent / "fixtures" / "ep01_replay" / "P01"
+
+
+def entered(home: Path, writes: bool) -> plan_ladder.Desk:
+    """One entry of step 02: capture the climb number, then (maybe) the first writer call."""
+    ctx, d = Ctx(home), desk(home)
+    s02.enter_climb(ctx, d)
+    if writes:
+        d.first_writer_call()
+    return d
+
+
+def test_an_entry_with_no_writer_call_leaves_the_count_unchanged(tmp_path):
+    d = entered(tmp_path, writes=False)
+    s02.climb_ladder(Ctx(tmp_path), d)
+    assert step_attempts.count(tmp_path, s02.CLIMBS) == 0
+
+
+def test_a_first_draft_entry_runs_as_climb_one_with_a_defer_terminal(tmp_path):
+    d = entered(tmp_path, writes=True)             # the first draft was the writer call that spent it
+    assert step_attempts.count(tmp_path, s02.CLIMBS) == 1
+    assert sum(r.tries for r in s02.climb_ladder(Ctx(tmp_path), d).rungs) == 3
+    assert d.climb == 1 and d.battery_terminal == plan_ladder.DEFER
+    assert step_attempts.count(tmp_path, s02.CLIMBS) == 1
+
+
+def test_the_climb_is_spent_once_per_entry_however_many_rounds_write(tmp_path):
+    d = entered(tmp_path, writes=True)
+    d.first_writer_call()
+    d.first_writer_call()
+    assert step_attempts.count(tmp_path, s02.CLIMBS) == 1
+
+
+def test_a_resumed_entry_is_the_climb_already_counted(tmp_path):
+    entered(tmp_path, writes=True)
+    resumed = desk(tmp_path)
+    resumed.rungs_done = 1
+    s02.enter_climb(Ctx(tmp_path), resumed)
+    resumed.first_writer_call()
+    assert resumed.climb == 1 and step_attempts.count(tmp_path, s02.CLIMBS) == 1
+
+
+def test_the_second_entry_that_writes_is_climb_two_and_the_last(tmp_path):
+    entered(tmp_path, writes=True)
+    second = entered(tmp_path, writes=True)
+    s02.climb_ladder(Ctx(tmp_path), second)
+    assert second.climb == 2 and second.battery_terminal == plan_ladder.KEEP_BEST
+    third = entered(tmp_path, writes=False)         # an entry past the cap that writes nothing
+    assert s02.climb_ladder(Ctx(tmp_path), third).rungs == []
+    assert step_attempts.count(tmp_path, s02.CLIMBS) == 2
+
+
+def test_the_ep01_entries_replay_to_the_writer_call_count(tmp_path):
+    """attempts.json read plan.climbs = 3 for four step_02 entries; two of them called a writer."""
+    assert json.loads((FIX / "attempts.json").read_text(encoding="utf-8"))["plan.climbs"]["rounds"] == 3
+    entries = [json.loads(line) for line in (FIX / "timing_plan.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [round(e["seconds"]) for e in entries] == [1717, 640, 6, 18]
+    for e in entries:
+        resigned = e["seconds"] < 10                            # the 16:15 entry re-signed, no ladder
+        if not resigned:
+            entered(tmp_path, writes=e["seconds"] > 60)         # a writer round costs minutes; 18 s wrote none
+    assert step_attempts.count(tmp_path, s02.CLIMBS) == 2

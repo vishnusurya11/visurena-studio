@@ -1,0 +1,65 @@
+CONTRACT OK: Story of the Door | 29 shots | 154s projected
+G-LIGHT      : clean
+PLAN GATES   : clean
+G-SETUP      : clean
+G-PACE       : clean
+G-ACTION     : clean
+G-TALK       : clean
+GRAMMAR      : 9
+    G-PUSH shot 16: a push past the episode's two -- hold it locked and let the actor carry the beat, measured 3 against 2
+    G-PUSH shot 3: the camera head names an amount ('a forearm') the model ignores; name the direction only, measured a forearm against no amount
+    G-PUSH shot 6: the camera head names an amount ('a forearm') the model ignores; name the direction only, measured a forearm against no amount
+    G-PUSH shot 16: the camera head names an amount ('a forearm') the model ignores; name the direction only, measured a forearm against no amount
+    G-PUSH shot 22: the camera head names an amount ('a forearm') the model ignores; name the direction only, measured a forearm against no amount
+    G-TWO shot 27: a two-person reaction is a locked medium two-shot, measured medium/tilt_up against medium/locked
+    G-REACT shot 22: the exchange on shots 20-21 ends without a silent listener's face, measured a line or no face against a silent reaction
+    G-REACT shot 25: the exchange on shots 23-24 ends without a silent listener's face, measured a line or no face against a silent reaction
+    G-SHOTS plan: shots in the cut -- 5.8 h projected against the owner's 6 h, measured 29 against 28
+G-ASPECT     : clean
+G-CROWD      : ["G-CROWD shot 1: a wide over 'two distant figures in Sunday dress strolling at the far end' with no extras declared, measured 0 against >= 1", "G-CROWD shot 19: a wide over 'three distant Sunday walkers on the far pavement, strolling' with no extras declared, measured 0 against >= 1"]
+    G-CROWD shot 1: a wide over 'two distant figures in Sunday dress strolling at the far end' with no extras declared, measured 0 against >= 1
+    G-CROWD shot 19: a wide over 'three distant Sunday walkers on the far pavement, strolling' with no extras declared, measured 0 against >= 1
+G-ARTICLE    : clean
+G-SPEAKER    : clean (narrator 'narrator')
+G-CROWD-CLOSE: clean
+G-STAGE      : clean
+G-PROPCARD   : clean
+G-LOOK/PLACE : clean
+G-FACE-KIND  : clean
+G-PHANTOM    : clean
+G-PRESENT    : 1
+    G-PRESENT shot 8: child_of_hyde_incident is marked entering and the motion shows no arrival, measured child_of_hyde_incident against an arrival in the motion
+G-GHOST      : clean
+G-BANNED-PROP: clean
+G-TWICE      : clean
+EXPECTS TEXT : [13]
+G-BED        : clean
+MOVES/SOURCE : clean
+COVER/SHOUT  : 2
+    G-ORDER shot 1: comes before the shot ahead of it in the chapter; follow the chapter, or omit the flash-forward, measured 3 against 8
+    G-ORDER shot 28: comes before the shot ahead of it in the chapter; follow the chapter, or omit the flash-forward, measured 4 against 28
+SOUND        : clean
+CELL GATES   : 6
+    G-AIM shot 9: the camera aims at 'girl at a walking pace', which the cell (at_rest) does not hold; a move toward what is not drawn invents it. Name it in at_rest, or aim
+    G-AIM shot 11: the camera aims at 'shorter at a walking pace', which the cell (at_rest) does not hold; a move toward what is not drawn invents it. Name it in at_rest, or
+    G-AIM shot 27: the camera aims at 'taller at a walking pace', which the cell (at_rest) does not hold; a move toward what is not drawn invents it. Name it in at_rest, or a
+    G-LAID shot 12: a medium_close of a person lying down, and the camera 'A low angle from chest height' neither looks down on the face nor lies level with it; the drawer st
+    G-LAID shot 15: a close of a person lying down, and the camera 'On the pavement at eye height' neither looks down on the face nor lies level with it; the drawer stands th
+    G-LAID shot 23: a close of a person lying down, and the camera 'On the pavement at eye height' neither looks down on the face nor lies level with it; the drawer stands th
+MOTION hard  : clean
+    M5 shot 15: the LAST clause states an end state ('his hand closes on the front of his overcoat as he speaks.'), and the builder appends `continues to th
+    M4 shot 25: the LAST clause says the picture is still ('he holds out his black-gloved right hand toward the lawyer.'); `calm()` rewrites that into a pos
+MARKS        : clean | unmeasured 0
+ACTOR        : clean
+ROW TEXT     : clean
+CAST BOUND   : all bound
+QUOTE        : clean
+ONE PER TAKE : every shot its own take
+G-HOLE       : clean
+TAKE LENGTH  : every shot inside a take (at 2.45 words/s, budget 8.0 s)
+  advisory shot 15 M5: the LAST clause states an end state ('his hand closes on the front of his overcoat as he speaks.'), and the builder appends `continues to the last frame` to it. End on something still going: `runs along`, `comes down`, `lifts`.
+  advisory shot 25 M4: the LAST clause says the picture is still ('he holds out his black-gloved right hand toward the lawyer.'); `calm()` rewrites that into a positive static assertion the take lint cannot see. A stillness clause is fine anywhere but last.
+G-TAKELINT   : clean
+SHEET TEXT   :
+    not applicable: this book draws storyboard grids, not seq_boards sheets
+VERDICT      : REFUSED

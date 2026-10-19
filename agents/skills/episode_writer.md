@@ -387,6 +387,18 @@ When a REFUSED section follows the brief, every line in it is a gate's refusal
 of your previous plan, quoted verbatim. Fix each one and return the whole plan
 again — the gates read the plan, never a diff.
 
+## What a refusal costs, and the gates that were chased
+
+- Tier 1 refusals must reach zero (CONTRACT, G-LIGHT, PLAN GATES, TAKE LENGTH, TAKE BUILDER, MOTION hard, G-TAKELINT, CAST BOUND, ACTOR): a downstream step repeats them.
+- Tier 2 refusals get three rounds, then the best draft is signed flagged (G-AIM, G-LAID, G-CROWD, G-REACT, G-TWO, G-PUSH, G-PRESENT, G-SYNC).
+- Tier 3 voice-measured rows (seconds, shares, counts, tail wording) are advice: never chase one.
+- Edit the previous plan, changing only the rows the REFUSED section names; a line "already fixed, keep fixed: <gates>" names gates not to touch.
+- A setup `crowd` rides only a shot that declares `extras` > 0; G-CROWD asks `extras` >= 1 on a wide over a crowd, and a bigger count comes from the setup's crowd.
+- G-AIM: the aimed noun in `at_rest` is the bare noun, never with a pace phrase ("girl", not "girl at a walking pace").
+- G-SYNC: a dialogue line is the first line on its shot.
+- G-LAID: a person lying down is seen from above looking down on the face, or level with it.
+- Never write a limb entering from an edge (a hand, an arm, a foot) without its body in the cell.
+
 ## Before you return, check
 
 1. The question is written, the turn sits at 50–75 % of the projected runtime,

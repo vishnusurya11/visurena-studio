@@ -3,8 +3,9 @@ crowd prose stages people declare extras >= 1, its cure writes `extras=1`,
 and the critic then flags "count 'extras=1' has no chapter span" -- one
 judge's cure is another judge's fault (5 of 21 flags at 15:54Z).  A count of
 ONE under a setup that stages a crowd is that setup's own declaration, not a
-claim about the chapter; a larger count, or a count with no crowd staged, is
-still a claim the chapter must back."""
+claim about the chapter; so is a larger one (D5: G-CROWD asks >= 1, the writer
+obeys with the setup's count); a count with no crowd staged is still a claim
+the chapter must back."""
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -44,4 +45,5 @@ def test_the_critic_drops_a_cure_written_count_and_keeps_the_rest():
     notes = [f.note for f in critic.claim_faults(plan, [reading], "the chapter text")]
     assert not any("extras=1" in n and "shot_00" in n for n in notes)
     assert any("'extras=1'" in n for n in notes)             # shot 1: no crowd staged -> still a claim
-    assert any("extras=6" in n for n in notes) and any("kneels" in n for n in notes)
+    # D5 (2026-10-19): any extras >= 1 under a staged crowd is the setup's declaration (G-CROWD asks >= 1)
+    assert not any("extras=6" in n for n in notes) and any("kneels" in n for n in notes)

@@ -234,11 +234,17 @@ def claim_note(claim: Claim, chapter: str | None, shots: set[int]) -> tuple[str,
     return note, evidence
 
 
+EXTRAS_CLAIM = re.compile(r"extras\s*=?\s*(\d+)")
+"""A count claim on the shot's extras, as the reader words it ('extras=2', 'extras 3')."""
+
+
 def declared_count(plan, claim: Claim) -> bool:
-    """A count of ONE on a shot whose setup stages a crowd is the setup's own
-    declaration (G-CROWD's minimum, written by its cure), not a claim on the
-    chapter (A36, ep19 2026-10-07: 5 of the critic's 21 flags)."""
-    if claim.kind != "count" or re.sub(r"[^a-z0-9]", "", claim.claim.lower()) != "extras1":
+    """An `extras=N` claim (N >= 1) on a shot whose setup stages a crowd is the setup's own
+    declaration, not a claim on the chapter: G-CROWD asks `extras >= 1` there and a bigger count
+    comes from the setup's crowd (Jekyll ep01 Kawajiri, 2026-10-18: shots 1 and 18 wrote 2 and 3 and
+    the critic refused both as invented; earlier, A36 ep19: 5 of the critic's 21 flags)."""
+    said = EXTRAS_CLAIM.fullmatch(claim.claim.lower().strip()) if claim.kind == "count" else None
+    if not said or int(said.group(1)) < 1:
         return False
     shot = next((s for s in plan.shots if s.index == claim.shot), None)
     setup = (getattr(plan, "setups", None) or {}).get(getattr(shot, "setup", None)) if shot else None

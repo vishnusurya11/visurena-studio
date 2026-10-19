@@ -33,6 +33,7 @@ from studio.deferral import Deferred  # noqa: E402
 from studio import episode_home, gate_policy, judged_gate, plan_ladder, plan_provenance, plan_verdict, step_cli  # noqa: E402
 from studio import plan_tags, step_attempts, step_caps  # noqa: E402
 from studio.ladder import Ladder  # noqa: E402
+from studio.learnings import Learning  # noqa: E402
 from studio.judges import plan as plan_judge  # noqa: E402
 from studio.judges import verdict as jv  # noqa: E402
 
@@ -45,7 +46,10 @@ MAX_IMPROVE = 2
 PLAN_CHECK = "scripts/episode/plan_check.py"
 CLIMBS = "plan.climbs"
 """The episode's climb count in attempts.json (owner 2026-10-18): the cap table's `climbs`.  A
-climb is one pass of the ladder; a deferral's re-author is the next one."""
+climb is one pass of the ladder; a deferral's re-author is the next one.  It is spent at the
+entry's FIRST WRITER CALL (D3), never at entry: an entry that writes nothing spends none."""
+RESIGN = "plan.resign"
+"""A stale flagged signature re-signed over the rows it carries; counted apart from the climbs."""
 PARKED = "plan.parked"
 """The one park a tier-1 line buys at the last climb, marked so a relaunch goes on."""
 
@@ -111,8 +115,11 @@ def resigned(ctx) -> bool:
     """A stale APPROVE whose bytes moved ONLY through recorded cures
     (plan.cures.jsonl), over a battery that passes NOW, is re-signed with
     zero writer/critic calls (ep18: a mechanical repair lapsed the signature
-    and the paid climb ran again on an already-clean plan, $1.05).  A broken
-    chain or a dirty battery answers False and the ordinary climb runs."""
+    and the paid climb ran again on an already-clean plan, $1.05).  A FLAGGED
+    signature is also re-signed over a battery that still refuses, when every
+    row left is one it already carries (`carried`): one critic read, no writer
+    round (Jekyll ep01 Kawajiri: climb 2 spent 10.7 min on one carried G-TWO
+    row).  A broken chain or a new or tier-1 row answers False and the climb runs."""
     plan = plan_of(ctx)
     if not plan.exists() or (old := stale_approve(plan)) is None:
         return False
@@ -120,20 +127,46 @@ def resigned(ctx) -> bool:
                                   plan_verdict.plan_sha8(plan))
     if cures is None:
         return False
-    rc, _ = ctx.capture_script(PLAN_CHECK)
-    if rc != 0:
+    rc, out = ctx.capture_script(PLAN_CHECK)
+    if rc != 0 and not carried(old, out):
         return False
-    resign(ctx, plan, old, cures)
+    resign(ctx, plan, old, cures, critic_rows(ctx, plan) if rc != 0 else [])
     return True
 
 
-def resign(ctx, plan: Path, old: dict, cures: list[str]) -> None:
+def carried(old: dict, out: str) -> bool:
+    """Every row the battery still prints is one the flagged signature already carries (its gate id,
+    at no greater a count), and none is tier 1 (a downstream builder repeats it)."""
+    lines = refusal_lines(out)
+    now = plan_ladder.gate_counts(plan_ladder.rows_in(lines))
+    then = plan_ladder.gate_counts(plan_ladder.rows_in([str(f.get("note") or "") for f in old.get("faults") or []]))
+    if not old.get("flagged") or not now or plan_tags.builder_lines(lines):
+        return False
+    return all(then.get(gate, 0) >= n for gate, n in now.items())
+
+
+def critic_rows(ctx, plan: Path) -> list[dict]:
+    """The critic reads the carried bytes once (no writer round) and its rows ride the new signature;
+    a read that fails keeps the signature's own rows."""
+    try:
+        desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
+        return [f.model_dump() for f in critic(ctx, desk).faults]
+    except Exception as why:        # noqa: BLE001 -- a failed read never un-signs a carried plan
+        ctx.log(f"{GATE} re-sign: the critic read failed ({str(why)[:160]}); the carried rows stand",
+                step_id=STEP_ID, level="WARNING")
+        return []
+
+
+def resign(ctx, plan: Path, old: dict, cures: list[str], critic_faults: list[dict] | None = None) -> None:
     """The old signature carried forward over the cured bytes: same signer,
-    same faults, same flag -- only the note says what moved them."""
+    same faults (plus the critic's read of a carried battery refusal), same flag -- only the note says
+    what moved them.  Counted as `plan.resign`, never as a climb."""
     names = ", ".join(cures) or "none"
     plan_verdict.sign(plan, f"re-signed after mechanical cures: {names}",
                       signed_by=old.get("signed_by") or jv.OWNER,
-                      faults=old.get("faults"), flagged=bool(old.get("flagged")))
+                      faults=(old.get("faults") or []) + (critic_faults or []), flagged=bool(old.get("flagged")))
+    if getattr(ctx, "home", None) is not None:
+        step_attempts.spend(ctx.home, RESIGN)
     ctx.log(f"{GATE} re-signed: bytes moved only through recorded cures ({names})", step_id=STEP_ID)
 
 
@@ -231,10 +264,25 @@ def climb_ladder(ctx, desk) -> Ladder:
 
 
 def climb_number(ctx, desk) -> int:
-    """This climb's number: a climb resumed from its checkpoint is the one already counted."""
+    """This climb's number: the one `enter_climb` captured before the first draft; a desk that never
+    entered (a bare ladder) counts as it always did -- a climb resumed from its checkpoint is the one
+    already counted."""
+    if desk.climb is not None:
+        return desk.climb
     if desk.rungs_done or (ctx.home / plan_ladder.CLIMB).exists():
         return max(1, step_attempts.count(ctx.home, CLIMBS))
     return step_attempts.spend(ctx.home, CLIMBS)
+
+
+def enter_climb(ctx, desk) -> None:
+    """Capture this entry's climb number ONCE, before `first_draft` (which would make climb 1 look like
+    climb 2), and spend it at the entry's first writer call -- not at entry (D3: attempts.json read
+    plan.climbs 3 against a cap of 2 when an entry wrote nothing).  A resumed climb is already counted."""
+    counted = bool(desk.rungs_done or (ctx.home / plan_ladder.CLIMB).exists())
+    spent = step_attempts.count(ctx.home, CLIMBS)
+    desk.climb = max(1, spent) if counted else spent + 1
+    if not counted:
+        desk.on_write = lambda: step_attempts.spend(ctx.home, CLIMBS)
 
 
 def climbs_spent(ctx) -> bool:
@@ -256,11 +304,26 @@ def aside_draft(ctx, plan: Path) -> bool:
 
 def first_draft(ctx, desk) -> None:
     """The draft a climb judges: past the episode's climbs the aside's draft as it is, no
-    writer round; else the aside edited by the reasoner, or a fresh draft."""
+    writer round; else the aside edited by the reasoner, or a fresh draft (its seconds and tokens
+    are a learnings row, the wall is not moved)."""
     if climbs_spent(ctx) and aside_draft(ctx, desk.plan):
         ctx.log("the plan's climbs are spent: the aside's draft is judged as it is", step_id=STEP_ID)
         return
-    desk.resume() or desk.write(None)
+    started, desk.usage = desk.now(), {}
+    try:
+        desk.resume() or desk.write(None)
+    finally:
+        note_draft(ctx, desk, desk.now() - started)
+        desk.usage = None
+
+
+def note_draft(ctx, desk, seconds: float) -> None:
+    """One learnings row `draft`: what the first draft cost in seconds and tokens (a bare ctx keeps none)."""
+    if not hasattr(ctx, "learn"):
+        return
+    used = desk.usage or {}
+    ctx.learn(Learning(step=STEP_ID, gate=GATE, measured=used.get("total_tokens", 0), action="draft",
+                       seconds=seconds, note=f"{used.get('input_tokens', 0)} in, {used.get('output_tokens', 0)} out tokens"))
 
 
 def tier_one_left(plan: Path) -> list[str]:
@@ -361,6 +424,7 @@ def run(ctx) -> None:
             cure_aside_first(ctx, plan)
         desk = plan_ladder.Desk(ctx, plan, writer=episode_writer)
         restored = restore_climb(ctx, desk)
+        enter_climb(ctx, desk)
         if wants_rewrite(ctx) and ran_downstream(ctx):
             ctx.log("--rewrite refused: placed.json exists, this plan already ran downstream",
                     step_id=STEP_ID, level="WARNING")
@@ -385,6 +449,7 @@ def run(ctx) -> None:
                 level="WARNING" if rc else "INFO")
         if rc == 0:
             fresh = plan_ladder.Desk(ctx, plan_of(ctx), writer=episode_writer)
+            enter_climb(ctx, fresh)
             signed = clear(ctx, fresh)
     if signed.name == plan_ladder.DEFERRED:
         raise Deferred(GATE, str(signed.relative_to(ctx.book_dir)).replace("\\", "/"), deferred_note(signed))

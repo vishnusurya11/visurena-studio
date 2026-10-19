@@ -50,10 +50,10 @@ def _run(ctx, monkeypatch):
 
 def test_the_best_draft_is_kept_and_signed_flagged(ctx, monkeypatch):
     writer, critic = _run(ctx, monkeypatch)
-    # 33f11b4 (ep15): a converged draft (<= CONVERGED faults) is edited by every
-    # rung, model_tier too, so a near pass gets its last edit before the terminal
-    assert [t[:7] for t in TITLES[:len(writer.calls)]] == ["Draft A", "Draft B", "Draft C", "Draft D"]
-    assert len(critic.texts) == 4
+    # P01 (2026-10-19): Draft B shows the same gate ids as Draft A and one fault fewer (< 2 fewer), so
+    # the round moved no row: improve 2 and model_tier write nothing and the terminal keeps the best
+    assert [t[:7] for t in TITLES[:len(writer.calls)]] == ["Draft A", "Draft B"]
+    assert len(critic.texts) == 2
     assert json.loads(_plan(ctx).read_text(encoding="utf-8"))["title"] == "Draft B"
     doc = json.loads(plan_verdict.verdict_path(_plan(ctx)).read_text(encoding="utf-8"))
     assert doc["verdict"] == "APPROVE" and doc["flagged"] is True
@@ -68,15 +68,15 @@ def test_the_terminal_leaves_an_audit_row_and_a_terminal_learning(ctx, monkeypat
     assert rows[0].sha8 == plan_verdict.plan_sha8(_plan(ctx))
     assert rows[0].artefact == "episodes/ep03/plan.verdict.json"
     actions = [(row.action, row.terminal) for row in learnings.load(ctx.learnings_path)]
-    assert actions == [("improve", False), ("improve", False), ("model_tier", False), ("keep_best", True)]
+    assert actions == [("draft", False), ("improve", False), ("improve", False), ("model_tier", False),
+                       ("keep_best", True)]
 
 
 def test_the_writer_saw_the_critics_lines_on_every_rung(ctx, monkeypatch):
     writer, _ = _run(ctx, monkeypatch)
     assert writer.calls[0] is None
     assert all(line.startswith("G-READER ") for line in writer.calls[1])
-    # 33f11b4 (ep15): a CONVERGED draft is edited by every rung, model_tier too
-    assert all(line.startswith("G-READER ") for line in writer.calls[3])
+    assert len(writer.calls) == 2, "the stuck stop: rung 2 and model_tier wrote nothing (P01)"
 
 
 def test_a_draft_the_battery_refused_is_never_the_best(ctx, monkeypatch):

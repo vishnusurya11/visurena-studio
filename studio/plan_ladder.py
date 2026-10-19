@@ -31,11 +31,12 @@ from datetime import date as _date
 from pathlib import Path
 
 import re
+from collections import Counter
 
 from pydantic import ValidationError
 from strands.types.exceptions import StructuredOutputException
 
-from studio import episode_home, episode_spec, llm, plan_brief, plan_cures, plan_verdict, step_caps
+from studio import episode_home, episode_spec, llm, plan_brief, plan_cures, plan_tags, plan_verdict, step_caps
 from studio.judges import plan as plan_judge
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
@@ -206,6 +207,56 @@ def merged(so_far: list[str], fresh: list[str]) -> list[str]:
     return so_far + [line for line in fresh if line not in so_far]
 
 
+HEADER_LABEL = re.compile(r"[A-Z][A-Z0-9 /&-]*(?: hard)? *")
+"""A section label: capitals ('G-CROWD-CLOSE', 'G-LOOK/PLACE', 'MOTION hard'); a row says 'shot 4' in lower case."""
+
+
+def is_header(line: str) -> bool:
+    """A plan_check section header at column 0 (`GRAMMAR      : 9`).  The printer pads a label to 13
+    characters, so a header has a space before its colon or a label of 13 or more; `MONEY: ...` is a row."""
+    label = line.split(":", 1)[0] if line and not line[0].isspace() and ":" in line else ""
+    return bool(HEADER_LABEL.fullmatch(label)) and (label.endswith(" ") or len(label) >= 13)
+
+
+def rows_in(lines: list[str]) -> list[str]:
+    """The REAL rows of a printout: the detail lines under a refusing header and the CONTRACT lines.
+    Never a header (`VERDICT`, `CONTRACT OK`, `EXPECTS TEXT`, the duplicate G-CROWD list) or a clean line;
+    a column-0 line that is no header is an unplaced refusal and stays (Jekyll ep01 Kawajiri: 65 printed
+    lines held 20 rows)."""
+    if not any(is_header(line) or line.startswith("CONTRACT") for line in lines):
+        return [line for line in lines if line.strip()]       # no printout: nothing to place, nothing to drop
+    out, open_ = [], False
+    for line in lines:
+        if line.startswith("CONTRACT") and not line.startswith("CONTRACT OK"):
+            out.append(line)
+        elif line.startswith("CONTRACT OK") or is_header(line):
+            open_ = not line.startswith("CONTRACT OK") and plan_tags.refusing(line)
+        elif line.strip() and (open_ or not line[0].isspace()):
+            out.append(line)
+    return out
+
+
+def real_rows(verdict: Verdict) -> list[str]:
+    """A verdict's refused rows: a battery verdict's printout read as `rows_in`, a critic's faults as they are."""
+    notes = [f.note or f.kind for f in verdict.faults]
+    return rows_in(notes) if is_battery(verdict) else notes
+
+
+GATE_ID = re.compile(r"\s*([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*)")
+
+
+def gate_counts(rows: list[str]) -> dict[str, int]:
+    """Rows keyed by (gate id, count), no shot numbers."""
+    return dict(Counter(m.group(1) for r in rows if (m := GATE_ID.match(r))))
+
+
+def row_keys(verdict: Verdict) -> dict[str, int]:
+    """A verdict's rows by gate id and count: a critic fault is keyed by its G- id, else its kind."""
+    if is_battery(verdict):
+        return gate_counts(real_rows(verdict))
+    return dict(Counter((re.match(r"G-[A-Z0-9-]+", f.note or "") or [f.kind])[0] for f in verdict.faults))
+
+
 class Caller:
     """A structured caller on another tier, built on first use so that no test
     ever constructs a provider client."""
@@ -254,6 +305,12 @@ class Desk:
     rungs_done: int = 0                     # rungs whose draft landed (the checkpoint's resume point)
     began: float | None = None              # the climb's start (epoch s), checkpointed: CLIMB_WALL_S runs from it
     _names_cache: dict | None = None        # the refs-derived token table the ghost scrub reads
+    stuck: bool = False                     # a writer round moved no row: the remaining rungs write nothing
+    prev_keys: tuple | None = None          # (is_battery, row_keys) of the round before
+    seen: tuple = ()                        # the gate ids any round has refused, in order
+    climb: int | None = None                # this entry's climb number, captured before the first draft
+    on_write: object | None = None          # called once at the entry's first writer call (spends the climb)
+    usage: dict | None = None               # tokens of the writer calls, filled while set
 
     def now(self) -> float:
         import time
@@ -301,7 +358,7 @@ class Desk:
         if not doc.get("draft"):
             return False
         self.escalate()
-        self.refusals = [f["note"] for f in doc.get("faults", []) if f.get("note")]
+        self.refusals = rows_in([f["note"] for f in doc.get("faults", []) if f.get("note")])
         self.write(self.refusals, previous=doc["draft"])
         return True
 
@@ -310,6 +367,9 @@ class Desk:
         draft the CONTRACT refuses is a pending refusal for the next rung, not a crash."""
         agent = agent or self.agent
         kwargs = {"_agent": agent} if agent is not None else {}
+        self.first_writer_call()
+        if self.usage is not None:
+            kwargs["usage"] = self.usage
         try:
             episode = self.writer.write(self.brief_(), refusals, previous=previous, **kwargs)
         except ValidationError as bad:
@@ -333,6 +393,12 @@ class Desk:
         doc = plan_cures.ghost_limbs(episode.model_dump(), self._names())
         episode_home.write_plan(self.plan, doc)
         mechanical_cures(self.plan, Path(self.ctx.book_dir), self.ctx.number, say=self._say)
+
+    def first_writer_call(self) -> None:
+        """The entry's first writer call (a draft or a rung) spends its climb, once (D3)."""
+        spend, self.on_write = self.on_write, None
+        if spend is not None:
+            spend()
 
     def refused_by_money(self, over: llm.OverBudget) -> None:
         """The $3 wall refused the writer BEFORE the call was sent: a pending
@@ -360,8 +426,8 @@ class Desk:
         doc = episode_home.read_json(self.plan)
         if not is_battery(verdict):
             self.drafts.append((doc, verdict))
-        elif self.best is None or len(verdict.faults) < self.best[1]:
-            self.best = (doc, len(verdict.faults), list(verdict.faults))
+        elif self.best is None or len(real_rows(verdict)) < self.best[1]:
+            self.best = (doc, len(real_rows(verdict)), list(verdict.faults))
         self.checkpoint()
 
     def climb_path(self) -> Path:
@@ -426,7 +492,14 @@ class Desk:
         rung, never discarded: ep15 (2026-10-01) ran eight passes in which
         improve reached one fault and the old fresh_brief rung wrote from nothing
         (39-57 faults back), ~3.5 h of paid calls to stand still."""
-        self.refusals = merged(self.refusals, refusal_lines_of(verdict))
+        self.refusals = self.hear(verdict, self.refused_plan())
+        if self.stuck or self.moved_no_row(verdict):
+            self.stuck = True
+            self.remember(verdict)
+            self.rungs_done += 1
+            self._say(f"plan climb: the round moved no row ({', '.join(row_keys(verdict))}); "
+                      f"rung {rung.name} writes nothing, the best draft is kept")
+            return
         if self.wall_spent():                     # the owner's cap: no writer round past the wall
             self.remember(verdict)
             self.rungs_done += 1
@@ -434,13 +507,32 @@ class Desk:
             return
         if is_battery(verdict):
             self.escalate()                       # a rule miss: the reasoner edits from here
-        self.remember(verdict)                    # checkpointed with the merged refusals
-        near = len(verdict.faults) <= CONVERGED and self.refused_plan() is not None
+        self.remember(verdict)                    # checkpointed with the refusals
+        near = len(real_rows(verdict)) <= CONVERGED and self.refused_plan() is not None
         if rung.name == IMPROVE or near:
             self.write(self.refusals, previous=self.refused_plan())
         elif rung.name == MODEL_TIER and not self.drafts:
             self.write(self.refusals, previous=self.refused_plan())
         self.rungs_done += 1
+
+    def hear(self, verdict: Verdict, previous: dict | None) -> list[str]:
+        """What the writer hears: editing `previous` it is the CURRENT rows plus one line naming the gates
+        fixed since (merged() re-asserted rows already fixed); with no previous plan, every refusal so far."""
+        current, keys = refusal_lines_of(verdict), row_keys(verdict)
+        fixed = [g for g in self.seen if g not in keys]
+        self.seen = self.seen + tuple(g for g in keys if g not in self.seen)
+        if previous is None:
+            return merged(self.refusals, current)
+        return current + ([f"already fixed, keep fixed: {', '.join(fixed)}"] if fixed else [])
+
+    def moved_no_row(self, verdict: Verdict) -> bool:
+        """The round just judged shows no more than the round before: every id was there and the count
+        fell by less than 2.  Battery rows are weighed against battery rows, a critic's against a critic's."""
+        keys, before = (is_battery(verdict), row_keys(verdict)), self.prev_keys
+        self.prev_keys = keys
+        if before is None or before[0] != keys[0] or not keys[1]:
+            return False
+        return set(keys[1]) <= set(before[1]) and sum(before[1].values()) - sum(keys[1].values()) < 2
 
     def terminal(self, verdict: Verdict) -> Verdict:
         """By cause: no draft ever passed the battery -> defer; else the best
@@ -476,7 +568,7 @@ class Desk:
     def best_refused(self, verdict: Verdict) -> Verdict:
         """The best battery-refused draft back on disk for the deferral, and the
         verdict that refused it: what the next pass resumes from."""
-        if self.best is None or len(verdict.faults) <= self.best[1]:
+        if not is_battery(verdict) or self.best is None or len(real_rows(verdict)) <= self.best[1]:
             return verdict
         episode_home.write_plan(self.plan, self.best[0])
         return battery_verdict([f.note for f in self.best_faults()])
@@ -516,7 +608,7 @@ SECTION = re.compile(r"^[A-Z][A-Z0-9 /&-]*:")
 
 
 def refusal_lines_of(verdict: Verdict) -> list[str]:
-    """What goes back to the writer: the battery's lines as printed, the critic's as gate lines."""
+    """What goes back to the writer: the battery's REAL rows as printed, the critic's as gate lines."""
     if is_battery(verdict):
-        return [f.note for f in verdict.faults]
+        return real_rows(verdict)
     return plan_judge.lines(verdict)

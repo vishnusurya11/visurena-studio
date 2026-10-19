@@ -19,13 +19,12 @@ def test_the_whole_ladder_is_climbed_then_the_draft_is_deferred(ctx, monkeypatch
     with pytest.raises(Deferred) as aside:
         step.run(ctx)
     assert aside.value.gate == "PLAN" and aside.value.aside == "episodes/ep03/plan.deferred.json"
-    # round 0, improve, improve, model_tier -- plus one closing
-    # battery read the episode headroom now pays for (2026-10-01: shares are
-    # an allocation of the ceiling; the free re-judge replaced the deferral)
-    assert len(writer.calls) == 4 and len(gate.commands) == 5
+    # round 0, improve -- the same row again stops the climb (P01, 2026-10-19: rung 2 and model_tier
+    # write nothing) -- plus the closing battery reads
+    assert len(writer.calls) == 2 and len(gate.commands) == 5
     assert all(call is not None for call in writer.calls[1:]), "every rung keeps the refusal history"
     assert writer.agents[0] is None, "the first draft is the cheap tier's"
-    assert [a.tier for a in writer.agents[1:]] == [step.plan_ladder.MODEL_TIER_NAME] * 3, \
+    assert [a.tier for a in writer.agents[1:]] == [step.plan_ladder.MODEL_TIER_NAME], \
         "a battery refusal hands the climb to the reasoner"
 
 

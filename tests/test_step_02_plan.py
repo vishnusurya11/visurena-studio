@@ -165,9 +165,8 @@ def test_a_missing_plan_is_written_through_write_plan_then_judged_and_signed(ctx
 def test_two_refusals_then_a_pass_locks_the_plan(ctx, monkeypatch):
     writer, gate = _wire(ctx, monkeypatch, (1, REFUSED_OUT), (1, REFUSED_OUT), (0, CLEAN_OUT))
     step.run(ctx)
-    assert len(writer.calls) == 3 and writer.calls[0] is None
-    assert writer.calls[1] == ["CONTRACT OK: The Yard | 24 shots | 140s projected", "PLAN GATES   : 1",
-                               "    G-SCALE shot 4: a close with no cell", "VERDICT      : REFUSED"]
+    assert len(writer.calls) == 2 and writer.calls[0] is None      # the 2nd identical refusal writes nothing (P01)
+    assert writer.calls[1] == ["    G-SCALE shot 4: a close with no cell"]          # the real row, no header (P01)
     assert _plan(ctx).exists() and not (ctx.home / step.plan_ladder.DEFERRED).exists()
     assert _verdict(ctx)["signed_by"] == "judge:plan@1" and plan_verdict.current(_plan(ctx))
 
@@ -181,7 +180,7 @@ def test_a_battery_that_keeps_refusing_defers_the_unit_after_the_whole_ladder(ct
     # 5 battery reads + ONE plan_repair attempt before the deferral surfaces
     # (2026-10-01: the cure table runs on the aside; only when it cannot clean
     # the battery does the unit defer)
-    assert len(writer.calls) == 4 and len(gate.commands) == 5   # no fresh_brief rung (C2_verdict #3)
+    assert len(writer.calls) == 2 and len(gate.commands) == 5   # no fresh_brief rung (C2_verdict #3); the same row stops it (P01)
     assert gate.commands[-1][1].endswith("plan_repair.py")
     assert not _plan(ctx).exists(), "a refused draft is not left where the next run would take it as written"
     assert (ctx.home / step.plan_ladder.DEFERRED).exists()
@@ -292,13 +291,14 @@ def test_a_draft_the_contract_refuses_goes_back_to_the_writer(ctx, monkeypatch):
 
 
 def test_every_refusal_so_far_goes_back_to_the_writer(ctx, monkeypatch):
-    """Each draft is written from scratch: shown only the last round's refusals it
-    traded one fault for another.  The writer is shown them all."""
+    """The writer EDITS the previous plan (P01, 2026-10-19): it hears this round's rows plus one line
+    naming the gates fixed since, never a row that was fixed."""
     writer, _ = _wire(ctx, monkeypatch, (1, "VERDICT      : REFUSED\n    G-A first\n"),
                       (1, "VERDICT      : REFUSED\n    G-B second\n"), (0, CLEAN_OUT))
     step.run(ctx)
     third = writer.calls[2]
-    assert any("G-A first" in line for line in third) and any("G-B second" in line for line in third)
+    assert any("G-B second" in line for line in third) and not any("G-A first" in line for line in third)
+    assert third[-1] == "already fixed, keep fixed: G-A"
 
 
 def test_the_critics_faults_go_back_to_the_writer_as_gate_lines(ctx, monkeypatch):

@@ -27,7 +27,7 @@ def test_a_battery_climb_never_builds_a_fresh_brief(ctx, monkeypatch):
     writer, _ = _wire(ctx, monkeypatch, (1, REFUSED_OUT))
     with pytest.raises(Deferred):
         step.run(ctx)
-    assert len(writer.calls) == 4                       # round 0, improve, improve, model_tier
+    assert len(writer.calls) == 2                       # round 0, improve: the same row again stops the climb (P01)
     assert all(call is not None for call in writer.calls[1:]), "every rung edits with the history"
     assert not any(kw.get("fresh") for kw in fresh)
 
@@ -41,10 +41,14 @@ def test_a_converged_draft_is_still_edited(tmp_path):
     assert writer.previous[-1] is not None
 
 
-def test_model_tier_hears_every_refusal_of_the_climb(tmp_path):
+def test_model_tier_hears_the_current_rows_and_the_gates_already_fixed(tmp_path):
+    """P01 (2026-10-19): the writer edits the previous plan, so it hears this round's rows plus one line
+    naming the gates fixed since, not every refusal of the climb."""
     writer = Recorder()
     desk = _desk(tmp_path, writer)
     rungs = [rung for rung, _ in _tries(plan_ladder.ladder())]
     for rung, line in zip(rungs, ["G-A shot 1", "G-B shot 2", "G-C shot 3"]):
         desk.take(rung, 0, plan_ladder.battery_verdict([line, "G-X far 1", "G-X far 2"]))
-    assert {"G-A shot 1", "G-B shot 2", "G-C shot 3"} <= set(writer.refusals[-1])
+    heard = writer.refusals[-1]
+    assert "G-C shot 3" in heard and "G-A shot 1" not in heard
+    assert heard[-1] == "already fixed, keep fixed: G-A, G-B"
