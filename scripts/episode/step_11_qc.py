@@ -170,7 +170,7 @@ def qc_report(ctx, extra: list[str]) -> dict:
                 return report
             if spent:
                 return past_ceiling(ctx, qc, report)
-            raise SystemExit(f"REFUSED: qc FAIL in {qc.name} for these exact bytes; "
+            raise SystemExit(f"REFUSED: qc FAIL in {qc.name} for these exact bytes ({fail_words(report)}); "
                              f"fix the cut before anyone watches it")
     ctx.run_script("scripts/episode/qc.py", *engine_flags(extra), *(["--ceiling-spent"] if spent else []),
                    gpu=GPU, clock="qc")
@@ -183,8 +183,19 @@ def qc_report(ctx, extra: list[str]) -> dict:
     if not report.get("passed") and spent:
         return past_ceiling(ctx, qc, report)
     if not report.get("passed"):
-        raise SystemExit(f"REFUSED: qc FAIL in {qc.name}; fix the cut before anyone watches it")
+        raise SystemExit(f"REFUSED: qc FAIL in {qc.name} ({fail_words(report)}); fix the cut before anyone watches it")
     return report
+
+
+def fail_words(report: dict) -> str:
+    """`failed: loudness, gap` -- the rows a qc FAIL failed, kept in the refusal (and so in the
+    events table) because the report is overwritten on the next pass (timeline debate P3)."""
+    from scripts.episode import qc as qc_rows
+    try:
+        rows = qc_rows.failed_rows(report)
+    except Exception:                                   # noqa: BLE001 -- an old report shape
+        rows = []
+    return "failed: " + (", ".join(rows) if rows else "unknown rows")
 
 
 def clock_spent(ctx) -> bool:

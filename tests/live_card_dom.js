@@ -38,7 +38,8 @@ const timers = [];
 let partial = 'empty';
 const P = { vital: 'live', now: 1000, unit: 'ep01', title: 't', run_started: 900, step_started: 950,
   now_step: { id: '02', name: 'plan', kind: 'loop' }, items: [],
-  eta: { finish: '4:40 pm', left: '3h 05m', step_end: '1:58 pm', range: '3:55–5:50 pm', steps_left: 11, n_runs: 15, basis: 'measured' },
+  eta: { finish: '4:40 pm', left: '3h 05m', step_end: '1:58 pm', range: '3:55–5:50 pm', steps_left: 11, n_runs: 15, basis: 'measured',
+         firm: 'rough', rework: 0.11, rework_n: 9 },
   steps: [{ id: '01', state: 'done', fin: '50m · 3:52 pm' }, { id: '10', state: 'waiting', window: '~18m', will_run: true }] };
 
 const doc = node({ visibilityState: 'visible', title: '' });
@@ -80,7 +81,7 @@ async function run() {
   check('a quiet poll patches a later window', win10.textContent === '~18m', win10.textContent);
   check('a quiet poll patches the time left', left.textContent === '3h 05m', left.textContent);
   check('a quiet poll patches a finished step', fin01.textContent === '50m · 3:52 pm', fin01.textContent);
-  check('a quiet poll patches the range', range.textContent === 'range 3:55–5:50 pm · 11 steps to run · 15 runs · measured', range.textContent);
+  check('a quiet poll patches the range', range.textContent === 'range 3:55–5:50 pm · rough · rework +11 % (9 episodes) · 11 steps to run · 15 runs · measured', range.textContent);
   check('a quiet poll schedules the next', timers.length === 1, timers.length);
 
   card.dataset.shape = 'stale';

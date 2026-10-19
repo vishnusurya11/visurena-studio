@@ -32,6 +32,8 @@
   </div>
   {% elif p['items'] %}{% include "_live_sheet.html" %}{% endif %}
   {% include "_live_rail.html" %}
+  <div class="lv-loops"{% if not p.loops_text %} hidden{% endif %}><span class="eyebrow">loops</span> <span data-k="loops">{{ p.loops_text }}</span></div>
+  {% include "_live_work.html" %}
   {% if ns_ and ns_.rounds %}{% include "_live_ladder.html" %}{% endif %}
   {% if p.last_words %}<div class="lv-words"><span class="eyebrow">last words</span> <q data-k="words">{{ p.last_words }}</q></div>{% endif %}
   {% endif %}

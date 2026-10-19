@@ -34,9 +34,24 @@ def done(ctx) -> bool:
                       ctx.home / "plan.json", ctx.home / "audio" / "lines" / "lines.json")
 
 
+def camera_advisories(plan: dict) -> list[str]:
+    """`shot 1: the aim 'the left third' is a layout word, not a thing` for each writer camera
+    head camera_lint would refuse as cure text -- said, never walled: the lint was calibrated on
+    cure-written heads, not the writer's (timeline debate 2026-10-18, P1)."""
+    from studio import camera_lint
+    return [f"shot {s.get('index')}: {f}" for s in plan.get("shots") or []
+            for f in camera_lint.faults(str(s.get("motion") or ""))]
+
+
 def run(ctx) -> None:
     ctx.run_script("scripts/episode/takes_r2v.py", "--from-refs", "--prompts", clock="prompts")
     ctx.run_script("scripts/episode/no_last_frame.py", clock="no_last_frame")
+    # the grid prompts linted before any grid is drawn: step 07's own wall, dry, no GPU (P1)
+    ctx.run_script("scripts/episode/grids.py", "--prompts", clock="grid_lint")
+    import json
+    plan = json.loads((ctx.home / "plan.json").read_text(encoding="utf-8"))
+    for said in camera_advisories(plan):
+        ctx.log(f"camera advisory {said}")
 
 
 if __name__ == "__main__":

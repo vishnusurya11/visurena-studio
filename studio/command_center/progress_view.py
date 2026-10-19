@@ -17,6 +17,7 @@ from pathlib import Path
 
 from studio import eta, progress as prog, registry
 from studio.command_center import legacy_progress as lp
+from studio.command_center import loops, workgrid
 from studio.command_center import library_paths, procs, unit_view, vitals
 from studio.run_budget import EPISODE_CEILING_SECONDS, OWNER_LIMIT_SECONDS
 
@@ -333,18 +334,32 @@ def later_steps(state: dict, hist: dict, names: dict, db_rows: list[dict], unit:
     return [(s, runs, hist.get(s) or []) for s, runs in will.items()]
 
 
-def finish(state: dict, left: dict, later: list[tuple], now: float, work_s: float) -> dict:
-    """The episode's rounded finish band, the running step's end and each later step's
-    window (eta.project), held for a minute per run, step and round."""
+def rework(conn: sqlite3.Connection, now: float) -> tuple[float, float, int]:
+    """The relaunch rework band of the most recent delivered units (eta.rework_band), a minute."""
+    hit = _cache.get(("rework",))
+    if hit and now - hit[0] < HISTORY_TTL:
+        return hit[1]
+    units = eta.finished_units(conn, last_n=eta.REWORK_LAST_N)
+    band = eta.rework_band(eta.rework_shares(eta.episode_pairs(conn), units))
+    _cache[("rework",)] = (now, band)
+    return band
+
+
+def finish(state: dict, left: dict, later: list[tuple], now: float, work_s: float,
+           band: tuple[float, float, int] = (eta.REWORK_PRIOR, 2 * eta.REWORK_PRIOR, 0)) -> dict:
+    """The episode's rounded finish band with the measured relaunch rework (eta.with_rework),
+    the running step's end and each later step's window, held a minute per run, step and round."""
     key = ("eta", state["run"], state["step"], len(state["rounds"]))
     hit = _cache.get(key)
     if hit and now - hit[0] < ETA_TTL:
         return hit[1]
-    p = eta.project(now, left["left"], left["sigma"], later, now + EPISODE_CEILING_SECONDS - work_s)
+    ceiling = now + EPISODE_CEILING_SECONDS - work_s
+    p = eta.with_rework(eta.project(now, left["left"], left["sigma"], later, ceiling), now, band, ceiling)
     out = {**{k: (eta.round_to(p[k]) if p[k] else None) for k in ("finish_at", "lo", "hi")},
            "basis": left["basis"], "n_runs": left["n"], "long": p["long"], "capped": p["capped"],
            "steps_left": p["steps_left"], "plan": p["steps"], "step_end": clock(p["step_end_at"]),
-           "finish_raw": p["finish_at"]}
+           "finish_raw": p["finish_at"], "rework": p["rework"], "rework_n": p["rework_n"],
+           "firm": eta.firmness(p["rework_n"], p["long"], p["hi"] - p["finish_at"])}
     out.update(finish=clock(out["finish_at"]), range=clock_range(out["lo"], out["hi"]) if out["lo"] else "")
     _cache[key] = (now, out)
     return out
@@ -396,6 +411,13 @@ def home_timing(home: Path) -> list[dict]:
     if key not in _cache:
         _cache[key] = lp.jsonl_rows(lp.read_tail(path))
     return _cache[key]
+
+
+def work_rows(library: Path, codex: str, unit: str) -> list[dict]:
+    """The work grid under the live card (workgrid; timeline debate D3): clean shots folded."""
+    book = library_paths.book_folder(library, codex)
+    home = book / "episodes" / unit if book else None
+    return workgrid.fold(workgrid.grid(workgrid.read(home, unit))) if home and home.is_dir() else []
 
 
 def with_left(e: dict, now: float) -> dict:
@@ -471,7 +493,7 @@ def assemble(library, codex, unit, home, conn, db_rows, derived, now, proc_rows,
     work = work_before(home, state["t0"]) + elapsed
     runs = make_runs(home, state["run"])
     later = later_steps(state, hist, names, db_rows, unit, runs) if v["vital"] in RUNNING else []
-    e = finish(state, left, later, now, work) if v["vital"] in RUNNING else {}
+    e = finish(state, left, later, now, work, rework(conn, now)) if v["vital"] in RUNNING else {}
     return card(library, codex, unit, home, state, db_rows, hist, names, derived, v, tiles, e, now, work)
 
 
@@ -479,7 +501,10 @@ def card(library, codex, unit, home, state, db_rows, hist, names, derived, v, ti
     """The `models.Progress` dict."""
     step, e = now_step(state, names, tiles), with_left(e, now)
     url, qc = master(library, codex, home) if v["vital"] == "done" else (None, None)
-    made = make_steps(home_timing(home), make_start(home, state["t0"]))
+    since = make_start(home, state["t0"])
+    made = make_steps(home_timing(home), since)
+    looped = loops.loops_text(loops.attempts(db_rows, make_runs(home, state["run"])),
+                              loops.borrowed(home_timing(home), since), clock)
     return {"codex": codex, "unit": unit, "run_id": state["run"], "vital": v["vital"], "vital_reason": v["reason"],
             "quiet_s": v["quiet_s"], "budget_s": v["budget_s"], "budget_x": budget_x(v), "run_started": state["t0"],
             "step_started": state["step_t"], "now": now, "elapsed_s": now - state["t0"] if state["t0"] else 0.0,
@@ -490,7 +515,7 @@ def card(library, codex, unit, home, state, db_rows, hist, names, derived, v, ti
             "media_base": f"/thumb/{codex}/160/episodes/{unit}/", "lib_base": f"/lib/{codex}/episodes/{unit}/",
             "eta": e, "trace": [round(t, 1) for t in vitals.trace(derived["signals"], now)],
             "last_words": derived["refusal"] if v["vital"] == "refused" else derived["last_words"],
-            "why": derived.get("why", ""),
+            "why": derived.get("why", ""), "loops_text": looped,
             "title": title(v["vital"], step, e.get("finish", ""), unit), "master": url, "qc": qc}
 
 
@@ -538,6 +563,10 @@ def range_words(e: dict) -> str:
     out = []
     if e.get("range") and not e.get("long"):
         out.append(f"range {e['range']}")
+    if e.get("firm"):
+        out.append(e["firm"])
+    if (e.get("rework") or 0) >= 0.005:
+        out.append(f"rework +{round(e['rework'] * 100)} % ({e.get('rework_n', 0)} episodes)")
     if e.get("finish"):
         out.append(f"{e['steps_left']} step{'' if e['steps_left'] == 1 else 's'} to run")
     if e.get("n_runs"):

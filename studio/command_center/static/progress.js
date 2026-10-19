@@ -82,6 +82,8 @@
   function rangeText(e) {            /* progress_view.range_words: the range, the steps, the runs */
     var out = [];
     if (e.range && !e.long) out.push('range ' + e.range);
+    if (e.firm) out.push(e.firm);
+    if ((e.rework || 0) >= 0.005) out.push('rework +' + Math.round(e.rework * 100) + ' % (' + (e.rework_n || 0) + ' episodes)');
     if (e.finish) out.push(e.steps_left + ' step' + (e.steps_left === 1 ? '' : 's') + ' to run');
     if (e.n_runs) out.push(e.n_runs + ' runs' + (e.basis ? ' · ' + e.basis : ''));
     return out.join(' · ');
@@ -104,6 +106,8 @@
     text('range', rangeText(e));
     if (p.last_words) text('words', p.last_words);
     text('why', p.why || '');
+    text('loops', p.loops_text || '');
+    var lp = $('loops'); if (lp && lp.parentNode) lp.parentNode.hidden = !p.loops_text;
     var why = $('why'); if (why && why.parentNode) why.parentNode.hidden = !p.why || p.vital === 'done';
   }
   function patchRail(p) {

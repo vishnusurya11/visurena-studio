@@ -154,10 +154,22 @@ def test_prompts_are_done_when_newer_than_the_plan_and_the_measured_lines(ctx):
     assert not step_06_prompts.done(ctx) and lines.exists()
 
 
-def test_prompts_launch_the_lint_then_the_last_frame_check(ctx):
+def test_prompts_launch_the_lint_then_the_last_frame_check_then_the_grid_lint(ctx):
+    # timeline debate 2026-10-18, P1 (owner go): the grid prompts are linted before any grid is
+    # drawn -- grids.py --prompts is the same lint as step 07's wall, dry, no GPU
     step_06_prompts.run(ctx)
     assert ctx.launched == [["scripts/episode/takes_r2v.py", CODEX, "4", "--from-refs", "--prompts"],
-                            ["scripts/episode/no_last_frame.py", CODEX, "4"]]
+                            ["scripts/episode/no_last_frame.py", CODEX, "4"],
+                            ["scripts/episode/grids.py", CODEX, "4", "--prompts"]]
+
+
+def test_a_garbled_camera_head_is_an_advisory_at_step_06_never_a_refusal(ctx):
+    # camera_lint was built for cure-written text; on the writer's heads it is uncalibrated,
+    # so it is said, not walled (memory: constants outlive their world)
+    plan = {**PLAN, "shots": [{"index": 1, "setup": "yard", "motion": "pans from the left third"},
+                              {"index": 2, "setup": "yard", "motion": "holds on the gate"}]}
+    said = step_06_prompts.camera_advisories(plan)
+    assert len(said) == 1 and said[0].startswith("shot 1:") and "layout word" in said[0]
 
 
 # ---- 07 board -----------------------------------------------------------------

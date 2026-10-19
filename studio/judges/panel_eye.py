@@ -389,6 +389,39 @@ def read_panel(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -
     return [f for f in out if f], read is not None
 
 
+CACHE = "eye_cache"
+"""storyboard/eye_cache/<key>.json: one panel's read, kept while nothing it reads moved (P2)."""
+
+
+def read_key(shot: dict, setup: dict, path: Path, refs: list[Path]) -> str:
+    """What one panel's read depends on: its bytes, its shot's size/faces/frame/at_rest, the setup's
+    words, its references (size + mtime: sheets are megabytes), the judge's version and switches
+    (timeline debate 2026-10-18, P2: Jekyll ep01's eye re-read unchanged bytes, 46 of 08's 66 min)."""
+    import hashlib
+    h = hashlib.sha256(Path(path).read_bytes())
+    words = {k: shot.get(k) for k in ("size", "faces", "frame", "at_rest")}
+    stats = [(Path(r).name, *((Path(r).stat().st_size, Path(r).stat().st_mtime_ns) if Path(r).is_file() else ()))
+             for r in refs]
+    h.update(json.dumps([words, setup.get("described", ""), stats, VERSION, SCORED_BOXES],
+                        sort_keys=True, default=str).encode())
+    return h.hexdigest()[:16]
+
+
+def cached_read(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -> tuple[list[Fault], bool]:
+    """read_panel once per key; an unreadable read is never kept (a transient VL failure)."""
+    hit = Path(path).parent / CACHE / f"{read_key(shot, setup, path, refs)}.json"
+    try:
+        doc = json.loads(hit.read_text(encoding="utf-8"))
+        return [Fault(**f) for f in doc["faults"]], bool(doc["ok"])
+    except (OSError, ValueError, KeyError, TypeError):
+        pass
+    found, ok = read_panel(shot, setup, path, t, refs)
+    if ok:
+        hit.parent.mkdir(exist_ok=True)
+        hit.write_text(json.dumps({"faults": [f.model_dump() for f in found], "ok": ok}), encoding="utf-8")
+    return found, ok
+
+
 def judge(home: Path, plan: dict, *, book: Path | None = None, run=None, stage=None, reader=None,
           detect=None, embed=None) -> Verdict:
     """The verdict over every panel of the board, as it stands."""
@@ -402,7 +435,7 @@ def judge(home: Path, plan: dict, *, book: Path | None = None, run=None, stage=N
             if not path.exists():
                 continue
             setup = setups.get(shot.get("setup"), {}) or {}
-            found, ok = read_panel(shot, setup, path, t, refs_of(book, shot, setup))
+            found, ok = cached_read(shot, setup, path, t, refs_of(book, shot, setup))
             faults, reads, readable = faults + found, reads + 1, readable + int(ok)
     faults += repeat_faults(board, plan, rows_of(board, "panel_content.json"))
     faults += place_faults(home, plan, book)

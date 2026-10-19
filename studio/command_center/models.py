@@ -266,6 +266,9 @@ class Eta(BaseModel):
     n_runs: int = 0
     long: bool = False
     capped: bool = False
+    firm: str = ""                   # firm | rough (eta.firmness; timeline debate 2026-10-18, D2)
+    rework: float | None = None      # the median relaunch rework share the finish carries (0.11 = +11 %)
+    rework_n: int = 0                # the delivered units it was measured on
 
 
 class Progress(BaseModel):
@@ -293,6 +296,7 @@ class Progress(BaseModel):
     trace: list[float] = []
     last_words: str = ""
     why: str = ""                    # the run's newest warning or refusal (legacy_progress.why_of)
+    loops_text: str = ""             # relaunches + a step's work for an earlier step (loops.loops_text)
     title: str = ""
     master: str | None = None
     qc: dict[str, Any] | None = None

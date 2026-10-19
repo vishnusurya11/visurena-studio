@@ -245,6 +245,20 @@ section.live[data-still] .lv-trace polyline{stroke:var(--line)}
 .lv-step .lv-count small{font-size:var(--t-micro);color:var(--ink-2)}
 .lv-whyline{margin:0 0 10px;padding:6px 10px;border-left:3px solid var(--qc);background:var(--paper-2);font-size:var(--t-body);color:var(--ink)}
 .lv-whyline[hidden]{display:none}
+/* the loops line (timeline debate 2026-10-18, D1): relaunches and a step's work for an earlier step */
+.lv-loops{margin:0 0 10px;font-family:var(--f-mono);font-size:var(--t-label);color:var(--ink-2)}
+.lv-loops[hidden]{display:none}
+/* the work grid (timeline debate 2026-10-18, D3): a shot per row, a round per cell */
+.lv-work{margin:0 0 12px}
+.lv-work summary{cursor:pointer;font-size:var(--t-label);color:var(--ink-2)}
+.lv-work table{border-collapse:collapse;width:100%;margin-top:6px;font-size:var(--t-label)}
+.lv-work th{text-align:left;font-family:var(--f-mono);font-size:var(--t-micro);color:var(--ink-2);padding:2px 8px;border-bottom:1px solid var(--rule)}
+.lv-work td{padding:3px 8px;border-bottom:1px solid var(--rule);font-family:var(--f-mono);white-space:nowrap}
+.lv-work td span{font-family:inherit;color:var(--ink-2);white-space:normal}
+.lv-work .wclean td{color:var(--ink-2)}
+.lv-work .st-done{color:var(--ok)} .lv-work .st-fail{color:var(--accent)} .lv-work .st-flag{color:var(--qc)}
+.lv-work .st-waiting{color:var(--ink-2)} .lv-work .st-check{color:var(--think)}
+.lv-work td b{color:var(--ink)}
 .lv-sheet{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:5px;margin:0 0 14px;padding:8px;background:var(--paper-2);border:1px solid var(--rule)}
 .lt{position:relative;margin:0;aspect-ratio:1/1;background:var(--code);overflow:hidden;border-radius:var(--r-1);cursor:default}
 .lt img{display:block;width:100%;height:100%;object-fit:cover}

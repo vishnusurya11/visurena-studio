@@ -1,0 +1,22 @@
+{#- The work grid (timeline debate 2026-10-18, D3; owner go): one row per shot, a cell per stage
+    with its round and the word that put it there.  A loop is a round on a cell (r2, r3), never an
+    arrow.  Clean shots fold into one line.  Re-drawn with the card (workgrid.read; the run stream
+    replaces the reader later). -#}
+{% set glyph = {'done': '✓', 'waiting': '·', 'fail': '✕', 'flag': '⚑', 'check': '◌'} %}
+{% if live_work %}
+<details class="lv-work" open>
+  <summary><span class="eyebrow">work</span> board · panel · take, per shot</summary>
+  <table>
+    <thead><tr><th>shot</th><th>board</th><th>panel</th><th>take</th></tr></thead>
+    <tbody>
+    {% for r in live_work %}
+      {% if r.clean %}<tr class="wclean"><td class="mono">{{ r.clean }}</td><td colspan="3">{{ r.n }} clean</td></tr>
+      {% else %}<tr class="wrow"><td class="mono">{{ '%02d' | format(r.shot) }}</td>
+        {%- for k in ('board', 'panel', 'take') %}{% set c = r[k] %}
+        <td class="wc st-{{ c.state }}" title="{{ k }} · {{ c.state }}{% if c.round > 1 %} · round {{ c.round }}{% endif %}{% if c.note %} · {{ c.note }}{% endif %}">{{ glyph.get(c.state, '·') }}{% if c.round > 1 %} <b>r{{ c.round }}</b>{% endif %}{% if c.note %} <span>{{ c.note }}</span>{% endif %}</td>
+        {%- endfor %}</tr>{% endif %}
+    {% endfor %}
+    </tbody>
+  </table>
+</details>
+{% endif %}

@@ -140,6 +140,69 @@ def full_runs(xs, frac: float = FULL_RUN) -> list[float]:
     return [x for x in xs if x >= floor] or xs
 
 
+REWORK_PRIOR = 0.15
+"""The measured median rework share of the published WotW episodes (timeline debate 2026-10-18)."""
+FIRM_EPISODES, FIRM_SPREAD_S = 5, 30 * 60
+
+
+REWORK_LAST_N = 9
+"""The norm is the most recent delivered units: rework fell from 90-320 % (September) to 0-17 %."""
+
+
+def finished_units(conn: sqlite3.Connection, stage: str = "episode", last_n: int | None = None) -> set[str]:
+    """`codex/unit` of the units a run delivered (step 12 completed), the last_n most recent."""
+    rows = conn.execute("SELECT codex_id, unit FROM events WHERE stage = ? AND step_id = '12'"
+                        " AND event = 'completed' GROUP BY codex_id, unit ORDER BY MAX(event_ts) DESC"
+                        + (" LIMIT ?" if last_n else ""), (stage, last_n) if last_n else (stage,))
+    return {f"{c}/{u}" for c, u in rows}
+
+
+def episode_pairs(conn: sqlite3.Connection, stage: str = "episode") -> list[tuple[str, str, float]]:
+    """(codex/unit, step, seconds) of every same-run step pair, in event order (a unit name
+    repeats across books, so the key carries the codex)."""
+    rows = conn.execute("SELECT event_ts, step_id, event, run_id, codex_id || '/' || unit FROM events"
+                        " WHERE stage = ? AND event IN ('started', 'completed') ORDER BY id", (stage,))
+    return _pairs([tuple(r) for r in rows])
+
+
+def rework_shares(pairs, finished: set[str]) -> list[float]:
+    """Per finished unit: its repeat step time over its one full pass -- each step's LONGEST
+    pair (a first pair can be a resume that found its outputs in seconds, 2026-10-18)."""
+    longest: dict[tuple[str, str], float] = {}
+    total: dict[str, float] = {}
+    for unit, step, secs in pairs:
+        if unit in finished:
+            total[unit] = total.get(unit, 0.0) + secs
+            longest[(unit, step)] = max(longest.get((unit, step), 0.0), secs)
+    once: dict[str, float] = {}
+    for (unit, _), secs in longest.items():
+        once[unit] = once.get(unit, 0.0) + secs
+    return [total[u] / once[u] - 1.0 for u in total if once.get(u)]
+
+
+def rework_band(shares, prior: float = REWORK_PRIOR) -> tuple[float, float, int]:
+    """(median, 80th percentile, n) of the rework shares; the prior below three units."""
+    xs = sorted(shares)
+    if len(xs) < 3:
+        return (prior, 2 * prior, len(xs))
+    return (statistics.median(xs), statistics.quantiles(xs, n=10, method="inclusive")[7], len(xs))
+
+
+def with_rework(p: dict, now: float, band: tuple[float, float, int], ceiling_at: float) -> dict:
+    """The projection with relaunch rework on the time left: p50 x (1 + median share), the high
+    end x (1 + p80 share), the low end the clean first pass; all under the ceiling."""
+    left, (p50, p80, n) = max(0.0, p["finish_at"] - now), band
+    mid, hi = now + left * (1 + p50), now + left * (1 + p80)
+    return {**p, "lo": min(p["finish_at"], ceiling_at), "finish_at": min(mid, ceiling_at),
+            "hi": min(hi, ceiling_at), "capped": bool(p.get("capped")) or hi > ceiling_at,
+            "rework": p50, "rework_n": n}
+
+
+def firmness(n_units: int, long: bool, spread_s: float) -> str:
+    """`firm` with enough finished units, a step inside its measured runs and a tight band."""
+    return "firm" if n_units >= FIRM_EPISODES and not long and spread_s < FIRM_SPREAD_S else "rough"
+
+
 def sub_norm(files: list[list[dict]], subs) -> float:
     """Σ over `subs` of the median seconds timing.jsonl measured for each."""
     total = 0.0

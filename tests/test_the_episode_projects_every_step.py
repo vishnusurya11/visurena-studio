@@ -78,7 +78,8 @@ def test_the_rail_carries_each_steps_window():
                       {"id": "04", "will_run": False, "start_at": None, "end_at": None}]}
     steps = [{"id": "02", "state": "running"}, {"id": "03", "state": "waiting"}, {"id": "04", "state": "waiting"}]
     out = {s["id"]: s for s in progress_view.with_windows(steps, plan)}
-    assert out["03"]["will_run"] is True and "–" in out["03"]["window"]
+    # 32e9899 (owner 2026-10-18): a later step reads its duration `~15m`; the clock range is the tooltip
+    assert out["03"]["will_run"] is True and out["03"]["window"].startswith("~") and "–" in out["03"]["when"]
     assert out["04"]["will_run"] is False and out["04"]["window"] == "kept"
     assert out["02"].get("window", "") == ""
 
