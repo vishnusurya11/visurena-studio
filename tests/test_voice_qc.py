@@ -117,3 +117,53 @@ def test_a_numeral_heard_for_a_number_word_is_the_same_word():
     assert voice_qc.normalised("9. From Seven") == voice_qc.normalised("Nine from seven")
     assert voice_qc.error_rate("Travelers for Nevada, 7 from 5.", "Travellers for Nevada. Seven from five.") == 0.0
     assert voice_qc.normalised("twenty-nine days") == voice_qc.normalised("29 days")
+
+
+class TestPhonemeEqualEar:
+    """Jekyll ep01 l11: whisper heard 'check' for 'cheque' eight times -- a ruler fault."""
+
+    def test_a_homophone_pair_is_phoneme_equal(self):
+        assert voice_qc.phoneme_equal("check", "cheque")
+        assert voice_qc.phoneme_equal("knight", "night")
+
+    def test_floor_and_flour_are_not_one_sound(self):
+        assert not voice_qc.phoneme_equal("floor", "flour")
+
+    def test_a_name_the_dictionary_lacks_is_never_equal(self):
+        assert not voice_qc.phoneme_equal("utterson", "otterson")
+
+    def test_the_one_differing_pair_is_found(self):
+        assert voice_qc.differing_pair("Gold and a check.", "Gold, and a cheque.") == ("check", "cheque")
+
+    def test_two_differences_are_no_pair(self):
+        assert voice_qc.differing_pair("gold or a check", "gold and a cheque") is None
+
+    def test_a_filed_pair_reads_the_heard_word_as_the_book_word(self, tmp_path):
+        assert voice_qc.file_homophone(tmp_path, "Gold and a check.", "Gold, and a cheque.")
+        assert voice_qc.ear_lexicon(tmp_path) == {"check": "cheque"}
+        heard = voice_qc.heard_as("Gold and a check.", voice_qc.ear_lexicon(tmp_path))
+        assert voice_qc.error_rate(heard, "Gold, and a cheque.") == 0.0
+
+    def test_a_pair_that_sounds_different_is_not_filed(self, tmp_path):
+        assert not voice_qc.file_homophone(tmp_path, "the floor", "the flour")
+        assert not voice_qc.file_homophone(tmp_path, "Mr utterson", "Mr otterson")
+        assert voice_qc.ear_lexicon(tmp_path) == {}
+
+    def test_the_global_fold_still_keeps_pored_and_poured_apart(self):
+        assert voice_qc.error_rate("he poured it", "he pored it") > 0.0
+        assert voice_qc.error_rate("the floor", "the flour") > 0.0
+
+
+def test_heard_on_master_listens_once_per_identical_window(tmp_path):
+    calls = []
+    pcm = np.arange(240, dtype="int16").tobytes()
+    cache = tmp_path / "heard_cache.json"
+    def listen():
+        calls.append(1)
+        return "gold and a cheque"
+    first = voice_qc.heard_on_master(pcm, listen, cache)
+    again = voice_qc.heard_on_master(pcm, listen, cache)
+    assert first == again == "gold and a cheque" and len(calls) == 1
+    voice_qc.heard_on_master(pcm + b"\x01\x00", listen, cache)       # a different window re-listens
+    voice_qc.heard_on_master(pcm, listen, cache, model="other")      # a different model re-listens
+    assert len(calls) == 3

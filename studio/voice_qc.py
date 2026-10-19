@@ -286,6 +286,55 @@ def ear_lexicon(book: Path) -> dict[str, str]:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
+def _plain_words(text: str) -> list[str]:
+    """The words as written, lower-cased and unpunctuated -- NO spelling fold, so the
+    pair the fold does not already cover is still visible."""
+    flat = unicodedata.normalize("NFKD", APOSTROPHE.sub("", text)).encode("ascii", "ignore").decode()
+    return FILLER.sub(" ", flat.lower()).split()
+
+
+def differing_pair(heard: str, intended: str) -> tuple[str, str] | None:
+    """(heard word, intended word) when the two lines differ in exactly one word, else None."""
+    said, meant = _plain_words(heard), _plain_words(intended)
+    odd = [(a, b) for a, b in zip(said, meant) if a != b]
+    return odd[0] if len(said) == len(meant) and len(odd) == 1 else None
+
+
+def phoneme_equal(a: str, b: str) -> bool:
+    """Do two spellings share a pronunciation in CMUdict?  A word the dictionary lacks
+    (a book's name) is never equal: it cannot be proved the ear is wrong."""
+    import cmudict
+    table = cmudict.dict()
+    one, two = table.get(a.lower()), table.get(b.lower())
+    return bool(one and two and any(p in two for p in one))
+
+
+def file_homophone(book: Path, heard: str, intended: str) -> bool:
+    """A stable wrong transcript whose one differing word is a homophone of the line's
+    (Jekyll ep01 l11: 'check' for 'cheque') is filed in the book's ear lexicon, heard
+    word -> line word.  True when filed; the global fold and the other pairs stay alone."""
+    pair = differing_pair(heard, intended)
+    if pair is None or not phoneme_equal(*pair):
+        return False
+    path = Path(book) / "cast" / "ear_lexicon.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({**ear_lexicon(book), pair[0]: pair[1]}, indent=1), encoding="utf-8")
+    return True
+
+
+def heard_on_master(pcm: bytes, listen: Callable[[], str], cache: Path, model: str = "") -> str:
+    """What the ear heard in one 24 kHz window of the master, listened to ONCE: the key is
+    the sha256 of the window's PCM plus the model id; a miss listens and files the text."""
+    import hashlib
+    key = hashlib.sha256(pcm + (model or MODEL).encode("utf-8")).hexdigest()
+    cache = Path(cache)
+    seen = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
+    if key not in seen:
+        seen[key] = listen()
+        cache.write_text(json.dumps(seen), encoding="utf-8")
+    return seen[key]
+
+
 def with_lexicon(listen: Callable[[Path], str], lexicon: dict[str, str]) -> Callable[[Path], str]:
     """An ear that reads the book's names before anything scores it."""
     return lambda clip: heard_as(listen(clip), lexicon)

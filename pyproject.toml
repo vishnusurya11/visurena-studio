@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Visurena Studio - AI content studio: books to audiobooks, shorts, songs, novels"
 requires-python = ">=3.12"
 dependencies = [
+    "cmudict==1.1.3",
     "cupy-cuda12x==14.2.0",
     "fastapi==0.141.1",
     "fonttools==4.63.0",

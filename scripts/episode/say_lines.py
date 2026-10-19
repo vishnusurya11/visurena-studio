@@ -13,12 +13,13 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
-from studio import episode_emotion, episode_home, voice, voice_ear, voice_qc, voice_say
+from studio import episode_emotion, episode_home, step_attempts, step_caps, voice, voice_ear, voice_qc, voice_say
 from studio.episode_spec import Episode, Line
 
 SEED_BASE = 71000
@@ -209,16 +210,47 @@ def remember_best(record: dict, wav: Path, best: dict | None, out_dir: Path) -> 
 
 
 def carried(old: dict, new: dict) -> dict:
-    """A fresh render's record, still carrying the line's best try (ep01 l15 forgot its 0.63)."""
-    return dict(new, best_try=old["best_try"]) if old.get("best_try") else new
+    """A fresh render's record, still carrying the line's best try (ep01 l15 forgot its 0.63)
+    and the transcript the last try was heard as (`prior_heard`: two alike is a ruler fault)."""
+    out = dict(new, best_try=old["best_try"]) if old.get("best_try") else new
+    return dict(out, prior_heard=old["heard"]) if old.get("heard") else out
 
 
-def terminal(record: dict, best: dict | None) -> dict | None:
+LINES_WALL_DEFAULT_S = 600.0
+"""The lines wall until stages.yaml carries the `lines` cap row (K1: episode, 10 min)."""
+
+
+def lines_wall_s() -> float:
+    """The lines wall, seconds: the cap table's `lines` row, its own bucket apart from `voice`."""
+    try:
+        return step_caps.wall_s("lines")
+    except KeyError:
+        return LINES_WALL_DEFAULT_S
+
+
+def wall_spent(home: Path) -> bool:
+    """The seconds the line loop has already used (persisted per episode) reached the lines wall."""
+    return step_attempts.seconds(home, "lines") >= lines_wall_s()
+
+
+def ear_cure(book: Path, record: dict, among: dict, listen) -> bool:
+    """Two identical wrong transcripts whose one differing word sounds like the line's
+    (cmudict) are the ear's fault, not the mouth's: file the pair in the book's ear lexicon
+    and listen to the SAME wav again -- no render.  True when the line now passes."""
+    heard = record.get("heard") or ""
+    if not heard or heard != record.get("prior_heard"):
+        return False
+    if not voice_qc.file_homophone(book, heard, record["text"]):
+        return False
+    return not listen_all([record], book, listen, among=among)
+
+
+def terminal(record: dict, best: dict | None, force: bool = False) -> dict | None:
     """keep_best flagged: the best rightly heard try once the line has had TERMINAL_TRIES;
     `keep_best_far` when it sits more than TERMINAL_MARGIN under its floor (step caps,
     2026-10-18: voice is tier 2, it never parks the episode).  None while it may still be
     cured, or when no try's words were heard right (that still refuses)."""
-    if record.get("tries", 0) < TERMINAL_TRIES or best is None:
+    if (record.get("tries", 0) < TERMINAL_TRIES and not force) or best is None:
         return None
     far = best.get("similarity", 0.0) < best.get("floor", 0.0) - TERMINAL_MARGIN
     return dict(best, passed=True, flagged="keep_best_far" if far else "keep_best", tries=record["tries"])
@@ -359,18 +391,28 @@ def prune_stale(records: dict, count: int) -> dict:
     return {k: v for k, v in records.items() if 0 <= int(k) < count}
 
 
-def keep_terminal(records: dict, index: int, out_dir: Path) -> bool:
-    """Remember a failing line's best try; at the terminal put it back on disk, flagged."""
+def keep_terminal(records: dict, index: int, out_dir: Path, force: bool = False) -> bool:
+    """Remember a failing line's best try; at the terminal (or, forced, at the wall) put it
+    back on disk, flagged."""
     import shutil
     record, wav = records[index], Path(out_dir) / f"l{index:02d}.wav"
     record["best_try"] = remember_best(record, wav, record.get("best_try"), out_dir)
-    if (kept := terminal(record, record["best_try"])) is None:
+    if (kept := terminal(record, record["best_try"], force)) is None:
         return False
     shutil.copyfile(wav.with_suffix(".best.wav"), wav)
     records[index] = kept
     print(f"  keep_best l{index:02d} sim {kept['similarity']:.2f}/{kept['floor']:.2f} after "
           f"{kept['tries']} tries -- flagged", flush=True)
     return True
+
+
+def at_wall(records: dict, todo: list, out_dir: Path, home: Path, rounds: int) -> list:
+    """The lines wall is spent: every failing line takes its terminal now (best rightly heard
+    try kept, flagged) and a CAP line says so; the lines left are those with no rightly heard try."""
+    left = [line for line in todo if not keep_terminal(records, line.index, out_dir, force=True)]
+    print(step_caps.cap_line("lines", step_attempts.count(home, "lines"), rounds,
+                             step_attempts.seconds(home, "lines"), len(todo) - len(left)), flush=True)
+    return left
 
 
 def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool = False) -> None:
@@ -398,7 +440,13 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
     todo = [line for line in episode.lines if not records.get(line.index, {}).get("passed")]
     start = {line.index: records.get(line.index, {}).get("tries", 0) for line in todo}
     rounds = rounds_for(start)
+    home = episode_home.home(book, number)
     for attempt in range(rounds):
+        if wall_spent(home):
+            todo = at_wall(records, todo, out_dir, home, rounds)
+            episode_home.write_json(sheet, [records[k] for k in sorted(records)])
+            break
+        began = time.time()
         for line in todo:
             have = records.get(line.index)
             if attempt == 0 and have and "passed" not in have and (out_dir / f"l{line.index:02d}.wav").exists():
@@ -409,8 +457,9 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
             print(f"  said l{line.index:02d} {line.speaker:16} {records[line.index]['seconds']:.2f}s",
                   flush=True)
             episode_home.write_json(sheet, [records[k] for k in sorted(records)])
-        failed = listen_all([records[line.index] for line in todo], book, voice_qc.any_transcriber(),
-                            among=records)
+        ear = voice_qc.any_transcriber()
+        failed = listen_all([records[line.index] for line in todo], book, ear, among=records)
+        failed = [i for i in failed if not ear_cure(book, records[i], records, ear)]
         for line in todo:  # a redo keeps whichever try scored higher, across every attempt
             if line.index in previous:
                 wav = out_dir / f"l{line.index:02d}.wav"
@@ -430,6 +479,7 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
         failed = [i for i in failed if not keep_terminal(records, i, out_dir)]
         episode_home.write_json(sheet, [records[k] for k in sorted(records)])
         todo = [line for line in todo if line.index in failed]
+        step_attempts.spend(home, "lines", time.time() - began)
         if not todo:
             break
     print(f"{len(records) - len(todo)}/{len(records)} lines said their line -> {sheet}", flush=True)
