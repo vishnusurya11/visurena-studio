@@ -1,6 +1,6 @@
-"""The warp measure keeps `tracks: [{median_px, life}]` in render px (P07); a take whose every
-planned face is tracked, mostly, at SMALL_FACE_PX or more is declined before the refine's own
-tracker runs.  The wall was 60 px (ep01: 6 of 8 picks ended no_faces, 579 s of CPU) and is 120
+"""The warp measure keeps `tracks: [{median_px, min_px, life}]` in render px (P07; min_px since
+2026-10-19); a take whose every planned face is tracked, mostly, at SMALL_FACE_PX or more AT ITS
+SMALLEST is declined before the refine's own tracker runs (a median-only record goes to the tracker).  The wall was 60 px (ep01: 6 of 8 picks ended no_faces, 579 s of CPU) and is 120
 since 2026-10-19 (a 60-110 px face draws a 5-10 px eye).  Never face-at-end (T08's is 0.31
 while its child track is under 60 px)."""
 from __future__ import annotations
@@ -25,7 +25,7 @@ def card(n=1):
 
 
 def test_a_148_px_face_is_declined_though_the_shot_is_wide():
-    assert not fr.eligible(card(), ["wide"], dq([{"median_px": 148.0, "life": 60}]))
+    assert not fr.eligible(card(), ["wide"], dq([{"median_px": 148.0, "min_px": 140.0, "life": 60}]))
 
 
 def test_a_34_px_face_is_selected():

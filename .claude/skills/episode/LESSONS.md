@@ -73,7 +73,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Gate notes moved out of GATES.md (board states, known gaps, speed arms)
 - Jekyll Kawajiri ep01 retro (the 13 failures, the five bricks, each package's lessons, what is owed)
 - The framing floor (face-blur fix #3, 2026-10-19: a face that matters is planned big enough for an eye)
-- The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19: why it skipped the blurry shots, T01, the YOLO worker)
+- The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19: why it skipped the blurry shots, T01, the YOLO worker, the pre-filter's median)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

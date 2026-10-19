@@ -107,14 +107,23 @@ TRACKED_HIGH = 0.8
 
 def readable(card: dict, dq: dict | None) -> bool:
     """Every planned face is tracked by the warp gate, for most of the take, at SMALL_FACE_PX
-    or more: the tracker need not run.  MTCNN misses small faces, so fewer tracks than faces
-    proves nothing."""
+    or more AT ITS SMALLEST: the tracker need not run.  Never the track's median (a push-in from
+    80 to 300 px reads 190 there); a record holding medians alone is left to the tracker.
+    MTCNN misses small faces, so fewer tracks than faces proves nothing."""
     from studio import warp_gate
     m = warp_measure(dq)
     tracks = m.get("tracks") or []
-    height = warp_gate.smallest_track(m)
+    height = warp_gate.smallest_face(m)
     return (bool(tracks) and len(tracks) >= len(card.get("faces") or [None]) and m.get("share", 0) >= TRACKED_HIGH
             and height is not None and height >= SMALL_FACE_PX)
+
+
+def soft_faces(card: dict, dq: dict | None) -> int:
+    """The faces a take's refine is priced for: its planned faces less the warp tracks readable
+    at their smallest (a close-up's big face costs no GPU), at least one."""
+    tracks = warp_measure(dq).get("tracks") or []
+    seen = sum(1 for t in tracks if t.get("min_px") is not None and t["min_px"] >= SMALL_FACE_PX)
+    return max(len(card.get("faces") or []) - seen, 1)
 
 
 def retake_owed(dq: dict, taken: int) -> bool:

@@ -1858,5 +1858,15 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   calibrate on the bench). The keep/decline walls are unchanged.
 - **Stale rows.** A `no_faces` row of the 60 px wall is owed a new look and its jobless round is
   refunded until the first new decision; ep01 therefore re-tracks its six.
-- Tests: `tests/test_face_refine_reaches_every_soft_face.py`, `tests/test_face_track_holds_the_crop_still.py`,
+- **Skeptic round: one shortcut still read the median.** The pre-filter that declines a take
+  before the tracker runs read the warp gate's MTCNN track MEDIAN: a dolly-in from 80 to 300 px
+  reads 190 there, so the owner's kind of shot (T06 pushes in from 60 px) would be declined on any
+  episode whose dq kept tracks. The warp gate now records each track's smoothed minimum (`min_px`)
+  and only that declines; a median-only record goes to the tracker. A rule restated in two places
+  must be one function or one field: "smallest" in the refine, "median" in its shortcut.
+- **Also fixed:** the price counts only faces not already readable (`fr.soft_faces`), so a
+  close-up's big face no longer pushes the clock to cut the soft takes; a detect worker that idled
+  out (IDLE_S 60) between takes is restarted, never handed to MTCNN (which drops cel faces and
+  writes a `none_found` that stands); a clock cut over a stale `no_faces` row keeps its refund.
+- Tests: `tests/test_face_refine_judges_a_push_in_by_its_smallest_face.py`, `tests/test_face_refine_reaches_every_soft_face.py`, `tests/test_face_track_holds_the_crop_still.py`,
   `tests/test_face_detect_finds_anime_faces.py`.

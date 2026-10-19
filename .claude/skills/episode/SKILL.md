@@ -568,8 +568,9 @@ or new flicker, and the face count holds; else the unrefined take. Decisions per
 owed a new look, its jobless round refunded). Step 09 queues the refine on the
 GPU lane right behind the renders (a REFINE job: after renders and retakes, before the GPU checks) and refines what
 the ladder left owed once at the end. ~110 s per face per take (ep01: 11 takes, 1,512 s priced); the FIRST thing cut
-for time, never a check. A take whose every planned face the warp gate tracked >= 80 % of it at >= 120 px is declined
-before tracking; `none_found` / `all_readable` spend no round. Assemble pastes the kept crops at CUT scale on the
+for time, never a check. A take whose every planned face the warp gate tracked >= 80 % of it at >= 120 px AT ITS
+SMALLEST (each track's `min_px`, never its median: a push-in reads big there) is declined before tracking; a record
+with medians only goes to the tracker. Priced per face not already readable (`fr.soft_faces`); `none_found` / `all_readable` spend no round. Assemble pastes the kept crops at CUT scale on the
 decoded frames, before the denoise and the one upscale (owner 2026-10-18, 24caaeb); after the upscale only audio is
 muxed. On `av3` (the default) the pass runs in the portable python's worker (`studio/master_av3.py`),
 which rebuilds the paste from its spans: the same geometry, the same frame loop. By hand: `uv run python scripts/episode/face_refine.py <book> <n> [take ...]`.

@@ -71,3 +71,8 @@ ep01 (docs/audit/2026-10-19_face_blur/pipeline_audit.md section 2). Now:
 - **Walls unchanged** (identity, seam, flicker, faces, change). The window now follows the face's
   smoothed size, so seam and flicker are measured with every window brought to the track's median
   side (`face_gate.at_side`).
+- **Pre-filter reads the smallest face too.** A take is declined before the tracker only when the
+  warp gate's MTCNN tracks are >= 120 px at their smallest (`min_px`, running median over 51 frames;
+  recorded from 2026-10-19), never their median (a push-in from 80 to 300 px has a median near 190).
+  The one 120 px wall is read on boxes from two detectors (MTCNN there, face_yolov8m here) that
+  draw a face box differently; uncalibrated between them, so the bench should log both on its takes.

@@ -77,10 +77,6 @@ STALE = ("no_faces",)
 its round was spent with no job (fixed by P07, 41fba62).  Jekyll ep01 T05 T06 T13 T21 T23 T24."""
 
 
-def status_of(doc: dict, index: int) -> str | None:
-    return (doc.get(f"T{index:02d}") or {}).get("status")
-
-
 def current(doc: dict, room: Path, index: int) -> bool:
     """A decision exists for exactly these take bytes (a cut or a stale row is still owed)."""
     entry = doc.get(f"T{index:02d}") or {}
@@ -92,18 +88,23 @@ def pending(book: Path, number: int, among: list[int] | None = None) -> list[int
     room, home = room_of(book, number), episode_home.home(book, number)
     doc = read(room / DOC, {})
     return [i for i in selection(book, number) if (among is None or i in among) and not current(doc, room, i)
-            and not refined_out(home, i, status_of(doc, i))]
+            and not refined_out(home, i, refund_of(doc.get(f"T{i:02d}")))]
 
 
 def refine_key(index: int) -> str:
     return f"face_refine.T{index:02d}"
 
 
-def refined_out(home: Path, index: int, status: str | None = None) -> bool:
+def refund_of(entry: dict | None) -> int:
+    """1 for a STALE row's jobless round, kept by a clock cut that replaced it (`refund`)."""
+    entry = entry or {}
+    return 1 if entry.get("status") in STALE or entry.get("refund") else 0
+
+
+def refined_out(home: Path, index: int, refund: int = 0) -> bool:
     """The take has had its refines (owner 2026-10-18: 1 per take, persisted in attempts.json);
-    a STALE row's jobless round is refunded until the first new decision replaces the row."""
-    spent = step_attempts.count(home, refine_key(index)) - (1 if status in STALE else 0)
-    return spent >= step_caps.rounds("face_refine")
+    a STALE row's jobless round is refunded until the first decision that is not a cut replaces it."""
+    return step_attempts.count(home, refine_key(index)) - refund >= step_caps.rounds("face_refine")
 
 
 def count_refine(home: Path, index: int) -> None:
@@ -123,10 +124,11 @@ def wall_spent(began: float, now: float) -> bool:
 
 def owed(book: Path, number: int, among: list[int] | None = None) -> dict[int, float]:
     """take -> the GPU seconds its refine is priced at, for every pending take
-    (one face per staged person, over the take's frames)."""
-    cards = {int(c["index"]): c for c in read(room_of(book, number) / "prompts.json", [])}
-    return {i: fr.price(len(cards[i].get("faces") or []), int(cards[i].get("frames") or fr.REF_FRAMES))
-            for i in pending(book, number, among)}
+    (one face per planned face the warp gate did not track readable, over the take's frames)."""
+    room = room_of(book, number)
+    cards = {int(c["index"]): c for c in read(room / "prompts.json", [])}
+    return {i: fr.price(fr.soft_faces(cards[i], read(room / f"T{i:02d}.dq.json", None)),
+                        int(cards[i].get("frames") or fr.REF_FRAMES)) for i in pending(book, number, among)}
 
 
 def write_entry(room: Path, index: int, entry: dict) -> None:
@@ -138,9 +140,11 @@ def write_entry(room: Path, index: int, entry: dict) -> None:
 def record_cut(room: Path, indices: list[int], price: float, book: Path, number: int, why: str = "") -> None:
     """The clock (or the refine's wall) cut the refine: said in refine.json, the takes still owed one."""
     why = why or f"the clock's reserve needs the time: {price:.0f} s priced, cut first"
+    doc = read(room / DOC, {})
     for i in indices:
+        refund = {"refund": 1} if refund_of(doc.get(f"T{i:02d}")) else {}
         write_entry(room, i, {"status": "cut", "take_sha8": sha8(room / f"T{i:02d}.mp4"), "people": [],
-                              "why": why, "decided": stamp()})
+                              "why": why, "decided": stamp(), **refund})
 
 
 def stamp() -> str:

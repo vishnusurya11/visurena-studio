@@ -72,6 +72,10 @@ class Worker:
             self.close()
             raise RuntimeError("the face detect worker never said ready")
 
+    def exited(self) -> bool:
+        """The worker left on its own (IDLE_S without a take, studio/face_detect_worker)."""
+        return self.proc.poll() is not None
+
     def __call__(self, take: Path) -> Dets:
         if (gone := self.proc.poll()) is not None:
             raise RuntimeError(f"the face detect worker had exited (code {gone})")
@@ -125,7 +129,11 @@ class Finder:
         return by_frames(frames, self.loose)
 
     def ready(self):
-        """The live worker; a GPU one that sees a render arrive is swapped for a CPU one."""
+        """The live worker; a GPU one that sees a render arrive is swapped for a CPU one, and one
+        that idled out between two takes is started again (never handed to MTCNN for that)."""
+        if self.worker is not None and self.worker.exited():
+            print("FACE DETECT: the worker idled out between takes; started again", flush=True)
+            self.close()
         if self.worker is not None and self.device == "cuda" and self.busy():
             print("DEVICE face detect -> cpu: a render arrived", flush=True)
             self.close()

@@ -104,6 +104,9 @@ class FakeWorker:
     def close(self):
         self.closed = True
 
+    def exited(self):
+        return False
+
 
 def finder(route="cpu", busy=False, fail=False, started=None):
     started = [] if started is None else started

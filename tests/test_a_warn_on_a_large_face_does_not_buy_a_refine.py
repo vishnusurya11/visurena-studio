@@ -15,7 +15,8 @@ def dq(**warp):
 
 
 def tracked(px: float) -> list[dict]:
-    return [{"median_px": px, "life": 120}]
+    """A steady face: its smallest (min_px, read by the refine since 2026-10-19) is its median."""
+    return [{"median_px": px, "min_px": px, "life": 120}]
 
 
 def test_a_warn_with_a_face_tracked_readable_is_not_refined():

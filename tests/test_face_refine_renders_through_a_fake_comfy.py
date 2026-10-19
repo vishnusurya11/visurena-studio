@@ -98,7 +98,7 @@ def test_a_wide_take_is_pending_until_refined(tmp_path):
 def test_a_take_the_warp_gate_tracked_readable_is_not(tmp_path):
     w = Room(tmp_path, size="wide")
     dq = json.loads((w.room / "T00.dq.json").read_text())
-    dq["measures"] = {"warp": {"S": 0.1, "Se": 0.1, "share": 1.0, "tracks": [{"median_px": 150.0, "life": 22}]}}
+    dq["measures"] = {"warp": {"S": 0.1, "Se": 0.1, "share": 1.0, "tracks": [{"median_px": 150.0, "min_px": 150.0, "life": 22}]}}
     (w.room / "T00.dq.json").write_text(json.dumps(dq))
     assert cli.pending(w.book, 1) == []
 

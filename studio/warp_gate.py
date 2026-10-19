@@ -30,6 +30,8 @@ from pathlib import Path
 
 import numpy as np
 
+from studio.face_track import SIZE_SMOOTH, running_median
+
 SIDE = 384
 EVERY = 2
 PROB_MIN = 0.9
@@ -126,9 +128,19 @@ def pick(e: np.ndarray, idx: list[int]) -> float | None:
 
 
 def track_stats(tracks: list[list], scale: float) -> list[dict]:
-    """Each track's median face height in render px and its life in detections."""
-    return [{"median_px": round(float(np.median([(b[3] - b[1]) / scale for _, b in tr])), 1), "life": len(tr)}
-            for tr in tracks]
+    """Each track's median face height in render px, its smallest (min_px) and its life in detections."""
+    return [{"median_px": round(float(np.median(heights_px(tr, scale))), 1), "min_px": smallest_px(tr, scale),
+             "life": len(tr)} for tr in tracks]
+
+
+def heights_px(track: list, scale: float) -> np.ndarray:
+    return np.array([(b[3] - b[1]) / scale for _, b in track], float)
+
+
+def smallest_px(track: list, scale: float) -> float:
+    """The track's smallest face after a running median over SIZE_SMOOTH frames (face_track.track_px):
+    a push-in from 80 to 300 px is an 80 px face though its median reads 190; a one-detection dip is not."""
+    return round(float(running_median(heights_px(track, scale), max(SIZE_SMOOTH // EVERY, 1)).min()), 1)
 
 
 def face_width(tracks: list[list]) -> float | None:
@@ -169,6 +181,15 @@ def smallest_track(m: dict | None) -> float | None:
     """The smallest tracked median face height (render px) in a warp measure; None unlogged."""
     heights = [t["median_px"] for t in (m or {}).get("tracks") or []]
     return min(heights) if heights else None
+
+
+def smallest_face(m: dict | None) -> float | None:
+    """The smallest tracked face (each track's min_px) in a warp measure; None when unlogged
+    or when any track logged only its median (records before 2026-10-19)."""
+    tracks = (m or {}).get("tracks") or []
+    if not tracks or any("min_px" not in t for t in tracks):
+        return None
+    return min(t["min_px"] for t in tracks)
 
 
 def row(m: dict | None):

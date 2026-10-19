@@ -360,7 +360,9 @@ that"):** no plan size and no face-at-end is read. The refine's tracker (`face_y
 MTCNN behind it) runs on every take with a planned face but an insert; each track whose smallest face (running median
 over 51 frames) is under `SMALL_FACE_PX` 120 is refined (a 60-110 px face draws a 5-10 px eye; ep01 replay: T01 T05 T06
 T08 T10 T13 T15 T18 T20 T23 T26, close-ups skipped). A take whose every planned face the warp gate tracked >= 80 % of it
-at >= 120 px is declined before tracking. Denoise `fr.denoise_for`: 0.45 at 60 px, +0.05 per halving, 0.40-0.55.
+at >= 120 px at its SMALLEST (`warp_gate` track `min_px`, a running median over 51 frames; never the median, which
+reads a push-in from 80 px as 190) is declined before tracking; a median-only record goes to the tracker. The clock
+prices only the faces not already readable (`fr.soft_faces`). Denoise `fr.denoise_for`: 0.45 at 60 px, +0.05 per halving, 0.40-0.55.
 `none_found` / `all_readable` / `no_cast` spend no round; a `no_faces` row of the old 60 px wall is owed a new look.
 A warp, gait, pulse, frozen-whole, lip-sync or lag hard fail may follow the refine (a warp FAIL after its one seed
 retake); identity, clones, content, lettering, look and leak still bar it. ep01 T01 had no row because the 2026-10-18
