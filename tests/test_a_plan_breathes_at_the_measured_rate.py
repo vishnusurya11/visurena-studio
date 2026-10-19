@@ -91,7 +91,8 @@ def test_the_battery_holds_pace_hard_on_a_plan_nothing_was_drawn_from(tmp_path):
     from scripts.episode import plan_check
     from studio import episode_home
     ep = Episode.model_validate(_plan(14, beat=0.0))
-    assert plan_check.pace_gate(ep, tmp_path, 3) == 2
+    # words + pauses, and since c65583f the breathless cuts: the gate returns every fault, hard
+    assert plan_check.pace_gate(ep, tmp_path, 3) == len(plan_gates.pace_faults(ep)) >= 3
     (episode_home.home(tmp_path, 3) / "takes").mkdir(parents=True)
     assert plan_check.pace_gate(ep, tmp_path, 3) == 0           # rendered: printed as advice
 
