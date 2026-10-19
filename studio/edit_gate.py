@@ -32,10 +32,26 @@ ep01, the same cut both ways: Lanczos 2x segments 0.35-0.55, RTX 4x 0.97-1.48
 of another picture (SAME_FRAME) and a held run still fail as before."""
 
 
+SEGMENT_MEAN_AV3 = 2.5
+"""The cap on an av3 master (hqdn3d temporal denoise + x4 upscale).  MEASURED on
+Jekyll ep01 (28 segments, offset 0 on all, cuts 27/27 exact): 1.47-2.10, three
+over RTX's 2.0 (T01 2.06, T11 2.102, T12 2.017).  A wrong picture reads 32-63."""
+HOLD_FRAMES_DENOISED = 6
+"""A run of repeats an edit hold needs on a denoised master: the temporal denoise
+smooths slow motion into 3-frame near-repeats the take does not have (ep01 T13,
+T15, T19, T23: every run exactly 3); a freeze edit is a quarter second or more."""
+
+
 def segment_cap(upscale: str) -> float:
-    """The segment mean cap for the upscale that made the master ('' = unrecorded).
-    av3 (2026-10-18) sharpens like RTX: 1.50-1.77 on C|M|W against RTX's 1.64-1.69."""
-    return SEGMENT_MEAN_RTX if upscale.startswith("rtx") or upscale == "av3" else SEGMENT_MEAN
+    """The segment mean cap for the upscale that made the master ('' = unrecorded)."""
+    if upscale == "av3":
+        return SEGMENT_MEAN_AV3
+    return SEGMENT_MEAN_RTX if upscale.startswith("rtx") else SEGMENT_MEAN
+
+
+def hold_least(upscale: str) -> int:
+    """The shortest run of added repeats that is a hold, for the master's upscale."""
+    return HOLD_FRAMES_DENOISED if upscale == "av3" else HOLD_FRAMES
 
 
 DUP = 0.6
@@ -144,8 +160,15 @@ def held_runs(master_dups: set[int], take_dups: set[int], least: int = HOLD_FRAM
     return [r for r in runs if len(r) >= least]
 
 
+def segment_ok(row: dict, cap: float, least: int = HOLD_FRAMES) -> bool:
+    """The verdict on a measured segment row: offset 0, close, no other picture, no hold."""
+    holds = [h for h in row["held"] if len(h) >= least]
+    close = row["mean"] <= cap or row["flat"]
+    return row["offset"] == 0 and close and not row["frames_off"] and not holds
+
+
 def segment_match(master: np.ndarray, take: np.ndarray, start: int, n: int,
-                  cap: float = SEGMENT_MEAN) -> dict:
+                  cap: float = SEGMENT_MEAN, hold: int = HOLD_FRAMES) -> dict:
     """Is master[start:start+n] take[0:n]?  Offset, mean, the frames that are another
     picture, and the holds the edit added."""
     per = [frame_diff(master[start + i], take[i]) if start + i < len(master) and i < len(take) else 255.0
@@ -153,10 +176,9 @@ def segment_match(master: np.ndarray, take: np.ndarray, start: int, n: int,
     offset, _ = best_offset(master, take, start, n)
     row = {"offset": offset, "mean": round(float(np.mean(per)), 3),
            "frames_off": [i for i, d in enumerate(per) if d > SAME_FRAME],
-           "held": held_runs(repeats(master[start:start + n + 1]), repeats(take[:n + 1])),
+           "held": held_runs(repeats(master[start:start + n + 1]), repeats(take[:n + 1]), hold),
            "flat": level_shift(per)}
-    close = row["mean"] <= cap or row["flat"]
-    row["ok"] = offset == 0 and close and not row["frames_off"] and not row["held"]
+    row["ok"] = segment_ok(row, cap, hold)
     return row
 
 
@@ -367,7 +389,7 @@ def edit_integrity(master_path: Path, placed: dict, records: list[dict], book: P
     segments = [{**row, **(still_match(master, row["start"], row["n"], stills[row["take"]])
                            if row["take"] in stills else
                            segment_match(master, takes[row["take"]], row["start"], row["n"],
-                                         cap=segment_cap(upscale)))} for row in plan]
+                                         cap=segment_cap(upscale), hold=hold_least(upscale)))} for row in plan]
     cuts = [{"at": nxt["start"],
              "exact": (cut_beside_still(master, nxt["start"])
                        if prev["take"] in stills or nxt["take"] in stills else

@@ -399,8 +399,9 @@ used and encoder are in `takes/work/upscale_used.json` and the QC report's `upsc
 fallback is an advisory row). QC has no timeout (D16), runs with gpu=False and 6 torch threads.
 **The edit gate reads the cut G-DEAD made** (`edit_gate.dead_view` over `takes/work/dead_cuts.json`:
 cut shots lose their rows, slowed takes take their new length); loudness and true peak share one
-audio-only (`-vn`) ffmpeg run cached by (path, size, mtime). Open: the edit gate reads the av3
-hqdn3d x4 pixels as off/held (ep01: 7 of 28 segments, mean diff 2.02-2.10 vs about 2.0).
+audio-only (`-vn`) ffmpeg run cached by (path, size, mtime). An av3 master (hqdn3d + x4) takes
+its own segment cap 2.5 and a hold needs 6 repeats, not 3 (`segment_cap`/`hold_least`; ep01: 7 of 28
+segments read off at mean 2.02-2.10 and 3-frame runs, now 0; a swapped take or a real hold still fails).
 
 
 ## Publish — `youtube_upload.py`
