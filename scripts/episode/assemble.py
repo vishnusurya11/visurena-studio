@@ -849,7 +849,7 @@ def black_chip(out: Path) -> Path:
 
 
 def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 0, *,
-         upscale: master_upscale.Upscale, wrap=None) -> Path:
+         upscale: master_upscale.Upscale, wrap=None, encoder: str = "cpu") -> Path:
     """After the last frame: the book's animated title card if it exists (its
     own sound kept), then black with silence.  No text is burned anywhere.
 
@@ -886,7 +886,9 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # MAIN SESSION 2026-10-18: the default is av3 (hqdn3d per shot + realesr-animevideov3
     # 4x); its denoise is temporal, so it is told where every shot starts.
     cuts = cut_frames(work, parts) if upscale.engine == "av3" else []
-    master_upscale.master(listing, out, W, H, upscale, FPS, wrap=wrap, cuts=cuts)   # wrap: the face refine's paste
+    # encoder: x264, or NVENC p7 when the device router found the GPU idle (owner 2026-10-18)
+    master_upscale.master(listing, out, W, H, upscale, FPS, wrap=wrap, cuts=cuts,   # wrap: the face refine's paste
+                          encoder=encoder)
     # The concat demuxer does not refuse a part whose picture does not match the
     # first one: it drops it and reports success.  That is how a master four
     # frames short shipped without anyone seeing it, so the join counts itself.
@@ -1039,8 +1041,10 @@ def upscaled_tail(book: Path, number: int, mixed: Path, title: Path, out: Path, 
     from studio import episode_clock
     master_upscale.say(why)
     note = f"{up.label()} -> {'x'.join(map(str, master_upscale.size(W, H, up)))}" + (f"; {why}" if why else "")
-    with episode_clock.timed(book, number, "upscale", note=note, within="assemble"):
-        return tail(mixed, title, out, work, number, upscale=up, wrap=wrap)
+    from studio import video_encoder
+    encoder = video_encoder.encoder_for("master encode")
+    with episode_clock.timed(book, number, "upscale", note=f"{note}; encode {encoder}", within="assemble"):
+        return tail(mixed, title, out, work, number, upscale=up, wrap=wrap, encoder=encoder)
 
 
 def record_layout(cut: Path, master: Path, *, main: int, card: int, upscale: str = "") -> None:

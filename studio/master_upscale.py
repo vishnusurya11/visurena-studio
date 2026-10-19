@@ -35,6 +35,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+from studio.video_encoder import video_args
+
 SETTING = "VISURENA_MASTER_UPSCALE"
 ENCODE = ["-c:v", "libx264", "-preset", "slow", "-crf", "14", "-pix_fmt", "yuv420p",
           "-movflags", "+faststart", "-c:a", "aac", "-b:a", "256k", "-ar", "48000"]
@@ -124,13 +126,14 @@ def resolved(env=None) -> tuple[Upscale, str]:
     return settle(want, missing_for(want))
 
 
-def lanczos_argv(listing: Path, out: Path, width: int, height: int, up: Upscale) -> list[str]:
+def lanczos_argv(listing: Path, out: Path, width: int, height: int, up: Upscale,
+                 encoder: str = "cpu") -> list[str]:
     """The pre-2026-10-14 master encode: join, Lanczos scale, x264, in one ffmpeg."""
     w, h = size(width, height, up)
     return ["ffmpeg", "-y", "-v", "error", "-itsoffset", START_SHIFT,
             "-f", "concat", "-safe", "0", "-i", str(listing),
             "-vf", f"scale={w}:{h}:flags=lanczos,format=yuv420p", "-af", "asetpts=PTS-STARTPTS",
-            "-fps_mode", "vfr", "-muxdelay", "0", "-muxpreload", "0", *ENCODE, str(out)]
+            "-fps_mode", "vfr", "-muxdelay", "0", "-muxpreload", "0", *video_args(ENCODE, encoder), str(out)]
 
 
 def decode_argv(listing: Path, width: int, height: int) -> list[str]:
@@ -142,16 +145,43 @@ def decode_argv(listing: Path, width: int, height: int) -> list[str]:
             "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
 
 
-def encode_argv(listing: Path, out: Path, width: int, height: int, fps: int) -> list[str]:
-    """Upscaled raw frames from stdin, the joined cut's sound from the listing."""
+def encode_argv(listing: Path, out: Path, width: int, height: int, fps: int, encoder: str = "cpu") -> list[str]:
+    """Upscaled raw frames from stdin, the joined cut's sound from the listing; x264, or
+    NVENC when the router sent the encode to the GPU (studio/video_encoder)."""
     return ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
             "-s", f"{width}x{height}", "-framerate", str(fps), "-i", "-",
             "-itsoffset", START_SHIFT, "-f", "concat", "-safe", "0", "-i", str(listing),
             "-map", "0:v", "-map", "1:a", "-af", "asetpts=PTS-STARTPTS",
-            "-muxdelay", "0", "-muxpreload", "0", *ENCODE, str(out)]
+            "-muxdelay", "0", "-muxpreload", "0", *video_args(ENCODE, encoder), str(out)]
 
 
 Frame = Callable[["object"], "object"]
+
+
+def pasted(read: Callable[[int], bytes], paste: Frame | None, width: int, height: int) -> Callable[[int], bytes]:
+    """The decoder's frames with the face paste applied at CUT scale (owner 2026-10-18:
+    every picture edit before the one upscale, none after it); `read` itself when none."""
+    if paste is None:
+        return read
+    import numpy as np
+
+    def out(n: int) -> bytes:
+        buf = read(n)
+        if len(buf) != width * height * 3:
+            return buf
+        return np.ascontiguousarray(paste(np.frombuffer(buf, np.uint8).reshape(height, width, 3))).tobytes()
+    return out
+
+
+def at_cut(wrap) -> Frame | None:
+    """assemble's wrap (a partial of face_paste.Paster built for master scale) as a paste
+    at the cut's own scale with no upscale inside it; a plain wrap gets the identity."""
+    if wrap is None:
+        return None
+    keywords = getattr(wrap, "keywords", None)
+    if keywords is not None and "spans" in keywords:
+        return wrap.func(lambda f: f, **{**keywords, "factor": 1})
+    return wrap(lambda f: f)
 
 
 def pump(read: Callable[[int], bytes], write: Callable[[bytes], object], width: int, height: int,
@@ -189,15 +219,23 @@ class Rtx:
 
 
 def streamed(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
-             upscaler: Frame) -> int:
-    """decode | upscale | encode; refuses a failed ffmpeg on either side."""
+             upscaler: Frame, encoder: str = "cpu", paste: Frame | None = None) -> int:
+    """decode | paste at cut scale | upscale | encode; refuses a failed ffmpeg on either
+    side, and a failure kills the decoder rather than wait on its full pipe."""
     w, h = size(width, height, up)
     dec = subprocess.Popen(decode_argv(listing, width, height), stdout=subprocess.PIPE)
-    enc = subprocess.Popen(encode_argv(listing, out, w, h, fps), stdin=subprocess.PIPE)
+    enc = subprocess.Popen(encode_argv(listing, out, w, h, fps, encoder), stdin=subprocess.PIPE)
     try:
-        n = pump(dec.stdout.read, enc.stdin.write, width, height, upscaler)
+        n = pump(pasted(dec.stdout.read, paste, width, height), enc.stdin.write, width, height, upscaler)
+    except BaseException:
+        for proc in (dec, enc):
+            proc.kill()
+        raise
     finally:
-        enc.stdin.close()
+        try:
+            enc.stdin.close()
+        except OSError:
+            pass
         codes = enc.wait(), dec.wait()
     if any(codes):
         raise RuntimeError(f"the {up.label()} master encode failed: encoder {codes[0]}, decoder {codes[1]}")
@@ -206,21 +244,22 @@ def streamed(listing: Path, out: Path, width: int, height: int, up: Upscale, fps
 
 def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
            upscaler: Frame | None = None, wrap: Callable[[Frame], Frame] | None = None,
-           cuts: list[int] | None = None) -> Path:
-    """The joined cut, upscaled and encoded once.  `upscaler` replaces the GPU in tests;
-    `wrap` takes each upscaled frame on its way to the encoder (the face refine's
-    paste at master scale, studio/face_paste.Paster); `cuts` are the frames each new
+           cuts: list[int] | None = None, encoder: str = "cpu") -> Path:
+    """The joined cut, upscaled and encoded once (`encoder`: the router's device).  `upscaler` replaces the GPU in tests;
+    `wrap` is the face refine's paste (studio/face_paste.Paster), applied at CUT scale
+    to every frame BEFORE the upscale (owner 2026-10-18: the upscale is the last picture
+    operation, only muxing follows it); `cuts` are the frames each new
     shot starts on (av3's denoise starts fresh there)."""
     if up.engine == "lanczos":
         if wrap is not None:
             print("FACE REFINE: the lanczos fallback has no frame loop; nothing pasted", file=sys.stderr, flush=True)
-        subprocess.run(lanczos_argv(listing, out, width, height, up), check=True)
+        subprocess.run(lanczos_argv(listing, out, width, height, up, encoder), check=True)
         return out
     if up.engine == "av3":
-        return av3_master(listing, out, width, height, up, fps, upscaler, wrap, cuts or [])
+        return av3_master(listing, out, width, height, up, fps, upscaler, wrap, cuts or [], encoder)
     effect = upscaler or Rtx(width, height, up)
     try:
-        streamed(listing, out, width, height, up, fps, wrap(effect) if wrap else effect)
+        streamed(listing, out, width, height, up, fps, effect, encoder, paste=at_cut(wrap))
     finally:
         if upscaler is None:
             effect.close()
@@ -228,27 +267,53 @@ def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: 
 
 
 def av3_master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
-               upscaler, wrap, cuts: list[int]) -> Path:
+               upscaler, wrap, cuts: list[int], encoder: str = "cpu") -> Path:
     """In process with a stand-in model (tests); else the portable python's worker,
-    which rebuilds the face paste from its spans and pastes after the 4x, as RTX did."""
+    which rebuilds the face paste from its spans and pastes at cut scale BEFORE the 4x.
+    A stalled or failed worker falls back to rtx4x (lanczos without RTX), said."""
     from studio import master_av3
     if upscaler is not None:
-        master_av3.streamed(listing, out, width, height, up.factor, fps, wrap(upscaler) if wrap else upscaler, cuts)
+        master_av3.streamed(listing, out, width, height, up.factor, fps, upscaler, cuts, encoder=encoder,
+                            paste=at_cut(wrap))
         return out
     python, weights = av3_paths()
     job = out.with_name(out.stem + ".av3_job.json")
-    job.write_text(json.dumps(av3_job(listing, out, width, height, up, fps, spans_of(wrap), cuts, weights)),
-                   encoding="utf-8")
-    subprocess.run(worker_argv(python, job), check=True)
+    job.write_text(json.dumps(av3_job(listing, out, width, height, up, fps, spans_of(wrap), cuts, weights,
+                                      encoder)), encoding="utf-8")
+    from studio import compute_device
+    with compute_device.claim("av3 master"):     # the card is ours outside ComfyUI's queue
+        code = run_worker(python, job)
+    if code:
+        return av3_fallback(code, listing, out, width, height, fps, wrap, encoder)
     return out
 
 
+AV3_STALLED = 75
+"""The av3 worker's exit code for a stall (studio/master_av3.STALLED)."""
+
+
+def run_worker(python: Path, job: Path) -> int:
+    """The av3 worker under the portable python; its exit code."""
+    return subprocess.run(worker_argv(python, job)).returncode
+
+
+def av3_fallback(code: int, listing: Path, out: Path, width: int, height: int, fps: int,
+                 wrap, encoder: str) -> Path:
+    """A stalled or failed av3 worker: the master again through rtx4x, or lanczos
+    without RTX here -- said where the run's log reads it, never silent."""
+    up = LANCZOS if rtx_missing() else CHOICES["rtx4x"]
+    what = "stalled" if code == AV3_STALLED else f"failed (exit {code})"
+    print(f"CAP upscale: av3 {what}, fell back to {name_of(up)}", file=sys.stderr, flush=True)
+    return master(listing, out, width, height, up, fps, wrap=wrap, encoder=encoder)
+
+
 def av3_job(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
-            spans: list, cuts: list[int], weights: Path) -> dict:
+            spans: list, cuts: list[int], weights: Path, encoder: str = "cpu") -> dict:
     """Everything the worker needs, as JSON (a transient beside the output, never kept)."""
     from studio import master_av3
     return {"listing": str(listing), "out": str(out), "width": width, "height": height, "factor": up.factor,
-            "fps": fps, "cuts": list(cuts), "weights": str(weights), "spans": master_av3.spans_json(spans)}
+            "fps": fps, "cuts": list(cuts), "weights": str(weights), "spans": master_av3.spans_json(spans),
+            "encoder": encoder}
 
 
 def worker_argv(python: Path, job: Path) -> list[str]:

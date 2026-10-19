@@ -15,6 +15,7 @@ loop runs in process with a stand-in model (tests).
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import threading
@@ -80,6 +81,7 @@ class Segmented:
         self.feeder.start()
 
     def feed(self, proc, frame: bytes, count: int | None) -> None:
+        """One shot's frames into its denoise; a killed pipeline ends it quietly."""
         need, k = len(frame), 0
         try:
             while True:
@@ -90,8 +92,13 @@ class Segmented:
                 if len(frame := self.upstream(need)) < need:
                     self.ended = True
                     break
+        except OSError:
+            self.ended = True
         finally:
-            proc.stdin.close()
+            try:
+                proc.stdin.close()
+            except OSError:
+                pass
 
     def close_current(self) -> None:
         self.feeder.join()
@@ -101,20 +108,105 @@ class Segmented:
         self.done = self.ended
 
 
+STALL_S = 60.0
+"""No frame through the pump for this long is a stall: the pipeline is killed."""
+STALLED = 75
+"""The worker's exit code for a stall (studio/master_upscale.AV3_STALLED)."""
+
+
+class Stalled(RuntimeError):
+    """The pump moved no frame for STALL_S; the pipeline was killed."""
+
+
+class Watchdog:
+    """Calls `fire` once when `tick` has not been called for `seconds`."""
+
+    def __init__(self, seconds: float, fire, poll: float = 1.0):
+        self.seconds, self.fire, self.poll = seconds, fire, poll
+        self.last, self.fired, self.halt = time.monotonic(), False, threading.Event()
+        self.thread = threading.Thread(target=self.watch, daemon=True)
+
+    def start(self) -> "Watchdog":
+        self.thread.start()
+        return self
+
+    def tick(self) -> None:
+        self.last = time.monotonic()
+
+    def watch(self) -> None:
+        while not self.halt.wait(self.poll):
+            if time.monotonic() - self.last > self.seconds:
+                self.fired = True
+                self.fire()
+                return
+
+    def stop(self) -> None:
+        self.halt.set()
+
+
+def kill_all(*procs) -> None:
+    """Every live process of the pipeline, killed: no pipe is left blocking another."""
+    for proc in procs:
+        if proc is not None and proc.poll() is None:
+            proc.kill()
+
+
+def ticking(write, dog: Watchdog):
+    def out(data: bytes):
+        write(data)
+        dog.tick()
+    return out
+
+
 def streamed(listing: Path, out: Path, width: int, height: int, factor: int, fps: int,
-             upscaler, cuts: list[int], filt: str = PREFILTER) -> int:
-    """decode | denoise per shot | upscale (+ paste) | encode; refuses a failed ffmpeg."""
+             upscaler, cuts: list[int], filt: str = PREFILTER, encoder: str = "cpu",
+             paste=None, stall_s: float = STALL_S, hard_exit=None) -> int:
+    """decode | face paste at cut scale | denoise per shot | upscale | encode.  A failure
+    or a stall kills the whole pipeline and surfaces; it never waits on a blocked pipe."""
     dec = subprocess.Popen(mu.decode_argv(listing, width, height), stdout=subprocess.PIPE)
-    enc = subprocess.Popen(mu.encode_argv(listing, out, width * factor, height * factor, fps), stdin=subprocess.PIPE)
+    enc = subprocess.Popen(mu.encode_argv(listing, out, width * factor, height * factor, fps, encoder),
+                           stdin=subprocess.PIPE)
+    seg = Segmented(mu.pasted(dec.stdout.read, paste, width, height), width, height, lengths(cuts), filt)
+    dog = Watchdog(stall_s, lambda: stall(dec, enc, seg, hard_exit), poll=min(1.0, stall_s / 4)).start()
     try:
-        n = mu.pump(Segmented(dec.stdout.read, width, height, lengths(cuts), filt).read,
-                    enc.stdin.write, width, height, upscaler)
+        n = mu.pump(seg.read, ticking(enc.stdin.write, dog), width, height, upscaler)
+    except BaseException as failed:
+        kill_all(dec, enc, seg.proc)
+        if dog.fired:
+            raise Stalled(f"the av3 pass moved no frame for {stall_s:.0f} s") from failed
+        raise
     finally:
-        enc.stdin.close()
-        codes = enc.wait(), dec.wait()
+        dog.stop()
+        codes = finish(dec, enc, seg)
+    if dog.fired:
+        raise Stalled(f"the av3 pass moved no frame for {stall_s:.0f} s")
     if any(codes):
         raise RuntimeError(f"the av3 master encode failed: encoder {codes[0]}, decoder {codes[1]}")
     return n
+
+
+def stall(dec, enc, seg: "Segmented", hard_exit) -> None:
+    """The watchdog's act: the pipeline killed, said, and (in the worker) the process ended."""
+    print(f"CAP upscale: av3 stalled (no frame for {STALL_S:.0f} s); the pipeline is killed",
+          file=sys.stderr, flush=True)
+    kill_all(dec, enc, seg.proc)
+    if hard_exit is not None:
+        hard_exit()
+
+
+def finish(dec, enc, seg: "Segmented") -> tuple[int, int]:
+    """The encoder closed and both ends reaped; the decoder is killed first if it still
+    holds frames nobody will read (a short cut, an early end)."""
+    try:
+        enc.stdin.close()
+    except OSError:
+        pass
+    code = enc.wait()
+    try:
+        return code, dec.wait(timeout=30)
+    except subprocess.TimeoutExpired:
+        kill_all(dec, seg.proc)
+        return code, dec.wait()
 
 
 def spans_json(spans: list[fp.Span]) -> list[dict]:
@@ -147,19 +239,30 @@ class Av3:
             return (y.clamp(0, 1) * 255).round().byte().permute(1, 2, 0).contiguous().cpu().numpy()
 
 
-def run(job: dict, upscaler=None) -> int:
-    """One job: the model (or a stand-in), the face paste at master scale when the job
-    carries spans, then the streamed pass."""
-    effect = upscaler or Av3(job["weights"])
+def paste_of(job: dict):
+    """The face paste at CUT scale (owner 2026-10-18: paste, then the one upscale), or None."""
     spans = spans_back(job["spans"])
-    frame = fp.Paster(effect, spans, job["width"], job["height"], job["factor"]) if spans else effect
+    return fp.Paster(lambda f: f, spans, job["width"], job["height"], 1) if spans else None
+
+
+def run(job: dict, upscaler=None, hard_exit=None) -> int:
+    """One job: the model (or a stand-in), the face paste at cut scale ahead of it when
+    the job carries spans, then the streamed pass."""
+    effect = upscaler or Av3(job["weights"])
     return streamed(Path(job["listing"]), Path(job["out"]), job["width"], job["height"], job["factor"],
-                    job["fps"], frame, job["cuts"])
+                    job["fps"], effect, job["cuts"], encoder=job.get("encoder", "cpu"), paste=paste_of(job),
+                    hard_exit=hard_exit)
 
 
 def main(argv: list[str]) -> None:
+    """The worker: a stall exits with STALLED (even when the main thread is stuck in
+    CUDA, the watchdog ends the process), so the repo can fall back."""
     t0 = time.perf_counter()
-    n = run(json.loads(Path(argv[1]).read_text(encoding="utf-8")))
+    try:
+        n = run(json.loads(Path(argv[1]).read_text(encoding="utf-8")), hard_exit=lambda: os._exit(STALLED))
+    except Stalled as stuck:
+        print(f"CAP upscale: av3 stalled: {stuck}", file=sys.stderr, flush=True)
+        raise SystemExit(STALLED)
     print(json.dumps({"av3_frames": n, "wall_s": round(time.perf_counter() - t0, 1)}), flush=True)
 
 

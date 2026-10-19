@@ -1,5 +1,6 @@
 """The paste rides the master's one upscale pass (studio/master_upscale.master,
-`wrap=`): each frame is upscaled, then pasted, then encoded -- no second encode.
+`wrap=`): each cut frame is pasted, then upscaled, then encoded -- no second encode
+(owner 2026-10-18: the upscale is the last picture operation).
 The Lanczos fallback has no frame loop, so it pastes nothing and SAYS so.  And
 assemble records the cut's layout (`work/layout.json`) so the paste can find
 where every take sits.  ffmpeg on testsrc, a CPU stand-in for RTX VSR."""
@@ -31,20 +32,21 @@ def listing_of(tmp_path, parts):
     return listing
 
 
-def test_a_wrap_sees_every_upscaled_frame_before_the_encode(tmp_path):
+def test_a_wrap_pastes_every_cut_frame_before_the_upscale(tmp_path):
+    """Owner 2026-10-18: the paste is at cut scale, ahead of the one upscale."""
     listing = listing_of(tmp_path, [clip(tmp_path / "a.mp4", 0.5)])
     seen = []
 
     def wrap(up):
         def paste(frame):
             out = up(frame).copy()
-            out[100:150, 100:150] = 255
+            out[25:37, 25:37] = 255
             seen.append(out.shape)
             return out
         return paste
 
-    out = mu.master(listing, tmp_path / "o.mp4", 64, 64, mu.choice({}), 24, upscaler=nearest, wrap=wrap)
-    assert seen and set(seen) == {(256, 256, 3)}
+    out = mu.master(listing, tmp_path / "o.mp4", 64, 64, mu.CHOICES["rtx4x"], 24, upscaler=nearest, wrap=wrap)
+    assert seen and set(seen) == {(64, 64, 3)}
     frame = subprocess.run(["ffmpeg", "-v", "error", "-i", str(out), "-frames:v", "1", "-f", "rawvideo",
                             "-pix_fmt", "rgb24", "-"], capture_output=True).stdout
     img = np.frombuffer(frame, np.uint8).reshape(256, 256, 3)
