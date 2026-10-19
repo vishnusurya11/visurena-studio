@@ -521,6 +521,19 @@ def refuse_double_pins(anchors: list[tuple[str, int]], index: int) -> None:
         raise SystemExit(f"take {index:02d}: a cell is pinned twice: {anchors}")
 
 
+PANEL_AHEAD = False
+"""The prompt pass (`--prompts`, step 06) runs before step 08 draws a panel: a take whose panel
+the board will draw is built as the plan's dry build builds it -- panel staged, no picture count
+-- so the lint judges the band the render uses (Jekyll Kawajiri ep01: 227-234 words refused on
+the 240 references floor; the render's panel band is 150)."""
+
+
+def panel_ahead(book: Path, number: int, index: int, panel: Path | None) -> bool:
+    """In the prompt pass, the board will draw this take's panel and none is drawn yet."""
+    from studio import refs_only
+    return PANEL_AHEAD and panel is None and index not in refs_only.read(episode_home.home(book, number))
+
+
 def storyboard_panel(book: Path, number: int, index: int) -> Path | None:
     """This take's own storyboard panel, at H3's native size, or None.
 
@@ -591,10 +604,12 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     voice = [(book / measured[l.index]["rel_path"], round(measured[l.index]["at"] - take["t_start"], 3))
              for l in spoken]
     setup = episode.setups[first.setup]
+    ahead = panel_ahead(book, number, first.index, panel)
+    staged = panel is not None or ahead
     prompt = ro.build(shots, take["placed"], lines, at, take["frames"], faces, physicals(book, setup),
                       setup.described, narrator_of(episode.lines), ends=end_numbers(segs, ends), setup=setup,
-                      refs=len(refs), fps=FPS, props=props, panel=panel is not None, pin=PIN_PANEL,
-                      **staged_facts(sizes, FROM_REFS, faces, panel=panel is not None))
+                      refs=None if ahead else len(refs), fps=FPS, props=props, panel=staged, pin=PIN_PANEL,
+                      **staged_facts(sizes, FROM_REFS, faces, panel=staged))
     route = {"sizes": sizes}
     return {"index": first.index, "shots": take["shots"], "section": first.section, "setup": first.setup,
             "lane": "dialogue" if spoken else "narration", "sizes": sizes, "workflow": card_workflow(route),
@@ -1251,6 +1266,8 @@ def lint_wall(book: Path, episode, built: list[dict]) -> None:
 
 
 def prompts(book_id: str, number: int) -> None:
+    global PANEL_AHEAD
+    PANEL_AHEAD = True              # the board draws the panels after this pass
     book, episode = opened(book_id, number)
     built = cards(book, episode, number)
     out = episode_home.write_json(episode_home.takes_dir(book, number, "r2v") / "prompts.json", built)

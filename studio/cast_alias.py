@@ -46,6 +46,19 @@ def owner_of(fragments: list[str], rows: dict[str, str]) -> str | None:
     return winners[0] if best and len(winners) == 1 else None
 
 
+CHILD_NOUNS = ("girl", "boy", "child", "lad", "lass")
+
+
+def child_nouns(said: str) -> list[str]:
+    """'the fallen girl' -> 'the girl' (Jekyll Kawajiri ep01 T07: the plan tagged the
+    girl once and said 'the girl' / 'the child' bare, so <Subject 2> was never cited).  A man's
+    epithet is never shortened: 'the man' is too many people."""
+    words = said.lower().split()
+    if len(words) < 3 or words[0] != "the" or words[-1] not in CHILD_NOUNS:
+        return []
+    return [f"the {words[-1]}"]
+
+
 def aliases(texts: list[str], rows: dict[str, str]) -> dict[str, list[str]]:
     """{who: [epithet, ...]} over a plan's texts; a phrase two people share binds nobody."""
     seen: dict[str, set[str]] = {}
@@ -53,6 +66,9 @@ def aliases(texts: list[str], rows: dict[str, str]) -> dict[str, list[str]]:
         for said, frags in tags_in(text):
             if (who := owner_of(frags, rows)) is not None:
                 seen.setdefault(said.lower(), set()).add(who)
+    for said, owners in list(seen.items()):
+        for short in child_nouns(said):
+            seen.setdefault(short, set()).update(owners)
     out: dict[str, list[str]] = {}
     for said, owners in seen.items():
         if len(owners) == 1:

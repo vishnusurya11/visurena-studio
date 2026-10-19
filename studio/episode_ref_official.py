@@ -943,6 +943,8 @@ def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -
     rest = clauses_of(motion)[1][1:]
     if not rest:
         return []
+    if line_end is not None:     # every follow-on is timed from the line's end: none is spoken (P8, T22/T23)
+        rest = [SPEAKING.sub("", c) for c in rest]
     marks = ([line_end] + beats(line_end, t1, len(rest) - 1)) if line_end is not None else beats(t0, t1, len(rest))
     if not marks:   # a segment too short for a first beat: every clause rides the tail (ep11 shot 5, 1.5 s)
         return [f"Then {', then '.join(rest)}, and {motion_noun(rest[-1])} continues to the last frame of the shot."]
