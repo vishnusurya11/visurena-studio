@@ -7,9 +7,11 @@ No GPU, no ComfyUI, no write to the episode (it lists the episode's files before
 It reports:
   - the repair window the next drive runs on (a backed leftover continues; an unbacked one is closed at
     drive start; else the owner's redo of `--steps` is assumed) and whether the owner's order still stands;
-  - step 09's render pass, take by take, built exactly as takes_r2v builds its cards: `current` (its words,
-    pictures and canvas are the card's), `frozen` (the repair keeps the delivered or measured bytes;
-    take_currency.frozen_in) or `render` (and why) -- a launch is right only when this says 0;
+  - step 09's render pass, take by take, built exactly as takes_r2v builds its cards and asked its own
+    question (takes_r2v.wants_render over take_currency.held_in): `current`, `frozen` (the repair keeps
+    the delivered or measured bytes) or `render` (and why) -- a launch is right only when this says 0 --
+    and the same pass on a relaunch after the drive ends (the closed repair row governs);
+  - the terminal's best-draw swaps: a take an archived draw beats is KEPT when frozen, else it SWAPS;
   - the dq / content / eye passes, the retake ladder's rounds, the refine owed and the tiny-face rung,
     each priced against the repair cap (and against the episode's own clock, for contrast);
   - what steps 10-13 would do.
@@ -40,34 +42,35 @@ CHECK_RESERVE_S = 550.0
 
 # ---- one take ------------------------------------------------------------------------------
 
-def stale_why(built: str, take: Path, pictures: list, canvas: tuple[int, int]) -> str | None:
-    """The first input is_current refuses, in its own order; None when the take is current."""
-    graph = tc.graph_of(take)
-    if graph.exists() and graph.stat().st_mtime - take.stat().st_mtime > tc.UNFINISHED_S:
-        return "unfinished render (graph newer than the take)"
-    said = tc.recorded_prompt(take)
-    if said is None or said.strip() != (built or "").strip():
-        return "unknown provenance" if said is None else "prompt"
-    if tc.recorded_canvas(take) != tuple(canvas):
-        return "canvas"
-    from studio.comfy import staged_name
-    return None if {staged_name(p) for p in pictures} <= tc.staged_images(take) else "pictures"
-
-
 def take_state(c: dict, take: Path, home: Path, window: dict | None, pictures: list,
                canvas: tuple[int, int], records: dict) -> tuple[str, str]:
-    """(current | frozen | render, why) as takes_r2v.wants_render + current_to decide it, under `window`."""
-    if not take.exists():
-        return "render", "no take on disk"
-    rec = records.get(int(c["index"]))
-    if rec is None or rec.get("shots") != c["shots"]:
-        return "render", "no shots.json record for this grouping"
-    why = stale_why(c.get("prompt") or "", take, pictures, canvas)
+    """(current | frozen | render, why): takes_r2v.wants_render over take_currency.held_in under `window`
+    -- the render pass's own question, never a copy of it (skeptic minor 2) -- with stale_why's reason."""
+    from scripts.episode import takes_r2v
+    built = c.get("prompt") or ""
+    held = lambda: tc.held_in(window, built, take, home, pictures, canvas)  # noqa: E731
+    if takes_r2v.wants_render(c, take, records, None, held):
+        return "render", render_why(c, take, records, tc.stale_why(built, take, pictures, canvas))
+    why = tc.stale_why(built, take, pictures, canvas)
     if why is None:
         return "current", "words, pictures and canvas are the card's"
-    if held := tc.frozen_in(window, take, home):
-        return "frozen", f"{held} bytes {tc.sha8_of(take)} kept by the repair (stale by {why} under today's rule)"
-    return "render", f"stale: {why}"
+    froze = tc.frozen_in(window, take, home)
+    return "frozen", f"{froze} bytes {tc.sha8_of(take)} kept by the repair (stale by {why} under today's rule)"
+
+
+def render_why(c: dict, take: Path, records: dict, stale: str | None) -> str:
+    """Why the render pass renders this card: no take, no record of its grouping, or the stale input."""
+    rec = records.get(int(c["index"]))
+    if not take.exists():
+        return "no take on disk"
+    if rec is None or rec.get("shots") != c["shots"]:
+        return "no shots.json record for this grouping"
+    return f"stale: {stale}"
+
+
+def closed_form(window: dict) -> dict:
+    """The row `repair_clock.close` writes for this window: what governs a relaunch after the drive ends."""
+    return {**window, "closed_at": time.time(), "spent_s": 0.0}
 
 
 def count_line(rows: dict[int, tuple[str, str]]) -> str:
@@ -272,8 +275,41 @@ def report(conn, codex: str, number: int, steps: list[str]) -> list[str]:
     lines = [f"repair window: {how}" + (f"; cap {window['cap_s']:.0f} s" if window else ""),
              order_line(conn, home, steps, redo, pending), "", count_line(rows)]
     lines += [f"  T{i:02d} {state:7} {why}" for i, (state, why) in sorted(rows.items())]
-    return lines + [""] + checks_lines(home) + [""] + refine_lines(codex, number, home, window) + [""] + \
-        downstream_lines(codex, number, home)
+    lines += [relaunch_line(render_rows(codex, number, home, closed_form(window)) if window else rows)]
+    return lines + [""] + checks_lines(home) + swap_block(home, window) + [""] + \
+        refine_lines(codex, number, home, window) + [""] + downstream_lines(codex, number, home)
+
+
+def relaunch_line(rows: dict[int, tuple[str, str]]) -> str:
+    """Step 09 on a relaunch after this drive ends (receipt cleared, window closed into repair.jsonl)."""
+    return "relaunch after the drive ends (the closed repair row governs): " + count_line(rows)
+
+
+def swap_block(home: Path, window: dict | None) -> list[str]:
+    """The terminal's best-draw swaps: keep_best_draws runs on every take the new eye faults, so every
+    take an archived draw beats is named, measured from its own dq record (take_ladder.recorded_draw)."""
+    from studio import take_ladder
+    said = swap_lines(home, window, take_ladder.recorded_draw)
+    return [f"terminal best-draw swaps (if the eye faults the take): {len(said)} candidate(s)"] + said
+
+
+def swap_lines(home: Path, window: dict | None, runner) -> list[str]:
+    """One line per take whose archived draw beats it (take_ladder.pick_best; nothing moves): KEPT when
+    the repair froze its bytes, else SWAPS."""
+    from studio import take_ladder
+    room, out = Path(home) / TAKES, []
+    for take in sorted(room.glob("T??.mp4")):
+        scored = take_ladder.scored_draws(room, int(take.stem[1:3]), runner)
+        best = take_ladder.pick_best(room, int(take.stem[1:3]), runner, scored)
+        if best is not None:
+            froze = tc.frozen_in(window, take, home)
+            out.append(f"  {take.stem} best draw attempts/{best.name} ({measure(scored[best])}) over the take "
+                       f"({measure(scored[take])}): " + (f"KEPT, {froze} bytes frozen" if froze else "SWAPS"))
+    return out
+
+
+def measure(m: dict) -> str:
+    return f"hard {m['hard']}, Se {m.get('Se')}"
 
 
 def main(codex: str, number: int, steps: list[str]) -> int:

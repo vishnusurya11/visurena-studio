@@ -59,9 +59,36 @@ def test_a_missing_take_or_record_renders(ep01):
 
 
 def test_the_stale_reason_names_the_first_input_that_moved(ep01):
-    assert dry.stale_why(NEW_WORDS, ep01.take, [], ep01.canvas) == "prompt"
-    assert dry.stale_why(graph_prompt("T00.graph.json"), ep01.take, [], (576, 1024)) == "canvas"
-    assert dry.stale_why(graph_prompt("T00.graph.json"), ep01.take, [], ep01.canvas) is None
+    assert tc.stale_why(NEW_WORDS, ep01.take, [], ep01.canvas) == "prompt"
+    assert tc.stale_why(graph_prompt("T00.graph.json"), ep01.take, [], (576, 1024)) == "canvas"
+    assert tc.stale_why(graph_prompt("T00.graph.json"), ep01.take, [], ep01.canvas) is None
+
+
+def test_the_dry_check_asks_the_render_pass_its_own_question(ep01, monkeypatch):
+    """Skeptic minor 2: the state is takes_r2v.wants_render over take_currency.held_in, never a copy."""
+    own = {**card(), "prompt": graph_prompt("T00.graph.json")}
+    monkeypatch.setattr(tc, "held_in", lambda *a, **k: False)
+    assert dry.take_state(own, ep01.take, ep01.home, None, [], ep01.canvas, RECORDS)[0] == "render"
+
+
+def test_a_relaunch_after_the_drive_reads_the_closed_row(ep01):
+    window = repair_clock.open_window(ep01.home, {"09": 38}, 1_000.0)
+    closed = dry.closed_form(window)
+    assert closed["steps"] == ["09"] and "closed_at" in closed
+    assert dry.take_state(card(), ep01.take, ep01.home, closed, [], ep01.canvas, RECORDS)[0] == "frozen"
+
+
+# ---- the terminal's best-draw swap ------------------------------------------------------------
+
+def test_the_terminal_swap_is_named_and_the_freeze_keeps_the_take(tmp_path):
+    from tests.test_the_freeze_outlives_the_repair_drive import draws, t21_home
+    ep = t21_home(tmp_path)
+    window = repair_clock.open_window(ep.home, {"09": 38}, 1_000.0)
+    said = dry.swap_lines(ep.home, window, draws)
+    assert said == ["  T21 best draw attempts/T21_fail2.mp4 (hard 1, Se 3.34) over the take (hard 1, Se 3.55): "
+                    "KEPT, delivered bytes frozen"]
+    assert "SWAPS" in dry.swap_lines(ep.home, None, draws)[0]
+    assert (ep.room / "T21.mp4").read_bytes() == b"delivered T21"
 
 
 # ---- the window and the order -------------------------------------------------------------

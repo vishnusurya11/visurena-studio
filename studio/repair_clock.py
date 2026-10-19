@@ -13,8 +13,9 @@ A window opens when the runner has taken the owner's orders and an OWNER redo re
 work_orders.owner_receipts; an autopilot cure is not one) names a step of an episode whose
 manifest.json exists.  It lasts until its drive ends (drive.py closes it), so a relaunch inside
 the drive continues it.  A window a killed drive left open is closed at the next drive's start unless
-the owner's receipts still back every order it names (`close_unbacked`; incident 2026-10-19 11:18 PDT).
-Inside it, a redo of 09 or later re-renders no delivered take (take_currency.frozen).  Its budget is charged with the repair-tagged run spans since it opened
+the repair is still owed (`backed`: the owner's receipt stands, or its step completed and step 12 has not
+delivered again; incident 2026-10-19 11:18 PDT).  A redo of 09 or later re-renders no delivered take, in
+the window and after it (take_currency.frozen reads the open window, else the latest closed row).  Its budget is charged with the repair-tagged run spans since it opened
 (run_clock.repair_spent), never with the episode's earlier hours, and its limit is the cap.
 
 THE CAP (never unlimited): the clock's own price for the work the order makes owed -- the share of
@@ -67,22 +68,39 @@ def open_window(home, orders: dict, started: float | None = None) -> dict:
     window = {"opened_at": float(started if started is not None else time.time()),
               "cap_s": cap_for(list(orders)), "steps": sorted(orders),
               "orders": {k: int(v) for k, v in sorted(orders.items())}}
+    write(home, window)
+    return window
+
+
+def write(home, window: dict) -> None:
+    """repair.json, atomically."""
     path = Path(home) / WINDOW
     tmp = path.with_name(path.name + ".tmp")
     tmp.write_text(json.dumps(window), encoding="utf-8")
     os.replace(tmp, path)
-    return window
 
 
 def window_for(conn, home, started: float | None) -> dict | None:
-    """The window this drive runs in: the open one, else one opened now for an owner redo of a
-    delivered episode, else None (a normal run, on the episode's 6 h)."""
+    """The window this drive runs in: the open one (adopting a newer owner order for its steps), else
+    one opened now for an owner redo of a delivered episode, else None (a normal run, on the 6 h)."""
     if (window := read(home)) is not None:
-        return window
+        return adopt(home, window, work_orders.owner_receipts(conn, home))
     orders = work_orders.owner_receipts(conn, home)
     if not orders or not delivered(home):
         return None
     return open_window(home, orders, started)
+
+
+def adopt(home, window: dict, receipts: dict[str, int]) -> dict:
+    """A second owner order for a step the open window names, taken by the runner after the drive's
+    start, becomes the window's order (same opening, same cap): the next drive's start backs it."""
+    newer = {s: oid for s, oid in receipts.items() if s in (window.get("orders") or {})
+             and oid != int(window["orders"][s])}
+    if not newer:
+        return window
+    window = {**window, "orders": {**window["orders"], **newer}}
+    write(home, window)
+    return window
 
 
 def spent(home, window: dict) -> float:
@@ -126,14 +144,26 @@ def close(home, now=time.time, why: str = "") -> dict | None:
     return row
 
 
-UNBACKED = "drive start: no owner receipt backs it (a drive that never reached its end left it open)"
+UNBACKED = ("drive start: no owner receipt backs it and no step it redid is still owed (a drive that never "
+            "reached its end left it open)")
 
 
 def backed(conn, home, window: dict) -> bool:
-    """Every order the window names is an OWNER redo still receipted beside the episode (K12)."""
-    receipts = work_orders.owner_receipts(conn, home)
+    """The repair is still owed: every order the window names is an OWNER redo whose receipt still
+    stands (K12), or whose step completed (receipt cleared) while the episode has not been delivered
+    again since the window opened (fix round 2026-10-19: a drive killed in 10-12).  A receipt naming
+    another order backs nothing."""
     orders = {k: int(v) for k, v in (window.get("orders") or {}).items()}
-    return bool(orders) and all(receipts.get(step) == oid for step, oid in orders.items())
+    if not orders or work_orders.owner_ids(conn, orders.values()) != set(orders.values()):
+        return False
+    taken, again = work_orders.receipts(home), redelivered(home, window)
+    return all(taken.get(step) == oid or (step not in taken and not again) for step, oid in orders.items())
+
+
+def redelivered(home, window: dict) -> bool:
+    """Step 12 wrote the manifest again after the window opened: the repair delivered."""
+    path = Path(home) / "manifest.json"
+    return path.exists() and path.stat().st_mtime >= float(window["opened_at"])
 
 
 def close_unbacked(conn, home, now=time.time) -> dict | None:

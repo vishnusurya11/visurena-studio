@@ -660,7 +660,7 @@ never a moving shot's coda.
 - The 6 h episode clock is the outer wall; the caps only stop a runaway step. GATES.md holds
   the generated cap and clock tables.
 - An owner redo of a delivered episode (GATES.md): `repair_dry_check.py` (0 renders),
-  the redo order, `retry N`, `resume`.
+  the order, `retry N`, `resume`; pause at its end.
 
 ## Resuming
 

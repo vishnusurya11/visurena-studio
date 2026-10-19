@@ -148,8 +148,8 @@ def end_row(home: Path, code: int, sha: str) -> dict:
 
 
 def leftover_window(home: Path, conn=None, say=None) -> dict | None:
-    """Before the first run: a repair window a killed drive left open, that no owner receipt backs, is
-    closed and said (repair_clock.close_unbacked; ship review minor 1, incident 2026-10-19 11:18 PDT)."""
+    """Before the first run: a repair window a killed drive left open whose repair is no longer owed
+    (repair_clock.backed) is closed and said (repair_clock.close_unbacked; incident 2026-10-19 11:18 PDT)."""
     from studio import db, repair_clock
     closed = repair_clock.close_unbacked(conn if conn is not None else db.get_connection(), home)
     if closed:

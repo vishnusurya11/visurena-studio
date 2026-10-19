@@ -128,7 +128,7 @@ def recorded_canvas(take: Path) -> tuple[int, int] | None:
 def is_current(built: str, take: Path, pictures: list | None = None,
                canvas: tuple[int, int] | None = None) -> bool:
     """True only when this take exists AND was rendered from this prompt -- and,
-    when `pictures` is given, from exactly these pictures' bytes.
+    when `pictures` is given, from exactly these pictures' bytes (`stale_why` is None).
 
     MEASURED 2026-09-22 (audit item 10): with the words alone, 16 ep05 takes
     whose sheet was redrawn and 6 ep07 takes whose panel was redrawn all read
@@ -137,27 +137,37 @@ def is_current(built: str, take: Path, pictures: list | None = None,
     Unprovable is not current: an episode from before the graph file was
     written cannot show what it ran with, and re-rendering is the safe answer.
     Whitespace is not a picture, so a re-wrap does not spend 200 s of GPU."""
+    return stale_why(built, take, pictures, canvas) is None
+
+
+def stale_why(built: str, take: Path, pictures: list | None = None,
+              canvas: tuple[int, int] | None = None) -> str | None:
+    """The first input `is_current` refuses -- no take, unfinished render, unknown provenance, prompt,
+    canvas, pictures -- or None when the take is current (the dry check prints this very answer)."""
     take = Path(take)
     if not take.exists():
-        return False
+        return "no take"
     # AN UNFINISHED RENDER IS NOT CURRENT: takes_r2v writes the graph before it
     # renders, so ep12 T16's interrupted run left a new graph beside the old
     # video and the runner kept it.  A graph more than a minute newer than
     # its video describes a render that never landed.
     graph = take.with_suffix(".graph.json")
     if graph.exists() and graph.stat().st_mtime - take.stat().st_mtime > UNFINISHED_S:
-        return False
+        return "unfinished render"
     said = recorded_prompt(take)
     if said is None or said.strip() != (built or "").strip():
-        return False
+        return "unknown provenance" if said is None else "prompt"
     # THE CANVAS IS AN INPUT: ep14 (2026-09-30) flipped 9:16 -> 1:1, the words
     # and pictures were unchanged, and 7 portrait takes read as current.
     if canvas is not None and recorded_canvas(take) != tuple(canvas):
-        return False
-    if pictures is None:
-        return True
+        return "canvas"
+    return None if pictures is None else pictures_why(take, pictures)
+
+
+def pictures_why(take: Path, pictures: list) -> str | None:
+    """`pictures` when the take's graph did not stage every one of these pictures' bytes."""
     from studio.comfy import staged_name
-    return {staged_name(p) for p in pictures} <= staged_images(take)
+    return None if {staged_name(p) for p in pictures} <= staged_images(take) else "pictures"
 
 
 # --- a repair freezes what it was handed (incident 2026-10-19 11:18 PDT) ---------------------
@@ -191,12 +201,19 @@ def measured_sha8(take: Path) -> str | None:
         return None
 
 
-def frozen(take: Path, home: Path) -> str | None:
-    """Why this take is current for a repair's render pass -- `delivered` (its bytes are the manifest's)
-    or `measured` (its dq record's) -- inside the episode's open repair window; None otherwise (a normal
-    run: today's rule, exactly)."""
+def governing(home: Path) -> dict | None:
+    """The owner repair that governs the takes: the open window, else the LATEST closed one
+    (repair.jsonl).  Fix round 2026-10-19: step 09 completing clears the receipt and the drive's end
+    closes the window, and a relaunch with no window read all 28 delivered takes stale again."""
     from studio import repair_clock
-    return frozen_in(repair_clock.read(home), take, home)
+    return repair_clock.read(home) or next(iter(repair_clock.history(home)[-1:]), None)
+
+
+def frozen(take: Path, home: Path) -> str | None:
+    """Why this take is current for the render pass -- `delivered` (its bytes are the manifest's) or
+    `measured` (its dq record's) -- on an episode an owner repaired at 09 or later, until an owner redo
+    of 01-08 governs; None for an episode never repaired (today's rule, exactly)."""
+    return frozen_in(governing(home), take, home)
 
 
 def frozen_in(window: dict | None, take: Path, home: Path) -> str | None:
@@ -215,9 +232,15 @@ def frozen_in(window: dict | None, take: Path, home: Path) -> str | None:
 
 def held(built: str, take: Path, home: Path, pictures: list | None = None,
          canvas: tuple[int, int] | None = None) -> bool:
-    """Current to its card (`is_current`), or frozen by the owner's repair (`frozen`): the one question
-    step 09 and takes_r2v ask before a render."""
-    return is_current(built, take, pictures, canvas) or frozen(take, home) is not None
+    """The one question step 09 and takes_r2v ask before a render, under the repair that governs."""
+    return held_in(governing(home), built, take, home, pictures, canvas)
+
+
+def held_in(window: dict | None, built: str, take: Path, home: Path, pictures: list | None = None,
+            canvas: tuple[int, int] | None = None) -> bool:
+    """Current to its card (`is_current`), or frozen under `window` (`frozen_in`); the dry check asks it
+    under the window a launch would run in."""
+    return is_current(built, take, pictures, canvas) or frozen_in(window, take, home) is not None
 
 
 # --- unit currency: a take is stale when ITS OWN inputs differ (early cutoff) ---

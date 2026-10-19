@@ -265,12 +265,23 @@ def owner_receipts(conn: sqlite3.Connection, home) -> dict[str, int]:
     """{step_id: order_id} of the receipted redos the OWNER wrote (studio_cli redo, the board), not
     an autopilot cure: what opens a delivered episode's repair window (studio/repair_clock)."""
     taken = _taken(home)
-    if not taken:
-        return {}
-    marks = ",".join("?" * len(taken))
-    owners = {row[0] for row in conn.execute(
-        f"SELECT id FROM orders WHERE \"by\" = 'owner' AND id IN ({marks})", [int(v) for v in taken.values()])}
+    owners = owner_ids(conn, taken.values())
     return {step: int(oid) for step, oid in taken.items() if int(oid) in owners}
+
+
+def receipts(home) -> dict[str, int]:
+    """{step_id: order_id} of every redo order the unit's receipt still names (owner's or not)."""
+    return {step: int(oid) for step, oid in _taken(home).items()}
+
+
+def owner_ids(conn: sqlite3.Connection, ids) -> set[int]:
+    """The ids among `ids` that are orders the OWNER wrote."""
+    ids = [int(v) for v in ids]
+    if not ids:
+        return set()
+    marks = ",".join("?" * len(ids))
+    return {row[0] for row in conn.execute(
+        f"SELECT id FROM orders WHERE \"by\" = 'owner' AND id IN ({marks})", ids)}
 
 
 def clear_taken(home, step_id: str) -> None:

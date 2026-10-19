@@ -651,18 +651,31 @@ def swap_in(room: Path, index: int, best: Path, scored: dict) -> str:
             f"(hard {last['hard']}, Se {last.get('Se')}); the last draw is {archive.name}")
 
 
-def best_draw(room: Path, index: int, runner) -> str:
-    """The draw with the fewest hard rows, then the lowest Se, restored to T<nn>.mp4; a tie keeps the
-    current take.  `runner(path)` measures one draw: {'hard': n, 'Se': x, 'dq': optional record}."""
+def scored_draws(room: Path, index: int, runner) -> dict[Path, dict]:
+    """{path: measure} of the kept take and every archived draw of it; {} when it has no draws."""
     current = Path(room) / f"T{index:02d}.mp4"
     draws = sorted((Path(room) / "attempts").glob(f"T{index:02d}_fail*.mp4"))
-    if not draws:
-        return ""
-    scored = {p: runner(p) for p in [current, *draws]}
-    inf = float("inf")
+    return {p: runner(p) for p in [current, *draws]} if draws and current.exists() else {}
+
+
+def pick_best(room: Path, index: int, runner, scored: dict | None = None) -> Path | None:
+    """The draw with the fewest hard rows, then the lowest Se, when it is not the kept take (a tie keeps
+    the take); None otherwise.  Moves nothing: the dry check asks it too."""
+    scored = scored_draws(room, index, runner) if scored is None else scored
+    current, inf = Path(room) / f"T{index:02d}.mp4", float("inf")
+    if not scored:
+        return None
     best = min(scored, key=lambda p: (scored[p]["hard"], inf if scored[p].get("Se") is None else scored[p]["Se"],
                                       p != current))
-    return "" if best == current else swap_in(room, index, best, scored)
+    return None if best == current else best
+
+
+def best_draw(room: Path, index: int, runner) -> str:
+    """The best draw (`pick_best`) restored to T<nn>.mp4.  `runner(path)` measures one draw:
+    {'hard': n, 'Se': x, 'dq': optional record}."""
+    scored = scored_draws(room, index, runner)
+    best = pick_best(room, index, runner, scored)
+    return "" if best is None else swap_in(room, index, best, scored)
 
 
 HARD_UNKNOWN = 999
@@ -690,11 +703,20 @@ def recorded_draw(path: Path) -> dict:
 
 
 def keep_best_draws(ctx, verdict: Verdict, runner) -> None:
-    """Each faulted take keeps its best measured draw, said and logged."""
+    """Each faulted take keeps its best measured draw, said and logged -- except a take an owner's repair
+    froze (fix round 2026-10-19: ep01's terminal restored attempts/T21_fail2.mp4 over the delivered T21
+    without its graph or dq record, and the next entry of step 09 rendered it)."""
     for index in sorted({index_of(f.where) for f in verdict.faults}):
-        if line := best_draw(Path(ctx.home) / TAKES, index, runner):
+        if line := kept_frozen(ctx.home, index) or best_draw(Path(ctx.home) / TAKES, index, runner):
             print(line, flush=True)
             ctx.log(line, level="WARNING")
+
+
+def kept_frozen(home: Path, index: int) -> str:
+    """The line for a take whose bytes the governing repair froze (take_currency.frozen), else ''."""
+    from studio import take_currency
+    why = take_currency.frozen(Path(home) / TAKES / f"T{index:02d}.mp4", Path(home))
+    return f"KEPT T{index:02d}: the owner's repair froze its {why} bytes; no best-draw swap" if why else ""
 
 
 def terminal_for(ctx, plan, draws=None):

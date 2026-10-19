@@ -2085,3 +2085,28 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
 - Tests: `tests/test_a_repair_freezes_its_delivered_takes.py` (replay on ep01's T00 graph pair, dq record,
   manifest and window: `tests/fixtures/ep01_replay/repair_rerun/`),
   `tests/test_a_leftover_repair_window_closes_at_drive_start.py`, `tests/test_the_repair_dry_check.py`.
+- **Fix round (ship review, same day): the freeze ended before the repair did.** Step 09 completing clears the
+  owner's receipt (`work_orders.clear_taken`) and the drive's end closes repair.json (`drive.end_row`). Any later
+  drive of ep01 -- the autopilot's retry after a QC refusal, a crash relaunch, a resume after the G-STANDING
+  park -- then had no window, read all 28 takes stale by P03's words and would have queued them again. Now
+  `take_currency.governing` reads the open window, else the LATEST closed row in repair.jsonl: an episode an
+  owner repaired at 09+ keeps the bytes its records name until an owner redo of 01-08 governs. An episode never
+  repaired keeps today's rule exactly. `is_current` is now `stale_why(...) is None`, and the dry check asks the
+  render pass's own question (`takes_r2v.wants_render` over `take_currency.held_in`), never a copy.
+- **Fix round: the terminal swapped a delivered take.** The retry stamp re-reads the eye; the ladder is spent,
+  so the terminal's `keep_best_draws` ran. Replayed read-only on ep01's records it restored
+  `attempts/T21_fail2.mp4` (hard 1, Se 3.34) over the delivered T21 (hard 1, Se 3.55) without its graph or dq
+  record, so T21 then matched no record, was neither frozen nor current, and the next entry of 09 rendered it.
+  Now a frozen take keeps its bytes at the terminal (`take_ladder.kept_frozen`: `KEPT T21: the owner's repair
+  froze its delivered bytes`); `take_ladder.pick_best` names the swap without moving anything, and the dry check
+  lists every candidate (ep01: 1, T21, KEPT).
+- **Fix round: a window is backed while its repair is owed.** A drive killed in 10-12 left its window after 09
+  had cleared the receipt, and the next start closed it as unbacked. `repair_clock.backed` now holds a window
+  whose orders are all OWNER orders (`work_orders.owner_ids`) and whose receipt still stands, or whose step
+  completed while step 12 has not written the manifest again since the window opened. A second owner order for
+  the same step is adopted by the open window when the runner takes it (`repair_clock.adopt`), so the next
+  start does not close the repair mid-way. Still: do not write a second order while the first is owed.
+- **Lesson.** A freeze, a lock or a window must last as long as the work it protects, not as long as the process
+  that opened it. Ask what reads the state after the step completes, the drive ends and the autopilot relaunches.
+- Tests: `tests/test_the_freeze_outlives_the_repair_drive.py` (ep01's T00 pair after the drive, T21's two draws
+  at the terminal), `tests/test_a_repair_window_holds_until_it_redelivers.py`, `tests/test_the_repair_dry_check.py`.
