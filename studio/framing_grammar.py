@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import re
 
+from studio import face_floor
 from studio.plan_gates import OVER_SHOULDER, fault, head_of, move_verb
 
 FACE_SIZES = ("extreme_close", "close", "medium_close")
@@ -65,7 +66,8 @@ def band() -> dict:
             "wide_seconds": WIDE_S, "opener_wide_seconds": OPENER_WIDE_S, "medium_seconds": MEDIUM_S,
             "insert_seconds": list(INSERT_S), "max_pushes": MAX_PUSHES, "locked_share": LOCKED_SHARE,
             "two_shot_size": TWO_SHOT_SIZE, "payoff_size": PAYOFF_SIZE, "ots_tightest": OTS_TIGHTEST,
-            "unsupported": ["silhouette", "Dutch / canted angle", "eye close-up"]}
+            "unsupported": ["silhouette", "Dutch / canted angle", "eye close-up"],
+            "face_floor_px": face_floor.FLOOR_PX, "face_px_by_size": dict(face_floor.FACE_PX)}
 
 
 def cut(episode) -> list:

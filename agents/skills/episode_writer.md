@@ -70,6 +70,12 @@ amount). Every number below is in `grammar_rules`; count them.
   (G-TWO). The payoff line is a locked CLOSE (G-PAYOFF).
 - Over-the-shoulder is medium_close: the near shoulder and the back of the head
   in the foreground, never a close (G-OTS).
+- A face under `face_floor_px` on the take has no eyes the model can draw;
+  `face_px_by_size` is what each size drew (a wide about 28 px, a full 67, a
+  medium 82). A shot whose face MATTERS -- the line of someone in it, or a
+  reaction -- is medium or closer; keep wides and fulls for places and bodies
+  (G-FACE-FLOOR). A wide or full whose face matters is stepped one size closer
+  for free when its staging allows.
 - A silhouette, a Dutch (canted) angle and an eye close-up are UNSUPPORTED: the
   drawer and the model ignore them in words. Never ask for them (G-UNSUPPORTED).
 - At most `max_shots` shots: every shot is its own take (G-SHOTS).

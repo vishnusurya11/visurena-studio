@@ -7,7 +7,7 @@ anything is drawn; `advisories` print and refuse nothing.  Lengths read the voic
 """
 from __future__ import annotations
 
-from studio import episode_capacity, framing_grammar as fg, plan_gates, screenplay_grammar as sg
+from studio import episode_capacity, face_floor, framing_grammar as fg, plan_gates, screenplay_grammar as sg
 
 
 def seconds(placed: dict) -> dict[int, float]:
@@ -49,6 +49,7 @@ def advisories(episode, rate: float) -> list[str]:
     return (voice_advisories(episode, seconds(placed))
             + fg.full_advisories(episode, seconds(placed)) + sg.inner_advisories(episode)
             + sg.tease_advisories(episode) + motif_advisories(episode)
+            + face_floor.advisories(episode.model_dump())
             + [f"G-SHOTS plan: {shots} shots, {episode_capacity.projected_hours(shots):.1f} h projected "
                f"(cap {episode_capacity.MAX_SHOTS})"])
 

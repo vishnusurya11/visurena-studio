@@ -1804,3 +1804,22 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   ready); P12 dark budget has no caller; P03 PANEL_AHEAD global not moved to an argument.
 - Late findings: the QC edit gate reads the hqdn3d x4 av3 pixels as off/held (7/28 segments, mean
   diff 2.02-2.10 vs about 2.0); the GPU whisper worker failed `[Errno 22]` and fell back to CPU.
+
+## The framing floor (face-blur fix #3, 2026-10-19)
+
+- **Rule.** H3 draws a 768 take on 32 px tokens; a face under 96 px is under 3 tokens and its eye
+  under half a VAE cell, so the model paints an average (docs/audit/2026-10-19_face_blur, PLAN
+  section 1). A size is a projection of face pixels: ep01 measured the smallest confident face per
+  take (face_yolov8m, 3 frames) at wide 15/41, full 55/79, medium 64/101, medium_close 60-267,
+  close 183-326 px. Medians are `face_floor.FACE_PX`; the owner's blurry T01, T06, T08 sit under it.
+- **What the cure may do.** Only a cut changes size, and the drawer obeys the at_rest fraction,
+  not the size word (G-SIZE, ep10 7/7), so a step rewrites both. It steps one notch (wide -> full ->
+  medium) only where the face matters and the staging survives: ep01's shot 6 strides in boots on
+  the cobbles and shot 8 tramples the girl; a medium would cut the action. So ep01 as shipped moves
+  nothing, and all six faced shots under the floor (1, 6, 8, 10, 18, 26) are listed for the face
+  refine. On a variant of shot 6 without the boots the cure moves full -> medium and plan_check
+  prints no new row (the G-FULL advisory leaves).
+- **Why advisory.** It is a projection, not a measurement of the take; a wall would send the
+  writer round for pixels it cannot see (cap every loop). The writer is told the floor in the
+  brief (`grammar_rules.face_floor_px`, `face_px_by_size`) and in its skill.
+- Tests: `tests/test_the_face_floor.py`.

@@ -39,7 +39,8 @@ brick or a new instance of one, a line here.
 11. **Where a fault was born decides its cure.** A fault that repeats on a fresh seed is the
     plan's; a panel that carries a fault is the board's; a seed cures a draw. -> Takes; DQ.
 12. **H3 obeys direction, not amount**: the cell and the camera verb; point every move at what
-    the cell holds. -> Takes; The take model follows the planned size.
+    the cell holds. A face under 96 px (3 tokens of 32 px) has no eye the model can draw: plan it
+    closer, refine what stays small. -> Takes; The take model follows the planned size; The framing floor.
 13. **A place is held by pixels, not words**: one room per setup, a recurring place pinned, a
     state one edit of its master. -> Places; Grids and panels.
 14. **The voice is the ruler**: picture cut to the measured voice; every projection reads a
@@ -71,6 +72,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - GPU when idle, CPU when rendering
 - Gate notes moved out of GATES.md (board states, known gaps, speed arms)
 - Jekyll Kawajiri ep01 retro (the 13 failures, the five bricks, each package's lessons, what is owed)
+- The framing floor (face-blur fix #3, 2026-10-19: a face that matters is planned big enough for an eye)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

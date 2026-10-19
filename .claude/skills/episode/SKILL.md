@@ -306,6 +306,10 @@ enough to read and a CUT changes the size: faces at close / medium close on 55 %
 shots, few and short wides, mostly locked, a silent face after every exchange, a cold open,
 one act_out, at most 28 shots, every shot its own take. Every wall with its number and its
 replay is the GATES.md grammar table (one home, so the two cannot drift).
+A face that MATTERS (a line by someone in the shot, or a reaction) is planned medium or closer:
+a wide draws it about 28 px and a full 67 on the 768 take, under the 96 px an eye needs, so the
+plan ladder steps such a wide or full one size closer for free and lists every faced shot still
+under the floor as a face-refine candidate (G-FACE-FLOOR, advisory; GATES.md).
 A scratch re-plan is judged beside the live one: `plan_check.py <book> <n> --plan=plan_v3.json`.
 The title card stays at the END of the Short (the G2 bumper was not adopted).
 
