@@ -17,6 +17,8 @@ from contextlib import ExitStack
 from pathlib import Path
 from typing import Callable
 
+IDLE_S = 30.0
+"""Mirror of studio/whisper_worker.IDLE_S (that file runs under another python, so it is not imported)."""
 WHISPER_GB = 4.0
 """large-v3-turbo fp16 on the card with its decoder buffers, and room."""
 AGREE = 0.10
@@ -46,9 +48,21 @@ class Worker:
             self.close()
             raise RuntimeError("the whisper worker never said ready")
 
+    def ask(self, clip: Path) -> None:
+        """Send one clip; a worker already gone is named, not left to a write error."""
+        gone = self.proc.poll()
+        if gone is not None:
+            raise RuntimeError(f"the whisper worker had exited (code {gone}) before this clip; it leaves "
+                               f"after {IDLE_S:.0f} s idle, so a gap between clips longer than that ends it")
+        try:
+            self.proc.stdin.write(json.dumps({"clip": str(clip)}) + "\n")
+            self.proc.stdin.flush()
+        except OSError as failed:                  # Windows says [Errno 22] for a pipe nobody reads
+            raise RuntimeError(f"the whisper worker closed its input pipe ({failed}); "
+                               "it had exited or was exiting") from failed
+
     def __call__(self, clip: Path) -> str:
-        self.proc.stdin.write(json.dumps({"clip": str(clip)}) + "\n")
-        self.proc.stdin.flush()
+        self.ask(clip)
         said = json.loads(self.proc.stdout.readline() or '{"error": "the worker died"}')
         if "text" not in said:
             raise RuntimeError(said.get("error", "no text"))

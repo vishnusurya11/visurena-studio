@@ -144,3 +144,41 @@ def test_gpu_and_cpu_transcripts_agree_within_tolerance():
         assert apart <= rw.AGREE, f"{row['clip']}: {apart:.2f} apart: {row['gpu']!r} vs {row['cpu']!r}"
         assert (voice_qc.error_rate(row["gpu"], row["intended"]) <= voice_qc.MAX_ERROR_RATE) == \
                (voice_qc.error_rate(row["cpu"], row["intended"]) <= voice_qc.MAX_ERROR_RATE)
+
+
+class DeadPipe(io.StringIO):
+    """A stdin whose reader is gone: Windows answers a write to it [Errno 22], not BrokenPipe."""
+
+    def write(self, text):
+        raise OSError(22, "Invalid argument")
+
+
+def test_a_worker_that_idled_out_is_named_not_errno_22():
+    """ep01 step 11: the worker left after IDLE_S, the next write read '[Errno 22] Invalid argument'."""
+    proc, heard = FakeProc([{"text": "x"}]), []
+    listen = rw.routed(cpu_ear(heard), route=lambda job, gb: "cuda", spawn=lambda: proc, busy=lambda: False)
+    proc.closed = True                                      # exited between clips; poll() -> 0
+    assert listen(Path("a.wav")) == "cpu words" and heard == ["a.wav"]
+
+
+def test_the_failure_message_names_the_exit_and_the_idle_limit(capsys):
+    proc = FakeProc([{"text": "x"}])
+    listen = rw.routed(cpu_ear([]), route=lambda job, gb: "cuda", spawn=lambda: proc, busy=lambda: False)
+    proc.closed = True
+    listen(Path("a.wav"))
+    said = capsys.readouterr().out
+    assert "exited" in said and "idle" in said and "Errno 22" not in said
+
+
+def test_a_dead_pipe_write_is_named_even_when_the_exit_is_not_yet_seen(capsys):
+    proc = FakeProc([{"text": "x"}])
+    listen = rw.routed(cpu_ear([]), route=lambda job, gb: "cuda", spawn=lambda: proc, busy=lambda: False)
+    proc.stdin = DeadPipe()
+    assert listen(Path("a.wav")) == "cpu words"
+    said = capsys.readouterr().out
+    assert "closed its input" in said and "Errno 22" in said
+
+
+def test_the_message_quotes_the_workers_real_idle_limit():
+    from studio import whisper_worker
+    assert rw.IDLE_S == whisper_worker.IDLE_S
