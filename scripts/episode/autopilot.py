@@ -62,6 +62,13 @@ BRAIN_TIMEOUT_S = 45 * 60
 BRAIN_ATTEMPTS = 3
 ENGINE_RESTARTS = 2
 LOG_LINES = 40
+ENGINE_DOWN_TICKS = 2
+"""Consecutive ticks /system_stats must fail before a non-idle engine is restarted."""
+COMMIT_LOW_GB = 8.0
+COMMIT_HARD_GB = 3.0
+"""Host commit headroom: below LOW with an empty queue the engine is told to /free;
+below HARD after that, and with no drive alive, it is recycled."""
+UNPARK_CAP = 2
 log = logging.getLogger("autopilot")
 
 
@@ -452,8 +459,11 @@ def claim_supervisor(deps: Deps) -> bool:
     return True
 
 
-def heartbeat(deps: Deps, tick_no: int, state: str, n: int | None) -> None:
-    write_atomic(deps.root / "heartbeat.json", {"ts": deps.now(), "tick": tick_no, "state": state, "episode": n})
+def heartbeat(deps: Deps, tick_no: int, state: str, n: int | None, engine_down_ticks: int | None = None) -> None:
+    """The beat, with the engine's missed-poll count carried from the last one."""
+    kept = engine_down_ticks if engine_down_ticks is not None else read_json(deps.root / "heartbeat.json", {}).get("engine_down_ticks", 0)
+    write_atomic(deps.root / "heartbeat.json", {"ts": deps.now(), "tick": tick_no, "state": state, "episode": n,
+                                                "engine_down_ticks": kept})
 
 
 def adopt(book: Path, deps: Deps) -> None:
@@ -610,7 +620,7 @@ def launch(book: Path, codex: str, n: int, deps: Deps, why: str) -> dict:
 def running_id(queue: Any) -> str | None:
     """The prompt /queue says is running, in whichever shape engine_ops hands it."""
     if isinstance(queue, dict):
-        queue = queue.get("queue_running") or []
+        queue = queue.get("queue_running") or queue.get("running_ids") or []
     if isinstance(queue, (list, tuple)):
         if not queue:
             return None
@@ -786,6 +796,106 @@ def note_tree_clear(book: Path, deps: Deps) -> None:
         event(book, {"event": "tree_clear", "waited_s": round(deps.now() - float(wait.get("since", deps.now())))})
 
 
+# ---- ComfyUI health ----------------------------------------------------------------
+
+def probe(engine: Any, name: str, *args: Any) -> Any:
+    """An engine call that may not exist on a stand-in; None when it does not."""
+    call = getattr(engine, name, None)
+    return call(*args) if call else None
+
+
+def engine_ticks(deps: Deps, signals) -> int:
+    """Consecutive ticks the engine failed to answer, carried in heartbeat.json."""
+    if getattr(signals, "engine_up", True):
+        return 0
+    return int(read_json(deps.root / "heartbeat.json", {}).get("engine_down_ticks", 0)) + 1
+
+
+def watch_engine(book: Path, n: int, derived, signals, deps: Deps, ticks: int) -> None:
+    """Restart a dead engine after ENGINE_DOWN_TICKS missed polls in any state but
+    paused (IDLE restarts itself in act_idle); free host commit when it runs low."""
+    state = getattr(derived.state, "name", str(derived.state))
+    if signals.engine_up:
+        return commit_check(book, n, signals, deps)
+    if ticks < ENGINE_DOWN_TICKS or state == "PAUSED" or is_paused(book):
+        return
+    event(book, {"event": "engine_down", "episode": n, "ticks": ticks, "log": probe(deps.engine, "log_tail", 3) or [],
+                 "commit_free_gb": probe(deps.engine, "commit_free_gb")})
+    if state != "IDLE":
+        deps.engine.restart()
+        event(book, {"event": "engine_restart", "episode": n, "why": "down"})
+
+
+def queue_busy(deps: Deps) -> bool:
+    queue = deps.engine.queue(ENGINE_URL)
+    pending = queue.get("pending") or queue.get("queue_pending") if isinstance(queue, dict) else 0
+    return running_id(queue) is not None or bool(pending)
+
+
+def commit_check(book: Path, n: int, signals, deps: Deps) -> None:
+    """Commit headroom under COMMIT_LOW_GB with an empty queue: POST /free and read
+    again; still under COMMIT_HARD_GB with no drive alive: recycle the engine."""
+    before = probe(deps.engine, "commit_free_gb")
+    if before is None or before >= COMMIT_LOW_GB or queue_busy(deps):
+        return
+    deps.engine.free(ENGINE_URL)
+    after = probe(deps.engine, "commit_free_gb")
+    event(book, {"event": "commit_low", "episode": n, "before_gb": before, "after_gb": after})
+    if after is not None and after < COMMIT_HARD_GB and not signals.proc_alive:
+        deps.engine.kill_engine(deps.procs())
+        deps.engine.restart()
+        event(book, {"event": "engine_recycled", "episode": n, "commit_gb": after})
+
+
+# ---- auto-unpark and the handover ----------------------------------------------------
+
+def runtime_changed(deps: Deps, sha: str) -> bool:
+    """`git diff --name-only sha..HEAD` touches a file a run reads."""
+    from studio import episode_drive
+    if deps.git("rev-parse", "HEAD").strip().startswith(sha):
+        return False                                           # nothing has landed since the park
+    try:
+        names = deps.git("diff", "--name-only", f"{sha}..HEAD").splitlines()
+    except Exception:                                          # noqa: BLE001 -- an unknown sha clears nothing
+        return False
+    return any(episode_drive.runtime_path(name) for name in names if name.strip())
+
+
+def unparked_count(book: Path, n: int) -> int:
+    return sum(1 for r in rows_of(paths_of(book).events) if r.get("event") == "auto_unpark" and r.get("episode") == n)
+
+
+def auto_unpark(book: Path, deps: Deps) -> list[int]:
+    """A `brain:` park clears when a runtime file changed since its sha (at most
+    UNPARK_CAP times per episode): Jekyll ep01's three parks were all false and
+    each needed the owner.  step_cap, over_budget, SAFETY, the token and clock_loop
+    never match `brain:`, so they never clear."""
+    cleared = []
+    for row in rows_of(paths_of(book).parked):
+        n = row.get("episode")
+        if not str(row.get("reason", "")).startswith("brain:") or not row.get("sha"):
+            continue
+        if unparked_count(book, n) >= UNPARK_CAP or not runtime_changed(deps, str(row["sha"])):
+            continue
+        retry(book, n)
+        event(book, {"event": "auto_unpark", "episode": n, "from": str(row["sha"])[:8]})
+        cleared.append(n)
+    return cleared
+
+
+def spawn_successor(book: Path, codex: str, deps: Deps, head: str, every: int) -> bool:
+    """One detached `autopilot.py run` for a HEAD that has no successor yet."""
+    marker = deps.root / "successor.json"
+    if read_json(marker, {}).get("head") == head:
+        return False
+    write_atomic(marker, {"head": head, "ts": utc_now()})
+    flags = (subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS) if sys.platform == "win32" else 0
+    argv = ["uv", "run", "--no-sync", "python", "scripts/episode/autopilot.py", "run", "--book", codex, "--every", str(every)]
+    proc = deps.popen(argv, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=flags)
+    event(book, {"event": "successor", "head": head[:8], "pid": getattr(proc, "pid", None)})
+    return True
+
+
 def cure(book: Path, codex: str, n: int, derived, deps: Deps) -> dict:
     deps.order(codex, n, derived.order)
     event(book, {"event": "cure", "episode": n, "order": str(derived.order)})
@@ -868,8 +978,10 @@ def episode_doc(n: int | None, derived, signals, done: dict) -> dict:
 
 def tick(book: Path, codex: str, deps: Deps, tick_no: int = 0) -> dict:
     """One pass: gather -> derive -> ONE action -> status.json + heartbeat."""
-    series, p = load_series(book, codex, deps.chapters), paths_of(book)
+    series, p, ticks = load_series(book, codex, deps.chapters), paths_of(book), 0
     uploads, parked = uploads_of(book), rows_of(p.parked)
+    if auto_unpark(book, deps):
+        parked = rows_of(p.parked)
     n = deps.next_unit(deps.chapters(book), uploads, parked, series["last"])
     if n is None:
         derived, signals = SimpleNamespace(state="COMPLETE", reason="", order=None, packet={}), SimpleNamespace(engine_up=None)
@@ -879,13 +991,15 @@ def tick(book: Path, codex: str, deps: Deps, tick_no: int = 0) -> dict:
         derived = deps.derive(signals, n)
         if signals.paused:
             derived = SimpleNamespace(state="PAUSED", reason="paused", order=None, packet={})
+        ticks = engine_ticks(deps, signals)
+        watch_engine(book, n, derived, signals, deps, ticks)
         done = act(book, codex, n, derived, signals, deps)
         if done["state"] != "WAIT_TREE":
             note_tree_clear(book, deps)
         done["brain_attempts"] = len(brain_attempts_of(home_of(book, n)))
     doc = status_doc(book, codex, n, derived, signals, series, done, deps)
     write_atomic(p.status, doc)
-    heartbeat(deps, tick_no, doc["episode"]["state"], n)
+    heartbeat(deps, tick_no, doc["episode"]["state"], n, ticks)
     return doc
 
 
@@ -899,7 +1013,8 @@ def run_loop(book: Path, codex: str, deps: Deps, every: float = 30.0, ticks: int
     while ticks is None or i < ticks:
         i += 1
         if code_moved(book, deps, born):
-            return 0                       # the scheduler starts a fresh loop on the new code
+            spawn_successor(book, codex, deps, deps.git("rev-parse", "HEAD").strip(), int(every))
+            return 0                       # the successor (or, failing it, the scheduler) runs the new code
         try:
             tick(book, codex, deps, i)
         except Exception as why:                               # noqa: BLE001 -- the supervisor outlives any fault

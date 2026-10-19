@@ -66,6 +66,57 @@ def queue(base_url: str = HOST, get: Callable[[str], dict] = _get_json) -> dict:
     return {"running_ids": running, "pending": len(doc.get("queue_pending", []))}
 
 
+def _memory_status() -> dict:
+    """GlobalMemoryStatusEx as a dict (Windows); {} where the call is not there."""
+    import ctypes
+
+    class Status(ctypes.Structure):
+        _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong),
+                    ("ullTotalPhys", ctypes.c_ulonglong), ("ullAvailPhys", ctypes.c_ulonglong),
+                    ("ullTotalPageFile", ctypes.c_ulonglong), ("ullAvailPageFile", ctypes.c_ulonglong),
+                    ("ullTotalVirtual", ctypes.c_ulonglong), ("ullAvailVirtual", ctypes.c_ulonglong),
+                    ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+    status = Status()
+    status.dwLength = ctypes.sizeof(Status)
+    try:
+        ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status))
+    except (AttributeError, OSError):
+        return {}
+    return {name: getattr(status, name) for name, _ in Status._fields_}
+
+
+def commit_free_gb(stat: Callable[[], dict] = _memory_status) -> float | None:
+    """Host commit headroom in GB (ullAvailPageFile): ComfyUI's 'error 1450' came
+    with 0.8 GB left while RAM looked free (Jekyll ep01, cured by POST /free)."""
+    avail = stat().get("ullAvailPageFile")
+    return None if avail is None else round(avail / 2**30, 2)
+
+
+def _post_json(url: str, body: dict, timeout: float = 30.0) -> bool:
+    request = urllib.request.Request(url, data=json.dumps(body).encode(), method="POST",
+                                     headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(request, timeout=timeout):
+        return True
+
+
+def free(base_url: str = HOST, post: Callable[[str, dict], bool] = _post_json) -> bool:
+    """POST /free: unload models and free memory without touching the queue."""
+    try:
+        return bool(post(f"{base_url}/free", {"unload_models": True, "free_memory": True}))
+    except Exception:                       # noqa: BLE001 -- an engine that will not answer was not freed
+        return False
+
+
+def log_tail(n: int = 3, root: Path | str | None = None) -> list[str]:
+    """The engine log's last n lines (ComfyUI/user/comfyui.log); none when absent."""
+    path = (Path(root) if root else portable_root()) / "ComfyUI" / "user" / "comfyui.log"
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return []
+    return [ln.strip() for ln in lines if ln.strip()][-n:]
+
+
 def same_prompt_stuck(before: dict, after: dict) -> bool:
     """The hung-engine signal: one prompt running at both ends of the window."""
     ids = list(before.get("running_ids") or [])
