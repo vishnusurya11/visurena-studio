@@ -196,9 +196,10 @@ def test_no_layout_still_cuts_at_the_card_and_the_chip(tmp_path):
 
 def test_qc_reads_an_av3_master_under_the_sharpened_cap():
     """MEASURED 2026-10-18 on C|M|W: av3 segments 1.50-1.77 against their takes (RTX 4x
-    1.64-1.69, Lanczos 0.33-0.51); the old 1.0 cap would fail every av3 master."""
+    1.64-1.69, Lanczos 0.33-0.51); the old 1.0 cap would fail every av3 master.  C1 (ada8fda,
+    Jekyll ep01's 28 segments 1.47-2.10) gave av3 its own cap above RTX's 2.0."""
     from studio import edit_gate as eg
-    assert eg.segment_cap("av3") == eg.SEGMENT_MEAN_RTX == 2.0
+    assert eg.segment_cap("av3") == eg.SEGMENT_MEAN_AV3 == 2.5 > eg.SEGMENT_MEAN_RTX == 2.0
 
 
 @pytest.mark.local

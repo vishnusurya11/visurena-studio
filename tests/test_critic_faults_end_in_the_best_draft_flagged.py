@@ -50,10 +50,10 @@ def _run(ctx, monkeypatch):
 
 def test_the_best_draft_is_kept_and_signed_flagged(ctx, monkeypatch):
     writer, critic = _run(ctx, monkeypatch)
-    # P01 (2026-10-19): Draft B shows the same gate ids as Draft A and one fault fewer (< 2 fewer), so
-    # the round moved no row: improve 2 and model_tier write nothing and the terminal keeps the best
-    assert [t[:7] for t in TITLES[:len(writer.calls)]] == ["Draft A", "Draft B"]
-    assert len(critic.texts) == 2
+    # C7 (cc5a260): Draft B's one fault fewer is progress; Draft C brings back an id Draft B did not
+    # show, so every rung writes (improve x2, model_tier) and the terminal keeps the best, Draft B
+    assert [t[:7] for t in TITLES[:len(writer.calls)]] == ["Draft A", "Draft B", "Draft C", "Draft D"]
+    assert len(critic.texts) == 4
     assert json.loads(_plan(ctx).read_text(encoding="utf-8"))["title"] == "Draft B"
     doc = json.loads(plan_verdict.verdict_path(_plan(ctx)).read_text(encoding="utf-8"))
     assert doc["verdict"] == "APPROVE" and doc["flagged"] is True
@@ -75,8 +75,10 @@ def test_the_terminal_leaves_an_audit_row_and_a_terminal_learning(ctx, monkeypat
 def test_the_writer_saw_the_critics_lines_on_every_rung(ctx, monkeypatch):
     writer, _ = _run(ctx, monkeypatch)
     assert writer.calls[0] is None
+    assert len(writer.calls) == 4, "a fall of one row is progress (C7): every rung wrote"
+    # a rung after Draft B also carries the ladder's own 'already fixed, keep fixed' line
+    assert all(any(line.startswith("G-READER ") for line in call) for call in writer.calls[1:])
     assert all(line.startswith("G-READER ") for line in writer.calls[1])
-    assert len(writer.calls) == 2, "the stuck stop: rung 2 and model_tier wrote nothing (P01)"
 
 
 def test_a_draft_the_battery_refused_is_never_the_best(ctx, monkeypatch):

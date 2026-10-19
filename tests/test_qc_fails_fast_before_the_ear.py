@@ -54,8 +54,16 @@ def _wire(monkeypatch, tmp_path, lufs=-14.0, sound_ok=True):
     monkeypatch.setattr(qc.episode_sound, "presence", lambda *a: [{"ok": sound_ok}])
     monkeypatch.setattr(qc, "takes_rollup", lambda d: {"unjudged": []})
     monkeypatch.setattr(qc, "sheets_rollup", lambda b, book: [])
-    monkeypatch.setattr(qc, "window", lambda master, at, seconds, out: out)
+    monkeypatch.setattr(qc, "window", fake_window)
     monkeypatch.setattr(qc, "title_card_on_disk", lambda book, number: True)
+
+
+def fake_window(master, at, seconds, out):
+    """A real wav per window, its samples its own (f5f4684: the ear's cache is keyed on the PCM)."""
+    import numpy as np
+    import soundfile
+    soundfile.write(str(out), np.full(240, int(at * 100) + 1, dtype="int16"), 24000)
+    return out
 
 
 def test_a_failed_cheap_row_never_calls_the_ear(monkeypatch, tmp_path):
