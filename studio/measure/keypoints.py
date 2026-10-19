@@ -192,3 +192,30 @@ def estimate(image: Path, run=None, timeout: float = 120.0) -> list[dict]:
     from studio import comfy
     staged = comfy.stage_image(Path(image))
     return parse((run or comfy.run_text)(WORKFLOW, {"image_1": staged}, timeout))
+
+
+EDGE = 0.02
+"""A wrist closer than this to a border may belong to an arm the frame cropped away."""
+ARMS = ((R_WRIST, R_ELBOW, R_SHOULDER), (L_WRIST, L_ELBOW, L_SHOULDER))
+
+
+def _inside(pts: np.ndarray, i: int) -> bool:
+    return bool(visible(pts, i) and all(EDGE <= pts[i, k] <= 1 - EDGE for k in (0, 1)))
+
+
+def orphan_limbs(pts: np.ndarray) -> list[int]:
+    """Wrists inside the borders with no elbow and no shoulder on their side, on a body that shows no
+    head and no shoulder: a hand that hangs in the picture (ep01 shot 27, the floating hand)."""
+    if any(visible(pts, i) for i in (*HEAD, R_SHOULDER, L_SHOULDER)):
+        return []
+    return [w for w, elbow, shoulder in ARMS
+            if _inside(pts, w) and not visible(pts, elbow) and not visible(pts, shoulder)]
+
+
+def orphan_frame(frame: dict) -> list[str]:
+    """Why a DWPose frame holds a limb with no body: an orphan wrist on any person, or more wrists
+    than two per head (`extra_limbs`)."""
+    named = {R_WRIST: "right", L_WRIST: "left"}
+    out = [f"a {named[w]} wrist hangs in the picture with no arm or head" for p in people(frame)
+           for w in orphan_limbs(p)]
+    return out + extra_limbs(frame)

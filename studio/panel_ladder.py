@@ -49,10 +49,12 @@ deferred after the work was spent (speed plan #3)."""
 CAP = 2
 """Distinct grids that may climb per episode."""
 SUPERSEDED = "superseded"
-REDRAW_CANNOT_CURE = frozenset({"framing", "posture", "place"})
+REDRAW_CANNOT_CURE = frozenset({"framing", "posture", "place", "unread_for_time"})
 """MEASURED on ep13 (speed plan #4): nine climbs, and no seed or reprose rung
 ever moved a framing or posture fault; a prompt fix (9cb4609) and judge fixes
-did.  Such a fault goes to keep_best, flagged, at no GPU cost."""
+did.  Such a fault goes to keep_best, flagged, at no GPU cost.  `unread_for_time` is a panel the
+wall left unread: a redraw would redraw a picture nobody judged.  `body` and `orphan_limb` are NOT
+here: a new seed or a reprose can move a floating hand, so they climb seed -> reprose -> flag."""
 CURES = {
     "clones": "Each person in the picture is a different man with his own face, build and dress.",
     "clone": "Each person in the picture is a different man with his own face, build and dress.",
@@ -72,6 +74,8 @@ CURES = {
     "landform": "The ground runs flat to the horizon.",
     "banned": "The picture holds only the things of this place and its time.",
     "unread": "One clear main subject fills the frame.",
+    "body": "Each person is drawn whole and solid, a head, a torso and two arms joined at the shoulders.",
+    "orphan_limb": "Every hand is joined by its arm to a shoulder and a body that is drawn in the frame.",
     # affirmative on purpose: the plan contract refuses an absence word ("no
     # second copy") in frame prose, so the once-ness is said positively
     "twin": "Each person in the picture appears exactly once, with a face, hair and dress all his own.",
@@ -159,6 +163,24 @@ def cap_line(home: Path, advisories: int) -> str:
                               step_attempts.seconds(home, REGRID), advisories)
 
 
+def panel_digest(board: Path) -> str:
+    """One sha over every panel's bytes: the board as the next judge will read it."""
+    import hashlib
+    h = hashlib.sha256()
+    for panel in sorted(Path(board).glob("shot_*.png")):
+        h.update(panel.name.encode() + panel.read_bytes())
+    return h.hexdigest()
+
+
+def refund_round(home: Path, key: str = REGRID) -> None:
+    """Give back one round of `key` (its seconds stay: the time was spent)."""
+    with step_attempts._locked(home):
+        doc = step_attempts.read(home)
+        row = doc.get(key) or {"rounds": 0, "seconds": 0.0}
+        doc[key] = {**row, "rounds": max(0, int(row.get("rounds", 0)) - 1)}
+        step_attempts._write(home, doc)
+
+
 def _ladder_path(home: Path) -> Path:
     return Path(home) / "storyboard" / LADDER_FILE
 
@@ -214,6 +236,13 @@ class Climb:
     drawn: set = field(default_factory=set)
     clock: Callable[[], float] = time.time
     began: float = -1.0
+    refund_due: bool = False
+
+    def settle(self) -> None:
+        """A rung whose rebuild changed no panel byte spent a round for nothing: give it back (B1)."""
+        if self.refund_due:
+            self.refund_due = False
+            refund_round(self.home)
 
     def over_wall(self) -> bool:
         """Earlier runs' regrid seconds plus this one's have reached the wall: read between
@@ -325,6 +354,7 @@ class Climb:
         the grids; each climb is remembered on disk so the cap survives a
         resume."""
         self.drawn = set()
+        before = panel_digest(self.home / "storyboard")
         self.seams_isolated(verdict)                                   # the seam rung, outside the cap
         faults = [f for f in cured_by_redraw(verdict) if f.kind not in SEAMED]
         rows = self.climbing(grid_layout.read(self.home), shots_of(faults))
@@ -345,10 +375,12 @@ class Climb:
             self.rebuild(touched or None)
         except TypeError:           # an older caller's rebuild takes no scope
             self.rebuild()
+        self.refund_due = panel_digest(self.home / "storyboard") == before   # settled once the gate has spent it
 
     def keep_best(self, verdict: Verdict) -> Verdict:
         """The terminal: the panels stand; each fault says whether its grid climbed.
         A shot still seamed renders refs-only (owner ruling 2026-10-11), flagged."""
+        self.settle()
         rows = grid_layout.read(self.home)
         kept = {int(i) for r in self.kept(rows, shots_of(verdict.faults)) for i in r.get("shots") or []}
         seamed = shots_of([f for f in verdict.faults if f.kind in SEAMED])
@@ -362,6 +394,7 @@ class Climb:
     def curable(self, verdict: Verdict) -> bool:
         """A redraw could move a non-seam fault, or a seamed shot can still be
         isolated -- AND the machine gates still fail a panel."""
+        self.settle()       # the gate spent the last rung's round before asking
         others = [f for f in cured_by_redraw(verdict) if f.kind not in SEAMED]
         seams = shots_of([f for f in verdict.faults if f.kind in SEAMED])
         movable = bool(others) or any(not self.alone(i) for i in seams)

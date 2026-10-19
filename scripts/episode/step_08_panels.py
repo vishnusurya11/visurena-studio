@@ -64,6 +64,8 @@ def panel_refusals(home: Path) -> list[str]:
     out = [f"{name}: {why}" for name in VERDICTS
            if (why := panel_dq.panel_refusal(board / name, panels, shots, judged_ok=judged_ok))]
     out += [f"{g}: redrawn after the panels were cut" for g in redrawn_grids(board)]
+    if panel_eye.unread_marker(board).exists():
+        out.append(f"the panel eye left panels unread for time ({BOARD}/eye_unread.json): read them first")
     if not eye_verdict.passed(board, panels):
         out.append(f"no current panel eye verdict ({BOARD}/eye_<sha8>.json)")
     return out
@@ -110,17 +112,40 @@ def rebuild(ctx, only: list[int] | None = None) -> list[Path]:
     return panels
 
 
+def deadline_of(home: Path) -> float | None:
+    """What is left of the panel_checks wall: the cap row less the step's elapsed seconds (K3,
+    `step_attempts.elapsed`; 0 booked until that lands).  None when the cap table has no such row."""
+    from studio import step_attempts, step_caps
+    try:
+        wall = step_caps.wall_s("panel_checks")
+    except KeyError:
+        return None
+    elapsed = getattr(step_attempts, "elapsed", None)
+    return panel_eye.deadline_left(wall, float(elapsed(home, STEP_ID)) if elapsed else 0.0)
+
+
 def judge_of(ctx) -> Callable[[], Verdict]:
     """The panel eye over the board as it stands, the plan read afresh on
     every call (a reprose rung edits it); the readers built once; each pass
-    stamped in timing.jsonl (five-hour plan fix 6)."""
+    stamped in timing.jsonl with its reads, cache hits and seconds per reader
+    (five-hour plan fix 6; P05)."""
+    import time
     from studio import episode_clock
     readers = panel_eye.tools()
 
     def judge() -> Verdict:
-        with episode_clock.timed(ctx.book_dir, ctx.number, "panel_eye"):
-            return panel_eye.judge(ctx.home, episode_home.read_json(ctx.home / "plan.json"),
-                                   book=ctx.book_dir, **readers)
+        began, got, ok = time.time(), None, True
+        try:
+            got = panel_eye.judge(ctx.home, episode_home.read_json(ctx.home / "plan.json"),
+                                  book=ctx.book_dir, deadline=deadline_of(ctx.home), **readers)
+            return got
+        except BaseException:
+            ok = False
+            raise
+        finally:
+            books = getattr(got, "evidence", None)
+            note = panel_eye.timing_note(books) if books else ""
+            episode_clock.stamp(ctx.book_dir, ctx.number, "panel_eye", began, time.time(), ok, note)
     return judge
 
 

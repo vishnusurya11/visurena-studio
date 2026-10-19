@@ -54,3 +54,17 @@ def test_the_stored_rows_are_never_cached(tmp_path):
     from studio import episode_home
     episode_home.write_json(board / "panel_dq.json", [{"shot": 1, "passed": False, "flags": ["stacked"]}])
     assert not panel_eye.judge(board.parent, plan, **t).passed
+
+
+def test_a_recut_room_with_a_new_mtime_gives_zero_new_reads(tmp_path):
+    # P05: refs are keyed by their bytes, not their mtime -- a re-cut of identical pixels moves nothing
+    import os
+    board, plan = board_of(tmp_path, [])
+    room = board.parent / "room.png"
+    Image.new("RGB", (8, 8), (9, 9, 9)).save(room)
+    shot, setup = plan["shots"][0], plan["setups"]["s"]
+    before = panel_eye.read_key(shot, setup, board / "shot_01.png", [room])
+    os.utime(room, ns=(1, room.stat().st_mtime_ns + 5_000_000_000))
+    assert panel_eye.read_key(shot, setup, board / "shot_01.png", [room]) == before
+    Image.new("RGB", (8, 8), (9, 9, 10)).save(room)
+    assert panel_eye.read_key(shot, setup, board / "shot_01.png", [room]) != before

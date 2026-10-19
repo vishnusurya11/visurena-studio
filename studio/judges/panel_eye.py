@@ -26,11 +26,14 @@ from __future__ import annotations
 
 import re
 import json
+import time
+from functools import lru_cache
 from pathlib import Path
 from typing import Callable
 
 import numpy as np
 from PIL import Image
+from pydantic import Field
 
 from studio import cell_gates, identity_gate, panel_content, panel_dq
 from studio.judges import verdict as jv
@@ -63,8 +66,19 @@ CALIBRATED = frozenset({"stacked", "seam", "tiled", "people", "clone", "clones",
 judged in code -- so it refuses rather than flags-as-thin."""
 CONTENT = (("unread", "unread"), ("twin", "twin"), ("missing", "missing"), ("lettering", "lettering"),
            ("posture", "posture"), ("hour", "hour"), ("landform", "landform"), ("banned", "banned"))
+ADVISORY_BODY = ("body", "orphan_limb")
+"""Kinds not in CALIBRATED on purpose: they join it only after P06's E1 eval reaches recall >= 0.6 and
+precision >= 0.8 (decision D8); until then they are listed, never a wall."""
+UNREAD = "unread_for_time"
+READERS = ("keypoints", "size", "faces", "lettering")
+"""The readers whose seconds the evidence names."""
 Unreadable = panel_content.Unreadable
 _DEFAULT: dict = {}
+
+
+class EyeVerdict(Verdict):
+    """The verdict with the eye's own books: reads, cache_hits, seconds per reader, unread_for_time."""
+    evidence: dict = Field(default_factory=dict)
 
 
 # ---- the stored rows -------------------------------------------------------------
@@ -110,9 +124,26 @@ def content_faults(rows: list[dict]) -> list[Fault]:
             for r in rows if not r.get("passed", True) for text in r.get("faults") or []]
 
 
+def advisory(kind: str, where: str, note: str, **evidence) -> Fault:
+    """A listed fault that changes no verdict (an uncalibrated detector)."""
+    return fault(kind, where, note, **evidence).model_copy(update={"severity": "advisory"})
+
+
+def answer_faults(rows: list[dict]) -> list[Fault]:
+    """panel_content's optional anatomy answers (contract K9: ok / fading / floating / cannot_tell)
+    as advisory `body` and `orphan_limb` rows; the paid read already made them, no second ask."""
+    out = []
+    for r in rows:
+        for key, kind in (("body", "body"), ("limb_attached", "orphan_limb")):
+            if str(r.get(key) or "ok") not in ("ok", "cannot_tell"):
+                out.append(advisory(kind, where_of(r["shot"]), f"{key} reads {r[key]!r}", source="panel_content", answer=r[key]))
+    return out
+
+
 def stored_faults(board: Path) -> list[Fault]:
     """The two machine gates' rows as faults with a where."""
-    return dq_faults(rows_of(board, "panel_dq.json")) + content_faults(rows_of(board, "panel_content.json"))
+    content = rows_of(board, "panel_content.json")
+    return dq_faults(rows_of(board, "panel_dq.json")) + content_faults(content) + answer_faults(content)
 
 
 # ---- the short read ----------------------------------------------------------------
@@ -160,8 +191,23 @@ def person_of(frames: list[dict]) -> np.ndarray | None:
     return max(found, key=lambda p: int((p[:, 2] >= keypoints.CONF).sum())) if found else None
 
 
+def keypoint_frames(staged: str, run: Callable) -> list[dict]:
+    return keypoints.parse(run(keypoints.WORKFLOW, {"image_1": staged}, TIMEOUT))
+
+
 def keypoint_read(staged: str, run: Callable) -> np.ndarray | None:
-    return person_of(keypoints.parse(run(keypoints.WORKFLOW, {"image_1": staged}, TIMEOUT)))
+    return person_of(keypoint_frames(staged, run))
+
+
+def orphan_faults(frames: list[dict] | None, shot: dict, where: str) -> list[Fault]:
+    """A limb with no body, from the DWPose frame already read: an orphan wrist, too many wrists per
+    head, or declared extras that the pose found nobody for.  Advisory until calibrated."""
+    if frames is None:
+        return []
+    why = keypoints.orphan_frame(frames[0]) if frames else []
+    if int(shot.get("extras") or 0) > 0 and not (frames and keypoints.people(frames[0])):
+        why = [*why, f"{shot['extras']} extras declared and the pose found nobody"]
+    return [advisory("orphan_limb", where, "; ".join(why), source="dwpose")] if why else []
 
 
 UNPOSED = ("insert", "extreme_close", "close", "medium_close")
@@ -348,14 +394,27 @@ def refs_of(book: Path | None, shot: dict, setup: dict) -> list[Path]:
     return [p for p in out if Path(p).exists()]
 
 
-def asked(ask: Callable, default):
+def asked(ask: Callable, default, stats: dict | None = None):
     """One detector ask that may die on the shared GPU queue: a timeout or an
     unreadable answer is a missing measure, never a crash of the whole judge.
-    The rows that needed it read "not measured" and the calibrated rows stand."""
+    The rows that needed it read "not measured" and the calibrated rows stand.
+    The failure is counted (`failed`): a read that had one is never kept."""
     try:
         return ask()
     except (Unreadable, TimeoutError) as why:          # comfy.StillRunning is a TimeoutError
+        if stats is not None:
+            stats["failed"] = stats.get("failed", 0) + 1
         return default
+
+
+def metered(t: dict, reader: str, ask: Callable):
+    """`ask()`, its seconds booked to `reader` in the judge's stats (when it keeps any)."""
+    stats, began = t.get("stats"), time.monotonic()
+    try:
+        return ask()
+    finally:
+        if stats is not None:
+            stats["seconds"][reader] = round(stats["seconds"].get(reader, 0.0) + time.monotonic() - began, 3)
 
 
 def short_read(staged: str, run: Callable, planned_size: str, where: str) -> tuple[dict | None, Fault | None]:
@@ -374,18 +433,19 @@ def read_panel(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -
     rgb = np.asarray(Image.open(path).convert("RGB"))
     size = (rgb.shape[1], rgb.shape[0])
     staged = t["stage"](path)
-    pts = asked(lambda: keypoint_read(staged, t["run"]), None)
-    read, unread = short_read(staged, t["run"], shot.get("size", ""), where)
-    seen = face_rows(rgb, t["detect"], t["embed"])
+    frames = metered(t, "keypoints", lambda: asked(lambda: keypoint_frames(staged, t["run"]), None, t.get("stats")))
+    pts = person_of(frames) if frames else None
+    read, unread = metered(t, "size", lambda: short_read(staged, t["run"], shot.get("size", ""), where))
+    seen = metered(t, "faces", lambda: face_rows(rgb, t["detect"], t["embed"]))
     out = [framing(shot.get("size", ""), keypoints.shot_size(pts) if pts is not None else None, read, where),
            posture_fault(pts, prose, planned, where, shot.get("size", "")), copy_fault(path, refs, where), unread,
-           asked(lambda: hat_fault(staged, t["run"], seen, pts, size, where), None)
+           asked(lambda: hat_fault(staged, t["run"], seen, pts, size, where), None, t.get("stats"))
            if planned == 1 and SCORED_BOXES else None]
-    out += clone_faults(seen, where)
+    out += clone_faults(seen, where) + orphan_faults(frames, shot, where)
     if SCORED_BOXES:
-        out += asked(lambda: landmark_faults(staged, t["run"], setup.get("described", ""), where), [])
-    out += lettering_faults(path, t["reader"], list(shot.get("faces") or []), prose,
-                            shot.get("size") == "insert", size[0], where)
+        out += asked(lambda: landmark_faults(staged, t["run"], setup.get("described", ""), where), [], t.get("stats"))
+    out += metered(t, "lettering", lambda: lettering_faults(path, t["reader"], list(shot.get("faces") or []), prose,
+                                                            shot.get("size") == "insert", size[0], where))
     return [f for f in out if f], read is not None
 
 
@@ -393,51 +453,170 @@ CACHE = "eye_cache"
 """storyboard/eye_cache/<key>.json: one panel's read, kept while nothing it reads moved (P2)."""
 
 
+@lru_cache(maxsize=None)
+def workflow_sha(name: str) -> str:
+    """The identity of a VL workflow: the sha of its JSON on disk, "absent" when it is not there."""
+    import hashlib
+    from studio import comfy
+    try:
+        hit = next(iter(comfy.WORKFLOWS.glob(f"*/{name}.json")), None)
+        return hashlib.sha256(hit.read_bytes()).hexdigest()[:12] if hit else "absent"
+    except OSError:
+        return "absent"
+
+
+def ask_sha() -> str:
+    """What the reads ASK: SIZE_ASK, the caption workflow and DWPose by name and by file.  Reworded
+    asks or a swapped workflow make every cached read stale (ep01: the key held none of them)."""
+    import hashlib
+    parts = [SIZE_ASK, CAPTION, keypoints.WORKFLOW, workflow_sha(CAPTION), workflow_sha(keypoints.WORKFLOW)]
+    return hashlib.sha256("\n".join(parts).encode("utf-8")).hexdigest()[:12]
+
+
+_REF_SHA: dict = {}
+
+
+def ref_sha(path: Path) -> str:
+    """A reference's bytes, hashed once per (size, mtime): a re-cut of identical pixels is the same ref."""
+    import hashlib
+    p = Path(path)
+    if not p.is_file():
+        return ""
+    st = p.stat()
+    memo = (str(p), st.st_size, st.st_mtime_ns)
+    if memo not in _REF_SHA:
+        _REF_SHA[memo] = hashlib.sha256(p.read_bytes()).hexdigest()[:16]
+    return _REF_SHA[memo]
+
+
 def read_key(shot: dict, setup: dict, path: Path, refs: list[Path]) -> str:
     """What one panel's read depends on: its bytes, its shot's size/faces/frame/at_rest, the setup's
-    words, its references (size + mtime: sheets are megabytes), the judge's version and switches
-    (timeline debate 2026-10-18, P2: Jekyll ep01's eye re-read unchanged bytes, 46 of 08's 66 min)."""
+    words, its references' bytes, the asks (ask_sha), the judge's version and switches (timeline debate
+    2026-10-18, P2: Jekyll ep01's eye re-read unchanged bytes, 46 of 08's 66 min)."""
     import hashlib
     h = hashlib.sha256(Path(path).read_bytes())
     words = {k: shot.get(k) for k in ("size", "faces", "frame", "at_rest")}
-    stats = [(Path(r).name, *((Path(r).stat().st_size, Path(r).stat().st_mtime_ns) if Path(r).is_file() else ()))
-             for r in refs]
-    h.update(json.dumps([words, setup.get("described", ""), stats, VERSION, SCORED_BOXES],
+    stats = [(Path(r).name, ref_sha(r)) for r in refs]
+    h.update(json.dumps([words, setup.get("described", ""), stats, VERSION, SCORED_BOXES, ask_sha()],
                         sort_keys=True, default=str).encode())
     return h.hexdigest()[:16]
 
 
-def cached_read(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -> tuple[list[Fault], bool]:
-    """read_panel once per key; an unreadable read is never kept (a transient VL failure)."""
-    hit = Path(path).parent / CACHE / f"{read_key(shot, setup, path, refs)}.json"
+def cache_file(shot: dict, setup: dict, path: Path, refs: list[Path]) -> Path:
+    return Path(path).parent / CACHE / f"{read_key(shot, setup, path, refs)}.json"
+
+
+def load_hit(hit: Path) -> tuple[list[Fault], bool] | None:
     try:
         doc = json.loads(hit.read_text(encoding="utf-8"))
         return [Fault(**f) for f in doc["faults"]], bool(doc["ok"])
     except (OSError, ValueError, KeyError, TypeError):
-        pass
+        return None
+
+
+def bump(t: dict, name: str) -> None:
+    if t.get("stats") is not None:
+        t["stats"][name] += 1
+
+
+def cached_read(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -> tuple[list[Fault], bool]:
+    """read_panel once per key.  A read is kept only when every ask answered: an Unreadable or a
+    TimeoutError is a transient failure, asked again next time."""
+    hit = cache_file(shot, setup, path, refs)
+    if (kept := load_hit(hit)) is not None:
+        bump(t, "cache_hits")
+        return kept
+    stats = t.get("stats") or {}
+    failed = stats.get("failed", 0)
     found, ok = read_panel(shot, setup, path, t, refs)
-    if ok:
+    bump(t, "reads")
+    if ok and stats.get("failed", 0) == failed:
         hit.parent.mkdir(exist_ok=True)
         hit.write_text(json.dumps({"faults": [f.model_dump() for f in found], "ok": ok}), encoding="utf-8")
     return found, ok
 
 
+def new_stats() -> dict:
+    return {"reads": 0, "cache_hits": 0, "failed": 0, "seconds": {k: 0.0 for k in READERS}, "unread_for_time": []}
+
+
+def deadline_left(wall_s: float, booked_s: float) -> float:
+    """What is left of the panel_checks wall after the step's booked seconds (contract K3)."""
+    return max(0.0, wall_s - booked_s)
+
+
+def unread_marker(board: Path) -> Path:
+    return Path(board) / "eye_unread.json"
+
+
+def mark_unread(board: Path, unread: list[str]) -> None:
+    """storyboard/eye_unread.json lists the panels the wall left unread; step 08 refuses to sign
+    the board while it exists, so the next window reads them before any take."""
+    marker = unread_marker(board)
+    if unread:
+        marker.write_text(json.dumps(unread), encoding="utf-8")
+    elif marker.exists():
+        marker.unlink()
+
+
+def timing_note(evidence: dict) -> str:
+    """The timing.jsonl note: the three counts, then the whole evidence as json."""
+    return (f"reads={evidence['reads']} cache_hits={evidence['cache_hits']} "
+            f"unread={len(evidence['unread_for_time'])}|{json.dumps(evidence, sort_keys=True)}")
+
+
+def order_of(items: list[tuple]) -> list[tuple]:
+    """Uncached panels first (the newest picture first: the rewound ones), cached last."""
+    return sorted(items, key=lambda i: (i[3].exists(), -i[2].stat().st_mtime_ns))
+
+
+def unread_faults(unread: list[str]) -> list[Fault]:
+    return [fault(UNREAD, where, note="not read before the panel_checks wall; read in the next window") for where in unread]
+
+
+def planned_panels(board: Path, plan: dict, book: Path | None) -> list[tuple]:
+    """(shot, setup, path, cache file, refs) of every panel on disk."""
+    setups, out = plan.get("setups") or {}, []
+    for shot in plan.get("shots") or []:
+        path = board / f"{where_of(shot['index'])}.png"
+        if path.exists():
+            setup = setups.get(shot.get("setup"), {}) or {}
+            refs = refs_of(book, shot, setup)
+            out.append((shot, setup, path, cache_file(shot, setup, path, refs), refs))
+    return out
+
+
 def judge(home: Path, plan: dict, *, book: Path | None = None, run=None, stage=None, reader=None,
-          detect=None, embed=None) -> Verdict:
-    """The verdict over every panel of the board, as it stands."""
+          detect=None, embed=None, deadline: float | None = None, clock: Callable = time.monotonic) -> EyeVerdict:
+    """The verdict over every panel of the board, as it stands.  With `deadline` (seconds) it stops
+    taking NEW reads at the wall: the panels left are faults (`unread_for_time`), never passed."""
     board, t = Path(home) / "storyboard", tools(run, stage, reader, detect, embed)
-    setups = plan.get("setups") or {}
+    t["stats"], began = new_stats(), clock()
     faults, reads, readable = stored_faults(board), 0, 0
     from studio import comfy
     with comfy.model_kept():    # ~30 reads, ONE VL load (five-hour plan fix 5; ~9.7 s a reload)
-        for shot in plan.get("shots") or []:
-            path = board / f"{where_of(shot['index'])}.png"
-            if not path.exists():
+        for shot, setup, path, hit, refs in order_of(planned_panels(board, plan, book)):
+            reads += 1
+            if not hit.exists() and deadline is not None and clock() - began >= deadline:
+                t["stats"]["unread_for_time"].append(path.stem)
                 continue
-            setup = setups.get(shot.get("setup"), {}) or {}
-            found, ok = cached_read(shot, setup, path, t, refs_of(book, shot, setup))
-            faults, reads, readable = faults + found, reads + 1, readable + int(ok)
-    faults += repeat_faults(board, plan, rows_of(board, "panel_content.json"))
-    faults += place_faults(home, plan, book)
-    return Verdict(judge=NAME, version=VERSION, passed=not any(f.severity != "advisory" for f in faults),
-                   faults=faults, confidence=jv.confidence(readable, reads), reads=reads)
+            found, ok = cached_read(shot, setup, path, t, refs)
+            faults, readable = faults + found, readable + int(ok)
+    return finish(board, plan, (home, book), t["stats"], faults, (reads, readable), clock() - began)
+
+
+def finish(board: Path, plan: dict, where: tuple, stats: dict, faults: list[Fault],
+           counts: tuple[int, int], spent_s: float) -> EyeVerdict:
+    """The board-wide checks, the unread panels as faults, the books in the evidence."""
+    home, book = where
+    unread = sorted(stats["unread_for_time"])
+    faults += repeat_faults(board, plan, rows_of(board, "panel_content.json")) + place_faults(home, plan, book)
+    faults += unread_faults(unread)
+    mark_unread(board, unread)
+    if unread:
+        from studio import step_caps
+        print(step_caps.cap_line("panel_checks", 1, 1, spent_s, len(faults)), flush=True)
+    evidence = {k: stats[k] for k in ("reads", "cache_hits", "seconds", "unread_for_time")}
+    return EyeVerdict(judge=NAME, version=VERSION, passed=not any(f.severity != "advisory" for f in faults),
+                      faults=faults, confidence=jv.confidence(counts[1], counts[0]), reads=counts[0],
+                      evidence=evidence)
