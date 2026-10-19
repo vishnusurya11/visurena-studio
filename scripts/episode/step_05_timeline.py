@@ -25,6 +25,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
+from types import SimpleNamespace  # noqa: E402
+
 from pydantic import ValidationError  # noqa: E402
 
 from studio import episode_home, speech_gap, step_cli  # noqa: E402
@@ -160,7 +162,8 @@ def packed(ctx) -> list[list[int]]:
     plan = episode_home.read_json(episode_home.home(ctx.book_dir, ctx.number) / "plan.json")
     setups = {s["index"]: s.get("setup") for s in plan.get("shots") or []}
     rows = [dict(s, setup=setups.get(s["index"])) for s in placed_of(ctx.book_dir, ctx.number).get("shots") or []]
-    return [g for g in tk.groups(rows) if len(g) > 1]
+    budget = tk.budget_for(SimpleNamespace(grammar=plan.get("grammar") or ""))   # takes_r2v's own budget
+    return [g for g in tk.groups(rows, budget) if len(g) > 1]
 
 
 def unpacked(ctx) -> int:
