@@ -87,6 +87,12 @@ def wardrobe_rows(home: Path, sha8: str) -> list[dict] | None:
     return said if isinstance(said, list) else said.get("rows", [])
 
 
+def flagged_rows(home: Path) -> list[dict]:
+    """The takes that shipped flagged (assemble's takes/work/flagged_takes.json, contract K7)."""
+    path = Path(home) / "takes" / "work" / "flagged_takes.json"
+    return episode_home.read_json(path) if path.exists() else []
+
+
 def gather(home: Path, engine: str, sha8: str) -> dict:
     """Every measured input, or the G-SIGNOFF-MEASURED refusal listing all gaps."""
     if gaps := missing(home, engine, sha8):
@@ -100,7 +106,7 @@ def gather(home: Path, engine: str, sha8: str) -> dict:
             "takes": take_rows(episode_home.takes_under(home, engine)),
             "terminals": publish_lock.last_by_gate(load(Path(home) / "learnings.jsonl")),
             "speakers": episode_home.read_json(speakers) if speakers.exists() else {},
-            "wardrobe": wardrobe_rows(home, sha8)}
+            "wardrobe": wardrobe_rows(home, sha8), "flagged": flagged_rows(home)}
 
 
 # ---- the four sections, every slot a parsed value ---------------------------------
@@ -158,6 +164,19 @@ def flags_lines(m: dict) -> list[str]:
     return out or ["- none measured open."]
 
 
+def flagged_take_lines(m: dict) -> list[str]:
+    """Every take that shipped flagged: its seconds in the master, severity, rows and notes.
+    A section of the page, never a publish stop (owner ruling 2026-10-01)."""
+    rows = m.get("flagged") or []
+    if not rows:
+        return ["- none recorded."]
+    total = sum(float(r["seconds_in_master"]) for r in rows)
+    out = [f"{len(rows)} flagged takes ship, {total:g} s of the master."]
+    return out + [f"- T{int(r['take']):02d}: {r['seconds_in_master']} s{' (slowed)' if r.get('slowed') else ''}, "
+                  f"{r.get('severity')}, {', '.join(r.get('rows', []))} -- {'; '.join(r.get('notes', []))[:160]}"
+                  for r in rows]
+
+
 def signed_line(m: dict) -> str:
     """Who signed and from what: the generator and its inputs, never a person."""
     inputs = [f"eye_{m['sha8']}.json", m["qc_name"],
@@ -175,6 +194,7 @@ def render(m: dict) -> str:
              "Generated from measures; no sentence here was typed.", ""]
     for name in publish_lock.SECTIONS:
         parts += [f"## {name}", *lines_by[name], ""]
+    parts += ["## Flagged takes", *flagged_take_lines(m), ""]
     parts.append(signed_line(m))
     return "\n".join(parts) + "\n"
 

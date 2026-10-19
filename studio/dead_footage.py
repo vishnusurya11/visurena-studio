@@ -50,6 +50,37 @@ TRULY_DEAD = frozenset({"frozen-at-start", "frozen-share", "frozen-whole"})
 """The rows that make a take dead footage whatever the ladder kept (owner option A, 2026-10-18)."""
 
 
+KNOWN_FLAG_ROWS = ("warp", "gait", "pulse", "coherence", "last-vs-", "drift", "face-at-end", "zoom",
+                   "camera-move", "rotation", "lip-sync", "tail", "lag")
+"""The rows the ladder has measured and cured, so a kept take failing them ships flagged at the
+row's own severity.  Any other failing row on a kept take ships too, flagged HIGH -- G-DEAD never
+fails closed on a row nobody listed (letterbox, a new gate); only TRULY_DEAD refuses."""
+ALWAYS_HIGH = frozenset({"clones", "identity"})
+"""Take-eye faults that are a wrong picture, not a soft one: two faces read as one man."""
+SETTLED = ("keep_best", "high")
+"""`fault.evidence["settled"]` values (contract K5) that let the take ship; `still` does not."""
+
+
+def known_row(name: str) -> bool:
+    return any(str(name).startswith(k) for k in KNOWN_FLAG_ROWS)
+
+
+def take_of(where) -> int | None:
+    """`T08` -> 8; anything else (a pair, a panel, nothing) -> None."""
+    text = str(where or "")
+    return int(text[1:]) if text[:1] == "T" and text[1:].isdigit() else None
+
+
+def lifted(faults: list[dict]) -> dict[int, list[dict]]:
+    """The eye's settled faults (keep_best / high) grouped by the take they name."""
+    out: dict[int, list[dict]] = {}
+    for f in faults:
+        index = take_of(f.get("where"))
+        if index is not None and (f.get("evidence") or {}).get("settled") in SETTLED:
+            out.setdefault(index, []).append(f)
+    return out
+
+
 def failing_rows(record: dict) -> list[str]:
     return [g.get("name") for g in (record or {}).get("gates", []) if g.get("hard") and not g.get("ok")]
 
@@ -70,6 +101,30 @@ def flag_line(index: int, record: dict) -> str:
     rows = [g for g in (record or {}).get("gates", []) if g.get("hard") and not g.get("ok")]
     return f"FLAGGED T{index:02d}: kept best at the cap -- " + "; ".join(
         f"{g.get('name')}: {str(g.get('note') or '')[:90]}" for g in rows)
+
+
+def severity_of(rows: list[str], faults: list[dict]) -> str:
+    """high for a wrong picture, an unlisted row or a fault the eye called high; else normal."""
+    loud = any(r in ALWAYS_HIGH or not known_row(r) for r in rows)
+    return "high" if loud or any(f.get("severity") == "high" for f in faults) else "normal"
+
+
+def flag_row(index: int, shots: list[int], seconds: float, slow: float, record: dict | None,
+             faults: list[dict]) -> dict:
+    """One take that ships flagged: contract K7 (work/flagged_takes.json)."""
+    rows = list(dict.fromkeys(failing_rows(record or {}) + [str(f.get("kind")) for f in faults]))
+    notes = [f"{g.get('name')}: {str(g.get('note') or '')[:90]}"
+             for g in (record or {}).get("gates", []) if g.get("hard") and not g.get("ok")]
+    notes += [f"{f.get('kind')}: {str(f.get('note') or '')[:90]}" for f in faults]
+    return {"take": index, "shot": shots, "seconds_in_master": round(seconds, 3), "slowed": slow > 1.0,
+            "rows": rows, "notes": notes, "severity": severity_of(rows, faults)}
+
+
+def flagged_takes(order: list[tuple[int, float]], shots: dict, slows: dict, records: dict,
+                  kept: dict[int, list[dict]]) -> list[dict]:
+    """Every kept take that is still in the cut, with the seconds it holds there."""
+    return [flag_row(i, shots.get(i, [i]), s, slows.get(i, 1.0), records.get(i), kept[i])
+            for i, s in order if i in kept]
 
 
 def is_dead(state: str, seconds: float) -> bool:

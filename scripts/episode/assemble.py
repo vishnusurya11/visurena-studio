@@ -12,7 +12,9 @@ sound engineering; it is the trailer's assemble stage under an episode's plan.
 """
 from __future__ import annotations
 
+import contextlib
 import functools
+import inspect
 import itertools
 import subprocess
 import sys
@@ -26,7 +28,7 @@ from studio import episode_emotion, episode_sound, finished_file, inner_voice
 from studio.comfy import run
 from studio.episode_spec import Episode
 from studio import trailer_assemble
-from studio import master_loudness, master_upscale
+from studio import episode_clock, eye_verdict, master_loudness, master_upscale, video_encoder
 from studio.trailer_assemble import clip_seconds, concat, extract, integrated, mix_with_lines, true_peak
 
 W, H, FPS = canvas.size("9:16") + (24,)
@@ -671,32 +673,69 @@ def dialogue_takes(placed: dict, takes: dict) -> set[int]:
             if spoken & set(getattr(takes[i], "shots", None) or [i])}
 
 
-def ladder_kept(take_dir: Path) -> bool:
-    """The take ladder's last terminal kept its best at the cap: the newest take-eye verdict
-    says `keep_best` (owner option A, 2026-10-18)."""
-    eyes = sorted(Path(take_dir).glob("eye_*.json"), key=lambda p: p.stat().st_mtime)
-    return bool(eyes) and episode_home.read_json(eyes[-1]).get("terminal") == "keep_best"
+def current_eye(take_dir: Path) -> dict | None:
+    """The newest take-eye verdict whose sha8 names the take files on disk now, else None:
+    a retaken take moves the fingerprint and the old verdict stops counting."""
+    for path in sorted(Path(take_dir).glob("eye_*.json"), key=lambda p: p.stat().st_mtime, reverse=True):
+        verdict = episode_home.read_json(path)
+        files = [Path(take_dir) / name for name in verdict.get("files", [])]
+        if files and all(f.exists() for f in files) and eye_verdict.fingerprint(files) == verdict.get("sha8"):
+            return verdict
+    return None
+
+
+def kept_of(take_dir: Path) -> dict[int, list[dict]]:
+    """{take: its settled faults} for the takes the take ladder ended on keep_best or high
+    (contract K5, `evidence.settled`) in the eye of the current take set.  A `still` or an
+    unmarked fault admits nothing; there is no second state file (Jekyll Kawajiri ep01)."""
+    from studio import dead_footage as dead
+    return dead.lifted((current_eye(take_dir) or {}).get("faults", []))
+
+
+@contextlib.contextmanager
+def within(book: Path, number: int, stage: str, note: str = ""):
+    """One inner step of assemble as its own clock row, counted once (net of the outer row)."""
+    with episode_clock.timed(book, number, stage, note=note, within="assemble"):
+        yield
+
+
+def flag_summary(flagged: list[dict]) -> str:
+    """The cut log's one line: how many takes ship flagged, high ones named, total seconds."""
+    high = [f"T{r['take']:02d}" for r in flagged if r["severity"] == "high"]
+    total = sum(r["seconds_in_master"] for r in flagged)
+    return (f"flagged takes: {len(flagged)} ship flagged ({total:.1f} s of the master)"
+            + (f"; high: {', '.join(high)}" if high else "") + " -> flagged_takes.json")
+
+
+def flags_of(order: list, plan: dict, takes: dict, records: dict, kept: dict) -> list[dict]:
+    """flagged_takes.json (contract K7): every kept take left in the cut, with its seconds there."""
+    from studio import dead_footage as dead
+    after = dead.apply(order, plan)
+    slows = {i: dead.stretch(s, plan["room"].get(i, 0.0)) for i, s in after if i in plan["seconds"]}
+    shots = {i: list(getattr(takes[i], "shots", None) or [i]) for i, _ in order}
+    return dead.flagged_takes(after, shots, slows, records, kept)
 
 
 def dead_plan(placed: dict, takes: dict, stills: dict, take_dir: Path, heads: dict) -> dict:
     """G-DEAD (studio/dead_footage): the free cut that takes every dead shot it can
-    out of the master; what it cannot cure REFUSES the master -- a retake, never a
-    flagged ship (Jekyll ep01 shipped T04, T06, T15 failed and two 6.4 s stills)."""
+    out of the master; what it cannot cure REFUSES the master -- a retake.  A take the
+    ladder settled keep_best/high ships FLAGGED (owner option A, 2026-10-18): `plan["flagged"]`
+    is what lands in flagged_takes.json.  Only frozen rows and unsettled failures are refused."""
     from studio import dead_footage as dead
     order = segments_of(placed, takes)
     records = {i: episode_home.read_json(p) for i, _ in order
                if (p := Path(take_dir) / f"T{i:02d}.dq.json").exists()}
-    kept = ladder_kept(Path(take_dir))
-    states = {i: dead.state_of(i, stills, records.get(i), kept) for i, _ in order}
+    kept = {i: f for i, f in kept_of(Path(take_dir)).items() if i not in stills}
+    states = {i: dead.state_of(i, stills, records.get(i), i in kept) for i, _ in order}
     for i, _ in order:
         if states[i] == "flagged":
             print(dead.flag_line(i, records[i]), flush=True)
     room = {i: clip_seconds(takes[i]) - heads.get(i, 0.0) for i, _ in order if i not in stills}
-    plan = dead.cut_plan(order, states, room, dialogue_takes(placed, takes))
+    plan = dead.cut_plan(order, states, room, dialogue_takes(placed, takes)) | {"room": room}
     if left := dead.faults(dead.apply(order, plan), states):
         raise SystemExit("G-DEAD refuses the master:\n  " + "\n  ".join(left)
                          + "\nno free cut cures these: retake them (the take ladder's move_type)")
-    return plan | {"room": room}
+    return plan | {"flagged": flags_of(order, plan, takes, records, kept)}
 
 
 def picture(placed: dict, takes: dict[int, Path], work: Path, heads: dict[int, float] | None = None,
@@ -742,7 +781,7 @@ def face_paste_wrap(work: Path, take_dir: Path, factor: int):
     guards = episode_home.read_json(work / "gutter.json") if (work / "gutter.json").exists() else {}
     spans = face_paste.spans_from(rows, frames, guards, take_dir, sha_of=lambda i: face_paste.sha8(
         take_dir / f"T{i:02d}.mp4"), fps=FPS)
-    print(f"face refine: {len(spans)} take(s) pasted at master scale", flush=True)
+    print(f"face refine: {len(spans)} take(s) pasted at cut scale, before the one upscale", flush=True)
     # a partial, not a lambda: the av3 worker (another python) rebuilds it from its spans
     return functools.partial(face_paste.Paster, spans=spans, width=W, height=H, factor=factor) if spans else None
 
@@ -887,12 +926,12 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
     # 4x); its denoise is temporal, so it is told where every shot starts.
     cuts = cut_frames(work, parts) if upscale.engine == "av3" else []
     # encoder: x264, or NVENC p7 when the device router found the GPU idle (owner 2026-10-18)
+    want = sum(video_frames(p) for p in parts)
     master_upscale.master(listing, out, W, H, upscale, FPS, wrap=wrap, cuts=cuts,   # wrap: the face refine's paste
-                          encoder=encoder)
+                          encoder=encoder, **expected_of(want))
     # The concat demuxer does not refuse a part whose picture does not match the
     # first one: it drops it and reports success.  That is how a master four
     # frames short shipped without anyone seeing it, so the join counts itself.
-    want = sum(video_frames(p) for p in parts)
     got = video_frames(out)
     if join_lost(got, want):
         raise RuntimeError(
@@ -900,6 +939,13 @@ def tail(master: Path, title: Path | None, out: Path, work: Path, number: int = 
             f"({', '.join(f'{p.name} {video_frames(p)}f' for p in parts)}). "
             f"A part whose size, rate or pixel format differs is dropped silently.")
     return out
+
+
+def expected_of(frames: int) -> dict:
+    """The frame count the master must emit (contract K8, P10): passed only once
+    `master_upscale.master` takes it, so this lands before or after P10 alike."""
+    takes = "expected_frames" in inspect.signature(master_upscale.master).parameters
+    return {"expected_frames": frames} if takes else {}
 
 
 def join_lost(got: int, want: int) -> bool:
@@ -982,10 +1028,15 @@ def main(book_id: str, number: int, engine: str = "i2v",
         episode_home.takes_dir(book, number, engine) / "shots.json"), book)
     stills = stills_of(episode_home.takes_dir(book, number, engine), book)
     plan = dead_plan(placed, takes, stills, episode_home.takes_dir(book, number, engine), heads_of(home))
+    flagged = plan.pop("flagged")
+    episode_home.write_json(work / "flagged_takes.json", flagged)   # contract K7: the takes that ship flagged
     episode_home.write_json(work / "dead_cuts.json", plan)      # what G-DEAD cut, for qc and the audit
-    cut = picture(placed, takes, work, heads_of(home), stills, plan=plan)
-    music = quiet_bed(toned_bed(home, number, episode.beds, placed, bed_engine),
-                      placed["duration_s"], work / "bed_quiet.wav", normalise=False)
+    print(flag_summary(flagged), flush=True)
+    with within(book, number, "cut", f"{len(flagged)} flagged"):
+        cut = picture(placed, takes, work, heads_of(home), stills, plan=plan)
+    with within(book, number, "bed", bed_engine):
+        music = quiet_bed(toned_bed(home, number, episode.beds, placed, bed_engine),
+                          placed["duration_s"], work / "bed_quiet.wav", normalise=False)
     # audio reviewer, iteration 3: 10 dB in 20 ms on every line pumped; the bed now sits lower
     # (BED_TRIM_DB) and ducks gently: at least 4 dB, 0.15 s attack, 0.25 s pre-delay, 1.0 s release
     trailer_assemble.DUCK_DEPTH_DB, trailer_assemble.DUCK_ATTACK = 4.0, 0.15
@@ -995,8 +1046,9 @@ def main(book_id: str, number: int, engine: str = "i2v",
     # line sat at one level whether it was a whisper or a scream.
     # A cue the last MEASURED master could not hear is lifted before this
     # recut (ep15: three quiet cues, no cure but editing the signed plan).
-    episode_sound.cure_from_qc(home, engine)
-    sound = episode_sound.layer(home, episode, placed)
+    with within(book, number, "sfx"):
+        episode_sound.cure_from_qc(home, engine)
+        sound = episode_sound.layer(home, episode, placed)
     said = {r["index"]: r for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
     offsets = [episode_emotion.offset_of(said.get(line["index"], {}).get("delivery", "calm"),
                                          line.get("kind") or said.get(line["index"], {}).get("kind", ""))
@@ -1004,8 +1056,9 @@ def main(book_id: str, number: int, engine: str = "i2v",
     laid = line_laid.laid_lines(placed, episode_home.takes_dir(book, number, engine))
     # EFFECTS DUCK UNDER THE VOICE like the bed (owner 2026-09-27: "too loud")
     sound = episode_sound.ducked(sound, [(l["at"], l["at"] + l["seconds"]) for l in laid], work)
-    mixed = mix_with_lines(cut, music, sound, [(line["at"], wavs[line["index"]]) for line in laid],
-                           work / "mixed.mp4", seconds=placed["duration_s"], offsets=offsets)
+    with within(book, number, "mix", f"{len(laid)} lines"):
+        mixed = mix_with_lines(cut, music, sound, [(line["at"], wavs[line["index"]]) for line in laid],
+                               work / "mixed.mp4", seconds=placed["duration_s"], offsets=offsets)
     card = book / "title" / f"ep{number:02d}.mp4"
     # The master's NAME goes on a finished file, never on a growing one: the
     # join is `-preset slow -crf 14` over three minutes of picture, and while it
@@ -1013,8 +1066,9 @@ def main(book_id: str, number: int, engine: str = "i2v",
     # master was found truncated at 133 MB that way.  See studio/finished_file.
     master = episode_home.master_path(book, number, engine)
     up, why = master_upscale.resolved()
+    encoder = video_encoder.encoder_for("master encode")
     out = upscaled_tail(book, number, mixed, card if card.exists() else book / "title" / "title.mp4",
-                        finished_file.scratch_for(master, work), work, up, why,
+                        finished_file.scratch_for(master, work), work, up, why, encoder=encoder,
                         wrap=face_paste_wrap(work, episode_home.takes_dir(book, number, engine), up.factor))
     out = trim(out, work)
     out = master_loudness.into_band(out, work, measure=integrated)   # a quiet chapter's beds (ep20)
@@ -1030,33 +1084,33 @@ def main(book_id: str, number: int, engine: str = "i2v",
     conformed = work / "title_conformed.mp4"
     record_layout(home / "cut", master, main=video_frames(mixed),
                   card=video_frames(conformed) if conformed.exists() else 0,
-                  upscale=master_upscale.name_of(up))
+                  upscale=master_upscale.name_of(up), encoder=encoder)
     print(f"master -> {master}  (kept as master_iter{keep}.mp4)")
 
 
 def upscaled_tail(book: Path, number: int, mixed: Path, title: Path, out: Path, work: Path,
-                  up: master_upscale.Upscale, why: str, wrap=None) -> Path:
+                  up: master_upscale.Upscale, why: str, wrap=None, encoder: str = "") -> Path:
     """`tail` under the settled upscale, its own row on the episode clock (owner
     2026-10-14: the 6 h clock sees it), stamped within assemble so it counts once."""
-    from studio import episode_clock
     master_upscale.say(why)
     note = f"{up.label()} -> {'x'.join(map(str, master_upscale.size(W, H, up)))}" + (f"; {why}" if why else "")
-    from studio import video_encoder
-    encoder = video_encoder.encoder_for("master encode")
+    encoder = encoder or video_encoder.encoder_for("master encode")
     with episode_clock.timed(book, number, "upscale", note=f"{note}; encode {encoder}", within="assemble"):
         return tail(mixed, title, out, work, number, upscale=up, wrap=wrap, encoder=encoder)
 
 
-def record_layout(cut: Path, master: Path, *, main: int, card: int, upscale: str = "") -> None:
+def record_layout(cut: Path, master: Path, *, main: int, card: int, upscale: str = "", encoder: str = "") -> None:
     """Where this master's card starts, by its sha8 (cut/master_layout.json): the
     book video splits the Short there instead of guessing it (it guessed wrong
     on WotW ep06/10/20 and Scarlet ep12, 2026-10-11).  And which upscale made
-    these bytes: QC's segment cap follows it (2026-10-14)."""
+    these bytes: QC's segment cap follows it (2026-10-14).  `encoder` (cuda | cpu) says which
+    device encoded them; readers that do not know a key ignore it (P09, 2026-10-19)."""
     from studio import book_compilation as bc, youtube_publish as yp
     path = cut / bc.LAYOUT
     layout = episode_home.read_json(path) if path.exists() else {}
     layout[yp.sha8(master)] = {"main": main, "card": card, "chip": edit_gate.END_CHIP_FRAMES,
-                               **({"upscale": upscale} if upscale else {})}
+                               **({"upscale": upscale} if upscale else {}),
+                               **({"encoder": encoder} if encoder else {})}
     episode_home.write_json(path, layout)
 
 

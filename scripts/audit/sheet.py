@@ -20,6 +20,7 @@ json, writes html.  The page style is the dossier's.
 from __future__ import annotations
 
 import hashlib
+import json
 import random
 import sys
 from pathlib import Path
@@ -121,10 +122,59 @@ def flag_card(row: AuditRow) -> str:
             f"{fault_table(row.faults)}</div></div></div>")
 
 
+def deduped(rows: list[AuditRow]) -> list[AuditRow]:
+    """One row per (gate, take-set sha8, terminal): a ladder that re-signs a verdict on every
+    resume writes the same terminal again; the newest shows.  A row with no sha8 is never merged."""
+    newest: dict = {}
+    for row in rows:
+        key = (row.gate, row.sha8, row.terminal) if row.sha8 else id(row)
+        if key not in newest or row.ts >= newest[key].ts:
+            newest[key] = row
+    return list(newest.values())
+
+
 def flagged(rows: list[AuditRow]) -> str:
     out = [f"<h2>Flagged <small>{len(rows)} terminal rung(s); every fault with its numbers</small></h2>"]
     out += [flag_card(row) for row in rows] or ["<div class=card>nothing was flagged</div>"]
     return "".join(out)
+
+
+# ---- the takes that shipped flagged (contract K7) ---------------------------------------
+
+def strip_range(path: str) -> tuple[int, int]:
+    """`reports/strip_T15_T27.png` -> (15, 27); a strip that names no range covers none."""
+    nums = [int(n) for n in Path(path).stem.replace("strip_T", " ").replace("_T", " ").split() if n.isdigit()]
+    return (nums[0], nums[-1]) if len(nums) >= 2 else (-1, -1)
+
+
+def strip_of(take: int, strips: list[str]) -> str:
+    """The strip whose range holds this take, else the first strip, else nothing."""
+    return next((s for s in strips if strip_range(s)[0] <= take <= strip_range(s)[1]), (strips or [""])[0])
+
+
+def flagged_take_row(row: dict, strips: list[str]) -> str:
+    strip = strip_of(int(row["take"]), strips)
+    link = f"<a href='{esc(href(strip))}'>strip</a>" if strip else ""
+    cls = "bad" if row.get("severity") == "high" else ""
+    return (f"<tr><td class={cls}>T{int(row['take']):02d}</td><td class=n>{row['seconds_in_master']} s"
+            f"{' slowed' if row.get('slowed') else ''}</td><td class={cls}>{esc(row.get('severity'))}</td>"
+            f"<td>{esc(', '.join(row.get('rows', [])))}</td><td>{esc('; '.join(row.get('notes', [])))}</td>"
+            f"<td>{link}</td></tr>")
+
+
+def flagged_takes_table(book: Path, unit: str) -> str:
+    """The takes that shipped flagged, with the seconds each holds in the master; "" when
+    assemble wrote none (takes/work/flagged_takes.json)."""
+    path = Path(book) / "episodes" / unit / "takes" / "work" / "flagged_takes.json"
+    rows = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    if not rows:
+        return ""
+    strips = found(Path(book), f"episodes/{unit}/reports/strip_*.png")
+    total = sum(float(r["seconds_in_master"]) for r in rows)
+    return (f"<h2>Flagged takes <small>{len(rows)} ship flagged, {total:g} s of the master</small></h2>"
+            "<div class=card><table><tr><th>take</th><th>seconds in the master</th><th>severity</th>"
+            "<th>rows</th><th>notes</th><th>strip</th></tr>"
+            + "".join(flagged_take_row(r, strips) for r in rows) + "</table></div>")
 
 
 # ---- the unit's pictures ----------------------------------------------------------------
@@ -187,13 +237,14 @@ def sampled(picked: dict[str, list[str]], seed: str) -> str:
 
 def page(book: Path, unit: str, rows: list[AuditRow]) -> str:
     seed = unit_seed(unit, rows)
+    rows = deduped(rows)
     return (f"<!doctype html><meta charset=utf-8>"
             f"<meta name=viewport content='width=device-width,initial-scale=1'>"
             f"<title>{esc(book.name)} {esc(unit)} audit</title><style>{CSS}</style>"
             f"<header><h1>{esc(unit)} audit</h1><div class=sub>{esc(book.name)} &middot; "
             f"<a href='index.html' style='color:#b9b2a6'>index</a></div>"
             f"<div class=num><b>{len(rows)}</b> flagged &middot; seed <b>{esc(seed)}</b></div></header>"
-            f"<main>{flagged(rows)}{pictures_of(book, unit)}{sampled(sample(book, unit, rows, seed), seed)}</main>")
+            f"<main>{flagged(rows)}{flagged_takes_table(book, unit)}{pictures_of(book, unit)}{sampled(sample(book, unit, rows, seed), seed)}</main>")
 
 
 def index_page(book: Path, rows: list[AuditRow]) -> str:
