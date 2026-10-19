@@ -97,21 +97,18 @@ def test_the_master_is_every_frame_of_every_part(tmp_path):
     assert frames(out) == frames(master) + frames(card) + chip
 
 
-def test_a_part_the_join_silently_drops_is_refused(tmp_path):
-    """The concat demuxer does not refuse a part whose picture does not match:
-    it drops it and reports success, which is how a master four frames short
-    shipped without anyone seeing it.  So the join counts its own frames."""
+def test_a_part_of_another_size_is_conformed_not_dropped(tmp_path):
+    """The old concat-demuxer join dropped a part whose picture did not match and
+    reported success (a master four frames short shipped).  Since the master pass
+    decodes every part through one scale (RTX/Lanczos path, 2026-10-14) a part of
+    another size is conformed and kept; the loss itself is still refused by
+    `join_lost` (tests/test_a_join_one_frame_long_is_not_a_lost_part.py)."""
     ep = _assemble()
-    # the card is rescaled on the way in, so the part that can mismatch is the
-    # cut itself: a master at the wrong size takes the chip down with it
     odd = clip(tmp_path / "master.mp4", 1.0, size="256x448")
     card = clip(tmp_path / "card.mp4", 0.5)
-    try:
-        ep.tail(odd, card, tmp_path / "out.mp4", tmp_path, upscale=LANCZOS)
-    except RuntimeError as raised:
-        assert "frames" in str(raised)
-    else:
-        raise AssertionError("a dropped part was joined without complaint")
+    out = ep.tail(odd, card, tmp_path / "out.mp4", tmp_path, upscale=LANCZOS)
+    chip = round(ep.END_CHIP_SECONDS * ep.FPS)
+    assert frames(out) == frames(odd) + frames(card) + chip
 
 
 class Nearest:
