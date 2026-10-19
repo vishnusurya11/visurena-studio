@@ -33,5 +33,7 @@ def test_a_title_does_not_cut_the_aim():
     -- the at_rest clause was cut at the period of "Mr." -- and a second cure on that motion
     aimed at the bare title again."""
     at_rest = "THE FOCUS OF THE PICTURE IS Mr. Enfield's frank, lively face at the CENTRE"
-    assert tl.aim_of("The camera holds a locked-off frame", at_rest) == "Mr. Enfield's frank"
-    assert tl.aim_of("The camera pans across to Mr; he speaks", at_rest) == "Mr. Enfield's frank"
+    assert tl.aim_of("The camera holds a locked-off frame", at_rest) == "Mr. Enfield"
+    assert tl.aim_of("The camera pans across to Mr; he speaks", at_rest) == "Mr. Enfield"
+    # 3ae4584 (ep01 T19, 2026-10-15): a possessive cut off by its adjectives' comma
+    # ("frank, lively face") aims at its owner, not at the dangling "Mr. Enfield's frank".
