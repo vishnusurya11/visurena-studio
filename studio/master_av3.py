@@ -112,6 +112,8 @@ STALL_S = 60.0
 """No frame through the pump for this long is a stall: the pipeline is killed."""
 STALLED = 75
 """The worker's exit code for a stall (studio/master_upscale.AV3_STALLED)."""
+SHORT = 77
+"""The worker's exit code for a pass that ended short (studio/master_upscale.AV3_SHORT)."""
 
 
 class Stalled(RuntimeError):
@@ -160,9 +162,10 @@ def ticking(write, dog: Watchdog):
 
 def streamed(listing: Path, out: Path, width: int, height: int, factor: int, fps: int,
              upscaler, cuts: list[int], filt: str = PREFILTER, encoder: str = "cpu",
-             paste=None, stall_s: float = STALL_S, hard_exit=None) -> int:
+             paste=None, stall_s: float = STALL_S, hard_exit=None, expected_frames: int | None = None) -> int:
     """decode | face paste at cut scale | denoise per shot | upscale | encode.  A failure
-    or a stall kills the whole pipeline and surfaces; it never waits on a blocked pipe."""
+    or a stall kills the whole pipeline and surfaces; it never waits on a blocked pipe.
+    A pass that emitted other than `expected_frames` is a ShortPass (K8)."""
     dec = subprocess.Popen(mu.decode_argv(listing, width, height), stdout=subprocess.PIPE)
     enc = subprocess.Popen(mu.encode_argv(listing, out, width * factor, height * factor, fps, encoder),
                            stdin=subprocess.PIPE)
@@ -182,7 +185,7 @@ def streamed(listing: Path, out: Path, width: int, height: int, factor: int, fps
         raise Stalled(f"the av3 pass moved no frame for {stall_s:.0f} s")
     if any(codes):
         raise RuntimeError(f"the av3 master encode failed: encoder {codes[0]}, decoder {codes[1]}")
-    return n
+    return mu.counted(n, expected_frames)
 
 
 def stall(dec, enc, seg: "Segmented", hard_exit) -> None:
@@ -251,7 +254,7 @@ def run(job: dict, upscaler=None, hard_exit=None) -> int:
     effect = upscaler or Av3(job["weights"])
     return streamed(Path(job["listing"]), Path(job["out"]), job["width"], job["height"], job["factor"],
                     job["fps"], effect, job["cuts"], encoder=job.get("encoder", "cpu"), paste=paste_of(job),
-                    hard_exit=hard_exit)
+                    hard_exit=hard_exit, expected_frames=job.get("expected_frames"))
 
 
 def main(argv: list[str]) -> None:
@@ -263,6 +266,9 @@ def main(argv: list[str]) -> None:
     except Stalled as stuck:
         print(f"CAP upscale: av3 stalled: {stuck}", file=sys.stderr, flush=True)
         raise SystemExit(STALLED)
+    except mu.ShortPass as short:
+        print(f"CAP upscale: av3 ended short: {short} frames", file=sys.stderr, flush=True)
+        raise SystemExit(SHORT)
     print(json.dumps({"av3_frames": n, "wall_s": round(time.perf_counter() - t0, 1)}), flush=True)
 
 

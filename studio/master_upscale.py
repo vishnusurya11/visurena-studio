@@ -158,6 +158,18 @@ def encode_argv(listing: Path, out: Path, width: int, height: int, fps: int, enc
 Frame = Callable[["object"], "object"]
 
 
+class ShortPass(RuntimeError):
+    """A pass whose frame count is not the cut's (ep01 2026-10-18: 3,259 of 3,348 frames
+    encoded and the pass still exited 0); the message is 'N of M'."""
+
+
+def counted(n: int, expected: int | None) -> int:
+    """`n` frames emitted; ShortPass('N of M') when the cut said it holds another count."""
+    if expected is not None and n != expected:
+        raise ShortPass(f"{n} of {expected}")
+    return n
+
+
 def pasted(read: Callable[[int], bytes], paste: Frame | None, width: int, height: int) -> Callable[[int], bytes]:
     """The decoder's frames with the face paste applied at CUT scale (owner 2026-10-18:
     every picture edit before the one upscale, none after it); `read` itself when none."""
@@ -219,9 +231,11 @@ class Rtx:
 
 
 def streamed(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
-             upscaler: Frame, encoder: str = "cpu", paste: Frame | None = None) -> int:
+             upscaler: Frame, encoder: str = "cpu", paste: Frame | None = None,
+             expected_frames: int | None = None) -> int:
     """decode | paste at cut scale | upscale | encode; refuses a failed ffmpeg on either
-    side, and a failure kills the decoder rather than wait on its full pipe."""
+    side, a failure kills the decoder rather than wait on its full pipe, and a pass
+    that emitted other than `expected_frames` is a ShortPass."""
     w, h = size(width, height, up)
     dec = subprocess.Popen(decode_argv(listing, width, height), stdout=subprocess.PIPE)
     enc = subprocess.Popen(encode_argv(listing, out, w, h, fps, encoder), stdin=subprocess.PIPE)
@@ -239,27 +253,30 @@ def streamed(listing: Path, out: Path, width: int, height: int, up: Upscale, fps
         codes = enc.wait(), dec.wait()
     if any(codes):
         raise RuntimeError(f"the {up.label()} master encode failed: encoder {codes[0]}, decoder {codes[1]}")
-    return n
+    return counted(n, expected_frames)
 
 
 def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
            upscaler: Frame | None = None, wrap: Callable[[Frame], Frame] | None = None,
-           cuts: list[int] | None = None, encoder: str = "cpu") -> Path:
+           cuts: list[int] | None = None, encoder: str = "cpu",
+           expected_frames: int | None = None) -> Path:
     """The joined cut, upscaled and encoded once (`encoder`: the router's device).  `upscaler` replaces the GPU in tests;
     `wrap` is the face refine's paste (studio/face_paste.Paster), applied at CUT scale
     to every frame BEFORE the upscale (owner 2026-10-18: the upscale is the last picture
     operation, only muxing follows it); `cuts` are the frames each new
-    shot starts on (av3's denoise starts fresh there)."""
+    shot starts on (av3's denoise starts fresh there); `expected_frames` is the cut's frame count (K8)."""
     if up.engine == "lanczos":
         if wrap is not None:
             print("FACE REFINE: the lanczos fallback has no frame loop; nothing pasted", file=sys.stderr, flush=True)
         subprocess.run(lanczos_argv(listing, out, width, height, up, encoder), check=True)
         return out
     if up.engine == "av3":
-        return av3_master(listing, out, width, height, up, fps, upscaler, wrap, cuts or [], encoder)
+        return av3_master(listing, out, width, height, up, fps, upscaler, wrap, cuts or [], encoder,
+                          expected_frames)
     effect = upscaler or Rtx(width, height, up)
     try:
-        streamed(listing, out, width, height, up, fps, effect, encoder, paste=at_cut(wrap))
+        streamed(listing, out, width, height, up, fps, effect, encoder, paste=at_cut(wrap),
+                 expected_frames=expected_frames)
     finally:
         if upscaler is None:
             effect.close()
@@ -267,29 +284,32 @@ def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: 
 
 
 def av3_master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
-               upscaler, wrap, cuts: list[int], encoder: str = "cpu") -> Path:
+               upscaler, wrap, cuts: list[int], encoder: str = "cpu",
+               expected_frames: int | None = None) -> Path:
     """In process with a stand-in model (tests); else the portable python's worker,
     which rebuilds the face paste from its spans and pastes at cut scale BEFORE the 4x.
     A stalled or failed worker falls back to rtx4x (lanczos without RTX), said."""
     from studio import master_av3
     if upscaler is not None:
         master_av3.streamed(listing, out, width, height, up.factor, fps, upscaler, cuts, encoder=encoder,
-                            paste=at_cut(wrap))
+                            paste=at_cut(wrap), expected_frames=expected_frames)
         return out
     python, weights = av3_paths()
     job = out.with_name(out.stem + ".av3_job.json")
     job.write_text(json.dumps(av3_job(listing, out, width, height, up, fps, spans_of(wrap), cuts, weights,
-                                      encoder)), encoding="utf-8")
+                                      encoder, expected_frames)), encoding="utf-8")
     from studio import compute_device
     with compute_device.claim("av3 master"):     # the card is ours outside ComfyUI's queue
         code = run_worker(python, job)
     if code:
-        return av3_fallback(code, listing, out, width, height, fps, wrap, encoder)
+        return av3_fallback(code, listing, out, width, height, fps, wrap, encoder, expected_frames)
     return out
 
 
 AV3_STALLED = 75
 """The av3 worker's exit code for a stall (studio/master_av3.STALLED)."""
+AV3_SHORT = 77
+"""The av3 worker's exit code for a pass that ended short (studio/master_av3.SHORT)."""
 
 
 def run_worker(python: Path, job: Path) -> int:
@@ -298,22 +318,23 @@ def run_worker(python: Path, job: Path) -> int:
 
 
 def av3_fallback(code: int, listing: Path, out: Path, width: int, height: int, fps: int,
-                 wrap, encoder: str) -> Path:
+                 wrap, encoder: str, expected_frames: int | None = None) -> Path:
     """A stalled or failed av3 worker: the master again through rtx4x, or lanczos
     without RTX here -- said where the run's log reads it, never silent."""
     up = LANCZOS if rtx_missing() else CHOICES["rtx4x"]
-    what = "stalled" if code == AV3_STALLED else f"failed (exit {code})"
+    what = {AV3_STALLED: "stalled", AV3_SHORT: "ended short"}.get(code, f"failed (exit {code})")
     print(f"CAP upscale: av3 {what}, fell back to {name_of(up)}", file=sys.stderr, flush=True)
-    return master(listing, out, width, height, up, fps, wrap=wrap, encoder=encoder)
+    return master(listing, out, width, height, up, fps, wrap=wrap, encoder=encoder, expected_frames=expected_frames)
 
 
 def av3_job(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
-            spans: list, cuts: list[int], weights: Path, encoder: str = "cpu") -> dict:
+            spans: list, cuts: list[int], weights: Path, encoder: str = "cpu",
+            expected_frames: int | None = None) -> dict:
     """Everything the worker needs, as JSON (a transient beside the output, never kept)."""
     from studio import master_av3
     return {"listing": str(listing), "out": str(out), "width": width, "height": height, "factor": up.factor,
             "fps": fps, "cuts": list(cuts), "weights": str(weights), "spans": master_av3.spans_json(spans),
-            "encoder": encoder}
+            "encoder": encoder, "expected_frames": expected_frames}
 
 
 def worker_argv(python: Path, job: Path) -> list[str]:

@@ -208,3 +208,65 @@ def test_the_worker_pastes_at_cut_scale_before_the_model(tmp_path):
     job = {"spans": av.spans_json([span]), "width": 64, "height": 64, "factor": 4}
     paste = av.paste_of(job)
     assert isinstance(paste, fp.Paster) and paste.factor == 1
+
+
+# -- contract K8: a pass counts its frames (ep01 2026-10-18: 3,259 of 3,348 exited as a pass) ----
+
+def test_a_pass_that_ends_short_is_refused_with_its_count(tmp_path):
+    listing = parts(tmp_path, (10, 10, 5))        # 600 frames
+    state, got = within(60, lambda: av.streamed(listing, tmp_path / "o.mp4", SIDE, SIDE, 1, 24, lambda f: f,
+                                                [240, 480], expected_frames=650))
+    assert state == "error" and isinstance(got, mu.ShortPass), (state, got)
+    assert str(got) == "600 of 650"
+
+
+def test_the_rtx_path_counts_its_frames_too(tmp_path):
+    listing = parts(tmp_path, (5,))
+    up = mu.CHOICES["rtx4x"]
+    with pytest.raises(mu.ShortPass, match="120 of 121"):
+        mu.streamed(listing, tmp_path / "o.mp4", SIDE, SIDE, mu.Upscale("rtx", 1, "ULTRA"), 24, lambda f: f,
+                    expected_frames=121)
+    assert up.engine == "rtx"
+
+
+def test_an_exact_count_and_an_unset_count_both_pass(tmp_path):
+    listing = parts(tmp_path, (5,))
+    assert av.streamed(listing, tmp_path / "a.mp4", SIDE, SIDE, 1, 24, lambda f: f, [], expected_frames=120) == 120
+    assert av.streamed(listing, tmp_path / "b.mp4", SIDE, SIDE, 1, 24, lambda f: f, []) == 120
+
+
+def test_audio_longer_than_its_video_does_not_false_refuse(tmp_path):
+    clip = tmp_path / "p.mp4"
+    subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", f"testsrc=s={SIDE}x{SIDE}:r=24:d=2",
+                    "-f", "lavfi", "-t", "5", "-i", "sine=f=440:r=48000", "-c:v", "libx264", "-preset",
+                    "ultrafast", "-pix_fmt", "yuv420p", "-c:a", "aac", str(clip)], check=True)
+    listing = tmp_path / "l.txt"
+    listing.write_text(f"file '{clip.as_posix()}'\n", encoding="utf-8")
+    assert av.streamed(listing, tmp_path / "o.mp4", SIDE, SIDE, 1, 24, lambda f: f, [], expected_frames=48) == 48
+
+
+def test_a_short_worker_exits_with_its_own_code(monkeypatch, capsys):
+    def short(job, hard_exit=None):
+        raise mu.ShortPass("3259 of 3348")
+    monkeypatch.setattr(av, "run", short)
+    monkeypatch.setattr(av.Path, "read_text", lambda self, encoding=None: "{}")
+    with pytest.raises(SystemExit) as out:
+        av.main(["master_av3.py", "job.json"])
+    assert out.value.code == av.SHORT
+    assert "3259 of 3348" in capsys.readouterr().err
+
+
+def test_a_short_worker_falls_back_and_says_the_count(tmp_path, monkeypatch, capsys):
+    calls = fallback_of(tmp_path, monkeypatch, mu.AV3_SHORT)
+    assert calls[0][0][4] == mu.CHOICES["rtx4x"]
+    assert "CAP upscale: av3 ended short, fell back to rtx4x" in capsys.readouterr().err
+
+
+def test_the_expected_count_rides_the_job_and_the_fallback(tmp_path, monkeypatch):
+    job = mu.av3_job(tmp_path / "l.txt", tmp_path / "o.mp4", 768, 768, mu.CHOICES["av3"], 24, [], [5],
+                     tmp_path / "w.pth", "cpu", expected_frames=3348)
+    assert job["expected_frames"] == 3348
+    calls = a_worker(monkeypatch, tmp_path, mu.AV3_SHORT)
+    mu.av3_master(tmp_path / "l.txt", tmp_path / "o.mp4", 768, 768, mu.CHOICES["av3"], 24, None, None, [5], "cuda",
+                  expected_frames=3348)
+    assert calls[0][1]["expected_frames"] == 3348

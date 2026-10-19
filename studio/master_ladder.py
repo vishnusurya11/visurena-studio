@@ -14,7 +14,9 @@ rung's body when it exists, and a test hands in a fake.
 """
 from __future__ import annotations
 
+import hashlib
 import time
+from pathlib import Path
 from typing import Callable
 
 from studio import judged_gate, step_attempts
@@ -23,18 +25,53 @@ from studio.judges.verdict import Verdict
 from studio.ladder import Ladder, Rung
 
 RETAKE_SECONDS = 9 * 60.0
-"""One shot through the take ladder, 4-9 GPU minutes; the ceiling's worst case."""
+"""One shot through the take ladder, 4-9 GPU minutes; the floor of its price."""
 TERMINAL = "flag"
 LADDER = Ladder([Rung("retake_shot", RETAKE_SECONDS, tries=1)], TERMINAL)
 EMPTY = Ladder([], TERMINAL)
 
 Recut = Callable[[], None]
-Retake = Callable[[int, Verdict], None]
+Retake = Callable[[int, Verdict], object]
+"""A retake answers whether it changed anything: a bool, a RungResult (`.changed`), or None
+for a legacy retake, which is taken to have changed."""
+
+
+class Round:
+    """Whether the rung just taken moved a take: the recut and the second master eye need it."""
+
+    def __init__(self) -> None:
+        self.changed = True
+
+
+def changed_by(result: object) -> bool:
+    """A retake answer as a bool: None is a legacy retake that always recut."""
+    return True if result is None else bool(getattr(result, "changed", result))
+
+
+def retake_seconds(home) -> float:
+    """What one master retake costs: the measured seconds per booked round, never under the floor."""
+    rounds, spent = step_attempts.count(home, "retakes"), step_attempts.seconds(home, "retakes")
+    return max(RETAKE_SECONDS, spent / rounds) if rounds else RETAKE_SECONDS
 
 
 def recuttable(v: Verdict) -> bool:
-    """Whether any fault is on a field a recut or a retake can move."""
-    return any(f.kind in master_eye.MEASURED for f in v.faults)
+    """Whether a measured fault names a shot a retake can move (a shadow fault names none)."""
+    return worst_shot(v) is not None
+
+
+def fingerprint(home, shot: int) -> tuple[str, str]:
+    """(the named take sha8, shots.json sha8): what a retake can change."""
+    room = Path(home) / "takes" / "r2v"
+    return tuple(sha8_of(room / name) for name in (f"T{shot:02d}.mp4", "shots.json"))
+
+
+def sha8_of(path: Path) -> str:
+    digest = hashlib.sha256()
+    if path.exists():
+        with open(path, "rb") as handle:
+            for block in iter(lambda: handle.read(1 << 20), b""):
+                digest.update(block)
+    return digest.hexdigest()[:8]
 
 
 def named_shots(v: Verdict) -> list[int]:
@@ -61,28 +98,41 @@ def worst_shot(v: Verdict) -> int | None:
     return named[0] if named else None
 
 
-def rungs(v: Verdict, recut: Recut, retake: Retake) -> judged_gate.Rungs:
-    """The priced rungs for this verdict, and how each is taken.  A retake is
-    followed by a recut: the new take is nothing until it is in the master."""
+def ladder_for(v: Verdict, seconds: float = RETAKE_SECONDS) -> Ladder:
+    """The master ladder priced at `seconds` a retake; empty when no shot is named."""
+    return Ladder([Rung("retake_shot", seconds, tries=1)], TERMINAL) if recuttable(v) else EMPTY
+
+
+def rungs(v: Verdict, recut: Recut, retake: Retake, moved: Round | None = None,
+          seconds: float = RETAKE_SECONDS) -> judged_gate.Rungs:
+    """The priced rungs for this verdict, and how each is taken.  A retake that moved a
+    take is followed by a recut; one that changed nothing is said and takes none."""
+    moved = moved if moved is not None else Round()
+
     def take(rung: Rung, _i: int, current: Verdict) -> None:
-        if rung.name == "retake_shot":
-            shot = worst_shot(current)
-            if shot is not None:
-                retake(shot, current)
-        recut()
-    return judged_gate.Rungs(LADDER if recuttable(v) else EMPTY, take)
+        shot = worst_shot(current)
+        moved.changed = shot is not None and changed_by(retake(shot, current))
+        if moved.changed:
+            recut()
+        else:
+            print(f"CAP master: retake of T{shot or 0:02d} changed no take, no recut", flush=True)
+    return judged_gate.Rungs(ladder_for(v, seconds), take)
 
 
-def once(first: Verdict, again: Callable[[], Verdict]) -> Callable[[], Verdict]:
+def once(first: Verdict, again: Callable[[], Verdict], moved: Round | None = None) -> Callable[[], Verdict]:
     """The verdict already read, then fresh reads: the ladder is built from the
-    first read and the gate must not pay for it twice."""
+    first read and the gate must not pay for it twice.  When the rung moved nothing the
+    master is the same bytes, so the last verdict stands and no eye is paid for."""
     served = []
 
     def judge() -> Verdict:
         if not served:
             served.append(first)
             return first
-        return again()
+        if moved is not None and not moved.changed:
+            return served[-1]
+        served.append(again())
+        return served[-1]
     return judge
 
 
@@ -91,16 +141,20 @@ def flag(v: Verdict) -> Verdict:
     return v
 
 
-def retake_through_take_ladder(ctx, shot: int, v: Verdict) -> None:
+def retake_through_take_ladder(ctx, shot: int, v: Verdict) -> bool:
     """One round of the take ladder over the named shot, under the render flag
-    the RENDER row earns; the take gates run on it, then the master is recut
-    and read again.  Loaded when asked: the step imports nothing of step 09."""
+    the RENDER row earns; True when it changed the take or shots.json (then the master
+    is recut and read again), False when it was refused or left the bytes (K11 mirrored).
+    Loaded when asked: the step imports nothing of step 09."""
     from scripts.episode import step_09_shoot
     from studio import gate_policy, take_ladder
     faults = [f for f in v.faults if f.kind in master_eye.MEASURED]
     if take_ladder.refuse_spent(ctx, len(faults)):       # the episode's 2 retake rounds: keep the master
-        return
-    began = time.time()
+        return False
+    began, before = time.time(), fingerprint(ctx.home, shot)
     take_ladder.retake(ctx, [shot], take_ladder.why_of("retake_shot", faults),
                        step_09_shoot.approved(gate_policy.of(ctx.stage, "RENDER")))
+    if fingerprint(ctx.home, shot) == before:
+        return False
     step_attempts.spend(ctx.home, take_ladder.RETAKES, time.time() - began)
+    return True

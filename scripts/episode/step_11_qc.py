@@ -257,11 +257,12 @@ def recut(ctx, extra: list[str]) -> None:
 
 def judged(ctx, extra: list[str]) -> Path:
     memo: dict = {}
-    first = judge_master(ctx, memo)
+    first, moved = judge_master(ctx, memo), master_ladder.Round()
     return judged_gate.clear(
-        ctx, GATE, judge=master_ladder.once(first, lambda: judge_master(ctx, memo)),
+        ctx, GATE, judge=master_ladder.once(first, lambda: judge_master(ctx, memo), moved),
         sign=lambda v: sign_master(ctx, memo, v),
-        ladder=master_ladder.rungs(first, recut=lambda: recut(ctx, extra),
+        ladder=master_ladder.rungs(first, recut=lambda: recut(ctx, extra), moved=moved,
+                                   seconds=master_ladder.retake_seconds(ctx.home),
                                    retake=lambda shot, v: master_ladder.retake_through_take_ladder(ctx, shot, v)),
         terminal=master_ladder.flag)
 
