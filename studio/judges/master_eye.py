@@ -83,6 +83,7 @@ class Read:
     framing: str = ""
     action: str = ""
     faces: list[dict] = field(default_factory=list)
+    parts: list[str] = field(default_factory=list)
 
 
 # ---- where each frame sits ---------------------------------------------------------
@@ -120,7 +121,14 @@ def extra_fields(said: str) -> dict:
         got = got[0] if isinstance(got[0], dict) else extra_fields(str(got[0]))
     if not isinstance(got, dict):
         return {}
-    return {k: str(got.get(k) or "").lower().strip() for k in ("framing", "action")}
+    return {**{k: str(got.get(k) or "").lower().strip() for k in ("framing", "action")},
+            "parts": parts_of(got.get("parts"))}
+
+
+def parts_of(raw) -> list[str]:
+    """The reader's visible body parts, as a list of lower-case words."""
+    items = raw if isinstance(raw, list) else str(raw or "").split(",")
+    return [str(p).lower().strip() for p in items if str(p).strip()]
 
 
 def read_frame(reader: Reader, frame: np.ndarray, at: float, shot: int | None) -> Read:
@@ -133,6 +141,43 @@ def read_frame(reader: Reader, frame: np.ndarray, at: float, shot: int | None) -
     except pc.Unreadable:
         read.seen = None
     return read
+
+
+# ---- the flagged takes' extra frames and the body read --------------------------------
+
+EXTRA_FRAMES = 3
+LIMBS = ("arm", "arms", "hand", "hands", "leg", "legs", "foot", "feet")
+"""Parts whose loss between two frames of one shot is worth a line (advisory, D8)."""
+
+
+def flagged_shots(home: Path) -> list[int]:
+    """The shots of the takes that shipped flagged (work/flagged_takes.json, contract K7)."""
+    rows = json_or(Path(home) / "takes" / "work" / "flagged_takes.json", [])
+    out = [int(i) for r in rows for i in (r.get("shot") if isinstance(r.get("shot"), list) else [r.get("shot")])
+           if i is not None]
+    return sorted(set(out))
+
+
+def with_extra(times: list[float], placed: dict, shots: list[int]) -> list[float]:
+    """The sampled times plus EXTRA_FRAMES inside each flagged shot, in order."""
+    extra = []
+    for s in placed.get("shots", []):
+        if int(s["index"]) in shots:
+            extra += [round(s["t_start"] + s["seconds"] * (k + 1) / (EXTRA_FRAMES + 1), 3) for k in range(EXTRA_FRAMES)]
+    return sorted(set(times) | set(extra))
+
+
+def body_faults(grouped: dict[int, list[Read]], flagged: list[int]) -> list[Fault]:
+    """A limb seen in one frame of a flagged shot and gone in another: an advisory fault naming the shot."""
+    out = []
+    for shot in flagged:
+        sets = [set(r.parts) for r in grouped.get(shot, []) if r.parts]
+        lost = sorted(p for p in set().union(*sets) - set.intersection(*sets) if p in LIMBS) if len(sets) > 1 else []
+        if lost:
+            out.append(Fault(kind="body", where=f"shot_{shot:02d}", severity="low",
+                             evidence={"shot": shot, "lost": lost, "frames": len(sets)},
+                             note=f"a limb is visible in one frame of shot {shot} and gone in another: {', '.join(lost)}"))
+    return out
 
 
 # ---- the five fields ----------------------------------------------------------------
@@ -461,7 +506,8 @@ def read_all(pics: list[np.ndarray], times: list[float], placed: dict, reader: R
 def measures(home: Path, master: Path, plan: dict, placed: dict, *, frames: Frames, reader: Reader,
              embed: Embed, count: int = FRAMES, cache: "EyeCache | None" = None) -> dict:
     """Every number the rubric is answered from, keyed by field, plus the reads."""
-    times = sample_times(float(placed["duration_s"]), count)
+    flagged = flagged_shots(home)
+    times = with_extra(sample_times(float(placed["duration_s"]), count), placed, flagged)
     pics = frames(master, times)
     reads = read_all(pics, times, placed, reader, embed, plan, cache)
     grouped, sigs = by_shot(reads), dict(zip(times, signatures(pics)))
@@ -473,7 +519,7 @@ def measures(home: Path, master: Path, plan: dict, placed: dict, *, frames: Fram
             "board": board(last_vs_panel(home, grouped, sigs)),
             "repeats": repeats(near_pairs(representative(grouped, sigs), setups)),
             "story": story(turn, grouped),
-            "take_identity": take_identity(home),
+            "take_identity": take_identity(home), "flagged": flagged,
             "reads": reads, "grouped": grouped, "shots": shots}
 
 
@@ -518,7 +564,7 @@ def read_faults(m: dict, plan: dict) -> list[Fault]:
 def verdict_of(m: dict, plan: dict) -> Verdict:
     reads = m["reads"]
     faults = (field_faults(m) + read_faults(m, plan) + identity(m["grouped"], m["shots"])
-              + take_identity_faults(m.get("take_identity") or {}))
+              + take_identity_faults(m.get("take_identity") or {}) + body_faults(m["grouped"], m.get("flagged") or []))
     return Verdict(judge=NAME, version=VERSION, passed=not faults, faults=faults,
                    confidence=confidence(sum(r.seen is not None for r in reads), len(reads)), reads=len(reads))
 

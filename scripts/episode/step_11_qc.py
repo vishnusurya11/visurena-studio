@@ -35,7 +35,8 @@ GATE = "MASTER"
 WORKFLOW = "image_qwen3vl_caption"
 ASK = (pc.ASK + '\n"framing": how much of the main person the frame holds, one of '
        "extreme_close, close, medium_close, medium, full, wide.\n"
-       '"action": what the main person is DOING, as one or two plain verbs.')
+       '"action": what the main person is DOING, as one or two plain verbs.\n'
+       '"parts": the body parts of the main person that are visible, a list from head, torso, arm, hand, leg, foot.')
 """The panel vocabulary plus the two fields the story field is answered from."""
 
 
