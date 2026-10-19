@@ -221,9 +221,10 @@ def test_a_public_setup_puts_people_to_work_behind_the_shot():
 
 
 def test_an_insert_takes_no_background_life_and_a_segment_inherits_its_setups():
-    """`Setup.crowd`: it 'reaches every panel that is not an insert'."""
+    """`Setup.crowd`: it reaches every panel that is not an insert AND declares extras (owner 2026-10-18)."""
     setup = Setup(described="The Criterion Bar.", crowd="The drinkers lift their glasses.")
-    assert ro.crowd_of({"size": "close", "crowd": "", "setup": setup}) == "the drinkers lift their glasses"
+    assert ro.crowd_of({"size": "close", "crowd": "", "setup": setup, "extras": 4}) == "the drinkers lift their glasses"
+    assert ro.crowd_of({"size": "close", "crowd": "", "setup": setup}) == ""
     assert ro.crowd_of({"size": "close", "crowd": "a barman draws a cork", "setup": setup}) == \
         "a barman draws a cork"
     assert ro.crowd_of({"size": "insert", "crowd": "", "setup": setup}) == ""

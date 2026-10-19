@@ -24,7 +24,7 @@ import re
 import time
 from pathlib import Path
 
-from studio import episode_home, episode_ref_official as ro, judged_gate, plan_gates, step_attempts, step_caps, take_leak
+from studio import episode_home, episode_ref_official as ro, judged_gate, plan_gates, stillness, step_attempts, step_caps, take_leak
 from studio.judges import take_eye
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
@@ -358,6 +358,8 @@ def move_type(doc: dict, index: int, faults: list[Fault]) -> dict:
     kind = next((f.kind for f in faults if f.kind in CAUSE_OF), None)
     if kind is None:       # nothing a move answers (ep14 T20: letterbox, content) -- the terminal will
         return doc
+    if doc.get("grammar") and CAUSE_OF[kind] == "frozen" and stillness.locked(shot["motion"]):
+        return doc     # a locked grammar shot is never pushed (G-PUSH; owner 2026-10-18): a seed answers it
     spoken = any(l.get("kind") == "dialogue" and l.get("shot") == index for l in doc.get("lines") or [])
     shot["motion"] = substitute(kind, shot["motion"], shot.get("at_rest", ""), dialogue=spoken)
     return doc

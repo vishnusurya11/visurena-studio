@@ -720,6 +720,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         rec["motion"], rec["motions"] = planned_motion(episode, rec), planned_motions(episode, rec)
         rec["size"] = planned_size(episode, rec)
         rec["still"] = any(episode.shot(i).still for i in rec.get("shots", [index]))
+        rec["grammar"] = bool(getattr(episode, "grammar", ""))     # a locked grammar hold (owner 2026-10-18)
         placed = episode_home.load_placed(book, number, episode)
         rec["placed_seconds"] = current_placed(placed, rec)
         rec["line_room"] = line_room(placed, rec)

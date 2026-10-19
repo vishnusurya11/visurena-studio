@@ -627,7 +627,7 @@ def measure(video: Path, record: dict, cells: Path, seconds: float, attempt: int
     v.gates.append(take_lock.row(take_lock.lock(take_lock.frames(video, seconds)),
                                  (plan_motions(record) or [""])[0]))
     v.gates.append(stillness_row(video, seconds, record))
-    v.gates = board_rows(v.gates, record)
+    v.gates = grammar_still(board_rows(v.gates, record), record)
     v.score, v.passed = score(v.gates)
     return v
 
@@ -663,6 +663,19 @@ def stillness_row(video: Path, seconds: float, record: dict) -> Gate:
     from studio import stillness
     m = stillness.measure(video, seconds, exempt=bool(record.get("still")))
     return Gate(**stillness.gate_args(m))
+
+
+def grammar_still(rows: list[Gate], record: dict) -> list[Gate]:
+    """frozen-whole demoted to a scored advisory on a grammar plan's locked shot that speaks
+    with a moving mouth (the lip-sync row present and passing) or acts (owner 2026-10-18)."""
+    from studio import stillness
+    mouth = any(g.name == "lip-sync" and g.ok for g in rows)
+    if not stillness.grammar_locked(record, mouth):
+        return rows
+    for g in rows:
+        if g.name == stillness.KIND and g.hard and not g.ok:
+            g.hard, g.note = False, f"{g.note} (locked on the grammar, advisory)"
+    return rows
 
 
 def plan_motions(record: dict) -> list[str]:

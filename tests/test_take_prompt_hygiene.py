@@ -172,12 +172,12 @@ def test_who_the_crowd_is_behind_is_the_staged_faces_never_a_pronoun_for_nobody(
 
 def test_the_crowd_goes_in_the_first_wide_enough_block_only():
     setup = Setup(described="A farm.", crowd="two farm hands pitch wheat", outdoors=True)
-    segs = [{"size": "close", "crowd": "", "setup": setup}, {"size": "medium", "crowd": "", "setup": setup},
-            {"size": "wide", "crowd": "", "setup": setup}]
+    segs = [{"size": "close", "crowd": "", "setup": setup}, {"size": "medium", "crowd": "", "setup": setup, "extras": 2},
+            {"size": "wide", "crowd": "", "setup": setup, "extras": 2}]
     assert ro.crowd_block(segs) == 1
     # a take of closes still stands in a public place: the first block that is not an insert
-    assert ro.crowd_block([{"size": "insert", "crowd": "", "setup": setup},
-                           {"size": "close", "crowd": "", "setup": setup}]) == 1
+    assert ro.crowd_block([{"size": "insert", "crowd": "", "setup": setup, "extras": 2},
+                           {"size": "close", "crowd": "", "setup": setup, "extras": 2}]) == 1
     assert ro.crowd_block([{"size": "insert", "crowd": "", "setup": setup}]) is None
     assert ro.crowd_block([{"size": "wide", "crowd": "", "setup": Setup(described="A parlour.")}]) is None
 
@@ -343,7 +343,7 @@ FARM = Setup(described="John Ferrier's farm on the valley floor, June 1860: a lo
                        "behind, hard morning sunlight", cast=["john_ferrier", "lucy_ferrier"], outdoors=True,
              crowd="Two farm hands in shirtsleeves pitch cut wheat onto a waggon at the fence line, and a yoke "
                    "of oxen stands in the shafts with a boy at their heads.")
-T03 = Shot(index=3, section="setup", setup="ferrier_land", size="wide", faces=[],
+T03 = Shot(index=3, section="setup", setup="ferrier_land", size="wide", faces=[], extras=2,
            frame="Wide of Ferrier's farm on the valley floor: the long log house with its deep porch and "
                  "shingled roof on the left, a rail fence running out from it, a hundred acres of ripe gold "
                  "wheat beyond, red pine hills behind under a bleached sky.",
@@ -410,7 +410,7 @@ def test_a_rebuilt_two_shot_take_carries_the_crowd_once_in_its_first_wide_enough
 
 def test_the_crowd_is_the_first_thing_dropped_when_a_block_would_overflow():
     ctx = {"crowd_at": 0, "names": (), "faces": [], "cast": [], "life": {}}
-    seg = {"t": 0.0, "end": 5, "size": "wide", "crowd": "", "setup": FARM}
+    seg = {"t": 0.0, "end": 5, "size": "wide", "crowd": "", "setup": FARM, "extras": 2}
     assert ro.life_for(1, seg, ctx, ro.HIGH_BLOCK - 5) == ""
     assert ctx["life"] == {}
     # short of room for the whole caption, its first clause goes in; L10 asks for exactly that

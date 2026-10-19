@@ -155,6 +155,28 @@ def is_still(m: dict, seconds: float, exempt: bool = False) -> bool:
     return not exempt and seconds >= MIN_SECONDS and m["static_share"] >= WALL
 
 
+def locked(motion: str) -> bool:
+    """The plan's camera head holds a locked-off frame."""
+    from studio import plan_gates
+    cam, _ = plan_gates.camera_clause(plan_gates.head_of(motion or ""))
+    return plan_gates.move_verb(cam) == "locked"
+
+
+def acted(motion: str) -> bool:
+    """The plan gives the shot an actor or ambient verb beyond its camera."""
+    from studio import episode_ref_official as ro
+    return bool(ro.clauses_of(motion or "")[1])
+
+
+def grammar_locked(record: dict, mouth_moves: bool) -> bool:
+    """Owner 2026-10-18: on a grammar plan a LOCKED shot is the grammar's own hold -- frozen-whole
+    is advisory on it when it speaks with a moving mouth, or carries an actor / ambient verb."""
+    motions = [m for m in (record.get("motions") or [record.get("motion", "")]) if m]
+    if not (record.get("grammar") and motions and all(locked(m) for m in motions)):
+        return False
+    return mouth_moves if record.get("lane") == "dialogue" else all(acted(m) for m in motions)
+
+
 def is_advisory(m: dict, seconds: float, exempt: bool = False) -> bool:
     """ADVISORY: static for ADVISORY of it at any length, unless planned still."""
     return not exempt and m["static_share"] >= ADVISORY

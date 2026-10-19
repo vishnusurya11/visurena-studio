@@ -1466,3 +1466,12 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
 - **Run nothing heavy beside a Qwen edit.** The place-state edit failed twice on `HostBuffer.read_file_slice`
   (Windows 1450, MemoryError) with ComfyUI at 33 GB private and 0.8 GB of system commit left while a full
   pytest and two plan_checks ran beside it. Run the suite while the drive is paused, or before the launch.
+- **Old rulers meet a new grammar, one at a time per relaunch.** Kawajiri ep01 parked five times on rulers
+  calibrated before the anime-TV grammar: step 05 measured packs at the legacy 8 s budget (a grammar plan
+  never packs), step 06 linted a panel-less prompt on the 240-word references floor (the render stages the
+  panel: 150), the listen gate heard "cheque" as "check", the voice terminal refused a 2 s line far under
+  its floor, and frozen-whole failed the grammar's own locked dialogue holds (84-85 % static). When a plan
+  form changes, replay every downstream gate on it BEFORE the run (`takes_r2v` cards + lint_wall, no write).
+- **A setup's crowd is a shot's, not the setup's.** The night door's ring of townsfolk was pasted into every
+  non-insert take of the setup, extras 0 or not; Hyde alone at 3 a.m. got a crowd walking in (owner
+  2026-10-18: the setup crowd rides only a shot with extras > 0).

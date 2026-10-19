@@ -202,7 +202,7 @@ def test_a_clause_keeps_its_punctuation_when_the_seconds_come_out():
 
 # ---- the whole block -------------------------------------------------------
 
-SHOT = Shot(index=4, section="setup", setup="criterion", size="close", faces=["john_watson"],
+SHOT = Shot(index=4, section="setup", setup="criterion", size="close", faces=["john_watson"], extras=8,
             frame="Close on Watson turned from the counter, the brown bowler held against his chest.",
             motion="Static shot; he lifts the wine glass and drinks; he sets it down on the mahogany",
             camera="on the drinkers' side of the counter at its crowded near end, at standing eye "

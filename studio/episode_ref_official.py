@@ -1019,10 +1019,14 @@ def normal_crowd(text: str, names=()) -> str:
 
 
 def crowd_of(seg: dict, names=()) -> str:
-    """This segment's background life: its own crowd, else the setup's, normalised."""
+    """This segment's background life: its own crowd, else the setup's -- the setup's only on
+    a shot that declares extras > 0 (owner 2026-10-18: the night door's ring of townsfolk rode
+    into four extras=0 takes and H3 walked strangers in) -- normalised."""
     if seg["size"] == "insert":
         return ""
-    return normal_crowd(calm(seg.get("crowd") or getattr(seg.get("setup"), "crowd", "") or ""), names)
+    own = seg.get("crowd") or ""
+    setup = getattr(seg.get("setup"), "crowd", "") or "" if int(seg.get("extras") or 0) > 0 else ""
+    return normal_crowd(calm(own or setup), names)
 
 
 WIDE_ENOUGH = ("wide", "full", "medium")
@@ -1238,7 +1242,7 @@ def cell(framed) -> dict:
     return {"frame": framed.frame, "motion": framed.motion, "faces": list(framed.faces),
             "size": framed.size, "crowd": framed.crowd, "end_frame": framed.end,
             "camera": framed.camera, "at_rest": framed.at_rest, "changed": framed.changed,
-            "still": bool(getattr(framed, "still", False))}
+            "still": bool(getattr(framed, "still", False)), "extras": int(getattr(framed, "extras", 0) or 0)}
 
 
 def segments(shots: list[Shot], placed: list[dict], offset: float, frames: int,
