@@ -92,6 +92,12 @@ def run_row(n: int, sha: str, text: str) -> dict:
     return row
 
 
+def silence_row(log_name: str, seconds: float) -> dict:
+    """The ledger row for a log silent past SILENCE_S: written even under DRIVE_QUIET,
+    where the Telegram stays with the supervisor (P13)."""
+    return {"event": "silent", "minutes": int(seconds // 60), "log": log_name}
+
+
 def first_log_number(home: Path) -> int:
     """The number of this launch's first run log: one past the logs already there,
     so a launch never overwrites an earlier one (Jekyll ep01: twelve launches left
@@ -115,6 +121,7 @@ def run_once(codex: str, number: int, log: Path, label: str) -> str:
                 notify(f"{label}: no log output for {episode_drive.SILENCE_S // 60} min\n"
                        f"{episode_drive.tail(log.read_text(encoding='utf-8', errors='replace'))}")
                 told = True
+                ledger(log.parent, silence_row(log.name, episode_drive.SILENCE_S))
     return log.read_text(encoding="utf-8", errors="replace")
 
 

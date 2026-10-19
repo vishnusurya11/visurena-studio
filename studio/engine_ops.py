@@ -164,6 +164,25 @@ def _terminate(pid: int) -> None:
         pass                                # already gone
 
 
+def _cpu_seconds(pid: int) -> float:
+    """User + kernel CPU seconds a process has used (GetProcessTimes); 0 when it is gone."""
+    import ctypes
+    from ctypes import wintypes
+    handle = ctypes.windll.kernel32.OpenProcess(0x1000, False, pid)           # QUERY_LIMITED_INFORMATION
+    if not handle:
+        return 0.0
+    times = [wintypes.FILETIME() for _ in range(4)]
+    ok = ctypes.windll.kernel32.GetProcessTimes(handle, *[ctypes.byref(t) for t in times])
+    ctypes.windll.kernel32.CloseHandle(handle)
+    ticks = lambda t: (t.dwHighDateTime << 32 | t.dwLowDateTime)
+    return (ticks(times[2]) + ticks(times[3])) / 1e7 if ok else 0.0
+
+
+def tree_cpu_s(rows: Iterable[ProcInfo], codex: str, n: int, cpu: Callable[[int], float] = _cpu_seconds) -> float:
+    """CPU seconds burned by this episode's whole run tree: the liveness the log cannot give."""
+    return round(sum(cpu(p.pid) for p in run_tree(rows, codex, n)), 2)
+
+
 def kill_run_tree(rows: Iterable[ProcInfo], codex: str, n: int, kill: Callable[[int], None] = _terminate,
                   keep: Iterable[int] | None = None) -> list[int]:
     """Kill the whole tree of this episode's run, never the caller's own pid;

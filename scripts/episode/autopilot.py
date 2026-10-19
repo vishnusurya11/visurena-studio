@@ -69,6 +69,12 @@ COMMIT_HARD_GB = 3.0
 """Host commit headroom: below LOW with an empty queue the engine is told to /free;
 below HARD after that, and with no drive alive, it is recycled."""
 UNPARK_CAP = 2
+LIVENESS_QUIET_S = 600
+"""CPU flat and outputs still for this long, past 1.5x the step's cap wall: stuck."""
+OVERRUN_FACTOR = 1.5
+OVERRUN_FLOOR_S = 20 * 60
+OVERRUNS_BEFORE_PARK = 2
+OUTPUT_IGNORED = re.compile(r"(\.log|\.jsonl|\.tmp|\.lock|attempts\.json|heartbeat\.json)$")
 log = logging.getLogger("autopilot")
 
 
@@ -277,10 +283,33 @@ class Deps:
     sleep: Callable[[float], None] = time.sleep
     pid: int = field(default_factory=os.getpid)
     root: Path = LIBRARY / ".autopilot"
+    cpu_s: Callable | None = None                # (rows, codex, n) -> run-tree CPU seconds; None = no watchdog
+    outputs_at: Callable[[Path], float] | None = None   # the newest artifact mtime under an episode home
+    ledger: Callable[[], None] | None = None     # starts the GPU ledger beside a drive
+
+
+def newest_output(home: Path) -> float:
+    """Newest mtime of any artifact under an episode home: logs, ledgers and the
+    attempt heartbeat are written by a stuck step too, so they are not growth."""
+    newest = 0.0
+    for path in Path(home).rglob("*"):
+        if path.is_file() and not OUTPUT_IGNORED.search(path.name):
+            newest = max(newest, path.stat().st_mtime)
+    return newest
+
+
+def start_ledger() -> None:
+    """One detached gpu_ledger.py, unless one already runs."""
+    if any("gpu_ledger.py" in r.cmdline for r in procs.list_processes()):
+        return
+    flags = (subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS) if sys.platform == "win32" else 0
+    subprocess.Popen(["uv", "run", "--no-sync", "python", "scripts/episode/gpu_ledger.py"], cwd=ROOT,
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, creationflags=flags)
 
 
 def default_deps() -> Deps:
-    return Deps()
+    from studio import engine_ops
+    return Deps(cpu_s=engine_ops.tree_cpu_s, outputs_at=newest_output, ledger=start_ledger)
 
 
 # ---- files -----------------------------------------------------------------------
@@ -614,6 +643,8 @@ def launch(book: Path, codex: str, n: int, deps: Deps, why: str) -> dict:
     if not write_lock(deps.root / "gpu.lock", body):
         event(book, {"event": "lock_held", "episode": n, "drive_pid": proc.pid})
     event(book, {"event": why, "episode": n, "drive_pid": proc.pid, "log": f"episodes/ep{n:02d}/drive_launch{k:02d}.log"})
+    if deps.ledger:
+        deps.ledger()                         # the GPU/RAM ledger runs beside every drive (P13)
     return {"action": why, "state": "RUNNING", "drive_pid": proc.pid}
 
 
@@ -640,6 +671,71 @@ def hung(book: Path, n: int, deps: Deps) -> bool:
         write_atomic(path, {"prompt_id": prompt, "since": deps.now()})
         return False
     return quiet >= HUNG_S and deps.now() - float(seen.get("since", deps.now())) >= HUNG_S
+
+
+def open_step(home: Path) -> str | None:
+    """The newest step with a `started` row in timing.jsonl and no closing row after it."""
+    opened: dict[str, bool] = {}
+    for row in rows_of(Path(home) / "timing.jsonl"):
+        stage = str(row.get("stage", ""))
+        if stage.startswith("step_"):
+            opened[stage[5:]] = row.get("event") == "started"
+    live = [step for step, is_open in opened.items() if is_open]
+    return live[-1] if live else None
+
+
+def cpu_quiet_s(step: str, cpu: float, deps: Deps) -> float:
+    """Seconds the run tree's CPU time has not grown, kept in liveness.json across ticks."""
+    path, seen = deps.root / "liveness.json", read_json(deps.root / "liveness.json", {})
+    if seen.get("step") != step or cpu > float(seen.get("cpu", 0.0)) + 0.5:
+        seen = {"step": step, "cpu": cpu, "changed_at": deps.now()}
+        write_atomic(path, seen)
+    return deps.now() - float(seen["changed_at"])
+
+
+def stuck_limit_s(step: str) -> float:
+    from studio import step_caps
+    return max(OVERRUN_FACTOR * step_caps.step_wall_s(step), OVERRUN_FLOOR_S)
+
+
+def stuck_step(book: Path, codex: str, n: int, deps: Deps) -> str | None:
+    """The open step id when ALL THREE hold: elapsed past 1.5x its cap wall, the run
+    tree's CPU flat, its outputs still for LIVENESS_QUIET_S.  A quiet log alone is
+    not liveness (Jekyll ep01: the log was quiet through healthy renders)."""
+    home = home_of(book, n)
+    if deps.cpu_s is None or deps.outputs_at is None or (step := open_step(home)) is None:
+        return None
+    from studio import step_attempts
+    quiet = cpu_quiet_s(step, deps.cpu_s(deps.procs(), codex, n), deps)
+    over = step_attempts.elapsed(home, f"wall.{step}") > stuck_limit_s(step)
+    still = deps.now() - deps.outputs_at(home) >= LIVENESS_QUIET_S
+    return step if over and quiet >= LIVENESS_QUIET_S and still else None
+
+
+def overran(book: Path, codex: str, n: int, step: str, deps: Deps) -> dict:
+    """Kill the stuck step's tree and relaunch; the third overrun of a step parks."""
+    before = sum(1 for r in rows_of(paths_of(book).events) if r.get("event") == "step_overran"
+                 and r.get("episode") == n and r.get("step") == step)
+    from studio import step_attempts
+    event(book, {"event": "step_overran", "episode": n, "step": step, "limit_s": stuck_limit_s(step),
+                 "elapsed_s": step_attempts.elapsed(home_of(book, n), f"wall.{step}")})
+    deps.engine.kill_run_tree(deps.procs(), codex, n)
+    (deps.root / "gpu.lock").unlink(missing_ok=True)
+    if before >= OVERRUNS_BEFORE_PARK:
+        return park(book, codex, n, "step_overran", {"step": step}, deps)
+    return launch(book, codex, n, deps, "relaunch")
+
+
+def note_dirty_during_run(book: Path, n: int, signals, deps: Deps) -> None:
+    """A runtime edit while a drive runs: one event per drive, no pause (owner: drive, don't babysit)."""
+    if not (signals.proc_alive and signals.code_dirty):
+        return
+    pid = (signals.lock or {}).get("drive_pid")
+    if any(r.get("event") == "code_dirty_during_run" and r.get("drive_pid") == pid for r in rows_of(paths_of(book).events)):
+        return
+    from studio import episode_drive
+    names = [ln[3:].strip() for ln in signals.porcelain.splitlines() if len(ln) > 3 and episode_drive.runtime_path(ln[3:])]
+    event(book, {"event": "code_dirty_during_run", "episode": n, "drive_pid": pid, "files": names})
 
 
 def restarts_of(book: Path, n: int) -> int:
@@ -933,7 +1029,11 @@ def act(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
     if state == "IDLE":
         return act_idle(book, codex, n, derived, signals, deps)
     if state == "RUNNING":
-        return rescue_engine(book, codex, n, deps) if hung(book, n, deps) else {"action": "wait", "state": "RUNNING"}
+        if hung(book, n, deps):
+            return rescue_engine(book, codex, n, deps)
+        if (step := stuck_step(book, codex, n, deps)) is not None:
+            return overran(book, codex, n, step, deps)
+        return {"action": "wait", "state": "RUNNING"}
     if state == "NEEDS_BRAIN":
         return act_needs_brain(book, codex, n, derived, signals, deps)
     if state == "PARKED":
@@ -993,6 +1093,7 @@ def tick(book: Path, codex: str, deps: Deps, tick_no: int = 0) -> dict:
             derived = SimpleNamespace(state="PAUSED", reason="paused", order=None, packet={})
         ticks = engine_ticks(deps, signals)
         watch_engine(book, n, derived, signals, deps, ticks)
+        note_dirty_during_run(book, n, signals, deps)
         done = act(book, codex, n, derived, signals, deps)
         if done["state"] != "WAIT_TREE":
             note_tree_clear(book, deps)
