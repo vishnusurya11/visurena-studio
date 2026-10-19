@@ -135,7 +135,8 @@ def tools(home: Path) -> dict:
 
 def read_master(home: Path, master: Path, plan: dict, placed: dict, tools_: dict | None = None):
     """(verdict, measures) from the master eye over the real tools unless given."""
-    return master_eye.read(home, master, plan, placed, **(tools_ or tools(home)))
+    kit = tools_ or {**tools(home), "cache": master_eye.EyeCache(home, WORKFLOW, master_eye.sha8_text(ASK))}
+    return master_eye.read(home, master, plan, placed, **kit)
 
 
 def contact_sheet(home: Path, master: Path, sha8: str) -> Path:

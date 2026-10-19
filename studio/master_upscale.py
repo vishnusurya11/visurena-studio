@@ -256,6 +256,37 @@ def streamed(listing: Path, out: Path, width: int, height: int, up: Upscale, fps
     return counted(n, expected_frames)
 
 
+WAIT_S = 300.0
+"""The longest a master waits for a busy card before it falls back to lanczos."""
+POLL_S = 15.0
+NEED_GB = {"av3": 4.0, "rtx": 6.0}
+"""VRAM each engine needs free (the router refuses a card without it)."""
+
+
+def card_free(job: str, need_gb: float, route=None, sleep=None, clock=None) -> bool:
+    """Ask the compute router for the card; a cpu answer is waited out up to WAIT_S."""
+    import time
+    if route is None:
+        from studio.compute_device import device_for as route
+    sleep, clock = sleep or time.sleep, clock or time.monotonic
+    began = clock()
+    while route(job, need_gb) != "cuda":
+        if clock() - began >= WAIT_S:
+            return False
+        sleep(POLL_S)
+    return True
+
+
+def settled_for_card(up: Upscale, upscaler) -> Upscale:
+    """`up`, or lanczos (said) when its GPU engine cannot get the card in WAIT_S; a stand-in model never asks."""
+    if up.engine == "lanczos" or upscaler is not None:
+        return up
+    if card_free(f"{up.engine} master", NEED_GB[up.engine]):
+        return up
+    print(f"CAP upscale: card busy for {WAIT_S:.0f} s, {name_of(up)} fell back to lanczos", file=sys.stderr, flush=True)
+    return LANCZOS
+
+
 USED_FILE = "upscale_used.json"
 """Beside the master's scratch file: {asked, used, encoder, fallback}, for the QC report."""
 
@@ -278,6 +309,7 @@ def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: 
     to every frame BEFORE the upscale (owner 2026-10-18: the upscale is the last picture
     operation, only muxing follows it); `cuts` are the frames each new
     shot starts on (av3's denoise starts fresh there); `expected_frames` is the cut's frame count (K8)."""
+    up = settled_for_card(up, upscaler)
     record_used(out, up, encoder)
     if up.engine == "lanczos":
         if wrap is not None:
@@ -311,7 +343,7 @@ def av3_master(listing: Path, out: Path, width: int, height: int, up: Upscale, f
     python, weights = av3_paths()
     job = out.with_name(out.stem + ".av3_job.json")
     job.write_text(json.dumps(av3_job(listing, out, width, height, up, fps, spans_of(wrap), cuts, weights,
-                                      encoder, expected_frames)), encoding="utf-8")
+                                      encoder, expected_frames, pass_cap_s())), encoding="utf-8")
     from studio import compute_device
     with compute_device.claim("av3 master"):     # the card is ours outside ComfyUI's queue
         code = run_worker(python, job)
@@ -320,8 +352,19 @@ def av3_master(listing: Path, out: Path, width: int, height: int, up: Upscale, f
     return out
 
 
+def pass_cap_s() -> float:
+    """The `upscale` cap row's wall, seconds a pass (stages.yaml); 15 min when the table is unreadable."""
+    try:
+        from studio import step_caps
+        return float(step_caps.wall_s("upscale"))
+    except Exception:       # a table that will not load must not stop a master
+        return 900.0
+
+
 AV3_STALLED = 75
 """The av3 worker's exit code for a stall (studio/master_av3.STALLED)."""
+AV3_SLOW = 76
+"""The av3 worker's exit code for a pass projected past its pace budget (studio/master_av3.SLOW)."""
 AV3_SHORT = 77
 """The av3 worker's exit code for a pass that ended short (studio/master_av3.SHORT)."""
 
@@ -336,19 +379,20 @@ def av3_fallback(code: int, listing: Path, out: Path, width: int, height: int, f
     """A stalled or failed av3 worker: the master again through rtx4x, or lanczos
     without RTX here -- said where the run's log reads it, never silent."""
     up = LANCZOS if rtx_missing() else CHOICES["rtx4x"]
-    what = {AV3_STALLED: "stalled", AV3_SHORT: "ended short"}.get(code, f"failed (exit {code})")
+    what = {AV3_STALLED: "stalled", AV3_SHORT: "ended short", AV3_SLOW: "too slow"}.get(code, f"failed (exit {code})")
     print(f"CAP upscale: av3 {what}, fell back to {name_of(up)}", file=sys.stderr, flush=True)
     return master(listing, out, width, height, up, fps, wrap=wrap, encoder=encoder, expected_frames=expected_frames)
 
 
 def av3_job(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
             spans: list, cuts: list[int], weights: Path, encoder: str = "cpu",
-            expected_frames: int | None = None) -> dict:
+            expected_frames: int | None = None, cap_s: float | None = None) -> dict:
     """Everything the worker needs, as JSON (a transient beside the output, never kept)."""
     from studio import master_av3
     return {"listing": str(listing), "out": str(out), "width": width, "height": height, "factor": up.factor,
             "fps": fps, "cuts": list(cuts), "weights": str(weights), "spans": master_av3.spans_json(spans),
-            "encoder": encoder, "expected_frames": expected_frames}
+            "encoder": encoder, "expected_frames": expected_frames,
+            "cap_s": cap_s}
 
 
 def worker_argv(python: Path, job: Path) -> list[str]:

@@ -14,6 +14,8 @@ loop runs in process with a stand-in model (tests).
 """
 from __future__ import annotations
 
+import collections
+import faulthandler
 import json
 import os
 import subprocess
@@ -113,11 +115,75 @@ STALL_S = 60.0
 STALLED = 75
 """The worker's exit code for a stall (studio/master_upscale.AV3_STALLED)."""
 SHORT = 77
+SLOW = 76
+"""The worker's exit code for a pass projected past its pace budget (master_upscale.AV3_SLOW)."""
+PACE_AFTER = 600
+"""Frames before the pace is judged: the model load and the first shots are not the pace."""
+PACE_SLACK = 1.25
+"""A pass is cut only past cap x this; one that fits its cap is never cut."""
+PROGRESS_EVERY = 300
+CAP_S = 900.0
+"""The cap row `upscale` (stages.yaml, 15 min a pass); the repo sends its own value in the job."""
 """The worker's exit code for a pass that ended short (studio/master_upscale.AV3_SHORT)."""
 
 
 class Stalled(RuntimeError):
     """The pump moved no frame for STALL_S; the pipeline was killed."""
+
+
+class TooSlow(RuntimeError):
+    """The pass is projected past cap + 25 %; the repo falls back to rtx4x."""
+
+
+class Pace:
+    """Judges a pass by its rolling fps: `frame(n)` after each frame emitted, a progress line
+    every PROGRESS_EVERY, and TooSlow once past PACE_AFTER if the projection breaks cap + 25 %."""
+
+    def __init__(self, total: int | None, cap_s: float = CAP_S, clock=time.monotonic):
+        self.total, self.cap_s, self.clock = total, cap_s, clock
+        self.t0 = clock()
+        self.window = collections.deque([(0, self.t0)], maxlen=8)
+
+    def fps(self) -> float:
+        (n0, t0), (n1, t1) = self.window[0], self.window[-1]
+        return (n1 - n0) / (t1 - t0) if t1 > t0 else 0.0
+
+    def projected(self, n: int) -> float:
+        """Seconds the whole pass takes: spent so far plus the rest at the window's fps."""
+        rate = self.fps()
+        return (self.clock() - self.t0) + ((self.total - n) / rate if rate else 0.0)
+
+    def frame(self, n: int) -> None:
+        if n % 50 == 0:
+            self.window.append((n, self.clock()))
+        if self.total is None:
+            return
+        if n % PROGRESS_EVERY == 0:
+            print(f"av3 {n}/{self.total} f, {self.fps():.1f} fps, eta {self.projected(n) - (self.clock() - self.t0):.0f} s",
+                  file=sys.stderr, flush=True)
+        if n >= PACE_AFTER and n % 50 == 0 and self.projected(n) > self.cap_s * PACE_SLACK:
+            raise TooSlow(f"projected {self.projected(n):.0f} s against a {self.cap_s:.0f} s budget at frame {n}/{self.total}")
+
+
+class Counted:
+    """The frames the pump has written, for the pace guard and a failure's context."""
+
+    def __init__(self, pace: Pace | None = None):
+        self.n, self.pace = 0, pace
+
+    def __call__(self, write, dog: "Watchdog"):
+        def out(data: bytes):
+            write(data)
+            dog.tick()
+            self.n += 1
+            if self.pace is not None:
+                self.pace.frame(self.n)
+        return out
+
+
+def shot_of(frame: int, cuts: list[int]) -> int:
+    """The 1-based shot a frame falls in, from the frames each new shot starts on."""
+    return 1 + sum(1 for c in cuts if 0 < c <= frame)
 
 
 class Watchdog:
@@ -153,16 +219,18 @@ def kill_all(*procs) -> None:
             proc.kill()
 
 
-def ticking(write, dog: Watchdog):
-    def out(data: bytes):
-        write(data)
-        dog.tick()
-    return out
+def failed_at(failed: BaseException, counted: "Counted", total: int | None, cuts: list[int]) -> None:
+    """A failure says where it happened: the frame, of how many, and the shot."""
+    if isinstance(failed, (Stalled, TooSlow, mu.ShortPass)):
+        return
+    print(f"CAP upscale: av3 failed at frame {counted.n}/{total if total is not None else '?'} "
+          f"(shot {shot_of(counted.n, cuts)})", file=sys.stderr, flush=True)
 
 
 def streamed(listing: Path, out: Path, width: int, height: int, factor: int, fps: int,
              upscaler, cuts: list[int], filt: str = PREFILTER, encoder: str = "cpu",
-             paste=None, stall_s: float = STALL_S, hard_exit=None, expected_frames: int | None = None) -> int:
+             paste=None, stall_s: float = STALL_S, hard_exit=None, expected_frames: int | None = None,
+             cap_s: float | None = None) -> int:
     """decode | face paste at cut scale | denoise per shot | upscale | encode.  A failure
     or a stall kills the whole pipeline and surfaces; it never waits on a blocked pipe.
     A pass that emitted other than `expected_frames` is a ShortPass (K8)."""
@@ -171,10 +239,12 @@ def streamed(listing: Path, out: Path, width: int, height: int, factor: int, fps
                            stdin=subprocess.PIPE)
     seg = Segmented(mu.pasted(dec.stdout.read, paste, width, height), width, height, lengths(cuts), filt)
     dog = Watchdog(stall_s, lambda: stall(dec, enc, seg, hard_exit), poll=min(1.0, stall_s / 4)).start()
+    counted = Counted(Pace(expected_frames, cap_s) if cap_s else None)
     try:
-        n = mu.pump(seg.read, ticking(enc.stdin.write, dog), width, height, upscaler)
+        n = mu.pump(seg.read, counted(enc.stdin.write, dog), width, height, upscaler)
     except BaseException as failed:
         kill_all(dec, enc, seg.proc)
+        failed_at(failed, counted, expected_frames, cuts)
         if dog.fired:
             raise Stalled(f"the av3 pass moved no frame for {stall_s:.0f} s") from failed
         raise
@@ -254,18 +324,30 @@ def run(job: dict, upscaler=None, hard_exit=None) -> int:
     effect = upscaler or Av3(job["weights"])
     return streamed(Path(job["listing"]), Path(job["out"]), job["width"], job["height"], job["factor"],
                     job["fps"], effect, job["cuts"], encoder=job.get("encoder", "cpu"), paste=paste_of(job),
-                    hard_exit=hard_exit, expected_frames=job.get("expected_frames"))
+                    hard_exit=hard_exit, expected_frames=job.get("expected_frames"), cap_s=job.get("cap_s"))
+
+
+def dump_on_hang() -> None:
+    """A hang leaves its Python stack in the log after STALL_S; a stderr with no fd (a test) skips it."""
+    try:
+        faulthandler.dump_traceback_later(STALL_S, exit=False, file=sys.stderr)
+    except (OSError, ValueError):
+        pass
 
 
 def main(argv: list[str]) -> None:
     """The worker: a stall exits with STALLED (even when the main thread is stuck in
     CUDA, the watchdog ends the process), so the repo can fall back."""
     t0 = time.perf_counter()
+    dump_on_hang()
     try:
         n = run(json.loads(Path(argv[1]).read_text(encoding="utf-8")), hard_exit=lambda: os._exit(STALLED))
     except Stalled as stuck:
         print(f"CAP upscale: av3 stalled: {stuck}", file=sys.stderr, flush=True)
         raise SystemExit(STALLED)
+    except TooSlow as slow:
+        print(f"CAP upscale: av3 too slow: {slow}", file=sys.stderr, flush=True)
+        raise SystemExit(SLOW)
     except mu.ShortPass as short:
         print(f"CAP upscale: av3 ended short: {short} frames", file=sys.stderr, flush=True)
         raise SystemExit(SHORT)

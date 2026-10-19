@@ -23,7 +23,9 @@ Decision: architecture/decisions/2026-09-24_judges_replace_the_eye.md, section 2
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -351,24 +353,117 @@ def last_vs_panel(home: Path, reads: dict[int, list[Read]], sigs: dict[float, np
     return out
 
 
-def read_all(pics: list[np.ndarray], times: list[float], placed: dict, reader: Reader, embed: Embed) -> list[Read]:
-    """Every sampled frame: read by the reader, its faces embedded."""
-    out = []
-    for pic, at in zip(pics, times):
-        read = read_frame(reader, pic, at, shot_at(placed, at))
-        read.faces = list(embed(pic) or [])
-        out.append(read)
-    return out
+EYE_READS = Path("review") / "work" / "eye_reads.json"
+"""One entry per (take sha8, local frame, slow, plan row, reader model, prompt): the reader's
+answer and the faces found, so a recut that changed one take re-reads only that take."""
+TAKE_FPS = 24
+
+
+def sha8_text(*parts) -> str:
+    return hashlib.sha256("|".join(str(p) for p in parts).encode("utf-8")).hexdigest()[:8]
+
+
+def sha8_of(path: Path) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()[:8]
+
+
+def faces_json(faces: list[dict]) -> list[dict]:
+    return [{**f, "vec": np.asarray(f["vec"]).tolist()} if "vec" in f else dict(f) for f in faces]
+
+
+def faces_back(rows: list[dict]) -> list[dict]:
+    return [{**f, "vec": np.asarray(f["vec"])} if "vec" in f else dict(f) for f in rows]
+
+
+def json_or(path: Path, default):
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
+
+
+class EyeCache:
+    """The per-frame read cache, persisted after every read so an engine crash loses none."""
+
+    def __init__(self, home: Path, reader_id: str, prompt_sha: str):
+        self.home, self.reader_id, self.prompt_sha = Path(home), reader_id, prompt_sha
+        self.path = self.home / EYE_READS
+        self.rows = json_or(self.path, {})
+        self.shas: dict[str, str] = {}
+
+    def take_sha8(self, index: int) -> str:
+        name = f"T{index:02d}.mp4"
+        if name not in self.shas:
+            take = self.home / "takes" / "r2v" / name
+            self.shas[name] = sha8_of(take) if take.exists() else "missing"
+        return self.shas[name]
+
+    def load_cut(self, placed: dict) -> tuple[dict, list[dict], dict]:
+        """The timeline as the master was cut (G-DEAD applied), the take records, the dead plan."""
+        from studio import edit_gate
+        records = json_or(self.home / "takes" / "r2v" / "shots.json", [])
+        dead = json_or(self.home / "takes" / "work" / "dead_cuts.json", None)
+        cut, kept = edit_gate.dead_view(placed, records, dead)
+        return cut, kept, dead or {}
+
+    def key(self, placed: dict, plan: dict, at: float) -> str | None:
+        """The cache key of the frame at `at`, or None in the tail / outside any take."""
+        cut, records, dead = self.load_cut(placed)
+        shot = next((s for s in cut["shots"] if s["t_start"] <= at < s["t_start"] + s["seconds"]), None)
+        rec = next((r for r in records if shot and shot["index"] in (r.get("shots") or [r["index"]])), None)
+        if rec is None:
+            return None
+        first = next(s for s in cut["shots"] if s["index"] == (rec.get("shots") or [rec["index"]])[0])
+        row = next((r for r in plan.get("shots", []) if int(r.get("index", -1)) == shot["index"]), {})
+        slow = (dead.get("seconds") or {}).get(str(rec["index"]), (dead.get("seconds") or {}).get(rec["index"], ""))
+        return sha8_text(self.take_sha8(rec["index"]), round((at - first["t_start"]) * TAKE_FPS), slow,
+                         json.dumps(row, sort_keys=True), self.reader_id, self.prompt_sha)
+
+    def get(self, key: str | None) -> dict | None:
+        return self.rows.get(key) if key else None
+
+    def put(self, key: str | None, said: str, faces: list[dict]) -> None:
+        if key is None:
+            return
+        self.rows[key] = {"said": said, "faces": faces_json(faces)}
+        tmp = self.path.with_name(self.path.name + ".tmp")
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        tmp.write_text(json.dumps(self.rows), encoding="utf-8")
+        os.replace(tmp, self.path)
+
+
+def read_one(pic: np.ndarray, at: float, placed: dict, plan: dict, reader: Reader, embed: Embed,
+             cache: "EyeCache | None") -> Read:
+    """One sampled frame: a cache hit costs nothing; a miss is read, embedded and kept once readable."""
+    key = cache.key(placed, plan, at) if cache else None
+    if hit := (cache.get(key) if cache else None):
+        read = read_frame(lambda _f: hit["said"], pic, at, shot_at(placed, at))
+        read.faces = faces_back(hit["faces"])
+        return read
+    said = reader(pic)
+    said = said if isinstance(said, str) else str(said)
+    read = read_frame(lambda _f: said, pic, at, shot_at(placed, at))
+    read.faces = list(embed(pic) or [])
+    if cache and read.seen is not None:
+        cache.put(key, said, read.faces)
+    return read
+
+
+def read_all(pics: list[np.ndarray], times: list[float], placed: dict, reader: Reader, embed: Embed,
+             plan: dict | None = None, cache: "EyeCache | None" = None) -> list[Read]:
+    """Every sampled frame: read by the reader (or the cache), its faces embedded."""
+    return [read_one(pic, at, placed, plan or {}, reader, embed, cache) for pic, at in zip(pics, times)]
 
 
 # ---- the judge -----------------------------------------------------------------------
 
 def measures(home: Path, master: Path, plan: dict, placed: dict, *, frames: Frames, reader: Reader,
-             embed: Embed, count: int = FRAMES) -> dict:
+             embed: Embed, count: int = FRAMES, cache: "EyeCache | None" = None) -> dict:
     """Every number the rubric is answered from, keyed by field, plus the reads."""
     times = sample_times(float(placed["duration_s"]), count)
     pics = frames(master, times)
-    reads = read_all(pics, times, placed, reader, embed)
+    reads = read_all(pics, times, placed, reader, embed, plan, cache)
     grouped, sigs = by_shot(reads), dict(zip(times, signatures(pics)))
     shots = {int(s["index"]): s for s in plan.get("shots", [])}
     setups = {i: s.get("setup", "") for i, s in shots.items()}
@@ -429,16 +524,16 @@ def verdict_of(m: dict, plan: dict) -> Verdict:
 
 
 def judge(home: Path, master: Path, plan: dict, placed: dict, *, frames: Frames, reader: Reader,
-          embed: Embed, count: int = FRAMES) -> Verdict:
+          embed: Embed, count: int = FRAMES, cache: "EyeCache | None" = None) -> Verdict:
     """The master judged: pass, or every fault listed with its numbers."""
     return verdict_of(measures(home, master, plan, placed, frames=frames, reader=reader, embed=embed,
-                               count=count), plan)
+                               count=count, cache=cache), plan)
 
 
 def read(home: Path, master: Path, plan: dict, placed: dict, *, frames: Frames, reader: Reader,
-         embed: Embed, count: int = FRAMES) -> tuple[Verdict, dict]:
+         embed: Embed, count: int = FRAMES, cache: "EyeCache | None" = None) -> tuple[Verdict, dict]:
     """(verdict, measures): the step keeps the measures to fill the rubric's y fields."""
-    m = measures(home, master, plan, placed, frames=frames, reader=reader, embed=embed, count=count)
+    m = measures(home, master, plan, placed, frames=frames, reader=reader, embed=embed, count=count, cache=cache)
     return verdict_of(m, plan), m
 
 
