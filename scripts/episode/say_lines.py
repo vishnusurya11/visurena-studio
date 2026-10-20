@@ -233,6 +233,16 @@ def wall_spent(home: Path) -> bool:
     return step_attempts.seconds(home, "lines") >= lines_wall_s()
 
 
+def round_bucket(attempt: int, redo: list[int], records: dict, todo: list[int]) -> str:
+    """Where a round's seconds are booked: `say` (the cap table's first-saying row) when it is the
+    first round of a run that redoes nothing and no line in it was ever listened to, else `lines`,
+    the re-say wall.  Deadline retro 2026-10-20: ep01's first pass (22 lines, 1,075 s with l11's
+    'cheque' re-says) spent the whole 10 min re-say wall, so the wall cut the cure, not the work."""
+    if attempt or redo:
+        return "lines"
+    return "lines" if any("passed" in records.get(i, {}) for i in todo) else "say"
+
+
 def ear_cure(book: Path, record: dict, among: dict, listen) -> bool:
     """Two identical wrong transcripts whose one differing word sounds like the line's
     (cmudict) are the ear's fault, not the mouth's: file the pair in the book's ear lexicon
@@ -446,7 +456,7 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
             todo = at_wall(records, todo, out_dir, home, rounds)
             episode_home.write_json(sheet, [records[k] for k in sorted(records)])
             break
-        began = time.time()
+        began, bucket = time.time(), round_bucket(attempt, redo or [], records, [line.index for line in todo])
         for line in todo:
             have = records.get(line.index)
             if attempt == 0 and have and "passed" not in have and (out_dir / f"l{line.index:02d}.wav").exists():
@@ -479,7 +489,7 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
         failed = [i for i in failed if not keep_terminal(records, i, out_dir)]
         episode_home.write_json(sheet, [records[k] for k in sorted(records)])
         todo = [line for line in todo if line.index in failed]
-        step_attempts.spend(home, "lines", time.time() - began)
+        step_attempts.spend(home, bucket, time.time() - began)
         if not todo:
             break
     print(f"{len(records) - len(todo)}/{len(records)} lines said their line -> {sheet}", flush=True)

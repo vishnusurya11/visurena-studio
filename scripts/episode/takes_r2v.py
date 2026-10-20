@@ -1265,6 +1265,26 @@ def collect_twice(jobs: list[tuple[dict, dict]], where, on_take=None,
     return done + more, hard + still
 
 
+def render_note(jobs: list[tuple[dict, dict]]) -> str:
+    """The take_render row's note: the takes the span rendered as bare numbers, which
+    `episode_clock.indices_in` reads to price the row by their frames."""
+    return " ".join(str(c["index"]) for c, _ in jobs) + (" --tiny-face" if TINY_FACE else "")
+
+
+def stamp_render(book: Path, number: int, jobs: list[tuple[dict, dict]], began: float, ended: float,
+                 lost: list | None) -> dict | None:
+    """The render span's own timing row: `take_render`, on the gpu, stamped within the takes row
+    (which is then net of it, so every sum counts it once); None when nothing was queued.  `lost`
+    None means the collect raised; a take lost to anything but a boundary stop fails the row.
+    Deadline retro 2026-10-20: ep01's 84.7 min of renders over 3 spans had no row of their own."""
+    if not jobs:
+        return None
+    from studio import episode_clock
+    ok = lost is not None and all(said == BOUNDARY for _, said in lost)
+    return episode_clock.stamp(book, number, "take_render", began, ended, ok=ok, note=render_note(jobs),
+                               within="takes", device="gpu")
+
+
 def render(c: dict, graph: dict, out: Path, approved: bool = False) -> dict:
     """One take, submitted and collected on its own.  `submit_all` + `collect`
     is the way a whole run goes; this stays for a single take."""
@@ -1595,13 +1615,14 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
 
     from studio import boundary
     home, began = episode_home.home(book, number), time.time()
-    prior = prior_first_seconds(home)
+    prior, lost = prior_first_seconds(home), None
     try:
         _, lost = collect_twice(jobs, lambda c: wheres[c["index"]], keep, approved,
                                 stop=lambda: boundary.requested(home)
                                 or first_wall_spent(began, time.time(), retake or [], prior))
     finally:
         book_first_seconds(home, began, time.time(), retake or [])
+        stamp_render(book, number, jobs, began, time.time(), lost)
     if first_wall_spent(began, time.time(), retake or [], prior):
         lost, line = after_wall(lost, prior + time.time() - began)
         print(line, flush=True)

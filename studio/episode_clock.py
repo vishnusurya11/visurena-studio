@@ -26,7 +26,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from pathlib import Path
 
-from studio import episode_home
+from studio import episode_home, run_clock
 
 NORMS = {
     "plan": 0, "lines": 900, "respot": 30, "timeline": 30, "frames": 600,
@@ -44,6 +44,13 @@ DEFAULT_TAKES, DEFAULT_FRAMES = 30, 141
 TAKE_COLD, TAKE_FIXED, TAKE_PER_FRAME = 300.0, 60.0, 1.2
 """One cold load of the MiniMax weights per run, a fixed per-take cost (encode
 + VAE decode) and the sampler's slope -- least squares on ep09 and ep10, I.md §2."""
+
+RENDERS = ("takes", "take_render")
+"""The rows priced by the takes they render: the takes run, and the GPU render span takes_r2v
+stamps inside it (deadline retro 2026-10-20: ep01's 84.7 min of renders had no row of their own)."""
+KILLED = "killed"
+"""The stage of a row `report` adds for a run clock.jsonl closed `killed`: the seconds of its span no
+timing row covers (a Stop-Process runs no `finally`; ep01 run 12's av3 hang left 41 min on no row)."""
 
 
 def path(book: Path, number: int) -> Path:
@@ -109,11 +116,74 @@ def rows(book: Path, number: int) -> list[dict]:
     return [json.loads(l) for l in p.read_text(encoding="utf-8").splitlines() if l.strip()]
 
 
+def local_epoch(stamp: str) -> float:
+    """A naive timing.jsonl stamp (this machine's local time) as epoch seconds."""
+    return datetime.fromisoformat(stamp).timestamp()
+
+
+def epochs(row: dict) -> tuple[float, float] | None:
+    """A row's (start, end) in epoch seconds: its `t0`/`t1` when stamped, else its ISO stamps."""
+    if "t0" in row and "t1" in row:
+        return float(row["t0"]), float(row["t1"])
+    try:
+        return local_epoch(row["started"]), local_epoch(row["ended"])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def covered(start: float, end: float, got: list[dict]) -> float:
+    """Seconds of [start, end] some timing row covers, each moment once."""
+    pairs = [(max(start, a), min(end, b)) for a, b in filter(None, map(epochs, got))]
+    return run_clock.union([(a, b) for a, b in pairs if b > a])
+
+
+def in_flight(start: float, end: float, got: list[dict]) -> str:
+    """The step whose `started` mark is the last inside [start, end]: the step a kill caught."""
+    seen = [(span[0], r["stage"]) for r in got
+            if r.get("note") == "started" and (span := epochs(r)) and start <= span[0] <= end]
+    return max(seen)[1] if seen else "no step"
+
+
+def killed_row(run: dict, lost: float, step: str) -> dict:
+    """The row a killed run's uncovered seconds are charged on: never `ok`, marked KILLED."""
+    s, e = float(run["started"]), float(run["ended"])
+    return {"stage": KILLED, "started": datetime.fromtimestamp(s).isoformat(timespec="seconds"),
+            "ended": datetime.fromtimestamp(e).isoformat(timespec="seconds"), "seconds": round(lost, 1),
+            "ok": False, "killed": True, "run_id": run.get("run_id"), "t0": s, "t1": e,
+            "note": f"run killed in {step}; charged to its last beat" + (" (repair)" if run.get("repair") else "")}
+
+
+def killed_rows(book: Path, number: int) -> list[dict]:
+    """One row per run clock.jsonl closed `killed`, for the seconds of its span that no timing row
+    covers (the step in flight never stamped): on the clock as killed, never lost."""
+    got, out = rows(book, number), []
+    for run in run_clock.rows(episode_home.home(book, number)):
+        if run.get("how") != "killed":
+            continue
+        s, e = float(run["started"]), float(run["ended"])
+        if (lost := (e - s) - covered(s, e, got)) >= 1.0:
+            out.append(killed_row(run, lost, in_flight(s, e, got)))
+    return out
+
+
+def killed_part(home) -> str:
+    """The finish line's killed part: the hours of the runs a kill ended (charged to their last beat)
+    and the repair's share of them; '' when no run was killed.  ep01: 1.73 h in 4 runs, 1.00 h repair."""
+    dead = [r for r in run_clock.rows(home) if r.get("how") == "killed"]
+    if not dead:
+        return ""
+    hours = sum(float(r["seconds"]) for r in dead) / 3600
+    repair = sum(float(r["seconds"]) for r in dead if r.get("repair")) / 3600
+    return (f" | killed {hours:.2f} h in {len(dead)} run{'s' if len(dead) > 1 else ''}"
+            + (f" ({repair:.2f} h of it repair)" if repair else ""))
+
+
 def norm_for(stage: str, count: int | None = None, frames: list[int] | None = None) -> float:
     """Expected seconds under the run's own conditions: `frames` per take for a
     takes run (30 x 141 when unknown), `count` of takes for take_dq, of lines
-    for qc and lines. Anything else is the episode-9 table."""
-    if stage == "takes":
+    for qc and lines. Anything else is the episode-9 table.  A `take_render` row (the render span
+    inside a takes run) is priced as the takes it rendered."""
+    if stage in RENDERS:
         frames = frames or [DEFAULT_FRAMES] * DEFAULT_TAKES
         return TAKE_COLD + sum(TAKE_FIXED + TAKE_PER_FRAME * f for f in frames)
     if stage == "title":
@@ -155,7 +225,7 @@ def row_norm(row: dict, cond: dict) -> float:
     a DQ of one take is not a DQ of the episode."""
     stage, named = row["stage"], indices_in(row.get("note", ""))
     frames = cond.get("frames") or dict(enumerate([DEFAULT_FRAMES] * DEFAULT_TAKES))
-    if stage == "takes":
+    if stage in RENDERS:
         picked = [frames[i] for i in named if i in frames] if named else list(frames.values())
         return norm_for(stage, frames=picked or list(frames.values()))
     if stage == "take_dq":
@@ -187,12 +257,13 @@ def nested(a: dict, b: dict) -> bool:
 def contended(row: dict, others: list[dict]) -> bool:
     """Whether another run in the file overlapped this one's interval. Strict at
     the ends, so a stage that starts the second another ends is clean; a
-    zero-second row (a refusal) is a mark, not a run, and contends with nothing."""
-    if not row.get("seconds"):
+    zero-second row (a refusal) is a mark, not a run, and contends with nothing; nor does a KILLED
+    row, which is the uncovered rest of a run whose rows lie inside its span."""
+    if not row.get("seconds") or row.get("killed"):
         return False
     a0, a1 = _span(row)
     for other in others:
-        if other is row or not other.get("seconds") or nested(row, other):
+        if other is row or not other.get("seconds") or other.get("killed") or nested(row, other):
             continue
         b0, b1 = _span(other)
         if a0 < b1 and b0 < a1:
@@ -203,7 +274,9 @@ def contended(row: dict, others: list[dict]) -> bool:
 def marks(row: dict, got: list[dict], cond: dict) -> list[str]:
     """What is wrong with one run, in words the report prints."""
     out = []
-    if not row.get("ok", True):
+    if row.get("killed"):
+        out.append("KILLED")
+    elif not row.get("ok", True):
         out.append("REFUSED" if row.get("note", "").startswith("refused") else "FAIL")
     elif slow(row, row_norm(row, cond)):
         out.append("SLOW")
@@ -238,9 +311,10 @@ def _flagged_lines(got: list[dict], cond: dict) -> list[str]:
 
 def report(book: Path, number: int) -> str:
     """Total wall time, per stage, retries counted; the norm scaled to the
-    episode's own take frames and line count; every SLOW, FAIL, REFUSED or
-    CONTENDED run listed underneath with the norm it was judged by."""
-    got = rows(book, number)
+    episode's own take frames and line count; every SLOW, FAIL, REFUSED,
+    CONTENDED or KILLED run listed underneath with the norm it was judged by.
+    A killed run's uncovered seconds are a `killed` row (`killed_rows`)."""
+    got = rows(book, number) + killed_rows(book, number)
     if not got:
         return "no stages timed"
     cond = conditions(book, number)
@@ -250,7 +324,8 @@ def report(book: Path, number: int) -> str:
     total = sum(r["seconds"] for r in got)
     lines = [f"{'stage':<12} {'seconds':>8} {'share':>6}  runs   norm  flags"]
     lines += [_stage_line(stage, runs, total, got, cond) for stage, runs in by.items()]
-    span = (datetime.fromisoformat(got[-1]["ended"]) - datetime.fromisoformat(got[0]["started"])).total_seconds()
+    span = (max(datetime.fromisoformat(r["ended"]) for r in got)
+            - min(datetime.fromisoformat(r["started"]) for r in got)).total_seconds()
     lines.append(f"{'TOTAL':<12} {total:>8.0f}  ({total / 3600:.1f} h of stages; {span / 3600:.1f} h first start to last end)")
     if flagged := _flagged_lines(got, cond):
         lines += ["flagged runs:"] + flagged
