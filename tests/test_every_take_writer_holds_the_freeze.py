@@ -7,7 +7,8 @@ code, so the next new writer cannot bypass the freeze in silence.
 
 How it reads the code (AST over studio/ and scripts/, no import, no GPU, no library/ read):
   1. BYTE WRITERS: every function in a module that names a take file and moves bytes (rename, a
-     one-argument Path.replace, os.replace/rename, shutil.move/copy*, write_bytes, an ffmpeg `-y` argv).
+     one-argument Path.replace, os.replace/rename, shutil.move/copy*, write_bytes, open() in a binary
+     write mode, an argv list carrying `-y` wherever it is built).
      Each is either one of the five that put bytes on (or take them off) T<nn>.mp4, or names what it
      writes instead.  A new byte writer fails until it is sorted.
   2. THE CLOSURE: from those five, every caller, and its callers, up to a SITE that asks the freeze
@@ -18,7 +19,13 @@ How it reads the code (AST over studio/ and scripts/, no import, no GPU, no libr
   4. THE SEVEN KNOWN SITES of LESSONS brick 4 (first pass, early round, batched rung, terminal, take_dq
      --attempts, master retake, the repair's own work) are each found in the code with their freeze.
 The two writers that skip the freeze today are recorded as strict xfails (GAPS): fixing one turns its
-xfail into a failure, which removes it from the list."""
+xfail into a failure, which removes it from the list.  A gap does not stop the walk, so a new caller of
+a gap fails the closure like any other unguarded writer.
+
+What it cannot see: a call through getattr or a passed-in callback (harvest_labels hands
+rejudge_attempts over as one), an argv whose `-y` is not a literal in a list, an open() whose mode is
+not a literal, and a take module that names no take file by any TAKE pattern.  A writer imported
+under another name is refused by its own test below."""
 from __future__ import annotations
 
 import ast
@@ -34,7 +41,8 @@ SCANNED = ("studio", "scripts")
 TAKE = re.compile(r"T\{[^}]*:02d\}|T<NN>|T<nn>|T\?\?\.mp4|takes_dir\(|takes_under\(|\bTAKES\b")
 """A module that names a take file, or the take room, can write one."""
 MOVERS = {"os": {"replace", "rename"}, "shutil": {"move", "copy", "copy2", "copyfile"}}
-ATTEMPTS = "--attempts"
+ATTEMPTS = re.compile(r"""["']--attempts["']""")
+"""A spawn of take_dq.py with --attempts, in either quote."""
 TAKE_DQ_MAIN = "scripts/episode/take_dq.py:main"
 
 TAKE_BYTES = {
@@ -74,6 +82,8 @@ NOT_A_TAKE = {
     "studio/script_mix.py:premix": "the bed-plus-lines premix",
     "studio/script_mix.py:master": "the mixed master",
     "studio/take_currency.py:carry_graph": "T<nn>.graph.json, the take's graph, not its bytes",
+    "scripts/episode/takes_r2v.py:fit_argv": "the argv only: ffmpeg -y onto T<nn>_fit.mp4, which fit_into lands",
+    "scripts/episode/takes_r2v.py:composite": "the take's audio wav (dialogue over silence), not the take",
 }
 """Byte movers in a take module that write something else, and what."""
 
@@ -147,8 +157,10 @@ KNOWN_SEVEN = {
     2: ("early round", (("studio/take_overlap.py:early_cures", "take_ladder.route("),
                         ("studio/take_ladder.py:route", "curable_faults(verdict, room, window)"),
                         ("studio/take_ladder.py:curable_faults", "not frozen_here(room, i, window)"))),
-    3: ("batched rung", (("studio/take_ladder.py:still_curable", "bool(route("),
-                         ("studio/take_ladder.py:batch_for", "renderable(routed, room, written)"))),
+    3: ("batched rung", (("studio/take_ladder.py:take", "routed = route(verdict, room"),
+                         ("studio/take_ladder.py:take", "batch_for(ctx, rung, routed,"),
+                         ("studio/take_ladder.py:route", "curable_faults(verdict, room, window)"),
+                         ("studio/take_ladder.py:curable_faults", "not frozen_here(room, i, window)"))),
     4: ("terminal", (("studio/take_ladder.py:keep_best_draws", "kept_frozen("),)),
     5: ("take_dq --attempts", (("studio/take_ladder.py:measure_late", "frozen_here(room, i)"),
                                ("studio/take_overlap.py:ranked", "frozen_here(room, i)"))),
@@ -157,7 +169,11 @@ KNOWN_SEVEN = {
     7: ("the repair's own work", (("scripts/episode/tiny_face.py:restore", 'snap["fail"]'),
                                   ("scripts/episode/face_refine.py:collect", "room / OUT /"))),
 }
-"""LESSONS brick 4 / LESSONS_ARCHIVE 'A freeze holds at every place that renders', numbered as there."""
+"""LESSONS brick 4 / LESSONS_ARCHIVE 'A freeze holds at every place that renders', numbered as there.
+Sites 1-6 are read down to the freeze itself: the batched rung's batch (site 3) only renders what
+`route` let through, and `route` drops every frozen take (curable_faults -> frozen_here).  Site 7 holds
+differently: tiny_face gives the old take back, and face_refine writes its crops under refine/, never
+onto T<nn>.mp4 -- these are not-a-write checks, not freeze checks."""
 
 
 # ---- reading the code -------------------------------------------------------------------------
@@ -184,13 +200,26 @@ def mover(call: ast.Call) -> str | None:
         return f.attr
     if isinstance(f, ast.Attribute) and f.attr == "replace" and len(call.args) == 1 and not call.keywords:
         return "replace"
-    argv = [a for a in call.args if isinstance(a, ast.List)]
-    return "ffmpeg -y" if any(isinstance(e, ast.Constant) and e.value == "-y" for a in argv for e in a.elts) else None
+    return "open wb" if isinstance(f, ast.Name) and f.id == "open" and binary_write(call) else None
+
+
+def binary_write(call: ast.Call) -> bool:
+    """An open() whose mode writes bytes ('wb', 'ab', 'xb', 'r+b' ...); a take is never written as text."""
+    mode = call.args[1] if len(call.args) > 1 else next((k.value for k in call.keywords if k.arg == "mode"), None)
+    said = mode.value if isinstance(mode, ast.Constant) and isinstance(mode.value, str) else ""
+    return "b" in said and any(c in said for c in "wax+")
+
+
+def overwrite_argv(node: ast.AST) -> str | None:
+    """An argv list that carries '-y' (ffmpeg overwrites its output), wherever the list is built."""
+    hit = isinstance(node, ast.List) and any(isinstance(e, ast.Constant) and e.value == "-y" for e in node.elts)
+    return "ffmpeg -y" if hit else None
 
 
 def moves_in(node: ast.AST) -> frozenset[str]:
-    """Every byte move under one node."""
-    return frozenset(m for n in ast.walk(node) if isinstance(n, ast.Call) and (m := mover(n)))
+    """Every byte move under one node: a moving call, or an overwriting argv list."""
+    found = (mover(n) if isinstance(n, ast.Call) else overwrite_argv(n) for n in ast.walk(node))
+    return frozenset(m for m in found if m)
 
 
 def moves(source: str) -> frozenset[str]:
@@ -260,7 +289,7 @@ def callers(code: Code, key: str) -> set[str]:
     found = {k for k, d in code.defs.items() if k != key and want in d.calls}
     if key == TAKE_DQ_MAIN:
         found |= {k for k, d in code.defs.items()
-                  if not k.startswith("scripts/episode/take_dq.py:") and f'"{ATTEMPTS}"' in d.source}
+                  if not k.startswith("scripts/episode/take_dq.py:") and ATTEMPTS.search(d.source)}
     return found
 
 
@@ -281,7 +310,14 @@ def code() -> Code:
 
 
 def writers_above(code: Code) -> set[str]:
-    return closure(code, set(TAKE_BYTES), set(SITES) | set(GAPS))
+    """Every function above a take writer, up to a freeze site.  A gap does not stop the walk: a new
+    caller of a gap writes a take with no freeze above it, and must fail like any other."""
+    return closure(code, set(TAKE_BYTES), set(SITES))
+
+
+def loose_writers(code: Code) -> set[str]:
+    """Functions above a take writer that are neither a writer, a pass-through, a site nor a gap."""
+    return writers_above(code) - set(TAKE_BYTES) - set(PASS_THROUGH) - set(SITES) - set(GAPS)
 
 
 # ---- 1. byte writers --------------------------------------------------------------------------
@@ -303,8 +339,7 @@ def test_each_take_byte_writer_still_moves_bytes(code, key):
 # ---- 2. the closure ---------------------------------------------------------------------------
 
 def test_every_caller_of_a_take_writer_reaches_the_freeze(code):
-    above = writers_above(code)
-    loose = above - set(TAKE_BYTES) - set(PASS_THROUGH) - set(SITES) - set(GAPS)
+    loose = loose_writers(code)
     assert not loose, ("these write takes/**/T<nn>.mp4 (through a take writer) and no freeze site sits above "
                        f"them: ask take_currency.frozen / take_ladder.frozen_here there, or register the site: {sorted(loose)}")
 
@@ -408,3 +443,34 @@ def test_the_lint_sees_each_kind_of_byte_move():
                  "    shutil.move(a, b)\n    out.write_bytes(b'')\n    run(['ffmpeg', '-y', str(out)])\n"
                  "    'x'.replace('a', 'b')\n")
     assert said == {"rename", "replace", "os.replace", "shutil.move", "write_bytes", "ffmpeg -y"}
+
+
+def test_the_lint_sees_an_argv_built_first_and_a_binary_open():
+    said = moves("def f(out):\n    cmd = ['ffmpeg', '-y', str(out)]\n    subprocess.run(cmd)\n"
+                 "    with open(out, 'wb') as fh:\n        fh.write(b'')\n    open(out, 'rb').read()\n"
+                 "    open(out).read()\n")
+    assert said == {"ffmpeg -y", "open wb"}
+
+
+GAP_CALLER = '''
+from scripts.episode import takes_r2v
+from scripts.calibration import harvest_labels
+
+def revive(c, prompt_id, out):
+    takes_r2v.render(c, prompt_id, out)
+
+def rejudge(book, n):
+    harvest_labels.rejudge_attempts(book, n)
+'''
+
+
+@pytest.mark.parametrize("caller", ["revive", "rejudge"])
+def test_a_new_caller_of_a_gap_fails_the_lint(caller):
+    texts = {**sources(), "scripts/episode/gap_caller.py": GAP_CALLER}
+    assert f"scripts/episode/gap_caller.py:{caller}" in loose_writers(read_code(texts))
+
+
+def test_a_single_quoted_attempts_spawn_is_a_caller_of_take_dq_main():
+    texts = {"scripts/episode/take_dq.py": "def main():\n    pass\n",
+             "scripts/episode/spawner.py": "def go(n):\n    run(['take_dq.py', str(n), '--attempts'])\n"}
+    assert "scripts/episode/spawner.py:go" in callers(read_code(texts), TAKE_DQ_MAIN)
