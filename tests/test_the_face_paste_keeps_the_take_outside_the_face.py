@@ -347,8 +347,10 @@ def test_a_face_no_detector_reads_has_no_turn():
 
 def test_the_walls_refuse_a_paste_that_moves_the_take_warps_the_band_or_moves_the_face():
     from dataclasses import replace
-    base = fr.Measures(id_src=None, id_ref=None, seam=5.0, flick_src=2.0, flick_ref=2.0, faces_src=1, faces_ref=1)
+    base = fr.Measures(id_src=None, id_ref=None, seam=5.0, flick_src=2.0, flick_ref=2.0, faces_src=1, faces_ref=1,
+                       outside=0.0)
     assert fr.decide(base)[0]
+    assert not fr.decide(replace(base, outside=None))[0]                  # unread is a refusal (2026-10-20)
     assert not fr.decide(replace(base, outside=fr.OUTSIDE_MAX + 1))[0]
     kept, why = fr.decide(replace(base, band_warp=fr.BAND_WARP_MAX + 0.5))
     assert not kept and "band" in why
@@ -391,7 +393,7 @@ def test_a_row_the_new_gate_measured_or_with_no_measures_is_left_alone(tmp_path)
     from scripts.episode import face_refine as cli
     assert cli.regate_due(stale_entry(tmp_path))
     measured = stale_entry(tmp_path)
-    measured["people"][0]["measures"]["band_warp"] = 0.4
+    measured["people"][0]["measures"].update(band_warp=0.4, outside=0.0)
     bare = {"status": "refined", "people": [{"kept": True, "crop": "c.mp4", "track": "t.json"}]}
     assert not cli.regate_due(measured) and not cli.regate_due(bare)
 

@@ -92,5 +92,5 @@ def test_a_refine_that_returns_its_input_is_a_failure_never_a_pass():
 
 def test_a_real_refine_is_not_refused_for_changing_the_crop():
     m = fr.Measures(id_src=0.6, id_ref=0.6, seam=9.8, flick_src=16.6, flick_ref=14.4, faces_src=1, faces_ref=1,
-                    change=11.4)
+                    change=11.4, outside=0.0)
     assert fr.decide(m) == (True, "kept")

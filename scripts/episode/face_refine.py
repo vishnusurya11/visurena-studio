@@ -595,12 +595,22 @@ def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, s
 # ---- the regate: a decision made before the paste's walls ------------------------------------
 
 def regate_due(entry: dict) -> bool:
-    """A row measured before the band and turn walls (its measures hold no band_warp)."""
+    """A row measured before the paste's walls (its measures hold no band_warp or no outside)."""
     return any(stale_row(p) for p in entry.get("people", []))
 
 
+PASTE_READS = ("band_warp", "outside")
+"""The paste's measures a row must hold before a cut pastes it (an unread outside is a refusal,
+studio/face_refine.outside_refusal)."""
+
+
 def stale_row(row: dict) -> bool:
-    return "measures" in row and "band_warp" not in row["measures"]
+    return "measures" in row and any(row["measures"].get(k) is None for k in PASTE_READS)
+
+
+def unread_row(row: dict) -> dict:
+    """A row the regate could not read (no take or crop window): no paste measure, so the take keeps its face."""
+    return {**row, "kept": False, "why": fr.outside_refusal(None), "regated": stamp()}
 
 
 def centres_from(doc: dict, life: tuple[int, int], side: int) -> list | None:
@@ -621,7 +631,7 @@ def regate_row(room: Path, take: list[np.ndarray], row: dict, read, detect) -> d
     src_w = face_gate.at_side(face_gate.windows_of(take, doc["windows"], life), side)
     ref_w = face_gate.shrunk(refined, int(doc["start"]), life, side)
     if not src_w or not ref_w:
-        return row
+        return unread_row(row)
     known = {k: v for k, v in row["measures"].items() if k in fr.Measures.__dataclass_fields__}
     m = replace(fr.Measures(**known), turn=turn_of(src_w, over_life(refined, int(doc["start"]), life), detect),
                 **face_gate.paste_measures(src_w, ref_w, face_paste.face_share(doc, row), centres_from(doc, life, side)))

@@ -355,12 +355,21 @@ class Measures:
     turn: float | None = None
 
 
+def outside_refusal(outside: float | None) -> str:
+    """The paste moved the take outside the face core, or nobody read whether it did: an unread measure
+    is a refusal (retro 2026-10-20 item 3: the wall passed a None; the iter2 warp reached a master
+    through gates that never read those pixels).  '' inside the wall."""
+    if outside is None:
+        return "outside the face unread: the paste is never made unmeasured"
+    return f"outside the face moved {outside:.1f} > {OUTSIDE_MAX}" if outside > OUTSIDE_MAX else ""
+
+
 def paste_refusals(m: Measures) -> list[str]:
-    """The paste moved the take outside the face core, warped the band where it meets the take, or
-    pasted a face the redraw turned (core_flow is logged, never a wall: it did not part T08 from the rest)."""
+    """The paste moved the take outside the face core (or left it unread), warped the band where it meets
+    the take, or pasted a face the redraw turned (core_flow is logged, never a wall: it did not part T08)."""
     out = []
-    if m.outside is not None and m.outside > OUTSIDE_MAX:
-        out.append(f"outside the face moved {m.outside:.1f} > {OUTSIDE_MAX}")
+    if said := outside_refusal(m.outside):
+        out.append(said)
     if m.band_warp is not None and m.band_warp > BAND_WARP_MAX:
         out.append(f"band warp {m.band_warp:.2f} > {BAND_WARP_MAX}")
     if m.turn is not None and m.turn > TURN_MAX:

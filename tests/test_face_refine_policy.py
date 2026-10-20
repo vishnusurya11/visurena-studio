@@ -161,7 +161,8 @@ def test_the_crop_prompt_defines_only_its_one_person():
 # ---- the gate ------------------------------------------------------------------------------
 
 def measures(**kw):
-    base = dict(id_src=0.40, id_ref=0.45, seam=4.0, flick_src=3.0, flick_ref=3.1, faces_src=1, faces_ref=1)
+    base = dict(id_src=0.40, id_ref=0.45, seam=4.0, flick_src=3.0, flick_ref=3.1, faces_src=1, faces_ref=1,
+                outside=0.0)
     return fr.Measures(**(base | kw))
 
 

@@ -32,13 +32,18 @@ def measures(row: dict, soft: bool | None = None) -> fr.Measures:
                        flick_src=row["flick_src"], flick_ref=row["flick_soft" if soft else "flick_hard"],
                        faces_src=row["faces_src"], faces_ref=row["faces_ref"], change=row["change"], drift=row["drift"],
                        eye_src=row["eye_src"], eye_ref=row["eye_ref"], ccip_src=row["ccip_src"], ccip_ref=row["ccip_ref"],
-                       clip_src=row["clip_src"], clip_ref=row["clip_ref"])
+                       clip_src=row["clip_src"], clip_ref=row["clip_ref"], outside=CLEAN_OUTSIDE)
+
+
+CLEAN_OUTSIDE = 0.0
+"""Round 1 predates the outside-the-face measure; these tests judge the other walls, so the paste's
+outside reads clean (an unread one is a refusal since 2026-10-20, test_an_unread_outside_measure_refuses_the_paste)."""
 
 
 def good() -> fr.Measures:
     return fr.Measures(id_src=0.5, id_ref=0.6, seam=5.0, flick_src=10.0, flick_ref=9.0, faces_src=1, faces_ref=1,
                        change=12.0, drift=18.0, eye_src=40.0, eye_ref=70.0, ccip_src=0.08, ccip_ref=0.04,
-                       clip_src=0.8, clip_ref=0.85)
+                       clip_src=0.8, clip_ref=0.85, outside=CLEAN_OUTSIDE)
 
 
 def test_the_soft_paste_keeps_every_round_one_face_but_the_three_seams():

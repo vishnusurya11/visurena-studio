@@ -57,7 +57,8 @@ def test_the_window_face_box_is_the_one_the_crop_was_cut_round():
 
 def test_a_sharper_face_found_in_more_frames_is_no_clone():
     """POC W: one face per frame, found in 3 of 6 source crops and 6 of 6 refined."""
-    m = fr.Measures(id_src=0.6, id_ref=0.6, seam=9.8, flick_src=16.6, flick_ref=14.4, faces_src=1, faces_ref=1)
+    m = fr.Measures(id_src=0.6, id_ref=0.6, seam=9.8, flick_src=16.6, flick_ref=14.4, faces_src=1, faces_ref=1,
+                    outside=0.0)
     assert fr.decide(m) == (True, "kept")
 
 
@@ -68,7 +69,8 @@ def test_a_second_face_in_a_frame_is_a_clone():
 
 
 def test_a_source_nobody_detected_still_owns_its_one_face():
-    m = fr.Measures(id_src=0.6, id_ref=0.6, seam=4.0, flick_src=3.0, flick_ref=3.0, faces_src=0, faces_ref=1)
+    m = fr.Measures(id_src=0.6, id_ref=0.6, seam=4.0, flick_src=3.0, flick_ref=3.0, faces_src=0, faces_ref=1,
+                    outside=0.0)
     assert fr.decide(m)[0]
 
 
