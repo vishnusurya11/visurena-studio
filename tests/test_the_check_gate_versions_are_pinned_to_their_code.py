@@ -43,5 +43,6 @@ def test_take_contents_judging_code_is_pinned():
 
 def test_the_pinned_files_are_the_ones_that_judge():
     assert "studio/warp_gate.py" in take_dq.MEASURES and "studio/gait.py" in take_dq.MEASURES
-    assert set(take_content_check.JUDGES) == {"scripts/episode/take_content_check.py", "studio/take_content.py",
-                                             "studio/panel_content.py"}
+    assert set(take_content_check.JUDGES) == {"scripts/episode/take_content_check.py", "studio/frames.py",
+                                             "studio/take_content.py", "studio/panel_content.py",
+                                             "studio/look_table.py", "studio/panel_dq.py", "studio/people_count.py"}

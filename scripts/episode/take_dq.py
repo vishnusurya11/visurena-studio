@@ -696,6 +696,17 @@ when a verdict or a recorded measure changes; a refactor, a log line or a cure r
 only.  Jekyll ep01 run 15 re-measured 28 unchanged takes (1,070 s) on a hash that four commits
 moved, two of them changing no measure (docs/audit/2026-10-20_deadline_retro/h_diagnosis.md)."""
 
+MEASURED_AS = {"42a70889": "1"}
+"""Measuring-code hashes from before the gate version, each the version its code IS: 42a70889 is the
+MEASURES code at 92eacc1^, and 92eacc1 changed only the cache, so ep01's records are v1 (skeptic on
+92eacc1; spares the resume's one re-measure of 28 takes, about 18 min).  Add a row only for a hash
+whose code equals that version's; a record that names its own gate_version is read by it alone."""
+
+
+def gate_of(report: dict) -> str | None:
+    """The gate version a report was measured under: its own, or the one its legacy hash is."""
+    return report.get("gate_version") or MEASURED_AS.get(report.get("measures_sha8"))
+
 
 def measures_sha8() -> str:
     """The measuring code's fingerprint (line endings normalised)."""
@@ -719,7 +730,7 @@ def cached(take_dir: Path, index: int, kept: Path, any_code: bool = False) -> di
     report = json.loads(path.read_text(encoding="utf-8"))
     if report.get("deferred"):
         return None                     # a CPU-lane verdict owes its GPU rows
-    gate = any_code or report.get("gate_version") == GATE_VERSION
+    gate = any_code or gate_of(report) == GATE_VERSION
     return report if report.get("take_sha8") == take_sha8(kept) and gate else None
 
 

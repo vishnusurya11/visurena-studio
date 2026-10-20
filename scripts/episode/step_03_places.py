@@ -268,19 +268,28 @@ def read_places(ctx, doc: dict) -> dict:
     return out
 
 
-def watched_read(ctx, name: str, path: Path) -> list:
+def watched_read(ctx, name: str, path: Path) -> list | None:
     """One picture read under READ_S; a stall frees the engine and asks once more, and a second
-    stall reads nothing -- the writer's cells stand, as for any unreadable picture."""
+    stall is None -- STALLED, not unreadable: the writer's cells stand for this run and the marker
+    stays unstamped, so a resume reads again.  A stall past the row's own cap raises (the cap's)."""
     from studio import comfy
     for attempt in (1, 2):
         try:
             with comfy.row_deadline(read_deadline(READ_S)):
                 return (READ or picture_read.read)(path)
         except comfy.StillRunning:
+            if row_spent():
+                raise
             ctx.log(f"  WATCHDOG 03_03 VQA {name}: no answer in {READ_S:.0f} s (try {attempt} of 2); "
                     "the engine is freed", step_id=STEP_ID, level="WARNING")
             free_all()
-    return []
+    return None
+
+
+def row_spent() -> bool:
+    """The row's own cap has passed: no second ask fits in it."""
+    from studio import comfy
+    return comfy.ROW_DEADLINE is not None and time.time() >= comfy.ROW_DEADLINE
 
 
 def read_deadline(seconds: float) -> float:
@@ -312,10 +321,23 @@ def cells_from_reads(ctx) -> None:
     readings = read_places(ctx, doc)
     kept = apply(ctx, plan, doc, {k: v for k, v in readings.items() if v}) if any(readings.values()) else False
     for name, things in readings.items():
-        ctx.log(f"  {name}: {len(things)} fixed things read" + ("" if things else " (unreadable: the writer's cells stand)"),
-                step_id=STEP_ID)
-    episode_home.write_json(ctx.home / MARK, {"plan_sha8": plan_verdict.plan_sha8(plan), "from_picture": kept,
-                                              "readings": readings})
+        ctx.log(f"  {name}: " + read_line(things), step_id=STEP_ID)
+    episode_home.write_json(ctx.home / MARK, marker(plan, kept, readings))
+
+
+def read_line(things: list | None) -> str:
+    if things is None:
+        return "stalled twice (the writer's cells stand; the marker is not stamped, a resume reads again)"
+    return f"{len(things)} fixed things read" + ("" if things else " (unreadable: the writer's cells stand)")
+
+
+def marker(plan: Path, kept: bool, readings: dict) -> dict:
+    """The cells' stamp: bound to the plan only when every setup was read or found unreadable;
+    a stalled setup leaves plan_sha8 out, so cells_done() asks again on the next run."""
+    stalled = sorted(k for k, v in readings.items() if v is None)
+    mark = {"from_picture": kept, "stalled": stalled,
+            "readings": {k: v for k, v in readings.items() if v is not None}}
+    return mark if stalled else {"plan_sha8": plan_verdict.plan_sha8(plan), **mark}
 
 
 def run(ctx) -> None:

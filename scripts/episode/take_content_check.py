@@ -19,8 +19,10 @@ Promoted from a session driver (audit 2026-09-22, item 4). On the way in:
   session folder.
 
 A verdict is served again, unread, while the take's bytes, every row it is
-judged against (`judged_row`, the asks among them) and GATE_VERSION are the
-same (package H, retro 2026-10-20); a pass of hits never asks the engine.
+judged against (`judged_row`, the asks among them), the reading engine and
+GATE_VERSION are the same (package H, retro 2026-10-20); a pass of hits never
+asks the engine.  GATE_VERSION is pinned to the hash of JUDGES, the import
+closure of the judging code, so no judging edit reaches the key unseen.
 """
 from __future__ import annotations
 
@@ -29,14 +31,17 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import comfy, episode_home, frames, panel_content as pc, panel_dq, take_content as tc
+from studio import code_closure, comfy, episode_home, frames, panel_content as pc, panel_dq, take_content as tc
 from studio.episode_home import episode_arg
 
 WORKFLOW = "image_qwen3vl_caption"
 SAMPLES = 3
 ROOT = Path(__file__).resolve().parents[2]
-JUDGES = ("scripts/episode/take_content_check.py", "studio/take_content.py", "studio/panel_content.py")
-"""The code a take's reads are judged by; its hash is pinned to GATE_VERSION (tests/fixtures/gate_pins.json)."""
+JUDGES = tuple(sorted({"scripts/episode/take_content_check.py", "studio/frames.py",
+                       *code_closure.closure(ROOT, ("studio/take_content.py",))}))
+"""The code a take's reads are judged by -- this script, the frames it samples and the import
+closure of the judges (look_table, panel_dq, people_count came in by lazy imports; package H
+skeptic) -- its hash pinned to GATE_VERSION (tests/fixtures/gate_pins.json)."""
 GATE_VERSION = "1"
 """What a cached content verdict must have been judged under.  Bump it when the judging changes a
 verdict on unchanged reads; a refactor or a log line re-pins the hash only.  A changed ask needs no
@@ -162,12 +167,22 @@ def judges_sha8() -> str:
     return hashlib.sha256(body).hexdigest()[:8]
 
 
+def engine_sha8() -> str:
+    """The reading engine as the VL text cache keys it (workflow JSON, inject map, TEXT_CACHE_VERSION);
+    'absent' when the workflow is not on disk -- the reads then fail unread and nothing is kept."""
+    try:
+        return comfy.text_key(WORKFLOW, {})[:8]
+    except FileNotFoundError:
+        return "absent"
+
+
 def words_sha8(row: dict, seconds: float) -> str:
-    """The judged rows, the asks, the frames sampled: everything but the bytes that makes a verdict."""
+    """The judged rows, the asks, the engine, the frames sampled: everything but the bytes that makes a verdict."""
     import hashlib
     import json
     body = json.dumps({"row": row, "ask": pc.ASK, "twin_ask": pc.TWIN_ASK, "workflow": WORKFLOW,
-                       "samples": SAMPLES, "seconds": seconds}, sort_keys=True, default=str)
+                       "engine": engine_sha8(), "samples": SAMPLES, "seconds": seconds},
+                      sort_keys=True, default=str)
     return hashlib.sha256(body.encode("utf-8")).hexdigest()[:8]
 
 

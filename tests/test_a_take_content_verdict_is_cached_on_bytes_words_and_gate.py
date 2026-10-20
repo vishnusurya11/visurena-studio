@@ -27,6 +27,7 @@ def plan_rows(monkeypatch) -> None:
     monkeypatch.setattr(tcc.pc, "stage_text", lambda shot, setup: setup.described)
     monkeypatch.setattr(tcc, "pc_row", lambda book, who: f"{who} is tall")
     monkeypatch.setattr(tcc, "look_markers", lambda book, faces, setup: ["top hat"])
+    monkeypatch.setattr(tcc.comfy, "load_workflow", lambda name: ({"1": {"class_type": "Qwen3VL"}}, {}))
 
 
 SHOT = SimpleNamespace(faces=["richard_enfield"], size="medium", extras=0)

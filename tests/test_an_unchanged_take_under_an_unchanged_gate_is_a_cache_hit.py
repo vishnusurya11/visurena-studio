@@ -45,9 +45,22 @@ def test_changed_bytes_are_a_miss(tmp_path):
     assert take_dq.cached(tmp_path, 0, take) is None
 
 
-def test_ep01s_record_from_before_the_gate_version_is_measured_once(tmp_path):
+def test_ep01s_record_from_before_the_gate_version_is_a_hit(tmp_path):
+    """Skeptic on 92eacc1: ep01 was measured at 42a70889, the code v1 was pinned from (92eacc1
+    changed only the cache), so its 28 takes are not re-measured (about 18 min) on the resume."""
     take = room(tmp_path)
     assert "gate_version" not in json.loads(FIXTURE.read_text(encoding="utf-8"))
+    hit = take_dq.cached(tmp_path, 0, take)
+    assert hit is not None and hit["measures_sha8"] == "42a70889"
+
+
+def test_a_record_from_older_measuring_code_is_measured_once(tmp_path):
+    take = room(tmp_path, measures_sha8="c85850eb")       # the first delivery's code: warp changed since
+    assert take_dq.cached(tmp_path, 0, take) is None
+
+
+def test_a_record_naming_its_gate_version_is_never_read_by_its_hash(tmp_path):
+    take = room(tmp_path, gate_version="0")               # 42a70889 kept, the version says otherwise
     assert take_dq.cached(tmp_path, 0, take) is None
 
 
