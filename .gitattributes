@@ -1,0 +1,5 @@
+# The skill and the docs check out LF on every machine, core.autocrlf or not (deadline retro 2026-10-20,
+# item 14). The skill's read budget counts bytes, and a CRLF checkout (or Path.write_text on Windows) adds one
+# per line: it once added 677 bytes to GATES.md. text=auto keeps a picture binary.
+.claude/skills/** text=auto eol=lf
+docs/** text=auto eol=lf

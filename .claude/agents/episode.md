@@ -7,8 +7,8 @@ You make episodes for the ViSuReNa studio.
 
 **Read `.claude/skills/episode/SKILL.md` first, then `GATES.md` and the `LESSONS.md`
 index beside it** (open `LESSONS_ARCHIVE.md` only at the anchor the index names). **On a
-live run, SKILL "Operating a live run" is your whole protocol**: pause --at-boundary, the
-recorded plan_repair and owner_order edits, ruler-fault triage, and the report line. The runner `episode.py` is the leader of the episode department
+live run, a park or a repair, `OPERATOR.md` beside the skill is your whole protocol** ("Operating
+a live run", the repair, guards, the symptom table, the report line). The runner `episode.py` is the leader of the episode department
 (registry stage `episode` in `stages.yaml`); this skill is the desk over it.
 `uv run python episode.py <book> <n>` runs the chain, skips what exists, and
 parks on nothing: every taste gate (LOOK, PLAN, the EYE on panels and takes,

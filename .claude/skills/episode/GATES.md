@@ -32,7 +32,7 @@ missing input, or an unread picture.
 | G-PLACE (decision 2026-10-10) | a setup's place is a member's master or a drawn view: a lookalike new id (0.85), a member with nothing drawn whose room a sibling drew, a framing/hour/state view of a RECURRING place (`continuity_place.place_gate`) | HARD, CODE CURE: rewritten to the member / its master, the state kept in `place_state` |
 | G-LOOK-WORDS | one-face shot prose naming a hair colour the look contradicts (`scripts/refs/continuity_replay.py`) | ADVISORY: refuses nothing (7 on 27 WotW plans) |
 | ONE PER TAKE / TAKE LENGTH | every shot is its own take, inside the 8 s budget | HARD |
-| LISTEN (step 04, `say_lines`) | every line heard word for word (Whisper) and its voice against the design clip (ECAPA; floors 0.70 >= 4 s, 0.65 >= 2 s, 0.60, none under 2 s, lower for a felt delivery); a resume says a failed line on NEW seeds, the reference alternating design / best line from the third try (2026-10-14). A stable wrong transcript (two identical) is first tested for phoneme equality (cmudict): a homophone pair is filed in `cast/ear_lexicon.json` and the same wav re-listened with no render (ep01 l11 "cheque" heard "check" x8) | HARD per try; after 8 tries, or when the `lines` wall is spent, the best rightly heard try is kept, flagged keep_best / keep_best_far; no rightly heard try is the only refusal. A line under 2 s has no similarity floor; speaker_check records its f0 offset from the speaker's register (`short_lines`, advisory, 4 st, uncalibrated) |
+| LISTEN (step 04, `say_lines`) | every line heard word for word (Whisper) and its voice against the design clip (ECAPA; floors 0.70 >= 4 s, 0.65 >= 2 s, 0.60, none under 2 s, lower for a felt delivery); a resume says a failed line on NEW seeds, the reference alternating design / best line from the third try (2026-10-14). A stable wrong transcript (two identical) is first tested for phoneme equality (cmudict): a homophone pair is filed in `cast/ear_lexicon.json` and the same wav re-listened with no render (ep01 l11 "cheque" heard "check" x8) | HARD per try; after 8 tries, or when the `lines` re-say wall is spent (a first saying books to `say`), the best rightly heard try is kept, flagged keep_best / keep_best_far; no rightly heard try is the only refusal. A line under 2 s has no similarity floor; speaker_check records its f0 offset from the speaker's register (`short_lines`, advisory, 4 st, uncalibrated) |
 | TIMELINE | `placed.json` is of this plan AND this voice (`episode_home.load_placed`) | HARD |
 | SHEET TEXT | the Scarlet book's paid-sheet check; skipped for sheet books, and a crash is printed, never counted silently | HARD where it applies |
 | G-STORY advisories, G-NAMES, G-RATE, G-MOTION, L8 pace, G-SUNSPLIT, G-LIGHT-SIDE, G-HAT with "bareheaded" | caption-like lines, first hearing of a name, speaking rate, motion wording, a face split under a sun, the light side of a face, a hat clash the picture already resolves | advisory |
@@ -347,7 +347,7 @@ scale: it must DIFFER from its source crop (mean |refined - source| >= 0.5, `SAM
 passes every other wall); **identity**: CCIP distance to the sheet's face window may not rise > 0.03 nor cross 0.1785 (same character); else facenet AND clip_vision_h must BOTH
 fall (> 0.05) to refuse; anime terms unread -> facenet alone (drop > 0.05); **drift** (mean |refined - take| inside
 the face box) <= 35; **seam** (|refined - take| on the slope of round 1's feather band, a small face's soft head ring, outside the head) <= 18;
-on the shipped paste: nothing outside the core moves (1 level), **band warp** (take -> paste flow, feather to 1.2 radii, px@384) <= 0.9, **turn** (MTCNN eye line) <= 4 deg;
+on the shipped paste: nothing outside the core moves (1 level; unread = refused), **band warp** (take -> paste flow, feather to 1.2 radii, px@384) <= 0.9, **turn** (MTCNN eye line) <= 4 deg;
 **flicker** pasted <= 1.10 x the take's + 0.5; **faces**: no clone, no loss. Drawn-eye score
 (`studio/face_eye.py`), core flow: logged. A broken wall falls back to the unrefined take; every decision and its
 measures in `takes/r2v/refine.json`; a crop pastes only onto the take bytes it was made from (sha8). Walls fitted on
@@ -355,8 +355,9 @@ round 1's 15 ep01 faces (12 kept); old rows regated before a cut. **The paste**:
 ONLY the face core (brow to chin, cheek to cheek, 0.08 feather inside), any size, redraw re-seated on the take's head; its band the take's low frequencies;
 hat, hair, ears, jaw, collar stay the take's. **Tracking** (`studio/face_track.py`): a weak face (0.3-0.6)
 only continues a track; detections go to tracks by least cost (motion, size, head colour); a head must read >= the track's own reading - 0.15; bodies make only far figures; the crop is the soft
-span (on < 120 px, off > 150) on H3's grid inside its shot, one frozen side. CLOCK: priced 110 s per face per 192 frames; runs only while
-`leaves_reserve(step, price + 550 s)`, else `REFINE CUT`, status `cut`. **Selection**: no plan size, no face-at-end;
+span (on < 120 px, off > 150) on H3's grid inside its shot, one frozen side. CLOCK: priced 110 s per face per 192 frames; 09 holds N takes x 81 s
+from its start, a re-measure cut before it; the refine is cut LAST (`fr.cut_last`, own price): `REFINE CUT`, status
+`cut`, ships flagged, a FACE_REFINE terminal holds the publish (lanes, tiny-face: + 550 s, cut first). **Selection**: no plan size, no face-at-end;
 every take with a planned face but an insert, whose dq lets it ship; each track whose smallest face (median over 51
 frames) is under 120 px is refined. A take whose every planned face the warp gate tracked >= 80 % of it at
 >= 120 px at its SMALLEST (`min_px`, never the median) is declined before tracking. Priced per face not already
@@ -364,6 +365,8 @@ readable (`fr.soft_faces`). Denoise `fr.denoise_for`: 0.45 at 60 px, +0.05 per h
 `all_readable` / `no_cast` spend no round. A warp, gait,
 pulse, frozen-whole, lip-sync or lag hard fail may follow the refine (a warp FAIL after its one seed retake);
 identity, clones, content, lettering, look and leak still bar it. History: LESSONS_ARCHIVE.md.
+**FACE LIST** (09 last, log only, V3): refine.json `face_list`, per take its smallest tracked face and whether a paste
+was kept; under 120 px with none is listed and routed to the refine, never a wall (ep01 iter3: T01 T08 T09 T26).
 
 **TINY-FACE RUNG (09_08, 2026-10-19, `scripts/episode/tiny_face.py`).** A take whose refine refused (seam or drift,
 current bytes) a planned face (shot face or speaker) of 20-40 px at its smallest (`min_px`), on the Spark graph
@@ -478,7 +481,7 @@ test refuses a commit that loses a catch. `fitted_on` is carried on every measur
 | LAYOUT (episode/07) | `grid_layout@1` | a rule: grids ≤ 9, cols × rows = shots, a face alone in a 1x1 when a setup mixes sizes | — | — | deterministic |
 | EYE panels (episode/08) | `judge:panel_eye@1` | stored dq + content rows; hats worn and held; a reference handed back; posture; framing; clones; lettering; invented landmark; repeats; one short size read | redraw grid seed → reprose the frame (timing untouched); cap 2 grids; framing/posture take no rung (no rung ever moved one on ep13: cure them in the prompt) | best panel kept flagged | refuse on calibrated rows; flag on thin rows |
 | EYE takes (episode/09) | `judge:take_eye@1` | dq rows incl. pass-through, rotation, leak, cut vote, lag; content; identity vs sheet; clones | seed → move type → shorter → head cut → re-plan the cell (priced); the router reads `take_ladder.CURE_RATES` (dated): a cure under 20 % over 4+ tries is dropped for its class; gait → `gait_verb`; an S warp → `warp_gate.cure`, an Se-only warp → none; early clones (clone rows carry `t`, the sample's second; all t <= 0.3 s) → head cut, else one seed on a clean panel | a still from the panel on a narration shot (≤2, never adjacent), else the best recorded draw (fewest hard rows, then lowest Se, read from `T<nn>.dq.json` attempts; the last draw is archived) kept and flagged, high on dialogue/turn/button; every kept fault stamped `evidence.settled` = still / keep_best / high (K5); dropped cure classes land as one `watch` audit row; a signed eye whose fingerprint names the current takes is kept on step 09 re-entry (no re-judge) | refuse where calibrated; "cannot tell" on wides |
-| MASTER (episode/11) | `judge:master_eye@1` | qc hard rows; shadow, faces, board, repeats, story from measures; a 30-frame read; cross-take identity | one retake through the take ladder, then its recut (no free recut: step 11's master is already current); a rung that changed no take sha8 (nor shots.json sha8) takes no recut and no second eye, books no round, prints `CAP master: retake of Txx changed no take, no recut`; a retake is priced from measured retake seconds, floor 9 min; `review/work/eye_reads.json` keys each frame read (take sha8, frame, slow, plan row, reader, prompt sha) so only misses are read; a flagged take (K7) gets 3 extra frames and a `parts` ask, a vanishing limb is a low advisory `body` fault naming the shot (D8) | the rubric flagged with evidence; never waived by a judge | refuse → retake on measured fields; flag on story |
+| MASTER (episode/11) | `judge:master_eye@1` | qc hard rows; shadow, faces, board, repeats, story from measures; a 30-frame read; cross-take identity; the face strip (`studio/face_strip`, 4 crops a tier, `FACE_ASK`) LOG ONLY (V3), never a fault, its `review/face_labels_<sha8>.json` the label source for any face metric | one retake through the take ladder, then its recut (no free recut: step 11's master is already current); a rung that changed no take sha8 (nor shots.json sha8) takes no recut and no second eye, books no round, prints `CAP master: retake of Txx changed no take, no recut`; a retake is priced from measured retake seconds, floor 9 min; `review/work/eye_reads.json` keys each frame read (take sha8, frame, slow, plan row, reader, prompt sha) so only misses are read; a flagged take (K7) gets 3 extra frames and a `parts` ask, a vanishing limb is a low advisory `body` fault naming the shot (D8) | the rubric flagged with evidence; never waived by a judge | refuse → retake on measured fields; flag on story |
 
 The owner's eye: `library/<book>/audit/<unit>.html` (`scripts/audit/sheet.py`), every
 flag with its numbers beside the wall and a seeded sample of passes per gate; a finding
@@ -492,8 +495,8 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
 - **One episode, one clock.** The 5 h ceiling covers the EPISODE across resumes
   (`Budget.charge(spent_before(home))`); a spent ceiling takes terminals, and the
   driver never auto-resumes past it. ep14 got 31 fresh ceilings.
-- **One episode, one commit.** The driver warns when HEAD moved since the episode
-  started (ep14 ran on 23 commits). Fix bugs after the ship, not during it.
+- **One episode, one commit.** The launch records its sha; HEAD moving under a live drive keeps
+  the supervisor on its code until the drive ends (V4; ep14 ran on 23 commits, ep01 on 9 shas).
 - **The GPU never waits on a check** (owner, 2026-10-14; decision
   `2026-10-14-gpu-never-waits-for-checks`). Step 09 and every ladder round run two lanes
   (`studio/take_overlap.py`): the GPU renders back to back; the CPU runs `take_dq
@@ -550,6 +553,7 @@ holds it equal): edit the registry, never this table.
 | 01 | bind | 1 | pass | 2 |  |
 | 02 | plan | 3 | climb (2 climbs per episode) | 30 | PLAN |
 | 03 | places | 3 | draw | 15 |  |
+| 04 | say | 1 | episode | 15 |  |
 | 04 | lines | 1 | episode | 10 |  |
 | 04 | voice | 2 | episode | 30 |  |
 | 05 | timeline | 1 | pass | 2 |  |
@@ -604,7 +608,7 @@ The counters (code as of the Jekyll Kawajiri ep01 retro, 2026-10-19):
   in the previous round and did not fall in count sets `desk.stuck`: the remaining rungs write nothing
   (`plan.climb.json` keeps the baseline as `prev_keys`). G-HOLE has one ruler, `speech_gap.HOLE_WALL_S` 5.5 s
   (cures aim at it); the gate refuses past it by `HOLE_SLACK_S` 0.05 s (ep01: 5.53 after the hold cure).
-- **04 lines** (K1) is its own wall (10 min), separate from the `voice` revoice rounds: when
+- **04 lines** (K1) is the re-say wall (10 min; a first saying books to `say`), apart from `voice`: when
   spent every failing line takes its terminal at once (keep_best / keep_best_far) and `CAP
   lines:` is printed; a line with no rightly heard try still refuses.
 - **08 panel_checks:** the panel eye's deadline is the wall minus the step's elapsed; unread
@@ -631,7 +635,7 @@ The counters (code as of the Jekyll Kawajiri ep01 retro, 2026-10-19):
 | dark budget | 2 episodes | `run_budget.DARK_EPISODES_REQUIRED` | a share-based cut is allowed only after this many dark (logged, never cutting) episodes |
 <!-- /registry:clock -->
 
-The report reads **charged | wall | dead** per step: `step_wall.ledger` / `charged` for the
+The report reads **charged | wall | dead | killed** per step (killed: runs a kill ended): `step_wall.ledger` / `charged` for the
 first two, `run_clock.dead_gaps` (K4) for the gaps between runs with the reason the drive row
 gives; `drive.py` prints it at the end (`gpu_ledger.finish_report`: the line, then busy / claimed /
 idle minutes per step), and the runner writes a dark `budget.jsonl` row per step. A manual pause then
@@ -652,9 +656,8 @@ resume is dead time: the relaunch it causes is not counted by `autopilot.step_gu
   Past the ceiling a verdict on the SAME bytes stands under moved code: a take's dq report
   (`take_dq --ceiling-spent`) and a PASSING QC report; a QC fail is measured again.
 - **Repair clock (owner 2026-10-19):** an owner redo of a delivered episode runs on `studio/repair_clock`
-  (own cap, `repair` rows, not the 6 h); a redo of 09+ freezes delivered takes past its drive at every
-  render site; a ladder round counts on bytes its own run landed; a leftover window closes once not owed;
-  `repair_dry_check.py` first (its batches empty). LESSONS.
+  (own cap, not the 6 h); a redo of 09+ freezes delivered takes; every launch runs
+  `repair_dry_check.preflight` and an unnamed delivered take exits 2. The protocol: OPERATOR.md.
 - **SAFETY (closed list, `gate_policy.SAFETY`):** a master over the Short length or with no
   title card; a line not heard; an unjudged or stale take; loudness out of band after the
   leveller; a plan BUILDER line; money; publish auth; GPU lost. Only these stop a spent-clock
@@ -673,5 +676,7 @@ resume is dead time: the relaunch it causes is not counted by `autopilot.step_gu
 - **G-FRAME (advisory):** MCU face < 0.15, close < 0.25 of the frame height (D9). Never a wall.
 - **The reader** (`panel_content` / `take_content` / LOOK-STATE): one seeded, cached read. A
   cached refusal is never re-read; only a redraw escapes it.
+- **Check caches (2026-10-20):** take_dq keys on the take's bytes + `GATE_VERSION`; take_content on bytes, judged
+  plan rows, asks, engine and its `GATE_VERSION`; a pin test holds each version to its code hash; unread is never kept.
 - **MASTER-EYE content = the panel gate's J5** (2026-10-11): `master_eye.content_faults` judges each
   frame by `pc.judge_staged` (last-daylight hour, shoulder +1, legacy crowd in words), never its own copy.

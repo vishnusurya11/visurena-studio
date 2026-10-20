@@ -2230,3 +2230,89 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
 - By eye (strips in docs/audit/2026-10-19_face_blur/iter2_strips/): drawn eyes with pupils where iter1 had smears (T26 Enfield's blank white eye, T13). The upscale never fixed an eye; the refine did. The Laplacian eye score read cel ink as worse -- judge faces by eye, never by that score.
 - Three launches were stopped before a byte was kept: (1) every take read stale (P03 changed the prompt words), (2) the ladder retook frozen T01 (P08 counted empty rounds), (3) the operator's own guard killed the legal tiny-face draw because it expected the rung's TINY FACE line BEFORE its queueing line; the rung prints it after judging. A guard is a rule like any other: derive it from the code's print order, not a guess. The killed draw's booked round was given back with step_attempts.refund.
 - Open: the GPU whisper worker exits after 30 s idle and is not re-spawned (QC ran CPU whisper twice); master_av3's 60 s faulthandler dump prints a traceback mid-pass that reads like a crash; a repair's freeze lasts until an owner redo of 01-08, so plan any re-shoot of a repaired episode as an owner order.
+
+## The ep01 deadline retro (2026-10-20, Jekyll HEL ep01: where 31 hours went)
+
+- **What the records say** (`docs/audit/2026-10-20_deadline_retro/RETRO.md`). Wall from the first launch (10-18
+  15:00) to the upload-ready master_iter3 (10-19 21:51): 30.85 h. The machine was not the problem: the first
+  master took 6.02 h of a 6 h budget. Then: 11.2 h of agents building while the machine waited, 4.7 h with the
+  supervisor dead, 4.7 h of unlogged waiting, 1.83 h of repair machine time (1.0 h of it in launches that had to
+  be killed), 2.15 h idle between first-delivery runs. The owner found both picture faults (blurry faces, then
+  head warp); no gate measured either. Changes from the overnight retro broke the repair three times.
+- **The brick (index brick 16).** The owner's eye is the last instrument, never the first. A run is finished only
+  when the cheapest measure of what he will look at has passed; a change is safe only when it has been replayed on
+  what is already delivered. Both faults trace to one of these two rules. Five root causes: no gate measures a face
+  at cut scale or the pixels outside a paste (RC1); a change to a shared decider is never replayed on the delivered
+  episode before it can launch (RC2); re-entry repeats whole-set work and code moves under a live run (RC3); nobody
+  owns idle time (RC4); agent loops build before measuring and have no budget (RC5). The owner vetoed none of
+  V1-V11, so the defaults hold. Packages, all test-first, each with its replay on ep01's records:
+- **A: the launch refuses** (7e6ffe9, ba486a1). `drive.py` calls `repair_dry_check.preflight` on a delivered
+  episode before the title bake: an unordered delivered take in any decider's batch (render pass, early round,
+  rung, terminal swap) or past the freeze writes a `REFUSED to start: the dry check` run log, a `run` row and an
+  `end` row with `refused: dry_check` (the repair window stays open), and exits 2. It fails closed: a check that
+  raises (SystemExit too) or writes into the episode refuses. Replayed in
+  `tests/test_a_launch_runs_the_dry_check_and_refuses.py`: P03's reworded cheque without the freeze lists 28
+  renders and refuses; P08's round rule with a router that skips the freeze lists T01 and refuses. A note naming
+  `T<nn>` orders that take. The finish line shows each repair window against its own cap (it once printed "repair
+  1.83 h of a 0.63 h cap", both repairs summed against the second).
+- **B1: the list is a test** (b42111f, d94ed9f). `tests/test_every_take_writer_holds_the_freeze.py` reads studio/
+  and scripts/ (AST, no import): the five functions whose bytes land on `T<nn>.mp4` (`episode_home.keep_aside`,
+  `episode_home.swap_in`, `take_ladder.swap_in`, `takes_r2v.collect`, `takes_r2v.fit_into`), every caller up to a
+  freeze site, each site's freeze read link by link down to `take_currency`, and the seven known sites found with
+  their freeze. Two writers skip the freeze today, strict xfails: `harvest_labels.py --rejudge` and
+  `takes_r2v.render` (uncalled). A gap does not stop the walk: a new caller of a gap fails. It cannot see
+  getattr/callback calls or a non-literal mode or argv.
+- **B2: a delivered episode is a frozen input** (34a0105). `regress_delivered.py` stands ep01 in from its records
+  (`tests/fixtures/delivered/ep01/`, no mp4) and asks the deciders what each take would do, `bare` and `held`; a
+  cell that differs from `actions.baseline.json` fails the default test run, naming the take and column. P03's
+  reword flips 27 of today's delivered takes to render without the freeze, and all 28 with T01's 11:18 words:
+  incident 3, replayed. The freeze keeps every one. Re-baseline in its own commit (`--rebaseline ep01 "<why>"`,
+  refused while a guarded path is uncommitted). Pictures are not compared; the dry check rebuilds the words at launch.
+- **C: the refine is cut last, and the owner's eye is not the first face check** (231071c, 4bc872a;
+  `architecture/decisions/2026-10-20_face_refine_cut_last.md`). `paste_refusals` passed an unread `outside` (None);
+  now an unread measure is a refusal, and ep01's iter3 16 rows re-decide unchanged. The face list replayed on ep01:
+  at the first master (only T08 and T18 pasted) it names 10 of the 12 takes the repair later refined; the other
+  two, T00 (166 px) and T19 (120.3 px), the repair's tracker also read as readable. At iter3 it names T01, T08, T09
+  and T26, whose pastes the walls refused. The refine was cut first (price + 550 s); now N x 81 s is held,
+  re-measures go first, and a cut take parks the publish (a FACE_REFINE terminal).
+- **D: the QC face strip shows the face at its size** (60da90e). Step 11 cuts 4 crops per face-size tier out of the
+  master; the master eye reads them; the owner's labels file is kept. On ep01 iter1 the tiny and small rows were the
+  8 listed takes the repair later refined. A 192 px cell shrank a 300 px master face 3x and hid the blur, so a strip
+  cell must never shrink the faces it exists to show: replay a display on the real master before trusting it.
+- **E: silence is a state too** (4740b4d; `architecture/decisions/2026-10-20_ops_leases_and_watchdog.md`). The
+  4.68 h dead supervisor was a Windows Update restart (User32 1074 at 00:59 and 01:03 PDT) with nobody logged on:
+  the Interactive-logon task cannot run before logon. The watchdog task alerts at the next logon; only an elevated
+  S4U or AtStartup task, or paused updates, closes the gap itself. A pause is a lease {by, why, expires}; a retro
+  pause is said again at 2 h; the 23:11 pause had no end. G-STANDING is HELD_PUBLISH, never a park. HEAD moving
+  under a live drive keeps the supervisor on its code (9 shas ran over 13 first-delivery runs). The YouTube token
+  had been dead since 10-14; a 5-day-old token now sends the consent link at launch and at render start.
+- **F: clock honesty** (8bd1965, cd625c1). A render span is a `take_render` detail row (gpu, within `takes`,
+  `seconds` 0, span in `span_s`; ep01's 84.7 min of renders had none; a counted row double-counted the CPU checks
+  beside it, summing span 1 to 3,865 s against a 2,054 s wall). A run closed `killed` shows in
+  `episode_clock.report` as a KILLED row for the seconds no timing row covers (ep01 run 12: 2,457 s in step_10),
+  and on the finish line as `killed X h in N runs`. Step 04's first saying books to `say` (15 min); the 10 min
+  `lines` wall counts re-says only (ep01's 1,075 s first pass, with l11's 'cheque' re-says, had spent it all).
+- **H: caches and fail-fasts** (92eacc1, 0e9d0e2; `docs/audit/2026-10-20_deadline_retro/h_diagnosis.md`). Run 15
+  re-measured 28 unchanged takes (1,070 s) because four commits moved take_dq's code hash and two of them changed no
+  measure. The cache keys on bytes + a pinned `GATE_VERSION` now (`tests/fixtures/gate_pins.json`; 41fba62's warp
+  change was owed anyway). take_content keys on bytes, every judged plan row, the asks, the reading engine and its
+  version; its pin covers the import closure of `studio/take_content.py` (look_table, panel_dq, people_count).
+  Step 03's vision reads have a `places` row and a 150 s deadline; a read that stalls twice is `stalled`, apart
+  from an unreadable picture. The QC ear drops a GPU whisper worker silent 60 s on a clip.
+- **G: one page and an agent budget** (this package). The repair protocol sat in four places (SKILL 662, GATES
+  654-657, LESSONS brick 4, the three sections above) and the 11:18 launch had two. It moved to `OPERATOR.md`
+  (out of the read set), with a symptom table; the read set came down from 133,112 bytes of 133,120 and
+  `READ_MAX` was ratcheted to 128 KB. `Path.write_text` on Windows writes CRLF (it once added 677 bytes to
+  GATES.md): a test refuses a CRLF in the skill and `.gitattributes` keeps the skill and the docs LF. The 13:54
+  guard killed a legal 41 min draw because it waited for a line the rung prints after judging: a guard is derived
+  from the code's print order and keyed on bytes (OPERATOR "Guards"). The agent rules (OPERATOR "Fixing an
+  owner-reported defect"): round 0 counts the defect and predicts a number (round 1's framing floor moved 0 of 12
+  plans); the reviewer runs the change on the real files (diff readers passed 23/24, measuring reviewers sent 6/8
+  back); at most 2 fix rounds, a cap on rounds not minutes (a 45 min cap would have killed the 151 min round that
+  worked); one research fleet, 2 build rounds and about 3 h of agent wall per owner-reported defect (V5).
+- **Open.** The autopilot has no park row for `REFUSED to start: the dry check` (package A's request to E): the
+  generic REFUSED row sends it to the brain, and a relaunch changes nothing. The two writer-lint gaps above. The
+  master_eye per-input cache waits on its 1,037 s row. Refs are not on the episode clock and were never measured.
+  ep02 is the rehearsal that turns RETRO.md's `[est]` into numbers (3.9-5.4 h projected).
+- Tests: `tests/test_the_episode_skill_reads_in_budget.py`, `tests/test_the_skill_names_the_operator_verbs.py`,
+  `tests/test_the_operator_page_has_symptoms_guards_and_an_agent_budget.py`, and each package's own above.

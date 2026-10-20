@@ -21,7 +21,7 @@ goes here and into memory.
 **Read by the question you have (D17, 2026-10-19):**
 - What runs next, what caps it, what stops it: "The chain" below (the generated algorithm) and
   GATES.md "Step caps" (the generated cap and clock tables).
-- What may I do to a live run: "Operating a live run" below.
+- What may I do to a live, parked or delivered run: `OPERATOR.md` beside this file (its symptom table first).
 - Why a rule exists: `LESSONS.md` beside this file, an index of bricks (8 KB); open
   `LESSONS_ARCHIVE.md` only at the anchor the index names.
 - What a gate measures, whether it is hard, its outcome at the cap: `GATES.md`.
@@ -36,34 +36,22 @@ master as `cut/master_iterN.mp4`, and never overwrite the only copy.
 
 ## THE RUN, ON ONE PAGE (ten-agent debate, 2026-09-27; docs/audit/2026-09-27_ep13_ten_agent_plan.md)
 
-ep13 took 43 hours and 12 masters for about 5 hours of real work: code debugged on a
-live episode, re-reads of unchanged pictures, retries on faults no retry cures, runs
-nobody watched, and hand edits to pipeline state. Sherlock ep04-14 took 1 master each.
-The rules below are what closes that gap. **The owner's standing order: no input from
-him in production.** The chapter number and its cast are the only inputs.
+**The owner's standing order: no input from him in production.** The chapter number and
+its cast are the only inputs.
 
 **The series runs itself (decision 2026-10-06, `architecture/decisions/2026-10-06_autopilot_and_brain.md`).**
 The scheduled task `visurena-autopilot` runs `scripts/episode/autopilot.py run --book <codex>`
 at logon and every 5 minutes. Every 30 s it reads the disk, names ONE state (IDLE, RUNNING,
-PUBLISHED, NEEDS_BRAIN, BRAIN_RUNNING, WAIT_TREE, PARKED, PAUSED, COMPLETE), takes ONE
+PUBLISHED, HELD_PUBLISH, NEEDS_BRAIN, BRAIN_RUNNING, WAIT_TREE, PARKED, PAUSED, COMPLETE), takes ONE
 action, and writes `library/<book>/autopilot/status.json` + `events.jsonl`. It launches
 `drive.py` for the next chapter, retries what retries, cures through work orders, restarts a
 hung ComfyUI, asks the brain (read-only triage, a JSON verdict) when a stop is not in its
 table, and PARKS with a reason — a row in `parked.jsonl` and one Telegram — never a wait on
-a person. Two consecutive parks pause the series. A commit on master makes the loop exit
-and the scheduler restarts it on the new code; a dirty tree is WAIT_TREE.
+a person. Two consecutive parks pause the series. A commit restarts the loop on the new code
+once no drive runs (a live drive keeps its code); a dirty tree is WAIT_TREE.
 
-**Your job is WATCH + REPORT, never a hand.** You do not launch `drive.py`. You do not run a
-step script. You do not edit anything under `library/`. You read:
-
-    uv run python scripts/episode/autopilot.py status --book <codex>
-    library/<book>/autopilot/{status.json,events.jsonl,parked.jsonl}
-    library/<book>/episodes/epNN/{drive.jsonl,drive_runNN.log,brain/attempt_NN.json}
-
-and when a parked row names a CODE fault, you fix it the way the fixer does: the failing
-test first, the fix, the suite, one commit by explicit path, then
-`autopilot.py retry N --book <codex>` (and `resume` if the series paused). The owner's
-optional acts are `pause`, `resume`, `retry N`, `park N --why`.
+**Your job is WATCH + REPORT, never a hand:** what you read, every act on a live run or a
+repair, and the symptom table are `OPERATOR.md`.
 
 | step | stops on (HARD) | what the autopilot does |
 |---|---|---|
@@ -84,15 +72,9 @@ optional acts are `pause`, `resume`, `retry N`, `park N --why`.
 3. **One launcher:** the autopilot (`scripts/episode/autopilot.py`, the scheduled task);
    `drive.py` is its child, never yours. No guard-stops, no scratch drivers, no bare step
    scripts mid-run. What the runner cannot do is a finding and a fix, then `retry N`.
-4. **No code changes on a live episode.** Fix, test, commit (the loop restarts itself on
-   the new code), then `autopilot.py retry N` once; a paused series needs `resume`.
-   **Landing a fix during an episode (C3_verdict #7, 2026-10-11):** `autopilot.py pause
-   --at-boundary --book <codex>`, wait for `paused_at_boundary` in the drive log (one unit:
-   a take ~4 min, a grid ~5 min, a plan rung 4-10 min), commit, `resume`. Never kill a
-   drive: 22 of 23 kills over ep19-27 were this, 527 waste-minutes. The full protocol is
-   "Operating a live run" below.
-   **A spent clock ships the episode flagged** (C3_verdict #5): read the audit sheet; never
-   `retry` to buy hours -- a retry no longer resets the clock.
+4. **No code changes on a live episode.** Fix, test, commit, then `autopilot.py retry N`
+   once. A fix during an episode lands at a boundary, and a drive is never killed
+   (OPERATOR.md). A spent clock ships the episode flagged; never `retry` to buy hours.
 5. **A terminal is not a pass.** A judge-signed terminal on an `auto` gate auto-clears the lock
    and ships flagged (2026-10-01); a hand-waived or unsigned terminal never does. Never write
    `review/waiver.json` yourself.
@@ -214,7 +196,7 @@ RUN(book, n): the autopilot launches drive.py; you read the disk, never call a s
 01 bind      caps: bind 1/pass, 2 min
 02 plan      caps: plan 3/climb x2, 30 min, gate PLAN
 03 places    caps: places 3/draw, 15 min
-04 record    caps: lines 1/episode, 10 min; voice 2/episode, 30 min
+04 record    caps: say 1/episode, 15 min; lines 1/episode, 10 min; voice 2/episode, 30 min
 05 timeline  caps: timeline 1/pass, 2 min
 06 prompts   caps: prompts 1/pass, 2 min
 07 board     caps: grids 1/grid, 30 min
@@ -261,7 +243,7 @@ The first column is the registry step the tool belongs to.
 | 10 | Title card | `uv run python scripts/episode/series_title.py <book> <n>` | QC fails a master without one |
 | 10 | Cut | `uv run python scripts/episode/assemble.py <book> <n> --engine=r2v` | kept as `cut/master_iterN.mp4` |
 | 11 | QC | `uv run python scripts/episode/qc.py <book> <n> --engine=r2v` | must say PASS; a silent gap names the shot it is made of |
-| 13 | Publish (only when the owner asks; no `publish/standing.json` = step 13 parks, 2026-10-12) | write `episodes/epNN/youtube.json`; `youtube_upload.py <book> <n> --engine=r2v --dry-run`, then `--approved`; then `uv run python scripts/publish/youtube_privacy.py <book> <n> public --approved` | the upload refuses failed or unjudged takes; the flip to public re-checks QC (about the uploaded sha8) and every take, as they stand then |
+| 13 | Publish (only when the owner asks; no `publish/standing.json` = HELD_PUBLISH, 2026-10-20) | write `episodes/epNN/youtube.json`; `youtube_upload.py <book> <n> --engine=r2v --dry-run`, then `--approved`; then `uv run python scripts/publish/youtube_privacy.py <book> <n> public --approved` | the upload refuses failed or unjudged takes; the flip to public re-checks QC (about the uploaded sha8) and every take, as they stand then |
 
 The publish row inserts the video private, because an unverified API project forces
 that on `videos.insert`, and then flips it public. **When the owner says
@@ -563,7 +545,7 @@ never edited). The gate (GATES.md, FACE REFINE GATE) reads identity by CCIP and 
 (`studio/anime_id.py`), drift, seam, flicker and the face count; the drawn-eye score is logged. Decisions per take:
 `takes/r2v/refine.json` (`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`, `cut`). Step 09 queues it on
 the GPU lane right behind the renders and refines what the ladder left owed once at the end; ~110 s per face per take,
-the FIRST thing cut for time, never a check. Assemble pastes the kept crops at CUT scale before the one upscale (owner
+cut LAST for time (V2): a cut take ships flagged and holds the publish. Assemble pastes the kept crops at CUT scale before the one upscale (owner
 2026-10-18, 24caaeb; a face under 40 px through a soft head mask); on `av3` the portable python's worker rebuilds the
 paste from its spans. The render is the SaveVideo node's output by node id (`fr.saved_node`): v0.41.2 echoes the
 LoadVideo input first. A refused 20-40 px face earns one 1024 draw (09_08). By hand: `face_refine.py <book> <n>`.
@@ -573,7 +555,7 @@ face for frame-to-frame face redraw (`studio/warp_gate.py`, CPU lane). FAIL is S
 face tracked under 60 px, else the take ships kept-best and flagged. An Se-only score is the advisory `eye` (all 8 ep01
 hard fails were Se-only; seeds cured 0 of 4). A WARN goes to F2 only for a small face (face_w < 0.10) or S_held > 1.5.
 The wall has no owner labels: `scripts/episode/warp_labels.py` takes person-signed labels only and re-arms hard Se at
->= 80 % precision. A `warp_gate.py` edit re-measures every take: land it between episodes.
+>= 80 % precision. A MEASURES edit re-pins its hash; only a GATE_VERSION bump re-measures.
 
 **A round is a change of bytes (2026-10-19).** A retake rung that renders, trims or cuts a head spends a round; one that
 does none of them prints `NO ROUND` and ends the climb. An unaffordable batch is trimmed to the takes the budget affords,
@@ -646,6 +628,10 @@ gap is made of. If a silent shot lies inside the gap, give it a line or move
 the silence to a short shot with lines on both sides. Trim a coda last, and
 never a moving shot's coda.
 
+**Face strip (V3, log only).** Step 11 writes `review/faces_<sha8>.png`, 4 crops per face-size
+tier from the master; look at it before any retro. The owner labels
+`review/face_labels_<sha8>.json` good / bad in 2-3 min; a new face wall needs those labels first.
+
 ---
 
 ## Step caps (owner, 2026-10-18; table in GATES.md "Step caps")
@@ -659,43 +645,11 @@ never a moving shot's coda.
   killed step is charged from its 60 s heartbeat. A round is a change of bytes.
 - The 6 h episode clock is the outer wall; the caps only stop a runaway step. GATES.md holds
   the generated cap and clock tables.
-- An owner redo of a delivered episode (GATES.md): `repair_dry_check.py` (0 renders),
-  the order, `retry N`, `resume`; pause at its end.
+- An owner redo of a delivered episode: OPERATOR.md (drive.py runs the dry check and refuses).
 
-## Resuming
+## Live runs, repairs, resuming: OPERATOR.md
 
-1. Read `episodes/epNN/drive.jsonl` and the last `drive_runNN.log` (one log per launch), and
-   say back where the episode is.
-2. Resume through the autopilot only: `autopilot.py retry N --book <codex>` for a parked
-   episode, `autopilot.py resume --book <codex>` for a paused series. Never launch drive.py.
-3. The autopilot restarts a dead ComfyUI after 2 missed ticks; if a job ignores `/interrupt`,
-   see memory `project_comfy_restart`. Never kill a drive (memory `project_kill_run_tree`
-   is for a run already lost).
-
-## Operating a live run (2026-10-19, Jekyll Kawajiri ep01 retro)
-
-You watch and report; these are the only acts on a live run.
-
-| you want | do | never |
-|---|---|---|
-| land a fix | the failing test, `autopilot.py pause --at-boundary --book <codex>`, wait for `paused_at_boundary` in the drive log, apply the patch file, run the touched tests NOW (the drive is paused), commit by explicit path, `autopilot.py resume`; a commit restarts the loop on the new code | edit a file a running drive will load (every subprocess it starts loads it); run pytest or a plan_check beside a Qwen edit; kill a drive |
-| a plan row is wrong | `plan_repair` (records the cure in `plan.cures.jsonl`); an owner order is a recorded plan edit named `owner_order_<shots>`, judged first as a scratch plan by `plan_check.py <book> <n> --plan=<scratch>.json`; the next entry re-signs over carried rows, no writer round | patch `plan.json` unrecorded; touch a timestamp |
-| a gate accuses correct work | read the MEASURE against the WALL; a wall calibrated on another form is a ruler fault: fix the ruler test-first (cheque/check, packs at 8 s, the 240-word floor), then `retry N` | re-roll a render; raise a wall without its replay |
-| the owner changes an order mid-run | state the pictures it stales ("inputs: 2 of 28 takes stale"), redraw by the registry route only | a tagged one-off redraw the next step 07 supersedes |
-
-- Dirty means runtime code: edits to tests/, docs/, architecture/, library/, logs/, `*.md`
-  and `.claude/skills/` never hold a launch; a runtime edit during a run is logged
-  (`code_dirty_during_run`), never paused for. A park at an older HEAD or on a dirty tree is
-  never the brain's; a `brain:` park clears itself when runtime code lands (2 per episode).
-- After a prompt-builder change, before any re-render: a no-write take-build replay (rebuild
-  the dry prompts, diff against `takes/r2v/shots.json`, list the changed takes).
-- On a plan park read `plan.cures.jsonl` and the learnings `draft` row first; after a panel
-  rewind read the `panel_eye` row in timing.jsonl (`reads=N cache_hits=M unread=K`).
-- After each run read `library/.device/gpu_util.jsonl` (`gpu_ledger.minutes_per_step`:
-  busy / claimed / idle) and `scripts/audit/doc_sync.py` (fix commits with no doc line).
-- **The report line:** the master's full path first, then QC's
-  "inputs: all N takes current", every `CAP` line of the run, the flagged takes with their
-  seconds, then the time left in Seattle time.
+The one home (deadline retro 2026-10-20): every act, the repair, the guards, the report line.
 
 ## After every run: improve this skill (owner, 2026-10-08)
 
@@ -706,7 +660,8 @@ fixed the fault (or a `Docs: none (<reason>)` trailer; `scripts/audit/doc_sync.p
 lists the commits that did neither). An owner ruling that retires a sentence
 adds it to `tests/fixtures/ep01_replay/P16/retired_phrases.json` in its own
 commit. The Jekyll Kawajiri ep01 retro (13 failures, five bricks) is in the
-archive. Rules learned on ep19-21:
+archive. An owner-reported fault follows OPERATOR.md "Fixing an owner-reported defect":
+round 0 counts it, 2 fix rounds, one fleet + 2 builds + ~3 h. Rules learned on ep19-21:
 
 - **One ruler.** A judge and the cure for its fault measure the same number the
   same way (`plan_gates.line_seconds`: the voice where a line is recorded). A

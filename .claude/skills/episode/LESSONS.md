@@ -20,9 +20,10 @@ brick or a new instance of one, a line here.
    2, 3, 7, 8; Jekyll Kawajiri ep01 under the step caps; The face refine, round 2.
 4. **One rule per fact, read by every channel; a number lives in one home** (B3). ep01: a setup
    crowd leaked through 5 channels into 14 takes; the 8.0 s take budget had 4 copies. A freeze
-   must hold at EVERY place that renders (first pass, early round, ladder, terminal, master retake,
-   --attempts, takes_r2v: list them); a dry check calls the deciders, never a counter; a round counts
-   on bytes its own run landed. -> ep01 retro, failures 3, 4; A freeze holds.
+   must hold at EVERY place that renders, and `tests/test_every_take_writer_holds_the_freeze.py`
+   lists them: a new writer of `T<nn>.mp4` fails it until it names its freeze site; a launch runs
+   the dry check, which calls the deciders, never a counter; a round counts on bytes its own run
+   landed. -> ep01 retro, failures 3, 4; A freeze holds; The ep01 deadline retro.
 5. **A gate that counts cannot see shape; a repair re-stages only what it changed** (B4). ep01:
    a fading body and a floating hand passed every gate; grids 13-17 were redrawn for one figure.
    -> ep01 retro, failure 5.
@@ -50,15 +51,21 @@ brick or a new instance of one, a line here.
     recorded line's seconds. -> Process; The anime-TV grammar.
 15. **Measure where the minutes go before moving them; a free per read is harmful.** -> GPU when
     idle, CPU when rendering.
+16. **The owner's eye is the last instrument, never the first.** A run is finished only when the
+    cheapest measure of what he will look at passed (face list, QC face strip); a change is safe
+    only when replayed on what is delivered. ep01: 6.02 h of machine, then 31 h of wall: two faults
+    no gate measured, 11.2 h of agents, 3 launches stopped by unreplayed changes, a 4.68 h silent
+    supervisor (silence is a state too). -> The ep01 deadline retro.
 
 ## Read by question
 
 - A gate accuses work that looks right: bricks 3 and 7, then the gate's GATES.md row.
 - A ladder spends rounds and nothing changes: brick 2; GATES.md "Step caps".
 - A picture is wrong in a way no gate saw: bricks 5 and 10; Grids and panels.
-- A run stalled, parked or died: brick 6; The autopilot under the subscription; ep01 retro 11-13.
-- What did the last run teach: the newest dated section of the archive (today: Jekyll Kawajiri
-  ep01 retro, the 13 failures with measurement, brick, fix commits and pinning test).
+- A run stalled, parked or died, or a repair: `OPERATOR.md` (its symptom table); brick 6.
+- An owner-reported defect to fix: brick 16; OPERATOR.md "Fixing an owner-reported defect".
+- What did the last run teach: the newest dated section of the archive (today: The ep01
+  deadline retro; before it the Jekyll Kawajiri ep01 retro's 13 failures).
 
 ## Archive map
 
@@ -82,6 +89,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - An owner's repair runs on its own clock (owner ruling 2026-10-19)
 - A repair re-renders nothing it was handed (2026-10-19, + fix round)
 - A freeze holds at every place that renders (incident 2)
+- The ep01 deadline retro (2026-10-20: where 31 hours went; packages A-H)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,
