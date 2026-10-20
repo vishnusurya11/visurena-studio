@@ -22,7 +22,7 @@ def test_launch_spawns_only_drive_and_writes_the_lock(tmp_path):
     if sys.platform == "win32":
         assert kw["creationflags"] & subprocess.DETACHED_PROCESS
     lock = json.loads((d.root / "gpu.lock").read_text(encoding="utf-8"))
-    assert lock == {"drive_pid": 777, "started": lock["started"], "book": fx.CODEX, "episode": 1}
+    assert lock == {"drive_pid": 777, "started": lock["started"], "book": fx.CODEX, "episode": 1, "sha": "abc123def"}
     assert (book / "episodes" / "ep01" / "drive_launch01.log").exists()
     assert doc["episode"]["state"] == "RUNNING" and doc["episode"]["drive_pid"] == 777
 

@@ -38,7 +38,7 @@ ENGINE_RESTARTS = 2
 """ComfyUI restarts per episode before PARK(engine) (ops §2)."""
 CRASHES_BEFORE_BRAIN = 3
 """A `start` row with no `end` after it is a crash; three ask the brain."""
-KINDS = {"completed", "retry", "cure", "wait", "brain", "park"}
+KINDS = {"completed", "retry", "cure", "wait", "brain", "park", "held"}
 
 
 class State(str, Enum):
@@ -51,6 +51,9 @@ class State(str, Enum):
     PARKED = "PARKED"
     PAUSED = "PAUSED"
     COMPLETE = "COMPLETE"
+    HELD_PUBLISH = "HELD_PUBLISH"
+    """A finished master step 13 holds at G-STANDING: a deliberate hold, never a
+    park (retro 2026-10-20 item 7: ep01 parked twice on it and needed retry + resume)."""
 
 
 @dataclass
@@ -74,6 +77,7 @@ class Signals:
     media_spent_usd: float              # spend.unit_spent
     failed_sha: str | None = None       # the commit the last drive row names (P13)
     code_dirty: bool = False            # a runtime file is modified or untracked (P13)
+    standing: bool = False              # library/<book>/publish/standing.json is signed
 
 
 @dataclass
@@ -179,6 +183,8 @@ TABLE: list[tuple[str, object]] = [
     (r"REFUSED to start: the working tree is dirty", ("wait", "tree_dirty", None)),
     (r"title card could not be baked", ("brain", "title_card", None)),
     (r"HELD: ", ("wait", "held", None)),
+    # no standing publish approval is the owner's own hold, not a fault (retro 2026-10-20 item 7)
+    (r"^OWNER G-STANDING \|", ("held", "held_publish", None)),
     (r"^OWNER (\S+) \|", ("park", "escalated: {1}", None)),
     (r"DEFERRED PLAN \|", _deferred_plan),
     (r"ComfyUI's queue stayed busy", ("cure", "queue_busy", ("comfy_restart", None))),
@@ -341,12 +347,24 @@ def _answer(s: Signals, n: int, kind: str, reason: str, order) -> Derived:
         return Derived(State.WAIT_TREE if reason == "tree_dirty" else State.PAUSED, reason, None, packet(s, n, reason))
     if kind == "park":
         return Derived(State.PARKED, reason, None, packet(s, n, reason))
+    if kind == "held":
+        return _held(s, n)
     if kind == "brain":
         return _brain(s, n, reason)
     cap = RELAUNCH_CAP if kind == "retry" else CURE_CAP
     if stops(s.drive_rows) > cap:
         return _brain(s, n, f"{kind}_exhausted: {reason}")
     return _idle(s, n, reason, order)
+
+
+HELD_WHY = "held_publish: sign publish/standing.json (book-relative) to let step 13 upload"
+
+
+def _held(s: Signals, n: int) -> Derived:
+    """G-STANDING: HELD_PUBLISH until the owner signs; signed, the drive runs step 13 again."""
+    if s.standing:
+        return _idle(s, n, "standing_signed")
+    return Derived(State.HELD_PUBLISH, HELD_WHY, None, packet(s, n, "held_publish"))
 
 
 def _ended(s: Signals, n: int) -> Derived:
@@ -403,6 +421,45 @@ def derive(s: Signals, n: int) -> Derived:
     if crashed(s.drive_rows) and s.exit_code is None:
         return _idle(s, n, "relaunch") if crashes(s.drive_rows) < CRASHES_BEFORE_BRAIN else _brain(s, n, "crash_loop")
     return _ended(s, n)
+
+
+# --- pause leases and moved judge code (retro 2026-10-20 items 7, 12) ------------------
+
+LEASE_S = {"retro": 2 * 3600.0, "autopilot": 2 * 3600.0}
+"""How long a pause holds before it is said again, by who set it (V7: a retro pause
+expires at 2 h).  An owner's pause holds until he says otherwise, or for his hours."""
+
+
+def lease(by: str, why: str, now: float, hours: float | None = None, sha: str | None = None) -> dict:
+    """{by, why, since, expires, sha}: who paused, why, and when the pause is owed a look."""
+    held = hours * 3600.0 if hours is not None else LEASE_S.get(by)
+    return {"by": by, "why": why, "since": now, "expires": None if held is None else now + held, "sha": sha}
+
+
+def lease_expired(held: dict | None, now: float) -> bool:
+    """Past its `expires`; a pause with no lease (one from before leases) never expires."""
+    return bool(held) and held.get("expires") is not None and now >= float(held["expires"])
+
+
+def may_resume(held: dict | None, now: float, head: str | None) -> bool:
+    """Only a pause the autopilot set itself, only past its lease, and only once a
+    commit landed since (the brake waits on a fix); never an owner's or a retro's."""
+    if not held or held.get("by") != "autopilot" or not lease_expired(held, now):
+        return False
+    return bool(head and held.get("sha") and not str(head).startswith(str(held["sha"])))
+
+
+JUDGE_CODE = re.compile(r"^(studio/judges/|studio/measure/|studio/\w*(?:_gates?|_dq|_currency|judged|gate_policy)\.py$"
+                        r"|scripts/episode/\w*(?:_check|_dq|qc|eye_review)\.py$|gates\.yaml$)")
+"""A file whose change can turn a verdict already on disk: the judges, the measures,
+the gates, the dq and content checks, qc and gates.yaml."""
+
+
+def invalidated_checks(names: list[str]) -> list[str]:
+    """The checks a diff's judge code invalidates, by name, sorted (retro item 12)."""
+    hits = {Path(n.strip()).stem if n.strip().endswith(".py") else Path(n.strip()).name
+            for n in names if JUDGE_CODE.search(n.strip().replace("\\", "/"))}
+    return sorted(hits)
 
 
 # --- the lock, the series, the status ---------------------------------------------

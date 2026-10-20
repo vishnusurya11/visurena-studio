@@ -100,8 +100,12 @@ TABLE = [
                      log_tail="SystemExit: HELD: RENDER_HOLD is set; ep20 stops before step 09"),
      State.PAUSED, "held"),
     ("escalated to the owner", signals(drive_rows=rows(("start",), ("run", "failed"), ("end", 1)),
-                                       log_tail="OWNER G-STANDING | ep20 | publish needs standing | sign: publish/standing.json"),
-     State.PARKED, "escalated: G-STANDING"),
+                                       log_tail="OWNER G-LOOK | ep20 | the look needs the owner | sign: look.json"),
+     State.PARKED, "escalated: G-LOOK"),
+    # retro 2026-10-20 item 7: no standing approval is the owner's own hold, never a park
+    ("held at the publish door", signals(drive_rows=rows(("start",), ("run", "failed"), ("end", 1)),
+                                         log_tail="OWNER G-STANDING | ep20 | publish needs standing | sign: publish/standing.json"),
+     State.HELD_PUBLISH, ap.HELD_WHY),
 ]
 
 

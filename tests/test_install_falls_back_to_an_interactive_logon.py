@@ -28,7 +28,8 @@ def test_install_retries_with_an_interactive_logon_when_s4u_is_refused():
         return 1 if "S4U" in cmd else 0
 
     assert cli.install(Path("x"), 5, None, run=run) == 0
-    assert len(seen) == 2 and "LogonType Interactive" in seen[1] and "AtStartup" not in seen[1]
+    assert len(seen) == 3 and "LogonType Interactive" in seen[1] and "AtStartup" not in seen[1]
+    assert "visurena-autopilot-watchdog" in seen[2] and "LogonType Interactive" in seen[2], "the watchdog takes the logon that worked"
 
 
 def test_install_names_uv_by_its_full_path():
@@ -46,4 +47,4 @@ def test_install_stops_at_s4u_when_it_is_accepted():
     cli = fx.load()
     seen = []
     assert cli.install(Path("x"), 5, "2099", run=lambda cmd: seen.append(cmd) or 0) == 0
-    assert len(seen) == 1 and "S4U" in seen[0]
+    assert len(seen) == 2 and "S4U" in seen[0] and "visurena-autopilot-watchdog" in seen[1] and "S4U" in seen[1]

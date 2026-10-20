@@ -19,12 +19,64 @@ are never stored at all.
 """
 from __future__ import annotations
 
+import json
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import youtube
+
+MINTED = "YOUTUBE_REFRESH_TOKEN_AT"
+"""When the refresh token was stored (epoch seconds), written beside it in .env."""
+TOKEN_WARN_DAYS = 5.0
+"""A Testing consent's token dies at 7 days: at 5 the owner is sent the link (retro 2026-10-20 item 8)."""
+DAY = 86_400.0
+
+
+def store_token(env: Path, token: str, now: float | None = None) -> Path:
+    """The token and the moment it was stored: the age the launch check reads."""
+    youtube.save_refresh_token(env, token)
+    return youtube.set_var(env, MINTED, str(time.time() if now is None else now))
+
+
+def token_age_days(env: Path, now: float) -> float | None:
+    """Days since the token was stored: its stamp, else .env's last write (the token
+    is at least that old, so an old file is surely an old token).  None: no file."""
+    stamp = youtube.read_env(env).get(MINTED)
+    try:
+        at = float(stamp) if stamp else Path(env).stat().st_mtime
+    except (ValueError, OSError):
+        return None
+    return round((now - at) / DAY, 1)
+
+
+def refresh_fails(env: Path) -> str | None:
+    """None when Google trades the refresh token for an access token; else its error."""
+    from google.auth.transport.requests import Request
+    try:
+        youtube.credentials(env).refresh(Request())
+    except (Exception, SystemExit) as why:                     # noqa: BLE001 -- every failure is the same ask
+        return f"{type(why).__name__}: {str(why)[:160]}"
+    return None
+
+
+def default_blob(root: Path = Path(".")) -> Path | None:
+    """The downloaded OAuth client file in the repo root, when there is one."""
+    return next(iter(sorted(Path(root).glob("client_secret*.json"))), None)
+
+
+def token_note(env: Path, blob: Path | None, now: float, refresh=refresh_fails, link=None) -> str | None:
+    """The owner's message when the token is TOKEN_WARN_DAYS old or a refresh fails,
+    with the consent paste link; None when it is young and good."""
+    age, failed = token_age_days(env, now), refresh(env)
+    if failed is None and age is not None and age < TOKEN_WARN_DAYS:
+        return None
+    why = (f"refresh fails ({failed})" if failed else f"is {age} days old (a Testing consent dies at 7)"
+           if age is not None else "has no recorded age")
+    return (f"YouTube token {why}: open {(link or pending_link)(env, blob)} , approve, then send the localhost "
+            f"address it fails on (uv run python scripts/publish/youtube_auth.py --paste=<address>)")
 
 
 def consent(env: Path, blob: Path | None = None) -> str:
@@ -69,6 +121,17 @@ def paste_link(env: Path, blob: Path | None) -> str:
     return url
 
 
+def pending_link(env: Path, blob: Path | None) -> str:
+    """The link for the verifier already pending -- an owner mid-paste keeps a working
+    link -- else a fresh one, its verifier kept for half two."""
+    try:
+        verifier = json.loads(PENDING.read_text(encoding="utf-8"))["verifier"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return paste_link(env, blob)
+    url, _state = paste_flow(env, blob, verifier).authorization_url(prompt="consent", access_type="offline")
+    return url
+
+
 def paste_token(env: Path, blob: Path | None, redirected: str) -> str:
     """Half two: the pasted address's code exchanged for the refresh token."""
     import json
@@ -97,9 +160,7 @@ def whose_channel(env: Path) -> dict:
 def main(argv: list[str]) -> None:
     args = [a for a in argv[1:] if not a.startswith("--")]
     env = youtube.ENV
-    blob = next((Path(a) for a in args if a.endswith(".json")), None)
-    if blob is None:
-        blob = next(iter(sorted(Path(".").glob("client_secret*.json"))), None)
+    blob = next((Path(a) for a in args if a.endswith(".json")), None) or default_blob()
     if blob:
         print(f"using the OAuth client from {blob} (it cannot go stale like a copied secret)")
     print(f"scopes: {', '.join(youtube.SCOPES)}")
@@ -109,10 +170,10 @@ def main(argv: list[str]) -> None:
         return
     pasted = next((a.split("=", 1)[1] for a in argv if a.startswith("--paste=")), None)
     if pasted:
-        youtube.save_refresh_token(env, paste_token(env, blob, pasted))
+        store_token(env, paste_token(env, blob, pasted))
     else:
         print("a browser will open -- sign in as the owner of The Keeper's Lantern\n")
-        youtube.save_refresh_token(env, consent(env, blob))
+        store_token(env, consent(env, blob))
     print(f"refresh token stored in {env} (value not shown)\n")
 
     channel = whose_channel(env)

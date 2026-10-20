@@ -5,8 +5,11 @@
     uv run --no-sync python scripts/episode/autopilot.py tick  --book <codex>      one pass, prints status
     uv run --no-sync python scripts/episode/autopilot.py status [--book <codex>]
     uv run --no-sync python scripts/episode/autopilot.py install [--every 5] [--book <codex>]
-    uv run --no-sync python scripts/episode/autopilot.py uninstall | pause | resume
+    uv run --no-sync python scripts/episode/autopilot.py uninstall | resume
+    uv run --no-sync python scripts/episode/autopilot.py pause [--at-boundary] [--by owner|retro] [--why ".."] [--hours H]
     uv run --no-sync python scripts/episode/autopilot.py retry N | park N --why "..."
+    uv run --no-sync python scripts/episode/autopilot.py watchdog       the second task's heartbeat look
+    uv run --no-sync python scripts/episode/autopilot.py may-commit     exit 3 while a drive runs on staged runtime code
 
 Decision 2026-10-06 (architecture/decisions/2026-10-06_autopilot_and_brain.md):
 the interactive session that watched a run, read a deferral and relaunched was
@@ -16,7 +19,13 @@ reads the ledgers, `studio.autopilot.derive` names the state, `act` takes ONE
 action -- launch, cure, wait, restart the engine, call the brain, park, note a
 publish, or say the series is complete.  PARKED is a record, never a wait; the
 series moves to N+1 on the same tick.  Telegram speaks only on PUBLISHED,
-PARKED, SERIES_COMPLETE, and a tree dirty past six hours.
+PARKED, HELD_PUBLISH, SERIES_COMPLETE, a tree dirty past six hours, a pause past
+its lease, a silent supervisor (the watchdog task) and an old YouTube token.
+
+Retro 2026-10-20 (architecture/decisions/2026-10-20_ops_leases_and_watchdog.md):
+a pause is a lease {by, why, expires}; a G-STANDING hold is HELD_PUBLISH, never a
+park; HEAD moving under a live drive keeps this loop on its code until the drive
+ends; a relaunch on moved code names the checks the new judge code invalidates.
 
 Every outward call (Popen, the process table, git, the engine, the brain, the
 work-orders desk, Telegram) is a `Deps` field, so the tests inject fakes and
@@ -286,6 +295,18 @@ class Deps:
     cpu_s: Callable | None = None                # (rows, codex, n) -> run-tree CPU seconds; None = no watchdog
     outputs_at: Callable[[Path], float] | None = None   # the newest artifact mtime under an episode home
     ledger: Callable[[], None] | None = None     # starts the GPU ledger beside a drive
+    token_note: Callable[[], str | None] | None = None  # the YouTube token's message, None = good; None = no check
+
+
+def youtube_token_note() -> str | None:
+    """youtube_auth.token_note for this repo's .env and OAuth client file (retro 2026-10-20 item 8)."""
+    from scripts.publish import youtube_auth
+    return youtube_auth.token_note(ROOT / ".env", youtube_auth.default_blob(ROOT), time.time())
+
+
+def pure():
+    """The pure core, `studio.autopilot`, imported when first needed."""
+    return importlib.import_module("studio.autopilot")
 
 
 def newest_output(home: Path) -> float:
@@ -309,7 +330,8 @@ def start_ledger() -> None:
 
 def default_deps() -> Deps:
     from studio import engine_ops
-    return Deps(cpu_s=engine_ops.tree_cpu_s, outputs_at=newest_output, ledger=start_ledger)
+    return Deps(cpu_s=engine_ops.tree_cpu_s, outputs_at=newest_output, ledger=start_ledger,
+                token_note=youtube_token_note)
 
 
 # ---- files -----------------------------------------------------------------------
@@ -415,19 +437,42 @@ def status_now(book: Path) -> dict:
     return patch_status(book, is_paused(book))
 
 
-def set_paused(book: Path, codex: str, paused: bool) -> dict:
-    """Pause sets the flag; resume clears the flag, paused_why and the STOP file.
-    status.json is rewritten at once, the next tick launches nothing while paused."""
+def set_paused(book: Path, codex: str, paused: bool, by: str = "owner", why: str = "",
+               hours: float | None = None, now: float | None = None, sha: str | None = None) -> dict:
+    """Pause sets the flag and its lease {by, why, since, expires, sha} (retro 2026-10-20
+    V7); resume clears the flag, the lease, paused_why and the STOP file.  status.json
+    is rewritten at once, the next tick launches nothing while paused."""
     doc = load_series(book, codex, lambda b: chapters_of(b))
     doc["paused"] = paused
-    if not paused:
-        doc.pop("paused_why", None)
+    if paused:
+        doc["pause"] = pure().lease(by, why, time.time() if now is None else now, hours, sha)
+        if why:
+            doc["paused_why"] = why
+    else:
+        for key in ("paused_why", "pause"):
+            doc.pop(key, None)
         paths_of(book).stop.unlink(missing_ok=True)
     write_atomic(paths_of(book).series, doc)
-    event(book, {"event": "pause" if paused else "resume"})
+    event(book, {"event": "pause" if paused else "resume", "by": by, **({"why": why} if why else {})})
     if paths_of(book).status.exists():
         write_atomic(paths_of(book).status, patch_status(book, is_paused(book, doc)))
     return doc
+
+
+def lease_check(book: Path, codex: str, series: dict, deps: "Deps") -> dict:
+    """A pause past its lease: the autopilot's own resumes once a fix landed; any other
+    is said once and stays paused (V7: an owner's pause is never lifted by code)."""
+    held = series.get("pause") if series.get("paused") else None
+    if not pure().lease_expired(held, deps.now()):
+        return series
+    if pure().may_resume(held, deps.now(), deps.git("rev-parse", "HEAD").strip()):
+        return set_paused(book, codex, False, by="autopilot")
+    if not any(r.get("event") == "pause_expired" and r.get("since") == held.get("since")
+               for r in rows_of(paths_of(book).events)):
+        event(book, {"event": "pause_expired", "by": held.get("by"), "why": held.get("why"), "since": held.get("since")})
+        deps.notify(f"the series pause set by {held.get('by')} ({held.get('why') or 'no reason given'}) passed its "
+                    f"lease and is still holding the GPU: `autopilot.py resume` to go on, or pause again with --hours")
+    return series
 
 
 # ---- locks and the heartbeat -----------------------------------------------------
@@ -493,6 +538,36 @@ def heartbeat(deps: Deps, tick_no: int, state: str, n: int | None, engine_down_t
     kept = engine_down_ticks if engine_down_ticks is not None else read_json(deps.root / "heartbeat.json", {}).get("engine_down_ticks", 0)
     write_atomic(deps.root / "heartbeat.json", {"ts": deps.now(), "tick": tick_no, "state": state, "episode": n,
                                                 "engine_down_ticks": kept})
+
+
+WATCHDOG_TASK = TASK + "-watchdog"
+WATCHDOG_EVERY = 5
+"""Minutes between the second task's looks at heartbeat.json (retro 2026-10-20 item 7)."""
+
+
+def told_silent(book: Path, beat: dict) -> bool:
+    """This silence (this heartbeat's ts) was already said."""
+    return any(r.get("event") == "supervisor_silent" and r.get("beat_ts") == beat.get("ts")
+               for r in rows_of(paths_of(book).events))
+
+
+def watchdog(book: Path, deps: Deps) -> dict:
+    """The second task's one look: a heartbeat older than ten minutes is ONE
+    `supervisor_silent` row and ONE message per silence.  ep01's 4.68 h gap was a
+    Windows Update restart with nobody logged on; only `adopt` said so, afterwards."""
+    beat = read_json(deps.root / "heartbeat.json", {}) or {}
+    if not beat.get("ts"):
+        return {"silent": False, "age_s": None}
+    age = deps.now() - float(beat["ts"])
+    if age <= DEAD_BEAT_S:
+        return {"silent": False, "age_s": round(age)}
+    if not told_silent(book, beat):
+        event(book, {"event": "supervisor_silent", "heartbeat_age_s": round(age), "tick": beat.get("tick"),
+                     "state": beat.get("state"), "beat_ts": beat["ts"]})
+        deps.notify(f"autopilot supervisor silent for {age / 60:.0f} min (last tick {beat.get('tick')}, "
+                    f"{beat.get('state')}): the PC may have restarted with nobody logged on; log on, "
+                    f"or `schtasks /run /tn {TASK}`")
+    return {"silent": True, "age_s": round(age)}
 
 
 def adopt(book: Path, deps: Deps) -> None:
@@ -595,7 +670,14 @@ def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
         "brain_attempts": len(attempts), "brain_verdict": verdict,
         "paused": is_paused(book, series),
         "head_sha": deps.git("rev-parse", "HEAD").strip(), "media_spent_usd": deps.spent_usd(codex, n),
-        "failed_sha": core_failed_sha(drive_rows), "code_dirty": episode_drive_dirty(porcelain)})
+        "failed_sha": core_failed_sha(drive_rows), "code_dirty": episode_drive_dirty(porcelain),
+        "standing": standing_ok(book)})
+
+
+def standing_ok(book: Path) -> bool:
+    """The owner's standing publish approval is signed for this book (G-STANDING)."""
+    from studio import standing_approval
+    return standing_approval.ok(book)
 
 
 # ---- the actions ---------------------------------------------------------------
@@ -635,24 +717,69 @@ def step_guard(book: Path, n: int, tail: str, deps: Deps, why: str = "relaunch")
 
 
 def launch(book: Path, codex: str, n: int, deps: Deps, why: str) -> dict:
-    """ONE detached drive.py, its stdout to drive_launchNN.log, and the gpu.lock.
-    Never while the series is paused or STOP exists."""
+    """ONE detached drive.py, its stdout to drive_launchNN.log, and the gpu.lock, both
+    naming the sha it launched on (retro 2026-10-20 item 12).  Never while paused."""
     if is_paused(book):
         return {"action": "paused", "state": "PAUSED"}
-    home = home_of(book, n)
+    home, sha = home_of(book, n), deps.git("rev-parse", "HEAD").strip()
     home.mkdir(parents=True, exist_ok=True)
     k = len(list(home.glob("drive_launch*.log"))) + 1
     out = (home / f"drive_launch{k:02d}.log").open("w", encoding="utf-8")
+    if why == "relaunch":
+        say_moved_judges(book, n, sha, out, deps)
     flags = (subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.DETACHED_PROCESS) if sys.platform == "win32" else 0
     proc = deps.popen(deps.drive_argv(codex, n), cwd=ROOT, env={**os.environ, "DRIVE_QUIET": "1"},
                       stdout=out, stderr=subprocess.STDOUT, creationflags=flags)
-    body = {"drive_pid": proc.pid, "started": utc_now(), "book": codex, "episode": n}
+    body = {"drive_pid": proc.pid, "started": utc_now(), "book": codex, "episode": n, "sha": sha}
     if not write_lock(deps.root / "gpu.lock", body):
         event(book, {"event": "lock_held", "episode": n, "drive_pid": proc.pid})
-    event(book, {"event": why, "episode": n, "drive_pid": proc.pid, "log": f"episodes/ep{n:02d}/drive_launch{k:02d}.log"})
+    event(book, {"event": why, "episode": n, "drive_pid": proc.pid, "sha": sha,
+                 "log": f"episodes/ep{n:02d}/drive_launch{k:02d}.log"})
+    token_watch(book, n, "launch", deps)
     if deps.ledger:
         deps.ledger()                         # the GPU/RAM ledger runs beside every drive (P13)
     return {"action": why, "state": "RUNNING", "drive_pid": proc.pid}
+
+
+def say_moved_judges(book: Path, n: int, sha: str, out, deps: Deps) -> list[str]:
+    """A relaunch on moved code names, atop its launch log and in one event, the checks
+    whose judge code changed since the last drive: their verdicts on disk were signed
+    by the old code (retro 2026-10-20 item 12)."""
+    before = core_failed_sha(rows_of(home_of(book, n) / "drive.jsonl"))
+    if not before or not sha or sha.startswith(before) or before.startswith(sha):
+        return []
+    try:
+        checks = pure().invalidated_checks(deps.git("diff", "--name-only", f"{before}..{sha}").splitlines())
+    except Exception:                                          # noqa: BLE001 -- an unknown sha names nothing
+        return []
+    if checks:
+        out.write(f"RELAUNCH on moved code {before[:8]}..{sha[:8]}: judge code changed; the verdicts on disk "
+                  f"from these checks were signed by the old code: {', '.join(checks)}\n")
+        out.flush()
+        event(book, {"event": "judge_code_moved", "episode": n, "from": before[:8], "to": sha[:8], "checks": checks})
+    return checks
+
+
+def told_this_drive(book: Path, n: int, at: str) -> bool:
+    """A `youtube_token_told` row for N at `at` since N's last launch."""
+    rows = rows_of(paths_of(book).events)
+    starts = [i for i, r in enumerate(rows) if r.get("event") in ("launch", "relaunch") and r.get("episode") == n]
+    since = rows[starts[-1] + 1:] if starts else rows
+    return any(r.get("event") == "youtube_token_told" and r.get("episode") == n and r.get("at") == at for r in since)
+
+
+def token_watch(book: Path, n: int, at: str, deps: Deps) -> None:
+    """At launch and at render start, once each per drive: an old or failing YouTube token
+    sends the consent paste link while the episode renders (retro 2026-10-20 item 8)."""
+    if deps.token_note is None or told_this_drive(book, n, at):
+        return
+    try:
+        note = deps.token_note()
+    except Exception as why:                                   # noqa: BLE001 -- a check never stops a launch
+        note = f"the YouTube token check failed ({scrub(repr(why))[:160]}); run youtube_auth.py --paste-link"
+    if note:
+        event(book, {"event": "youtube_token_told", "episode": n, "at": at})
+        deps.notify(f"ep{n:02d}: {note}")
 
 
 def running_id(queue: Any) -> str | None:
@@ -787,9 +914,10 @@ def brake_two_parks(book: Path, parked: list[dict], deps: Deps) -> bool:
     last = [r.get("episode") for r in parked[-2:]]
     if len(last) < 2 or last[1] != last[0] + 1:
         return False
-    series = paths_of(book).series
+    series, why = paths_of(book).series, f"two parked in a row: ep{last[0]:02d}, ep{last[1]:02d}"
     doc = read_json(series, {}) or {}
-    write_atomic(series, {**doc, "paused": True, "paused_why": f"two parked in a row: ep{last[0]:02d}, ep{last[1]:02d}"})
+    held = pure().lease("autopilot", why, deps.now(), sha=deps.git("rev-parse", "HEAD").strip())
+    write_atomic(series, {**doc, "paused": True, "paused_why": why, "pause": held})   # resumes itself once a fix lands
     event(book, {"event": "two_parked_in_a_row", "episodes": last})
     deps.notify(f"two chapters parked in a row (ep{last[0]:02d}, ep{last[1]:02d}): the series is paused until a fix lands; "
                 f"autopilot.py retry N + resume to continue")
@@ -805,6 +933,36 @@ def note_published(book: Path, n: int, uploads: list[dict], deps: Deps) -> dict:
     event(book, {"event": "published", "episode": n, "video_id": video})
     deps.notify(f"ep{n:02d} PUBLISHED https://youtu.be/{video}")
     return {"action": "published", "state": "PUBLISHED"}
+
+
+def held_units(book: Path) -> list[dict]:
+    """Episodes at HELD_PUBLISH: a `held_publish` row newer than their last `retry`,
+    as rows `next_unit` can skip like parked ones."""
+    held, retried = {}, {}
+    for i, row in enumerate(rows_of(paths_of(book).events)):
+        if row.get("event") == "held_publish":
+            held[row.get("episode")] = i
+        elif row.get("event") == "retry":
+            retried[row.get("episode")] = i
+    return [{"episode": n} for n, i in sorted(held.items()) if i > retried.get(n, -1)]
+
+
+def hold(book: Path, n: int, derived, deps: Deps) -> dict:
+    """HELD_PUBLISH: one row and one message per hold, and no parked row, so a hold
+    never trips the two-parks brake (retro 2026-10-20 item 7)."""
+    if n not in {r["episode"] for r in held_units(book)}:
+        event(book, {"event": "held_publish", "episode": n, "reason": str(derived.reason or "")})
+        deps.notify(f"ep{n:02d} HELD before upload: the master is finished; the owner's standing approval "
+                    f"publish/standing.json lets step 13 upload it. The series moves on.")
+    return {"action": "held_publish", "state": "HELD_PUBLISH"}
+
+
+def pick_unit(book: Path, deps: Deps, series: dict, uploads: list[dict], parked: list[dict]) -> int | None:
+    """The next chapter past parked and held ones; with only holds left, the lowest hold
+    (never COMPLETE over a held master).  A signed standing file lifts every hold."""
+    chapters, held = deps.chapters(book), ([] if standing_ok(book) else held_units(book))
+    n = deps.next_unit(chapters, uploads, parked + held, series["last"])
+    return n if n is not None or not held else deps.next_unit(chapters, uploads, parked, series["last"])
 
 
 def complete(book: Path, series: dict, parked: list[dict], uploads: list[dict], deps: Deps) -> dict:
@@ -1028,6 +1186,21 @@ def act_needs_brain(book: Path, codex: str, n: int, derived, signals, deps: Deps
     return brain(book, codex, n, derived, signals, deps)
 
 
+RENDER_STEP = "09"
+
+
+def act_running(book: Path, codex: str, n: int, deps: Deps) -> dict:
+    """RUNNING: a hung engine is rescued, a stuck step killed; at render start the
+    YouTube token is checked so the owner's click lands inside the render (item 8)."""
+    if hung(book, n, deps):
+        return rescue_engine(book, codex, n, deps)
+    if (step := stuck_step(book, codex, n, deps)) is not None:
+        return overran(book, codex, n, step, deps)
+    if open_step(home_of(book, n)) == RENDER_STEP:
+        token_watch(book, n, "render", deps)
+    return {"action": "wait", "state": "RUNNING"}
+
+
 def act(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
     """ONE action per tick, by the derived state; returns the state it leaves."""
     state = getattr(derived.state, "name", str(derived.state))
@@ -1036,11 +1209,9 @@ def act(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
     if state == "IDLE":
         return act_idle(book, codex, n, derived, signals, deps)
     if state == "RUNNING":
-        if hung(book, n, deps):
-            return rescue_engine(book, codex, n, deps)
-        if (step := stuck_step(book, codex, n, deps)) is not None:
-            return overran(book, codex, n, step, deps)
-        return {"action": "wait", "state": "RUNNING"}
+        return act_running(book, codex, n, deps)
+    if state == "HELD_PUBLISH":
+        return hold(book, n, derived, deps)
     if state == "NEEDS_BRAIN":
         return act_needs_brain(book, codex, n, derived, signals, deps)
     if state == "PARKED":
@@ -1086,10 +1257,11 @@ def episode_doc(n: int | None, derived, signals, done: dict) -> dict:
 def tick(book: Path, codex: str, deps: Deps, tick_no: int = 0) -> dict:
     """One pass: gather -> derive -> ONE action -> status.json + heartbeat."""
     series, p, ticks = load_series(book, codex, deps.chapters), paths_of(book), 0
+    series = lease_check(book, codex, series, deps)
     uploads, parked = uploads_of(book), rows_of(p.parked)
     if auto_unpark(book, deps):
         parked = rows_of(p.parked)
-    n = deps.next_unit(deps.chapters(book), uploads, parked, series["last"])
+    n = pick_unit(book, deps, series, uploads, parked)
     if n is None:
         derived, signals = SimpleNamespace(state="COMPLETE", reason="", order=None, packet={}), SimpleNamespace(engine_up=None)
         done = complete(book, series, parked, uploads, deps)
@@ -1120,8 +1292,8 @@ def run_loop(book: Path, codex: str, deps: Deps, every: float = 30.0, ticks: int
     born, i = deps.git("rev-parse", "HEAD").strip(), 0
     while ticks is None or i < ticks:
         i += 1
-        if code_moved(book, deps, born):
-            spawn_successor(book, codex, deps, deps.git("rev-parse", "HEAD").strip(), int(every))
+        if (head := hand_over(book, codex, deps, born)) is not None:
+            spawn_successor(book, codex, deps, head, int(every))
             return 0                       # the successor (or, failing it, the scheduler) runs the new code
         try:
             tick(book, codex, deps, i)
@@ -1132,15 +1304,48 @@ def run_loop(book: Path, codex: str, deps: Deps, every: float = 30.0, ticks: int
     return 0
 
 
-def code_moved(book: Path, deps: Deps, born: str) -> bool:
+def code_moved(book: Path, deps: Deps, born: str, head: str | None = None) -> bool:
     """HEAD is not the commit this loop started on: the first live loop ticked
     on stale code through four fixes (2026-10-06) and paid the brain for it."""
-    head = deps.git("rev-parse", "HEAD").strip()
+    head = head if head is not None else deps.git("rev-parse", "HEAD").strip()
     if head == born:
         return False
     event(book, {"event": "code_moved", "from": born[:8], "to": head[:8]})
     release_supervisor(deps)
     return True
+
+
+def live_drive(codex: str, deps: Deps) -> int | None:
+    """The episode gpu.lock names, while the process table still runs its drive."""
+    n = read_json(deps.root / "gpu.lock", {}).get("episode")
+    return int(n) if n is not None and deps.engine.drive_alive(deps.procs(), codex, int(n)) else None
+
+
+def hand_over(book: Path, codex: str, deps: Deps, born: str) -> str | None:
+    """The HEAD to hand the loop over to, or None.  Under a live drive the loop keeps
+    the code it was born on, says so once per commit, and hands over after the drive
+    ends (retro 2026-10-20 item 12: 62 code_moved, 35 successors in ep01's window)."""
+    head = deps.git("rev-parse", "HEAD").strip()
+    if head == born:
+        return None
+    if (n := live_drive(codex, deps)) is not None:
+        if not any(r.get("event") == "code_moved_during_run" and r.get("to") == head[:8]
+                   for r in rows_of(paths_of(book).events)):
+            event(book, {"event": "code_moved_during_run", "episode": n, "from": born[:8], "to": head[:8]})
+        return None
+    return head if code_moved(book, deps, born, head) else None
+
+
+def commit_hold(book: Path, codex: str, deps: Deps, names: list[str]) -> str | None:
+    """A runtime commit waits while a drive runs (retro 2026-10-20 item 12): the message
+    naming `pause --at-boundary`, or None when the staged files may land now."""
+    from studio import episode_drive
+    runtime = [x.strip() for x in names if x.strip() and episode_drive.runtime_path(x)]
+    if not runtime or (n := live_drive(codex, deps)) is None:
+        return None
+    return (f"ep{n:02d}'s drive is RUNNING: committing {', '.join(runtime[:5])} moves its code mid-run. Run "
+            f"`autopilot.py pause --at-boundary --by <you> --why \"...\"`, wait for its paused_at_boundary stop, "
+            f"commit, then `autopilot.py resume`")
 
 
 # ---- the scheduler ---------------------------------------------------------------
@@ -1155,8 +1360,26 @@ def install(repo: Path, every: int, book: str | None, run: Callable[[str], int] 
         if run(install_command(repo, every, book, logon=logon, startup=startup, uv=uv)) == 0:
             print(f"task {TASK} registered with a {logon} logon, every {every} min"
                   + ("" if startup else " (AtLogOn only: AtStartup needs elevation)"))
-            return 0
+            watched = run(watchdog_command(repo, book, logon=logon, uv=uv)) == 0
+            print(f"task {WATCHDOG_TASK} " + ("registered" if watched else "REFUSED") + f", every {WATCHDOG_EVERY} min")
+            return 0 if watched else 1
     return 1
+
+
+def watchdog_command(repo: Path, book: str | None = None, logon: str = "S4U", uv: str = "uv") -> str:
+    """The second task (retro 2026-10-20 item 7): AtLogOn + every WATCHDOG_EVERY min, one
+    `autopilot.py watchdog` look at heartbeat.json, IgnoreNew, a 5 min limit.  Pure."""
+    work = Path(repo).as_posix()
+    arg = "run --no-sync python scripts/episode/autopilot.py watchdog" + (f" --book {book}" if book else "")
+    span = f"([System.Xml.XmlConvert]::ToTimeSpan('PT{WATCHDOG_EVERY}M'))"
+    return (f"$a = New-ScheduledTaskAction -Execute '{uv}' -Argument '{arg}' -WorkingDirectory '{work}'; "
+            f"$t = @((New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME), "
+            f"(New-ScheduledTaskTrigger -Once -At 00:00 -RepetitionInterval {span})); "
+            f"$s = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -ExecutionTimeLimit {span} "
+            f"-StartWhenAvailable -AllowStartIfOnBatteries; "
+            f"$p = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType {logon} -RunLevel Limited; "
+            f"try {{ Register-ScheduledTask -TaskName '{WATCHDOG_TASK}' -Action $a -Trigger $t -Settings $s "
+            f"-Principal $p -Force -ErrorAction Stop | Out-Null }} catch {{ Write-Error $_; exit 5 }}")
 
 
 def install_command(repo: Path, every: int, book: str | None = None, logon: str = "S4U",
@@ -1181,7 +1404,10 @@ def install_command(repo: Path, every: int, book: str | None = None, logon: str 
 
 
 def uninstall_command() -> str:
-    return f"Unregister-ScheduledTask -TaskName '{TASK}' -Confirm:$false"
+    """Both tasks: the supervisor's refusal is the exit code; a missing watchdog is no fault."""
+    return (f"try {{ Unregister-ScheduledTask -TaskName '{TASK}' -Confirm:$false -ErrorAction Stop }} "
+            f"catch {{ Write-Error $_; exit 5 }}; "
+            f"Unregister-ScheduledTask -TaskName '{WATCHDOG_TASK}' -Confirm:$false -ErrorAction SilentlyContinue; exit 0")
 
 
 def powershell(command: str) -> int:
@@ -1204,10 +1430,11 @@ def retry(book: Path, n: int) -> int:
     return len(rows) - len(kept)
 
 
-def pause_at_boundary(book: Path, codex: str, deps: Deps) -> str:
+def pause_at_boundary(book: Path, codex: str, deps: Deps, by: str = "owner", why: str = "",
+                      hours: float | None = None) -> str:
     """Pause the series AND ask the running episode (gpu.lock's) to stop at its
     next boundary (C3_verdict #7): wait for `paused_at_boundary`, then commit."""
-    set_paused(book, codex, True)
+    set_paused(book, codex, True, by=by, why=why, hours=hours, now=deps.now(), sha=deps.git("rev-parse", "HEAD").strip())
     n = read_json(deps.root / "gpu.lock", {}).get("episode")
     if not n:
         return "series paused; no episode is running, nothing to stop"
@@ -1253,15 +1480,19 @@ def setup_logging(root: Path) -> None:
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="autopilot.py", description=__doc__.split("\n\n")[0])
     sub = p.add_subparsers(dest="cmd", required=True)
-    for name in ("run", "tick", "status", "install", "uninstall", "pause", "resume", "retry", "park"):
+    for name in ("run", "tick", "status", "install", "uninstall", "pause", "resume", "retry", "park",
+                 "watchdog", "may-commit"):
         s = sub.add_parser(name)
         s.add_argument("--book", default=None)
         if name in ("retry", "park"):
             s.add_argument("n", type=int)
         if name == "park":
             s.add_argument("--why", required=True)
-        if name == "pause":
+        if name == "pause":                   # the lease (retro 2026-10-20 V7): who, why, how long
             s.add_argument("--at-boundary", action="store_true")
+            s.add_argument("--by", default="owner")
+            s.add_argument("--why", default="")
+            s.add_argument("--hours", type=float, default=None)
         if name in ("run", "install"):
             s.add_argument("--every", type=int, default=30 if name == "run" else 5)
     return p
@@ -1282,6 +1513,13 @@ def main(argv: list[str]) -> int:
     return dispatch(args, book, codex, deps)
 
 
+def may_commit(book: Path, codex: str, deps: Deps) -> int:
+    """`may-commit`: 0 when the staged files may land now, 3 with the reason when a drive runs."""
+    said = commit_hold(book, codex, deps, deps.git("diff", "--cached", "--name-only").splitlines())
+    print(said or "may commit: no drive is running, or nothing staged is runtime code")
+    return 3 if said else 0
+
+
 def dispatch(args: argparse.Namespace, book: Path, codex: str, deps: Deps) -> int:
     if args.cmd == "run":
         return run_loop(book, codex, deps, every=float(args.every))
@@ -1289,10 +1527,17 @@ def dispatch(args: argparse.Namespace, book: Path, codex: str, deps: Deps) -> in
         print(json.dumps(tick(book, codex, deps, 1), indent=1, ensure_ascii=False))
     elif args.cmd == "status":
         print(json.dumps(status_now(book), indent=1, ensure_ascii=False))
+    elif args.cmd == "watchdog":
+        print(json.dumps(watchdog(book, deps)))
+    elif args.cmd == "may-commit":
+        return may_commit(book, codex, deps)
     elif args.cmd == "pause" and args.at_boundary:
-        print(pause_at_boundary(book, codex, deps))
-    elif args.cmd in ("pause", "resume"):
-        set_paused(book, codex, args.cmd == "pause")
+        print(pause_at_boundary(book, codex, deps, args.by, args.why, args.hours))
+    elif args.cmd == "pause":
+        set_paused(book, codex, True, by=args.by, why=args.why, hours=args.hours, now=deps.now(),
+                   sha=deps.git("rev-parse", "HEAD").strip())
+    elif args.cmd == "resume":
+        set_paused(book, codex, False)
     elif args.cmd == "retry":
         print(f"ep{args.n:02d}: {retry(book, args.n)} parked row(s) cleared")
     elif args.cmd == "park":

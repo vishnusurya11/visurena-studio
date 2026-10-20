@@ -38,7 +38,7 @@ def test_main_hands_install_and_uninstall_to_powershell_only(monkeypatch, tmp_pa
     monkeypatch.setattr(cli, "powershell", lambda cmd: ran.append(cmd) or 0)
     assert cli.main(["install", "--every", "3", "--book", "2099"]) == 0
     assert cli.main(["uninstall"]) == 0
-    assert "PT3M" in ran[0] and "Unregister" in ran[1]
+    assert "PT3M" in ran[0] and "visurena-autopilot-watchdog" in ran[1] and "Unregister" in ran[2]
 
 
 def test_main_dispatches_the_owner_acts(monkeypatch, tmp_path):
