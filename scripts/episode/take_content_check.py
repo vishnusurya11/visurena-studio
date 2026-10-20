@@ -17,6 +17,10 @@ Promoted from a session driver (audit 2026-09-22, item 4). On the way in:
   read as "3 figures, 3 copies" on ten single-person takes of ep07;
 - an unread take is a failure, and the frames go under the episode, not a
   session folder.
+
+A verdict is served again, unread, while the take's bytes, every row it is
+judged against (`judged_row`, the asks among them) and GATE_VERSION are the
+same (package H, retro 2026-10-20); a pass of hits never asks the engine.
 """
 from __future__ import annotations
 
@@ -30,11 +34,34 @@ from studio.episode_home import episode_arg
 
 WORKFLOW = "image_qwen3vl_caption"
 SAMPLES = 3
+ROOT = Path(__file__).resolve().parents[2]
+JUDGES = ("scripts/episode/take_content_check.py", "studio/take_content.py", "studio/panel_content.py")
+"""The code a take's reads are judged by; its hash is pinned to GATE_VERSION (tests/fixtures/gate_pins.json)."""
+GATE_VERSION = "1"
+"""What a cached content verdict must have been judged under.  Bump it when the judging changes a
+verdict on unchanged reads; a refactor or a log line re-pins the hash only.  A changed ask needs no
+bump: the asks are in the key (`words_sha8`), as they are in the VL text cache."""
+
+
+FRAME_READ_S = 120.0
+"""One frame read's deadline (package H, retro 2026-10-20): ep01's cold pass read a take's three
+frames in about 45 s, and a read waited up to 600 s.  A read past this is interrupted
+(comfy.run_text), the engine freed, and asked once more; a second stall raises, as the 600 s did."""
+
+
+def watched(ask):
+    """`ask()`, and once more after a /free when it stalls past FRAME_READ_S."""
+    try:
+        return ask()
+    except comfy.StillRunning as stall:
+        print(f"WATCHDOG take_content: {stall}; the engine is freed and asked once more", flush=True)
+        comfy.free_models()
+        return ask()
 
 
 def read_frame(path: Path, seed: int) -> pc.Seen:
-    said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": pc.ASK,
-                                     "seed": seed, "max_new_tokens": 1024}, readable=pc.readable)
+    values = {"image_1": comfy.stage_image(path), "prompt": pc.ASK, "seed": seed, "max_new_tokens": 1024}
+    said = watched(lambda: comfy.cached_text(WORKFLOW, values, readable=pc.readable, timeout=FRAME_READ_S))
     return pc.parse(said if isinstance(said, str) else str(said))
 
 
@@ -47,8 +74,8 @@ def read_take(video: Path, seconds: float, work: Path) -> list[pc.Seen]:
 
 def read_twin_frame(path: Path, seed: int) -> pc.Twins:
     """The G-TWIN ask on one already-extracted take frame (seed 23+i, cached)."""
-    said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": pc.TWIN_ASK,
-                                     "seed": seed, "max_new_tokens": 256}, readable=pc.twin_readable)
+    values = {"image_1": comfy.stage_image(path), "prompt": pc.TWIN_ASK, "seed": seed, "max_new_tokens": 256}
+    said = watched(lambda: comfy.cached_text(WORKFLOW, values, readable=pc.twin_readable, timeout=FRAME_READ_S))
     return pc.parse_twins(said if isinstance(said, str) else str(said))
 
 
@@ -78,17 +105,26 @@ def with_twins(row: dict, twins: list[str]) -> dict:
     return {**row, "faults": list(row.get("faults") or []) + twins, "passed": False}
 
 
-def verdict_for(book: Path, shot, setup, reads: list[pc.Seen], panel_people: int | None = None) -> dict:
+def judged_row(book: Path, shot, setup, panel_people: int | None = None) -> dict:
+    """Every row a take's reads are judged against: the words of its verdict, and of its cache key."""
+    faces = list(shot.faces or [])
+    return {"planned": len(faces), "crowd": pc.crowd_declared(shot, setup),
+            "flat": pc.flat_place(book, setup.location), "night": pc.judged_at_night(setup.described),
+            "physical": [pc_row(book, w) for w in faces], "frame": pc.stage_text(shot, setup),
+            "banned": pc.banned_subjects(book), "size": shot.size, "extras": getattr(shot, "extras", 0),
+            "markers": look_markers(book, faces, setup), "panel_people": panel_people}
+
+
+def look_markers(book: Path, faces: list[str], setup):
     from studio import cast_refs
-    markers = cast_refs.look_markers(book, list(shot.faces or []), setup)
-    got = tc.take_faults(
-        reads, planned=len(shot.faces or []), crowd=pc.crowd_declared(shot, setup),
-        flat=pc.flat_place(book, setup.location), night=pc.judged_at_night(setup.described),
-        physical=[pc_row(book, w) for w in (shot.faces or [])],
-        frame=pc.stage_text(shot, setup), banned=pc.banned_subjects(book),
-        size=shot.size, extras=getattr(shot, "extras", 0), markers=markers, panel_people=panel_people)
+    return cast_refs.look_markers(book, faces, setup)
+
+
+def verdict_for(book: Path, shot, setup, reads: list[pc.Seen], panel_people: int | None = None) -> dict:
+    rows = judged_row(book, shot, setup, panel_people)
+    got = tc.take_faults(reads, **rows)
     whole = tc.busiest(reads)
-    return {"passed": not got, "faults": got, "look_log": tc.look_log(reads, markers), "people": whole.people,
+    return {"passed": not got, "faults": got, "look_log": tc.look_log(reads, rows["markers"]), "people": whole.people,
             "lookalikes": whole.lookalikes, "hour": whole.hour, "text": whole.text,
             "panel_people": panel_people, "shape_advisory": pc.shape_read(reads)[1]}
 
@@ -119,6 +155,69 @@ def judge_take(book: Path, ep, record: dict, take_dir: Path, work: Path) -> dict
     return with_twins(row, twin_faults_for(shot, reads, work, video.stem))
 
 
+def judges_sha8() -> str:
+    """The judging code's fingerprint (line endings normalised): the pin test's half of the key."""
+    import hashlib
+    body = b"".join((ROOT / rel).read_bytes().replace(b"\r\n", b"\n") for rel in JUDGES)
+    return hashlib.sha256(body).hexdigest()[:8]
+
+
+def words_sha8(row: dict, seconds: float) -> str:
+    """The judged rows, the asks, the frames sampled: everything but the bytes that makes a verdict."""
+    import hashlib
+    import json
+    body = json.dumps({"row": row, "ask": pc.ASK, "twin_ask": pc.TWIN_ASK, "workflow": WORKFLOW,
+                       "samples": SAMPLES, "seconds": seconds}, sort_keys=True, default=str)
+    return hashlib.sha256(body.encode("utf-8")).hexdigest()[:8]
+
+
+def verdict_key(video: Path, row: dict, seconds: float) -> dict:
+    import hashlib
+    return {"take_sha8": hashlib.sha256(Path(video).read_bytes()).hexdigest()[:8],
+            "judged_sha8": words_sha8(row, seconds), "gate_version": GATE_VERSION}
+
+
+def take_key(book: Path, ep, record: dict, take_dir: Path) -> dict:
+    """The key of the verdict `judge_take` would write for this take now."""
+    shot = ep.shot(record["shots"][0])
+    row = judged_row(book, shot, ep.setups[shot.setup], panel_people_of(book, ep.number, shot.index))
+    return verdict_key(take_dir / f"T{record['index']:02d}.mp4", row, float(record.get("seconds") or 4.0))
+
+
+def keyed(row: dict, key: dict) -> dict:
+    """A verdict carrying its key; an unread one carries none, so the next pass reads it again."""
+    if any(str(f).startswith("unread") for f in row.get("faults") or []):
+        return row
+    return {**row, **key}
+
+
+def cached(path: Path, key: dict) -> dict | None:
+    """The verdict on disk when it was judged under exactly this key, or None."""
+    doc = episode_home.read_json(path) if Path(path).exists() else None
+    return doc if isinstance(doc, dict) and all(doc.get(k) == v for k, v in key.items()) else None
+
+
+def written(take_dir: Path, index: int, row: dict) -> dict:
+    """The verdict written (a hit too: the ladder asks for a fresh verdict file) and its line printed."""
+    episode_home.write_json(take_dir / f"T{index:02d}.content.json", row)
+    print(f"  {'ok  ' if row['passed'] else 'FAIL'} T{index:02d}  {'; '.join(row['faults'])}", flush=True)
+    return row
+
+
+def judge_all(book: Path, ep, records: list[dict], take_dir: Path, work: Path) -> list[int]:
+    """Every take's verdict, the hits first; the misses in ONE model batch, entered only for a miss."""
+    keys = {r["index"]: take_key(book, ep, r, take_dir) for r in records}
+    rows = {i: written(take_dir, i, hit) for i, k in keys.items()
+            if (hit := cached(take_dir / f"T{i:02d}.content.json", k)) is not None}
+    print(f"  {len(rows)}/{len(records)} content verdicts cached (bytes, judged rows and gate unchanged)", flush=True)
+    if misses := [r for r in records if r["index"] not in rows]:
+        with comfy.model_kept():        # the VL model loaded once for the batch (speed plan #6)
+            for record in misses:
+                i = record["index"]
+                rows[i] = written(take_dir, i, keyed(judge_take(book, ep, record, take_dir, work), keys[i]))
+    return [r["index"] for r in records if not rows[r["index"]]["passed"]]
+
+
 def main(book_id: str, number: int, only: list[int]) -> int:
     book = episode_home.book_dir(book_id)
     ep = episode_home.load_plan(book, number)
@@ -132,15 +231,7 @@ def main(book_id: str, number: int, only: list[int]) -> int:
         print(f"no takes to judge under {episode_home.relative(book, take_dir)}")
         return 1
     work = episode_home.work_dir(book, number, "r2v") / "content"
-    failed = []
-    with comfy.model_kept():        # the VL model loaded once for the batch (speed plan #6)
-        for record in records:
-            row = judge_take(book, ep, record, take_dir, work)
-            episode_home.write_json(take_dir / f"T{record['index']:02d}.content.json", row)
-            print(f"  {'ok  ' if row['passed'] else 'FAIL'} T{record['index']:02d}  "
-                  f"{'; '.join(row['faults'])}", flush=True)
-            if not row["passed"]:
-                failed.append(record["index"])
+    failed = judge_all(book, ep, records, take_dir, work)
     print(f"\n{len(records) - len(failed)}/{len(records)} takes clean on content; failing {failed}")
     return 1 if failed else 0
 

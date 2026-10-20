@@ -687,7 +687,14 @@ def take_sha8(path: Path) -> str:
 MEASURES = ("scripts/episode/take_dq.py", "studio/take_verdict.py", "studio/take_frame.py",
             "studio/plate_gate.py", "studio/invented_speech.py", "studio/gait.py",
             "studio/stillness.py", "studio/identity_gate.py", "studio/warp_gate.py")
-"""The code a take verdict is measured by: a change here re-measures every take."""
+"""The code a take verdict is measured by.  Its hash is pinned to GATE_VERSION
+(tests/fixtures/gate_pins.json), so an edit here is a decision, not a re-measure."""
+
+GATE_VERSION = "1"
+"""What a cached verdict must have been measured under (package H, retro 2026-10-20).  Bump it
+when a verdict or a recorded measure changes; a refactor, a log line or a cure re-pins the hash
+only.  Jekyll ep01 run 15 re-measured 28 unchanged takes (1,070 s) on a hash that four commits
+moved, two of them changing no measure (docs/audit/2026-10-20_deadline_retro/h_diagnosis.md)."""
 
 
 def measures_sha8() -> str:
@@ -698,12 +705,13 @@ def measures_sha8() -> str:
 
 
 def cached(take_dir: Path, index: int, kept: Path, any_code: bool = False) -> dict | None:
-    """The verdict already written for exactly these bytes BY this measuring
-    code, or None.  2026-09-29: 8 full passes decoded every unchanged take
+    """The verdict already written for exactly these bytes UNDER this gate
+    version, or None.  2026-09-29: 8 full passes decoded every unchanged take
     (2.1 h on ep14).  2026-10-08: the fixed letterbox measure never reached
-    ep21's T27/T30 -- the cache served the old refusals, 'bytes unchanged'.
-    `any_code` (a spent clock, 2026-10-11): a re-judge is a repeat, so the
-    verdict on these bytes stands under any measuring code."""
+    ep21's T27/T30 -- the cache served the old refusals, 'bytes unchanged'
+    (the pin test is that lesson's guard now).  `any_code` (a spent clock,
+    2026-10-11): a re-judge is a repeat, so the verdict on these bytes stands
+    under any gate version."""
     path = Path(take_dir) / f"T{index:02d}.dq.json"
     if not path.exists() or not Path(kept).exists():
         return None
@@ -711,8 +719,14 @@ def cached(take_dir: Path, index: int, kept: Path, any_code: bool = False) -> di
     report = json.loads(path.read_text(encoding="utf-8"))
     if report.get("deferred"):
         return None                     # a CPU-lane verdict owes its GPU rows
-    code = any_code or report.get("measures_sha8") == measures_sha8()
-    return report if report.get("take_sha8") == take_sha8(kept) and code else None
+    gate = any_code or report.get("gate_version") == GATE_VERSION
+    return report if report.get("take_sha8") == take_sha8(kept) and gate else None
+
+
+def cache_key(report: dict, kept: Path) -> dict:
+    """The report stamped with what `cached` asks of it: the bytes and the gate version
+    (and the measuring code's hash, the record of which code measured it)."""
+    return {**report, "take_sha8": take_sha8(kept), "measures_sha8": measures_sha8(), "gate_version": GATE_VERSION}
 
 
 def lane_threads(env=None) -> int:
@@ -797,8 +811,7 @@ def main(book_id: str, number: int, indices: list[int], attempts: bool = False, 
         # RELATIVE, never a drive letter (CLAUDE.md; audit item 15): this line
         # had put the worktree's absolute path into ~200 take reports.
         report["strip"] = episode_home.relative(book, tv.strip(v, kept, take_cells, work / f"take_T{index:02d}.png"))
-        report["take_sha8"] = take_sha8(kept)
-        report["measures_sha8"] = measures_sha8()
+        report = cache_key(report, kept)
         if deferred:
             report["deferred"] = deferred
         episode_home.write_json(take_dir / f"T{index:02d}.dq.json", report)

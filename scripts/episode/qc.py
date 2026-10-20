@@ -161,6 +161,39 @@ HEARD_CACHE = "heard_cache.json"
 """work/heard_cache.json: what the ear heard in each master window, listened to once."""
 
 
+EAR_STALL_S = 60.0
+"""One clip's deadline at the ear (package H, retro 2026-10-20): a line's window is heard in
+seconds, and the GPU worker's readline() had no deadline at all.  Past this the worker is
+dropped, and the routed ear's own fallback (studio/routed_whisper) hears the clip on the CPU."""
+
+
+def watched(listen, seconds: float = EAR_STALL_S):
+    """`listen` with a watchdog: a clip unanswered after `seconds` drops the GPU worker, whose
+    readline then ends, so the routed ear hears that clip on the CPU."""
+    import threading
+
+    def hear(clip):
+        timer = threading.Timer(seconds, stalled, (listen, clip, seconds))
+        timer.daemon = True
+        timer.start()
+        try:
+            return listen(clip)
+        finally:
+            timer.cancel()
+    return hear
+
+
+def stalled(listen, clip, seconds: float) -> None:
+    """The watchdog's one act: drop a live GPU worker; a CPU ear is only named."""
+    if getattr(listen, "worker", None) is None:
+        print(f"WATCHDOG whisper: {Path(clip).name} unanswered after {seconds:.0f} s; "
+              "no GPU worker to drop, the CPU ear is left to finish", flush=True)
+        return
+    print(f"WATCHDOG whisper: {Path(clip).name} unanswered after {seconds:.0f} s; "
+          "the GPU worker is dropped and the CPU ear hears it", flush=True)
+    listen.drop()
+
+
 def heard_on_master(master: Path, lines: list[dict], work: Path, listen) -> list[dict]:
     out = []
     for line in lines:
@@ -505,7 +538,7 @@ def measure(book_id: str, number: int, engine: str, listen, spent: bool = False)
 
 def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) -> None:
     limit_threads()
-    report = measure(book_id, number, engine, voice_qc.any_transcriber(), spent)
+    report = measure(book_id, number, engine, watched(voice_qc.any_transcriber()), spent)
     book, lufs, tp = episode_home.book_dir(book_id), report["lufs"], report["true_peak"]
     placed = episode_home.load_placed(book, number, episode_home.load_plan(book, number))
     lines = line_laid.laid_lines(placed, episode_home.takes_dir(book, number, engine))

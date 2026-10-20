@@ -16,8 +16,9 @@ def test_a_matching_sha_is_a_cache_hit_and_anything_else_is_not(tmp_path):
     take.write_bytes(b"the very bytes")
     sha = take_dq.take_sha8(take)
     assert len(sha) == 8
-    # 2026-10-08: the key is the bytes AND the measuring code (measures_sha8)
-    report = {"take_sha8": sha, "measures_sha8": take_dq.measures_sha8(), "score": 85.0}
+    # 2026-10-08: the key is the bytes AND what measured them; 2026-10-20 (package H): the gate
+    # version, pinned to the measuring code's hash by tests/test_the_check_gate_versions_are_pinned_to_their_code.py
+    report = {"take_sha8": sha, "gate_version": take_dq.GATE_VERSION, "score": 85.0}
     (tmp_path / "T03.dq.json").write_text(json.dumps(report), encoding="utf-8")
     assert take_dq.cached(tmp_path, 3, take) == report
     take.write_bytes(b"other bytes")

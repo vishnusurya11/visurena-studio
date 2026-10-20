@@ -53,6 +53,10 @@ CHECK = None
 PROMPT = None
 """A sheet-prompt writer for tests; None is stage_pick.write_sheet_prompt (workhorse
 tier, behind studio.llm's guard_spend)."""
+READ_S = 150.0
+"""One VL read's deadline (package H, retro 2026-10-20).  Jekyll ep01 read 54 s a picture with the
+engine freed and 285-295 s offloaded to the CPU beside another family; a read waited up to 600 s.
+A read past this is interrupted (comfy.run_text), the engine freed, and asked once more."""
 
 
 def pictures(book: Path, plan: dict) -> list[Path]:
@@ -256,16 +260,53 @@ def read_places(ctx, doc: dict) -> dict:
     pictures_by_setup = by_setup(ctx.book_dir, doc)
     if pictures_by_setup:
         free_for_vl()
-    read, out = READ or picture_read.read, {}
+    out = {}
     for name, path in pictures_by_setup.items():
         began = time.time()
-        out[name] = read(path)
+        out[name] = watched_read(ctx, name, path)
         ctx.log(f"  03_03 VQA {name}: {time.time() - began:.1f} s device=cuda", step_id=STEP_ID)
     return out
 
 
+def watched_read(ctx, name: str, path: Path) -> list:
+    """One picture read under READ_S; a stall frees the engine and asks once more, and a second
+    stall reads nothing -- the writer's cells stand, as for any unreadable picture."""
+    from studio import comfy
+    for attempt in (1, 2):
+        try:
+            with comfy.row_deadline(read_deadline(READ_S)):
+                return (READ or picture_read.read)(path)
+        except comfy.StillRunning:
+            ctx.log(f"  WATCHDOG 03_03 VQA {name}: no answer in {READ_S:.0f} s (try {attempt} of 2); "
+                    "the engine is freed", step_id=STEP_ID, level="WARNING")
+            free_all()
+    return []
+
+
+def read_deadline(seconds: float) -> float:
+    """The deadline that gives one text call `seconds` (comfy adds ROW_GRACE_S), never past the row's own."""
+    from studio import comfy
+    at = time.time() + seconds - comfy.ROW_GRACE_S
+    return at if comfy.ROW_DEADLINE is None else min(at, comfy.ROW_DEADLINE)
+
+
+def free_all() -> None:
+    """Every model out of the engine, best effort: a stalled read is often one loaded beside another family."""
+    from studio import comfy
+    try:
+        (FREE or (lambda family: comfy.free_models()))("vl")
+    except Exception:       # noqa: BLE001 -- an engine that will not free is asked anyway
+        pass
+
+
 def write_cells(ctx) -> None:
-    """03_03: every setup's picture read, the cells rewritten, the marker stamped."""
+    """03_03: every setup's picture read, the cells rewritten, the marker stamped -- on the clock
+    (ep01: run 6's 996 s of reads left no row; run 3 about 312 s)."""
+    with episode_clock.timed(ctx.book_dir, ctx.number, "places", note="03_03 cells from the picture"):
+        cells_from_reads(ctx)
+
+
+def cells_from_reads(ctx) -> None:
     plan = ctx.home / "plan.json"
     doc = episode_home.read_json(plan)
     readings = read_places(ctx, doc)

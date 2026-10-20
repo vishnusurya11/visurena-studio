@@ -58,17 +58,19 @@ def test_a_render_borne_fault_a_fresh_seed_reproduced_goes_to_the_terminal():
     assert take_ladder.cure_of([content("T06", "hair", repeated=True)], panel_clean=True) == ""
 
 
-def test_a_cached_take_verdict_lapses_when_the_measures_change(tmp_path, monkeypatch):
+def test_a_cached_take_verdict_lapses_when_the_gate_version_changes(tmp_path, monkeypatch):
+    """The measures changing is a gate-version bump now (package H, 2026-10-20); the pin test makes
+    every edit of the measuring code say whether it is one."""
     spec = importlib.util.spec_from_file_location("take_dq_mod", ROOT / "scripts" / "episode" / "take_dq.py")
     dq = importlib.util.module_from_spec(spec)
     sys.modules["take_dq_mod"] = dq
     spec.loader.exec_module(dq)
     kept = tmp_path / "T27.mp4"
     kept.write_bytes(b"take bytes")
-    report = {"score": 31.9, "take_sha8": dq.take_sha8(kept), "measures_sha8": dq.measures_sha8()}
+    report = dq.cache_key({"score": 31.9}, kept)
     (tmp_path / "T27.dq.json").write_text(json.dumps(report), encoding="utf-8")
     assert dq.cached(tmp_path, 27, kept) is not None
-    monkeypatch.setattr(dq, "measures_sha8", lambda: "deadbeef")
+    monkeypatch.setattr(dq, "GATE_VERSION", "0")
     assert dq.cached(tmp_path, 27, kept) is None
     old = {"score": 31.9, "take_sha8": dq.take_sha8(kept)}                  # written before the key existed
     (tmp_path / "T27.dq.json").write_text(json.dumps(old), encoding="utf-8")

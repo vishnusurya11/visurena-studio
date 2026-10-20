@@ -43,7 +43,7 @@ def test_with_no_embedder_installed_nothing_is_deferred(monkeypatch):
 def take_with_report(tmp_path: Path, **extra) -> Path:
     take = tmp_path / "T03.mp4"
     take.write_bytes(b"bytes of T03")
-    report = {"take_sha8": take_dq.take_sha8(take), "measures_sha8": take_dq.measures_sha8()} | extra
+    report = take_dq.cache_key({}, take) | extra
     (tmp_path / "T03.dq.json").write_text(json.dumps(report), encoding="utf-8")
     return take
 
