@@ -72,8 +72,9 @@ JOBS = [({"index": 3, "frames": 97, "shots": [3]}, {}), ({"index": 5, "frames": 
 
 def test_a_render_span_writes_a_take_render_row(book):
     row = tr.stamp_render(book, 1, JOBS, 1_000.0, 1_600.0, lost=[])
-    assert (row["stage"], row["seconds"], row["device"], row["within"]) == ("take_render", 600.0, "gpu", "takes")
+    assert (row["stage"], row["span_s"], row["device"], row["within"]) == ("take_render", 600.0, "gpu", "takes")
     assert row["ok"] and ck.indices_in(row["note"]) == [3, 5]
+    assert row["detail"] and row["seconds"] == 0.0     # a detail of the takes wall: every summing reader adds 0
 
 
 def test_nothing_queued_writes_no_render_row(book):
@@ -97,6 +98,35 @@ def test_the_takes_row_and_its_render_are_counted_once(book, monkeypatch):
     assert timing_sum.STAGES["take_render"] == ("09", True) and eta.SUB_STEP["take_render"] == "09"
 
 
+def test_a_render_under_concurrent_cpu_checks_still_sums_to_the_wall(book, monkeypatch):
+    """Skeptic, package F round 1: step 09's CPU lane stamps take_dq rows `within` takes WHILE the GPU
+    renders.  ep01 span 1 (timing.jsonl rows 69-75): takes 2,054 s gross, take_dq 1,965 s, renders
+    ~1,900 s.  Netting the takes row of both clamped it to 0 and summed 3,865 s against a 2,054 s wall."""
+    clock = iter([10_000.0, 12_054.0])
+    monkeypatch.setattr(ck.time, "time", lambda: next(clock))
+    with ck.timed(book, 1, "takes"):
+        ck.stamp(book, 1, "take_dq", 10_080.0, 11_000.0, within="takes")
+        tr.stamp_render(book, 1, JOBS, 10_050.0, 11_950.0, lost=[])
+        ck.stamp(book, 1, "take_dq", 11_000.0, 12_045.0, within="takes")
+    got = ck.rows(book, 1)
+    takes = next(r for r in got if r["stage"] == "takes")
+    assert sum(r["seconds"] for r in got) == 2_054.0 == timing_sum.gpu_seconds_of(book / "ep01")
+    assert takes["seconds"] == 89.0 and not takes.get("overlap_s")             # its own launch and waits
+    assert timing_sum.step_seconds_of(book / "ep01")["09"] == 2_054.0
+    assert next(r for r in got if r["stage"] == "take_render")["span_s"] == 1_900.0
+
+
+def test_a_render_row_is_judged_by_its_span_and_a_concurrent_check_is_no_rival():
+    cond = {"frames": {3: 97, 5: 121}}
+    norm = ck.row_norm({"stage": "take_render", "note": "3 5"}, cond)
+    render = {"stage": "take_render", "note": "3 5", "seconds": 0.0, "span_s": 3 * norm, "detail": True,
+              "within": "takes", "started": "2026-10-18T10:00:00", "ended": "2026-10-18T11:00:00"}
+    dq = {"stage": "take_dq", "seconds": 40.0, "within": "takes",
+          "started": "2026-10-18T10:10:00", "ended": "2026-10-18T10:10:40"}
+    assert ck.marks(render, [render, dq], cond) == ["SLOW"]
+    assert ck.marks(dq, [render, dq], cond) == []
+
+
 def test_main_stamps_the_render_span_around_the_queue(book, monkeypatch):
     built = [c for c, _ in JOBS]
     clock = itertools.count(10_000.0, 100.0)
@@ -113,7 +143,16 @@ def test_main_stamps_the_render_span_around_the_queue(book, monkeypatch):
     monkeypatch.setattr(tr.episode_home, "takes_dir", lambda b, n, e: book / "ep01" / "takes" / e)
     tr.main("x", 1)
     rows = [r for r in ck.rows(book, 1) if r["stage"] == "take_render"]
-    assert len(rows) == 1 and rows[0]["seconds"] > 0 and ck.indices_in(rows[0]["note"]) == [3, 5]
+    assert len(rows) == 1 and rows[0]["span_s"] > 0 and ck.indices_in(rows[0]["note"]) == [3, 5]
+
+
+def test_the_report_shows_the_render_span_inside_the_takes_wall(book):
+    ck.stamp(book, 1, "takes", 10_000.0, 12_000.0)
+    tr.stamp_render(book, 1, JOBS, 10_100.0, 11_900.0, lost=[])
+    line = next(l for l in ck.report(book, 1).splitlines() if l.startswith("take_render"))
+    assert "1800 s inside takes" in line
+    total = next(l for l in ck.report(book, 1).splitlines() if l.startswith("TOTAL"))
+    assert float(total.split()[1]) == 2_000.0
 
 
 def test_a_render_row_is_priced_by_the_frames_it_names():
@@ -159,7 +198,8 @@ def test_a_killed_row_contends_with_nothing():
 
 def test_the_finish_line_names_the_killed_hours_and_the_repairs_share(tmp_path):
     home = _ep01(tmp_path, timing=False)
-    assert ck.killed_part(home) == " | killed 1.73 h in 4 runs (1.00 h of it repair)"
+    # a share of the charge and of the repair already on the line, never a third part to add to them
+    assert ck.killed_part(home) == " | killed 1.73 h in 4 runs (0.73 h of the charge, 1.00 h of the repair)"
     assert ck.killed_part(tmp_path / "nowhere") == ""
 
 
@@ -218,4 +258,5 @@ def test_ep01s_finish_line_names_the_killed_hours_before_the_repairs(tmp_path):
     home = _ep01(tmp_path, timing=False)
     line = load().finish_line(home)
     assert line == ("charged 6.02 h | wall 30.85 h | dead 23.00 h"
-                    " | killed 1.73 h in 4 runs (1.00 h of it repair)" + repair_clock.finish_part(home))
+                    " | killed 1.73 h in 4 runs (0.73 h of the charge, 1.00 h of the repair)"
+                    + repair_clock.finish_part(home))

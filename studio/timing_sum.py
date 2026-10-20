@@ -27,7 +27,7 @@ STAGES: dict[str, tuple[str | None, bool]] = {
     "grids": ("07", True), "frames": ("07", True),
     "panels": ("08", False), "panel_dq": ("08", False), "panel_content": ("08", True),
     "takes": ("09", True), "take_dq": ("09", True), "take_content": ("09", True),
-    "take_render": ("09", True),   # the render span inside takes; the takes row is stamped net of it
+    "take_render": ("09", True),   # the render span inside takes: a detail row, seconds 0 (episode_clock.DETAIL)
     "strip": ("09", False),
     "title": ("10", True), "assemble": ("10", True), "upscale": ("10", True),
     "qc": ("11", True), "dossier": ("11", False), "eye_review": ("11", False),

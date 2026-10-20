@@ -48,6 +48,12 @@ TAKE_COLD, TAKE_FIXED, TAKE_PER_FRAME = 300.0, 60.0, 1.2
 RENDERS = ("takes", "take_render")
 """The rows priced by the takes they render: the takes run, and the GPU render span takes_r2v
 stamps inside it (deadline retro 2026-10-20: ep01's 84.7 min of renders had no row of their own)."""
+DETAIL = "detail"
+"""A row that times a span INSIDE another row's wall that a sibling row already counts: take_render, the
+GPU span inside takes while the CPU lane's take_dq rows (also `within` takes) run beside it.  Netting
+the takes row of both clamped it to 0 and summed ep01 span 1 to 3,865 s against a 2,054 s wall (skeptic,
+package F round 1), so a detail row carries `seconds` 0 -- every summing reader adds nothing, as for a
+zero-second `started` mark -- and its span in `span_s`, which `judged` reads for its norm."""
 KILLED = "killed"
 """The stage of a row `report` adds for a run clock.jsonl closed `killed`: the seconds of its span no
 timing row covers (a Stop-Process runs no `finally`; ep01 run 12's av3 hang left 41 min on no row)."""
@@ -59,32 +65,43 @@ def path(book: Path, number: int) -> Path:
 
 def stamp(book: Path, number: int, stage: str, started: float, ended: float,
           ok: bool = True, note: str = "", within: str = "", net_of: float = 0.0,
-          device: str = "") -> dict:
+          device: str = "", detail: bool = False) -> dict:
     """Record one stage run. Append-only; a retry is another row.
 
     `within` names the stage this run happened INSIDE (the master's upscale runs
     inside assemble, 2026-10-14); the outer row is then stamped `net_of` it, so
     every reader that sums `seconds` counts that time once.  A row never goes negative
     (ep01 held -421.1 s): `seconds` is max(0, gross - nested), the rest is `overlap_s`.
-    `t0`/`t1` are the epoch ends; `device` says where it ran (cpu / gpu), blank when unknown."""
+    `t0`/`t1` are the epoch ends; `device` says where it ran (cpu / gpu), blank when unknown.
+    A `detail` row (`DETAIL`) has `seconds` 0 and its span in `span_s`."""
     gross = ended - started
     row = {"stage": stage, "started": datetime.fromtimestamp(started).isoformat(timespec="seconds"),
            "ended": datetime.fromtimestamp(ended).isoformat(timespec="seconds"),
-           "seconds": round(max(0.0, gross - net_of), 1), "ok": ok, "note": note,
+           "seconds": 0.0 if detail else round(max(0.0, gross - net_of), 1), "ok": ok, "note": note,
            "t0": started, "t1": ended}
+    if detail:
+        row.update(detail=True, span_s=round(gross, 1))
     if device:
         row["device"] = device
     if within:
         row["within"] = within
     if net_of:
-        row["net_of_s"] = round(net_of, 1)
-        row["gross_s"] = round(gross, 1)
-        row["overlap_s"] = round(max(0.0, net_of - gross), 1)
+        row.update(net_of_s=round(net_of, 1), gross_s=round(gross, 1), overlap_s=round(max(0.0, net_of - gross), 1))
+    return append(book, number, row)
+
+
+def append(book: Path, number: int, row: dict) -> dict:
+    """One row onto the episode's timing.jsonl."""
     p = path(book, number)
     p.parent.mkdir(parents=True, exist_ok=True)
     with p.open("a", encoding="utf-8") as f:
         f.write(json.dumps(row) + "\n")
     return row
+
+
+def judged(row: dict) -> float:
+    """The seconds a row is judged by against its norm: a detail row's span, any other row's seconds."""
+    return float(row.get("span_s", row.get("seconds") or 0)) if row.get("detail") else float(row.get("seconds") or 0)
 
 
 @contextmanager
@@ -167,15 +184,17 @@ def killed_rows(book: Path, number: int) -> list[dict]:
 
 
 def killed_part(home) -> str:
-    """The finish line's killed part: the hours of the runs a kill ended (charged to their last beat)
-    and the repair's share of them; '' when no run was killed.  ep01: 1.73 h in 4 runs, 1.00 h repair."""
+    """The finish line's killed part: the hours of the runs a kill ended (charged to their last beat),
+    each named as the share of the charge or of the repair it already sits in, so nobody adds it a
+    second time; '' when no run was killed.  ep01: 1.73 h in 4 runs, 0.73 h charge + 1.00 h repair."""
     dead = [r for r in run_clock.rows(home) if r.get("how") == "killed"]
     if not dead:
         return ""
-    hours = sum(float(r["seconds"]) for r in dead) / 3600
     repair = sum(float(r["seconds"]) for r in dead if r.get("repair")) / 3600
-    return (f" | killed {hours:.2f} h in {len(dead)} run{'s' if len(dead) > 1 else ''}"
-            + (f" ({repair:.2f} h of it repair)" if repair else ""))
+    episode = sum(float(r["seconds"]) for r in dead if not r.get("repair")) / 3600
+    shares = [f"{h:.2f} h of the {where}" for h, where in ((episode, "charge"), (repair, "repair")) if h]
+    return (f" | killed {episode + repair:.2f} h in {len(dead)} run{'s' if len(dead) > 1 else ''}"
+            + f" ({', '.join(shares)})")
 
 
 def norm_for(stage: str, count: int | None = None, frames: list[int] | None = None) -> float:
@@ -242,7 +261,7 @@ def slow(row: dict, norm: float | None = None) -> bool:
     if not row.get("ok", True):
         return True
     norm = NORMS.get(row["stage"], 0) if norm is None else norm
-    return bool(norm) and row["seconds"] > SLOW * norm
+    return bool(norm) and judged(row) > SLOW * norm
 
 
 def _span(row: dict) -> tuple[datetime, datetime]:
@@ -295,15 +314,17 @@ def stage_norm(stage: str, cond: dict) -> float:
 def _stage_line(stage: str, runs: list[dict], total: float, got: list[dict], cond: dict) -> str:
     secs = sum(r["seconds"] for r in runs)
     flags = sorted({m for r in runs for m in marks(r, got, cond)})
+    inside = [r for r in runs if r.get("detail")]
     return (f"{stage:<12} {secs:>8.0f} {secs / total:>6.0%}  {len(runs):>4}  {stage_norm(stage, cond):>5.0f}"
-            + ("  " + " ".join(flags) if flags else ""))
+            + ("  " + " ".join(flags) if flags else "")
+            + (f"  [{sum(map(judged, inside)):.0f} s inside {inside[0].get('within')}]" if inside else ""))
 
 
 def _flagged_lines(got: list[dict], cond: dict) -> list[str]:
     out = []
     for r in got:
         if said := marks(r, got, cond):
-            out.append(f"  {r['started'][11:]} {r['stage']:<11} {r['seconds']:>7.0f} s"
+            out.append(f"  {r['started'][11:]} {r['stage']:<11} {judged(r):>7.0f} s"
                        f"  norm {row_norm(r, cond):>5.0f}  {' '.join(said)}"
                        + (f"  ({r['note']})" if r.get("note") else ""))
     return out

@@ -39,7 +39,7 @@ def test_the_finish_line_on_ep01s_clock_names_charged_wall_and_dead(tmp_path):
     spans = run_clock.spans(home)
     wall = max(e for _, e in spans) - min(s for s, _ in spans)
     dead = sum(g["seconds"] for g in run_clock.dead_gaps(home))
-    killed = " | killed 0.73 h in 1 run"          # run 12's av3 hang, charged to its last beat (retro 2026-10-20)
+    killed = " | killed 0.73 h in 1 run (0.73 h of the charge)"   # run 12's av3 hang, to its last beat (retro 2026-10-20)
     assert line == _ledger().time_line(run_clock.spent(home), wall, dead) + killed
     assert dead > 0 and wall > run_clock.spent(home)
 

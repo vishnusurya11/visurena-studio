@@ -1273,16 +1273,17 @@ def render_note(jobs: list[tuple[dict, dict]]) -> str:
 
 def stamp_render(book: Path, number: int, jobs: list[tuple[dict, dict]], began: float, ended: float,
                  lost: list | None) -> dict | None:
-    """The render span's own timing row: `take_render`, on the gpu, stamped within the takes row
-    (which is then net of it, so every sum counts it once); None when nothing was queued.  `lost`
-    None means the collect raised; a take lost to anything but a boundary stop fails the row.
+    """The render span's own timing row: `take_render`, on the gpu, a DETAIL row within the takes row
+    (its span in `span_s`, `seconds` 0: the CPU lane's take_dq rows already count those moments, see
+    episode_clock.DETAIL); None when nothing was queued.  `lost` None means the collect raised; a
+    take lost to anything but a boundary stop fails the row.
     Deadline retro 2026-10-20: ep01's 84.7 min of renders over 3 spans had no row of their own."""
     if not jobs:
         return None
     from studio import episode_clock
     ok = lost is not None and all(said == BOUNDARY for _, said in lost)
     return episode_clock.stamp(book, number, "take_render", began, ended, ok=ok, note=render_note(jobs),
-                               within="takes", device="gpu")
+                               within="takes", device="gpu", detail=True)
 
 
 def render(c: dict, graph: dict, out: Path, approved: bool = False) -> dict:

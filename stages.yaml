@@ -561,7 +561,7 @@ stages:
       bind:         { step: "01", rounds: 1, per: pass,    wall_min: 2, read: step }
       plan:         { step: "02", rounds: 3, per: climb,   wall_min: 30, gate: PLAN, climbs: 2 }
       places:       { step: "03", rounds: 3, per: draw,    wall_min: 15 }
-      say:          { step: "04", rounds: 1, per: episode, wall_min: 15, read: step }   # the first saying of every line: work, never cut (ep01: 22 lines; 1,075 s first pass spent the 10 min re-say wall, retro 2026-10-20)
+      say:          { step: "04", rounds: 1, per: episode, wall_min: 15, read: step }   # the first saying of every line: a record row, never a cut -- say_lines books it, no reader stops on it (ep01: 22 lines; 1,075 s first pass spent the 10 min re-say wall, retro 2026-10-20)
       lines:        { step: "04", rounds: 1, per: episode, wall_min: 10, read: step }   # the re-say wall: every round after the first saying
       voice:        { step: "04", rounds: 2, per: episode, wall_min: 30 }
       timeline:     { step: "05", rounds: 1, per: pass,    wall_min: 2, read: step }
