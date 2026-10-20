@@ -341,29 +341,29 @@ Take currency: a take is kept only when it was rendered from the same prompt
 AND the same staged picture bytes (content-addressed names in its
 `graph.json`).
 
-**FACE REFINE GATE (owner 2026-10-17; round 2 2026-10-19; `studio/face_refine.decide`, measures
+**FACE REFINE GATE (owner 2026-10-17; round 2 + face-warp fix 2026-10-19; `studio/face_refine.decide`, measures
 `studio/face_gate.py`, calibration `docs/calibration/face_refine.md`).** Per refined crop of a soft face, at window
 scale: it must DIFFER from its source crop (mean |refined - source| >= 0.5, `SAME_MAX`: a refine returning its input
-passes every other wall); **identity**: CCIP distance to the sheet's face window (`studio/anime_id.py`) may not rise > 0.03 nor cross 0.1785 (same character); else facenet AND clip_vision_h must BOTH
+passes every other wall); **identity**: CCIP distance to the sheet's face window may not rise > 0.03 nor cross 0.1785 (same character); else facenet AND clip_vision_h must BOTH
 fall (> 0.05) to refuse; anime terms unread -> facenet alone (drop > 0.05); **drift** (mean |refined - take| inside
-the face box) <= 35; **seam** (|refined - take| weighted by the paste mask's slope outside the head; via the feather, round 1's band seam) <= 18;
-face-region **flicker** pasted <= 1.10 x the take's + 0.5; **faces**: no clone, no loss. The drawn-eye score
+the face box) <= 35; **seam** (|refined - take| on the slope of round 1's feather band, a small face's soft head ring, outside the head) <= 18;
+the paste moves no pixel outside the face core (<= 1 level) and the **ring warp** (flow take -> paste, 1.2-1.8 core radii, px at 384) <= 0.25;
+**flicker** pasted <= 1.10 x the take's + 0.5; **faces**: no clone, no loss. The drawn-eye score
 (`studio/face_eye.py`) is logged, never a wall. A broken wall falls back to the unrefined take; every decision and its
 measures in `takes/r2v/refine.json`; a crop pastes only onto the take bytes it was made from (sha8). Walls fitted on
-round 1's 15 ep01 faces (12 kept; T01 x2, T07's child refused on the seam with either paste). **The paste**: at cut scale, before the one
-upscale (24caaeb); a face under 40 px (its window floored at 96 px) through a soft head mask (smoothstep from the
-head's edge to 1.8x, no sharpening), else the 8 % feather. **Tracking** (`studio/face_track.py`): a weak face (0.3-0.6)
+round 1's 15 ep01 faces (12 kept). **The paste**: at cut scale, before the one upscale; ONLY the face core (ellipse
+0.55 x 0.65 face heights round the tracked face, feather inside), any size; in its band the take's low frequencies,
+the redraw's lines; hat, hair, collar, background stay the take's. **Tracking** (`studio/face_track.py`): a weak face (0.3-0.6)
 only continues a track; detections go to tracks by least cost (motion, size, head colour); a head must read >= the track's own reading - 0.15; bodies make only far figures; the crop is the soft
 span (on < 120 px, off > 150) on H3's grid inside its shot, one frozen side. CLOCK: priced 110 s per face per 192 frames; runs only while
 `leaves_reserve(step, price + 550 s)`, else `REFINE CUT`, status `cut`. **Selection**: no plan size, no face-at-end;
-every take with a planned face but an insert, whose dq lets it ship; each track whose smallest face (running median
-over 51 frames) is under 120 px is refined. A take whose every planned face the warp gate tracked >= 80 % of it at
+every take with a planned face but an insert, whose dq lets it ship; each track whose smallest face (median over 51
+frames) is under 120 px is refined. A take whose every planned face the warp gate tracked >= 80 % of it at
 >= 120 px at its SMALLEST (`min_px`, never the median) is declined before tracking. Priced per face not already
 readable (`fr.soft_faces`). Denoise `fr.denoise_for`: 0.45 at 60 px, +0.05 per halving, 0.40-0.55. `none_found` /
-`all_readable` / `no_cast` spend no round; a `no_faces` row of the old 60 px wall is owed a new look. A warp, gait,
+`all_readable` / `no_cast` spend no round. A warp, gait,
 pulse, frozen-whole, lip-sync or lag hard fail may follow the refine (a warp FAIL after its one seed retake);
 identity, clones, content, lettering, look and leak still bar it. History: LESSONS_ARCHIVE.md.
-A failed anime-worker ask (its 120 s idle exit) starts one fresh worker.
 
 **TINY-FACE RUNG (09_08, 2026-10-19, `scripts/episode/tiny_face.py`).** A take whose refine refused (seam or drift,
 current bytes) a planned face (shot face or speaker) of 20-40 px at its smallest (`min_px`), on the Spark graph

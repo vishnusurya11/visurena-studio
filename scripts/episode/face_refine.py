@@ -445,6 +445,13 @@ class Run:
     windows: list
     face_px: float
     soft: bool
+    faces: list = field(default_factory=list)
+
+
+def faces_in(boxes: np.ndarray, windows: list) -> list[list[float]]:
+    """Each frame's face (x, y, height) as shares of its window: where the paste centres the face core."""
+    return [[round(((b[0] + b[2]) / 2 - x) / s, 4), round(((b[1] + b[3]) / 2 - y) / s, 4), round((b[3] - b[1]) / s, 4)]
+            for b, (x, y, s) in zip(boxes, windows)]
 
 
 def run_of(track: list, frames: int, width: int, height_: int, cuts: list[int]) -> Run:
@@ -455,7 +462,8 @@ def run_of(track: list, frames: int, width: int, height_: int, cuts: list[int]) 
     boxes = face_track.fill(track, frames)
     side = face_track.frozen_side(boxes, life, width, height_)
     px = round(float(np.median(boxes[life[0]:life[1] + 1, 3] - boxes[life[0]:life[1] + 1, 1])), 1)
-    return Run(start, n, life, side, face_track.windows(boxes, width, height_, side), px, face_paste.soft(px))
+    wins = face_track.windows(boxes, width, height_, side)
+    return Run(start, n, life, side, wins, px, face_paste.soft(px), faces_in(boxes, wins))
 
 
 def queue_take(book: Path, number: int, index: int, card: dict, engine, loose, detect, embed, find) -> TakeWork:
@@ -499,7 +507,7 @@ def track_doc(job: Job, run: Run) -> dict:
     """The track file assemble pastes from (studio/face_paste.kept_tracks)."""
     return {"windows": [list(v) for v in run.windows], "life": list(run.life), "start": run.start,
             "frames": run.frames, "who": job.person.who, "denoise": job.denoise, "face_px": run.face_px,
-            "side": run.side, "soft": run.soft, "source": job.source, "lost": job.lost}
+            "side": run.side, "soft": run.soft, "source": job.source, "lost": job.lost, "faces": run.faces}
 
 
 # ---- collecting and gating ------------------------------------------------------------

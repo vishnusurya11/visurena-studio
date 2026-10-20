@@ -67,6 +67,13 @@ DRIFT_MAX = 35.0
 """Mean |refined - take| inside the face box (T8mars Parity Stitch's idea, ported): round 1's own
 faces 11.6-31.6 (T07's child, a faceless blob given its face, the top); another row's refined face
 against a take's face (64 px regions, 210 pairs) reads from 23.9, p5 32.4, median 48.9."""
+OUTSIDE_MAX = 1.0
+"""The most any pixel outside the face core's mask may move in the paste (levels; rounding only): the
+take's hat, hair, collar and background are never the redraw's (owner 2026-10-19, ep01 iter2 warp)."""
+RING_WARP_MAX = 0.25
+"""The ring warp wall (px at 384, studio/face_gate.ring_warp), from the ep01 replay of the 14 kept crops
+(docs/calibration/face_refine.md, face-warp replay): the square paste read 0.89-2.75, the face-core
+paste 0.00-0.01; the take against itself reads 0, iter1 against iter2 outside the pastes 0.02."""
 CCIP_RISE = 0.03
 CLIP_DROP = 0.05
 """The anime identity walls (PLAN_FINAL section 3): CCIP distance to the sheet may not rise by
@@ -332,6 +339,18 @@ class Measures:
     ccip_ref: float | None = None
     clip_src: float | None = None
     clip_ref: float | None = None
+    outside: float | None = None
+    ring_warp: float | None = None
+
+
+def paste_refusals(m: Measures) -> list[str]:
+    """The paste moved the take outside the face core, or warped the ring round it."""
+    out = []
+    if m.outside is not None and m.outside > OUTSIDE_MAX:
+        out.append(f"outside the face moved {m.outside:.1f} > {OUTSIDE_MAX}")
+    if m.ring_warp is not None and m.ring_warp > RING_WARP_MAX:
+        out.append(f"ring warp {m.ring_warp:.2f} > {RING_WARP_MAX}")
+    return out
 
 
 def face_refusal(src: int, ref: int) -> str:
@@ -382,6 +401,7 @@ def refusals(m: Measures) -> list[str]:
         out.append(f"drift {m.drift:.1f} > {DRIFT_MAX}")
     if m.seam > SEAM_MAX:
         out.append(f"seam {m.seam:.1f} > {SEAM_MAX}")
+    out += paste_refusals(m)
     if m.flick_ref > m.flick_src * FLICKER_RATIO + FLICKER_SLACK:
         out.append(f"flicker {m.flick_ref:.2f} > {m.flick_src:.2f} x {FLICKER_RATIO} + {FLICKER_SLACK}")
     if said := face_refusal(m.faces_src, m.faces_ref):

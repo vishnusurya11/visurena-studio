@@ -1951,6 +1951,24 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   `tests/test_face_refine_runs_round_two.py`, `tests/test_face_detect_answers_weak_faces_and_bodies.py`
   (fixture `tests/fixtures/face_blur_round1_rows.json`).
 
+### Face-warp fix (2026-10-19): the paste is the face core only
+
+- Owner on ep01 master_iter2: "the face fix and eye fix is warping the video around". The square paste
+  carried H3's redraw of hat, hair, collar and background; its lines sat 1-4 px off and wandered, and the
+  flicker wall passed it (flicker FELL). A gate that reads only the paste's outer band cannot see what
+  the paste changes inside it: measure the ring round the thing you replaced.
+- Rule: outside the face core every pixel is the take's (`face_paste.paste_mask`, exact 0 beyond the
+  outline); the feather lies inside; the band takes the take's low frequencies (`band_lock`). Gate walls:
+  outside moved <= 1, ring warp <= 0.25 px at 384 (`face_gate.paste_check`). The old seam ruler stays.
+- Replay before wiring: every arm on the real crops at $0 (docs/calibration/face_refine.md). Two plausible
+  cures failed there: a similarity registration blurred the eyes, a per-frame Lab match flickered.
+- Moved here from GATES.md: a failed anime-worker ask (its 120 s idle exit) starts one fresh worker; a
+  `no_faces` row of the old 60 px wall is owed a new look.
+- The av3 worker's `spans_back` had dropped `Track.face`, so a soft face pasted through the feather on
+  the av3 path; it now carries `face` and `faces`.
+- Tests: `tests/test_the_face_paste_keeps_the_take_outside_the_face.py`, the seam rulers in
+  `tests/test_face_gate_reads_the_seam_at_any_face_size.py`, `tests/test_face_refine_pastes_a_small_face_softly.py`.
+
 ## The tiny-face rung (09_08, face-blur round 2 builder, 2026-10-19)
 
 - **Why.** The refine refused ep01 T01's two faces (Utterson 36 px, Enfield 30 px at their smallest; seam 19.1

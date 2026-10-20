@@ -289,7 +289,8 @@ def spans_json(spans: list[fp.Span]) -> list[dict]:
 def spans_back(rows: list[dict]) -> list[fp.Span]:
     """The face paste's spans as the repo built them, rebuilt in the worker."""
     def track(t):
-        return fp.Track([tuple(w) for w in t["windows"]], tuple(t["life"]), int(t["start"]), str(t["crop"]))
+        return fp.Track([tuple(w) for w in t["windows"]], tuple(t["life"]), int(t["start"]), str(t["crop"]),
+                        t.get("face"), fp.faces_of(t))
     return [fp.Span(int(r["index"]), int(r["start"]), int(r["frames"]), int(r["head"]), float(r["slow"]),
                     tuple(r["guard"]) if r["guard"] else None, tuple(track(t) for t in r["tracks"])) for r in rows]
 

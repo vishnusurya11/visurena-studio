@@ -209,6 +209,54 @@ about +2.5 min more CPU, overlapped with renders. The fix round's tracker adds a
 Still owed: the bench's round-2 GPU arm (render with the new runs and soft paste, owner's eye on the
 strips); the 0.4 colour floor, the 24 px body line and DRIFT_MAX 35 are one episode's numbers.
 
+## Face-warp fix: paste the face core only (2026-10-19)
+
+Owner, ep01 master_iter2: "the face fix and eye fix is warping the video around" the head. The audit
+(`docs/audit/2026-10-19_face_warp/audit_our_paste.md`, PLAN.md) measured the cause: 9 of 11 tracks pasted
+the whole re-rendered square through an 8 % feather, so H3's redraw of the hat, hair, collar and background
+replaced the take's (ring MAD 6-13 against a 0.4 control, ink lines 1.3-3.7 px off at 384, wandering with
+std 0.2-2.0 px). The flicker wall and the outer-band seam could not see it.
+
+**The paste now** (`studio/face_paste.paste_mask`, `band_lock`, `Paster.paste_one`): only a face-core ellipse,
+0.55 x 0.65 face heights round the tracked face (`faces` per frame in new track files, else the window's own
+face point), the feather 0.3 face heights INSIDE the outline, exactly 0 beyond it, the same rule at any face
+size. In the feather the take's low frequencies replace the redraw's (sigma 0.08 face heights), the redraw's
+ink lines stay. The crop is placed by the float box it was cut by (`box_at`, `face_in_patch`): the mask sits
+on the face to the sub-pixel; the patch itself is never resampled twice.
+
+**$0 CPU replay** (`docs/audit/2026-10-19_face_warp/replay/measures_replay.json`, strips in `replay/strips/`):
+the existing refined crops of the 14 kept ep01 tracks (T05 T06x2 T08 T09 T10x2 T13 T15 T18x2 T23 T26x2) pasted
+onto the delivered takes at 768, windows read at 384. R0 = the old paste (HEAD's `face_paste`), R1 = face
+core, R2a = R1 + band lock + per-frame Lab match on a ring, R2 = R2a + a ring-fitted similarity registration
+(DIS flow, LMEDS, smoothed over 9 frames), R3 = the production `Paster` (face core + band lock + float box).
+Harness check: R0's ring MAD sits within 3-7 % of the audit's master-scale numbers on 10 of 11 tracks (T06
+Hyde -14 %); its ring flow reads lower (0.90-2.57 vs 1.28-3.73) because the audit read the x4 master.
+
+| measure (ranges over 14 tracks) | R0 | R1 | R2a | R2 | R3 (chosen) |
+|---|---|---|---|---|---|
+| ring MAD (audit ring: old mask > 0.5 outside the face box) | 6.05-13.31 | 0.02-0.08 | 0.01-0.07 | 0.01-0.07 | 0.02-0.09 |
+| ring warp, Farneback px at 384 | 0.90-3.11 | 0.01-0.09 | 0.01-0.08 | 0.00-0.05 | 0.01-0.08 |
+| ring wobble, std of the ring's shift | 0.15-2.06 | 0.00-0.07 | 0.00-0.06 | 0.00-0.04 | 0.00-0.06 |
+| gate ring warp (1.2-1.8 core radii) | 0.89-2.75 | 0.00-0.01 | 0.00-0.01 | 0.00 | 0.00-0.01 |
+| pixels outside the mask moved | (whole square) | 0 | 0 | 0 | 0 |
+| outline low-frequency step | 3.63-11.92 | 0.96-3.81 | 0.64-2.67 | 0.63-2.03 | 0.88-2.61 |
+| eye band lines vs R0's redraw | 0 | 0.64-2.41 | 1.15-3.25 | 1.88-7.63 | 0.77-2.57 |
+| face flicker / the take's | 0.57-0.94 | 0.68-0.96 | 0.75-0.97 | 0.77-0.97 | 0.69-0.96 |
+
+Facenet to the sheet: R3 within -0.01 / +0.03 of R0 on every track (the face core is the same redraw). The
+gate on R3: old seam 6.0-16.0 (the logged 6.1-15.1, kept), flicker ratio 0.67-0.95, outside 0, ring warp
+<= 0.01: all 14 stay kept. By eye (strips take | R0 | R3): the take's hat band, brim, hair, ears, collar and
+background return (R0 had redrawn T18's background into a building and T13's hat band); the drawn eyes are
+the redraw's. Refused: R2's similarity warp (registration gained 5-10 %, 40 % only on T06 Hyde, and the
+resample blurred the eye lines 2-3x); R2a's Lab match (its per-frame L shift moves 0.9-3.2 levels frame to
+frame, a face-wide flicker, for 0.2-0.4 levels less outline step).
+
+**Walls**: `OUTSIDE_MAX` 1 level (rounding), `RING_WARP_MAX` 0.25 px at 384 (the old paste 0.89-2.75, the
+face core <= 0.01). The seam keeps round 1's ruler (feather band, a small face's soft head ring) and its
+wall 18; the flicker is read on the face-core paste. Residual, by eye: where H3 turned the head (T08's child)
+the redrawn face now sits in the take's hood, a pose mismatch the old square hid under a redrawn head; the
+GPU bench (PLAN.md 3b, masked re-render) is the next arm. Uncalibrated beyond ep01's 14 tracks.
+
 ## Tiny-face rung (2026-10-19, face-blur round 2 builder; `scripts/episode/tiny_face.py`)
 
 The refine's seam and drift refusals of a planned 20-40 px face (smallest tracked height, `min_px`) on a Spark

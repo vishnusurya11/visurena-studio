@@ -8,7 +8,8 @@ the head 2.6 and 6.5 -- all under the wall (the skeptic's probe).  The seam is n
 weighted by the mask's slope |grad m| outside the head: the change where the paste passes from the
 crop to the take.  It scales with the face (the soft ring is in head radii) and reads a uniform change
 D as D at any size.  Through the hard feather it is round 1's feather-band seam again (the bench's 15
-rows: within -1.3 / +0.8 of the logged value), so the wall returns to round 1's 18.
+rows: within -1.3 / +0.8 of the logged value), so the wall returns to round 1's 18.  Since the face-warp
+fix (2026-10-19) the paste is the face core alone; these rulers stay the seam's (studio/face_gate.seam_mask).
 Pure numpy: synthetic crops."""
 from __future__ import annotations
 
@@ -34,7 +35,7 @@ def shifted(frames, d):
 
 def halo(frames, face, d, out=1.3):
     """`d` levels added in a ring from the head's edge to `out` head radii."""
-    r = fp.head_radius(SIDE, face)
+    r = fg.head_radius(SIDE, face)
     ring = ((r > 1.0) & (r <= out))[..., None]
     return [np.clip(f.astype(int) + d * ring, 0, 255).astype(np.uint8) for f in frames]
 
@@ -61,7 +62,7 @@ def test_the_hard_feather_reads_a_level_change_as_itself():
 
 def test_a_change_inside_the_head_is_no_seam():
     src = take_like()
-    inside = fp.head_mask(SIDE, 20.0)[..., None]
+    inside = fg.head_mask(SIDE, 20.0)[..., None]
     ref = [np.clip(f.astype(int) + 80 * inside, 0, 255).astype(np.uint8) for f in src]
     seam, _, _ = fg.seam_and_flicker(src, ref, face=20 / SIDE, soft=True)
     assert seam < 1.0
@@ -78,7 +79,7 @@ def test_through_the_feather_the_seam_is_the_old_feather_band_difference():
 
 
 def test_the_seam_weights_are_the_masks_slope_outside_the_head():
-    mask, head = fp.paste_mask(SIDE, 20.0), fp.head_mask(SIDE, 20.0)
+    mask, head = fg.seam_mask(SIDE, 20.0), fg.head_mask(SIDE, 20.0)
     w = fg.edge_weight(mask, head)
     assert w.shape == (SIDE, SIDE) and w[head].sum() == 0 and w.sum() > 0
 

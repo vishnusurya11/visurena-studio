@@ -1,14 +1,14 @@
-"""A small face's refined crop is pasted through a soft head mask, and the seam is measured on what
-the paste does to the take around the head (face-blur round 2, 2026-10-19).
+"""A small face's seam is read on a soft ring round its head, and the seam is measured on what the
+redraw does to the take around the head (face-blur round 2, 2026-10-19; face-warp fix the same day).
 
 Round 1 refused T01 Utterson (36 px, seam 21.5), T01 Enfield (30 px, 20.1) and T07's child (38 px,
 23.9) on the wall of 18: their 96 px windows are floored (2.6-3.2 faces wide, not 2.4), the H3
 redraw repaints that background (a brick wall for shop panes, the railing erased), and the hard
-8 % feather pasted all of it.  The soft paste (community recipe: a soft feathered mask, no
-sharpening before the paste) keeps the head and fades to the take.  The seam is read where the
-mask falls (tests/test_face_gate_reads_the_seam_at_any_face_size.py); it reads a level change as
-itself through either mask, so the soft paste hides nothing from it: round 1's three still read
-19.8-25.1 through the soft mask and are refused.  Pure numpy."""
+8 % feather pasted all of it.  Round 2 pasted a soft head mask; the face-warp fix (owner: "the face
+fix and eye fix is warping the video around") pastes only the face core at every size
+(tests/test_the_face_paste_keeps_the_take_outside_the_face.py).  The soft head ring stays the seam's
+ruler (studio/face_gate.seam_mask): it reads a level change as itself through either ruler, so round
+1's three still read 19.8-25.1 and are refused.  Pure numpy."""
 from __future__ import annotations
 
 import numpy as np
@@ -25,22 +25,22 @@ def test_a_face_whose_window_is_floored_is_soft():
     assert fp.soft(38.0) and not fp.soft(41.0) and not fp.soft(None)
 
 
-def test_the_soft_mask_keeps_the_head_and_fades_to_nothing_at_the_window_edge():
-    m = fp.soft_mask(96, 36.0)[..., 0]
-    cx, cy, rx, ry = fp.head_shape(96, 36.0)
+def test_the_soft_seam_ring_keeps_the_head_and_fades_to_nothing_at_the_window_edge():
+    m = fg.soft_mask(96, 36.0)[..., 0]
+    cx, cy, rx, ry = fg.head_shape(96, 36.0)
     assert m[int(cy), int(cx)] == pytest.approx(1.0, abs=1e-3)
     edge = fp.feather(96, 8)[0, :, 0].max()          # the hard feather's own edge, ~0.04
     assert max(m[0, :].max(), m[:, 0].max(), m[-1, :].max(), m[:, -1].max()) <= edge + 1e-6
     assert m[:, 0].max() < 0.01                           # beside the head the soft mask is already gone
 
 
-def test_the_soft_mask_is_smooth_no_step_anywhere():
-    m = fp.soft_mask(96, 36.0)[..., 0]
+def test_the_soft_seam_ring_is_smooth_no_step_anywhere():
+    m = fg.soft_mask(96, 36.0)[..., 0]
     assert np.abs(np.diff(m, axis=0)).max() < 0.2 and np.abs(np.diff(m, axis=1)).max() < 0.2
 
 
-def test_a_hard_track_keeps_the_feather():
-    assert np.array_equal(fp.paste_mask(120, None), fp.feather(120, max(4, round(120 * fp.FEATHER_SHARE))))
+def test_a_big_face_reads_its_seam_on_the_windows_feather_band():
+    assert np.array_equal(fg.seam_mask(120, None), fp.feather(120, max(4, round(120 * fp.FEATHER_SHARE))))
 
 
 def test_the_paste_never_sharpens_a_flat_patch():
@@ -62,8 +62,8 @@ def test_identical_crops_have_no_seam():
     assert seam == 0.0
 
 
-def test_a_redrawn_background_reads_the_same_through_either_paste():
-    """A level change is a level change: the soft mask spreads the edge, it does not hide it."""
+def test_a_redrawn_background_reads_the_same_through_either_ruler():
+    """A level change is a level change: the soft ring spreads the edge, it does not hide it."""
     src = take_like()
     ref = [np.clip(s.astype(int) + 30, 0, 255).astype(np.uint8) for s in src]
     soft, _, _ = fg.seam_and_flicker(src, ref, face=36 / 96, soft=True)
@@ -82,7 +82,7 @@ def test_the_seam_wall_is_round_ones_wall():
     assert fr.SEAM_MAX == 18.0
 
 
-def test_a_kept_soft_track_is_pasted_through_its_soft_mask(tmp_path):
+def test_a_kept_soft_track_carries_its_face_size(tmp_path):
     import json
     room = tmp_path
     (room / "refine").mkdir()
@@ -93,7 +93,7 @@ def test_a_kept_soft_track_is_pasted_through_its_soft_mask(tmp_path):
     assert track.face == pytest.approx(36 / 96)
 
 
-def test_an_old_track_file_keeps_the_hard_feather(tmp_path):
+def test_an_old_track_file_has_no_face_size(tmp_path):
     import json
     (tmp_path / "refine").mkdir()
     (tmp_path / "refine" / "T01_p0.json").write_text(json.dumps({"windows": [[0, 0, 96]], "life": [0, 0], "start": 0}))
