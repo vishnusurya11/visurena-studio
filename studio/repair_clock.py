@@ -182,10 +182,14 @@ def history(home) -> list[dict]:
 
 
 def finish_part(home) -> str:
-    """The finish line's repair part: every repair run's hours, against the latest window's cap; ''
-    when the episode never ran a repair."""
-    total = run_clock.repair_spent(home)
-    windows = ([read(home)] if read(home) else []) or history(home)[-1:]
-    if total <= 0 or not windows:
+    """The finish line's repair part: each repair window's hours against its OWN cap, the redone steps
+    named when there are several; '' when the episode never ran a repair.  Deadline retro 2026-10-20:
+    ep01's line summed two repairs against the second cap ("1.83 h of a 0.63 h cap"); each stayed inside
+    its own (5,788 of 8,580 s, 790 of 2,280 s)."""
+    parts = [(row["spent_s"], row) for row in history(home)]
+    parts += [(spent(home, w), w) for w in [read(home)] if w]
+    if sum(s for s, _ in parts) <= 0:
         return ""
-    return f" | repair {total / 3600:.2f} h of a {windows[-1]['cap_s'] / 3600:.2f} h cap"
+    named = len(parts) > 1
+    return " | repair " + ", ".join(f"{s / 3600:.2f} h of a {w['cap_s'] / 3600:.2f} h cap"
+                                    + (f" ({','.join(w['steps'])})" if named else "") for s, w in parts)

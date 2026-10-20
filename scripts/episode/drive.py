@@ -21,6 +21,11 @@ any tracked change or any untracked file OUTSIDE library/, so a sibling
 session writing book data under library/<book>/ never blocks a drive, while
 any code edit does until it is committed -- one episode runs on one commit
 (fix #7), and a drive on moved code says so out loud.
+
+THE DRY CHECK REFUSES (deadline retro item 1, 2026-10-20): a launch of a DELIVERED episode runs
+repair_dry_check.preflight first -- the real deciders, never a counter -- and exits 2 with a
+`REFUSED to start: the dry check ...` run log when a delivered take would be written without a named
+owner order (all three stopped ep01 repair launches of 2026-10-19 were found by launching).
 """
 from __future__ import annotations
 
@@ -158,6 +163,27 @@ def leftover_window(home: Path, conn=None, say=None) -> dict | None:
     return closed
 
 
+def dry_check(codex: str, number: int) -> list[str]:
+    """The dry check the launch runs itself (deadline retro item 1, 2026-10-20): [] lets it go; else the
+    lines that refuse it -- a delivered take some decider would write without a named owner order."""
+    from scripts.episode import repair_dry_check
+    from studio import db
+    return repair_dry_check.preflight(db.get_connection(), codex, number)
+
+
+def refuse_launch(home: Path, label: str, lines: list[str]) -> int:
+    """A refused launch is a run that refused: its lines in this launch's run log (the autopilot reads that
+    tail), a run row and an end row that closes no repair window (the owner's order stays owed)."""
+    sha, n, text = git("rev-parse", "HEAD").strip(), first_log_number(home), "\n".join(lines) + "\n"
+    (home / f"drive_run{n:02d}.log").write_text(text, encoding="utf-8", newline="\n")
+    ledger(home, {"event": "start", "sha": sha})
+    ledger(home, run_row(n, sha, text))
+    ledger(home, {"event": "end", "code": 2, "sha": sha, "clock_spent": False, "paused_at_boundary": False,
+                  "refused": "dry_check"})
+    notify(f"{label}: " + "\n".join(lines))
+    return 2
+
+
 def main(codex: str, number: int) -> int:
     label = f"{codex} ep{number:02d}"
     if episode_drive.dirty(git("status", "--porcelain")):
@@ -165,6 +191,8 @@ def main(codex: str, number: int) -> int:
         return 2
     home = episode_home.home(episode_home.book_dir(codex), number)
     home.mkdir(parents=True, exist_ok=True)
+    if refused := dry_check(codex, number):
+        return refuse_launch(home, label, refused)
     # THE BOOK'S TITLE CARDS EXIST BEFORE ANY EPISODE RUNS (owner design,
     # 2026-09-30): the card depends only on the book, so it is baked book-wide
     # in one i2v session, outside the episode's clock, never mid-run.

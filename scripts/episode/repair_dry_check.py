@@ -18,7 +18,11 @@ It reports:
     (take_overlap.early_cures, take_ladder.still_curable / route / batch_for) on the episode's records
     under the window -- never inferred from a counter (incident 2, 2026-10-19 12:29 PDT) -- and the
     ladder.json rounds the next launch counts;
-  - what steps 10-13 would do.
+  - what steps 10-13 would do;
+  - THE LAUNCH'S VERDICT (`preflight`, deadline retro item 1, 2026-10-20): drive.py runs it before any GPU
+    second and refuses (exit 2) when a delivered take would be written without a named owner order -- by
+    the render pass, the early round, the batched rung, the terminal swap, or past the freeze.  This
+    command exits 1 on the same verdict.
 
 INCIDENT 2026-10-19 11:18 PDT: RERUN.md said "every take is current" without reading the files; the
 launch queued all 28 of Jekyll HEL ep01's takes over P03's reworded prompts.  A rerun's "nothing renders"
@@ -26,6 +30,8 @@ claim is proven by this check on the real episode before the launch (LESSONS).
 """
 from __future__ import annotations
 
+import json
+import re
 import subprocess
 import sys
 import time
@@ -401,20 +407,158 @@ def swap_block(home: Path, window: dict | None) -> list[str]:
 def swap_lines(home: Path, window: dict | None, runner) -> list[str]:
     """One line per take whose archived draw beats it (take_ladder.pick_best; nothing moves): KEPT when
     the repair froze its bytes, else SWAPS."""
+    return [f"  {take.stem} best draw attempts/{best.name} ({measure(scored[best])}) over the take "
+            f"({measure(scored[take])}): " + (f"KEPT, {froze} bytes frozen" if froze else "SWAPS")
+            for take, best, scored, froze in swaps(home, window, runner)]
+
+
+def swaps(home: Path, window: dict | None, runner) -> list[tuple]:
+    """(take, best draw, scores, why frozen or None) for every take an archived draw beats."""
     from studio import take_ladder
     room, out = Path(home) / TAKES, []
     for take in sorted(room.glob("T??.mp4")):
         scored = take_ladder.scored_draws(room, int(take.stem[1:3]), runner)
         best = take_ladder.pick_best(room, int(take.stem[1:3]), runner, scored)
         if best is not None:
-            froze = tc.frozen_in(window, take, home)
-            out.append(f"  {take.stem} best draw attempts/{best.name} ({measure(scored[best])}) over the take "
-                       f"({measure(scored[take])}): " + (f"KEPT, {froze} bytes frozen" if froze else "SWAPS"))
+            out.append((take, best, scored, tc.frozen_in(window, take, home)))
     return out
 
 
 def measure(m: dict) -> str:
     return f"hard {m['hard']}, Se {m.get('Se')}"
+
+
+# ---- the launch refuses (deadline retro item 1, 2026-10-20) -------------------------------------------
+# Every drive launch of a delivered episode runs this (drive.py) and refuses when a delivered take would be
+# written without a named owner order.  All three stopped repair launches of ep01 (2026-10-19 11:18, 12:29,
+# 13:54 PDT) were found by launching: this check existed, read counters, and nothing called it (RC2).
+
+TAKE_NAMED = re.compile(r"\bT(\d{2})\b")
+"""How an owner order names a take: `T05` in its note (studio_cli.py redo ... --note "retake T05: hands")."""
+DELIVERED_TAKE = re.compile(r"takes/r2v/T(\d{2})\.mp4$")
+RENDER_PASS = "render pass (takes_r2v.wants_render)"
+EARLY = "early round (take_overlap.early_cures)"
+RUNG = "take ladder (take_ladder.route -> batch_for)"
+SWAP = "terminal best-draw swap (take_ladder.pick_best)"
+FREEZE = "freeze (take_currency.frozen_in: what every T<nn>.mp4 writer asks)"
+
+
+def owner_orders(conn, home: Path, codex: str, number: int) -> list[dict]:
+    """The owner's redo orders this launch carries: receipted beside the episode (K12) or still pending for
+    its unit.  An autopilot cure is never one."""
+    ids = sorted(set(work_orders.owner_receipts(conn, home).values()))
+    marks = ",".join("?" * len(ids))
+    taken = [dict(r) for r in conn.execute(f"SELECT * FROM orders WHERE id IN ({marks})", ids)] if ids else []
+    pending = [dict(r) for r in work_orders.pending_orders(conn, codex, "episode", f"ep{number:02d}")
+               if r["kind"] == "redo" and r["by"] == "owner"]
+    return taken + pending
+
+
+def launch_window(conn, home: Path, orders: list[dict]) -> dict | None:
+    """The repair the launch's step 09 runs under: a backed open window; else the one the owner's orders
+    open at launch; else the row that governs today (take_currency.governing -- a leftover window no
+    receipt backs is closed into that same row at drive start)."""
+    window = repair_clock.read(home)
+    if window is not None and repair_clock.backed(conn, home, window):
+        return window
+    steps = {str(o["step_id"]): int(o["id"]) for o in orders if o.get("step_id")}
+    if steps:
+        return {"opened_at": time.time(), "cap_s": repair_clock.cap_for(list(steps)), "steps": sorted(steps),
+                "orders": steps}
+    return tc.governing(home)
+
+
+def delivered_takes(home: Path) -> set[int]:
+    """The takes step 12's manifest.json delivered (its `takes/r2v/T<nn>.mp4` rows)."""
+    try:
+        rows = json.loads((Path(home) / "manifest.json").read_text(encoding="utf-8")).get("inputs") or []
+    except (OSError, ValueError, AttributeError):
+        return set()
+    return {int(m.group(1)) for r in rows if (m := DELIVERED_TAKE.search(str(r.get("path", ""))))}
+
+
+def would_render(home: Path, window: dict | None, rows: dict[int, tuple[str, str]]) -> dict[str, set[int]]:
+    """site -> the takes it would write, each asked of its own decider under `window`; nothing is written."""
+    from studio import take_ladder
+    room, since = Path(home) / TAKES, run_budget.clock_reset_epoch(home)
+    ctx = SimpleNamespace(home=Path(home), budget=budget_of(home, window)[0])
+    return {RENDER_PASS: {i for i, (state, _) in rows.items() if state == "render"},
+            EARLY: set(early_batch(room, since, window)),
+            RUNG: set(rung_batch(ctx, room, since, window)),
+            SWAP: {int(t.stem[1:3]) for t, _, _, froze in swaps(home, window, take_ladder.recorded_draw) if not froze},
+            FREEZE: unfrozen(home, window)}
+
+
+def early_batch(room: Path, since: float, window: dict | None) -> dict:
+    """The early round's cures over every measured take.  Affordability is the live budget's call, so a take
+    in the batch counts even when today's frozen clock could not pay it."""
+    from studio import take_overlap
+    return take_overlap.early_cures(room, measured_takes(room), since, window=window)
+
+
+def rung_batch(ctx, room: Path, since: float, window: dict | None) -> dict:
+    """The batched rung's batch (route -> batch_for); none when still_curable's counters close the climb."""
+    from studio import take_ladder
+    if climb_closed(ctx.home, room, since):
+        return {}
+    routed = take_ladder.route(recorded_verdict(room)[0], room, try_i=take_ladder.rounds_of(room, since) + 1,
+                               window=window)
+    return take_ladder.batch_for(ctx, take_ladder.BATCH, routed, [], records_of(room), since)[3]
+
+
+def unfrozen(home: Path, window: dict | None) -> set[int]:
+    """Under a repair of 09 or later, the takes on disk the freeze does not hold: their bytes are neither
+    the manifest's nor their dq record's, so no writer's guard keeps them."""
+    if window is None or min(window.get("steps") or ["00"]) < tc.FREEZE_FROM:
+        return set()
+    room = Path(home) / TAKES
+    return {int(t.stem[1:3]) for t in room.glob("T??.mp4") if tc.frozen_in(window, t, home) is None}
+
+
+def unordered(would: dict[str, set[int]], delivered: set[int], orders: list[dict]) -> dict[str, list[int]]:
+    """site -> the delivered takes it would write that no owner order names; {} when the owner redid a step
+    before 09 (the takes' inputs moved: every take it re-renders is ordered)."""
+    if any(str(o.get("step_id") or "99") < tc.FREEZE_FROM for o in orders):
+        return {}
+    named = {int(m) for o in orders for m in TAKE_NAMED.findall(o.get("note") or "")}
+    return {site: sorted(left) for site, takes in would.items() if (left := (takes & delivered) - named)}
+
+
+def refusal_lines(left: dict[str, list[int]]) -> list[str]:
+    """[] when nothing is left; else the REFUSED line (the autopilot reads it) and one line per site."""
+    if not left:
+        return []
+    takes = sorted({i for site in left.values() for i in site})
+    head = (f"REFUSED to start: the dry check lists {len(takes)} delivered take(s) that would be written without "
+            f"a named owner order ({', '.join(f'T{i:02d}' for i in takes)}); name them in an owner order or fix "
+            f"the decider")
+    return [head] + [f"  {site}: {len(got)} take(s) {', '.join(f'T{i:02d}' for i in got)}"
+                     for site, got in left.items()]
+
+
+def refusals(conn, codex: str, number: int) -> list[str]:
+    """[] when the launch may go; else what refuses it.  An undelivered episode is never refused."""
+    home = episode_home.home(episode_home.book_dir(codex), number)
+    if not repair_clock.delivered(home):
+        return []
+    orders = owner_orders(conn, home, codex, number)
+    window = launch_window(conn, home, orders)
+    would = would_render(home, window, render_rows(codex, number, home, window))
+    return refusal_lines(unordered(would, delivered_takes(home), orders))
+
+
+def preflight(conn, codex: str, number: int) -> list[str]:
+    """What drive.py runs before any GPU second: `refusals`, refused too when the check cannot run or
+    writes into the episode (a delivered episode launches only on a dry check that ran clean)."""
+    home = episode_home.home(episode_home.book_dir(codex), number)
+    before = snapshot(home)
+    try:
+        said = refusals(conn, codex, number)
+    except Exception as why:                          # noqa: BLE001 -- fail closed, say what broke
+        return [f"REFUSED to start: the dry check could not run ({type(why).__name__}: {why})"]
+    if moved := changed(before, snapshot(home)):
+        return [f"REFUSED to start: the dry check wrote into the episode ({', '.join(moved)})"] + said
+    return said
 
 
 def main(codex: str, number: int, steps: list[str]) -> int:
@@ -423,12 +567,15 @@ def main(codex: str, number: int, steps: list[str]) -> int:
     head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
     print(f"DRY CHECK {codex} ep{number:02d} at {head}, {time.strftime('%Y-%m-%d %H:%M')} local; "
           f"owner redo of {', '.join(steps)} assumed", flush=True)
-    before = snapshot(home)
-    lines = report(db.get_connection(), codex, number, steps)
+    before, conn = snapshot(home), db.get_connection()
+    lines = report(conn, codex, number, steps)
     moved = changed(before, snapshot(home))
     print("\n".join(lines), flush=True)
     print(f"\nepisode untouched: {'yes' if not moved else 'NO -- ' + ', '.join(moved)}", flush=True)
-    return 1 if moved else 0
+    refused = preflight(conn, codex, number)
+    print("\nthe launch: " + ("\n".join(refused) if refused else "goes (no delivered take written unordered)"),
+          flush=True)
+    return 1 if moved or refused else 0
 
 
 def steps_arg(argv: list[str]) -> list[str]:
