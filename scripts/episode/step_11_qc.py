@@ -22,8 +22,8 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.episode import eye_review  # noqa: E402
-from studio import comfy, episode_home, judged_gate, master_ladder, panel_content as pc  # noqa: E402
+from scripts.episode import eye_review, face_refine as refine_step  # noqa: E402
+from studio import comfy, episode_home, face_strip as fs, judged_gate, master_ladder, panel_content as pc  # noqa: E402
 from studio import ceiling, gate_policy, step_cli, youtube_publish as yp  # noqa: E402
 from studio.judges import master_eye  # noqa: E402
 
@@ -100,8 +100,8 @@ def grab_frames(work: Path):
     return frames
 
 
-def vlm_reader(work: Path):
-    """`reader=`: one frame staged as a picture and read by the local VLM."""
+def vlm_reader(work: Path, ask: str = ASK):
+    """`reader=`: one frame staged as a picture and read by the local VLM, asked `ask`."""
     from PIL import Image
 
     def reader(frame: np.ndarray) -> str:
@@ -110,7 +110,7 @@ def vlm_reader(work: Path):
         Image.fromarray(np.asarray(frame).astype(np.uint8)).save(path)
         # cached_text (five-hour plan fix 5): an unchanged master's re-read is
         # free, and the answer cache keys on the frame's own bytes.
-        said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": ASK,
+        said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": ask,
                                             "seed": 11, "max_new_tokens": 1024},
                                  readable=lambda text: bool(text and text.strip()))
         return said if isinstance(said, str) else str(said)
@@ -129,15 +129,46 @@ def face_embed():
     return faces
 
 
+def face_boxes():
+    """`detect=`: the face boxes in one master frame, by the eye's own CPU detector (MTCNN)."""
+    from studio.measure import faces as fz
+    detect, _embed = fz.embedder()
+    return lambda frame: [f["box"] for f in detect(np.asarray(frame).astype(np.uint8))]
+
+
 def tools(home: Path) -> dict:
     work = Path(home) / "review" / "work" / "eye"
-    return {"frames": grab_frames(work), "reader": vlm_reader(work), "embed": face_embed()}
+    return {"frames": grab_frames(work), "reader": vlm_reader(work), "embed": face_embed(),
+            "detect": face_boxes(), "face_reader": vlm_reader(work, master_eye.FACE_ASK)}
+
+
+EYE_KIT = ("frames", "reader", "embed", "cache")
+"""The kit master_eye.read takes; `detect` is the strip's, `face_reader` is passed by name."""
+
+
+def face_strip(home: Path, master: Path, placed: dict, kit: dict) -> list[dict]:
+    """The face contact strip for THESE master bytes (studio/face_strip; CPU: ffmpeg + the detector),
+    tiered by step 09's face list; [] when the kit carries no detector."""
+    if "detect" not in kit:
+        return []
+    room = Path(home) / "takes" / "r2v"
+    records = episode_home.read_json(room / "shots.json") if (room / "shots.json").exists() else []
+    dead_path = Path(home) / "takes" / "work" / "dead_cuts.json"
+    dead = episode_home.read_json(dead_path) if dead_path.exists() else None
+    return fs.build(home, master, yp.sha8(master), refine_step.read_face_list(room), placed, records,
+                    kit["frames"], kit["detect"], dead)
 
 
 def read_master(home: Path, master: Path, plan: dict, placed: dict, tools_: dict | None = None):
-    """(verdict, measures) from the master eye over the real tools unless given."""
+    """(verdict, measures) from the master eye over the real tools unless given; the face strip is
+    cut first, read by the eye, and its reads kept in the owner's labels file."""
     kit = tools_ or {**tools(home), "cache": master_eye.EyeCache(home, WORKFLOW, master_eye.sha8_text(ASK))}
-    return master_eye.read(home, master, plan, placed, **kit)
+    strip = face_strip(home, master, placed, kit)
+    eye = {k: v for k, v in kit.items() if k in EYE_KIT}
+    verdict, m = master_eye.read(home, master, plan, placed, **eye, strip=strip, face_reader=kit.get("face_reader"))
+    if strip:
+        fs.write_labels(home, yp.sha8(master), (m.get("face_strip") or {}).get("crops") or strip)
+    return verdict, m
 
 
 def contact_sheet(home: Path, master: Path, sha8: str) -> Path:
@@ -239,7 +270,14 @@ def judge_master(ctx, memo: dict):
     with episode_clock.timed(ctx.book_dir, ctx.number, "master_eye"), comfy.model_kept():
         verdict, measures = read_master(ctx.home, master, plan, placed)
     memo.update(verdict=verdict, measures=measures)
+    ctx.log(fs.line((measures or {}).get("face_strip") or {}, yp.sha8(master)), step_id=STEP_ID)
     return verdict
+
+
+def face_list_note(ctx) -> None:
+    """Step 09's face list said at QC (retro 2026-10-20 item 2): a WARNING line, never a qc fail."""
+    if said := refine_step.face_list_line(refine_step.read_face_list(ctx.home / "takes" / "r2v")):
+        ctx.log(said, step_id=STEP_ID, level="WARNING")
 
 
 def sign_master(ctx, memo: dict, verdict) -> Path:
@@ -272,6 +310,7 @@ def judged(ctx, extra: list[str]) -> Path:
 def run(ctx) -> None:
     extra = getattr(ctx, "extra", None) or []
     report = qc_report(ctx, extra)
+    face_list_note(ctx)
     if not rubric_signed(ctx.home, report["sha8"]):
         judged(ctx, extra)
     ctx.run_script("scripts/episode/dossier.py", clock="dossier")

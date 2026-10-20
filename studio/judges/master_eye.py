@@ -180,6 +180,45 @@ def body_faults(grouped: dict[int, list[Read]], flagged: list[int]) -> list[Faul
     return out
 
 
+# ---- the face strip (deadline retro 2026-10-20 item 4: log only, owner veto list V3) ----------
+
+FACE_WORDS = ("clear", "soft", "warped", "none")
+FACE_ASK = ('This is one face cut from a frame of a drawn film. Reply with JSON only: {"face": one of '
+            '"clear", "soft", "warped", "none"}. "clear": the eyes, nose and mouth are drawn and readable. '
+            '"soft": the eyes or the mouth are smeared, blurred or missing. "warped": the head or the face is '
+            'bent, melted, stretched or doubled. "none": there is no face in the picture.')
+"""The strip's question: a crop shown alone, its answer one word judged in code."""
+STRIP_NOTE = "log only (owner veto list V3): the strip reads are never a fault until owner labels calibrate them"
+
+
+def face_word(said) -> str:
+    """The reader's answer as one of FACE_WORDS: its `face` field, else the first word it says."""
+    text = said if isinstance(said, str) else str(said)
+    try:
+        got = pc._loads(text)
+        word = str(got.get("face") or "").lower().strip() if isinstance(got, dict) else ""
+    except pc.Unreadable:
+        word = ""
+    if word in FACE_WORDS:
+        return word
+    return next((w for w in WORD.findall(text.lower()) if w in FACE_WORDS), "unreadable")
+
+
+def read_strip(home: Path, strip: list[dict], reader: Reader | None) -> list[dict]:
+    """Each crop (review/<crop>) shown to the reader alone; `eye` is '' when no reader was given."""
+    out = []
+    for row in strip:
+        picture = np.asarray(Image.open(Path(home) / "review" / row["crop"]).convert("RGB")) if reader else None
+        out.append({**row, "eye": face_word(reader(picture)) if reader else ""})
+    return out
+
+
+def strip_measure(rows: list[dict]) -> dict:
+    """The strip's reads for the rubric and the labels file: never a fault (STRIP_NOTE)."""
+    said = {word: [r["take"] for r in rows if r["eye"] == word] for word in ("soft", "warped")}
+    return {"crops": rows, "read": sum(r["eye"] in FACE_WORDS for r in rows), **said, "note": STRIP_NOTE}
+
+
 # ---- the five fields ----------------------------------------------------------------
 
 def shadow(stats: list[dict]) -> tuple[bool, dict]:
@@ -504,8 +543,9 @@ def read_all(pics: list[np.ndarray], times: list[float], placed: dict, reader: R
 # ---- the judge -----------------------------------------------------------------------
 
 def measures(home: Path, master: Path, plan: dict, placed: dict, *, frames: Frames, reader: Reader,
-             embed: Embed, count: int = FRAMES, cache: "EyeCache | None" = None) -> dict:
-    """Every number the rubric is answered from, keyed by field, plus the reads."""
+             embed: Embed, count: int = FRAMES, cache: "EyeCache | None" = None,
+             strip: list[dict] | None = None, face_reader: Reader | None = None) -> dict:
+    """Every number the rubric is answered from, keyed by field, plus the reads and the face strip's."""
     flagged = flagged_shots(home)
     times = with_extra(sample_times(float(placed["duration_s"]), count), placed, flagged)
     pics = frames(master, times)
@@ -520,6 +560,7 @@ def measures(home: Path, master: Path, plan: dict, placed: dict, *, frames: Fram
             "repeats": repeats(near_pairs(representative(grouped, sigs), setups)),
             "story": story(turn, grouped),
             "take_identity": take_identity(home), "flagged": flagged,
+            "face_strip": strip_measure(read_strip(home, strip or [], face_reader)),
             "reads": reads, "grouped": grouped, "shots": shots}
 
 
@@ -577,9 +618,11 @@ def judge(home: Path, master: Path, plan: dict, placed: dict, *, frames: Frames,
 
 
 def read(home: Path, master: Path, plan: dict, placed: dict, *, frames: Frames, reader: Reader,
-         embed: Embed, count: int = FRAMES, cache: "EyeCache | None" = None) -> tuple[Verdict, dict]:
+         embed: Embed, count: int = FRAMES, cache: "EyeCache | None" = None,
+         strip: list[dict] | None = None, face_reader: Reader | None = None) -> tuple[Verdict, dict]:
     """(verdict, measures): the step keeps the measures to fill the rubric's y fields."""
-    m = measures(home, master, plan, placed, frames=frames, reader=reader, embed=embed, count=count, cache=cache)
+    m = measures(home, master, plan, placed, frames=frames, reader=reader, embed=embed, count=count, cache=cache,
+                 strip=strip, face_reader=face_reader)
     return verdict_of(m, plan), m
 
 
@@ -613,6 +656,8 @@ def rubric(v: Verdict, digest: str = "", master: str = "", contact: str = "", ev
     doc.update(notes=v.summary(), reviewed_by=v.signer, terminal=v.terminal,
                reviewed_at=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
                faults=[f.model_dump() for f in v.faults])
+    if (measures or {}).get("face_strip"):
+        doc["face_strip"] = measures["face_strip"]     # log only: beside the fields, never one of them
     return doc
 
 
