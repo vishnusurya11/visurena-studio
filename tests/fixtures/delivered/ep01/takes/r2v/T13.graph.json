@@ -1,0 +1,339 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "wuli_h3_turbo_8step_v1_F2_flbase_ref2va_hq_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "sheet_front_97205759.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "sheet_front_c367d8b2.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is Mr. Enfield in <Picture 1>: Receding brown hair; clean-shaven; dove-grey top hat with a wide brown hatband. Wearing: mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Mr. Utterson in <Picture 2>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the book's own anime kawajiri noir look.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the pavement directly before the sinister door on the by-street. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track. Every sign, plate, cheque and paper in the picture is plain and unlettered.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot over the near shoulder and back of the head of <Subject 2> toward <Subject 1> speaking on the pavement before the blistered door. The camera is on the pavement at shoulder height behind <Subject 2>; low sun from the LEFT. At the first frame the focus of the picture is <Subject 1>'s lined face at the CENTRE, his head a third of the frame's height. <Subject 2>'s black shoulder and the back of his bowler fill the RIGHT third in the foreground. The blistered door in its shadowed recess stands at the LEFT third behind <Subject 1>, the blind plaster wall at the TOP edge. The camera keeps over <Subject 2>'s shoulder across the whole shot as <Subject 1> speaks and taps his black walking cane on the flagstones, from 00:00 to 00:04. At 00:04 he tips his head toward the door at the LEFT third, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:08 while he speaks and taps his black walking cane on the flagstones. By 00:08 the action of that shot continues through the last frame, and <Subject 1> at the CENTRE, head tipped toward the door at the LEFT third, cane on the flagstones, <Subject 2>'s shoulder at the RIGHT third.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 209,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 82013
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_13",
+      "format": "mp4",
+      "format.codec": "h264",
+      "format.codec.encoding": "re-encode",
+      "format.codec.encoding.crf": 10.0
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "attn",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "attn": {
+    "class_type": "MiniMaxH3SparkAttentionSM89",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "mode": "fidelity",
+      "steps": 8,
+      "warmup_mode": "warmup_ratio",
+      "warmup_ratio": 0.2,
+      "warmup_steps": 4,
+      "topk_mode": "topk_ratio",
+      "topk_ratio": 0.2,
+      "topk_blocks": 228,
+      "dense_layers": 0,
+      "min_tokens": 12288,
+      "strict": true,
+      "dense_backend": "kitchen",
+      "tail_granularity": "query",
+      "reblock_layout": "q_reuse_k",
+      "sparse_scope": "target-video",
+      "producer_chunk": 16384
+    },
+    "_meta": {
+      "title": "MiniMax H3 Spark Attention (SM89), zechengtang/Spark-H3 v0.1.4"
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "shot_13_cb1645ac.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_13_a1612368.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "22": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "21",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}
