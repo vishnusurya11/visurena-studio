@@ -168,7 +168,7 @@ def dry_check(codex: str, number: int) -> list[str]:
     lines that refuse it -- a delivered take some decider would write without a named owner order."""
     from scripts.episode import repair_dry_check
     from studio import db
-    return repair_dry_check.preflight(db.get_connection(), codex, number)
+    return repair_dry_check.launch_preflight(db.get_connection, codex, number)
 
 
 def refuse_launch(home: Path, label: str, lines: list[str]) -> int:

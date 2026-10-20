@@ -554,11 +554,26 @@ def preflight(conn, codex: str, number: int) -> list[str]:
     before = snapshot(home)
     try:
         said = refusals(conn, codex, number)
-    except Exception as why:                          # noqa: BLE001 -- fail closed, say what broke
-        return [f"REFUSED to start: the dry check could not run ({type(why).__name__}: {why})"]
+    except (Exception, SystemExit) as why:            # noqa: BLE001 -- the render road refuses by SystemExit
+        return [cannot_run(why)]
     if moved := changed(before, snapshot(home)):
         return [f"REFUSED to start: the dry check wrote into the episode ({', '.join(moved)})"] + said
     return said
+
+
+def cannot_run(why: BaseException) -> str:
+    """The refusal of a dry check that could not run: fail closed and say what broke."""
+    return f"REFUSED to start: the dry check could not run ({type(why).__name__}: {why})"
+
+
+def launch_preflight(connect, codex: str, number: int) -> list[str]:
+    """`preflight` on the connection `connect` opens; a database that will not open refuses the same way,
+    so the launch still writes its refused run log and end row (skeptic, package A round 2)."""
+    try:
+        conn = connect()
+    except (Exception, SystemExit) as why:            # noqa: BLE001 -- fail closed
+        return [cannot_run(why)]
+    return preflight(conn, codex, number)
 
 
 def main(codex: str, number: int, steps: list[str]) -> int:

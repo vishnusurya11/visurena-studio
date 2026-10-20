@@ -187,6 +187,21 @@ def test_a_dry_check_that_cannot_run_refuses(conn, ep01, monkeypatch):
     assert said[0].startswith("REFUSED to start: the dry check could not run") and "KeyError" in said[0]
 
 
+def test_a_render_road_that_raises_systemexit_refuses(conn, ep01, monkeypatch):
+    """The real road (takes_r2v.opened/cards) refuses a plan with SystemExit -- G-LIGHT, chapter_faults --
+    a BaseException; it is a dry check that could not run, never an escape past the launch's records."""
+    def refuses(*a):
+        raise SystemExit("G-LIGHT refuses the plan")
+    monkeypatch.setattr(dry, "render_rows", refuses)
+    said = dry.preflight(conn, CODEX, 1)
+    assert said[0].startswith("REFUSED to start: the dry check could not run") and "G-LIGHT" in said[0]
+
+
+def test_an_owner_redo_with_no_step_orders_no_take_its_note_does_not_name():
+    """A whole-unit owner redo carries no step: counted as 09 or later, so only the takes its note names
+    are ordered (errs to refusing; the owner names the takes or the step)."""
+    assert dry.unordered({"x": {1, 2}}, {1, 2}, [{"step_id": None, "note": "redo T02"}]) == {"x": [1]}
+
 def test_the_dry_checks_own_command_exits_non_zero_on_a_refusal(conn, ep01, monkeypatch, capsys):
     from studio import db
     ordered(conn, ep01.home)
@@ -215,6 +230,36 @@ def test_the_drive_refuses_the_launch_before_any_run(conn, ep01, monkeypatch):
     assert [r["event"] for r in rows] == ["start", "run", "end"] and rows[1]["outcome"] == "refused"
     assert rows[2]["code"] == 2 and rows[2]["refused"] == "dry_check"
     assert "T27" in (ep01.home / "drive_run01.log").read_text(encoding="utf-8")
+
+
+
+def drive_rows(home: Path) -> list[dict]:
+    return [json.loads(line) for line in (home / "drive.jsonl").read_text(encoding="utf-8").splitlines()]
+
+
+def test_a_dry_check_that_raises_systemexit_is_a_recorded_refusal(conn, ep01, monkeypatch):
+    from scripts.episode import drive
+    from studio import db
+    monkeypatch.setattr(db, "get_connection", lambda *a, **k: conn)
+    monkeypatch.setattr(drive, "git", lambda *a: "" if a[0] == "status" else "abc123\n")
+    monkeypatch.setattr(drive, "notify", lambda text: None)
+    monkeypatch.setattr(dry, "render_rows", lambda *a: (_ for _ in ()).throw(SystemExit("G-LIGHT refuses the plan")))
+    assert drive.main(CODEX, 1) == 2
+    assert [r["event"] for r in drive_rows(ep01.home)] == ["start", "run", "end"]
+    assert "could not run" in (ep01.home / "drive_run01.log").read_text(encoding="utf-8")
+
+
+def test_a_database_that_will_not_open_is_a_recorded_refusal(ep01, monkeypatch):
+    from scripts.episode import drive
+    from studio import db
+    def locked(*a, **k):
+        raise RuntimeError("database is locked")
+    monkeypatch.setattr(db, "get_connection", locked)
+    monkeypatch.setattr(drive, "git", lambda *a: "" if a[0] == "status" else "abc123\n")
+    monkeypatch.setattr(drive, "notify", lambda text: None)
+    assert drive.main(CODEX, 1) == 2
+    assert drive_rows(ep01.home)[-1]["refused"] == "dry_check"
+    assert "database is locked" in (ep01.home / "drive_run01.log").read_text(encoding="utf-8")
 
 
 # ---- the repair-cap display (drive_launch18.log: "repair 1.83 h of a 0.63 h cap") ------------------
