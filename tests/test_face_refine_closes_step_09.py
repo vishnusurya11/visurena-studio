@@ -1,7 +1,8 @@
 """Step 09's substep 09_07: the face refine.  Inside the lanes a take is refined the
 moment it passes its dq (tests/test_face_refine_runs_in_the_gpu_lane.py); after the
 ladder, any selected take still owed one (a retake, a swapped attempt) is refined in
-one GPU run -- or cut first when the clock's reserve needs the time.  A context
+one GPU run -- or cut LAST (retro 2026-10-20) when its own price leaves no reserve
+(tests/test_the_face_refine_is_cut_last.py).  A context
 double records the scripts; nothing renders."""
 from __future__ import annotations
 
@@ -42,9 +43,9 @@ def test_nothing_owed_runs_nothing(tmp_path, monkeypatch):
 def test_a_short_clock_cuts_the_refine_and_records_it(tmp_path, monkeypatch):
     monkeypatch.setattr(cli, "owed", lambda book, n, among=None: {3: 220.0})
     cuts = []
-    monkeypatch.setattr(cli, "record_cut", lambda room, indices, price, book, n: cuts.append((indices, price)))
+    monkeypatch.setattr(cli, "record_cut", lambda room, indices, price, book, n, why="": cuts.append((indices, price)))
     owed_after = Budget(5 * 3600, EPISODE_SHARES).owed_after("09")
-    ctx = ctx_at(tmp_path, spent=6 * 3600 - owed_after - 600.0)
+    ctx = ctx_at(tmp_path, spent=6 * 3600 - owed_after - 100.0)      # 220 s does not fit; cut last
     step.refine_rest(ctx)
     assert ctx.ran == [] and cuts == [([3], 220.0)]
     assert any("REFINE CUT" in m for m in ctx.logged)

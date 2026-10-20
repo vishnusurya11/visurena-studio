@@ -174,16 +174,111 @@ def eligible(card: dict, sizes: list[str], dq: dict | None, taken: int = 0) -> b
     return passed_but_warp(dq) and not retake_owed(dq, taken) and not readable(card, dq)
 
 
+def shot_sizes(card: dict, sizes: dict[int, str]) -> list[str]:
+    """The planned sizes of the shots a take covers."""
+    return [sizes[s] for s in card.get("shots") or [card["index"]] if s in sizes]
+
+
 def selected(cards: list[dict], sizes: dict[int, str], dqs: dict[int, dict],
              taken: dict[int, int] | None = None) -> list[int]:
     """The take indices the refine tracks, in take order; each track under SMALL_FACE_PX is refined."""
     out = []
     for c in cards:
         i = int(c["index"])
-        shot_sizes = [sizes[s] for s in c.get("shots") or [c["index"]] if s in sizes]
-        if eligible(c, shot_sizes, dqs.get(i), (taken or {}).get(i, 0)):
+        if eligible(c, shot_sizes(c, sizes), dqs.get(i), (taken or {}).get(i, 0)):
             out.append(i)
     return sorted(out)
+
+
+# ---- the face list (retro 2026-10-20 item 2) ----------------------------------------------
+
+LIST_PX = SMALL_FACE_PX
+"""A face under this (render px = cut scale: the paste is made on the cut before the one upscale) with
+no accepted paste is LISTED: written to refine.json for step 11 QC and routed to the refine, never a wall
+on the master.  It is the refine's eligibility constant, not a gate threshold (owner veto list V3,
+2026-10-20, not vetoed: log only until the owner has labelled faces; fitted on ep01 alone)."""
+STALE = ("no_faces",)
+"""A decision under the 60 px wall (before 2026-10-19): `no_faces` meant no face UNDER 60 px, and
+its round was spent with no job (fixed by P07, 41fba62).  Jekyll ep01 T05 T06 T13 T21 T23 T24."""
+UNREACHED = ("insert", "unplanned")
+"""Takes the refine never works on (NEVER sizes, no planned face): shown, never listed."""
+
+
+def standing(entry: dict | None, sha: str) -> dict | None:
+    """The refine's decision on exactly these take bytes; None for a cut, a stale row or other bytes."""
+    entry = entry or {}
+    ok = entry.get("status") not in (None, "cut", *STALE) and entry.get("take_sha8") == sha
+    return entry if ok else None
+
+
+def face_size(row: dict) -> float | None:
+    """A refine row's smallest face: min_px, else the run's face_px (rows decided before min_px was kept)."""
+    px = row.get("min_px") or row.get("face_px")
+    return None if px is None else float(px)
+
+
+def decided_faces(entry: dict) -> list[dict]:
+    """The faces the refine's own tracker worked on: a row exists only for a track under SMALL_FACE_PX."""
+    return [{"who": p.get("who"), "px": face_size(p), "soft": True, "pasted": bool(p.get("kept"))}
+            for p in entry.get("people") or []]
+
+
+def tracked_faces(dq: dict | None) -> list[dict]:
+    """The warp gate's tracks, where the refine has not decided on these bytes."""
+    px = [float(t["min_px"]) for t in warp_measure(dq).get("tracks") or [] if t.get("min_px") is not None]
+    return [{"who": None, "px": p, "soft": p < LIST_PX, "pasted": False} for p in px]
+
+
+def take_row(entry: dict | None, dq: dict | None, state: str) -> dict:
+    """One take's row: its smallest tracked face, whether a paste was accepted, the soft faces left
+    unpasted; `entry` is the refine's standing decision (None: none), `state` the take's state without one."""
+    faces = decided_faces(entry) if entry else tracked_faces(dq)
+    sizes = [f["px"] for f in faces if f["px"] is not None]
+    return {"smallest_px": min(sizes, default=None), "pasted": any(f["pasted"] for f in faces),
+            "unpasted": [{"who": f["who"], "px": f["px"]} for f in faces if f["soft"] and not f["pasted"]],
+            "status": entry["status"] if entry else state, "by": "refine" if entry else "warp"}
+
+
+def reachable(card: dict, sizes: list[str]) -> bool:
+    """A take the refine can work on: a planned face and no NEVER size."""
+    return bool(card.get("faces")) and not any(s in NEVER for s in sizes)
+
+
+def state_of(card: dict, sizes: list[str], entry: dict | None, sha: str, owed: bool) -> str:
+    """A take's state where the refine has no standing decision on its bytes."""
+    if not reachable(card, sizes):
+        return "insert" if any(s in NEVER for s in sizes) else "unplanned"
+    if (entry or {}).get("status") == "cut" and entry.get("take_sha8") == sha:
+        return "cut"
+    return "owed" if owed else "not_selected"
+
+
+def face_rows(cards: list[dict], sizes: dict[int, str], dqs: dict[int, dict], doc: dict,
+              shas: dict[int, str], owed=frozenset()) -> dict[int, dict]:
+    """take -> its row, from the cards, the plan's sizes, the dq records, refine.json and the takes' sha8."""
+    out = {}
+    for c in cards:
+        i = int(c["index"])
+        entry, sha = doc.get(f"T{i:02d}"), shas.get(i, "")
+        state = state_of(c, shot_sizes(c, sizes), entry, sha, i in owed)
+        out[i] = take_row(standing(entry, sha), dqs.get(i), state)
+    return out
+
+
+def listed(row: dict) -> bool:
+    """A soft face no paste was accepted for, on a take the refine can reach."""
+    return bool(row["unpasted"]) and row["status"] not in UNREACHED
+
+
+def face_list(rows: dict[int, dict]) -> dict:
+    """The list refine.json keeps: every take's row, the listed ones named and routed (`refine` while
+    the refine still owes the take, `logged` once it decided), never a verdict."""
+    for row in rows.values():
+        if listed(row):
+            row["route"] = "refine" if row["status"] in ("cut", "owed") else "logged"
+    takes = {f"T{i:02d}": rows[i] for i in sorted(rows)}
+    return {"px": LIST_PX, "listed": [t for t, row in takes.items() if listed(row)], "takes": takes,
+            "note": "log only: a listed take is routed to the refine and never fails the master"}
 
 
 # ---- the clock -----------------------------------------------------------------------
@@ -194,11 +289,30 @@ def price(faces: int, frames: int) -> float:
 
 
 def cut(budget, step: str, seconds: float) -> bool:
-    """The refine is the FIRST thing cut for time: it runs only while the reserve
-    holds it AND a full measuring pass after it.  A check is never cut for a refine."""
+    """The lanes' early refine and the tiny-face draw: cut first, run only while the reserve holds
+    them AND a full measuring pass after them (a draw changes bytes; an early refine cut in the lanes
+    is owed again after the ladder, where cut_last decides)."""
     if budget is None:
         return False
     return not budget.leaves_reserve(step, seconds + CHECK_RESERVE_S)
+
+
+REFINE_TAKE_S = 81.0
+"""A refined take on the episode clock, measured: ep01's repair refine, 972 s over 12 takes
+(timing.jsonl 2026-10-19 13:38; tests/fixtures/ep01_face_list/repair_refine_row.json)."""
+
+
+def reserve(takes: int) -> float:
+    """The seconds step 09 holds for the refine from its start: N takes x 81 s (retro 2026-10-20 item 5)."""
+    return REFINE_TAKE_S * max(takes, 0)
+
+
+def cut_last(budget, step: str, seconds: float) -> bool:
+    """After the ladder the refine is the LAST thing cut for time (owner veto list V2, 2026-10-20, not
+    vetoed): re-measures were cut before it (step 09 held its reserve against them), and no check is owed
+    after it -- it changes no take bytes, the paste is made at the cut.  Cut only when its own price leaves
+    no reserve; a take so cut ships flagged and the episode is not upload-ready."""
+    return budget is not None and not budget.leaves_reserve(step, seconds)
 
 
 # ---- the cast a take staged ------------------------------------------------------------

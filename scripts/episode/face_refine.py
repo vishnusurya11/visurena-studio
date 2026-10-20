@@ -16,7 +16,9 @@ identity against the sheet (facenet, and CCIP + clip_vision_h in a worker,
 studio/anime_id.py), seam, flicker, drift, face count; drawn eyes logged -- and the decision per take lands in
 takes/r2v/refine.json (`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`,
 `cut`); a refused crop falls back to the unrefined take.  Assemble pastes the kept crops
-at cut scale, then the one upscale (studio/face_paste.py).
+at cut scale, then the one upscale (studio/face_paste.py).  Step 09 ends by writing the face
+list under refine.json's `face_list` key (face_list: every take's smallest tracked face and
+whether a paste was accepted, the ones under 120 px with none listed; log only, retro 2026-10-20).
 
 Step 09 runs it inside its two lanes, right after a take passes its dq, and once
 more after the ladder for any take still owed one.  Pipelined: a take's crops are
@@ -80,11 +82,15 @@ def read(path: Path, default):
     return json.loads(Path(path).read_text(encoding="utf-8")) if Path(path).exists() else default
 
 
+def plan_sizes(home: Path) -> dict[int, str]:
+    """shot -> its planned size, from plan.json ({} before a plan)."""
+    return {int(s["index"]): s.get("size", "") for s in read(Path(home) / "plan.json", {}).get("shots", [])}
+
+
 def selection(book: Path, number: int) -> list[int]:
     """The takes the refine works on (studio/face_refine.selected), from the files."""
     home, room = episode_home.home(book, number), room_of(book, number)
-    cards = read(room / "prompts.json", [])
-    sizes = {int(s["index"]): s.get("size", "") for s in read(home / "plan.json", {}).get("shots", [])}
+    cards, sizes = read(room / "prompts.json", []), plan_sizes(home)
     dqs = {int(c["index"]): read(room / f"T{int(c['index']):02d}.dq.json", None) for c in cards}
     taken = {int(c["index"]): taken_of(home, room, int(c["index"])) for c in cards}
     return fr.selected(cards, sizes, dqs, taken)
@@ -97,15 +103,12 @@ def taken_of(home: Path, room: Path, index: int) -> int:
     return warp_gate.RETAKES if take_ladder.episode_spent(home) else take_ladder.attempts_of(room, index)
 
 
-STALE = ("no_faces",)
-"""A decision under the 60 px wall (before 2026-10-19): `no_faces` meant no face UNDER 60 px, and
-its round was spent with no job (fixed by P07, 41fba62).  Jekyll ep01 T05 T06 T13 T21 T23 T24."""
+STALE = fr.STALE
 
 
 def current(doc: dict, room: Path, index: int) -> bool:
     """A decision exists for exactly these take bytes (a cut or a stale row is still owed)."""
-    entry = doc.get(f"T{index:02d}") or {}
-    return entry.get("status") not in (None, "cut", *STALE) and entry.get("take_sha8") == sha8(room / f"T{index:02d}.mp4")
+    return fr.standing(doc.get(f"T{index:02d}"), sha8(room / f"T{index:02d}.mp4")) is not None
 
 
 def pending(book: Path, number: int, among: list[int] | None = None) -> list[int]:
@@ -166,7 +169,7 @@ def write_entry(room: Path, index: int, entry: dict) -> None:
 
 def record_cut(room: Path, indices: list[int], price: float, book: Path, number: int, why: str = "") -> None:
     """The clock (or the refine's wall) cut the refine: said in refine.json, the takes still owed one."""
-    why = why or f"the clock's reserve needs the time: {price:.0f} s priced, cut first"
+    why = why or f"the clock's reserve needs the time: {price:.0f} s priced, cut first in the lanes (owed again after the ladder)"
     doc = read(room / DOC, {})
     for i in indices:
         refund = {"refund": 1} if refund_of(doc.get(f"T{i:02d}")) else {}
@@ -177,6 +180,76 @@ def record_cut(room: Path, indices: list[int], price: float, book: Path, number:
 def stamp() -> str:
     from datetime import datetime
     return datetime.now().isoformat(timespec="seconds")
+
+
+# ---- the face list (retro 2026-10-20 item 2: what the owner would look at, measured first) -------
+
+FACE_LIST = "face_list"
+"""refine.json's key for the list (every other key is a take's `Tnn`)."""
+
+
+def face_list(book: Path, number: int) -> dict:
+    """Every take's smallest tracked face and whether a paste was accepted, the soft unpasted ones
+    listed (studio/face_refine.face_list), from the files as they are now."""
+    home, room = episode_home.home(book, number), room_of(book, number)
+    cards, sizes = read(room / "prompts.json", []), plan_sizes(home)
+    dqs = {int(c["index"]): read(room / f"T{int(c['index']):02d}.dq.json", None) for c in cards}
+    shas = {int(c["index"]): sha8(room / f"T{int(c['index']):02d}.mp4") for c in cards}
+    owed_now = frozenset(pending(book, number)) if cards else frozenset()
+    return fr.face_list(fr.face_rows(cards, sizes, dqs, read(room / DOC, {}), shas, owed_now))
+
+
+def write_face_list(room: Path, face: dict) -> bool:
+    """The list into refine.json, only when it changed: refine.json is an input of step 10, and an
+    unchanged list written again would re-cut the master on every re-entry."""
+    doc = read(Path(room) / DOC, {})
+    if doc.get(FACE_LIST) == face:
+        return False
+    episode_home.write_json(Path(room) / DOC, {**doc, FACE_LIST: face})
+    return True
+
+
+def cut_takes(face: dict) -> list[str]:
+    """The takes the refine skipped for time on their current bytes: they ship flagged, unrefined."""
+    return [t for t, row in (face.get("takes") or {}).items() if row.get("status") == "cut"]
+
+
+def owes_reserve(home: Path, doc: dict, card: dict) -> bool:
+    """No standing refine decision on the take's bytes, faces the warp gate does not already read at
+    SMALL_FACE_PX (fr.readable; no dq yet: owed), and a refine left in the cap table."""
+    room, index = Path(home) / TAKES, int(card["index"])
+    if current(doc, room, index) or fr.readable(card, read(room / f"T{index:02d}.dq.json", None)):
+        return False
+    return not refined_out(Path(home), index, refund_of(doc.get(f"T{index:02d}")))
+
+
+def reserve_takes(home: Path) -> int:
+    """The takes the refine can reach that still owe it: what step 09 holds N x 81 s for (before a
+    render, every faced take but an insert)."""
+    cards, doc, sizes = read(Path(home) / TAKES / "prompts.json", []), read(Path(home) / TAKES / DOC, {}), plan_sizes(home)
+    return sum(1 for c in cards if fr.reachable(c, fr.shot_sizes(c, sizes)) and owes_reserve(home, doc, c))
+
+
+def read_face_list(room: Path) -> dict:
+    """The list step 09 wrote ({} before it ran): what step 11 QC reads."""
+    return read(Path(room) / DOC, {}).get(FACE_LIST) or {}
+
+
+def listed_words(take: str, row: dict) -> str:
+    """`T26 61.7 px refined -> logged`: the smallest unpasted face, the take's state, its route."""
+    px = [f["px"] for f in row["unpasted"] if f["px"] is not None]
+    size = f"{min(px):.1f} px" if px else "unmeasured"
+    return f"{take} {size} {row['status']} -> {row.get('route', 'logged')}"
+
+
+def face_list_line(face: dict) -> str:
+    """`FACE LIST (log only, ...): T01 32.5 px unrefined -> logged; ...`; '' when nothing is listed."""
+    rows = face.get("takes") or {}
+    said = [listed_words(t, rows[t]) for t in face.get("listed", [])]
+    if not said:
+        return ""
+    return (f"FACE LIST (log only, faces under {face.get('px', fr.LIST_PX):.0f} px with no accepted paste, "
+            f"{len(said)} take(s)): " + "; ".join(said))
 
 
 # ---- tracking and matching -----------------------------------------------------------

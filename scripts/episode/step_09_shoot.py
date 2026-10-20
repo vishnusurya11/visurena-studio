@@ -15,7 +15,11 @@ renders; then the GPU window (take_dq's serial pass, take_content_check.py),
 take_strip.py.  A take that passes its dq and is wide, full or small-faced is
 owed a FACE REFINE (09_07, owner 2026-10-17): its face crops re-render on the GPU
 lane right behind the renders (studio/take_overlap.Refines), and whatever the
-ladder leaves owed is refined once after it -- the first thing cut for time.
+ladder leaves owed is refined once after it -- cut LAST for time (retro 2026-10-20):
+N takes x 81 s held from the step's start, a re-measure of unchanged bytes cut
+before it, and a take still cut ships flagged with the episode not upload-ready
+(a FACE_REFINE terminal on the publish lock).  Last, the face list (every take's
+smallest tracked face, pasted or not) lands in refine.json for step 11 QC: log only.
 A take whose refine refused a planned 20-40 px face then draws ONCE on the
 1024 graph (09_08, scripts/episode/tiny_face.py), kept only if every take gate
 passes it.
@@ -229,11 +233,32 @@ DQ_PASS_SECONDS = 550.0
 
 
 def dq_flags(ctx) -> list[str]:
-    """`--ceiling-spent` only when re-measuring would eat the downstream reserve:
-    then a take's verdict on the same bytes stands under moved measuring code.
-    Past the 5 h ceiling with room under 6 h the checks run (owner 2026-10-14)."""
+    """`--ceiling-spent` only when re-measuring would eat the downstream reserve and the face refine's
+    (refine_reserve: the refine is cut last, so a re-measure of unchanged bytes goes first): then a take's
+    verdict on the same bytes stands under moved measuring code.  Past the 5 h ceiling with room under
+    6 h the checks run (owner 2026-10-14)."""
     budget = getattr(ctx, "budget", None)
-    return ["--ceiling-spent"] if budget is not None and budget.checks_cut(STEP_ID, DQ_PASS_SECONDS) else []
+    if budget is None:
+        return []
+    return ["--ceiling-spent"] if budget.checks_cut(STEP_ID, DQ_PASS_SECONDS + refine_reserve(ctx)) else []
+
+
+def refine_reserve(ctx) -> float:
+    """The seconds held for the face refine: N takes still owed one x 81 s (retro 2026-10-20 item 5);
+    0 off an episode's folder."""
+    from scripts.episode import face_refine as cli
+    from studio import face_refine
+    home = getattr(ctx, "home", None)
+    return face_refine.reserve(cli.reserve_takes(home)) if home is not None else 0.0
+
+
+def say_reserve(ctx) -> None:
+    """At step 09's start: what the refine is held, so the log shows the cut order's other half."""
+    from studio import face_refine
+    seconds = refine_reserve(ctx)
+    ctx.log(f"REFINE RESERVE: {seconds / face_refine.REFINE_TAKE_S:.0f} take(s) x {face_refine.REFINE_TAKE_S:.0f} s = "
+            f"{seconds:.0f} s held for the face refine; a re-measure of unchanged bytes is cut before it",
+            step_id=STEP_ID)
 
 
 def first_wall_line(seconds: float) -> str:
@@ -285,20 +310,57 @@ def inputs_wall(ctx) -> None:
 
 def refine_rest(ctx) -> None:
     """09_07 after the ladder: every selected take still owed a face refine (a
-    retake, a swapped attempt) in ONE GPU run -- or none, cut first, when the
-    clock's reserve needs the time (logged and recorded in refine.json)."""
+    retake, a swapped attempt, a take the lanes cut) in ONE GPU run -- cut LAST
+    (retro 2026-10-20, owner veto list V2): only when its own price leaves no
+    reserve; a take so cut ships flagged and holds the publish (face_list_note)."""
     from scripts.episode import face_refine as cli
     from studio import face_refine
     owed = cli.owed(ctx.book_dir, ctx.number)
     if not owed:
         return
     price = sum(owed.values())
-    if face_refine.cut(getattr(ctx, "budget", None), STEP_ID, price):
-        cli.record_cut(ctx.home / TAKES, sorted(owed), price, ctx.book_dir, ctx.number)
-        ctx.log(f"REFINE CUT: the clock's reserve needs {price:.0f} s; takes {sorted(owed)} keep their faces",
+    if face_refine.cut_last(getattr(ctx, "budget", None), STEP_ID, price):
+        why = f"the clock's reserve cannot hold {price:.0f} s: cut last, after the re-measures"
+        cli.record_cut(ctx.home / TAKES, sorted(owed), price, ctx.book_dir, ctx.number, why=why)
+        ctx.log(f"REFINE CUT: {why}; takes {sorted(owed)} ship flagged with their faces, not upload-ready",
                 step_id=STEP_ID, level="WARNING")
         return
     ctx.run_script(REFINE, *map(str, sorted(owed)), gpu=True)
+
+
+HOLD = "FACE_REFINE"
+"""The learnings gate a take cut for time holds the publish under (studio/publish_lock): no
+gates.yaml row, so no judge clears it -- the refine runs on a later pass, or the owner waives it."""
+
+
+def hold_publish(ctx, cut: list[str]) -> None:
+    """A take the refine skipped for time: the episode is NOT upload-ready (a FACE_REFINE terminal
+    the publish lock holds; never auto-shipped).  None cut: a hold an earlier pass set is released."""
+    from studio.learnings import Learning
+    if cut:
+        ctx.learn(Learning(step=STEP_ID, gate=HOLD, measured=len(cut), threshold=0, action="flag", terminal=True,
+                           note=f"{' '.join(cut)} cut for time: shipped flagged with their faces unrefined"))
+    elif refine_held(ctx.home):
+        ctx.learn(Learning(step=STEP_ID, gate=HOLD, measured=0, threshold=0, action="pass"))
+
+
+def refine_held(home: Path) -> bool:
+    """The latest FACE_REFINE row holds the publish."""
+    from studio import learnings, publish_lock
+    row = publish_lock.last_by_gate(learnings.load(Path(home) / "learnings.jsonl")).get(HOLD)
+    return bool(row and row.terminal)
+
+
+def face_list_note(ctx) -> None:
+    """09 last (retro 2026-10-20 item 2): the face list into refine.json for step 11 QC, its listed
+    takes logged -- log only: a listed take was routed to the refine, and it never fails the master.
+    A take the refine skipped for time holds the publish (hold_publish)."""
+    from scripts.episode import face_refine as cli
+    face = cli.face_list(ctx.book_dir, ctx.number)
+    cli.write_face_list(ctx.home / TAKES, face)
+    if line := cli.face_list_line(face):
+        ctx.log(line, step_id=STEP_ID, level="WARNING")
+    hold_publish(ctx, cli.cut_takes(face))
 
 
 def tiny_face_rung(ctx, flag: str) -> None:
@@ -332,6 +394,7 @@ def run(ctx) -> None:
         # round 0 forever (step 09 raised with 10 of 24 takes on disk).
         ctx.log(f"the missing takes want {cost:.0f} s and the ceiling leaves {left:.0f} s -- they "
                 f"render anyway (firsts); every retake is terminal", step_id=STEP_ID, level="WARNING")
+    say_reserve(ctx)
     began = time.time()
     shoot(ctx, flag)
     say_first_wall(ctx, began)
@@ -343,6 +406,7 @@ def run(ctx) -> None:
     inputs_wall(ctx)
     refine_rest(ctx)
     tiny_face_rung(ctx, flag)
+    face_list_note(ctx)
 
 
 if __name__ == "__main__":
