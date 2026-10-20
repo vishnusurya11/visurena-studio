@@ -776,6 +776,8 @@ def face_paste_wrap(work: Path, take_dir: Path, factor: int):
     from studio import face_paste
     if not (take_dir / "refine.json").exists() or not (work / "layout.json").exists():
         return None
+    from scripts.episode import face_refine as refine_step
+    refine_step.regate_room(take_dir)          # a decision made before the paste's walls is re-judged on CPU
     rows = episode_home.read_json(work / "layout.json")
     frames = {int(r["index"]): video_frames(work / f"seg{int(r['index']):02d}.mp4") for r in rows}
     guards = episode_home.read_json(work / "gutter.json") if (work / "gutter.json").exists() else {}

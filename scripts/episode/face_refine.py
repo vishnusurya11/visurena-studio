@@ -49,6 +49,8 @@ ID_SAMPLES = 4
 """Crops per side the anime identity terms read (round 1's calibration: 4 + 4 and the sheet;
 1.2 s of GPU or 7.5 s of CPU a face)."""
 SIDE = 768
+TURN_SAMPLES = 12
+"""Crop pairs the turn is read on (studio/face_gate.face_turn): at 6, ep01 T09's median swung 3.9 -> 9.8 deg."""
 REACQUIRE_FLOOR = 0.4
 """A lost face is re-acquired only by a head whose Lab colour (hist_similarity) reads at least as
 much like the track's LATEST head as like any other person's present then, and over this floor.
@@ -531,6 +533,17 @@ def to768(crops: list[np.ndarray]) -> list[np.ndarray]:
     return [cv2.resize(np.ascontiguousarray(f), (SIDE, SIDE), interpolation=cv2.INTER_LANCZOS4) for f in crops]
 
 
+def over_life(refined: list[np.ndarray], start: int, life: tuple[int, int]) -> list[np.ndarray]:
+    """The refined crop's frames (768) over the track's life."""
+    return [refined[t - start] for t in range(life[0], life[1] + 1) if 0 <= t - start < len(refined)]
+
+
+def turn_of(src_w: list, ref768: list, detect) -> float | None:
+    """How far the redraw turned the face (degrees, rounded), over TURN_SAMPLES crop pairs at 768."""
+    turn = face_gate.face_turn(to768(sampled(src_w, TURN_SAMPLES)), to768(sampled(ref768, TURN_SAMPLES)), detect)
+    return None if turn is None else round(turn, 2)
+
+
 def anime_terms(anime, book: Path, job: Job, src_w: list, ref768: list, detect, loose=None) -> dict:
     """CCIP and clip_vision_h of the sheet's face window against ID_SAMPLES take and refined crops;
     every term None when no reader runs or the sheet holds no figure."""
@@ -549,14 +562,15 @@ def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None, an
     refined = read_frames(job.out)
     src_w = face_gate.at_side(face_gate.windows_of(work.frames, job.windows, life), side)
     ref_w = face_gate.shrunk(refined, job.start, life, side)
-    ref768 = [refined[t - job.start] for t in range(life[0], life[1] + 1) if 0 <= t - job.start < len(refined)]
+    ref768 = over_life(refined, job.start, life)
     vec, _ = sheet_face(book, job.person.sheet, detect, embed, loose)
     stem = f"T{work.index:02d}_p{job.k}"
     moved = face_gate.change(sampled(read_frames(job.out.with_name(f"{stem}_src.mp4"))), sampled(refined))
-    m = face_gate.measure(src_w, ref_w, to768(sampled(src_w)), sampled(ref768), vec, detect, embed, moved,
-                          job.face_px / side, job.soft)
     boxes = face_gate.face_boxes(face_track.fill(job.track, len(work.frames)), job.windows, life, side)
-    m = replace(m, **face_gate.extras(src_w, ref_w, boxes), **anime_terms(anime, book, job, src_w, ref768, detect, loose))
+    m = face_gate.measure(src_w, ref_w, to768(sampled(src_w)), sampled(ref768), vec, detect, embed, moved,
+                          job.face_px / side, job.soft, face_gate.centres_of(boxes))
+    m = replace(m, **face_gate.extras(src_w, ref_w, boxes), **anime_terms(anime, book, job, src_w, ref768, detect, loose),
+                turn=turn_of(src_w, ref768, detect))
     kept, why = fr.decide(m)
     return {"who": job.person.who, "crop": f"{OUT}/{stem}.mp4", "track": f"{OUT}/{stem}.json", "kept": kept,
             "why": why, "measures": m.__dict__, "frames": job.frames, "denoise": job.denoise, "face_px": job.face_px,
@@ -576,6 +590,74 @@ def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, s
     print(f"T{work.index:02d} {status}: " + ("; ".join(f"{p['who']} {'KEPT' if p['kept'] else 'fell back'} ({p['why']})"
                                                     for p in people) or "nothing to refine"), flush=True)
     return entry
+
+
+# ---- the regate: a decision made before the paste's walls ------------------------------------
+
+def regate_due(entry: dict) -> bool:
+    """A row measured before the band and turn walls (its measures hold no band_warp)."""
+    return any(stale_row(p) for p in entry.get("people", []))
+
+
+def stale_row(row: dict) -> bool:
+    return "measures" in row and "band_warp" not in row["measures"]
+
+
+def centres_from(doc: dict, life: tuple[int, int], side: int) -> list | None:
+    """The face's (cx, cy) per frame of the life, in window pixels, from the run's record; None without it."""
+    faces = doc.get("faces")
+    if not faces:
+        return None
+    rows = [faces[t] if t < len(faces) else None for t in range(life[0], life[1] + 1)]
+    return [(f[0] * side, f[1] * side) if f else (side / 2, face_paste.FACE_Y * side) for f in rows]
+
+
+def regate_row(room: Path, take: list[np.ndarray], row: dict, read, detect) -> dict:
+    """The row re-decided on its stored measures, the paste's measures and the turn taken again (CPU)."""
+    doc = json.loads((Path(room) / row["track"]).read_text(encoding="utf-8"))
+    life = (int(doc["life"][0]), min(int(doc["life"][1]), len(take) - 1))
+    side = face_track.side_of(doc["windows"])
+    refined = read(Path(room) / row["crop"])
+    src_w = face_gate.at_side(face_gate.windows_of(take, doc["windows"], life), side)
+    ref_w = face_gate.shrunk(refined, int(doc["start"]), life, side)
+    if not src_w or not ref_w:
+        return row
+    known = {k: v for k, v in row["measures"].items() if k in fr.Measures.__dataclass_fields__}
+    m = replace(fr.Measures(**known), turn=turn_of(src_w, over_life(refined, int(doc["start"]), life), detect),
+                **face_gate.paste_measures(src_w, ref_w, face_paste.face_share(doc, row), centres_from(doc, life, side)))
+    kept, why = fr.decide(m)
+    return {**row, "kept": kept, "why": why, "measures": m.__dict__, "regated": stamp()}
+
+
+def regate_entry(room: Path, index: int, entry: dict, read=read_frames, detect=None) -> dict:
+    """The take's entry with every stale row regated; its status follows what is kept."""
+    if not regate_due(entry):
+        return entry
+    if detect is None:
+        from studio.measure import faces
+        detect, _ = faces.embedder("cpu")
+    take = read(Path(room) / f"T{index:02d}.mp4")
+    people = [regate_row(room, take, p, read, detect) if stale_row(p) else p for p in entry["people"]]
+    status = entry.get("status")
+    if status in ("refined", "unrefined"):
+        status = "refined" if any(p.get("kept") for p in people) else "unrefined"
+    return {**entry, "people": people, "status": status}
+
+
+def regate_room(room: Path) -> list[str]:
+    """Every current take's stale rows regated in refine.json before a cut pastes them (assemble)."""
+    changed = []
+    for key, entry in sorted(read(Path(room) / DOC, {}).items()):
+        if not (key[:1] == "T" and key[1:].isdigit()):
+            continue
+        index = int(key[1:])
+        if regate_due(entry) and current({key: entry}, Path(room), index):
+            new = regate_entry(Path(room), index, entry)
+            write_entry(Path(room), index, new)
+            changed.append(key)
+            print(f"{key} regated: " + "; ".join(f"{p.get('who')} {'KEPT' if p.get('kept') else 'fell back'} "
+                                                 f"({p.get('why')})" for p in new["people"]), flush=True)
+    return changed
 
 
 # ---- the run -----------------------------------------------------------------------------

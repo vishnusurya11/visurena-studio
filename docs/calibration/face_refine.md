@@ -257,6 +257,79 @@ wall 18; the flicker is read on the face-core paste. Residual, by eye: where H3 
 the redrawn face now sits in the take's hood, a pose mismatch the old square hid under a redrawn head; the
 GPU bench (PLAN.md 3b, masked re-render) is the next arm. Uncalibrated beyond ep01's 14 tracks.
 
+## Face-warp fix, round 2: brow to chin, the head re-seated, the turn wall (2026-10-19)
+
+The skeptic's review of round 1 (722050e): `CORE_RADII (0.55, 0.65)` were used as RADII, so the outline ran
+1.1 x 1.3 face heights across. Drawn over the real frames, it crossed the hat band, the brim's lower edge, the
+hair at both sides, the ears, the jaw and the collar's top, and the production Paster still moved the brim and
+hairline 0.41-1.42 px at 384 (T05, T18 inside the range the owner complained about). Round 1's ring-warp wall
+read a ring where its mask was exactly 0, so it was zero by construction. T08's child was kept with the head
+H3 turned. Round 1 also read ep01's tracks as the margin's 1 / 2.4 face: their track files hold no `face_px`,
+so T06's 13.5 px Hyde (window 96) was pasted through a core three times his face.
+
+**The paste now** (`studio/face_paste`):
+- The core is brow to chin and cheek to cheek: `CORE_HALF` 0.35 across, 0.34 up, 0.34 down (face heights from
+  the face box's centre). It is a superellipse of power 4 above the centre, so it is square-shouldered over the
+  eyes, and an ellipse below. Its `CORE_FEATHER` is 0.08 face heights, inside the outline. The eyes
+  (face_yolov8m: -0.23 to -0.15, out to +-0.22) are the redraw's whole.
+- A track file without `face_px` reads its refine.json row's `face_px` over the window side (`face_share`).
+- Each redraw frame is put back on the take's head first (`head_shift`). The shift is the median Farneback
+  flow take -> redraw on the ring 1.0-1.8 core radii (hat, hair, ears), read at <= 384 px and held to 0.06
+  face heights. It is applied with a cubic shift. H3's redraws sit 0.7-2.9 px at 384 off the take's head and
+  jitter 0.8-3.9 frame to frame. Under a still head that jitter is the face swimming (the skeptic's shear).
+- `paste_patch` is the one paste. The Paster and the gate (`face_gate.pasted_of`) both call it. `blend` now
+  rounds instead of truncating (it read 1 level dark where the redraw equals the take).
+
+Probe before the build (`scratchpad fw2/shapes.py`, `reg.py`, `jitter.py`): shrinking the outline alone did
+not lower the flow in the feather (0.3-0.9 px for every shape). That flow is the redrawn features next to it,
+so the band is not the brim. A smoothed (9-frame) similarity registration changed it by 0-30 % and left the
+shear alone. Its eye-line "blur" in round 1's table was a metric artifact: the difference to an UNshifted
+redraw scores any shift as lost lines, and the high-pass energy of the eyes is unchanged by a Lanczos shift.
+A per-frame translation took the shear 2.72 -> 0.94 (T18 Utterson), 3.08 -> 1.07 (T18 Enfield),
+2.65 -> 1.13 (T08).
+
+**$0 CPU replay** (`docs/audit/2026-10-19_face_warp/replay/round2/`: `measures_round2.json`, `regate.json`,
+`strips/<track>_f<frame>.png` take | R0 | R1 | R2 | redraw, `strips/<track>_changed.png` where each arm
+changed the take). Each arm is the Paster as it shipped or ships, over the delivered takes at 768, read at
+384, on the 14 kept tracks. R0 is iter2's paste, R1 is round 1 (722050e), R2 is this round.
+
+| measure (14 tracks) | R0 iter2 | R1 round 1 | R2 this round |
+|---|---|---|---|
+| ring MAD (the audit's ring) | 1.26-13.21 | 0.01-0.09 | 0.00 |
+| brim / hairline flow, px at 384 (round 1's upper feather, the skeptic's region) | 0.70-5.38 | 0.23-1.47 | 0.09-0.45 |
+| brim wobble (std of its shift) | 0.12-4.76 | 0.04-1.35 | 0.01-0.37 |
+| jaw / collar flow | 1.40-5.30 | 0.51-1.38 | 0.07-0.20 |
+| face-vs-head shear, frame to frame, excess over the take | 0.07-1.28 | 0.13-2.61 | 0.12-1.05 |
+| facenet to the sheet, R2 - R0 | | | -0.07 / +0.08 |
+| face flicker, paste / take (gate) | | | 0.86-1.01 |
+
+The 0.45 brim flow is T06's 13.5 px Hyde; every other track reads <= 0.34. By eye (strips): the take's hat
+band, brim, hair, ears, jaw and collar stay. The changed maps show R2 touching only brow-to-chin (R1 took
+in the hat band and the collar). The eyes are the redraw's (T13, T18, T26 drawn where the take smudged
+them). The "eye lines vs redraw" column rises under R2 (1.88-16.0 against R0's 1.86-9.16) only because the
+redraw is shifted onto the take's head. Against R0, the cel eye score rises on 7 of the 12 readable tracks and falls by 6 or less on 4. T13 falls 103 -> 71, though its strip shows both eyes drawn.
+
+**Gate** (`studio/face_gate.paste_measures`, walls in `studio/face_refine`). It reads the paste the Paster makes.
+- Outside the core: <= 1 level moves. Every track reads 0.
+- **Band warp**: flow take -> paste on the feather and out to 1.2 core radii, `BAND_WARP_MAX` 0.9. R2 reads
+  0.27-0.67, and T01's refused faces 0.72-0.95. Read on their own bands, iter2's paste reads 0.46-1.19 and
+  round 1's 0.33-0.93. The wall guards against a gross misregistration; it refuses none of ep01.
+- **Turn**: the median change of MTCNN's eye line, take -> redraw, over 12 crop pairs at 768 where both read a
+  face's landmarks. The face is the one nearest the window's face point; at 6 pairs, or taking the largest
+  face, T09 swung to Enfield beside him. `TURN_MAX` is 4 deg. The faces kept by eye read 0.55-2.84 deg.
+  T08's child reads 9.34, T09's Hyde 8.03 (a tilt and a smirk), T26's Enfield 5.80 (profile -> three-quarter)
+  and T01's Utterson 5.55 (already refused on its seam). A face no detector reads (T06's Hyde) has no turn.
+- **Core flow** (take -> paste where it is the redraw whole) is logged, never a wall. After the head shift
+  it read T08 2.95, the same as T05 2.95 and T18 3.00: it does not separate a turned head.
+- **Regate**: a row measured before these walls (its measures have no `band_warp`) is re-decided on CPU
+  before the cut pastes it. `scripts/episode/face_refine.regate_room` runs in `assemble.face_paste_wrap`. It
+  keeps the row's stored measures (identity, drift, seam) and takes the paste's measures and the turn again.
+  ep01, replayed in memory (`regate.json`; refine.json is not written): 11 of the 14 kept faces stay kept.
+  T08, T09 and T26 Enfield fall back to the take.
+
+Uncalibrated beyond ep01's 16 rows. ep01's track files carry no per-frame faces, so its cores sit on the
+window's own face point.
+
 ## Tiny-face rung (2026-10-19, face-blur round 2 builder; `scripts/episode/tiny_face.py`)
 
 The refine's seam and drift refusals of a planned 20-40 px face (smallest tracked height, `min_px`) on a Spark

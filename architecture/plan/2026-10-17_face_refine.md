@@ -34,3 +34,9 @@ in wide shots, go ahead".
   diluted a small face's to nothing); wall 18 again; round 1's three stay refused with either paste. The
   tracker links by least cost and holds every head to its own track's reading less 0.15; the stitch no
   longer counts the piece as its own rival. Bench replay: identical tracks.
+- 2026-10-19 PM, face-warp fix round 2 (skeptic): the paste is brow to chin and cheek to cheek (round 1's
+  outline was 1.1 x 1.3 face heights and crossed the brim, hair, ears and jaw); each redraw frame is re-seated
+  on the take's head (H3 jitters 2-3 px at 384); the gate reads the paste the Paster makes: band warp <= 0.9,
+  turn (MTCNN eye line) <= 4 deg; older rows regated before the cut. ep01 replay at $0: brim flow 0.70-5.38
+  (iter2) -> 0.09-0.45, jaw 1.40-5.30 -> 0.07-0.20; T08, T09, T26 Enfield refused on the turn
+  (`docs/calibration/face_refine.md`).

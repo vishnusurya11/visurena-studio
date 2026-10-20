@@ -11,8 +11,10 @@ inside `master_upscale.streamed`, so the paste costs no extra encode; a cut with
 nothing kept is the upscale untouched, byte for byte.
 
 Only the face core is pasted (face-warp fix, owner 2026-10-19: "the face fix and eye fix is warping
-the video around"): outside an ellipse round the tracked face every pixel is the take's, and in the
-feather the take's low frequencies replace the redraw's (docs/calibration/face_refine.md, the replay).
+the video around"): outside a brow-to-chin, cheek-to-cheek outline round the tracked face every pixel is
+the take's (hat, brim, hair, ears, jaw, collar); each redraw frame is first put back on the take's head
+(head_shift: H3's redraw jitters 2-3 px at 384), and in the feather the take's low frequencies replace
+the redraw's (docs/calibration/face_refine.md, the replays).
 """
 from __future__ import annotations
 
@@ -32,20 +34,37 @@ SOFT_PX = 40.0
 """A face under this many take pixels has its window floored at face_track.MIN_SIDE (96 / 2.4 = 40):
 logged as `soft` on its track.  Since the face-warp fix (2026-10-19) it is pasted by the same face-core
 rule as any face, scaled to its size."""
-CORE_RADII = (0.55, 0.65)
-"""The face core pasted from the redraw, in face heights (x, y): brow to chin, cheek to cheek, never the
-hat brim, the hair top, the ears or the collar.  Everything outside it is the take's own pixels: the
-square paste let H3's redraw of hat, hair, collar and background replace the take's, 1-4 px off and
-wandering (docs/audit/2026-10-19_face_warp/audit_our_paste.md; ComfyUI-H3-FaceRefine, Carasibana, MIT,
-pastes `face_only` by default)."""
-CORE_FEATHER = 0.3
-"""The feather, in face heights, lies INSIDE the core's outline: the mask is exactly 0 at and beyond it."""
+CORE_HALF = (0.35, 0.34, 0.34)
+"""The face core pasted from the redraw, in face heights from the face box's centre (across, up, down):
+brow to chin, cheek to cheek, never the hat brim, the hair, the ears, the jaw or the collar.  Everything
+outside it is the take's own pixels: the square paste let H3's redraw of hat, hair, collar and background
+replace the take's, 1-4 px off and wandering (docs/audit/2026-10-19_face_warp/audit_our_paste.md;
+ComfyUI-H3-FaceRefine, Carasibana, MIT, pastes `face_only` by default).  Round 1 (722050e) used these
+numbers as 0.55 x 0.65 radii, an outline 1.1 x 1.3 face heights across that took in the brim, the hair,
+the ears and the jaw (the skeptic's overlay); drawn over all 14 kept ep01 tracks, this one runs under
+the brim, inside the hair and above the collar (docs/calibration/face_refine.md, round 2 of the fix)."""
+CORE_POWER = (4.0, 2.0)
+"""The outline's power above and below the face's centre: square-shouldered over the eyes (a
+superellipse; face_yolov8m puts them at -0.23 to -0.15 face heights, out to +-0.22), round under the chin."""
+CORE_FEATHER = 0.08
+"""The feather, in face heights, lies INSIDE the core's outline: the mask is exactly 0 at and beyond it.
+Thin, so the eyes are the redraw's whole and the brim is the take's whole; the edge lock (band_lock)
+takes the tone step out of it."""
 FACE_Y = 0.55
 """Where face_track.windows puts the face's centre: half the side across, 0.55 of it down."""
 LOW_SIGMA = 0.08
 """The edge lock's low-pass, in face heights: where the mask falls, the take's tone below it and the
 redraw's ink lines above it (the replay: the outline's low-frequency step 1.1-3.8 -> 0.7-2.6 levels,
 the eye band's lines within 0.4 of the plain core paste)."""
+
+REG_SIDE = 384
+"""The head shift is read at most this many pixels across (the replay's scale; Farneback's window 21)."""
+REG_RING = (1.0, 1.8)
+"""The ring the head shift is read on, in core radii: hat brim, hair, ears, drawn by take and redraw alike."""
+SHIFT_MAX = 0.06
+"""The most the redraw is moved onto the take's head, in face heights.  The ep01 replay: H3's redraws sit
+0.7-2.9 px at 384 off the take's head, std 0.8-3.9 frame to frame (0.005-0.03 face heights); the shift
+takes the face-vs-head shear 2.7 -> 0.9 (T18), 2.7 -> 1.1 (T08).  A turned head is not a jitter."""
 
 
 @dataclass(frozen=True)
@@ -133,18 +152,21 @@ def soft(face_px: float | None) -> bool:
 
 
 def core_radius(side: int, face: float, centre: tuple | None = None) -> np.ndarray:
-    """Every pixel's elliptic radius from the face's centre, 1 on the face core's outline (CORE_RADII
-    face heights); `centre` (cx, cy) in pixels, else where face_track.windows puts the face."""
+    """Every pixel's radius from the face's centre, 1 on the face core's outline (CORE_HALF face heights,
+    CORE_POWER above and below); `centre` (cx, cy) in pixels, else where face_track.windows puts the face."""
     cx, cy = centre or (side / 2, FACE_Y * side)
-    rx, ry = max(CORE_RADII[0] * face, 1e-6), max(CORE_RADII[1] * face, 1e-6)
     yy, xx = np.mgrid[0:side, 0:side].astype(np.float32) + 0.5
-    return np.sqrt(((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2)
+    up = yy < cy
+    f = max(face, 1e-6)
+    n = np.where(up, *CORE_POWER).astype(np.float32)
+    dy = np.abs(yy - cy) / (np.where(up, CORE_HALF[1], CORE_HALF[2]) * f)
+    return ((np.abs(xx - cx) / (CORE_HALF[0] * f)) ** n + dy ** n) ** (1.0 / n)
 
 
 def core_mask(side: int, face: float, centre: tuple | None = None) -> np.ndarray:
     """(side, side, 1) float: 1 on the face, a smoothstep down to exactly 0 at the core's outline;
     the feather (CORE_FEATHER face heights) lies inside it."""
-    width = CORE_FEATHER / float(np.mean(CORE_RADII))
+    width = CORE_FEATHER / float(np.mean(CORE_HALF))
     t = np.clip((1.0 - core_radius(side, face, centre)) / width, 0.0, 1.0)
     return (t * t * (3.0 - 2.0 * t))[..., None].astype(np.float32)
 
@@ -188,7 +210,43 @@ def blend(frame: np.ndarray, patch: np.ndarray, x: int, y: int, mask: np.ndarray
     p = patch[y0 - y:y1 - y, x0 - x:x1 - x].astype(np.float32)
     m = mask[y0 - y:y1 - y, x0 - x:x1 - x] * alpha
     region = frame[y0:y1, x0:x1].astype(np.float32)
-    frame[y0:y1, x0:x1] = (p * m + region * (1 - m)).clip(0, 255).astype(np.uint8)
+    frame[y0:y1, x0:x1] = np.rint(p * m + region * (1 - m)).clip(0, 255).astype(np.uint8)   # rounded, not cut
+
+
+def head_shift(patch: np.ndarray, take: np.ndarray, face: float, centre: tuple | None) -> tuple[float, float]:
+    """Where the redraw's head sits against the take's on this frame (patch pixels): the median flow take ->
+    redraw on the REG_RING round the face core, held to SHIFT_MAX face heights."""
+    import cv2
+    s = patch.shape[0]
+    n = min(s, REG_SIDE)
+    k = n / s
+    g = [cv2.cvtColor(cv2.resize(np.ascontiguousarray(f), (n, n), interpolation=cv2.INTER_AREA), cv2.COLOR_RGB2GRAY)
+         for f in (take, patch)]
+    flow = cv2.calcOpticalFlowFarneback(g[0], g[1], None, 0.5, 4, 21, 3, 5, 1.1, 0)
+    r = core_radius(n, face * k, None if centre is None else (centre[0] * k, centre[1] * k))
+    ring = (r >= REG_RING[0]) & (r <= REG_RING[1])
+    d = np.median(flow[ring], axis=0) / k if ring.any() else np.zeros(2)
+    most, size = SHIFT_MAX * face, float(np.hypot(*d))
+    return tuple(float(v) for v in (d * most / size if size > most else d))
+
+
+def shifted(patch: np.ndarray, d: tuple[float, float]) -> np.ndarray:
+    """The patch moved back by `d` (its content at x + d now at x), cubic, edges reflected."""
+    import cv2
+    m = np.float32([[1, 0, -d[0]], [0, 1, -d[1]]])
+    return cv2.warpAffine(np.ascontiguousarray(patch), m, patch.shape[1::-1], flags=cv2.INTER_CUBIC,
+                          borderMode=cv2.BORDER_REFLECT)
+
+
+def paste_patch(out: np.ndarray, patch: np.ndarray, x: int, y: int, face: float, centre: tuple | None,
+                alpha: float = 1.0) -> None:
+    """A redrawn patch over `out` at (x, y), in place: put back on the take's head (head_shift), the face
+    core only, edge-locked.  The Paster and the gate (studio/face_gate.pasted_of) both paste through it,
+    so the gate reads the paste that ships."""
+    take = under(out, x, y, patch)
+    patch = shifted(patch, head_shift(patch, take, face, centre))
+    mask = paste_mask(patch.shape[0], face, centre)
+    blend(out, band_lock(patch, take, mask, face), x, y, mask, alpha)
 
 
 def ring_diff(src: np.ndarray, ref: np.ndarray, f: int) -> float:
@@ -254,8 +312,7 @@ class Paster:
         x, y, s = placed = to_master(track.windows[t], span.guard, *self.size, self.factor)
         patch = cv2.resize(np.ascontiguousarray(patch), (s, s), interpolation=cv2.INTER_AREA)
         cx, cy, face = face_in_patch(face_at(track, t), box, placed)
-        mask = paste_mask(s, face, (cx, cy))
-        blend(out, band_lock(patch, under(out, x, y, patch), mask, face), x, y, mask, alpha)
+        paste_patch(out, patch, x, y, face, (cx, cy), alpha)
 
     def reader(self, crop: str):
         if crop not in self.readers:
@@ -274,9 +331,15 @@ def sha8(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()[:8] if Path(path).exists() else ""
 
 
-def face_share(doc: dict) -> float | None:
-    """A track's median face height over its frozen side; None for an old track that kept neither."""
-    return float(doc["face_px"]) / float(doc["side"]) if doc.get("face_px") and doc.get("side") else None
+def face_share(doc: dict, row: dict | None = None) -> float | None:
+    """A track's median face height over its frozen side; a track file written without them reads its
+    refine.json row's face_px over the window's side (ep01: T06's 13.5 px Hyde in a 96 window read as the
+    margin's 1 / 2.4 was pasted through a core three times his face); None when neither kept it."""
+    if doc.get("face_px") and doc.get("side"):
+        return float(doc["face_px"]) / float(doc["side"])
+    if (row or {}).get("face_px") and doc.get("windows"):
+        return float(row["face_px"]) / float(doc["windows"][int((doc.get("life") or [0])[0])][2])
+    return None
 
 
 def faces_of(doc: dict) -> tuple | None:
@@ -292,7 +355,7 @@ def kept_tracks(entry: dict, room: Path) -> tuple:
         if p.get("kept"):
             doc = json.loads((Path(room) / p["track"]).read_text(encoding="utf-8"))
             out.append(Track([tuple(w) for w in doc["windows"]], tuple(doc["life"]), int(doc["start"]),
-                             str(Path(room) / p["crop"]), face_share(doc), faces_of(doc)))
+                             str(Path(room) / p["crop"]), face_share(doc, p), faces_of(doc)))
     return tuple(out)
 
 

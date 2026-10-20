@@ -70,10 +70,19 @@ against a take's face (64 px regions, 210 pairs) reads from 23.9, p5 32.4, media
 OUTSIDE_MAX = 1.0
 """The most any pixel outside the face core's mask may move in the paste (levels; rounding only): the
 take's hat, hair, collar and background are never the redraw's (owner 2026-10-19, ep01 iter2 warp)."""
-RING_WARP_MAX = 0.25
-"""The ring warp wall (px at 384, studio/face_gate.ring_warp), from the ep01 replay of the 14 kept crops
-(docs/calibration/face_refine.md, face-warp replay): the square paste read 0.89-2.75, the face-core
-paste 0.00-0.01; the take against itself reads 0, iter1 against iter2 outside the pastes 0.02."""
+BAND_WARP_MAX = 0.9
+"""The band warp wall (px at 384, studio/face_gate.paste_check): flow from the take to the paste the Paster
+makes, on the core's feather and out to 1.2 core radii, where the redraw's lines meet the take's.  The ep01
+replay (docs/calibration/face_refine.md, face-warp round 2): this paste 0.27-0.67 on the 14 kept tracks;
+the iter2 square paste read on its own band 0.46-1.19, round 1's ellipse 0.33-0.93.  A guard against a
+gross misregistration: it refuses none of ep01's pastes.  One episode."""
+TURN_MAX = 4.0
+"""The most the redraw may turn the face (degrees; studio/face_gate.face_turn: the median change of MTCNN's
+eye line, take -> redraw, over 12 crop pairs where both read one).  The face-core paste puts the redraw's
+face in the take's head, so a re-posed face shows (ep01 T08: H3 turned the child's head; the paste showed
+the redraw's eyes over the take's open mouth).  The ep01 replay: 0.9-2.84 on the faces kept by eye,
+5.55-9.34 on T08's child, T09's Hyde (a tilt and a smirk), T26's Enfield (profile -> three-quarter) and
+T01's Utterson (refused on its seam already).  One episode."""
 CCIP_RISE = 0.03
 CLIP_DROP = 0.05
 """The anime identity walls (PLAN_FINAL section 3): CCIP distance to the sheet may not rise by
@@ -323,7 +332,8 @@ class Measures:
     faces_*: the most faces any one sampled crop shows (inside the window, overlaps merged);
     change: mean |refined - source crop| per pixel; drift: the same inside the face box;
     eye_*: the drawn-eye score (logged); ccip_*: CCIP distance to the sheet; clip_*: clip_vision_h
-    cosine to the sheet (None unread)."""
+    cosine to the sheet (None unread); outside / band_warp / core_flow: the paste's (studio/face_gate.
+    paste_measures; a row without band_warp was decided before them and is regated before a cut)."""
     id_src: float | None
     id_ref: float | None
     seam: float
@@ -340,16 +350,21 @@ class Measures:
     clip_src: float | None = None
     clip_ref: float | None = None
     outside: float | None = None
-    ring_warp: float | None = None
+    band_warp: float | None = None
+    core_flow: float | None = None
+    turn: float | None = None
 
 
 def paste_refusals(m: Measures) -> list[str]:
-    """The paste moved the take outside the face core, or warped the ring round it."""
+    """The paste moved the take outside the face core, warped the band where it meets the take, or
+    pasted a face the redraw turned (core_flow is logged, never a wall: it did not part T08 from the rest)."""
     out = []
     if m.outside is not None and m.outside > OUTSIDE_MAX:
         out.append(f"outside the face moved {m.outside:.1f} > {OUTSIDE_MAX}")
-    if m.ring_warp is not None and m.ring_warp > RING_WARP_MAX:
-        out.append(f"ring warp {m.ring_warp:.2f} > {RING_WARP_MAX}")
+    if m.band_warp is not None and m.band_warp > BAND_WARP_MAX:
+        out.append(f"band warp {m.band_warp:.2f} > {BAND_WARP_MAX}")
+    if m.turn is not None and m.turn > TURN_MAX:
+        out.append(f"the redraw turned the face {m.turn:.1f} deg > {TURN_MAX}")
     return out
 
 

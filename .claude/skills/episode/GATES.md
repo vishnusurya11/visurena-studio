@@ -347,13 +347,13 @@ scale: it must DIFFER from its source crop (mean |refined - source| >= 0.5, `SAM
 passes every other wall); **identity**: CCIP distance to the sheet's face window may not rise > 0.03 nor cross 0.1785 (same character); else facenet AND clip_vision_h must BOTH
 fall (> 0.05) to refuse; anime terms unread -> facenet alone (drop > 0.05); **drift** (mean |refined - take| inside
 the face box) <= 35; **seam** (|refined - take| on the slope of round 1's feather band, a small face's soft head ring, outside the head) <= 18;
-the paste moves no pixel outside the face core (<= 1 level) and the **ring warp** (flow take -> paste, 1.2-1.8 core radii, px at 384) <= 0.25;
-**flicker** pasted <= 1.10 x the take's + 0.5; **faces**: no clone, no loss. The drawn-eye score
-(`studio/face_eye.py`) is logged, never a wall. A broken wall falls back to the unrefined take; every decision and its
+on the shipped paste: nothing outside the core moves (1 level), **band warp** (take -> paste flow, feather to 1.2 radii, px@384) <= 0.9, **turn** (MTCNN eye line) <= 4 deg;
+**flicker** pasted <= 1.10 x the take's + 0.5; **faces**: no clone, no loss. Drawn-eye score
+(`studio/face_eye.py`), core flow: logged. A broken wall falls back to the unrefined take; every decision and its
 measures in `takes/r2v/refine.json`; a crop pastes only onto the take bytes it was made from (sha8). Walls fitted on
-round 1's 15 ep01 faces (12 kept). **The paste**: at cut scale, before the one upscale; ONLY the face core (ellipse
-0.55 x 0.65 face heights round the tracked face, feather inside), any size; in its band the take's low frequencies,
-the redraw's lines; hat, hair, collar, background stay the take's. **Tracking** (`studio/face_track.py`): a weak face (0.3-0.6)
+round 1's 15 ep01 faces (12 kept); old rows regated before a cut. **The paste**: cut scale, before the upscale;
+ONLY the face core (brow to chin, cheek to cheek, 0.08 feather inside), any size, redraw re-seated on the take's head; its band the take's low frequencies;
+hat, hair, ears, jaw, collar stay the take's. **Tracking** (`studio/face_track.py`): a weak face (0.3-0.6)
 only continues a track; detections go to tracks by least cost (motion, size, head colour); a head must read >= the track's own reading - 0.15; bodies make only far figures; the crop is the soft
 span (on < 120 px, off > 150) on H3's grid inside its shot, one frozen side. CLOCK: priced 110 s per face per 192 frames; runs only while
 `leaves_reserve(step, price + 550 s)`, else `REFINE CUT`, status `cut`. **Selection**: no plan size, no face-at-end;

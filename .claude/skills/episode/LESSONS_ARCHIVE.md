@@ -1961,13 +1961,37 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   outline); the feather lies inside; the band takes the take's low frequencies (`band_lock`). Gate walls:
   outside moved <= 1, ring warp <= 0.25 px at 384 (`face_gate.paste_check`). The old seam ruler stays.
 - Replay before wiring: every arm on the real crops at $0 (docs/calibration/face_refine.md). Two plausible
-  cures failed there: a similarity registration blurred the eyes, a per-frame Lab match flickered.
+  cures failed there: a similarity registration blurred the eyes (round 2: that blur was the metric), a per-frame Lab match flickered.
 - Moved here from GATES.md: a failed anime-worker ask (its 120 s idle exit) starts one fresh worker; a
   `no_faces` row of the old 60 px wall is owed a new look.
 - The av3 worker's `spans_back` had dropped `Track.face`, so a soft face pasted through the feather on
   the av3 path; it now carries `face` and `faces`.
 - Tests: `tests/test_the_face_paste_keeps_the_take_outside_the_face.py`, the seam rulers in
   `tests/test_face_gate_reads_the_seam_at_any_face_size.py`, `tests/test_face_refine_pastes_a_small_face_softly.py`.
+
+### Face-warp fix, round 2 (2026-10-19): brow to chin, the head re-seated, the turn wall
+
+- A constant named RADII that holds diameters' halves is a geometry claim. Draw the outline over the real
+  frames before the commit. Round 1's 0.55 x 0.65 "radii" put the outline across the brim, the hair, the
+  ears and the jaw. The skeptic saw it in one overlay.
+- A wall read where its own mask is exactly 0 can never fail. Read a paste's warp where the paste changes
+  pixels (the feather) and just outside it, on the paste the Paster makes. One function, `paste_patch`, is
+  shared by the Paster and the gate.
+- When the paste shrinks to the face, the redraw's frame-to-frame jitter (2-3 px at 384 on ep01) shows as a
+  face swimming in a still head. Re-seat each redraw frame on the take's head first (the median flow on
+  the hat/hair ring, held to 0.06 face heights). Smoothing over 9 frames removes the offset but not the jitter.
+- A metric that scores the difference to an unshifted reference calls every shift "blur". Round 1 refused
+  registration on such a metric. Read sharpness as high-pass energy instead, or compare against the
+  shifted reference.
+- The face-core paste puts the redraw's face in the take's head, so a redraw that re-posed the face (T08's
+  turned child, T26's profile turned three-quarter) is now a defect the square paste hid. The gate reads
+  MTCNN's eye line over 12 pairs, on the face nearest the window's face point; 6 pairs, or the largest
+  face, read a neighbour. Flow inside the core did not separate T08 after the shift (2.95 = T05).
+- Old decisions are regated on CPU before the cut (`regate_room` in `assemble.face_paste_wrap`). Track
+  files without `face_px` read the refine row's `face_px`; read as the margin's, T06's 13.5 px Hyde was
+  pasted through a core three times his face.
+- `Path.write_text` on Windows writes CRLF: patching GATES.md that way added 677 bytes and broke the 130 KB
+  read budget. Patch through bytes.
 
 ## The tiny-face rung (09_08, face-blur round 2 builder, 2026-10-19)
 

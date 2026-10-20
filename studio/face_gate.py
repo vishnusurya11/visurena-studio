@@ -8,8 +8,12 @@ and fakes in a test.
   soft ring).  Through the feather it is round 1's feather-band difference; it reads a change D as
   D at any face size (fix round 2026-10-19: a mean over the whole window outside the head read a
   13 px face 60 levels off as 2.5);
-- outside / ring warp (face-warp fix, 2026-10-19): the production paste (the face core, edge-locked)
-  must move no pixel outside the core, and the ring round the face must not warp (flow take -> paste);
+- outside / band warp (face-warp fix, 2026-10-19): the paste the Paster makes (face_paste.paste_patch:
+  the face core, edge-locked) must move no pixel outside the core, and its feather band and the ring just
+  outside it must not warp (flow take -> paste there; round 1 read a ring the mask never reached);
+- core flow (logged): flow take -> paste where the paste is the redraw whole, after the head shift;
+- turn: how far the redraw turned the face (MTCNN's eye line, take -> redraw; ep01 T08, H3 turned the
+  child's head inside her hood);
 - drift: the mean |refined - take| inside the face box (PLAN_FINAL 1a, T8mars' parity cap);
 - eyes: the drawn-eye score of the take and of the refined crop (studio/face_eye.py), logged;
 - flicker: the face region's frame-to-frame change, the take's own against the
@@ -117,14 +121,19 @@ def face_px_of(face: float | None, side: int) -> float:
     return (face or 1 / MARGIN) * side
 
 
-def pasted_of(src: list[np.ndarray], ref: list[np.ndarray], face: float | None) -> tuple[list, list, np.ndarray]:
-    """(the edge-locked crops, the pasted windows, the mask) as the production paste makes them."""
+def pasted_of(src: list[np.ndarray], ref: list[np.ndarray], face: float | None,
+              centres: list | None = None) -> tuple[list, list]:
+    """(the pasted windows, their masks): each redraw pasted on its take window by the Paster's own
+    face_paste.paste_patch; `centres` the face's (cx, cy) per frame in window pixels, else the window's."""
     n, side = min(len(src), len(ref)), src[0].shape[0]
     face_px = face_px_of(face, side)
-    mask = face_paste.paste_mask(side, face_px)
-    locked = [face_paste.band_lock(r, s, mask, face_px) for s, r in zip(src[:n], ref[:n])]
-    pasted = [np.rint(r * mask + s * (1 - mask)).astype(np.uint8) for s, r in zip(src[:n], locked)]
-    return locked, pasted, mask
+    pasted, masks = [], []
+    for k in range(n):
+        out, c = np.array(src[k], copy=True), centres[k] if centres else None
+        face_paste.paste_patch(out, ref[k], 0, 0, face_px, c)
+        pasted.append(out)
+        masks.append(face_paste.paste_mask(side, face_px, c))
+    return pasted, masks
 
 
 def seam_and_flicker(src: list[np.ndarray], ref: list[np.ndarray], face: float | None = None,
@@ -136,46 +145,84 @@ def seam_and_flicker(src: list[np.ndarray], ref: list[np.ndarray], face: float |
     side = src[0].shape[0]
     face_px = face_px_of(face, side)
     weight = edge_weight(seam_mask(side, face_px if soft else None), head_mask(side, face_px))
-    _, pasted, _ = pasted_of(src, ref, face)
+    pasted, _ = pasted_of(src, ref, face)
     n = len(pasted)
     seam = float(np.mean([edge_change(s, r, weight) for s, r in zip(src[:n:SEAM_EVERY], ref[:n:SEAM_EVERY])]))
     return seam, face_paste.region_flicker(src[:n]), face_paste.region_flicker(pasted)
 
 
 FLOW_SIDE = 384
-"""The ring warp is read at the audit's scale (docs/audit/2026-10-19_face_warp: 1 px there ~0.7 take px)."""
-RING = (1.2, 1.8)
-"""The ring round the face core the warp is read on, in core radii: hat brim, hair, ears, collar, and
-clear of the flow's own reach into the redrawn face."""
+"""The warps are read at the audit's scale (docs/audit/2026-10-19_face_warp: 1 px there ~0.7 take px)."""
+BAND_OUT = 1.2
+"""The band warp is read where the mask falls (0 < m < 1, inside the core's outline) and on the ring just
+outside it, out to 1.2 core radii: where a redraw's lines meet the take's."""
 
 
-def ring_mask(side: int, face: float | None) -> np.ndarray:
-    """(side, side) bool: the RING round the face core in a window of `side`."""
-    r = face_paste.core_radius(side, face_px_of(face, side))
-    return (r >= RING[0]) & (r <= RING[1])
+def band_mask(side: int, face: float | None, centre: tuple | None = None) -> np.ndarray:
+    """(side, side) bool: the paste mask's feather and the ring just outside the outline."""
+    face_px = face_px_of(face, side)
+    m = face_paste.paste_mask(side, face_px, centre)[..., 0]
+    r = face_paste.core_radius(side, face_px, centre)
+    return ((m > 0.0) & (m < 1.0)) | ((r >= 1.0) & (r <= BAND_OUT))
 
 
-def ring_warp(src: list[np.ndarray], pasted: list[np.ndarray], face: float | None) -> float:
-    """Mean optical-flow shift (px at FLOW_SIDE) from the take to the pasted window on the ring round the
-    face: the head-area warp the owner saw (square paste 0.9-3.1, the take against itself 0)."""
+def core_of(side: int, face: float | None, centre: tuple | None = None) -> np.ndarray:
+    """(side, side) bool: where the paste is the redraw whole (the mask is 1)."""
+    return face_paste.paste_mask(side, face_px_of(face, side), centre)[..., 0] >= 0.999
+
+
+def scaled(centre: tuple | None, k: float) -> tuple | None:
+    return None if centre is None else (centre[0] * k, centre[1] * k)
+
+
+def flow_on(a: np.ndarray, b: np.ndarray, where: np.ndarray) -> float:
+    """Mean Farneback flow magnitude from a to b at FLOW_SIDE, over the `where` pixels (at FLOW_SIDE)."""
     import cv2
-    ring, out = ring_mask(FLOW_SIDE, face), []
-    for s, p in zip(src[::SEAM_EVERY], pasted[::SEAM_EVERY]):
-        a, b = (cv2.cvtColor(cv2.resize(np.ascontiguousarray(f), (FLOW_SIDE, FLOW_SIDE), interpolation=cv2.INTER_AREA),
-                             cv2.COLOR_RGB2GRAY) for f in (s, p))
-        flow = cv2.calcOpticalFlowFarneback(a, b, None, 0.5, 4, 21, 3, 5, 1.1, 0)
-        out.append(float(np.hypot(flow[..., 0], flow[..., 1])[ring].mean()))
+    g = [cv2.cvtColor(cv2.resize(np.ascontiguousarray(f), (FLOW_SIDE, FLOW_SIDE), interpolation=cv2.INTER_AREA),
+                      cv2.COLOR_RGB2GRAY) for f in (a, b)]
+    flow = cv2.calcOpticalFlowFarneback(g[0], g[1], None, 0.5, 4, 21, 3, 5, 1.1, 0)
+    return float(np.hypot(flow[..., 0], flow[..., 1])[where].mean()) if where.any() else 0.0
+
+
+def warp_on(src: list, other: list, face: float | None, region, centres: list | None) -> float:
+    """The mean flow from take to `other` on `region(side, face, centre)` over every SEAM_EVERY-th frame."""
+    k = FLOW_SIDE / src[0].shape[0]
+    out = [flow_on(s, o, region(FLOW_SIDE, face, scaled(centres[i] if centres else None, k)))
+           for i, (s, o) in enumerate(zip(src, other)) if i % SEAM_EVERY == 0]
     return float(np.mean(out)) if out else 0.0
 
 
-def paste_check(src: list[np.ndarray], ref: list[np.ndarray], face: float | None) -> tuple[float, float]:
-    """(the most any pixel outside the mask moved, the ring warp) of the production paste: outside the
-    face core the pasted window must be the take."""
-    _, pasted, mask = pasted_of(src, ref, face)
-    out = mask[..., 0] == 0
-    moved = max((float(np.abs(p.astype(np.int16) - s.astype(np.int16))[out].max(initial=0)) for s, p in zip(src, pasted)),
-                default=0.0)
-    return moved, ring_warp(src, pasted, face)
+def outside_moved(src: list, pasted: list, masks: list) -> float:
+    """The most any pixel outside its mask moved from the take (levels)."""
+    return max((float(np.abs(p.astype(np.int16) - s.astype(np.int16))[m[..., 0] == 0].max(initial=0))
+                for s, p, m in zip(src, pasted, masks)), default=0.0)
+
+
+def core_flow(src: list[np.ndarray], ref: list[np.ndarray], face: float | None, centres: list | None = None) -> float:
+    """How far the paste moved the face's features off the take's: mean flow take -> paste where the paste
+    is the redraw whole (px at FLOW_SIDE), after the head shift.  A sharper face on the take's features
+    reads low; a turned head reads high."""
+    pasted, _ = pasted_of(src, ref, face, centres)
+    return warp_on(src, pasted, face, core_of, centres)
+
+
+def paste_check(src: list[np.ndarray], ref: list[np.ndarray], face: float | None,
+                centres: list | None = None) -> tuple[float, float]:
+    """(the most any pixel outside the mask moved, the band warp) of the paste the Paster makes."""
+    pasted, masks = pasted_of(src, ref, face, centres)
+    return outside_moved(src, pasted, masks), warp_on(src, pasted, face, band_mask, centres)
+
+
+def paste_measures(src: list[np.ndarray], ref: list[np.ndarray], face: float | None,
+                   centres: list | None = None) -> dict:
+    """The paste's measures as the gate logs them, from one paste: outside, band warp, core flow, the
+    take's flicker and the paste's."""
+    pasted, masks = pasted_of(src, ref, face, centres)
+    return {"outside": round(outside_moved(src, pasted, masks), 2),
+            "band_warp": round(warp_on(src, pasted, face, band_mask, centres), 3),
+            "core_flow": round(warp_on(src, pasted, face, core_of, centres), 3),
+            "flick_src": round(face_paste.region_flicker(src[:len(pasted)]), 3),
+            "flick_ref": round(face_paste.region_flicker(pasted), 3)}
 
 
 DRIFT_EVERY = 4
@@ -257,6 +304,33 @@ def change(src: list[np.ndarray], ref: list[np.ndarray]) -> float:
     return float(np.mean([np.abs(a.astype(np.float32) - b.astype(np.float32)).mean() for a, b in zip(src[:n], ref[:n])]))
 
 
+TURN_PAIRS = 3
+"""The turn is read only when at least this many sampled pairs read a face's landmarks on both sides."""
+
+
+def eye_angle(found: list[dict], side: int) -> float | None:
+    """The eye line's angle (degrees) of the face with landmarks nearest where the window puts the track's
+    face (a neighbour in the window is not the person: ep01 T09's Enfield beside Hyde), else None."""
+    core = [f for f in found if f.get("landmarks") and inside(f["box"], side)]
+    if not core:
+        return None
+    at = (side / 2, face_paste.FACE_Y * side)
+    marks = min(core, key=lambda f: np.hypot((f["box"][0] + f["box"][2]) / 2 - at[0],
+                                             (f["box"][1] + f["box"][3]) / 2 - at[1]))["landmarks"]
+    return float(np.degrees(np.arctan2(marks[1][1] - marks[0][1], marks[1][0] - marks[0][0])))
+
+
+def face_turn(src768: list, ref768: list, detect) -> float | None:
+    """The median |eye-line angle change| take -> redraw over the paired crops where both read one; None
+    with fewer than TURN_PAIRS such pairs (a face no detector reads is never refused on it)."""
+    turns = []
+    for a, b in zip(src768, ref768):
+        ea, eb = eye_angle(detect(a), a.shape[0]), eye_angle(detect(b), b.shape[0])
+        if ea is not None and eb is not None:
+            turns.append(abs((ea - eb + 180.0) % 360.0 - 180.0))
+    return float(np.median(turns)) if len(turns) >= TURN_PAIRS else None
+
+
 def faces_and_identity(src768, ref768, sheet_vec, detect, embed):
     """(faces unrefined, faces refined, identity unrefined, identity refined)."""
     cs, ids = read_faces(src768, sheet_vec, detect, embed)
@@ -265,17 +339,21 @@ def faces_and_identity(src768, ref768, sheet_vec, detect, embed):
 
 
 def measure(src_w, ref_w, src768, ref768, sheet_vec, detect, embed, moved: float | None = None,
-            face: float | None = None, soft: bool = False) -> face_refine.Measures:
+            face: float | None = None, soft: bool = False, centres: list | None = None) -> face_refine.Measures:
     """Every measure the decision reads, for one person's refined crop; `moved` is
     the refined crop's change from the crop it was rendered from; `face` the face's
-    share of the window and `soft` its floored window (seam_and_flicker, paste_check)."""
-    seam, f_src, f_ref = seam_and_flicker(src_w, ref_w, face, soft)
-    outside, ring = paste_check(src_w, ref_w, face)
+    share of the window, `soft` its floored window and `centres` the face's (cx, cy) per frame
+    (seam_and_flicker, paste_measures)."""
+    seam, _, _ = seam_and_flicker(src_w, ref_w, face, soft)
     cs, cr, ids, idr = faces_and_identity(src768, ref768, sheet_vec, detect, embed)
-    return face_refine.Measures(id_src=ids, id_ref=idr, seam=round(seam, 2), flick_src=round(f_src, 3),
-                                flick_ref=round(f_ref, 3), faces_src=cs, faces_ref=cr,
+    return face_refine.Measures(id_src=ids, id_ref=idr, seam=round(seam, 2), faces_src=cs, faces_ref=cr,
                                 change=None if moved is None else round(moved, 2),
-                                outside=round(outside, 2), ring_warp=round(ring, 3))
+                                **paste_measures(src_w, ref_w, face, centres))
+
+
+def centres_of(boxes: list) -> list:
+    """Each face box's centre (window pixels): where the paste puts the face core."""
+    return [((b[0] + b[2]) / 2, (b[1] + b[3]) / 2) for b in boxes]
 
 
 def face_boxes(boxes, wins: list, life: tuple[int, int], side: int) -> list:
