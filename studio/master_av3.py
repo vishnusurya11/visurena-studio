@@ -187,10 +187,11 @@ def shot_of(frame: int, cuts: list[int]) -> int:
 
 
 class Watchdog:
-    """Calls `fire` once when `tick` has not been called for `seconds`."""
+    """Calls `fire` once when `tick` has not been called for `seconds`; calls `beat` on every
+    poll while ticks still come (the worker re-arms its hang dump there, COSTS.md 2026-10-21)."""
 
-    def __init__(self, seconds: float, fire, poll: float = 1.0):
-        self.seconds, self.fire, self.poll = seconds, fire, poll
+    def __init__(self, seconds: float, fire, poll: float = 1.0, beat=None):
+        self.seconds, self.fire, self.poll, self.beat = seconds, fire, poll, beat
         self.last, self.fired, self.halt = time.monotonic(), False, threading.Event()
         self.thread = threading.Thread(target=self.watch, daemon=True)
 
@@ -207,6 +208,8 @@ class Watchdog:
                 self.fired = True
                 self.fire()
                 return
+            if self.beat is not None:
+                self.beat()
 
     def stop(self) -> None:
         self.halt.set()
@@ -238,7 +241,8 @@ def streamed(listing: Path, out: Path, width: int, height: int, factor: int, fps
     enc = subprocess.Popen(mu.encode_argv(listing, out, width * factor, height * factor, fps, encoder),
                            stdin=subprocess.PIPE)
     seg = Segmented(mu.pasted(dec.stdout.read, paste, width, height), width, height, lengths(cuts), filt)
-    dog = Watchdog(stall_s, lambda: stall(dec, enc, seg, hard_exit), poll=min(1.0, stall_s / 4)).start()
+    dog = Watchdog(stall_s, lambda: stall(dec, enc, seg, hard_exit), poll=min(1.0, stall_s / 4),
+                   beat=lambda: dump_on_hang(stall_s)).start()
     counted = Counted(Pace(expected_frames, cap_s) if cap_s else None)
     try:
         n = mu.pump(seg.read, counted(enc.stdin.write, dog), width, height, upscaler)
@@ -328,10 +332,12 @@ def run(job: dict, upscaler=None, hard_exit=None) -> int:
                     hard_exit=hard_exit, expected_frames=job.get("expected_frames"), cap_s=job.get("cap_s"))
 
 
-def dump_on_hang() -> None:
-    """A hang leaves its Python stack in the log after STALL_S; a stderr with no fd (a test) skips it."""
+def dump_on_hang(seconds: float = STALL_S) -> None:
+    """A hang leaves its Python stack in the log `seconds` after this call; a stderr with no fd (a
+    test) skips it.  Each call re-arms the one timer, so the pump's watchdog keeps it off while
+    frames move: armed once, it printed a false stall stack on every pass over 60 s."""
     try:
-        faulthandler.dump_traceback_later(STALL_S, exit=False, file=sys.stderr)
+        faulthandler.dump_traceback_later(seconds, exit=False, file=sys.stderr)
     except (OSError, ValueError):
         pass
 
