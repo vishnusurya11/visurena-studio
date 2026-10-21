@@ -182,3 +182,58 @@ def test_a_dead_pipe_write_is_named_even_when_the_exit_is_not_yet_seen(capsys):
 def test_the_message_quotes_the_workers_real_idle_limit():
     from studio import whisper_worker
     assert rw.IDLE_S == whisper_worker.IDLE_S
+
+
+# ---- A32 (face debate 2026-10-21, LEDGER_round4 check 3 + A32) --------------------------------------
+
+def spawner(procs: list):
+    made = []
+
+    def spawn():
+        made.append(len(made))
+        return procs[min(len(made) - 1, len(procs) - 1)]
+    spawn.made = made
+    return spawn
+
+
+def test_the_worker_is_spawned_at_the_first_clip_not_at_the_router():
+    """ep01 run01: the worker started before any clip was cut, idled past IDLE_S = 30 s and the first
+    write read [Errno 22]; 527 s on the CPU ear followed."""
+    spawn = spawner([FakeProc([{"text": "one"}])])
+    listen = rw.routed(cpu_ear([]), route=lambda job, gb: "cuda", spawn=spawn, busy=lambda: False)
+    assert spawn.made == []
+    assert listen(Path("a.wav")) == "one" and spawn.made == [0]
+
+
+def test_a_worker_that_died_is_spawned_once_more_before_the_cpu_ear():
+    dead, live, heard = FakeProc([{"text": "x"}]), FakeProc([{"text": "gpu words"}]), []
+    dead.closed = True                                         # exited between its ready line and the clip
+    spawn = spawner([dead, live])
+    listen = rw.routed(cpu_ear(heard), route=lambda job, gb: "cuda", spawn=spawn, busy=lambda: False)
+    assert listen(Path("a.wav")) == "gpu words" and heard == [] and spawn.made == [0, 1]
+
+
+def test_a_second_death_is_the_cpus_and_no_third_worker_is_started():
+    dead1, dead2, heard = FakeProc([{"text": "x"}]), FakeProc([{"text": "y"}]), []
+    dead1.closed = dead2.closed = True
+    spawn = spawner([dead1, dead2])
+    listen = rw.routed(cpu_ear(heard), route=lambda job, gb: "cuda", spawn=spawn, busy=lambda: False)
+    assert listen(Path("a.wav")) == "cpu words" and heard == ["a.wav"] and spawn.made == [0, 1]
+    assert listen(Path("b.wav")) == "cpu words" and spawn.made == [0, 1]
+
+
+def test_the_failure_line_names_the_workers_exit_code(capsys):
+    dead = FakeProc([{"text": "x"}])
+    dead.closed = True
+    listen = rw.routed(cpu_ear([]), route=lambda job, gb: "cuda", spawn=spawner([dead, dead]), busy=lambda: False)
+    listen(Path("a.wav"))
+    said = capsys.readouterr().out
+    assert "poll() = 0" in said and "respawn" in said.lower()
+
+
+def test_the_workers_stderr_goes_to_the_episodes_qc_log(tmp_path):
+    home = tmp_path / "ep01"
+    assert rw.err_log(home) == home / "review" / "work" / "qc_whisper.err"
+    kw = rw.popen_kwargs(rw.err_log(home))
+    assert kw["stderr"].name == str(home / "review" / "work" / "qc_whisper.err") and kw["text"] is True
+    kw["stderr"].close()

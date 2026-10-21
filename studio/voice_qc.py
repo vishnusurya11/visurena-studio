@@ -515,9 +515,9 @@ def cpu_transcriber() -> Callable[[Path], str]:
         return comfy_transcriber()
 
 
-def any_transcriber() -> Callable[[Path], str]:
+def any_transcriber(err_path: Path | None = None) -> Callable[[Path], str]:
     """The ear the device router picks (owner 2026-10-18: GPU when idle, CPU when
     rendering): the CPU ear above, unchanged, or the GPU worker with it behind
-    (studio/routed_whisper)."""
+    (studio/routed_whisper); `err_path` takes the worker's stderr (A32)."""
     from studio import routed_whisper
-    return routed_whisper.routed(cpu_transcriber)
+    return routed_whisper.routed(cpu_transcriber, err_path=err_path)

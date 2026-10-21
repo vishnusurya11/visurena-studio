@@ -537,9 +537,12 @@ def measure(book_id: str, number: int, engine: str, listen, spent: bool = False)
 
 
 def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) -> None:
+    from studio import routed_whisper
     limit_threads()
-    report = measure(book_id, number, engine, watched(voice_qc.any_transcriber()), spent)
-    book, lufs, tp = episode_home.book_dir(book_id), report["lufs"], report["true_peak"]
+    book = episode_home.book_dir(book_id)
+    ear = voice_qc.any_transcriber(err_path=routed_whisper.err_log(episode_home.home(book, number)))
+    report = measure(book_id, number, engine, watched(ear), spent)
+    lufs, tp = report["lufs"], report["true_peak"]
     placed = episode_home.load_placed(book, number, episode_home.load_plan(book, number))
     lines = line_laid.laid_lines(placed, episode_home.takes_dir(book, number, engine))
     report_path = episode_home.home(book, number) / ("qc.json" if engine == "i2v" else f"qc_{engine}.json")
