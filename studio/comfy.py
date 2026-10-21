@@ -202,7 +202,7 @@ def submit(workflow: dict, timeout: float = 180.0) -> str:
     prefix = save_prefix(workflow)
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            return json.loads(response.read())["prompt_id"]
+            return accepted(json.loads(response.read()))
     except UNREACHABLE as failure:
         if isinstance(failure, urllib.error.HTTPError):
             raise RuntimeError(
@@ -211,7 +211,26 @@ def submit(workflow: dict, timeout: float = 180.0) -> str:
         if landed:
             return landed
         with _open(request) as response:                 # engine really was down
-            return json.loads(response.read())["prompt_id"]
+            return accepted(json.loads(response.read()))
+
+
+def accepted(reply: dict) -> str:
+    """The prompt id of a WHOLE accept.  An HTTP 200 carrying `node_errors` is the engine's partial
+    accept (GPU transcript 2026-10-21, error_invalid_graph.json): it queued only the outputs that
+    still validate, and the job ends "success" with no picture, so a caller's `run(...)[0]` dies on
+    an IndexError.  The remnant is taken off the queue and the answer raised as the rejection it is."""
+    if not reply.get("node_errors"):
+        return reply["prompt_id"]
+    try:
+        _post("/queue", {"delete": [reply["prompt_id"]]})
+    except (OSError, ValueError):                       # best effort: the remnant renders no picture
+        pass
+    raise RuntimeError(f"ComfyUI accepted only part of the workflow: {json.dumps(reply['node_errors'])[:900]}")
+
+
+def node_order(node_id) -> tuple[int, ...]:
+    """A node id's place in node order; a subgraph's "30:20" sorts as (30, 20), after "30"."""
+    return tuple(int(part) if part.isdigit() else 0 for part in str(node_id).split(":"))
 
 
 def _post(path: str, body: dict | None = None) -> None:
@@ -320,7 +339,7 @@ def texts_of(record: dict) -> list[str]:
     entries, e.g. a VLM caption), in node order.  These are not files, so
     `outputs_of` never sees them."""
     found: list[str] = []
-    for node_id in sorted(record.get("outputs", {}), key=int):
+    for node_id in sorted(record.get("outputs", {}), key=node_order):
         found += [t for t in record["outputs"][node_id].get("text", []) if isinstance(t, str)]
     return found
 
