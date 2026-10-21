@@ -233,9 +233,25 @@ as a wall on this evidence."""
 FRAME_NOTE = "G-FRAME advisory: an MCU face under 0.15 or a close under 0.25 of the frame height"
 
 
+TINY_FACE_PX, RENDER_PX = 100.0, 768
+"""A28 (face debate 2026-10-21, LEDGER_round4): a panel face under 100 px of the 768 render draws its
+eye under one H3 token (32 px).  Take face px ~ panel px x 0.94-1.20 on 8 of 9 ep01 pairs (T19 drew
+2x closer); recall 4/4 under 70 px, precision 7/8.  ADVISORY: a log column beside the verdict that
+never drives a redraw (panels_board-6 deferred) or a refine (the tracker decides on the take)."""
+TINY_FACE_NOTE = "tiny-face advisory: the panel's face is under 100 px of 768, its eye under one H3 token"
+
+
+def tiny_face_record(face_h: float | None) -> dict:
+    """The A28 column: the face's predicted render pixels and whether they fall under TINY_FACE_PX."""
+    px = None if face_h is None else int(round(face_h * RENDER_PX))
+    out = {"face_px_768": px, "tiny_face_advisory": px is not None and px < TINY_FACE_PX}
+    return out | ({"tiny_face_note": TINY_FACE_NOTE} if out["tiny_face_advisory"] else {})
+
+
 def frame_record(present: list[dict], planned: int, size: str, prose: str) -> dict:
     """G-FRAME: the tallest present face's height against the planned size, for a
-    faced, non-back panel ({} otherwise).  A measurement, never a flag or a fault."""
+    faced, non-back panel ({} otherwise).  A measurement, never a flag or a fault;
+    the A28 tiny-face column rides with it."""
     if planned <= 0 or back_view(prose):
         return {}
     heights = sorted((float(f["h"]) for f in present or [] if f.get("score", 0.0) >= PRESENT_SCORE), reverse=True)
@@ -243,7 +259,7 @@ def frame_record(present: list[dict], planned: int, size: str, prose: str) -> di
     floor = FRAME_FLOORS.get(size)
     out = {"face_h": face_h, "planned_size": size,
            "frame_advisory": bool(floor and face_h is not None and face_h < floor)}
-    return out | ({"frame_note": FRAME_NOTE} if out["frame_advisory"] else {})
+    return out | ({"frame_note": FRAME_NOTE} if out["frame_advisory"] else {}) | tiny_face_record(face_h)
 
 
 def stacked(frame) -> float:

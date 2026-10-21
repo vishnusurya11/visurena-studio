@@ -172,3 +172,18 @@ def test_an_insert_has_its_own_blur_floor():
     assert "blur" not in verdict(faces=[], planned=0, sharp=0.34, ink=0.0, tiled=0.0, size="insert")["flags"]
     assert "blur" in verdict(faces=[], planned=0, sharp=0.20, ink=0.0, tiled=0.0, size="insert")["flags"]
     assert "blur" in verdict(faces=[], planned=0, sharp=0.47, ink=0.0, tiled=0.0, size="wide")["flags"]
+
+
+def test_a_planned_face_under_100_render_px_is_an_advisory_row_never_a_flag():
+    """A28 (face debate 2026-10-21, LEDGER_round4): panel face_h x 768 predicts the take's face within
+    0.94-1.20 on 8 of 9 ep01 pairs (T19 drew 2x closer); under 100 px the take's eye is under one H3
+    token.  A log column beside the verdict: it never drives a redraw or a refine."""
+    from studio import panel_dq
+    found = [{"score": 0.9, "h": 0.12}]
+    rec = panel_dq.frame_record(found, 1, "wide", "a man at the corner")
+    assert rec["face_px_768"] == 92 and rec["tiny_face_advisory"] is True and "token" in rec["tiny_face_note"]
+    row = panel_dq.verdict(faces=panel_dq.confident_faces(found), planned=1, sharp=1.0, ink=0.0, tiled=0.0, size="wide")
+    assert row["flags"] == [] and row["passed"]
+    big = panel_dq.frame_record([{"score": 0.9, "h": 0.2}], 1, "wide", "")
+    assert big["face_px_768"] == 154 and big["tiny_face_advisory"] is False and "tiny_face_note" not in big
+    assert panel_dq.frame_record([], 1, "wide", "")["face_px_768"] is None
