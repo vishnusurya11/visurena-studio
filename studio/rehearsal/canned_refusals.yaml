@@ -1,0 +1,182 @@
+# Canned answers REFUSE (docs/audit/2026-10-21_ep02_proof/DESIGN.md 2.4, R3).
+#
+# When no recorded stream answers a structured ask, studio.rehearsal.fake_sdk serves the row of the
+# asked schema below as the result's structured output.  Each instance is the answer a department
+# REFUSES downstream: a verdict that says no, an empty list the contract rejects, an empty text the
+# gate cannot pass.  A row with `validates: false` is refused by its own schema already (pydantic
+# raises inside brain.ask_structured), which is the refusal.  A check whose terminal rests on one of
+# these is `mechanism` only and never counts toward a quality question; a gate that PASSES on one is a
+# failing Q6 row.  tests/test_proof_canned_refuses.py fails when a schema reachable from an
+# llm.structured call site has no row here, or a row does not behave as it says.
+#
+#   schema    package.module:Class (the import path; two classes may share a title)
+#   titles    the JSON-schema titles the row answers (default: the class name)
+#   validates whether the schema accepts the instance (default true)
+#   refuses   why the instance refuses downstream (reviewed)
+#
+# What is VERIFIED by a test: every `validates: false` row (the schema refuses it;
+# test_proof_canned_refuses), studio.brain:Verdict (the supervisor parks; test_proof_fake_sdk_transport)
+# and agents.episode_writer:PartLines (the contract refuses the draft;
+# test_proof_fake_llm_serves_a_plan_as_draft_parts).  Every other `refuses` is the EXPECTED downstream
+# refusal, read from the schema and its caller; a scenario (P5) that sees a gate pass on it reports it.
+
+refusals:
+  # ---- the brain (brain.turn: the autopilot's triage and fixer sessions) ----
+  - schema: studio.brain:Verdict
+    instance: {response: park, reason: "CANNED: no recorded answer for this ask (rehearsal)", finding_row: "| F? | rehearsal | 0 | canned brain answer | open |"}
+    refuses: "park: the supervisor stops the episode instead of curing or relaunching on an unrecorded diagnosis"
+
+  # ---- the episode writer (agents/episode_writer: three strict parts per draft) ----
+  - schema: agents.episode_writer:PartFrame
+    instance: {number: 1, title: "", protagonist: "", setups: []}
+    refuses: "no setups and no title: every shot names a setup that does not exist, so the contract refuses the merged draft"
+  - schema: agents.episode_writer:PartShots
+    instance: {shots: []}
+    refuses: "no shots: the contract refuses an episode with nothing to film"
+  - schema: agents.episode_writer:PartLines
+    instance: {lines: []}
+    refuses: "no lines: nothing is spoken, the contract and the voice gates refuse the plan"
+
+  # ---- plan cures and plan readers ----
+  - schema: studio.plan_cures:RewrittenField
+    instance: {text: ""}
+    refuses: "an empty rewrite: the cure's own check finds the refused field still unfixed"
+  - schema: studio.plan_cures:SetupRewrite
+    instance: {described: "", geometry: ""}
+    refuses: "an empty setup: the cure keeps the refused setup and the gate still refuses it"
+  - schema: studio.plan_llm_cures:ShotPositions
+    instance: {frame: "", at_rest: "", end: ""}
+    refuses: "empty positions: the probe names the missing figures and the cure is re-asked, then gives up"
+  - schema: studio.move_llm:MotionHead
+    validates: false
+    instance: {head: ""}
+    refuses: "an empty head does not start 'The camera ' + its verb: the schema itself refuses it"
+  - schema: studio.judges.plan:PlanReading
+    instance: {turn: {}, answer: {}}
+    refuses: "no turn, no answer, no coverage: the plan judge finds the reading empty and refuses the plan"
+  - schema: studio.stage_pick:MachinePick
+    titles: [MachinePick, _Pick]
+    validates: true
+    instance: {pid: ""}
+    refuses: "pid '' is none of the candidates: pick_model's validator refuses it inside the schema, the re-ask ladder ends in a raise"
+  - schema: studio.stage_pick:SheetPrompt
+    validates: false
+    instance: {prompt: ""}
+    refuses: "an empty sheet prompt is under the schema's 40-character floor: refused before any picture is asked"
+
+  # ---- the book's looks and voices ----
+  - schema: studio.canon:Canon
+    instance: {known: false, source: "CANNED: no recorded answer for this ask (rehearsal)"}
+    refuses: "known: false -- the canon is unknown, so the look asks nothing of it"
+  - schema: studio.portrait:Portrait
+    instance: {sentences: []}
+    refuses: "no sentences: verify() finds nothing quoted from the passages and the portrait stays empty"
+  - schema: studio.voice_persona:VoiceInstruction
+    validates: false
+    instance: {character: "", name: "", voice_profile: "", background: "", presence: "", personality: "", gender: "", pitch: "", speed: "", volume: "", age: "", clarity: "", fluency: "", accent: "", texture: "", emotion: "", tone: "", personality_attribute: ""}
+    refuses: "every field empty is under the schema's length floors: the schema itself refuses the instruction"
+  - schema: studio.book_title:KeyArt
+    instance: {title: "", hero: "", thumb: "", sting: ""}
+    refuses: "empty key art prompts: the title card has no hero, thumb or sting to render, the spec refuses it"
+  - schema: agents.look_timeline_writer:LookDraft
+    instance: {looks: []}
+    refuses: "no looks: the look timeline has no row for any character, its check refuses the draft"
+
+  # ---- the trailer ----
+  - schema: studio.trailer_script:TrailerScript
+    validates: false
+    instance: {title: "", runtime: 0, beats: []}
+    refuses: "a zero runtime and no beats: the schema itself refuses the script"
+  - schema: studio.trailer_shots:ShotList
+    validates: false
+    instance: {shots: []}
+    refuses: "no shots is under the schema's one-shot floor: the schema itself refuses the list"
+  - schema: scripts.trailer.step_01_story:Judgement
+    validates: false
+    instance: {narrator: "", register: ""}
+    refuses: "an empty register is none of the schema's literals: the schema itself refuses the judgement"
+  - schema: scripts.trailer.step_03_music:CaptionSheet
+    validates: false
+    instance: {pulse_carriers: [], supporting_instruments: ""}
+    refuses: "no pulse carriers is under the schema's two-item floor: the schema itself refuses the sheet"
+  - schema: scripts.trailer.step_04_lines:LabelSheet
+    instance: {labels: []}
+    refuses: "no labels: no line gets a function, the lines check refuses the sheet"
+
+  # ---- publishing ----
+  - schema: scripts.publish.metadata:ShortMetadata
+    instance: {synopsis_paragraphs: [], attribution_line: "", tags: []}
+    refuses: "no synopsis, no attribution, no tags: the metadata gates refuse an empty description"
+
+  # ---- the book pipeline (ingest, analysis, screenplay) ----
+  - schema: agents.ingest_validator:Verdict
+    instance: {ok: false, issues: [], summary: "CANNED: no recorded answer for this ask (rehearsal)"}
+    refuses: "ok: false -- the ingest is refused"
+  - schema: agents.extraction_auditor:AuditVerdict
+    instance: {ok: false, issues: [], summary: "CANNED: no recorded answer for this ask (rehearsal)"}
+    refuses: "ok: false -- the extraction audit refuses"
+  - schema: studio.screenplay_spec:AuditVerdict
+    instance: {ok: false, issues: []}
+    refuses: "ok: false -- the adaptation audit refuses the screenplay"
+  - schema: agents.book_cartographer:BookMap
+    instance: {structure: "CANNED: no recorded answer for this ask (rehearsal)", divisions: []}
+    refuses: "no divisions: the book map finds no chapter, the cartographer's check refuses it"
+  - schema: agents.casting_director:CastReport
+    instance: {chapter: 0, scenes: []}
+    refuses: "chapter 0 with no scenes: the cast report matches no chapter, its merge refuses it"
+  - schema: agents.dialogue_editor:DialogueReport
+    instance: {chapter: 0, scenes: []}
+    refuses: "chapter 0 with no scenes: no exchange is attributed, the dialogue merge refuses it"
+  - schema: agents.entity_resolver:CharacterRegistry
+    instance: {characters: []}
+    refuses: "no characters: the registry resolves nobody, the cast check refuses it"
+  - schema: agents.entity_resolver:LocationRegistry
+    instance: {locations: []}
+    refuses: "no locations: the registry resolves no place, the location check refuses it"
+  - schema: agents.gap_filler:Placement
+    instance: {location_id: "", time_of_day: "", confidence: "none", reasoning: "CANNED: no recorded answer for this ask (rehearsal)"}
+    refuses: "an empty location id: the placement names no known place and is not applied"
+  - schema: agents.journey_tracer:Journey
+    instance: {is_journey: false, primary_location_id: "", legs: [], reasoning: "CANNED: no recorded answer for this ask (rehearsal)"}
+    refuses: "no primary location and no legs: the journey is not placed anywhere"
+  - schema: agents.line_filler:MicroLine
+    validates: false
+    instance: {text: ""}
+    refuses: "a 0-word line is outside the schema's 8-14 words: the schema itself refuses it"
+  - schema: agents.location_auditor:LocationVerdict
+    validates: false
+    instance: {location_id: "", confidence: "none", evidence: "", evidence_kind: ""}
+    refuses: "confidence and evidence kind outside their literals: the schema itself refuses the verdict"
+  - schema: agents.profile_writer:CharacterProfile
+    instance: {physical: "", physical_evolution: [], mental: "", mental_evolution: [], voice: "", motivation: "", arc: "", role_in_story: "", inferred_notes: "CANNED: no recorded answer for this ask (rehearsal)"}
+    refuses: "every description empty: the profile check refuses a character it cannot describe"
+  - schema: agents.profile_writer:LocationProfile
+    instance: {visual: "", atmosphere: "", significance: "", evolution: [], sensory: "", inferred_notes: "CANNED: no recorded answer for this ask (rehearsal)"}
+    refuses: "every description empty: the profile check refuses a place it cannot describe"
+  - schema: agents.scene_breakdown:CallSheet
+    instance: {chapter: 0, pov: {narrator: "", tense: ""}, scenes: []}
+    refuses: "chapter 0 with no scenes: the call sheet breaks nothing down, its merge refuses it"
+  - schema: studio.screenplay_spec:SceneDraft
+    instance: {elements: []}
+    refuses: "no elements: the screenplay contract refuses a scene with nothing in it"
+  - schema: agents.script_supervisor:TimeReport
+    instance: {chapter: 0, scenes: []}
+    refuses: "chapter 0 with no scenes: no time evidence, the supervisor's merge refuses it"
+  - schema: studio.screenplay_spec:ShotPlan
+    instance: {shots: []}
+    refuses: "no shots: the shot plan covers no element, the coverage check refuses it"
+  - schema: agents.story_analyst:EventReport
+    instance: {chapter: 0, scenes: []}
+    refuses: "chapter 0 with no scenes: no event, the analysis merge refuses it"
+  - schema: studio.screenplay_spec:ScreenplayPlan
+    instance: {spine: "", logline: "", opening_beat_id: "", final_beat_id: "", bookend: "", beats: []}
+    refuses: "no beats and no spine: the screenplay plan contract refuses it"
+
+# Call sites whose schema is not a bare class name: site (file:expression) -> the classes it asks.
+dynamic:
+  "agents/episode_writer.py:model": [agents.episode_writer:PartFrame, agents.episode_writer:PartShots, agents.episode_writer:PartLines]
+  "studio/stage_pick.py:pick_model(pids)": [studio.stage_pick:MachinePick]
+
+# llm.structured handed to another module's function by keyword: site (file:keyword) -> the callee's file.
+handoffs:
+  "scripts/episode/book_title.py:ask": studio/book_title.py
