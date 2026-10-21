@@ -1,0 +1,85 @@
+{
+ "sha8": "07b2f2e6",
+ "verdict": "flagged",
+ "note": "frozen-whole at T02: 74% static, run 0.46s HARD: the whole frame stands still; content at T05: text or lettering in the picture; content at T14: posture 'standing': the shot asks for low; content at T31: posture 'sitting': the shot asks for lying -> keep_best",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4",
+  "T25.mp4",
+  "T26.mp4",
+  "T27.mp4",
+  "T28.mp4",
+  "T29.mp4",
+  "T30.mp4",
+  "T31.mp4"
+ ],
+ "signed_at": "2026-10-08T15:57:09Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "frozen-whole",
+   "where": "T02",
+   "evidence": {
+    "value": 0.735,
+    "penalty": 44.1,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "74% static, run 0.46s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "content",
+   "where": "T05",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "content",
+   "where": "T14",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "posture 'standing': the shot asks for low"
+  },
+  {
+   "kind": "content",
+   "where": "T31",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "posture 'sitting': the shot asks for lying"
+  }
+ ],
+ "terminal": "keep_best"
+}

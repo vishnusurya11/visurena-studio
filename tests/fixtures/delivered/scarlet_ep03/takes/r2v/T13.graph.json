@@ -1,0 +1,393 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "plate_front_room.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "Q13_0.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The front room of Number 3 Lauriston Gardens, off the Brixton Road, a foggy March morning: a shabby brick terrace house standing back from the street behind a small garden of sickly plants, three tiers of blank curtainless windows with a yellowed TO LET card in one pane, a narrow path of yellow clay and gravel crossing the garden to the front door, a three-foot brick wall with wooden rails along its top at the street, and a dun-coloured fog lying over the house-tops, bare of furniture: a wide dusty floor of stripped boards, a thick coat of dust on every surface, wallpaper hanging away from the plaster in strips, one tall curtainless window in the FAR wall giving flat fog-grey daylight, a white marble mantelpiece with a stump of red wax candle on it, and a well-dressed man lying on his back in the middle of the floor. <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide of the bare front room from the doorway.\n<Picture 3> is the first frame of [Shot 2], a medium shot across the dusty floorboards.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 2 shots in <Subject 1>, the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 3> and runs from 00:03 to 00:05. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 2>: a wide of the bare front room from the doorway: stripped dusty floorboards running away to the far wall, the tall curtainless window in the CENTRE of that wall giving flat fog-grey light, the white marble mantelpiece at the LEFT edge with a stump of red candle on it, and a well-dressed man lying on his back across the CENTRE of the floor. The camera is in the front-room doorway at a standing man's eye height, square on across the room, a 35mm lens turned on the floor and the far wall. The doorway's edge stands at the RIGHT of frame. At the first frame The bare front room stands empty but for one man. Stripped dusty floorboards run away from the doorway to the far wall. The camera pushes a hand's breadth in through the doorway toward the body as the fog-grey light shifts a little across the boards, from 00:00 to 00:03. By 00:03 the camera has finished pushing a hand's breadth in through the doorway toward the body and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:03 to 00:05. At 00:03 the shot cuts to a medium shot across the dusty floorboards, beginning from <Picture 3>: the dead man's shoulders and head on the boards, his overcoat open, the flat window light lying along the dust beside him. The camera is on the boards a stride from the body, level with the dead man's shoulder and angled a little down, a 50mm lens turned along the floor. The window light comes flat from beyond him. At the first frame The dead man lies on his back on the stripped boards, his shoulders and head across the frame, his overcoat fallen open and his stiff white collar standing at his throat. The flat grey window light lies along the dust beside him and picks out the grain of the boards. His face is turned up and , his hair dark against the pale floor. The camera pushes a hand's breadth in over the floor as Dust turns in the window light above the boards, from 00:03 to 00:05. By 00:05 the camera has finished pushing a hand's breadth in over the floor and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 141,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "26",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 84013
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_13",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q13_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q13_0.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q13_0.png @ 0"
+    }
+  },
+  "22": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "21",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor image @ 0"
+    }
+  },
+  "23": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q13_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q13_1.png @ 68"
+    }
+  },
+  "24": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "22",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "23",
+        0
+      ],
+      "frame_idx": 68
+    },
+    "_meta": {
+      "title": "anchor image @ 68"
+    }
+  },
+  "25": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_13.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "26": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "24",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "25",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

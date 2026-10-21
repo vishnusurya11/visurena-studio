@@ -1,0 +1,334 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "lora_second",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "sheet_2449c1a2.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "sheet_ba87ad92.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian in <Picture 2>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 2> defines this creature alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in a pine-wooded Surrey hill at sunset occupies the picture. Violet lightning from the west strikes the pine crest and throws black shadows across rough heather. Field guns stand in a row through the centre and right. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low firelight from ahead, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on <Subject 1> (dark brown eyes, dark blue serge frock jacket) stands at the centre beside the gun line, a Martian rises at the far centre beyond the pine trunks, and ammunition cases fill the lower edge beneath the red fire glow. Pine trunks frame the left and right edges, and smoke reaches the upper edge. The camera is The camera stands at chest height behind the ammunition waggon. At the first frame the artilleryman (dark brown eyes, dark blue serge frock jacket) crouches beside the field gun at the CENTRE. Ammunition cases lie along the lower edge, the pine trunks frame both sides, and a Martian bulk rises beyond the trees at the far CENTRE. The camera keeps a locked-off frame across the whole shot as <Subject 1> ducks beside the field gun, from 00:00 to 00:04. At 00:04 flame climbs through the pine branches, and the climb continues to the last frame of the shot. Behind them one gunner runs along the earth bank; fire runs through the pine branches, from 00:00 to 00:09. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he ducks beside the field gun. By 00:09 the action of that shot continues through the last frame, and <Subject 1> reaches for the earth bank, ammunition bursts behind him, and fire climbs the trees.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 226,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 127679
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_03",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "lora_second": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 0.7
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "shot_03_76d92c6d.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_03_fc857468.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "22": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "21",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

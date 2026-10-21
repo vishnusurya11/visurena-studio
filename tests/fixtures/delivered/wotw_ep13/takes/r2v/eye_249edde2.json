@@ -1,0 +1,142 @@
+{
+ "sha8": "249edde2",
+ "verdict": "flagged",
+ "note": "lag at T00: -6f (-0.250s) corr 0.46; cut at T07: 91.6; jump at T07: 0.20 HARD: another picture; leak at T07: 12 frames of plate before the panel; cut-vote at T07: jump+step+scene HARD: an unplanned cut; lip-sync at T11: mux lag +1.080s wer 0.00; lag at T11: +19f (+0.792s) corr 0.64; lag at T15: +12f (+0.500s) corr 0.66; rotation at T21: 6.4deg turned, no roll planned -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4"
+ ],
+ "signed_at": "2026-09-27T20:11:26Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "lag",
+   "where": "T00",
+   "evidence": {
+    "value": -6,
+    "penalty": 30.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "-6f (-0.250s) corr 0.46"
+  },
+  {
+   "kind": "cut",
+   "where": "T07",
+   "evidence": {
+    "value": 91.6,
+    "penalty": 40.0,
+    "repeated": true,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "91.6"
+  },
+  {
+   "kind": "jump",
+   "where": "T07",
+   "evidence": {
+    "value": 0.195,
+    "penalty": 40.0,
+    "repeated": true,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "0.20 HARD: another picture"
+  },
+  {
+   "kind": "leak",
+   "where": "T07",
+   "evidence": {
+    "value": 12,
+    "penalty": 40.0,
+    "repeated": true,
+    "frames": 12,
+    "covers": true,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "low",
+   "note": "12 frames of plate before the panel"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T07",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": true,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  },
+  {
+   "kind": "lip-sync",
+   "where": "T11",
+   "evidence": {
+    "value": 1.08,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "mux lag +1.080s wer 0.00"
+  },
+  {
+   "kind": "lag",
+   "where": "T11",
+   "evidence": {
+    "value": 19,
+    "penalty": 30.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "+19f (+0.792s) corr 0.64"
+  },
+  {
+   "kind": "lag",
+   "where": "T15",
+   "evidence": {
+    "value": 12,
+    "penalty": 30.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "+12f (+0.500s) corr 0.66"
+  },
+  {
+   "kind": "rotation",
+   "where": "T21",
+   "evidence": {
+    "value": 6.39,
+    "penalty": 20.0,
+    "repeated": false
+   },
+   "severity": "low",
+   "note": "6.4deg turned, no roll planned"
+  }
+ ],
+ "terminal": "still"
+}

@@ -1,0 +1,712 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "doorway",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/cousins_house_leatherhead/wide_establishing.png",
+      "refs/props/dog_cart/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.5,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 91000,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: the front of a pale two-storey Georgian house at Leatherhead at night in 1894, calm before the storm: rows of lit sash windows glowing warm yellow, an arched front door with a fanlight and a lamp either side standing open at the top of three stone steps, a gravel drive running up to it between dark shrubs, two white gate piers with their gates swung open at the near end, a gas lantern on a post at the left, and heavy clouds driving fast across a black sky; the light is lamplight from the open door and the lit windows, and the gas lantern at the LEFT, so the gravel reads warm near the door and the garden reads black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Spotted Dog's dog cart in <Picture 2>: A light two-wheeled Victorian dog cart drawn by a single bay horse: a varnished dark-green body with a slatted box under the seat, back-to-back seats for four, tall spoked wheels picked out in yellow, long ash shafts, and a pair of brass carriage lamps on the dashboard. The servant's box rides clapped on the tail. Wheels about shoulder high on a standing man. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, the front of a pale two-storey Georgian house at Leatherhead at night in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Spotted Dog's dog cart in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the cousins’ house at Leatherhead, 1894, sash windows, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide on the pale house at Leatherhead at night, its sash windows lit, the front door standing open at the top of its steps, the dog cart waiting on the gravel drive with its two lamps lit, and heavy clouds driving across the black sky above the roof. The camera is on the drive at a standing man's eye between the gate piers, a 35mm lens. The lamplight comes from the open door at the CENTRE. At the first frame the gravel drive runs from the BOTTOM CENTRE up to the lit front door at the CENTRE between two white gate piers standing at the BOTTOM LEFT and the BOTTOM RIGHT with their gates swung open. The pale house fills the TOP half from the LEFT third to the RIGHT third with its lit windows in rows, the gas lantern stands at the LEFT edge, dark shrubs fill the LEFT and RIGHT edges. The shot is inside this place: the front of a pale two-storey Georgian house at Leatherhead at night in 1894, calm before the storm: rows of lit sash windows glowing warm yellow, an arched front door with a fanlight and a lamp either side standing open at the top of three stone steps, a gravel drive running up to it between dark shrubs. The camera rises from the gravel with small amplitude until the lit front of the house and the dog cart before it stand inside the picture as the cart lamps go on flickering, from 00:00 to 00:04. At 00:04 the clouds go on driving across the black sky, and the movement continues to the last frame of the shot. By 00:08 the camera is rising through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "doorway",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_wife/sheet.png",
+      "refs/locations/cousins_house_leatherhead/wide_establishing.png"
+    ],
+    "faces": [
+      "narrators_wife"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l01.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 9.0,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 91001,
+    "prompt": "subject_definitions:\n<Subject 1> is the Wife in <Picture 1>: Oval face, wide hazel eyes, softly arched chestnut brows, small straight nose, full mouth. Fair skin with light freckles across the nose. Thick chestnut-auburn hair, waved and swept up into a soft pompadour with a knot at the crown. Slim hands with a plain gold wedding band. Wearing: Sage-green linen walking costume: short fitted jacket over a cream high-collared blouse, long sage-green skirt. Small sage-green felt toque with a cream ostrich tip pinned to the pompadour. Pale fawn linen dust coat over the shoulders for the dog-cart drive. <Picture 1> defines this woman alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: the front of a pale two-storey Georgian house at Leatherhead at night in 1894, calm before the storm: rows of lit sash windows glowing warm yellow, an arched front door with a fanlight and a lamp either side standing open at the top of three stone steps, a gravel drive running up to it between dark shrubs, two white gate piers with their gates swung open at the near end, a gas lantern on a post at the left, and heavy clouds driving fast across a black sky; the light is lamplight from the open door and the lit windows, and the gas lantern at the LEFT, so the gravel reads warm near the door and the garden reads black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in <Subject 2>, the front of a pale two-storey Georgian house at Leatherhead at night in 1894. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows her; <Picture 1> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the cousins’ house at Leatherhead, 1894, sash windows, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on a medium close shot on <Subject 1> (thick chestnut-auburn hair, sage-green linen walking costume, small sage-green felt toque with a cream ostrich tip) standing in the lit doorway at night, her face very white, the warm passage light behind her and her hand on the door frame. The camera is on the step level with her eyes, three paces from her, an 85mm lens. The lamplight comes from the passage BEHIND her. At the first frame the narrator's wife stands at the CENTRE in the lit doorway, the warm light of the passage behind her filling the TOP half. The shot is inside this place: the front of a pale two-storey Georgian house at Leatherhead at night in 1894, calm before the storm: rows of lit sash windows glowing warm yellow, an arched front door with a fanlight and a lamp either side standing open at the top of three stone steps, a gravel drive running up to it between dark shrubs. The camera pushes in toward her with small amplitude until her head and shoulders fill the middle of the picture as she speaks and her eyes go on searching his face, from 00:00 to 00:03. <Subject 1> (S1), on screen, oval face, with a clipped English voice at an even pace, says: <d>[English] Must you go back tonight?</d> Her mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, her hand goes on tightening on the door frame, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:04 to 00:07 while she speaks and her eyes go on searching his face. By 00:09 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "doorway",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/cousins_house_leatherhead/wide_establishing.png",
+      "refs/props/dog_cart/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.125,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 91002,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey tweed lounge suit soaked to dark charcoal and clinging, mud to the knees from a roadside pool. Limp wet collar, loosened green tie. Bareheaded, hair plastered flat to the brow by rain. Brown boots black with water. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: the front of a pale two-storey Georgian house at Leatherhead at night in 1894, calm before the storm: rows of lit sash windows glowing warm yellow, an arched front door with a fanlight and a lamp either side standing open at the top of three stone steps, a gravel drive running up to it between dark shrubs, two white gate piers with their gates swung open at the near end, a gas lantern on a post at the left, and heavy clouds driving fast across a black sky; the light is lamplight from the open door and the lit windows, and the gas lantern at the LEFT, so the gravel reads warm near the door and the garden reads black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Spotted Dog's dog cart in <Picture 3>: A light two-wheeled Victorian dog cart drawn by a single bay horse: a varnished dark-green body with a slatted box under the seat, back-to-back seats for four, tall spoked wheels picked out in yellow, long ash shafts, and a pair of brass carriage lamps on the dashboard. The servant's box rides clapped on the tail. Wheels about shoulder high on a standing man. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, the front of a pale two-storey Georgian house at Leatherhead at night in 1894. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Spotted Dog's dog cart in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the cousins’ house at Leatherhead, 1894, sash windows, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot on <Subject 1> (neat close-trimmed dark brown moustache, bareheaded, hair plastered flat to the brow by rain, mid-grey tweed lounge suit soaked to dark charcoal and clinging) seen from behind with his back to the camera, climbing up into the dog cart before the lit house at night, one boot on the step and one hand on the rail. The camera is on the drive behind him at a standing man's eye, four paces from him, a 50mm lens. The lamplight comes from the lit house AHEAD. At the first frame the narrator stands with his back to the camera at the CENTRE RIGHT, one boot on the step of the dog cart. The shot is inside this place: the front of a pale two-storey Georgian house at Leatherhead at night in 1894, calm before the storm: rows of lit sash windows glowing warm yellow, an arched front door with a fanlight and a lamp either side standing open at the top of three stone steps, a gravel drive running up to it between dark shrubs. The camera tracks behind him as he climbs up into the dog cart at a normal walking pace, a follow with small amplitude as he goes on pulling himself up onto the seat at a steady pace, from 00:00 to 00:02. At 00:02 his free hand goes on reaching for the reins, and the reach continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he goes on pulling himself up onto the seat at a steady pace. By 00:05 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "setup",
+    "setup": "road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/road_ockham_ripley_pyrford/wide_road_storm_night.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.208333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 91003,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left, and far ahead along the western horizon a blood-red glow with masses of black and red smoke creeping up into the driving storm clouds; the light is the red glow on the horizon ahead at the LEFT and small far bolts of violet lightning in the clouds, so the road reads pale grey, the hedges read black and the sky reads red low down and black above <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide down a dark country road at night climbing between black hedges, and far ahead along the western horizon a blood-red glow creeping up into the storm clouds with black smoke in it. The camera is on the road at a driver's eye, a 35mm lens. The light is the red glow on the horizon AHEAD at the CENTRE. At the first frame the pale road runs from the BOTTOM CENTRE straight up and away over the rise at the CENTRE, a black hedge lines it along the LEFT third with the dark field beyond, a tall hedge and dark pines line it along the RIGHT third, the blood-red glow with its black smoke stands low along the horizon at the CENTRE LEFT, a far violet bolt stands in the clouds at the TOP LEFT, and black storm clouds fill the TOP third. The shot is inside this place: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left. The camera pans from the black hedge across to the red glow already in the picture until the glow is at the centre as the red glow goes on creeping up the sky, from 00:00 to 00:03. At 00:03 the hedge tops go on shivering in the first wind of the storm, and the movement continues to the last frame of the shot. By 00:06 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "spike",
+    "setup": "road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/road_ockham_ripley_pyrford/wide_road_storm_night.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.541667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 91004,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left, and far ahead along the western horizon a blood-red glow with masses of black and red smoke creeping up into the driving storm clouds; the light is the red glow on the horizon ahead at the LEFT and small far bolts of violet lightning in the clouds, so the road reads pale grey, the hedges read black and the sky reads red low down and black above <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert over the hedge at night on a thread of green fire falling out of the storm clouds into the dark field on the left, the clouds lit green for a moment around it; only that object and what touches it is in frame. The camera is on the road at a driver's eye looking over the hedge, a 50mm lens. The green fire lights the clouds from the LEFT. At the first frame the black hedge crosses the BOTTOM third from the LEFT edge to the RIGHT edge, the dark field lies beyond it at the LEFT half, and the storm clouds fill the TOP half with the thread of green fire falling through them at the CENTRE LEFT into the field. The shot is inside this place: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left. The camera tilts up from the hedge to the storm clouds already in the picture until the clouds stand in the middle of the frame as the thread of green fire goes on falling into the field, from 00:00 to 00:04. At 00:04 the clouds go on driving across the sky, and the movement continues to the last frame of the shot. By 00:08 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "spike",
+    "setup": "road",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/road_ockham_ripley_pyrford/wide_road_storm_night.png",
+      "refs/props/dog_cart/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l06.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 91005,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey tweed lounge suit soaked to dark charcoal and clinging, mud to the knees from a roadside pool. Limp wet collar, loosened green tie. Bareheaded, hair plastered flat to the brow by rain. Brown boots black with water. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left, and far ahead along the western horizon a blood-red glow with masses of black and red smoke creeping up into the driving storm clouds; the light is the red glow on the horizon ahead at the LEFT and small far bolts of violet lightning in the clouds, so the road reads pale grey, the hedges read black and the sky reads red low down and black above <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Spotted Dog's dog cart in <Picture 3>: A light two-wheeled Victorian dog cart drawn by a single bay horse: a varnished dark-green body with a slatted box under the seat, back-to-back seats for four, tall spoked wheels picked out in yellow, long ash shafts, and a pair of brass carriage lamps on the dashboard. The servant's box rides clapped on the tail. Wheels about shoulder high on a standing man. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 2>, a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Spotted Dog's dog cart in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> (neat close-trimmed dark brown moustache, bareheaded, hair plastered flat to the brow by rain, mid-grey tweed lounge suit soaked to dark charcoal and clinging) on the seat of the dog cart at night with the reins hauled tight in both hands, hunched against the rain, a far violet bolt in the clouds behind him. The camera is beside the cart level with his eyes, three paces from him, an 85mm lens. The far violet lightning comes from BEHIND him at the TOP RIGHT. At the first frame the narrator sits at the CENTRE on the seat of the dog cart with the reins in both hands, hunched against the rain. The shot is inside this place: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left. The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture as he shouts and hauls back on the reins, from 00:00 to 00:03. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Steady! Steady, boy!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his head goes on turning toward the hill, and the turn continues to the last frame of the shot. By 00:05 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "spike",
+    "setup": "road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/road_ockham_ripley_pyrford/wide_road_storm_night.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.625,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 91006,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left, and far ahead along the western horizon a blood-red glow with masses of black and red smoke creeping up into the driving storm clouds; the light is the red glow on the horizon ahead at the LEFT and small far bolts of violet lightning in the clouds, so the road reads pale grey, the hedges read black and the sky reads red low down and black above <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian fighting-machine in <Picture 2>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide across the dark field at night at a tripod far off on the slope of Maybury Hill, its three thin legs striding over the young pines, black against the storm clouds. The camera is on the road at a driver's eye, a 50mm lens. A far violet bolt lights the slope from the TOP RIGHT. At the first frame the black silhouette of a tripod stands far off on the slope at the CENTRE RIGHT, its three thin legs a tenth of the height of the frame, higher than the pines around it. The dark field fills the BOTTOM half, the hedge crosses the BOTTOM edge, and storm clouds fill the TOP third. The red glow stands low along the horizon at the LEFT third behind the far pines. The shot is inside this place: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left. The camera pushes in toward the tripod already in the picture with small amplitude as the tripod goes on striding down the slope, from 00:00 to 00:04. At 00:04 the pines go on swaying in the wind, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/road_ockham_ripley_pyrford/wide_road_storm_night.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 91007,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left, and far ahead along the western horizon a blood-red glow with masses of black and red smoke creeping up into the driving storm clouds; the light is the red glow on the horizon ahead at the LEFT and small far bolts of violet lightning in the clouds, so the road reads pale grey, the hedges read black and the sky reads red low down and black above <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian fighting-machine in <Picture 2>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot over the heather at night on a tripod heeling over as it strides, one long leg lifted high in the air, the red glow low on the horizon behind it. The camera is on the road at a driver's eye, a 50mm lens. The red glow comes from the horizon at the RIGHT. At the first frame a tripod heels over across the CENTRE, one leg lifted high to the LEFT and two planted at the RIGHT, a fifth of the height of the frame, over the dark heather that fills the BOTTOM third. The red glow stands low along the horizon at the RIGHT third and storm clouds fill the TOP. The shot is inside this place: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left. The camera tracks sideways to the left along the hedge, a truck with small amplitude, until the tripod already in the picture is at the centre as the tripod goes on heeling over and swinging its lifted leg forward, from 00:00 to 00:04. At 00:04 the heather goes on tossing, and the movement continues to the last frame of the shot. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "spike",
+    "setup": "road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/road_ockham_ripley_pyrford/wide_road_storm_night.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.625,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 91008,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left, and far ahead along the western horizon a blood-red glow with masses of black and red smoke creeping up into the driving storm clouds; the light is the red glow on the horizon ahead at the LEFT and small far bolts of violet lightning in the clouds, so the road reads pale grey, the hedges read black and the sky reads red low down and black above <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian fighting-machine in <Picture 2>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot down the pale road at night at a tripod bursting out of the dark pines ahead of it, snapping the trunks aside, its brass dome high above the road. The camera is on the road at a driver's eye, a 35mm lens. A far violet bolt lights the pines from the TOP. At the first frame a tripod bursts out of the dark pines at the CENTRE, its brass dome at the TOP third and its three legs reaching down to the BOTTOM edge, snapped pine trunks falling away at the LEFT third and the RIGHT third, and the pale road running into the BOTTOM CENTRE toward it. Black hedges line the road along the LEFT edge and the RIGHT edge. The shot is inside this place: a country road at night in 1894 climbing a little hill between high hedges and dark pines toward Maybury Hill, under a thunderstorm: the pale sandy road running from the near edge up and away over the rise, a dark field beyond the hedge on the left. The camera pushes in toward the tripod already in the picture with small amplitude as the tripod goes on bursting through the pines, from 00:00 to 00:04. At 00:04 the snapped trunks go on falling away to either side, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "spike",
+    "setup": "pool",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/maybury_hill/medium_pool_furze.png",
+      "refs/props/dog_cart/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.25,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 91009,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right, and storm clouds low over the heath with a far bolt of violet lightning at the top right; the light is the violet lightning from the right and its reflection in the pool, so the water reads black and glinting, the furze reads black-green and the gravel reads grey <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Spotted Dog's dog cart in <Picture 2>: A light two-wheeled Victorian dog cart drawn by a single bay horse: a varnished dark-green body with a slatted box under the seat, back-to-back seats for four, tall spoked wheels picked out in yellow, long ash shafts, and a pair of brass carriage lamps on the dashboard. The servant's box rides clapped on the tail. Wheels about shoulder high on a standing man. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Spotted Dog's dog cart in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on an insert at night on the yellow-spoked wheel of the overturned dog cart turning in the air beside a black pool, hail dimpling the water below it; only that object and what touches it is in frame. The camera is low at the pool's edge, a 50mm lens. The far violet lightning comes from the TOP RIGHT. At the first frame the yellow-spoked wheel of the overturned dog cart stands at the CENTRE, turning, the black bulk of the cart behind it filling the RIGHT half and the black pool across the BOTTOM third, dimpled with hail, with the dark furze at the LEFT edge. A broken shaft juts up from the cart at the TOP RIGHT against the storm clouds. The shot is inside this place: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right. The camera pushes in on the wheel at the centre of the picture as the wheel goes on turning, from 00:00 to 00:03. At 00:03 the hail goes on dimpling the black water, and the movement continues to the last frame of the shot. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "reaction",
+    "setup": "pool",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/maybury_hill/medium_pool_furze.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.041667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 91010,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey tweed lounge suit soaked to dark charcoal and clinging, mud to the knees from a roadside pool. Limp wet collar, loosened green tie. Bareheaded, hair plastered flat to the brow by rain. Brown boots black with water. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right, and storm clouds low over the heath with a far bolt of violet lightning at the top right; the light is the violet lightning from the right and its reflection in the pool, so the water reads black and glinting, the furze reads black-green and the gravel reads grey <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> (neat close-trimmed dark brown moustache, bareheaded, hair plastered flat to the brow by rain, mid-grey tweed lounge suit soaked to dark charcoal and clinging) crouched under a clump of dark furze at night with his feet in a black pool, soaked and shivering, rain running down his face. The camera is at the pool's edge level with his eyes, three paces from him, an 85mm lens. The violet lightning comes from the TOP RIGHT. At the first frame the narrator crouches under the clump of furze at the CENTRE LEFT, his feet in the black water at the BOTTOM LEFT, soaked and shivering, the pool across the BOTTOM half and the gravel verge at the RIGHT edge. His head is a quarter of the frame's height. The shot is inside this place: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right. The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture as he goes on shivering and pulls his knees in, from 00:00 to 00:02. At 00:02 his head goes on lifting toward the heath, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he goes on shivering and pulls his knees in. By 00:05 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "spike",
+    "setup": "pool",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/maybury_hill/medium_pool_furze.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.458333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 91011,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right, and storm clouds low over the heath with a far bolt of violet lightning at the top right; the light is the violet lightning from the right and its reflection in the pool, so the water reads black and glinting, the furze reads black-green and the gravel reads grey <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian fighting-machine in <Picture 2>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot from low in the heather at night on a tripod striding past, one long tentacle gripping a young pine, its white basket slung behind and green smoke puffing at its knees. The camera is low in the heather, a 24mm lens. The far violet lightning comes from the TOP RIGHT. At the first frame a tripod strides past at the CENTRE, seen from low down, its three legs reaching from the BOTTOM edge to the TOP third, one long tentacle at the LEFT third gripping a young pine, the white basket slung behind the body at the TOP RIGHT, green smoke at its knee joints, and wet heather across the BOTTOM edge. The shot is inside this place: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right. The camera tilts up from the heather to the tripod already in the picture until the tripod stands in the middle of the frame as the tripod goes on striding past, from 00:00 to 00:04. At 00:04 the gripped pine goes on bending, and the movement continues to the last frame of the shot. By 00:07 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "friction",
+    "setup": "pool",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/maybury_hill/medium_pool_furze.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.0,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 91012,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right, and storm clouds low over the heath with a far bolt of violet lightning at the top right; the light is the violet lightning from the right and its reflection in the pool, so the water reads black and glinting, the furze reads black-green and the gravel reads grey <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian fighting-machine in <Picture 2>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in <Subject 1>, a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert on the brass dome of a tripod at night turning to and fro against the storm clouds, its band of dark green glass catching a far bolt of lightning; only that object and what touches it is in frame. The camera is low in the heather looking up, a 50mm lens. The far violet lightning comes from the TOP RIGHT. At the first frame the brass dome of a tripod fills the CENTRE, its band of dark green glass across the middle of it, the white body under it at the BOTTOM third and storm clouds with a far violet bolt filling the TOP third and the RIGHT edge. The shot is inside this place: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right. The camera pushes in toward the brass dome already in the picture with small amplitude as the dome goes on swinging to and fro, from 00:00 to 00:04. At 00:04 the clouds go on driving behind it, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "reaction",
+    "setup": "pool",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/maybury_hill/medium_pool_furze.png",
+      "refs/props/fighting_machine/sheet.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.5,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 91013,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right, and storm clouds low over the heath with a far bolt of violet lightning at the top right; the light is the violet lightning from the right and its reflection in the pool, so the water reads black and glinting, the furze reads black-green and the gravel reads grey <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian fighting-machine in <Picture 2>: A walking engine of glittering white metal, higher than many houses, like a great boiler on three stilts: three very long thin jointed legs that stride with a rolling, heeling gait. The main body is a broad aluminium-bright carapace; on top sits a riveted dome of burnished brass plates that swings to and fro, with one broad slit of dark green glass across its front. Behind the body hangs a huge mass of white metal shaped like a gigantic fisherman's basket. Long flexible glittering tentacles and articulate ropes of steel swing from beneath the body, and puffs of green smoke squirt from the joints of the legs. One jointed arm carries a small box with a funnel mouth. About a hundred feet high. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide over the dark hedge tops at night at two tripods half a mile off, stooping over a pale cylinder in the field between them, blurred by the falling hail. The camera is in the furze at a crouching man's eye, a 50mm lens. The far violet lightning comes from the TOP. At the first frame two tripods stand half a mile off at the CENTRE, stooping over a pale cylinder in the field between them, each a fifth of the height of the frame. The dark hedge tops cross the BOTTOM third and storm clouds fill the TOP third. The shot is inside this place: a shallow pool of black rainwater beside a gravel road at the foot of Maybury Hill at night in 1894, in a thunderstorm: hailstones dimpling the black water, a big clump of dark furze with a few yellow blossoms rising behind the pool, a young pine and wet heather beyond, the gravel verge of the road along the right. The camera rises above the hedge tops with small amplitude until the two tripods already in the picture stand at the centre as the two tripods go on stooping over the cylinder, from 00:00 to 00:04. At 00:04 the hail goes on falling, and the movement continues to the last frame of the shot. By 00:07 the camera is rising through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "friction",
+    "setup": "lane",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/college_arms_lane/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.291667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 91014,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey tweed lounge suit soaked to dark charcoal and clinging, mud to the knees from a roadside pool. Limp wet collar, loosened green tie. Bareheaded, hair plastered flat to the brow by rain. Brown boots black with water. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right, brick and weatherboard houses with one lit window higher up the lane, the College Arms at the top of it, and storm clouds with a far bolt of violet lightning over the hill; the light is the lit cottage windows at the RIGHT and far violet lightning from the TOP, so the sand reads pale, the palings read grey and the gardens read black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows from the right, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot up a steep sandy lane at night on <Subject 1> (neat close-trimmed dark brown moustache, bareheaded, hair plastered flat to the brow by rain, mid-grey tweed lounge suit soaked to dark charcoal and clinging) walking up it away from the camera, between a grey paling fence and a lit cottage. The camera is in the lane at a standing man's eye, six paces behind him, a 35mm lens. The lit cottage windows glow from the RIGHT. At the first frame the narrator walks up the pale lane at the CENTRE, a quarter of the height of the frame, the grey palings along the LEFT third and the lit cottage at the RIGHT third, the lane climbing away to the TOP CENTRE. The shot is inside this place: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right. The camera tracks behind him up the lane as he walks toward the lit cottage at a normal walking pace, a follow with small amplitude as he goes on walking up the lane at a steady pace, from 00:00 to 00:03. At 00:03 his arms go on swinging wet at his sides, and the swing continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he goes on walking up the lane at a steady pace. By 00:06 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "friction",
+    "setup": "lane",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/college_arms_lane/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l16.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.708333,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 91015,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey tweed lounge suit soaked to dark charcoal and clinging, mud to the knees from a roadside pool. Limp wet collar, loosened green tie. Bareheaded, hair plastered flat to the brow by rain. Brown boots black with water. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right, brick and weatherboard houses with one lit window higher up the lane, the College Arms at the top of it, and storm clouds with a far bolt of violet lightning over the hill; the light is the lit cottage windows at the RIGHT and far violet lightning from the TOP, so the sand reads pale, the palings read grey and the gardens read black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in <Subject 2>, a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows from the right, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on a medium close shot on <Subject 1> (neat close-trimmed dark brown moustache, bareheaded, hair plastered flat to the brow by rain, mid-grey tweed lounge suit soaked to dark charcoal and clinging) in the lane at night staggering back as a stranger in a dark coat blunders into him, the grey palings behind them. The camera is in the lane at a standing man's eye, four paces from them, a 50mm lens. The lit cottage window comes from the RIGHT. At the first frame the narrator staggers back at the CENTRE LEFT as a stranger in a dark coat blunders past him at the CENTRE RIGHT. The shot is inside this place: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right. The camera pushes in toward the two of them with small amplitude as he calls out as the stranger goes on rushing past, from 00:00 to 00:03. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Is someone there? Are you hurt?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his head goes on turning after him, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:04 to 00:07 while he calls out as the stranger goes on rushing past. By 00:09 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "friction",
+    "setup": "lane",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/college_arms_lane/wide_establishing.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.125,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 91016,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right, brick and weatherboard houses with one lit window higher up the lane, the College Arms at the top of it, and storm clouds with a far bolt of violet lightning over the hill; the light is the lit cottage windows at the RIGHT and far violet lightning from the TOP, so the sand reads pale, the palings read grey and the gardens read black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in <Subject 1>, a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows from the right, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert at night on a heap of black broadcloth and a pair of black boots lying at the foot of the grey palings, rain standing on the sand of the lane; only that object and what touches it is in frame. The camera is low in the lane looking down, a 50mm lens. The far violet lightning comes from the TOP. At the first frame a heap of black broadcloth and a pair of black boots lie at the CENTRE at the foot of the grey palings, which run across the TOP half, with rain standing on the sand of the lane across the BOTTOM third. A rivulet of storm water runs past the boots from the LEFT edge to the RIGHT edge. The shot is inside this place: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right. The camera pushes in on the boots at the centre of the picture as the rain goes on running over the broadcloth, from 00:00 to 00:04. At 00:04 the water goes on streaming past the boots, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "turn",
+    "setup": "lane",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/characters/unnamed_landlord/sheet.png",
+      "refs/locations/college_arms_lane/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "unnamed_landlord"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.916667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 91017,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey tweed lounge suit soaked to dark charcoal and clinging, mud to the knees from a roadside pool. Limp wet collar, loosened green tie. Bareheaded, hair plastered flat to the brow by rain. Brown boots black with water. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the landlord in <Picture 2>: Landlord of the Spotted Dog, 52 years old, 5 ft 8 in, sturdy and barrel-chested with a thick neck and heavy forearms. Broad red face, fleshy nose, small shrewd blue eyes. Brown hair flecked with grey, thinning on the crown and brushed flat. Heavy grey-brown mutton-chop whiskers joined to a full moustache, short grey stubble on the chin. Wearing: Bare head with hair plastered flat by rain, black broadcloth coat soaked through over the black waistcoat, white shirt with the collar sprung open, black broadcloth trousers smeared with mud, black boots. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right, brick and weatherboard houses with one lit window higher up the lane, the College Arms at the top of it, and storm clouds with a far bolt of violet lightning over the hill; the light is the lit cottage windows at the RIGHT and far violet lightning from the TOP, so the sand reads pale, the palings read grey and the gardens read black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 3>, a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows from the right, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot on <Subject 1> (neat close-trimmed dark brown moustache, bareheaded, hair plastered flat to the brow by rain, mid-grey tweed lounge suit soaked to dark charcoal and clinging) stooping at night over a man lying at the foot of the grey palings, one hand on the man's shoulder, turning him over. The camera is low in the lane level with the narrator's eyes, three paces away, an 85mm lens. The far violet lightning comes from the TOP. At the first frame the narrator stoops at the CENTRE RIGHT over the landlord, who lies against the foot of the grey palings at the CENTRE LEFT, one of the narrator's hands on his shoulder. The palings fill the TOP half. The narrator's head is a quarter of the frame's height. The shot is inside this place: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right. The camera pushes in toward the two of them with small amplitude as <Subject 1> goes on turning the man over by the shoulder, from 00:00 to 00:03. At 00:03 his head goes on bending down toward the man's face, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he goes on turning the man over by the shoulder. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "answer",
+    "setup": "lane",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_landlord/sheet.png",
+      "refs/locations/college_arms_lane/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_landlord"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 91018,
+    "prompt": "subject_definitions:\n<Subject 1> is the landlord in <Picture 1>: Landlord of the Spotted Dog, 52 years old, 5 ft 8 in, sturdy and barrel-chested with a thick neck and heavy forearms. Broad red face, fleshy nose, small shrewd blue eyes. Brown hair flecked with grey, thinning on the crown and brushed flat. Heavy grey-brown mutton-chop whiskers joined to a full moustache, short grey stubble on the chin. Wearing: Bare head with hair plastered flat by rain, black broadcloth coat soaked through over the black waistcoat, white shirt with the collar sprung open, black broadcloth trousers smeared with mud, black boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right, brick and weatherboard houses with one lit window higher up the lane, the College Arms at the top of it, and storm clouds with a far bolt of violet lightning over the hill; the light is the lit cottage windows at the RIGHT and far violet lightning from the TOP, so the sand reads pale, the palings read grey and the gardens read black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows from the right, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a close shot of the face of <Subject 1> of the Spotted Dog (heavy grey-brown mutton-chop whiskers joined to a full moustache, bare head with hair plastered flat by rain) lying back on the sand at night with his eyes closed and rain on his cheeks, lit for a moment by the lightning. The camera is low over him, two paces away, an 85mm lens. The far violet lightning comes from the TOP. At the first frame the landlord's face fills the CENTRE, lying back on the sand with his eyes closed and rain on his cheeks, his whiskers dark and wet, the foot of a grey paling at the LEFT edge. His head is half the frame's height. The shot is inside this place: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right. The camera pushes in toward his face with small amplitude until it fills the middle of the picture as the rain goes on running over his cheeks, from 00:00 to 00:04. At 00:04 his head goes on lying back against the sand, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his head goes on lying back against the sand. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "reaction",
+    "setup": "lane",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/college_arms_lane/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.333333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 91019,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey tweed lounge suit soaked to dark charcoal and clinging, mud to the knees from a roadside pool. Limp wet collar, loosened green tie. Bareheaded, hair plastered flat to the brow by rain. Brown boots black with water. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right, brick and weatherboard houses with one lit window higher up the lane, the College Arms at the top of it, and storm clouds with a far bolt of violet lightning over the hill; the light is the lit cottage windows at the RIGHT and far violet lightning from the TOP, so the sand reads pale, the palings read grey and the gardens read black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows from the right, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on <Subject 1> (neat close-trimmed dark brown moustache, bareheaded, hair plastered flat to the brow by rain, mid-grey tweed lounge suit soaked to dark charcoal and clinging) climbing the lane at night with one hand trailing along the grey palings, head down against the rain. The camera is in the lane level with his chest, four paces from him, a 50mm lens. The lit cottage window comes from the RIGHT. At the first frame the narrator climbs the lane at the CENTRE LEFT with one hand along the grey palings, which run along the LEFT third, the lit cottage window at the RIGHT third and the sand running up to the TOP CENTRE. His head is a sixth of the frame's height. The shot is inside this place: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right. The camera tracks sideways with him up the lane at his own pace, a truck with small amplitude, keeping him in the middle of the picture as he goes on climbing the lane at a steady pace at a normal walking pace, from 00:00 to 00:03. At 00:03 his hand goes on trailing along the palings, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he goes on climbing the lane at a steady pace. By 00:06 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "runout",
+    "setup": "lane",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/college_arms_lane/wide_establishing.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.666667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 91020,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right, brick and weatherboard houses with one lit window higher up the lane, the College Arms at the top of it, and storm clouds with a far bolt of violet lightning over the hill; the light is the lit cottage windows at the RIGHT and far violet lightning from the TOP, so the sand reads pale, the palings read grey and the gardens read black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows from the right, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide up the lane at night toward the lit windows of the College Arms at the top of the hill, and the red glare of the common beating up into the storm clouds beyond. The camera is in the lane at a standing man's eye, a 35mm lens. The lit windows glow from the RIGHT. At the first frame the pale sandy lane runs from the BOTTOM CENTRE up and away to the TOP CENTRE, the grey paling fence runs along the LEFT third from the BOTTOM edge up the hill, the white cottage with its lit windows and red roses stands at the RIGHT third, the brick and weatherboard houses stand higher up at the CENTRE LEFT, and storm clouds with a far violet bolt fill the TOP edge. The shot is inside this place: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right. The camera pans from the grey palings across to the lit cottage already in the picture until the cottage is at the centre as the red glare goes on beating up into the clouds, from 00:00 to 00:04. At 00:04 the rain goes on streaming down the lane, and the movement continues to the last frame of the shot. By 00:08 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "button",
+    "setup": "lane",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_hussar/sheet.png",
+      "refs/locations/college_arms_lane/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_hussar"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l23.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.583333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 91021,
+    "prompt": "subject_definitions:\n<Subject 1> is the hussar in <Picture 1>: Trooper of the 8th Hussars, 22 years old, 5 ft 8 in, lean horseman's build with long thighs, narrow hips and slightly bowed legs. Oval face, olive-tanned skin, straight nose. Brown curly hair cropped close to the skull. Dark brown eyes. A thin pale scar across the left eyebrow. Wearing: Dark green pillbox forage cap with yellow band on a chin strap, dark rifle-green serge hussar jacket with yellow cord frogging and yellow-edged collar, right sleeve torn and blackened with soot, dark green overalls with double yellow stripes mud-caked to the knee, black riding boots, steel spurs, cavalry sword on slings. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right, brick and weatherboard houses with one lit window higher up the lane, the College Arms at the top of it, and storm clouds with a far bolt of violet lightning over the hill; the light is the lit cottage windows at the RIGHT and far violet lightning from the TOP, so the sand reads pale, the palings read grey and the gardens read black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows from the right, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a close shot of <Subject 1> (brown curly hair cropped close to the skull, clean-shaven boyish jaw, dark rifle-green serge hussar jacket with yellow cord frogging) at the head of the lane at night, turned half back over his shoulder and shouting, rain on his face and a far violet bolt behind him. The camera is in the lane level with his eyes, three paces from him, an 85mm lens. The far violet lightning comes from BEHIND him at the TOP RIGHT. At the first frame the hussar stands at the CENTRE at the head of the lane, turned half back over his shoulder, his mouth open and shouting, rain on his face, the storm sky with a far violet bolt behind him at the TOP RIGHT. His head is half the frame's height. The shot is inside this place: a steep sandy lane climbing Maybury Hill toward the College Arms at night in 1894, in a thunderstorm: the lane running up from the near edge between a weathered grey paling fence along the left and cottage gardens on the right, a white cottage with lit windows and red roses at the right. The camera keeps a locked-off frame as he shouts back over his shoulder, from 00:00 to 00:03. <Subject 1> (S1), on screen, trooper of the 8th Hussars, with a clipped English voice at an even pace, says: <d>[English] Down to the bridge, all of you! Keep moving!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his arm goes on waving the others down the hill, and the movement continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "runout",
+    "setup": "hall",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/narrators_home/interior_hall_staircase.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.208333,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 91022,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey tweed lounge suit soaked to dark charcoal and clinging, mud to the knees from a roadside pool. Limp wet collar, loosened green tie. Bareheaded, hair plastered flat to the brow by rain. Brown boots black with water. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: the front hall of the narrator's own house at Maybury at night in 1894, in a storm: a narrow hall with a patterned tiled floor, the dark wooden staircase rising on the right with a turned newel post and banister, the front door shut and bolted at the far end with a fanlight over it, a coat stand and a hall chair against the papered wall on the left, and the house dark; the light is grey storm light through the fanlight BEHIND the door at the far end, so the tiles read grey, the stair reads black and the walls read dark <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in <Subject 2>, the front hall of the narrator's own house at Maybury at night in 1894. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on a medium shot on <Subject 1> (neat close-trimmed dark brown moustache, bareheaded, hair plastered flat to the brow by rain, mid-grey tweed lounge suit soaked to dark charcoal and clinging) sitting at night on the bottom stair of his own dark hall with his back to the wall, soaked and shivering, the front door bolted behind him. The camera is on the tiles level with his chest, four paces from him, a 50mm lens. The grey storm light comes through the fanlight BEHIND the door. At the first frame the narrator sits at the CENTRE on the bottom stair with his back to the wall, soaked and shivering, the newel post at the RIGHT third, the grey fanlight at the TOP LEFT and the dark tiled floor across the BOTTOM third. His head is a quarter of the frame's height. The shot is inside this place: the front hall of the narrator's own house at Maybury at night in 1894, in a storm: a narrow hall with a patterned tiled floor, the dark wooden staircase rising on the right with a turned newel post and banister, the front door shut and bolted at the far end with a fanlight over it. The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture as he goes on shivering, from 00:00 to 00:02. At 00:02 his hands go on gripping his knees, and the movement continues to the last frame of the shot. By 00:03 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  }
+]

@@ -1,0 +1,320 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "lora_second",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "sheet_8dcb7907.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "shot_08_467881af.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is the Martian cylinder in <Picture 1>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a ruined kitchen opening hangs above the northern rim of the great circular pit. A triangular aperture cuts the south wall between a fallen beam and broken bricks. Green vapour crosses the view in bright veils. The far rim carries smashed shrubbery and a tall fighting-machine against the evening sky. The buried scullery lies behind the camera. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nSquare ruin, readable faces, widening pit, Surrey, 1894, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on the picture keeps only the things of this place and its time. Medium view through the vertical slit: the transformed roadway opens into the circular pit, with green vapour crossing the opened cylinder, a colossal hollow cylinder of yellowish-white unearthly metal, the fighting-machine at the far RIGHT edge, and rubble at the lower edge. The camera is Camera stands inside the ruined wall at head height, one yard from the vertical slit, a 28mm lens; violet light comes from the WEST. At the first frame tHE FOCUS OF THE PICTURE IS the vertical slit in the rubble at CENTER; the north rubble edge fills the foreground from LEFT to RIGHT, the opened cylinder lies at the far CENTER, the far fighting-machine stands at the RIGHT edge, and the pit wall drops below the opening. The camera pulls back from the vertical slit edge, widening one whole frame across the whole shot as green vapour crosses the opened cylinder, from 00:00 to 00:04. At 00:04 evening light glows over the far shrubbery, and the movement continues to the last frame of the shot. Beyond the foreground 1 distant Martian creature works beside the opened cylinder; green vapour drifts across the pit, from 00:00 to 00:07. By 00:07 the camera is pulling back through the last frame, with the vertical slit frames the opened cylinder now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 175,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "21",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 139603
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_08",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "lora_second": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 0.7
+    }
+  },
+  "20": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_08_9edf7e50.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "21": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "20",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

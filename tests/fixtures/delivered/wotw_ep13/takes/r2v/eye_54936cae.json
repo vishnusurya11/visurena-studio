@@ -1,0 +1,109 @@
+{
+ "sha8": "54936cae",
+ "verdict": "flagged",
+ "note": "lag at T00: -6f (-0.250s) corr 0.49; cut at T07: 95.2; jump at T07: -0.01 HARD: another picture; leak at T07: 12 frames of plate before the panel; cut-vote at T07: jump+step+scene HARD: an unplanned cut; lag at T11: +19f (+0.792s) corr 0.64 -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4"
+ ],
+ "signed_at": "2026-09-28T00:26:26Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "lag",
+   "where": "T00",
+   "evidence": {
+    "value": -6,
+    "penalty": 30.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "-6f (-0.250s) corr 0.49"
+  },
+  {
+   "kind": "cut",
+   "where": "T07",
+   "evidence": {
+    "value": 95.2,
+    "penalty": 40.0,
+    "repeated": true,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "95.2"
+  },
+  {
+   "kind": "jump",
+   "where": "T07",
+   "evidence": {
+    "value": -0.011,
+    "penalty": 40.0,
+    "repeated": true,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "-0.01 HARD: another picture"
+  },
+  {
+   "kind": "leak",
+   "where": "T07",
+   "evidence": {
+    "value": 12,
+    "penalty": 40.0,
+    "repeated": true,
+    "frames": 12,
+    "covers": true,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "low",
+   "note": "12 frames of plate before the panel"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T07",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": true,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  },
+  {
+   "kind": "lag",
+   "where": "T11",
+   "evidence": {
+    "value": 19,
+    "penalty": 30.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "+19f (+0.792s) corr 0.64"
+  }
+ ],
+ "terminal": "still"
+}

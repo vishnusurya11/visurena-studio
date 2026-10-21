@@ -1,0 +1,47 @@
+{
+ "rounds": [
+  {
+   "why": "batched_cures: cut, cut-vote, frozen-whole, jump, last-vs-panel, leak",
+   "at": 1791497247.7,
+   "faults": {
+    "0": [
+     "frozen-whole"
+    ],
+    "8": [
+     "content"
+    ],
+    "12": [
+     "last-vs-panel"
+    ],
+    "14": [
+     "last-vs-panel"
+    ],
+    "15": [
+     "cut",
+     "cut-vote",
+     "frozen-whole",
+     "jump",
+     "leak"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: frozen-whole",
+   "at": 1791498357.6,
+   "faults": {
+    "8": [
+     "content"
+    ],
+    "12": [
+     "last-vs-panel"
+    ],
+    "14": [
+     "last-vs-panel"
+    ],
+    "15": [
+     "frozen-whole"
+    ]
+   }
+  }
+ ]
+}

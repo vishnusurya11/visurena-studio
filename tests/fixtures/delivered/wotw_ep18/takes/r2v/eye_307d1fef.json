@@ -1,0 +1,181 @@
+{
+ "sha8": "307d1fef",
+ "verdict": "flagged",
+ "note": "last-vs-panel at T00: 0.16; content at T00: banned from this book: mountain; content at T01: 1 figure(s) for 2 named: someone the shot casts is missing; letterbox at T07: 1/3 frames letterboxed; content at T08: banned from this book: mountain; clones at T11: two faces read as one man (facenet 0.752); frozen-whole at T14: 79% static, run 1.62s HARD: the whole frame stands still; frozen-whole at T18: 72% static, run 0.79s HARD: the whole frame stands still; cut at T19: 41.4; jump at T19: 0.07 HARD: another picture; leak at T19: 4 frames of plate before the panel; cut-vote at T19: jump+step+scene HARD: an unplanned cut; frozen-whole at T21: 100% static, run 7.92s HARD: the whole frame stands still -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4"
+ ],
+ "signed_at": "2026-10-05T19:26:02Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "last-vs-panel",
+   "where": "T00",
+   "evidence": {
+    "value": 0.162,
+    "penalty": 11.9,
+    "repeated": false,
+    "still": "storyboard/shot_00.png"
+   },
+   "severity": "normal",
+   "note": "0.16"
+  },
+  {
+   "kind": "content",
+   "where": "T00",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_00.png"
+   },
+   "severity": "normal",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "content",
+   "where": "T01",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "1 figure(s) for 2 named: someone the shot casts is missing"
+  },
+  {
+   "kind": "letterbox",
+   "where": "T07",
+   "evidence": {
+    "value": 1,
+    "penalty": 60.0,
+    "repeated": false,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "1/3 frames letterboxed"
+  },
+  {
+   "kind": "content",
+   "where": "T08",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "clones",
+   "where": "T11",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.752,
+    "by": "facenet",
+    "frame": 1
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.752)"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T14",
+   "evidence": {
+    "value": 0.792,
+    "penalty": 47.5,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "79% static, run 1.62s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T18",
+   "evidence": {
+    "value": 0.719,
+    "penalty": 43.1,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "72% static, run 0.79s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "cut",
+   "where": "T19",
+   "evidence": {
+    "value": 41.4,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "41.4"
+  },
+  {
+   "kind": "jump",
+   "where": "T19",
+   "evidence": {
+    "value": 0.073,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "0.07 HARD: another picture"
+  },
+  {
+   "kind": "leak",
+   "where": "T19",
+   "evidence": {
+    "value": 4,
+    "penalty": 20.0,
+    "repeated": false,
+    "frames": 4,
+    "covers": true
+   },
+   "severity": "high",
+   "note": "4 frames of plate before the panel"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T19",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T21",
+   "evidence": {
+    "value": 1.0,
+    "penalty": 60.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "100% static, run 7.92s HARD: the whole frame stands still"
+  }
+ ],
+ "terminal": "still"
+}

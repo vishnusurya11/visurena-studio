@@ -1,0 +1,55 @@
+{
+ "sha8": "3860afe9",
+ "verdict": "flagged",
+ "note": "lip-sync at T02: mux lag -0.340s wer 0.00; content at T06: posture 'standing': the shot asks for low -> keep_best",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4"
+ ],
+ "signed_at": "2026-10-09T02:40:15Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "lip-sync",
+   "where": "T02",
+   "evidence": {
+    "value": -0.34,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "mux lag -0.340s wer 0.00"
+  },
+  {
+   "kind": "content",
+   "where": "T06",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "posture 'standing': the shot asks for low"
+  }
+ ],
+ "terminal": "keep_best"
+}

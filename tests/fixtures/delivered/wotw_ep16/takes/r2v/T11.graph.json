@@ -1,0 +1,334 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "lora_second",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "sheet_front_23f30789.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "sheet_front_93879a75.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is Miss Elphinstone in <Picture 1>: Oval face with high cheekbones, dark brown eyes under straight black brows, firm mouth. Clear olive-pale skin. Thick near-black hair worn in a low coiled chignon at the nape. Wearing: Dark aubergine serge travelling costume: fitted jacket with narrow puffed shoulders over a white high-collared blouse, long gored skirt to the ankle. Black felt hat with a wide brim turned up on one side and a black cock feather. Black gauntlet gloves. Carriage whip in one hand, black revolver in the other. <Picture 1> defines this woman alone; each shot keeps the framing its own words describe.\n<Subject 2> is the brother in <Picture 2>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the grass lane runs from the stile at the left edge around the old oak in the middle distance and toward the pony-chaise on the right-hand verge. Hawthorn hedges fill both side edges. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows her; <Picture 1> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, morning sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot on <Subject 1> and <Subject 2> side by side on the chaise seat as she hands him the reins and the chaise starts down the lane. The camera is on the lane in front of the pony at seat height, two paces away, a 50mm lens. Sun comes from the RIGHT and lights both faces. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the LEFT third, her head a third of the frame's height. The camera pulls back ahead of the chaise across the whole shot as <Subject 1> passes the reins to <Subject 2>, from 00:00 to 00:02. <Subject 1> (S1), on screen, oval face with high cheekbones, with a clipped English voice at an even pace, says: <d>[English] Give me the reins.</d> Her mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, the chaise rolls forward, and the roll continues to the last frame of the shot. Behind them three men struggle beside the chaise while two women sit inside, from 00:00 to 00:07. <Subject 1>'s mouth is closed from 00:02 to 00:07 while he passes the reins to <Subject 2>. By 00:07 the camera is pulling back through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 175,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 104930
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_11",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "lora_second": {
+    "class_type": "LoraLoaderModelOnly",
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 0.7
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "shot_11_a79fbad5.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "voice_11_624a1fa5.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "22": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "21",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

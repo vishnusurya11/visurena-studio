@@ -1,0 +1,97 @@
+{
+ "rounds": [
+  {
+   "why": "batched_cures: content, frozen-whole, last-vs-panel",
+   "at": 1791461089.6,
+   "faults": {
+    "2": [
+     "frozen-whole"
+    ],
+    "3": [
+     "content",
+     "frozen-whole"
+    ],
+    "5": [
+     "content"
+    ],
+    "6": [
+     "content"
+    ],
+    "14": [
+     "content"
+    ],
+    "23": [
+     "last-vs-panel"
+    ],
+    "26": [
+     "frozen-whole"
+    ],
+    "27": [
+     "letterbox"
+    ],
+    "30": [
+     "letterbox"
+    ],
+    "31": [
+     "content"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: content",
+   "at": 1791469949.9,
+   "faults": {
+    "5": [
+     "content"
+    ],
+    "6": [
+     "content"
+    ],
+    "14": [
+     "content"
+    ],
+    "31": [
+     "content"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: frozen-whole",
+   "at": 1791474712.3,
+   "faults": {
+    "2": [
+     "frozen-whole"
+    ],
+    "5": [
+     "content"
+    ],
+    "14": [
+     "content"
+    ],
+    "31": [
+     "content"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: frozen-at-start, frozen-share, frozen-whole",
+   "at": 1791477875.3,
+   "faults": {
+    "2": [
+     "frozen-at-start",
+     "frozen-share",
+     "frozen-whole"
+    ],
+    "5": [
+     "content"
+    ],
+    "14": [
+     "content"
+    ],
+    "31": [
+     "content"
+    ]
+   }
+  }
+ ]
+}

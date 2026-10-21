@@ -1,0 +1,723 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "space",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/earth_and_mars/wide_space.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.0,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 82000,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb, and leaves the night side of each planet and the whole of space black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in <Subject 1>, the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide of the gulf of space: the ochre-red planet Mars with its white polar cap at the left, lit hard from the right, and far across the black the small blue-white Earth with its drifting cloud. The camera is far off the plane of the orbits, a 35mm lens. The sun comes from the RIGHT onto the planet's limb. At the first frame the red planet Mars fills the LEFT third of the frame, half the frame's height, its lit limb on the RIGHT side and its night side black. The small blue Earth hangs at the RIGHT third, the height of a thumbnail. Fine stars scatter across the TOP and the BOTTOM edges and the rest of space is black. The shot is inside this place: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb. The camera pans right across the whole shot, travelling a hand's breadth as the red planet keeps the left third, from 00:00 to 00:04. At 00:04 the red planet turns a finger's breadth on its axis toward the far sun, and the turn continues to the last frame of the shot. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "space",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/earth_and_mars/wide_space.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.583333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82001,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb, and leaves the night side of each planet and the whole of space black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide of the gulf of space nearer the red planet: the ochre-red planet Mars with its white polar cap filling the left half, lit hard from the right, its dark night side turned toward the small blue-white Earth far across the black at the right. The camera is far off the plane of the orbits, nearer the red planet, a 35mm lens. The sun comes from the RIGHT onto the planet's limb. At the first frame the red planet Mars fills the LEFT half of the frame, two thirds of the frame's height, its lit limb on the RIGHT side and its night side black. The small blue Earth hangs at the RIGHT third, the height of a fingernail. Fine stars scatter across the TOP edge and the rest of space is black. The shot is inside this place: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb. The camera pushes in on the red planet across the whole shot, travelling a hand's breadth as the small blue Earth keeps the right third, from 00:00 to 00:04. At 00:04 the red planet turns a finger's breadth on its axis toward the far sun, and the turn continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "space",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/earth_and_mars/wide_space.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.333333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 82002,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb, and leaves the night side of each planet and the whole of space black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on an insert on the bright curved limb of Mars against black space: a reddish flash at its edge and a thin streamer of green-white flaming gas projecting out into the dark; only that object and what touches it is in frame. The camera is in space close over the planet, a 50mm lens. The sun comes from the RIGHT along the limb. At the first frame the curved bright limb of Mars crosses the BOTTOM half of the frame from the LEFT edge to the RIGHT edge. The reddish flash sits at the CENTRE of the limb and the green-white streamer rises from it to the TOP third. Space is black across the TOP edge with fine stars. The shot is inside this place: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb. The camera pushes in on the reddish flash across the whole shot, travelling a finger's breadth as the curved limb keeps the bottom half, from 00:00 to 00:03. At 00:03 the streamer of flaming gas travels out a finger's breadth into the black, and the movement continues to the last frame of the shot. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "setup",
+    "setup": "study",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/narrators_study/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.125,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 82003,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the narrator's upstairs study at Maybury at night in 1894, the camera within the room with walls closed on all sides: a mahogany writing-table with a green leather top and stacked manuscript sheets, a brass inkstand, a green-shaded brass oil lamp, a pair of glazed French windows with a low iron rail and a raised cream blind, oak bookcases and a globe; the green-shaded lamp is the only light and it comes from low at the right onto the table and the pages, and leaves the bookcases, the corners and the night in the windows black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, inside the narrator's upstairs study at Maybury at night in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lamp from the right, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit, the straw boater set on the table, bent over the manuscript at the writing-table under the green-shaded lamp with the steel pen moving across the page, the long oval face lit from the right. The camera is across the writing-table level with his eyes, an arm's length from him, a 50mm lens. The lamp comes from LOW at the RIGHT. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from his dark parted hair at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height, lit from the RIGHT. The green lamp glows at the RIGHT third and the bookcases are black at the LEFT edge. The shot is inside this place: Interior, inside the narrator's upstairs study at Maybury at night in 1894, the camera within the room with walls closed on all sides: a mahogany writing-table with a green leather top and stacked manuscript sheets, a brass inkstand, a green-shaded brass oil lamp, a pair of glazed French windows with a low iron rail and a raised cream blind. The camera pans right across the whole shot, travelling a finger's breadth as the green lamp keeps the right third, from 00:00 to 00:04. At 00:04 he sets the pen down on the page and his head lifts from it with a faint smile, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he sets the pen down on the page. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the narrator's upstairs study at Maybury at night in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "setup",
+    "setup": "knoll",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/ottershaw/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.916667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 82004,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path, and below the knoll a red-brick house with lit windows and the scattered lamps of Ottershaw; a brass lantern is the only near light and it comes from low on one side, warm and yellow, on the steps and the gravel, and leaves the dome, the fields and the sky black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in <Subject 2>, the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot of <Subject 1> in the grey herringbone tweed suit and straw boater climbing the three brick steps of the white observatory at night at a normal walking pace, turned three-quarters away from the camera toward the plank door, one boot already on the second step and his hand reaching for the door's edge, the brass lantern glowing on the top step. The camera is on the gravel path at a standing man's eye, three long strides from him, a 35mm lens. The lantern comes from LOW at the LEFT. At the first frame the white weatherboard wall of the observatory fills the CENTRE of the frame with the plank door ajar above the brick steps. The Narrator is on the steps at the RIGHT third, turned three-quarters toward the door, his head a quarter of the frame's height. The lantern glows on the top step at the BOTTOM LEFT and the sky is black at the TOP edge. The shot is inside this place: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path. The camera pans right across the whole shot, travelling a forearm as the plank door keeps the centre, from 00:00 to 00:04. At 00:04 <Subject 1> steps up onto the top step and his hand draws the plank door open, and the step continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:07 while he steps up onto the top step. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "setup",
+    "setup": "knoll",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/ottershaw/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l05.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.458333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 82005,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed Inverness cape coat with shoulder cape over a matching ochre tweed suit, white shirt with sleeves rolled over ink-stained cuffs. Round steel-rimmed spectacles. Black velvet smoking cap with a short tassel. Brass pocket chronometer on a leather fob. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path, and below the knoll a red-brick house with lit windows and the scattered lamps of Ottershaw; a brass lantern is the only near light and it comes from low on one side, warm and yellow, on the steps and the gravel, and leaves the dome, the fields and the sky black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot of <Subject 1> in the ochre tweed Inverness cape, black velvet smoking cap and steel spectacles standing at the plank door of the white observatory on the knoll at night, the broad ruddy face and full auburn beard lit from below by the brass lantern on the step, one hand raised toward the dome. The camera is on the gravel path at the foot of the steps level with his eyes, two long strides from him, a 50mm lens. The lantern comes from LOW at the LEFT. At the first frame Ogilvy's head and shoulders fill the CENTRE of the frame from the TOP third to the ochre cape at the BOTTOM edge, his head a third of the frame's height. The shot is inside this place: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path. The camera pans left across the whole shot, travelling a finger's breadth as the plank door keeps the left edge, from 00:00 to 00:06. <Subject 1> (S1), on screen, broad ruddy face, with a clipped English voice at an even pace, says: <d>[English] Come and look. It came out of Mars like a shot from a gun.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, his raised hand beckons toward the open door. At 00:07 his head turns back toward the path, and the turn continues to the last frame of the shot. By 00:08 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "setup",
+    "setup": "pier",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/ottershaw_observatory/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.333333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 82006,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit, a mahogany clockwork box on the pier, a little deal table with a soda siphon, tumblers and a brass chronometer in its box; a shaded lantern on the floor in the corner is the only light and it comes from low at the right, a small yellow oval on the pine boards, and leaves the dome, the walls and the corners black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, inside the small round private observatory at Ottershaw at midnight in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, shaded lantern from the right, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide of the dark round observatory at midnight: the long green-and-brass telescope on its black iron stand pointing up through the open slit full of stars, <Subject 1> in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left bent at the waist with his eye already at its eyepiece, his back half turned to the camera, the lantern's yellow oval on the boards in the right-hand corner. The camera is just inside the door at a standing man's eye, four long strides from the pier, a 35mm lens. The lantern comes from LOW at the RIGHT. At the first frame the green-and-brass telescope rises from its black iron stand across the CENTRE of the frame to the starry slit at the TOP RIGHT. The Narrator is bent to the eyepiece at the LEFT third, his back half to the camera, his head a fifth of the frame's height. The lantern's yellow oval lies at the BOTTOM RIGHT and the dome is black across the TOP. The shot is inside this place: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit. The camera pans right across the whole shot, travelling a hand's breadth as the green-and-brass telescope keeps the centre, from 00:00 to 00:04. At 00:04 <Subject 1>'s hand turns the brass focusing wheel and his shoulders settle lower to the glass, and the turn continues to the last frame of the shot. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the small round private observatory at Ottershaw at midnight in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "setup",
+    "setup": "space",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/earth_and_mars/wide_space.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.083333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 82007,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb, and leaves the night side of each planet and the whole of space black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a close shot view of the planet Mars through the great telescope, hanging in the black: the ochre-red globe fills the centre third of the frame, its white polar cap at the top, dark markings across its face, lit hard from the right with its night side fading into the black, a few faint stars around it; only that object and what touches it is in frame. The camera is at the telescope eyepiece, the lens to the glass, a 90mm lens. The planet's light comes from the CENTRE of the blue circle. At the first frame the circle of deep blue fills the CENTRE of the frame from the TOP third to the BOTTOM third. The small bright planet sits at the CENTRE, the height of a fingernail, with three faint stars at the RIGHT. The surround is black at the LEFT edge, the RIGHT edge and every corner. The shot is inside this place: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb. The camera pushes in steadily toward the red planet across the whole shot as the red planet turns steadily on its axis, its dark markings sliding from left to right, from 00:00 to 00:04. At 00:04 a thin pale haze shimmers along its lit limb, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "setup",
+    "setup": "corner",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/ottershaw_observatory/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.875,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82008,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit, a mahogany clockwork box on the pier, a little deal table with a soda siphon, tumblers and a brass chronometer in its box; a shaded lantern on the floor in the corner is the only light and it comes from low at the right, a small yellow oval on the pine boards, and leaves the dome, the walls and the corners black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, inside the small round private observatory at Ottershaw at midnight in 1894. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, shaded lantern from the right, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left with one eye to the brass eyepiece of the telescope, the long oval face and neat dark moustache lit from below by the lantern, the other eye narrowed. The camera is beside the pier level with his eyes, an arm's length from him, a 50mm lens. The lantern comes from LOW at the RIGHT. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from the straw boater at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height. The brass eyepiece comes in from the LEFT edge and the dome is black at the TOP RIGHT. The shot is inside this place: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit. The camera pans right across the whole shot, travelling a finger's breadth as the brass eyepiece keeps the left third, from 00:00 to 00:02. At 00:02 his hand lifts to the focusing wheel. At 00:05 his shoulders lower toward the glass, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his hand lifts to the focusing wheel. By 00:07 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the small round private observatory at Ottershaw at midnight in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "setup",
+    "setup": "corner",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/ottershaw_observatory/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82009,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed Inverness cape coat with shoulder cape over a matching ochre tweed suit, white shirt with sleeves rolled over ink-stained cuffs. Round steel-rimmed spectacles. Black velvet smoking cap with a short tassel. Brass pocket chronometer on a leather fob. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit, a mahogany clockwork box on the pier, a little deal table with a soda siphon, tumblers and a brass chronometer in its box; a shaded lantern on the floor in the corner is the only light and it comes from low at the right, a small yellow oval on the pine boards, and leaves the dome, the walls and the corners black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, inside the small round private observatory at Ottershaw at midnight in 1894. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, shaded lantern from the right, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert on the brass chronometer with its white enamel dial in its open mahogany box on the little deal table, the glass soda siphon behind it, <Subject 1>'s broad ink-stained hand resting on the open lid, the lantern's low yellow glow from the right across the dial; only that object and what touches it is in frame. The camera is low over the table at a seated man's eye, an arm's length from the box, a 90mm lens. The lantern comes from LOW at the RIGHT. At the first frame the open mahogany box sits at the CENTRE of the frame with the white dial the height of the middle third, its hands near twelve. The glass siphon stands at the LEFT third behind it, Ogilvy's hand rests on the open lid at the TOP RIGHT, the lantern glow lies along the BOTTOM edge and the curved wall is black across the TOP. The shot is inside this place: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit. The camera pans left across the whole shot, travelling a finger's breadth as the mahogany box keeps the frame's centre, from 00:00 to 00:04. At 00:04 <Subject 1>'s hand lifts the chronometer from the box and tilts its dial to the lantern, and the lift continues to the last frame of the shot. By 00:07 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the small round private observatory at Ottershaw at midnight in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "spike",
+    "setup": "space",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/earth_and_mars/wide_space.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 82010,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb, and leaves the night side of each planet and the whole of space black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 1>, the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on an insert through the telescope eyepiece: the circle of deep blue night inside a black surround with the small bright ochre-red planet Mars at its centre, a reddish flash blooming at the planet's right edge and a hair-thin streamer rising from it; only that object and what touches it is in frame. The camera is at the telescope eyepiece, the lens to the glass, a 90mm lens. The planet's light comes from the CENTRE of the blue circle. At the first frame the circle of deep blue fills the CENTRE of the frame from the TOP third to the BOTTOM third. The small planet sits at the CENTRE, the height of a fingernail, the reddish flash at its RIGHT edge. The surround is black at the LEFT edge, the RIGHT edge and every corner. The shot is inside this place: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb. The camera pushes in on the planet's edge across the whole shot, travelling a finger's breadth as the circle of blue keeps the frame, from 00:00 to 00:02. At 00:02 the reddish flash swells at the edge and a thin streamer travels out from it, and the movement continues to the last frame of the shot. By 00:05 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "turn",
+    "setup": "corner",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/ottershaw_observatory/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l10.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.083333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 82011,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit, a mahogany clockwork box on the pier, a little deal table with a soda siphon, tumblers and a brass chronometer in its box; a shaded lantern on the floor in the corner is the only light and it comes from low at the right, a small yellow oval on the pine boards, and leaves the dome, the walls and the corners black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, inside the small round private observatory at Ottershaw at midnight in 1894. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, shaded lantern from the right, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left lifting his face from the brass eyepiece and turning it toward the dark, the grey eyes wide, the lantern low at the right on his cheek. The camera is beside the pier level with his eyes, an arm's length from him, a 50mm lens. The lantern comes from LOW at the RIGHT. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from the straw boater at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height. The shot is inside this place: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit. The camera pans left across the whole shot, travelling a finger's breadth as the brass eyepiece keeps the left edge, from 00:00 to 00:05. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Ogilvy! A red flash, just now, at the edge of it!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his head turns off the eyepiece toward the dark, then his hand lifts and points back at the glass, and the lift continues to the last frame of the shot. By 00:06 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the small round private observatory at Ottershaw at midnight in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "reaction",
+    "setup": "corner",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/ottershaw_observatory/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.416667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82012,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed Inverness cape coat with shoulder cape over a matching ochre tweed suit, white shirt with sleeves rolled over ink-stained cuffs. Round steel-rimmed spectacles. Black velvet smoking cap with a short tassel. Brass pocket chronometer on a leather fob. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit, a mahogany clockwork box on the pier, a little deal table with a soda siphon, tumblers and a brass chronometer in its box; a shaded lantern on the floor in the corner is the only light and it comes from low at the right, a small yellow oval on the pine boards, and leaves the dome, the walls and the corners black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, inside the small round private observatory at Ottershaw at midnight in 1894. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, shaded lantern from the right, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot of <Subject 1> in the ochre tweed Inverness cape, black velvet smoking cap and steel spectacles bent to the brass eyepiece of the green-and-brass telescope beside its black iron stand, one hand on the tube, the lantern on the boards behind him in the corner. The camera is beside the table at a standing man's eye, three long strides from him, a 35mm lens. The lantern comes from LOW at the RIGHT. At the first frame Ogilvy stands at the CENTRE of the frame from the BOTTOM edge to the TOP third, his head a quarter of the frame's height, bent to the eyepiece. The black iron stand stands at the LEFT third, the lantern glows at the BOTTOM RIGHT and the curved wall is black at the RIGHT edge. The shot is inside this place: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit. The camera pans right across the whole shot, travelling a forearm as the black iron stand keeps the left third, from 00:00 to 00:02. At 00:02 <Subject 1>'s hand turns the brass wheel on the tube and his shoulders jerk back from the glass, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his hand turns the brass wheel on the tube. By 00:05 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the small round private observatory at Ottershaw at midnight in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "friction",
+    "setup": "corner",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/ottershaw_observatory/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.958333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82013,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit, a mahogany clockwork box on the pier, a little deal table with a soda siphon, tumblers and a brass chronometer in its box; a shaded lantern on the floor in the corner is the only light and it comes from low at the right, a small yellow oval on the pine boards, and leaves the dome, the walls and the corners black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, inside the small round private observatory at Ottershaw at midnight in 1894. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, shaded lantern from the right, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot of <Subject 1> in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left leaning over the little deal table in the dark corner, his hand already on the glass soda siphon beside the tumblers and his straw boater lying crown-down and the brass chronometer in its open box, the lantern low on the floor at the right beside the table leg. The camera is low beside the table at a seated man's eye, three long strides from him, a 35mm lens. The lantern comes from LOW at the RIGHT. At the first frame the little deal table stands at the CENTRE of the lower half of the frame with the siphon, the tumblers and the chronometer on it. The Narrator leans in from the LEFT third. The shot is inside this place: Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit. The camera pans left across the whole shot, travelling a forearm as the little deal table keeps the centre, from 00:00 to 00:04. At 00:04 his hand tilts the siphon over a tumbler and the soda fizzes into it, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his hand tilts the siphon over a tumbler. By 00:07 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the small round private observatory at Ottershaw at midnight in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "friction",
+    "setup": "space",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/earth_and_mars/wide_space.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.25,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 82014,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb, and leaves the night side of each planet and the whole of space black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide of the black gulf of space between the ochre-red planet Mars at the left and the small blue Earth at the right, a small glowing grey cylinder crossing the black between them toward the Earth. The camera is far off the plane of the orbits, a 35mm lens. The sun comes from the RIGHT onto both planets. At the first frame the red planet fills the LEFT third of the frame, half the frame's height, lit on its RIGHT side. The small blue Earth hangs at the RIGHT third. A small glowing cylinder crosses the CENTRE between them and the rest of space is black with fine stars at the TOP and BOTTOM edges. The shot is inside this place: The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb. The camera pans right across the whole shot, travelling a hand's breadth as the small Earth keeps the right third, from 00:00 to 00:04. At 00:04 the glowing grey cylinder travels across the black toward the Earth, and the movement continues to the last frame of the shot. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "transition",
+    "setup": "knoll",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/ottershaw/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.791667,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 82015,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed Inverness cape coat with shoulder cape over a matching ochre tweed suit, white shirt with sleeves rolled over ink-stained cuffs. Round steel-rimmed spectacles. Black velvet smoking cap with a short tassel. Brass pocket chronometer on a leather fob. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path, and below the knoll a red-brick house with lit windows and the scattered lamps of Ottershaw; a brass lantern is the only near light and it comes from low on one side, warm and yellow, on the steps and the gravel, and leaves the dome, the fields and the sky black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 2>, the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on an insert on the shaded brass lantern on the top brick step of the observatory at night, <Subject 1>'s broad ink-stained hand turning up its wick, the flame rising behind the glass and the gravel below; only that object and what touches it is in frame. The camera is beside the steps at the height of a crouching man's eye, an arm's length from the lantern, a 90mm lens. The flame comes from the CENTRE onto his fingers. At the first frame the brass lantern stands at the CENTRE of the frame on the red brick step, the height of the middle third, its flame bright behind the glass. His hand comes in from the LEFT edge, the gravel lies across the BOTTOM edge and the plank door is black across the TOP. The shot is inside this place: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path. The camera tilts down on the lantern across the whole shot, travelling a finger's breadth as the brass lantern keeps the frame's centre, from 00:00 to 00:02. At 00:02 his hand turns the wick up and lifts the lantern by its ring, and the turn continues to the last frame of the shot. By 00:05 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "answer",
+    "setup": "knoll",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/ottershaw/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l15.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.166667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 82016,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed Inverness cape coat with shoulder cape over a matching ochre tweed suit, white shirt with sleeves rolled over ink-stained cuffs. Round steel-rimmed spectacles. Black velvet smoking cap with a short tassel. Brass pocket chronometer on a leather fob. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path, and below the knoll a red-brick house with lit windows and the scattered lamps of Ottershaw; a brass lantern is the only near light and it comes from low on one side, warm and yellow, on the steps and the gravel, and leaves the dome, the fields and the sky black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot of <Subject 1> in the ochre tweed Inverness cape, black velvet smoking cap and steel spectacles on the brick steps of the observatory at night with the brass lantern raised in one hand, the broad ruddy face amused and sure, the full auburn beard, the plank door dark behind. The camera is on the gravel path level with his eyes, two long strides from him, a 50mm lens. The lantern comes from LOW at the RIGHT. At the first frame Ogilvy's head and shoulders fill the CENTRE of the frame from the TOP third to the ochre cape at the BOTTOM edge, his head a third of the frame's height, lit from LOW at the RIGHT. The plank door is dark at the LEFT edge and the starry sky is black across the TOP. The shot is inside this place: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path. The camera pans right across the whole shot, travelling a finger's breadth as the plank door keeps the left edge, from 00:00 to 00:06. <Subject 1> (S1), on screen, broad ruddy face, with a clipped English voice at an even pace, says: <d>[English] The chances against anything manlike on Mars are a million to one.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, his free hand lifts and waves the thought away. At 00:07 the lantern swings a hand's breadth, and the swing continues to the last frame of the shot. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "transition",
+    "setup": "knoll",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/ottershaw/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy",
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.583333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82017,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed Inverness cape coat with shoulder cape over a matching ochre tweed suit, white shirt with sleeves rolled over ink-stained cuffs. Round steel-rimmed spectacles. Black velvet smoking cap with a short tassel. Brass pocket chronometer on a leather fob. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Narrator in <Picture 2>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path, and below the knoll a red-brick house with lit windows and the scattered lamps of Ottershaw; a brass lantern is the only near light and it comes from low on one side, warm and yellow, on the steps and the gravel, and leaves the dome, the fields and the sky black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 3>, the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lit windows, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide from the knoll at night: <Subject 1> in the ochre tweed Inverness cape, black velvet smoking cap and steel spectacles and <Subject 2> in the grey herringbone tweed suit and straw boater walking down the grass beside the white observatory wall, the brass lantern swinging from <Subject 1>'s hand, the lit house below and the scattered lamps of Ottershaw beyond. The camera is at the observatory door on the knoll at a standing man's eye, four long strides from them, a 35mm lens. The lantern comes from LOW in Ogilvy's hand. At the first frame the white observatory wall keeps the LEFT edge of the frame. The two men walk at the CENTRE of the lower half, each the height of a finger, the lantern between them. The lit house sits at the CENTRE of the frame and the village lamps are small across the RIGHT third under a black sky. The shot is inside this place: The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path. The camera pans right across the whole shot, travelling a hand's breadth as the white observatory wall keeps the left edge, from 00:00 to 00:04. At 00:04 the two men walk down the grass at a normal walking pace toward the lit house, and the walk continues to the last frame of the shot. By 00:07 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "transition",
+    "setup": "study",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/narrators_study/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.291667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 82018,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the narrator's upstairs study at Maybury at night in 1894, the camera within the room with walls closed on all sides: a mahogany writing-table with a green leather top and stacked manuscript sheets, a brass inkstand, a green-shaded brass oil lamp, a pair of glazed French windows with a low iron rail and a raised cream blind, oak bookcases and a globe; the green-shaded lamp is the only light and it comes from low at the right onto the table and the pages, and leaves the bookcases, the corners and the night in the windows black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, inside the narrator's upstairs study at Maybury at night in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lamp from the right, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot of <Subject 1> in the grey herringbone tweed suit and straw boater, the boater set on the table, at the mahogany writing-table under the green-shaded lamp, a steel pen moving across a manuscript page, the French window dark beside him. The camera is at the side of the table at a seated man's eye, three long strides from him, a 35mm lens. The lamp comes from LOW at the RIGHT. At the first frame the writing-table crosses the BOTTOM half of the frame with the green-shaded lamp at the RIGHT third. The Narrator sits at the CENTRE, his head a quarter of the frame's height, bent to the page. The French window is black at the LEFT edge and the bookcases are black across the TOP. The shot is inside this place: Interior, inside the narrator's upstairs study at Maybury at night in 1894, the camera within the room with walls closed on all sides: a mahogany writing-table with a green leather top and stacked manuscript sheets, a brass inkstand, a green-shaded brass oil lamp, a pair of glazed French windows with a low iron rail and a raised cream blind. The camera pans left across the whole shot, travelling a forearm as the green lamp keeps the right third, from 00:00 to 00:04. At 00:04 he writes a line across the page and lifts the pen to the inkwell, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:07 while he writes a line across the page. By 00:08 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the narrator's upstairs study at Maybury at night in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "runout",
+    "setup": "porch",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_wife/sheet.png",
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/narrators_home/wide_establishing.png"
+    ],
+    "faces": [
+      "narrators_wife",
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.541667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82019,
+    "prompt": "subject_definitions:\n<Subject 1> is the Wife in <Picture 1>: Oval face, wide hazel eyes, softly arched chestnut brows, small straight nose, full mouth. Fair skin with light freckles across the nose. Thick chestnut-auburn hair, waved and swept up into a soft pompadour with a knot at the crown. Slim hands with a plain gold wedding band. Wearing: Cream cotton blouse with high collar and pin-tucked front, sage-green wool skirt to the ankle with a narrow brown belt, low brown boots. Small sage-green felt toque trimmed with a cream ostrich tip. <Picture 1> defines this woman alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Narrator in <Picture 2>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: The front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts, a fanlight glowing, a lit bay window at the left, clipped laurels, a gravel path; the lamplit fanlight is the only light and it comes from the door behind the couple, warm and low, onto the red-and-black tiled step and the gravel, and leaves the laurels, the brick and the sky black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 3>, the front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows her; <Picture 1> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, bay window from the left, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 2> in the grey herringbone tweed suit and straw boater and <Subject 1> in the cream high-collared blouse and paisley shawl side by side on the gravel path at night, three-quarter to the camera, her face turned up to him with a smile, her slim hand with its gold band already at the crook of his grey tweed arm. The camera is on the gravel path level with their eyes, two long strides from them, a 50mm lens. The fanlight comes from BEHIND at the LEFT. At the first frame the Narrator's head and shoulders fill the LEFT half and the Wife's the RIGHT half of the frame, from the TOP third to the BOTTOM edge, their heads a third of the frame's height. The glowing fanlight sits between them at the TOP and the laurels are black at the RIGHT edge. The shot is inside this place: The front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts, a fanlight glowing, a lit bay window at the left, clipped laurels, a gravel path. The camera pans right across the whole shot, travelling a finger's breadth as the glowing fanlight keeps the top, from 00:00 to 00:02. At 00:02 her hand slides into the crook of his arm and his arm draws it in. At 00:03 his head turns down to her, and the turn continues to the last frame of the shot. By 00:05 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "runout",
+    "setup": "porch",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/characters/narrators_wife/sheet.png",
+      "refs/locations/narrators_home/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "narrators_wife"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.0,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82020,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Wife in <Picture 2>: Oval face, wide hazel eyes, softly arched chestnut brows, small straight nose, full mouth. Fair skin with light freckles across the nose. Thick chestnut-auburn hair, waved and swept up into a soft pompadour with a knot at the crown. Slim hands with a plain gold wedding band. Wearing: Cream cotton blouse with high collar and pin-tucked front, sage-green wool skirt to the ankle with a narrow brown belt, low brown boots. Small sage-green felt toque trimmed with a cream ostrich tip. <Picture 2> defines this woman alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: The front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts, a fanlight glowing, a lit bay window at the left, clipped laurels, a gravel path; the lamplit fanlight is the only light and it comes from the door behind the couple, warm and low, onto the red-and-black tiled step and the gravel, and leaves the laurels, the brick and the sky black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 3>, the front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, bay window from the left, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot of <Subject 1> in the grey herringbone tweed suit and straw boater and <Subject 2> in the cream high-collared blouse, sage-green skirt and paisley shawl walking arm in arm down the gravel path from the black front door, three-quarter to the camera, the fanlight glowing behind them, his free hand already raised toward the stars. The camera is on the gravel path at a standing man's eye, three long strides from them, a 35mm lens. The fanlight comes from BEHIND them onto their shoulders. At the first frame the Narrator walks at the LEFT third and the Wife at the RIGHT third of the frame, each from the BOTTOM edge to the TOP third, heads a quarter of the frame's height. The black door and its glowing fanlight stand at the CENTRE behind them and the laurels are black at both edges. The shot is inside this place: The front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts, a fanlight glowing, a lit bay window at the left, clipped laurels, a gravel path. The camera pans right across the whole shot, travelling a forearm as the lit fanlight keeps the centre, from 00:00 to 00:02. At 00:02 <Subject 1> and <Subject 2> walk a short stride down the gravel path at a normal walking pace. At 00:03 his raised hand points up at the sky and she turns her face up after it, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he and <Subject 2> walk a short stride down the gravel path. By 00:05 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "runout",
+    "setup": "porch",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/narrators_home/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.958333,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 82021,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts, a fanlight glowing, a lit bay window at the left, clipped laurels, a gravel path; the lamplit fanlight is the only light and it comes from the door behind the couple, warm and low, onto the red-and-black tiled step and the gravel, and leaves the laurels, the brick and the sky black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in <Subject 2>, the front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, bay window from the left, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit and straw boater on the gravel path at night with his face turned up to the stars, the grey eyes on the sky, the lit fanlight of the porch glowing behind his shoulder. The camera is on the gravel path level with his eyes, two long strides from him, a 50mm lens. The fanlight comes from BEHIND at the LEFT. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from the straw boater at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height, his face turned up. The glowing fanlight sits at the LEFT third and the laurels are black at the RIGHT edge. The shot is inside this place: The front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts, a fanlight glowing, a lit bay window at the left, clipped laurels, a gravel path. The camera pans right across the whole shot, travelling a finger's breadth as the glowing fanlight keeps the left third, from 00:00 to 00:03. At 00:03 his raised hand points up at the red dot overhead. At 00:05 his head turns to her, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:07 while his raised hand points up at the red dot overhead. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "button",
+    "setup": "porch",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_wife/sheet.png",
+      "refs/locations/narrators_home/wide_establishing.png"
+    ],
+    "faces": [
+      "narrators_wife"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l21.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.541667,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 82022,
+    "prompt": "subject_definitions:\n<Subject 1> is the Wife in <Picture 1>: Oval face, wide hazel eyes, softly arched chestnut brows, small straight nose, full mouth. Fair skin with light freckles across the nose. Thick chestnut-auburn hair, waved and swept up into a soft pompadour with a knot at the crown. Slim hands with a plain gold wedding band. Wearing: Cream cotton blouse with high collar and pin-tucked front, sage-green wool skirt to the ankle with a narrow brown belt, low brown boots. Small sage-green felt toque trimmed with a cream ostrich tip. <Picture 1> defines this woman alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts, a fanlight glowing, a lit bay window at the left, clipped laurels, a gravel path; the lamplit fanlight is the only light and it comes from the door behind the couple, warm and low, onto the red-and-black tiled step and the gravel, and leaves the laurels, the brick and the sky black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in <Subject 2>, the front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows her; <Picture 1> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, bay window from the left, black shadow.\n[Shot 1] From 00:00 to 00:09. The shot opens on a medium close shot of <Subject 1> in the cream high-collared blouse, sage-green skirt and paisley shawl on the gravel path at night, her face turned up and toward the right, wide hazel eyes bright, one slim hand with its gold band raised toward the railway beyond the laurels. The camera is on the gravel path level with her eyes, two long strides from her, a 50mm lens. The fanlight comes from BEHIND at the LEFT. At the first frame the Wife's head and shoulders fill the CENTRE of the frame from her chestnut hair at the TOP third to the paisley shawl at the BOTTOM edge, her head a third of the frame's height. The glowing fanlight sits at the LEFT third and the laurels are black at the RIGHT edge. The shot is inside this place: The front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts, a fanlight glowing, a lit bay window at the left, clipped laurels, a gravel path. The camera pans left across the whole shot, travelling a finger's breadth as the glowing fanlight keeps the left third, from 00:00 to 00:06. <Subject 1> (S1), on screen, oval face, with a clipped English voice at an even pace, says: <d>[English] Look, dear, the signal lights. Red and green and yellow. So bright.</d> Her mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, her raised hand points toward the railway. At 00:08 her face turns to him with a smile, and the turn continues to the last frame of the shot. By 00:09 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  }
+]

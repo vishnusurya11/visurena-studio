@@ -1,0 +1,404 @@
+{
+  "take": 22,
+  "attempt": 0,
+  "file": "T22.mp4",
+  "seconds": 6.58,
+  "lane": "narration",
+  "gates": [
+    {
+      "name": "frozen-at-start",
+      "value": 0.0,
+      "ok": true,
+      "hard": true,
+      "note": "0.0s",
+      "penalty": 0.0
+    },
+    {
+      "name": "frozen-share",
+      "value": 0.0,
+      "ok": true,
+      "hard": false,
+      "note": "0%",
+      "penalty": 0.0
+    },
+    {
+      "name": "foreign",
+      "value": 0,
+      "ok": true,
+      "hard": true,
+      "note": "0",
+      "penalty": 0.0
+    },
+    {
+      "name": "cut-landing",
+      "value": 0,
+      "ok": true,
+      "hard": true,
+      "note": "1/1 on pin",
+      "penalty": 0.0
+    },
+    {
+      "name": "drift",
+      "value": -0.399,
+      "ok": false,
+      "hard": false,
+      "note": "-0.40",
+      "penalty": 0.0
+    },
+    {
+      "name": "lip-sync",
+      "value": 0.0,
+      "ok": true,
+      "hard": true,
+      "note": "n/a narration",
+      "penalty": 0.0
+    },
+    {
+      "name": "identity",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured",
+      "penalty": 0.0
+    },
+    {
+      "name": "wardrobe",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured",
+      "penalty": 0.0
+    }
+  ],
+  "segments": [
+    {
+      "cell": "Q22_0.png",
+      "target": "Q22_0.png",
+      "start_s": 0.0,
+      "end_s": 6.542,
+      "lead_in_s": 0.0,
+      "still_share": 0.0,
+      "kind": "hold",
+      "start_sim": 1.0,
+      "end_sim": -0.399,
+      "landed": true,
+      "offset": 0
+    }
+  ],
+  "frozen_spans": [],
+  "energy_q": [
+    5.8,
+    6.3,
+    6.3,
+    10.8,
+    37.0,
+    20.0,
+    26.5,
+    14.2,
+    14.3,
+    10.4,
+    7.6,
+    11.7,
+    31.0,
+    48.8,
+    44.0,
+    56.2,
+    54.3,
+    35.9,
+    22.3,
+    19.4,
+    15.0,
+    24.0,
+    16.2,
+    11.3,
+    11.8,
+    12.4
+  ],
+  "score": 100.0,
+  "passed": true,
+  "verdict_line": "T22 a0 PASS 100/100 | frozen-at-start 0.0s | frozen-share 0% | foreign 0 | cut-landing 1/1 on pin | drift -0.40 adv | lip-sync n/a narration | identity not measured | wardrobe not measured",
+  "attempts": [
+    {
+      "take": 22,
+      "attempt": 0,
+      "file": "T22.mp4",
+      "seconds": 6.58,
+      "lane": "narration",
+      "gates": [
+        {
+          "name": "frozen-at-start",
+          "value": 0.0,
+          "ok": true,
+          "hard": true,
+          "note": "0.0s",
+          "penalty": 0.0
+        },
+        {
+          "name": "frozen-share",
+          "value": 0.0,
+          "ok": true,
+          "hard": false,
+          "note": "0%",
+          "penalty": 0.0
+        },
+        {
+          "name": "foreign",
+          "value": 0,
+          "ok": true,
+          "hard": true,
+          "note": "0",
+          "penalty": 0.0
+        },
+        {
+          "name": "cut-landing",
+          "value": 0,
+          "ok": true,
+          "hard": true,
+          "note": "1/1 on pin",
+          "penalty": 0.0
+        },
+        {
+          "name": "drift",
+          "value": -0.399,
+          "ok": false,
+          "hard": false,
+          "note": "-0.40",
+          "penalty": 0.0
+        },
+        {
+          "name": "lip-sync",
+          "value": 0.0,
+          "ok": true,
+          "hard": true,
+          "note": "n/a narration",
+          "penalty": 0.0
+        },
+        {
+          "name": "identity",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured",
+          "penalty": 0.0
+        },
+        {
+          "name": "wardrobe",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured",
+          "penalty": 0.0
+        }
+      ],
+      "segments": [
+        {
+          "cell": "Q22_0.png",
+          "target": "Q22_0.png",
+          "start_s": 0.0,
+          "end_s": 6.542,
+          "lead_in_s": 0.0,
+          "still_share": 0.0,
+          "kind": "hold",
+          "start_sim": 1.0,
+          "end_sim": -0.399,
+          "landed": true,
+          "offset": 0
+        }
+      ],
+      "frozen_spans": [],
+      "energy_q": [
+        5.8,
+        6.3,
+        6.3,
+        10.8,
+        37.0,
+        20.0,
+        26.5,
+        14.2,
+        14.3,
+        10.4,
+        7.6,
+        11.7,
+        31.0,
+        48.8,
+        44.0,
+        56.2,
+        54.3,
+        35.9,
+        22.3,
+        19.4,
+        15.0,
+        24.0,
+        16.2,
+        11.3,
+        11.8,
+        12.4
+      ],
+      "foreign": [
+        {
+          "at": 0.0,
+          "own": "Q22_0.png",
+          "score": 1.0,
+          "other": "Q01_0E.png",
+          "other_score": 0.375,
+          "foreign": false
+        },
+        {
+          "at": 0.92,
+          "own": "Q22_0.png",
+          "score": 0.898,
+          "other": "Q23_0.png",
+          "other_score": 0.345,
+          "foreign": false
+        },
+        {
+          "at": 1.88,
+          "own": "Q22_0.png",
+          "score": 0.739,
+          "other": "Q10_0.png",
+          "other_score": 0.353,
+          "foreign": false
+        },
+        {
+          "at": 2.79,
+          "own": "Q22_0.png",
+          "score": 0.691,
+          "other": "Q10_0.png",
+          "other_score": 0.343,
+          "foreign": false
+        },
+        {
+          "at": 3.75,
+          "own": "Q22_0.png",
+          "score": 0.251,
+          "other": "Q10_0.png",
+          "other_score": 0.409,
+          "foreign": false
+        },
+        {
+          "at": 4.67,
+          "own": "Q22_0.png",
+          "score": -0.149,
+          "other": "Q20_0E.png",
+          "other_score": 0.455,
+          "foreign": false
+        },
+        {
+          "at": 5.62,
+          "own": "Q22_0.png",
+          "score": -0.32,
+          "other": "plate_lauriston_gate.png",
+          "other_score": 0.515,
+          "foreign": false
+        },
+        {
+          "at": 6.54,
+          "own": "Q22_0.png",
+          "score": -0.374,
+          "other": "plate_lauriston_gate.png",
+          "other_score": 0.535,
+          "foreign": false
+        }
+      ],
+      "score": 100.0,
+      "passed": true,
+      "verdict_line": "T22 a0 PASS 100/100 | frozen-at-start 0.0s | frozen-share 0% | foreign 0 | cut-landing 1/1 on pin | drift -0.40 adv | lip-sync n/a narration | identity not measured | wardrobe not measured"
+    }
+  ],
+  "budget_spent": false,
+  "foreign_samples": [
+    {
+      "at": 0.0,
+      "own": "Q22_0.png",
+      "score": 1.0,
+      "other": "Q01_0E.png",
+      "other_score": 0.375,
+      "foreign": false
+    },
+    {
+      "at": 0.92,
+      "own": "Q22_0.png",
+      "score": 0.898,
+      "other": "Q23_0.png",
+      "other_score": 0.345,
+      "foreign": false
+    },
+    {
+      "at": 1.88,
+      "own": "Q22_0.png",
+      "score": 0.739,
+      "other": "Q10_0.png",
+      "other_score": 0.353,
+      "foreign": false
+    },
+    {
+      "at": 2.79,
+      "own": "Q22_0.png",
+      "score": 0.691,
+      "other": "Q10_0.png",
+      "other_score": 0.343,
+      "foreign": false
+    },
+    {
+      "at": 3.75,
+      "own": "Q22_0.png",
+      "score": 0.251,
+      "other": "Q10_0.png",
+      "other_score": 0.409,
+      "foreign": false
+    },
+    {
+      "at": 4.67,
+      "own": "Q22_0.png",
+      "score": -0.149,
+      "other": "Q20_0E.png",
+      "other_score": 0.455,
+      "foreign": false
+    },
+    {
+      "at": 5.62,
+      "own": "Q22_0.png",
+      "score": -0.32,
+      "other": "plate_lauriston_gate.png",
+      "other_score": 0.515,
+      "foreign": false
+    },
+    {
+      "at": 6.54,
+      "own": "Q22_0.png",
+      "score": -0.374,
+      "other": "plate_lauriston_gate.png",
+      "other_score": 0.535,
+      "foreign": false
+    }
+  ],
+  "foreign": 0,
+  "off_beat": 0,
+  "audio": {
+    "lag_s": 0.0,
+    "lag_ok": true,
+    "lag_measured": false
+  },
+  "camera": {
+    "scale_curve": [
+      1.0,
+      1.02,
+      1.0,
+      1.04,
+      1.25,
+      0.81,
+      0.81
+    ],
+    "max_scale_per_s": 1.12,
+    "scene_events": [
+      3.25,
+      3.5,
+      3.75,
+      4.0,
+      4.25,
+      4.5
+    ],
+    "camera_ok": false
+  },
+  "strip": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260822113400_a-study-in-scarlet\\episodes\\ep04\\takes\\work\\dq\\take_T22.png"
+}

@@ -1,0 +1,219 @@
+{
+ "sha8": "40e93738",
+ "verdict": "flagged",
+ "note": "frozen-whole at T02: 66% static, run 0.79s HARD: the whole frame stands still; clones at T07: two faces read as one man (facenet 0.765); clones at T07: two faces read as one man (facenet 0.757); clones at T07: two faces read as one man (facenet 0.78); cut at T10: 33.0; jump at T10: 0.42 HARD: another picture; cut-vote at T10: jump+step HARD: an unplanned cut; frozen-whole at T16: 100% static, run 7.25s HARD: the whole frame stands still; content at T17: banned from this book: cliff, helicopter; cut at T18: 56.0; jump at T18: 0.17 HARD: another picture; leak at T18: 14 frames of plate before the panel; cut-vote at T18: jump+step+scene HARD: an unplanned cut; content at T18: banned from this book: cliff; frozen-whole at T19: 99% static, run 6.54s HARD: the whole frame stands still; content at T19: banned from this book: cliff -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4"
+ ],
+ "signed_at": "2026-10-07T18:19:42Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "frozen-whole",
+   "where": "T02",
+   "evidence": {
+    "value": 0.661,
+    "penalty": 39.7,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "66% static, run 0.79s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "clones",
+   "where": "T07",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.765,
+    "by": "facenet",
+    "frame": 0,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "two faces read as one man (facenet 0.765)"
+  },
+  {
+   "kind": "clones",
+   "where": "T07",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.757,
+    "by": "facenet",
+    "frame": 1,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "two faces read as one man (facenet 0.757)"
+  },
+  {
+   "kind": "clones",
+   "where": "T07",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.78,
+    "by": "facenet",
+    "frame": 2,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "two faces read as one man (facenet 0.78)"
+  },
+  {
+   "kind": "cut",
+   "where": "T10",
+   "evidence": {
+    "value": 33.0,
+    "penalty": 40.0,
+    "repeated": false,
+    "still": "storyboard/shot_10.png"
+   },
+   "severity": "normal",
+   "note": "33.0"
+  },
+  {
+   "kind": "jump",
+   "where": "T10",
+   "evidence": {
+    "value": 0.425,
+    "penalty": 40.0,
+    "repeated": false,
+    "still": "storyboard/shot_10.png"
+   },
+   "severity": "normal",
+   "note": "0.42 HARD: another picture"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T10",
+   "evidence": {
+    "value": 2,
+    "penalty": 40.0,
+    "repeated": false,
+    "still": "storyboard/shot_10.png"
+   },
+   "severity": "normal",
+   "note": "jump+step HARD: an unplanned cut"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T16",
+   "evidence": {
+    "value": 1.0,
+    "penalty": 60.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "100% static, run 7.25s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "content",
+   "where": "T17",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: cliff, helicopter"
+  },
+  {
+   "kind": "cut",
+   "where": "T18",
+   "evidence": {
+    "value": 56.0,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "56.0"
+  },
+  {
+   "kind": "jump",
+   "where": "T18",
+   "evidence": {
+    "value": 0.166,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "0.17 HARD: another picture"
+  },
+  {
+   "kind": "leak",
+   "where": "T18",
+   "evidence": {
+    "value": 14,
+    "penalty": 40.0,
+    "repeated": false,
+    "frames": 14,
+    "covers": true
+   },
+   "severity": "high",
+   "note": "14 frames of plate before the panel"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T18",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  },
+  {
+   "kind": "content",
+   "where": "T18",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: cliff"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T19",
+   "evidence": {
+    "value": 0.994,
+    "penalty": 59.6,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "99% static, run 6.54s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "content",
+   "where": "T19",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: cliff"
+  }
+ ],
+ "terminal": "still"
+}

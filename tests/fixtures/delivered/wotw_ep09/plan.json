@@ -1,0 +1,792 @@
+{
+ "number": 9,
+ "title": "The Fighting Begins",
+ "question": "What did he think a fight with them would look like?",
+ "aspect": "1:1",
+ "where": "Maybury, Surrey, 1894",
+ "light": "low raking sun and black shadows",
+ "look": "Angular stylised 3D animation, brush-stroke texture",
+ "protagonist": "unnamed_first_person_narrator",
+ "answer": "shot 21",
+ "beds": [
+  {
+   "from_shot": 0,
+   "tone": "plain"
+  },
+  {
+   "from_shot": 4,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 9,
+   "tone": "plain"
+  },
+  {
+   "from_shot": 12,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 13,
+   "tone": "grave"
+  },
+  {
+   "from_shot": 19,
+   "tone": "plain"
+  },
+  {
+   "from_shot": 21,
+   "tone": "grave"
+  }
+ ],
+ "setups": {
+  "garden": {
+   "described": "the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it, a low paling fence at the far side with a side gate in it, standard roses and a bed of stocks against the brick, a dark cedar at one corner and the open heath rising beyond the fence to a flat horizon of pines; the light is high flat hazy sunlight the morning sun from the left over the pines, so the lawn reads bleached green, the brick reads pale warm red and the shadows under the cedar are short and soft",
+   "cast": [
+    "unnamed_milkman",
+    "unnamed_neighbour"
+   ],
+   "landmark": "the side gate in the low paling fence",
+   "landmark_at": "far_end",
+   "landmark_size": "is a fifth of the height of the frame",
+   "route": "from the gravel path across the lawn toward the side gate in the fence",
+   "geometry": "The gravel path runs from the BOTTOM CENTRE away to the white paling gate at the CENTRE LEFT, with mown lawn and flower borders on both sides of it in the BOTTOM half. The brick wall of the house fills the RIGHT third from the BOTTOM to the TOP with its sash windows in it, and a tall dark cedar stands against it at the CENTRE RIGHT. The low white paling runs across the CENTRE from the LEFT edge to the CENTRE RIGHT, the open heather of the common lies flat beyond it, and a line of pines and a pale hazy sky fill the TOP third at the LEFT.",
+   "crowd": "",
+   "outdoors": true,
+   "props": [],
+   "location": "narrators_garden",
+   "view": "wide_morning"
+  },
+  "bridge": {
+   "described": "the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road, the pale dusty road running through it, the canal running flat and green alongside below a towpath, hedges and elms on the far bank and the open common beyond; the light is hard white midday sun sun from the far end of the arch, so the road reads bleached and chalky, the brick reads dark red and the water reads flat green",
+   "cast": [
+    "snippy"
+   ],
+   "landmark": "the bright opening of the arch with the road going away through it",
+   "landmark_at": "far_end",
+   "landmark_size": "is a third of the height of the frame",
+   "route": "from the near mouth of the arch along the road through it toward the daylight beyond",
+   "geometry": "The dark brick of the bridge fills the LEFT half and the TOP third of the frame, its arch springing from a pier at the LEFT third and coming down again at the RIGHT edge. The bright opening of the arch shows at the CENTRE RIGHT with hard white daylight, hedges and elms in it, and the green canal water lying flat beyond. The pale dusty road runs from the BOTTOM edge up through the opening, and grass and weeds edge it at the BOTTOM LEFT and the BOTTOM RIGHT.",
+   "crowd": "sappers in small round caps and dirty brick-red jackets unbuttoned over blue shirts, sitting on the parapet, standing in the shade of the arch, one squatting over the dust",
+   "outdoors": true,
+   "props": [],
+   "location": "maybury_canal_bridge",
+   "view": "wide_arch_day"
+  },
+  "pit": {
+   "described": "the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater, a single continuous streamer of grey smoke standing straight up out of it in the still air, knee-deep heather and dark furze running away flat to a horizon of low pines, and a shallow ditch with spoil thrown up along the near side; the light is a hard high sun from the right, so the sand ring reads raw pale yellow, the heather reads dusty olive and every shadow lies short to the LEFT of the thing that throws it",
+   "cast": [
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the raw ring of flung yellow sand round the crater",
+   "landmark_at": "far_end",
+   "landmark_size": "is a tenth of the height of the frame",
+   "route": "from the heather along the shallow ditch out toward the ring of the pit",
+   "geometry": "Dusty olive heather fills the BOTTOM third of the frame from the LEFT edge to the RIGHT edge, with the shallow ditch and its thrown-up spoil running across the BOTTOM LEFT. The raw ring of flung yellow sand runs across the CENTRE, a tenth of the height of the frame, and the single grey streamer of smoke stands straight up out of it at the CENTRE into the TOP third. Low pines close the horizon behind the ring and a pale hot sky fills the TOP third.",
+   "crowd": "",
+   "outdoors": true,
+   "props": [],
+   "location": "horsell_common",
+   "view": "wide_pit_day"
+  },
+  "lawn": {
+   "described": "the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a white gate on the near lawn, and broken red chimney brick scattered fresh on the grass; the light is the fire itself, low and raking from beyond the wall, so the lawn reads scorched orange, the summerhouse and the gate read hot red on their fire side and black on the other",
+   "cast": [
+    "unnamed_first_person_narrator",
+    "narrators_wife",
+    "unnamed_hussar"
+   ],
+   "landmark": "the burning church tower standing above the garden wall",
+   "landmark_at": "far_end",
+   "landmark_size": "is a quarter of the height of the frame",
+   "route": "from the summerhouse across the scorched lawn to the white gate in the wall",
+   "geometry": "The scorched lawn fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with broken red chimney brick scattered on it at the BOTTOM CENTRE and the BOTTOM RIGHT. The summerhouse stands at the LEFT third, the low brick garden wall runs across the CENTRE from the LEFT edge to the RIGHT edge with the white gate in it at the CENTRE RIGHT, the broken roof line and the burning church tower stand above the wall at the CENTRE, and thick black smoke fills the TOP third from the CENTRE to the RIGHT edge.",
+   "crowd": "",
+   "outdoors": true,
+   "props": [],
+   "location": "maybury_hill",
+   "view": "wide_lawn_burning"
+  },
+  "inn": {
+   "described": "the bar of a small country public house on a summer evening in 1894: a scrubbed wooden counter along one side with beer engines and their brass handles standing on it, shelves of bottles and pewter behind, a settle and a plain table against the far wall, a bare board floor, and a small sash window with the evening outside it; the light is a hanging oil lamp over the counter and the window, so the counter reads warm yellow, the brass reads bright and the corners are brown and dark",
+   "cast": [
+    "unnamed_landlord",
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the brass beer-engine handles standing on the counter",
+   "landmark_at": "far_end",
+   "landmark_size": "is a fifth of the height of the frame",
+   "route": "from the door along the bare boards to the counter and its brass handles",
+   "geometry": "The scrubbed counter runs across the BOTTOM of the frame from the LEFT edge to the CENTRE RIGHT with the brass beer-engine handles standing up from it at the CENTRE. Shelves of bottles and pewter fill the LEFT third behind it from the BOTTOM to the TOP, the hanging oil lamp burns at the TOP CENTRE, and the small sash window with the evening in it shows at the RIGHT third.",
+   "crowd": "",
+   "outdoors": false,
+   "props": [],
+   "location": "spotted_dog",
+   "view": "wide_bar"
+  }
+ },
+ "shots": [
+  {
+   "index": 0,
+   "section": "hook",
+   "setup": "garden",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.1,
+   "frame": "Wide across a bleached lawn behind a brick villa on a hot hazy summer morning, the gravel path running along it, a low paling fence with a side gate at the far side, a dark cedar at one corner and the open heath and its pines lying flat and empty beyond the fence.",
+   "motion": "The camera rises from the lawn with small amplitude until the fence, the gate and the flat heath beyond them all stand inside the picture, travelling one short stride; a lark goes on rising over the heath; the leaves of the cedar go on stirring a little in the hot air.",
+   "camera": "on the lawn at a standing man's eye looking toward the fence, a 35mm lens. The light is high flat hazy sun from the TOP; the lawn reads bleached, the brick reads pale red and the shadows are short",
+   "at_rest": "The gravel path runs from the BOTTOM CENTRE away to the white paling gate at the CENTRE LEFT, with mown lawn and flower borders on both sides of it in the BOTTOM half. The brick wall of the house fills the RIGHT third from the BOTTOM to the TOP with its sash windows in it, and a tall dark cedar stands against it at the CENTRE RIGHT. The low white paling runs across the CENTRE from the LEFT edge to the CENTRE RIGHT, the open heather of the common lies flat beyond it, and a line of pines and a pale hazy sky fill the TOP third at the LEFT.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "Saturday lives in my memory as a day of suspense.",
+   "cuts": []
+  },
+  {
+   "index": 1,
+   "section": "setup",
+   "setup": "garden",
+   "size": "medium",
+   "faces": [
+    "unnamed_milkman"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.4,
+   "frame": "Medium on the milkman (thick chestnut walrus moustache, brown felt pork-pie hat with a narrow brim, long white apron to the shin) standing at the side gate in the low paling fence on a hot hazy morning with a brass milk can hooked on one finger, the gate held half open against his hip and the flat empty heath running away behind him.",
+   "motion": "The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture, travelling one short stride; he goes on speaking and lifts the brass can a little as he does; the gate goes on resting against his hip.",
+   "camera": "at the fence level with his chest, four paces from him, a 50mm lens. The hazy sun comes from the TOP and slightly BEHIND him; his canvas coat reads dull brown and the heath reads pale",
+   "at_rest": "The milkman stands at the CENTRE LEFT with the white paling gate held half open against his hip at the LEFT edge. The flat heather of the common and a line of pines lie behind him across the TOP third under a pale hazy sky. His head is a quarter of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "The milkman came as usual, and had the night's news at the gate.",
+   "cuts": []
+  },
+  {
+   "index": 2,
+   "section": "setup",
+   "setup": "garden",
+   "size": "medium",
+   "faces": [
+    "unnamed_neighbour"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.6,
+   "frame": "Medium on the neighbour (short pointed grey goatee, wide-brimmed straw gardening hat, tan canvas gardening apron) leaning over the low paling fence with a handful of strawberries held out across it, his ash stick hooked over the rail beside him and the hazy heath flat behind him.",
+   "motion": "The camera tracks sideways to the right along the fence, a truck with small amplitude, until the side gate already in the picture is at the centre, travelling one short stride; he goes on holding the strawberries out across the rail and laughs as he speaks; his free hand goes on resting on the top of the paling.",
+   "camera": "at the fence level with his chest, four paces from him, a 50mm lens. The hazy sun comes from the TOP; his striped blazer reads pale blue and white and the heath behind reads bleached",
+   "at_rest": "The neighbour leans over the white paling at the CENTRE, the rail running across the frame at his waist from the LEFT edge to the RIGHT edge. The flat heather and the pines lie behind him across the TOP third. His head is a quarter of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "My neighbour was of opinion the troops would destroy them during the day.",
+   "cuts": []
+  },
+  {
+   "index": 3,
+   "section": "setup",
+   "setup": "garden",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.8,
+   "frame": "Insert past the paling fence at a flat haze of grey smoke standing over a line of pine woods far off across the heath on a hot hazy morning, the heather running away bleached and empty between, and the furze below the smoke standing green and unburnt.",
+   "motion": "The camera tilts up from the heather to the haze of smoke already in the picture until the smoke stands in the middle of the frame, travelling a forearm; the haze goes on drifting sideways above the pines by a thumb’s width; the heather goes on stirring in the hot air.",
+   "camera": "at the fence looking out across the heath, an 85mm lens. The hazy sun comes from the TOP; the smoke reads pale grey and the pines read dusty dark green",
+   "at_rest": "A pale hazy sky fills the TOP two thirds of the frame from the LEFT edge to the RIGHT edge, with the flat grey haze of smoke lying across the CENTRE above a dark line of pines. Bleached heather runs across the BOTTOM third.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "Another of those blessed things had fallen by the Byfleet golf links.",
+   "cuts": []
+  },
+  {
+   "index": 4,
+   "section": "setup",
+   "setup": "bridge",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.1,
+   "frame": "Wide on the road under a brick railway bridge at midday, the soot-blackened arch overhead, sappers in small round caps and dirty brick-red jackets unbuttoned over blue shirts sitting along the parapet and standing in the shade of it, and the pale dusty road running away bright through the opening beyond them.",
+   "motion": "The camera pushes in along the road toward the bright opening of the arch with small amplitude, travelling one short stride; the men go on talking among themselves in the shade; one of them goes on turning a mess tin over in his hands.",
+   "camera": "in the road at a standing man's eye, a 35mm lens. Hard white daylight stands in the opening at the CENTRE and the shade under the arch is cool; the road reads chalky and the brick reads dark red",
+   "at_rest": "The sappers sit along the brick parapet across the CENTRE and stand in the shade of the arch at the LEFT third. The bright opening of the arch shows at the CENTRE RIGHT with the pale road going away through it.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "Under the railway bridge I found a group of sappers.",
+   "cuts": []
+  },
+  {
+   "index": 5,
+   "section": "friction",
+   "setup": "bridge",
+   "size": "medium_close",
+   "faces": [
+    "snippy"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.35,
+   "frame": "Medium close on Snippy the sapper (sandy mouse-brown hair cropped short, clean-shaven, small round dark blue pillbox cap, dirty brick-red serge jacket) sitting on the parapet in the shade of the arch with his forearms on his knees and his short entrenching spade leaning against the brick beside him, the dark brick of the arch close behind him.",
+   "motion": "The camera pushes in toward his face with small amplitude until his head fills the middle of the picture, travelling a forearm; he goes on speaking and opens one hand flat as he does; he goes on knocking the back of that hand twice against his own knee.",
+   "camera": "in the shade level with his eyes, three paces from him, an 85mm lens. The daylight comes out of the bright arch opening at the LEFT and rakes across him; his red jacket reads dull brick and the brick behind him reads dark",
+   "at_rest": "The brick parapet runs across the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The soot-blackened brick of the arch fills the LEFT half from the BOTTOM to the TOP behind it, and the bright opening of the arch shows at the CENTRE RIGHT with hard white daylight and green hedges standing in it. His head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "Snippy, who wanted a trench, and had thought about it.",
+   "cuts": []
+  },
+  {
+   "index": 6,
+   "section": "friction",
+   "setup": "bridge",
+   "size": "medium",
+   "faces": [],
+   "extras": 1,
+   "view": "",
+   "path": 0.5,
+   "frame": "Medium along the pale dusty road beyond the arch at a single soldier standing sentinel in the middle of it in the hard midday sun, his rifle grounded beside his boot, the hedges and elms running away on both sides and the empty road going on past him.",
+   "motion": "The camera pans to the right along the road until the sentinel already in the picture is at the centre, travelling one short stride; he goes on standing where he is and shifts his weight once; the dust goes on lifting off the road behind him.",
+   "camera": "in the road level with his chest, eight paces from him, an 85mm lens. Hard white sun comes from the CENTRE beyond the arch; the road reads bleached and his shadow lies short and black under him",
+   "at_rest": "The sentinel stands in the middle of the pale road at the CENTRE, small against the hedges and elms that close both sides of it. The road runs away behind him into the TOP third.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "No one was allowed over the canal, and a sentinel stood in the road.",
+   "cuts": []
+  },
+  {
+   "index": 7,
+   "section": "friction",
+   "setup": "bridge",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.7,
+   "frame": "Medium down at a soldier squatting on his heels in the dust of the road in the shade of the arch, scratching a long straight line and then a second beside it with the point of a stick, boots and puttees of other men standing round the edge of the drawing.",
+   "motion": "The camera tilts down from the standing men to the drawing in the dust already in the picture until the scratched lines are in the middle of the frame, travelling a forearm; the stick goes on drawing the second line; the dust goes on lifting where it drags.",
+   "camera": "over his shoulder looking down at the road, a 50mm lens. The daylight comes from the CENTRE beyond the arch; the dust reads pale and the scratched lines read dark",
+   "at_rest": "The pale dust of the road fills the whole frame from the LEFT edge to the RIGHT edge. The two scratched lines run across the CENTRE, the point of the stick is at the CENTRE RIGHT, and boots and puttees stand round the edge at the TOP LEFT and the TOP RIGHT.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "You always want trenches; you ought to have been born a rabbit.",
+   "cuts": []
+  },
+  {
+   "index": 8,
+   "section": "reaction",
+   "setup": "bridge",
+   "size": "close",
+   "faces": [
+    "snippy"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.85,
+   "frame": "Close on the face of Snippy the sapper (sandy mouse-brown hair cropped short, clean-shaven, small round dark blue pillbox cap, dirty brick-red serge jacket) in the shade of the arch, his chin lifted and his cap pushed back off his forehead, the dark brick soft and out of focus behind him.",
+   "motion": "The camera pushes in on his face with small amplitude until it fills the middle of the picture, travelling a forearm; he goes on speaking with his chin up; his head goes on nodding once toward the common as he says it.",
+   "camera": "in the shade level with his eyes, two paces from him, an 85mm lens. The daylight out of the bright arch opening at the LEFT falls on his face, and the brick edge of the arch at the CENTRE throws its own shadow across the right of it",
+   "at_rest": "The brick parapet runs across the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The soot-blackened brick of the arch fills the LEFT half from the BOTTOM to the TOP behind it, and the bright opening of the arch shows at the CENTRE RIGHT with hard white daylight and green hedges standing in it. His head is half the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "Octopuses, said he; fighters of fish it is this time.",
+   "cuts": []
+  },
+  {
+   "index": 9,
+   "section": "setup",
+   "setup": "pit",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.15,
+   "frame": "Wide across dusty olive heather at the raw ring of flung yellow sand round the crater on a hot bright afternoon, one continuous grey streamer of smoke standing straight up out of it in the still air, the heath running away flat to low pines, and the raw sand lying still and bare inside its ring.",
+   "motion": "The camera rises from the heather with small amplitude until the whole ring of sand and the standing streamer of smoke are inside the picture, travelling one short stride; the streamer goes on rising straight up out of the pit; the heather goes on stirring in the hot air.",
+   "camera": "on the heath at a standing man's eye, a 35mm lens. A hard high sun stands at the RIGHT; the sand ring reads raw pale yellow, the heather reads dusty olive and every shadow lies short",
+   "at_rest": "Dusty olive heather fills the BOTTOM third of the frame from the LEFT edge to the RIGHT edge, with the shallow ditch and its thrown-up spoil running across the BOTTOM LEFT. The raw ring of flung yellow sand runs across the CENTRE, a tenth of the height of the frame, and the single grey streamer of smoke stands straight up out of it at the CENTRE into the TOP third. Low pines close the horizon behind the ring and a pale hot sky fills the TOP third.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "The Martians did not show an inch of themselves all day.",
+   "cuts": []
+  },
+  {
+   "index": 10,
+   "section": "friction",
+   "setup": "pit",
+   "size": "medium",
+   "faces": [],
+   "extras": 1,
+   "view": "",
+   "path": 0.4,
+   "frame": "Medium along a shallow ditch in the heather at a soldier lying flat in it on his elbows with a long pole in both hands and a white flag on the end of it held up above the spoil, the raw sand ring of the pit far off standing quiet and unanswering far beyond him.",
+   "motion": "The camera tracks sideways to the right along the ditch, a truck with small amplitude, until the ring of sand already in the picture is at the centre, travelling one short stride; he goes on swinging the pole from side to side above the spoil through a hand’s breadth; the flag goes on turning over on itself as it swings.",
+   "camera": "at the lip of the ditch level with the spoil, five paces from him, a 50mm lens. A hard high sun stands at the RIGHT; the flag reads bright white and the heather reads dusty olive",
+   "at_rest": "The soldier lies along the ditch across the BOTTOM third from the LEFT third to the CENTRE, the pole rising from his hands to the white flag at the CENTRE RIGHT. The raw sand ring of the pit stands far off in the TOP third at the CENTRE.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "It was done by a man in a ditch with a flag on a long pole.",
+   "cuts": []
+  },
+  {
+   "index": 11,
+   "section": "reaction",
+   "setup": "pit",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.65,
+   "frame": "Medium on the narrator (neat close-trimmed dark brown moustache, mid-grey herringbone tweed lounge suit) standing bareheaded in the heather in the hard afternoon sun with his straw boater held down in one hand and his hair flat with heat, looking out across the heath toward the raw ring of sand with his chin up, the flat common running away behind him.",
+   "motion": "The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture, travelling one short stride; he goes on looking out across the heath and turns the boater once right over in his hand; his shoulders go on standing square.",
+   "camera": "in the heather level with his chest, four paces from him, a 50mm lens. A hard high sun stands at the RIGHT; his grey tweed reads pale and bleached and the heather behind him reads olive",
+   "at_rest": "The narrator stands at the CENTRE LEFT in the heather with his boater in his hand. The raw ring of sand and its streamer of smoke stand far off behind him at the CENTRE RIGHT, and a pale hot sky fills the TOP third. His head is a quarter of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "My imagination became belligerent and defeated them a dozen ways.",
+   "cuts": []
+  },
+  {
+   "index": 12,
+   "section": "setup",
+   "setup": "garden",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator",
+    "narrators_wife"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.9,
+   "frame": "Medium on the narrator (neat close-trimmed dark brown moustache, mid-grey herringbone tweed lounge suit, straw boater with a black band) and the narrator's wife (thick chestnut-auburn hair, sage-green linen walking costume, small sage-green felt toque with a cream ostrich tip) sitting facing each other at a small table set out on their own lawn at six in the evening with a tea tray between them, both of them leaning in and talking, and the flower borders and the white paling gate behind them.",
+   "motion": "The camera tracks sideways to the left along the lawn, a truck with small amplitude, until both of them are in the middle of the picture, travelling one short stride; he goes on talking with one hand turned up on the table; she goes on holding her cup in both hands and nods once.",
+   "camera": "on the lawn level with their shoulders, four paces from them, a 50mm lens. The low evening sun comes from the LEFT across the lawn; the tea things read white and the borders behind them read dark",
+   "at_rest": "The narrator sits at the LEFT third and his wife at the RIGHT third, facing each other across a small table set at the CENTRE with a tea tray on it. The flower borders and the white paling gate lie behind them across the TOP third. Their heads are a quarter of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "We sat at tea in the summerhouse talking about the battle.",
+   "cuts": []
+  },
+  {
+   "index": 13,
+   "section": "spike",
+   "setup": "lawn",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.35,
+   "frame": "Wide from the lawn across the paling at the tops of the trees about the Oriental College below and beyond it bursting into smoky red flame, the broken roof line of the college standing behind them, and black smoke going up off the whole of it into a sky already going dark.",
+   "motion": "The camera rises from the lawn with small amplitude until the burning treetops and the broken roof line behind them are both inside the picture, travelling one short stride; the flame goes on standing up out of the treetops; the smoke goes on rolling up off them into the sky.",
+   "camera": "on the lawn at a standing man's eye looking over the paling, a 35mm lens. The light is low red firelight from the CENTRE LEFT and below; the lawn reads scorched gold and the smoke reads black",
+   "at_rest": "The scorched lawn fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with broken red chimney brick scattered on it at the BOTTOM CENTRE and the BOTTOM RIGHT. The summerhouse stands at the LEFT third, the low brick garden wall runs across the CENTRE from the LEFT edge to the RIGHT edge with the white gate in it at the CENTRE RIGHT, the broken roof line and the burning church tower stand above the wall at the CENTRE, and thick black smoke fills the TOP third from the CENTRE to the RIGHT edge.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "The tops of the trees about the Oriental College burst into flame.",
+   "cuts": []
+  },
+  {
+   "index": 14,
+   "section": "spike",
+   "setup": "lawn",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.45,
+   "frame": "Medium across the paling at the tower of a little church beside the burning college, its masonry going out of line and sliding down into its own ruin, red flame standing up behind it and a column of dust lifting where it falls.",
+   "motion": "The camera pushes in on the falling masonry at the centre of the picture, travelling a forearm; the tower goes on sliding down into itself; the dust goes on lifting up out of it.",
+   "camera": "on the lawn looking over the paling, an 85mm lens. The light is red firelight from behind the tower at the CENTRE, so the tower reads black against it and the dust reads hot red",
+   "at_rest": "The burning church tower stands up the whole height of the frame at the CENTRE, its masonry going out of line at the CENTRE LEFT. Red flame fills the LEFT third and the RIGHT third behind it and dust lifts across the BOTTOM third.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "The tower of the little church beside it slid down into ruin.",
+   "cuts": []
+  },
+  {
+   "index": 15,
+   "section": "spike",
+   "setup": "lawn",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.55,
+   "frame": "Insert down at a flower bed under a study window with a heap of broken red chimney fragments lying fresh on the turned earth among the crushed stocks, more pieces still lying along the roof tiles above, and red firelight coming across all of it from below the lawn.",
+   "motion": "The camera pushes in on the heap of red fragments at the centre of the picture, travelling a forearm; dust goes on sifting down onto the earth; a last fragment goes on rocking where it fell.",
+   "camera": "at the flower bed looking down, a 50mm lens. The light is low red firelight from the CENTRE LEFT; the broken brick reads hot red and the turned earth reads dark",
+   "at_rest": "Turned earth and crushed stocks fill the whole frame from the LEFT edge to the RIGHT edge. The heap of broken red chimney brick lies at the CENTRE, more pieces at the BOTTOM RIGHT, and the sill of the study window closes the TOP third.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "A piece of our chimney came down on the flower bed.",
+   "cuts": []
+  },
+  {
+   "index": 16,
+   "section": "turn",
+   "setup": "lawn",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator",
+    "narrators_wife"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.6,
+   "frame": "Medium close on the narrator (neat close-trimmed dark brown moustache, mid-grey herringbone tweed lounge suit, straw boater with a black band) and the narrator's wife (thick chestnut-auburn hair, sage-green linen walking costume, small sage-green felt toque with a cream ostrich tip) together on their own lawn in the red evening light, his hand closed hard round her upper arm and her shoulder already turning under it, both their faces in the picture and the smoke black behind their heads.",
+   "motion": "The camera pushes in toward the two of them with small amplitude until both faces fill the middle of the picture, travelling a forearm; the narrator takes his wife by the arm and draws her round toward the road as he speaks; she goes on turning her shoulder under his hand and brings her foot round after it.",
+   "camera": "on the lawn level with their eyes, three paces from them, an 85mm lens. The red firelight comes from the CENTRE LEFT and rakes across both their faces; the smoke behind them reads black",
+   "at_rest": "The two heads fill the CENTRE of the frame side by side, his at the CENTRE LEFT and hers at the CENTRE RIGHT, their shoulders across the BOTTOM third. Black smoke fills the TOP third and the RIGHT edge behind them, with red firelight standing along the LEFT edge. Their heads are a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 1.5,
+   "coda_s": 2.0,
+   "turn": "a man who has been winning the war in his head -> a man getting his wife out of the house",
+   "why": "I gripped my wife's arm and ran her out into the road.",
+   "cuts": []
+  },
+  {
+   "index": 17,
+   "section": "reaction",
+   "setup": "lawn",
+   "size": "medium_close",
+   "faces": [
+    "narrators_wife"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.7,
+   "frame": "Medium close on the narrator's wife (thick chestnut-auburn hair, sage-green linen walking costume, small sage-green felt toque with a cream ostrich tip) standing on the gravel drive in the red evening light with her apron still on and her hands held together in front of her, her face turned downhill and her pompadour loosened at the temples, the white gate behind her.",
+   "motion": "The camera pushes in toward her with small amplitude until her head and shoulders fill the middle of the picture, travelling a forearm; she goes on looking downhill and her hands go on gripping each other; she goes on turning her head further downhill as she speaks.",
+   "camera": "on the drive level with her eyes, three paces from her, an 85mm lens. The red firelight comes from the CENTRE LEFT; her lilac-grey dress reads warm and the gate behind her reads pale",
+   "at_rest": "Her head and shoulders fill the CENTRE of the frame. The white gate shows behind her at the RIGHT third, the scorched lawn runs across the BOTTOM third, and black smoke fills the TOP third from the CENTRE to the RIGHT edge. Her head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "But where are we to go? said my wife in terror.",
+   "cuts": []
+  },
+  {
+   "index": 18,
+   "section": "friction",
+   "setup": "lawn",
+   "size": "wide",
+   "faces": [],
+   "extras": 8,
+   "view": "",
+   "path": 0.8,
+   "frame": "Wide from the lawn at a bevy of hussars in dark blue passing along the road beyond the garden wall, six of them riding and two already dismounted and running from house to house, and the sun standing blood red in the smoke above the trees.",
+   "motion": "The camera pushes in toward the riders passing along beyond the garden wall, travelling one short stride; the riders go on cantering along beyond the wall; the two on foot go on running beside them.",
+   "camera": "at the gate looking downhill, a 35mm lens. The sun stands blood red in the smoke at the TOP CENTRE and throws a lurid light on everything; the road reads red-brown and the smoke reads black",
+   "at_rest": "The scorched lawn fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with broken red chimney brick scattered on it at the BOTTOM CENTRE and the BOTTOM RIGHT. The summerhouse stands at the LEFT third, the low brick garden wall runs across the CENTRE from the LEFT edge to the RIGHT edge with the white gate in it at the CENTRE RIGHT, the broken roof line and the burning church tower stand above the wall at the CENTRE, and thick black smoke fills the TOP third from the CENTRE to the RIGHT edge.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.9,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "The sun shone blood red through the smoke, on everything.",
+   "cuts": []
+  },
+  {
+   "index": 19,
+   "section": "setup",
+   "setup": "inn",
+   "size": "medium",
+   "faces": [
+    "unnamed_landlord"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.3,
+   "frame": "Medium on the landlord of the Spotted Dog (heavy grey-brown mutton-chop whiskers joined to a full moustache, brown hair flecked with grey, thinning on the crown, long tan leather cellarman's apron) behind the scrubbed counter of his bar under a hanging oil lamp with both hands spread flat on the wood, the brass beer-engine handles standing up beside him and the shelves of bottles and pewter behind, his weight settled back on his heels.",
+   "motion": "The camera pushes in across the counter toward him with small amplitude until his head and shoulders fill the middle of the picture, travelling one short stride; he goes on speaking and lifts one hand off the wood to turn it palm up; his moustache goes on moving as he talks.",
+   "camera": "at the counter level with his chest, four paces from him, a 50mm lens. The oil lamp hangs at the TOP CENTRE and lights the counter and his face from above; the corners of the room read brown and dark",
+   "at_rest": "The landlord stands behind the counter at the CENTRE with both hands flat on the wood, the brass beer-engine handles at the LEFT third beside him. Shelves of bottles and pewter fill the wall behind him. His head is a quarter of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "I must have a pound, said the landlord, and I've no one to drive it.",
+   "cuts": []
+  },
+  {
+   "index": 20,
+   "section": "friction",
+   "setup": "inn",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 1,
+   "view": "",
+   "path": 0.5,
+   "frame": "Medium on the narrator (neat close-trimmed dark brown moustache, mid-grey herringbone tweed lounge suit, straw boater with a black band) standing at the counter in the lamplight speaking past the shoulder of another man who stands with his back to the camera, the bottles on the shelves behind them, the narrator's two empty hands resting flat on the counter.",
+   "motion": "The camera tracks sideways to the right along the counter, a truck with small amplitude, until the brass handles already in the picture are at the centre, travelling one short stride; he goes on speaking across the other man's shoulder; the other man nods once as he listens.",
+   "camera": "at the counter level with his chest, four paces from him, a 50mm lens. The oil lamp hangs at the TOP CENTRE; his grey tweed reads warm under it and the man in front of him reads dark",
+   "at_rest": "The narrator stands at the CENTRE RIGHT beside the counter, the other man's shoulder dark and near at the LEFT third. The bottles on the shelves fill the wall behind them. His head is a quarter of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "I'll give you two, said I, over the stranger's shoulder.",
+   "cuts": []
+  },
+  {
+   "index": 21,
+   "section": "answer",
+   "setup": "lawn",
+   "size": "wide",
+   "faces": [],
+   "extras": 2,
+   "view": "",
+   "path": 0.9,
+   "frame": "Wide from the road at a dog cart standing at a white gate in the red evening with a horse in the shafts and two women already up in it, a bundle tied in a tablecloth and a corded box on the tail of it, and the whole crest of the hill behind the house going up in thick streamers of black smoke shot through with threads of red fire.",
+   "motion": "The camera rises from the road with small amplitude until the cart at the gate and the streaming smoke over the crest behind it are both inside the picture, travelling one short stride; the horse goes on shifting in the shafts; the streamers of smoke go on driving up off the crest.",
+   "camera": "in the road at a standing man's eye, a 35mm lens. The light is red firelight from the CENTRE and a red sun in the smoke above; the cart reads black against it and the smoke reads black",
+   "at_rest": "The scorched lawn fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with broken red chimney brick scattered on it at the BOTTOM CENTRE and the BOTTOM RIGHT. The summerhouse stands at the LEFT third, the low brick garden wall runs across the CENTRE from the LEFT edge to the RIGHT edge with the white gate in it at the CENTRE RIGHT, the broken roof line and the burning church tower stand above the wall at the CENTRE, and thick black smoke fills the TOP third from the CENTRE to the RIGHT edge.",
+   "end": "",
+   "changed": "",
+   "beat_s": 1.2,
+   "coda_s": 1.2,
+   "turn": "his own hill as a place he lives -> his own hill as the thing he is running from",
+   "why": "The beeches below the house were burning and the palings glowed red.",
+   "cuts": []
+  },
+  {
+   "index": 22,
+   "section": "button",
+   "setup": "lawn",
+   "size": "close",
+   "faces": [
+    "unnamed_hussar"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.95,
+   "frame": "Close on the dismounted hussar (brown curly hair cropped close to the skull, clean-shaven boyish jaw, dark rifle-green serge hussar jacket with yellow cord frogging, right sleeve torn and blackened with soot) stopped in the road in the red evening with his head turned back over his shoulder and his mouth open, shouting, the soot black across one cheek, and a whirl of black smoke already driving across the road behind him.",
+   "motion": "The camera pans to the right along the road until his face already in the picture is at the centre, travelling a forearm; he goes on shouting back over his shoulder as he moves off; the whirl of black smoke goes on driving across behind him and takes him into it.",
+   "camera": "in the road level with his eyes, three paces from him, an 85mm lens. The red firelight comes from the CENTRE LEFT and stands on one side of his face; the smoke behind him reads black",
+   "at_rest": "His head fills the CENTRE of the frame from the TOP third to the BOTTOM third, turned back over his shoulder at the CENTRE LEFT. A whirl of black smoke fills the RIGHT third and the TOP edge behind him, and red firelight stands along the LEFT edge. His head is half the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 1.0,
+   "coda_s": 1.5,
+   "turn": "",
+   "why": "He bawled something about a thing like a dish cover, and ran on.",
+   "cuts": []
+  }
+ ],
+ "lines": [
+  {
+   "index": 0,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Saturday I remember as a day of suspense, hot and close and still.",
+   "shot": 0
+  },
+  {
+   "index": 1,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The milkman said they were surrounded in the night, and that guns were coming up.",
+   "shot": 1
+  },
+  {
+   "index": 2,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A pity they are so unapproachable, said my neighbour; we might learn something.",
+   "shot": 2
+  },
+  {
+   "index": 3,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A second had come down by the golf links, and the woods still burned.",
+   "shot": 3
+  },
+  {
+   "index": 4,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "After breakfast I walked down, and got no further than the bridge.",
+   "shot": 4
+  },
+  {
+   "index": 5,
+   "kind": "dialogue",
+   "speaker": "snippy",
+   "text": "What's cover against this heat? The sticks would cook you.",
+   "shot": 5
+  },
+  {
+   "index": 6,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Nobody was allowed over the canal. None of these men had seen a Martian.",
+   "shot": 6
+  },
+  {
+   "index": 7,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I told them what I had seen, and they fell to arguing.",
+   "shot": 7
+  },
+  {
+   "index": 8,
+   "kind": "dialogue",
+   "speaker": "snippy",
+   "text": "Octopuses. Talk about fishers of men. Fighters of fish it is this time.",
+   "shot": 8
+  },
+  {
+   "index": 9,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "All afternoon they showed not an inch of themselves.",
+   "shot": 9
+  },
+  {
+   "index": 10,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "We signalled with a flag on a pole. They took no notice.",
+   "shot": 10
+  },
+  {
+   "index": 11,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "All that armament excited me. They seemed very helpless down there.",
+   "shot": 11
+  },
+  {
+   "index": 12,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "At six we sat at tea on the lawn, talking about the battle coming.",
+   "shot": 12
+  },
+  {
+   "index": 13,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A muffled detonation, a gust of firing, and a crash that shook the ground.",
+   "shot": 13
+  },
+  {
+   "index": 14,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The college was down. Our own crest was in range now.",
+   "shot": 14
+  },
+  {
+   "index": 15,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "We can't possibly stay here.",
+   "shot": 16
+  },
+  {
+   "index": 16,
+   "kind": "dialogue",
+   "speaker": "narrators_wife",
+   "text": "But where are we to go?",
+   "shot": 17
+  },
+  {
+   "index": 17,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Leatherhead, I shouted: her cousins' town, twelve miles off and out of this.",
+   "shot": 18
+  },
+  {
+   "index": 18,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The landlord wanted a pound for his horse and cart.",
+   "shot": 19
+  },
+  {
+   "index": 19,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I gave him two, and promised to bring it back by midnight.",
+   "shot": 20
+  },
+  {
+   "index": 20,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I packed our plate in a tablecloth. The palings glowed red.",
+   "shot": 21
+  },
+  {
+   "index": 21,
+   "kind": "dialogue",
+   "speaker": "unnamed_hussar",
+   "text": "Crawling out in a thing like a dish cover!",
+   "shot": 22
+  }
+ ]
+}

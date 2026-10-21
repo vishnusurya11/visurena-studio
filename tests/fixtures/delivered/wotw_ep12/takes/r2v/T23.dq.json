@@ -1,0 +1,862 @@
+{
+  "take": 23,
+  "attempt": 0,
+  "file": "T23.mp4",
+  "seconds": 3.5,
+  "lane": "narration",
+  "gates": [
+    {
+      "name": "frozen-at-start",
+      "value": 0.0,
+      "ok": true,
+      "hard": true,
+      "note": "0.0s",
+      "penalty": 0.0
+    },
+    {
+      "name": "frozen-share",
+      "value": 0.0,
+      "ok": true,
+      "hard": false,
+      "note": "0%",
+      "penalty": 0.0
+    },
+    {
+      "name": "foreign",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured (no cell)",
+      "penalty": 0.0
+    },
+    {
+      "name": "cut-landing",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured (no cell)",
+      "penalty": 0.0
+    },
+    {
+      "name": "drift",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured (no cell)",
+      "penalty": 0.0
+    },
+    {
+      "name": "coherence off-board",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured (no cell)",
+      "penalty": 0.0
+    },
+    {
+      "name": "last-vs-cell",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured (no cell)",
+      "penalty": 0.0
+    },
+    {
+      "name": "cut",
+      "value": 2.4,
+      "ok": true,
+      "hard": false,
+      "note": "2.4",
+      "penalty": 0.0
+    },
+    {
+      "name": "churn",
+      "value": 1.86,
+      "ok": true,
+      "hard": false,
+      "note": "1.9 wide",
+      "penalty": 0.0
+    },
+    {
+      "name": "zoom",
+      "value": 1.0330666632275907,
+      "ok": true,
+      "hard": false,
+      "note": "1.03x stride",
+      "penalty": 0.0
+    },
+    {
+      "name": "face-at-end",
+      "value": 0.049,
+      "ok": true,
+      "hard": false,
+      "note": "0.05",
+      "penalty": 0.0
+    },
+    {
+      "name": "look",
+      "value": 74.21,
+      "ok": false,
+      "hard": false,
+      "note": "no floor, daylight adv p5 74 black 0.00 hue 0.02",
+      "penalty": 5.0
+    },
+    {
+      "name": "post-cut",
+      "value": 0.53,
+      "ok": true,
+      "hard": false,
+      "note": "0.47->0.53 max 0.7",
+      "penalty": 0.0
+    },
+    {
+      "name": "pulse",
+      "value": 0.67,
+      "ok": true,
+      "hard": false,
+      "note": "r 0.67",
+      "penalty": 0.0
+    },
+    {
+      "name": "lip-sync",
+      "value": null,
+      "ok": true,
+      "hard": true,
+      "note": "n/a narration",
+      "penalty": 0.0
+    },
+    {
+      "name": "identity",
+      "value": 0,
+      "ok": true,
+      "hard": false,
+      "note": "0 cast on screen",
+      "penalty": 0.0
+    },
+    {
+      "name": "jump",
+      "value": 1.0,
+      "ok": true,
+      "hard": true,
+      "note": "1.00",
+      "penalty": 0.0
+    },
+    {
+      "name": "held",
+      "value": null,
+      "ok": true,
+      "hard": true,
+      "note": "not measured",
+      "penalty": 0.0
+    },
+    {
+      "name": "pass-through",
+      "value": null,
+      "ok": true,
+      "hard": true,
+      "note": "not measured",
+      "penalty": 0.0
+    },
+    {
+      "name": "rotation",
+      "value": 1.46,
+      "ok": true,
+      "hard": false,
+      "note": "1.5deg, roll planned",
+      "penalty": 0.0
+    },
+    {
+      "name": "leak",
+      "value": 0,
+      "ok": true,
+      "hard": false,
+      "note": "opens on its panel",
+      "penalty": 0.0
+    },
+    {
+      "name": "last-vs-panel",
+      "value": 0.934,
+      "ok": true,
+      "hard": false,
+      "note": "0.93",
+      "penalty": 0.0
+    },
+    {
+      "name": "cut-vote",
+      "value": 0,
+      "ok": true,
+      "hard": false,
+      "note": "none",
+      "penalty": 0.0
+    },
+    {
+      "name": "lag",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured",
+      "penalty": 0.0
+    }
+  ],
+  "segments": [
+    {
+      "cell": "",
+      "target": "",
+      "start_s": 0.0,
+      "end_s": 3.46,
+      "lead_in_s": 0.0,
+      "still_share": 0.0,
+      "kind": "hold",
+      "start_sim": null,
+      "end_sim": null,
+      "landed": null,
+      "offset": 0
+    }
+  ],
+  "frozen_spans": [],
+  "energy_q": [
+    5.3,
+    5.3,
+    6.0,
+    6.1,
+    6.7,
+    6.6,
+    6.6,
+    6.8,
+    6.8,
+    6.5,
+    6.5,
+    6.3,
+    6.1,
+    6.4
+  ],
+  "coherence": {
+    "frames": 84,
+    "cells": false,
+    "raw_diff": 1.86,
+    "nonrigid": 1.86,
+    "hard_cut": 2.4,
+    "hard_cut_at": 51
+  },
+  "zoom": {
+    "ratio": 1.0330666632275907,
+    "monotonic": true,
+    "measured": true,
+    "per_step": [
+      1.003648415235977,
+      1.0022185344790122,
+      1.003295455719698,
+      1.0033575232685215,
+      1.0038582781258263,
+      1.0034896908436481,
+      1.0023342781174394,
+      1.0028500736392871,
+      1.0022814426764362,
+      1.0025453656957937,
+      1.0027025532070948
+    ],
+    "inliers": [
+      49,
+      49,
+      49,
+      49,
+      49,
+      48,
+      48,
+      49,
+      47,
+      48,
+      48
+    ],
+    "camera": 1.0320759430222293,
+    "camera_steps": [
+      1.0030977313912193,
+      1.0016638548534174,
+      1.0025624775878448,
+      1.0026516652340984,
+      1.0030689146636014,
+      1.0035682625539233,
+      1.0026749830751667,
+      1.0035808511499307,
+      1.0026894817139305,
+      1.003464693413424,
+      1.0025962756244058
+    ],
+    "frames": [
+      0,
+      8,
+      16,
+      24,
+      32,
+      40,
+      49,
+      57,
+      65,
+      73,
+      81,
+      89
+    ],
+    "theta_steps": [
+      0.1,
+      0.09,
+      0.13,
+      0.1,
+      0.15,
+      0.14,
+      0.12,
+      0.14,
+      0.17,
+      0.17,
+      0.16
+    ],
+    "cum_theta": 1.46,
+    "start": 0,
+    "end": 90,
+    "segments": [
+      {
+        "ratio": 1.0330666632275907,
+        "monotonic": true,
+        "measured": true,
+        "per_step": [
+          1.003648415235977,
+          1.0022185344790122,
+          1.003295455719698,
+          1.0033575232685215,
+          1.0038582781258263,
+          1.0034896908436481,
+          1.0023342781174394,
+          1.0028500736392871,
+          1.0022814426764362,
+          1.0025453656957937,
+          1.0027025532070948
+        ],
+        "inliers": [
+          49,
+          49,
+          49,
+          49,
+          49,
+          48,
+          48,
+          49,
+          47,
+          48,
+          48
+        ],
+        "camera": 1.0320759430222293,
+        "camera_steps": [
+          1.0030977313912193,
+          1.0016638548534174,
+          1.0025624775878448,
+          1.0026516652340984,
+          1.0030689146636014,
+          1.0035682625539233,
+          1.0026749830751667,
+          1.0035808511499307,
+          1.0026894817139305,
+          1.003464693413424,
+          1.0025962756244058
+        ],
+        "frames": [
+          0,
+          8,
+          16,
+          24,
+          32,
+          40,
+          49,
+          57,
+          65,
+          73,
+          81,
+          89
+        ],
+        "theta_steps": [
+          0.1,
+          0.09,
+          0.13,
+          0.1,
+          0.15,
+          0.14,
+          0.12,
+          0.14,
+          0.17,
+          0.17,
+          0.16
+        ],
+        "cum_theta": 1.46,
+        "start": 0,
+        "end": 90
+      }
+    ]
+  },
+  "score": 95.0,
+  "passed": true,
+  "bytes": 551096,
+  "verdict_line": "T23 a0 PASS 95/100 | frozen-at-start 0.0s | frozen-share 0% | foreign not measured (no cell) | cut-landing not measured (no cell) | drift not measured (no cell) | coherence off-board not measured (no cell) | last-vs-cell not measured (no cell) | cut 2.4 | churn 1.9 wide | zoom 1.03x stride | face-at-end 0.05 | look no floor, daylight adv p5 74 black 0.00 hue 0.02 adv | post-cut 0.47->0.53 max 0.7 | pulse r 0.67 | lip-sync n/a narration | identity 0 cast on screen | jump 1.00 | held not measured | pass-through not measured | rotation 1.5deg, roll planned | leak opens on its panel | last-vs-panel 0.93 | cut-vote none | lag not measured",
+  "attempts": [
+    {
+      "take": 23,
+      "attempt": 0,
+      "file": "T23.mp4",
+      "seconds": 3.5,
+      "lane": "narration",
+      "gates": [
+        {
+          "name": "frozen-at-start",
+          "value": 0.0,
+          "ok": true,
+          "hard": true,
+          "note": "0.0s",
+          "penalty": 0.0
+        },
+        {
+          "name": "frozen-share",
+          "value": 0.0,
+          "ok": true,
+          "hard": false,
+          "note": "0%",
+          "penalty": 0.0
+        },
+        {
+          "name": "foreign",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured (no cell)",
+          "penalty": 0.0
+        },
+        {
+          "name": "cut-landing",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured (no cell)",
+          "penalty": 0.0
+        },
+        {
+          "name": "drift",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured (no cell)",
+          "penalty": 0.0
+        },
+        {
+          "name": "coherence off-board",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured (no cell)",
+          "penalty": 0.0
+        },
+        {
+          "name": "last-vs-cell",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured (no cell)",
+          "penalty": 0.0
+        },
+        {
+          "name": "cut",
+          "value": 2.4,
+          "ok": true,
+          "hard": false,
+          "note": "2.4",
+          "penalty": 0.0
+        },
+        {
+          "name": "churn",
+          "value": 1.86,
+          "ok": true,
+          "hard": false,
+          "note": "1.9 wide",
+          "penalty": 0.0
+        },
+        {
+          "name": "zoom",
+          "value": 1.0330666632275907,
+          "ok": true,
+          "hard": false,
+          "note": "1.03x stride",
+          "penalty": 0.0
+        },
+        {
+          "name": "face-at-end",
+          "value": 0.049,
+          "ok": true,
+          "hard": false,
+          "note": "0.05",
+          "penalty": 0.0
+        },
+        {
+          "name": "look",
+          "value": 74.21,
+          "ok": false,
+          "hard": false,
+          "note": "no floor, daylight adv p5 74 black 0.00 hue 0.02",
+          "penalty": 5.0
+        },
+        {
+          "name": "post-cut",
+          "value": 0.53,
+          "ok": true,
+          "hard": false,
+          "note": "0.47->0.53 max 0.7",
+          "penalty": 0.0
+        },
+        {
+          "name": "pulse",
+          "value": 0.67,
+          "ok": true,
+          "hard": false,
+          "note": "r 0.67",
+          "penalty": 0.0
+        },
+        {
+          "name": "lip-sync",
+          "value": null,
+          "ok": true,
+          "hard": true,
+          "note": "n/a narration",
+          "penalty": 0.0
+        },
+        {
+          "name": "identity",
+          "value": 0,
+          "ok": true,
+          "hard": false,
+          "note": "0 cast on screen",
+          "penalty": 0.0
+        },
+        {
+          "name": "jump",
+          "value": 1.0,
+          "ok": true,
+          "hard": true,
+          "note": "1.00",
+          "penalty": 0.0
+        },
+        {
+          "name": "held",
+          "value": null,
+          "ok": true,
+          "hard": true,
+          "note": "not measured",
+          "penalty": 0.0
+        },
+        {
+          "name": "pass-through",
+          "value": null,
+          "ok": true,
+          "hard": true,
+          "note": "not measured",
+          "penalty": 0.0
+        },
+        {
+          "name": "rotation",
+          "value": 1.46,
+          "ok": true,
+          "hard": false,
+          "note": "1.5deg, roll planned",
+          "penalty": 0.0
+        },
+        {
+          "name": "leak",
+          "value": 0,
+          "ok": true,
+          "hard": false,
+          "note": "opens on its panel",
+          "penalty": 0.0
+        },
+        {
+          "name": "last-vs-panel",
+          "value": 0.934,
+          "ok": true,
+          "hard": false,
+          "note": "0.93",
+          "penalty": 0.0
+        },
+        {
+          "name": "cut-vote",
+          "value": 0,
+          "ok": true,
+          "hard": false,
+          "note": "none",
+          "penalty": 0.0
+        },
+        {
+          "name": "lag",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured",
+          "penalty": 0.0
+        }
+      ],
+      "segments": [
+        {
+          "cell": "",
+          "target": "",
+          "start_s": 0.0,
+          "end_s": 3.46,
+          "lead_in_s": 0.0,
+          "still_share": 0.0,
+          "kind": "hold",
+          "start_sim": null,
+          "end_sim": null,
+          "landed": null,
+          "offset": 0
+        }
+      ],
+      "frozen_spans": [],
+      "energy_q": [
+        5.3,
+        5.3,
+        6.0,
+        6.1,
+        6.7,
+        6.6,
+        6.6,
+        6.8,
+        6.8,
+        6.5,
+        6.5,
+        6.3,
+        6.1,
+        6.4
+      ],
+      "foreign": [],
+      "coherence": {
+        "frames": 84,
+        "cells": false,
+        "raw_diff": 1.86,
+        "nonrigid": 1.86,
+        "hard_cut": 2.4,
+        "hard_cut_at": 51
+      },
+      "zoom": {
+        "ratio": 1.0330666632275907,
+        "monotonic": true,
+        "measured": true,
+        "per_step": [
+          1.003648415235977,
+          1.0022185344790122,
+          1.003295455719698,
+          1.0033575232685215,
+          1.0038582781258263,
+          1.0034896908436481,
+          1.0023342781174394,
+          1.0028500736392871,
+          1.0022814426764362,
+          1.0025453656957937,
+          1.0027025532070948
+        ],
+        "inliers": [
+          49,
+          49,
+          49,
+          49,
+          49,
+          48,
+          48,
+          49,
+          47,
+          48,
+          48
+        ],
+        "camera": 1.0320759430222293,
+        "camera_steps": [
+          1.0030977313912193,
+          1.0016638548534174,
+          1.0025624775878448,
+          1.0026516652340984,
+          1.0030689146636014,
+          1.0035682625539233,
+          1.0026749830751667,
+          1.0035808511499307,
+          1.0026894817139305,
+          1.003464693413424,
+          1.0025962756244058
+        ],
+        "frames": [
+          0,
+          8,
+          16,
+          24,
+          32,
+          40,
+          49,
+          57,
+          65,
+          73,
+          81,
+          89
+        ],
+        "theta_steps": [
+          0.1,
+          0.09,
+          0.13,
+          0.1,
+          0.15,
+          0.14,
+          0.12,
+          0.14,
+          0.17,
+          0.17,
+          0.16
+        ],
+        "cum_theta": 1.46,
+        "start": 0,
+        "end": 90,
+        "segments": [
+          {
+            "ratio": 1.0330666632275907,
+            "monotonic": true,
+            "measured": true,
+            "per_step": [
+              1.003648415235977,
+              1.0022185344790122,
+              1.003295455719698,
+              1.0033575232685215,
+              1.0038582781258263,
+              1.0034896908436481,
+              1.0023342781174394,
+              1.0028500736392871,
+              1.0022814426764362,
+              1.0025453656957937,
+              1.0027025532070948
+            ],
+            "inliers": [
+              49,
+              49,
+              49,
+              49,
+              49,
+              48,
+              48,
+              49,
+              47,
+              48,
+              48
+            ],
+            "camera": 1.0320759430222293,
+            "camera_steps": [
+              1.0030977313912193,
+              1.0016638548534174,
+              1.0025624775878448,
+              1.0026516652340984,
+              1.0030689146636014,
+              1.0035682625539233,
+              1.0026749830751667,
+              1.0035808511499307,
+              1.0026894817139305,
+              1.003464693413424,
+              1.0025962756244058
+            ],
+            "frames": [
+              0,
+              8,
+              16,
+              24,
+              32,
+              40,
+              49,
+              57,
+              65,
+              73,
+              81,
+              89
+            ],
+            "theta_steps": [
+              0.1,
+              0.09,
+              0.13,
+              0.1,
+              0.15,
+              0.14,
+              0.12,
+              0.14,
+              0.17,
+              0.17,
+              0.16
+            ],
+            "cum_theta": 1.46,
+            "start": 0,
+            "end": 90
+          }
+        ]
+      },
+      "score": 95.0,
+      "passed": true,
+      "bytes": 551096,
+      "verdict_line": "T23 a0 PASS 95/100 | frozen-at-start 0.0s | frozen-share 0% | foreign not measured (no cell) | cut-landing not measured (no cell) | drift not measured (no cell) | coherence off-board not measured (no cell) | last-vs-cell not measured (no cell) | cut 2.4 | churn 1.9 wide | zoom 1.03x stride | face-at-end 0.05 | look no floor, daylight adv p5 74 black 0.00 hue 0.02 adv | post-cut 0.47->0.53 max 0.7 | pulse r 0.67 | lip-sync n/a narration | identity 0 cast on screen | jump 1.00 | held not measured | pass-through not measured | rotation 1.5deg, roll planned | leak opens on its panel | last-vs-panel 0.93 | cut-vote none | lag not measured"
+    }
+  ],
+  "budget_spent": false,
+  "foreign_samples": [],
+  "foreign": 0,
+  "off_beat": 0,
+  "audio": {
+    "mux_lag_s": 0.0,
+    "lag_ok": true,
+    "lag_measured": false
+  },
+  "camera": {
+    "scale_curve": [
+      1.0,
+      0.98,
+      0.98,
+      0.98
+    ],
+    "max_scale_per_s": 0.24,
+    "scene_events": [],
+    "camera_ok": false
+  },
+  "measures": {
+    "pass_through": null,
+    "rotation": {
+      "cum_theta": 1.46,
+      "measured": true,
+      "fitted_on": "one owner-caught take (the room turned round a laid-down man's face); synthetic accuracy in the tests only: advisory until the bench has a second row"
+    },
+    "cut_vote": {
+      "votes": {
+        "jump": false,
+        "step": false,
+        "scene": false
+      },
+      "count": 0,
+      "cut": false,
+      "fitted_on": "the two named jumps and three named brightness cuts of one book; scenedetect at its default 3.0",
+      "scene_cuts": []
+    },
+    "leak": {
+      "frames": 0,
+      "seconds": 0.0,
+      "covers": true,
+      "best": [
+        "panel"
+      ],
+      "against": [],
+      "fitted_on": "290 takes ep01-ep12: the four heads (ep06 T01, ep10 T07, T12, ep12 T19) read 0.85-1.17, every other take at most 0.62; wall 0.75"
+    },
+    "board": {
+      "frames": 84,
+      "offboard_share": 0.0,
+      "last_vs_cell": 0.934,
+      "last_cell": "shot_23.png",
+      "onboard_last": [
+        83
+      ],
+      "raw_diff": 1.86,
+      "nonrigid": 1.86,
+      "hard_cut": 2.4,
+      "hard_cut_at": 51,
+      "cells": "panel"
+    },
+    "lag": null
+  },
+  "strip": "episodes/ep12/takes/work/dq/take_T23.png"
+}

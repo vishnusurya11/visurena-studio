@@ -1,0 +1,95 @@
+{
+ "sha8": "99c0a5f6",
+ "verdict": "flagged",
+ "note": "content at T05: text or lettering in the picture; look at T10: no floor p5 22 black 0.06 hue 0.67; content at T13: text or lettering in the picture; content at T19: mustache on a clean-shaven character; content at T19: 5 figure(s) for 2 declared (2 cast + 0 extras), 4 of them copies of another -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4",
+  "T25.mp4",
+  "T26.mp4",
+  "T27.mp4",
+  "T28.mp4",
+  "T29.mp4"
+ ],
+ "signed_at": "2026-09-30T06:48:40Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "content",
+   "where": "T05",
+   "evidence": {
+    "hard": true,
+    "repeated": true,
+    "still": "storyboard/shot_05.png"
+   },
+   "severity": "normal",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "look",
+   "where": "T10",
+   "evidence": {
+    "value": 22.225,
+    "penalty": 30.0,
+    "repeated": true
+   },
+   "severity": "normal",
+   "note": "no floor p5 22 black 0.06 hue 0.67"
+  },
+  {
+   "kind": "content",
+   "where": "T13",
+   "evidence": {
+    "hard": true,
+    "repeated": true,
+    "still": "storyboard/shot_13.png"
+   },
+   "severity": "normal",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "content",
+   "where": "T19",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "mustache on a clean-shaven character"
+  },
+  {
+   "kind": "content",
+   "where": "T19",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "5 figure(s) for 2 declared (2 cast + 0 extras), 4 of them copies of another"
+  }
+ ],
+ "terminal": "still"
+}

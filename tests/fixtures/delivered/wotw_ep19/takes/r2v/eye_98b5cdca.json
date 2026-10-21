@@ -1,0 +1,101 @@
+{
+ "sha8": "98b5cdca",
+ "verdict": "flagged",
+ "note": "clones at T07: two faces read as one man (facenet 0.765); clones at T07: two faces read as one man (facenet 0.757); clones at T07: two faces read as one man (facenet 0.78); content at T17: banned from this book: cliff, helicopter; content at T18: banned from this book: cliff; content at T19: banned from this book: cliff -> keep_best",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4"
+ ],
+ "signed_at": "2026-10-07T18:59:17Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "clones",
+   "where": "T07",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.765,
+    "by": "facenet",
+    "frame": 0
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.765)"
+  },
+  {
+   "kind": "clones",
+   "where": "T07",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.757,
+    "by": "facenet",
+    "frame": 1
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.757)"
+  },
+  {
+   "kind": "clones",
+   "where": "T07",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.78,
+    "by": "facenet",
+    "frame": 2
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.78)"
+  },
+  {
+   "kind": "content",
+   "where": "T17",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: cliff, helicopter"
+  },
+  {
+   "kind": "content",
+   "where": "T18",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "banned from this book: cliff"
+  },
+  {
+   "kind": "content",
+   "where": "T19",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "banned from this book: cliff"
+  }
+ ],
+ "terminal": "keep_best"
+}

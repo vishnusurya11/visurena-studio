@@ -1,0 +1,55 @@
+{
+ "rounds": [
+  {
+   "why": "batched_cures: content, cut, cut-vote, face-at-end, frozen-whole, jump, leak",
+   "at": 1791510608.6,
+   "faults": {
+    "2": [
+     "cut",
+     "cut-vote",
+     "jump",
+     "leak"
+    ],
+    "6": [
+     "content"
+    ],
+    "17": [
+     "frozen-whole"
+    ],
+    "19": [
+     "face-at-end"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: cut, cut-vote, frozen-whole, jump, leak",
+   "at": 1791512706.8,
+   "faults": {
+    "2": [
+     "cut",
+     "cut-vote",
+     "jump",
+     "leak"
+    ],
+    "6": [
+     "content"
+    ],
+    "19": [
+     "frozen-whole"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: lip-sync",
+   "at": 1791513264.8,
+   "faults": {
+    "2": [
+     "lip-sync"
+    ],
+    "6": [
+     "content"
+    ]
+   }
+  }
+ ]
+}

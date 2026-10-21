@@ -1,0 +1,421 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "char-john_watson_indoor.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "plate_window.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is the location in <Picture 2>: The nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast, seen from inside the room: twelve panes in two sashes, a brass catch at the meeting rail, heavy red curtains drawn back to either side, a low sill with a plant pot on it, and beyond the glass the roadway of Baker Street below with the opposite pavement, its railings and the plain brick house fronts across the way in grey morning light. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium close shot on <Subject 1> at the nearer broad window.\n<Picture 4> is the first frame of [Shot 2], a medium shot from the height of the low sill.\n<Picture 5> is the last frame of [Shot 1], watson's sunburnt face fills the LEFT half of frame at two-fifths of its height, bare-headed, the dark hair swept back, the thin waxed moustache level under the nose. His bare sunburnt right forefinger stands extended flat against the glass at the CENTRE, level with the meeting rail, the fingertip the width of the thumb-length brass catch beside it. The twelve-paned sash keeps the CENTRE and the RIGHT, a red curtain along the RIGHT edge, and below the frame's horizon the grey roadway and the opposite pavement lie small through the lower panes.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 2 shots in <Subject 2>, the nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 4> and runs from 00:04 to 00:09. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 3>: a medium close shot on <Subject 1> at the nearer broad window, three-quarters to the camera, bare-headed, dark hair swept back, a thin waxed moustache, his sunburnt face a third of the frame's height in the LEFT half. The twelve-paned sash keeps the CENTRE and the RIGHT, cold grey light along its bars, the roadway small and far below through the lower panes. His sunburnt jaw is set hard and his eyes are down on the painted sill, his bare sunburnt right hand shut into a fist at waist height with the knuckles up. The camera pushes in a hand's breadth as <Subject 1>'s shut fist opens and one sunburnt forefinger extends to the height of the meeting rail toward the glass, from 00:00 to 00:04. Behind him Two hansom cabs at a brisk roll on the roadway below, the nearer one a thumb long at the LEFT of the lower panes; one woman with a covered basket on her arm carries it along the opposite pavement, and one crossing-sweeper works his broom at the railings., from 00:00 to 00:04. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his shut fist opens.\n[Shot 2] From 00:04 to 00:09. At 00:04 the shot cuts to a medium shot from the height of the low sill, beginning from <Picture 4>: <Subject 1> stands over the clay plant pot with his back three-quarters to the camera, bare-headed, dark hair swept back, his sunburnt face at a fifth of the frame's height in the upper LEFT, his bare sunburnt right hand flat on the pane at the height of the meeting rail with the fingers spread a hand's width. The brick house fronts across the way stand through the upper panes in the grey morning. The camera pulls back a hand's breadth along the carpet from the clay plant pot as <Subject 1>'s spread fingers close a finger's width against the pane, from 00:04 to 00:09. Behind him Two hansom cab roofs pass along the lowest panes at a brisk roll at the BOTTOM of the glass, and one crossing-sweeper stooping over his broom works the iron railings across the way, his shoulders level with the sill line., from 00:04 to 00:09. <Subject 1>'s mouth is closed from 00:04 to 00:07 while his spread fingers close a finger's width against the pane as the camera pulls back a hand's breadth along the carpet from the clay plant pot.\n\noverall_soundscape: The ambience of the nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 209,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ],
+      "ref_images.ref_image_3": [
+        "21",
+        0
+      ],
+      "ref_images.ref_image_4": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "28",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 83015
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_15",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q15_0.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q15_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_4"
+    }
+  },
+  "22": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q15_0E.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_5"
+    }
+  },
+  "23": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q15_0.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q15_0.png @ 0"
+    }
+  },
+  "24": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "23",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor image @ 0"
+    }
+  },
+  "25": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q15_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q15_1.png @ 102"
+    }
+  },
+  "26": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "24",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "25",
+        0
+      ],
+      "frame_idx": 102
+    },
+    "_meta": {
+      "title": "anchor image @ 102"
+    }
+  },
+  "27": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_15.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "28": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "26",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "27",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

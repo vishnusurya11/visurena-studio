@@ -1,0 +1,1228 @@
+{
+ "number": 25,
+ "title": "The Dead London",
+ "words_per_second": 2.49481599156811,
+ "question": "Today, can the narrator walk into the silent city and learn what holds it?",
+ "where": "London, 1890s",
+ "light": "low sun raking from the, deep black shadows",
+ "palette": "black powder #1b1b1d, weed crimson #8e1f24, stucco cream #e3d9c3, dusk violet #5a5070, dawn gold #e8b45a, machine brass #b08d4a",
+ "look": "Angular stylised 3D animation, brush-stroke texture",
+ "aspect": "1:1",
+ "answer": "line 18",
+ "protagonist": "unnamed_first_person_narrator",
+ "setups": {
+  "fulham_road": {
+   "described": "A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. On the north pavement a jeweller's window gapes broken above scattered gold chains and a pocket watch; beside it a doorstep holds a smashed champagne magnum in a dark pool. On the south side stands a small baker's shop with its door ajar. Far down the road a white stucco terrace burns, grey smoke rising from its windows. Hard afternoon sunlight falls from the upper left, throwing the shadows of the fascias across the black-dusted roadway toward the right kerb, deep black shadow under every shop front. Grey daylight through the window at the LEFT, deep shadow.",
+   "cast": [
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the burning white stucco terrace",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "west to east along the Fulham Road, from the lane corner by Putney Bridge station past the baker's and the jeweller's to the burning white terrace",
+   "geometry": "The roadway enters at the BOTTOM edge and runs at a walking pace straight to a vanishing point at the CENTRE of the frame. The north terrace fills the LEFT third, its nearest shopfront a full frame tall at the LEFT edge, shrinking toward the centre; the jeweller's window sits at the LEFT third, a sixth of the frame tall. The south terrace fills the RIGHT third with the baker's door at the RIGHT edge, half the frame tall. The burning white terrace stands at the CENTRE, a tenth of the frame tall, its smoke rising toward the TOP edge. Black-dusted setts fill the BOTTOM half.",
+   "location": "fulham_high_street",
+   "view": "wide_fulham_road",
+   "crowd": "two stray dogs nosing along the far kerb",
+   "outdoors": true,
+   "ambience": "fire crackling far down the road, a dog barking two streets off, dry wind over the setts",
+   "props": []
+  },
+  "exhibition_road": {
+   "described": "On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions, and behind them the tall pale stone tower of the Imperial Institute with its copper cupola. Wide pavements and iron lamp posts line both sides. Every window holds a drawn blind. At the far end of the road stand the tall black iron gates of Hyde Park on stone piers, with green park trees behind them. Hard noon sunlight falls from the upper right over the museum roofline, laying the shadows of the lamp posts across the setts toward the left pavement. A haze of smoke hangs above the park trees. Raking grey daylight from the LEFT, deep shadow.",
+   "cast": [
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the tall black iron gates of Hyde Park",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "south to north up Exhibition Road, from the Cromwell Road crossing to the Hyde Park gates",
+   "geometry": "The roadway enters at the BOTTOM edge across the full width of the frame and narrows to the park gates at the CENTRE, which stand a tenth of the frame tall. The museum front fills the RIGHT third, its nearest bay reaching from the BOTTOM edge to the TOP edge. The mansions fill the LEFT third, half the frame tall at the LEFT edge, with the institute tower rising behind them to the TOP edge in the left half. Park trees fill the gap above the gates, under a strip of blue sky at the TOP.",
+   "location": "exhibition_road",
+   "view": "wide_establishing",
+   "crowd": "three pigeons pecking on the setts near the left kerb",
+   "outdoors": true,
+   "ambience": "a distant two-note howl rolling down the road, footsteps echoing off the house fronts, light wind in the park trees",
+   "props": [
+    "flying_machine"
+   ]
+  },
+  "regents_park_corner": {
+   "described": "The top of Baker Street where it meets Regent's Park in the 1890s, seen north-east over the park. In the foreground lies a granite-kerbed street corner with an unlit gas lamp and the black iron railings of the park. Beyond the railings, lawns stretch out to a dark mass of plane and elm trees, a clear amber and violet sky above the treetops. Cream stucco terrace fronts with columned porticoes and dark windows stand at the left. Black powder lies in the gutters. The last clear sunset light falls from the left, from the west behind the terraces, gilding the elm tops and laying the long shadow of the lamp across the kerb toward the right, deep black shadow under the porticoes. Raking grey daylight from the LEFT, deep shadow.",
+   "cast": [
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the brazen hood of the fighting-machine above the trees",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "south to north from the top of Baker Street along Park Road under the terraces toward St John's Wood",
+   "geometry": "The street corner and kerb fill the BOTTOM third, the gas lamp at the RIGHT third standing half the frame tall. The park railings cross the frame from the LEFT edge to the RIGHT edge along the lower third. The tree mass fills the middle band from edge to edge. The stucco terrace fills the LEFT edge from the BOTTOM edge to the TOP edge.",
+   "location": "regents_park",
+   "view": "wide_establishing",
+   "crowd": "a pack of six mongrel dogs running at a walking pace along the far kerb",
+   "outdoors": true,
+   "ambience": "a far two-note wail from across the park, dogs yelping in a side road, rooks settling in the elms",
+   "props": [
+    "fighting_machine"
+   ]
+  },
+  "canal_bridge_road": {
+   "described": "A London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road, 1890s. In the foreground stands the cast-iron parapet railing of the bridge with an unlit gas lamp standard. Ahead, tall white stucco terraces line both sides of the road, faint and tall and dim, their windows dark hollow openings like the sockets of skulls. The roadway ahead lies pitch-black with fallen powder, as if tarred. Crimson red weed clambers over heaps of fallen brick against the house fronts. Dark park trees stand at the right edge. The last violet dusk light falls from the upper left behind the western terrace, leaving the road in deep black shadow and paling the stucco fronts on the right. Moonlight from the LEFT, black shadows.",
+   "cast": [
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the unlit gas lamp on the bridge parapet",
+   "landmark_at": "start",
+   "landmark_size": "full",
+   "route": "south to north, from the canal bridge up the black road toward St John's Wood Road",
+   "geometry": "The bridge railing crosses the BOTTOM edge of the frame from LEFT to RIGHT, a fifth of the frame tall, with the gas lamp at the LEFT third rising to the TOP edge. The black roadway runs at a walking pace straight from the bridge to a vanishing point at the CENTRE. The white terraces fill the LEFT third and the RIGHT third, a full frame tall at the edges, shrinking toward the centre. Red weed heaps sit against the house fronts at the lower LEFT and lower RIGHT, a sixth of the frame tall. Trees darken the RIGHT edge.",
+   "location": "regents_canal_bridge",
+   "view": "reverse_road_north",
+   "crowd": "",
+   "outdoors": true,
+   "ambience": "a deep hush, light wind rustling the red weed, a loose brick settling in the rubble",
+   "props": []
+  },
+  "primrose_hill_foot": {
+   "described": "Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. At the left the stucco houses of St Edmund's Terrace rise out of breast-high crimson weed. Pale gold dawn light falls from the right, from the eastern sky, rimming the machine's legs and laying their long black shadows across the grass toward the left. Raking grey daylight from the LEFT, deep shadow.",
+   "cast": [
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the fighting-machine on the summit",
+   "landmark_at": "far_end",
+   "landmark_size": "full",
+   "route": "from Albert Road at the south-west foot, through the flood water and up the grass slope to the summit mounds",
+   "geometry": "The flood water and road fill the BOTTOM fifth from the LEFT edge to the RIGHT edge, the iron railings and gas lamp at the RIGHT third standing a third of the frame tall. The grass slope rises from the lower third to the summit at the CENTRE of the TOP half. St Edmund's Terrace fills the LEFT edge, half the frame tall, sunk in crimson weed.",
+   "location": "primrose_hill",
+   "view": "wide_establishing",
+   "crowd": "about forty black birds circling and settling on the Martian fighting-machine of the fighting-machine",
+   "outdoors": true,
+   "ambience": "rushing flood water over the road, rooks cawing high above, light dawn wind over the grass",
+   "props": [
+    "fighting_machine"
+   ]
+  },
+  "redoubt_pit": {
+   "described": "The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The rising sun falls from the right, from the east, striking the tops of the machines gold while the pit floor stays in black shadow; thin smoke rises from the central mounds.",
+   "cast": [
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the erect brass fighting-machine on the east lip",
+   "landmark_at": "far_end",
+   "landmark_size": "full",
+   "route": "from the south-west rampart crest along the trodden crest toward the east lip and the erect fighting-machine",
+   "geometry": "The rampart crest fills the BOTTOM fifth from the LEFT edge to the RIGHT edge. The pit opens across the CENTRE of the frame, its shadowed floor filling the middle band. The overturned fighting-machines lie at the LEFT third, a fifth of the frame wide. The erect fighting-machine stands at the RIGHT edge, rising from the pit lip to the TOP edge, half the frame tall. Gold sky fills the TOP strip.",
+   "location": "primrose_hill_redoubt",
+   "view": "wide_establishing",
+   "crowd": "a dozen dogs fighting on the shadowed pit floor",
+   "outdoors": true,
+   "ambience": "dogs snarling and fighting far below in the pit, rooks cawing overhead, light wind over the clay",
+   "props": [
+    "fighting_machine",
+    "handling_machine",
+    "flying_machine"
+   ]
+  }
+ },
+ "shots": [
+  {
+   "frame": "Medium of the narrator (face gaunt, grey eyes, battered brown felt hat) at the corner of the lane among shuttered shops as a man black as a sweep with dust lunges up at him from the kerb.",
+   "motion": "The camera pushes in a hand's breadth toward the narrator across the whole shot; the dust-blackened man heaves up off the kerb and swings a fist at the narrator's head; the narrator leans back with one hand raised as the man's arm keeps swinging through the air.",
+   "camera": "On the setts three yards east of the lane corner, at chest height, a 35mm lens; the afternoon sun comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator (face gaunt, grey eyes, battered brown felt hat) standing at the RIGHT third, his head a quarter of the frame's height, looking down at the kerb. The dust-blackened man sprawls on his side against the kerb at the LEFT third, one arm propped on the black-powdered setts. A shuttered shopfront with a painted fascia fills the TOP half behind them.",
+   "end": "The narrator stands at the RIGHT edge, leaning back with one hand raised before his face. The dust-blackened man kneels at the LEFT third, his arm stretched out toward the narrator's head. The shuttered shopfront fills the TOP half, black powder drifting across the setts at the BOTTOM edge.",
+   "changed": "the man lunges, narrator recoils",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 0,
+   "section": "hook",
+   "setup": "fulham_road",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 1,
+   "sounds": [
+    {
+     "sound": "a drunk man's hoarse cursing shout",
+     "at": 0.4,
+     "seconds": 2.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "He was as black as a sweep with the black dust, alive, but helplessly and speechlessly drunk",
+    "I could get nothing from him but curses and furious lunges at my head"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.0,
+   "turn": "a living man -> a hostile one: the first Londoner he meets answers him with fists",
+   "why": "Opens on the first living Londoner, a drunk who answers the narrator with blows; shows the narrator alone in a city that has lost its reason."
+  },
+  {
+   "frame": "Medium close of the narrator (face gaunt, grey eyes, sixteen days of grey-brown beard) at the lane corner, looking down past the LEFT edge toward the kerb as he speaks to the drunk man.",
+   "motion": "The camera holds a locked-off frame at the narrator's eye height across the whole shot; the narrator speaks down toward the kerb with one open hand held out; his shoulders draw back as he straightens up away from the kerb.",
+   "camera": "On the setts a yard and a half in front of the narrator, at his eye height, a 50mm lens; the afternoon sun comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face at the CENTRE, his head a third of the frame's height, bent a little forward, grey eyes looking down past the LEFT edge toward the kerb. A shuttered shopfront with a painted green fascia fills the TOP half behind him. Black powder dusts the brim of his battered brown felt hat, and the sun falls across his LEFT cheek.",
+   "end": "The narrator's face sits at the CENTRE, his head a third of the frame's height, raised and drawn back, his mouth set hard. The shuttered shopfront fills the TOP half behind him, its green fascia along the TOP edge.",
+   "changed": "he draws back, straightening",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 1,
+   "section": "friction",
+   "setup": "fulham_road",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "I think I should have stayed by him but for the brutal expression of his face"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.05,
+   "turn": "pity -> revulsion: he offers help and the brutal face drives him back",
+   "why": "The narrator's first spoken words are kindness to a stranger, refused; shows him still a man who would help in a city gone mad."
+  },
+  {
+   "frame": "Medium from behind of the narrator (battered brown felt hat, charcoal trousers caked with dried clay to the thigh) walking at a walking pace east along the black-dusted Fulham Road between shuttered shops.",
+   "motion": "The camera tracks behind the narrator a full shopfront's width across the whole shot as he walks at a walking pace east toward the far smoke; his cracked black boots press prints into the black powder; the dry wind lifts the dust in small puffs around his heels.",
+   "camera": "Behind the narrator on the roadway, at shoulder height, three yards back, a 35mm lens; the sun comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator walking at a walking pace at the CENTRE of the frame, seen from behind and the left, his figure two thirds of the frame's height, his boots pressing prints into the black powder. Shuttered shopfronts with blinded upper windows run at a walking pace along the LEFT third and the RIGHT third. Grey smoke from the far burning terrace rises at the TOP of the roadway.",
+   "end": "The narrator walks at a walking pace at the CENTRE, a little smaller, a line of boot prints trailing behind him across the BOTTOM edge. The shuttered fronts run at a walking pace along the LEFT edge and the RIGHT edge, and the far grey smoke rises at the TOP.",
+   "changed": "boot prints trail behind him",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 2,
+   "section": "setup",
+   "setup": "fulham_road",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "There was black dust along the roadway from the bridge onwards, and it grew thicker in Fulham. The streets were horribly quiet.",
+    "I saw altogether about a dozen in the length of the Fulham Road"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.3,
+   "turn": "the drunk's curses -> the hush: the street closes horribly quiet around him",
+   "why": "Sets the route east into London under the black dust; shows the narrator walking on alone past the dead."
+  },
+  {
+   "frame": "Insert of the jeweller's doorstep on the north pavement: gold chains and a pocket watch scattered on black-dusted stone beside a broken champagne magnum in a dark pool.",
+   "motion": "The camera tracks sideways to the right a yard across the whole shot, past the gold chains, toward the next doorstep; the dry wind ruffles the black powder over the pocket watch; the wind rolls a green glass shard across the paving toward the dark pool.",
+   "camera": "On the north pavement two feet above the stone, a yard from the doorstep, a 50mm lens; the sun comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS a tangle of gold chains and a pocket watch on the black-powdered pavement at the LEFT third, glinting in the sun. The broken frame of the jeweller's window rises at the TOP edge above them. The edge of the next doorstep sits at the RIGHT edge, its stone step dark and wet, a green glass shard near its corner.",
+   "end": "The pocket watch and the gold chains sit at the LEFT edge. The broken champagne magnum stands on the doorstep at the CENTRE, green glass shards glinting, its dark pool spreading across the paving toward the BOTTOM edge.",
+   "changed": "champagne pool slides into view",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 3,
+   "section": "friction",
+   "setup": "fulham_road",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a glass shard tinkling on paving stone",
+     "at": 1.0,
+     "seconds": 1.5,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "a number of gold chains and a watch lay scattered on the pavement",
+    "a smashed magnum of champagne formed a pool across the pavement. She seemed asleep, but she was dead."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.6,
+   "turn": "wealth -> worthless: gold glints in the dust and the narrator leaves it there",
+   "why": "Shows the riches nobody stoops for and the dead woman's pool; the city's quiet has made gold meaningless to the narrator."
+  },
+  {
+   "frame": "Wide of the Fulham Road looking east, the narrator (battered brown felt hat, charcoal trousers caked with dried clay to the thigh) small on the black setts as the white terrace burns at the far end.",
+   "motion": "The camera pans from the narrator across to the burning white terrace, a third of the frame, across the whole shot; flames lick out of the terrace windows; grey smoke rolls up from the roof into the blue sky.",
+   "camera": "In the middle of the roadway at eye height, twenty yards behind the narrator, a 28mm lens; the sun comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator walking at a walking pace at the LEFT third, a sixth of the frame's height, beside the shuttered north terrace. The black-dusted setts fill the BOTTOM half. The burning white stucco terrace stands at the CENTRE, a tenth of the frame tall, grey smoke rising from its windows toward the TOP edge. Two stray dogs nose along the far kerb at the RIGHT third.",
+   "end": "The burning white terrace fills the CENTRE, a fifth of the frame tall, orange flames in its windows and grey smoke pouring toward the TOP edge. The narrator drifts at the LEFT edge, small against the shopfronts.",
+   "changed": "frame arrives on burning terrace",
+   "crowd": "two stray dogs nosing along the far kerb",
+   "view": "",
+   "still": false,
+   "index": 4,
+   "section": "transition",
+   "setup": "fulham_road",
+   "size": "wide",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 2,
+   "sounds": [
+    {
+     "sound": "a house fire roaring and a roof beam crashing down",
+     "at": 1.5,
+     "seconds": 3.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "I passed a white terrace of houses on fire; the noise of the burning was an absolute relief",
+    "It was a city condemned and derelict"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.9,
+   "turn": "dead hush -> relief: the roar of the burning is the first sound of life",
+   "why": "Fire as company: shows how starved the narrator is for any sound in a city condemned and derelict."
+  },
+  {
+   "frame": "Wide of Exhibition Road looking north to the park gates, the narrator (battered brown felt hat, cracked black boots) small on the setts as the howl sweeps down the road.",
+   "motion": "The camera rises one whole storey above the narrator across the whole shot, looking down over the road to the park gates; the narrator turns his head from side to side toward the sound; three pigeons flap up from the setts and circle above the left kerb.",
+   "camera": "On the roadway near the south end, at eye height, thirty yards behind the narrator, a 28mm lens; the noon sun comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator standing at the CENTRE of the roadway, an eighth of the frame's height, facing the park gates. The red-brick museum front fills the RIGHT third. The stucco mansions and the institute tower fill the LEFT third. The black iron park gates stand at the far CENTRE under a strip of blue sky at the TOP, three pigeons pecking near the LEFT kerb.",
+   "end": "Seen from above, the narrator stands at the CENTRE, smaller, the setts spreading around him to the BOTTOM edge. The museum roofline runs at a walking pace along the RIGHT edge, the institute's copper cupola at the LEFT third, the park gates and green trees across the TOP third.",
+   "changed": "the camera rises above him",
+   "crowd": "three pigeons pecking on the setts near the left kerb",
+   "view": "",
+   "still": false,
+   "index": 5,
+   "section": "setup",
+   "setup": "exhibition_road",
+   "size": "wide",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 3,
+   "sounds": [
+    {
+     "sound": "a deep two-note mechanical howl rising and falling",
+     "at": 0.0,
+     "seconds": 6.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "It was near South Kensington that I first heard the howling",
+    "great waves of sound sweeping down the broad, sunlit roadway, between the tall buildings on each side"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.1,
+   "turn": "hush -> a voice: the shuttered city begins to cry",
+   "why": "The howl enters; the narrator, tiny in the huge avenue, is no longer the only sound in London."
+  },
+  {
+   "frame": "Medium close of the narrator (face gaunt, grey eyes, sixteen days of grey-brown beard) stopped on the setts, staring north toward the park as the wailing rolls over him.",
+   "motion": "The camera pushes in a hand's breadth toward the narrator's face across the whole shot; the narrator tilts his head to listen; his head turns north toward the sound as his shoulders rise with a quick breath.",
+   "camera": "On the roadway two yards in front of the narrator, at his eye height, a 50mm lens; the noon sun comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face at the CENTRE of the frame, his head a third of the frame's height, grey eyes lifted past the camera toward the north. The red-brick museum wall fills the LEFT third behind him, an arched window with a drawn blind at the TOP edge. Noon sunlight falls across his RIGHT cheek and the brim of his battered brown felt hat.",
+   "end": "The narrator's face fills the CENTRE, his head half the frame's height, turned toward the RIGHT, brows drawn together. The museum's red brick fills the LEFT edge behind the brim of his battered brown felt hat.",
+   "changed": "his face fills the frame",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 6,
+   "section": "friction",
+   "setup": "exhibition_road",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a deep two-note mechanical howl rising and falling",
+     "at": 0.0,
+     "seconds": 5.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "I stopped, staring towards Kensington Gardens, wondering at this strange, remote wailing",
+    "It was as if that mighty desert of houses had found a voice for its fear and solitude"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.3,
+   "turn": "marvelling -> unease: wonder at the wail becomes a weight on his mind",
+   "why": "Pushes on the narrator's realisation that the city has a voice; shows him curious before he is afraid."
+  },
+  {
+   "frame": "Medium from behind of the narrator (battered brown felt hat, charcoal trousers caked with dried clay to the thigh) walking at a walking pace north up Exhibition Road toward the park gates past shuttered mansions.",
+   "motion": "The camera tracks behind the narrator a full mansion's width across the whole shot as he walks at a walking pace north toward the park gates; his cracked black boots strike the setts at a normal walking pace; his shadow swings along the setts beside him.",
+   "camera": "On the roadway behind the narrator, at shoulder height, three yards back, a 35mm lens; the sun comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator walking at a walking pace at the LEFT third, seen from behind, his figure two thirds of the frame's height. The stucco mansion fronts with drawn blinds run at a walking pace along the LEFT edge. The red-brick museum front fills the RIGHT third. The black iron park gates stand small at the CENTRE at the far end of the road.",
+   "end": "The narrator walks at a walking pace at the LEFT third, nearer the gates. The iron park gates stand at the CENTRE, a fifth of the frame tall, park trees behind them toward the TOP edge. The mansion fronts run at a walking pace along the LEFT edge.",
+   "changed": "the park gates grow larger",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 7,
+   "section": "transition",
+   "setup": "exhibition_road",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "I turned northwards, marvelling, towards the iron gates of Hyde Park",
+    "All the large mansions on each side of the road were empty and still, and my footsteps echoed against the sides of the houses",
+    "and the skeleton of a horse picked clean",
+    "I found I was intensely weary, footsore, and now again hungry and thirsty"
+   ],
+   "take": 0,
+   "beat_s": 1.5,
+   "coda_s": 2.94,
+   "cuts": [],
+   "path": 0.7,
+   "turn": "following the voice -> weariness: the long road wears away the mood that sustained him",
+   "why": "The silent shot: only his own footsteps answer the city, and the long road shows hunger and loneliness taking hold of him."
+  },
+  {
+   "frame": "Wide of the top of Baker Street at sunset, the narrator (battered brown felt hat, cracked black boots) by the gas lamp as the fighting-machine, a brazen cowled Martian fighting-machine, a walking at a walking pace engine of glittering metal on tall jointed brass legs, stands far off above the park trees.",
+   "motion": "The camera pulls back from the narrator at the gas lamp across the whole shot, widening to show the park railings, the trees and the fighting-machine above them; the narrator lifts his face toward the brass Martian fighting-machine; the sunset light runs at a walking pace gold along the Martian fighting-machine's rim.",
+   "camera": "On the pavement at the street corner, at eye height, four yards from the gas lamp, a 35mm lens; the sunset comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator standing beside the unlit gas lamp at the RIGHT third, his figure half the frame's height, facing the park. The black iron park railings cross the lower third from the LEFT edge. The dark mass of trees fills the middle band, the fighting-machine's brazen Martian fighting-machine above them right of CENTRE against the amber sky at the TOP.",
+   "end": "The narrator stands at the RIGHT third, a quarter of the frame's height, by the gas lamp. The railings cross the lower third, the trees the middle band, and the fighting-machine, a brazen cowled Martian fighting-machine on three long jointed brass legs, stands above the treetops right of CENTRE. The stucco terrace fills the LEFT edge.",
+   "changed": "the park opens around him",
+   "crowd": "two rooks settling on the park railings",
+   "view": "",
+   "still": false,
+   "index": 8,
+   "section": "setup",
+   "setup": "regents_park_corner",
+   "size": "wide",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 2,
+   "sounds": [
+    {
+     "sound": "a far two-note mechanical howl across the park",
+     "at": 0.5,
+     "seconds": 5.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "slept on a black horsehair sofa I found there",
+    "I saw far away over the trees in the clearness of the sunset the hood of the Martian giant from which this howling proceeded"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.0,
+   "turn": "a voice -> a source: after sleep, the howl has a body standing above the trees",
+   "why": "Pulls back from the rested narrator to reveal what cries; he comes upon the giant as a matter of course."
+  },
+  {
+   "frame": "Medium of the narrator (face gaunt, grey eyes, battered brown felt hat) on the kerb as a dog with red meat in its jaws races past him, a pack of mongrels at its heels.",
+   "motion": "The camera pushes in toward waist height across the whole shot; the lean brown dog curves wide around the narrator with the red meat in its jaws; the six mongrels jostle and yelp across the centre of the road behind it.",
+   "camera": "On the pavement under the terraces, at waist height, three yards from the narrator, a 35mm lens; the sunset comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator standing at the LEFT third, his head a quarter of the frame's height, close by the black park railings. The roadway runs at a walking pace across the BOTTOM half, black powder in the gutter. A lean brown dog with a scrap of red meat in its jaws bounds along the far kerb at the RIGHT edge, six mongrels behind it.",
+   "end": "The narrator stands at the LEFT third, turned toward the RIGHT. The lean brown dog curves past him across the CENTRE, and six mongrels run at a walking pace along the BOTTOM half behind it, dust kicking up from their paws.",
+   "changed": "the pack streams past him",
+   "crowd": "a pack of six mongrel dogs running along the roadway",
+   "view": "",
+   "still": false,
+   "index": 9,
+   "section": "friction",
+   "setup": "regents_park_corner",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 7,
+   "sounds": [
+    {
+     "sound": "a pack of dogs yelping and snarling",
+     "at": 0.3,
+     "seconds": 4.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "first a dog with a piece of putrescent red meat in his jaws coming headlong towards me, and then a pack of starving mongrels in pursuit of him"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.3,
+   "turn": "a fresh competitor -> a bystander: the dog swerves wide and the pack runs by him",
+   "why": "Shows what feeds in the dead city; the narrator is one more hungry creature on the road."
+  },
+  {
+   "frame": "Insert of the spiked tops of the park railings at dusk with the far fighting-machine's brazen the Martian fighting-machine, a walking at a walking pace engine of glittering metal framed above the black trees.",
+   "motion": "The camera tilts up from the railing spikes to the brass Martian fighting-machine above the trees, a third of the frame, across the whole shot; the dusk wind stirs the elm tops; the last light runs at a walking pace along the Martian fighting-machine's brass rim.",
+   "camera": "On the kerb a foot from the railings, at hip height, an 85mm lens; the last light comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the row of black iron railing spikes across the BOTTOM half, sharp against the dusk, black powder along the stone kerb at the BOTTOM edge. A dark band of elm and plane trees fills the CENTRE behind them, the brazen Martian fighting-machine of the fighting-machine a small gold glint above the trees at the TOP third.",
+   "end": "The railing spikes sit at the BOTTOM edge. The dark treetops fill the lower half, and the fighting-machine's brazen cowled the Martian fighting-machine stands at the CENTRE above them, gold against the violet sky at the TOP.",
+   "changed": "the hood rises into centre",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 10,
+   "section": "friction",
+   "setup": "regents_park_corner",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "Certainly I was more curious to know the reason of this monotonous crying than afraid",
+    "this mechanical Samson lying, with its tentacles bent and smashed and twisted",
+    "Far away, through a gap in the trees, I saw a second Martian, as motionless as the first"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.4,
+   "turn": "fear -> curiosity: he means to learn why the giant cries, and finds a wreck and a second Titan",
+   "why": "Reveals the hood as the narrator's goal; shows him too tired to be afraid and more curious than frightened."
+  },
+  {
+   "frame": "Medium of the narrator (face gaunt, battered brown felt hat, charcoal trousers caked with dried clay to the thigh) crossing the canal bridge beside its iron railing at dusk.",
+   "motion": "The camera tracks sideways to the right with the narrator across the whole shot, past the gas lamp on the parapet; the narrator halts in mid-stride at a walking pace as the howl cuts off; his head turns back over his shoulder toward the park.",
+   "camera": "On the bridge roadway, at chest height, three yards to the narrator's side, a 35mm lens; the violet dusk light comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator walking at a walking pace at the LEFT third beside the cast-iron bridge railing, his head a quarter of the frame's height. The unlit gas lamp stands at the LEFT edge. The black road and the white stucco terraces recede to the CENTRE behind him, dim under the violet sky at the TOP.",
+   "end": "The narrator stands at the CENTRE, halted mid-stride at a walking pace on the bridge, his head turned back over his shoulder. The gas lamp has passed to the LEFT edge. The tarred road runs at a walking pace ahead at the RIGHT third toward the white terraces.",
+   "changed": "he halts mid-stride at a walking pace, listening",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 11,
+   "section": "friction",
+   "setup": "canal_bridge_road",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a two-note mechanical howl that stops dead",
+     "at": 0.0,
+     "seconds": 2.5,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "It was, as it were, cut off. The silence came like a thunderclap."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.1,
+   "turn": "endurable -> unbearable: the voice that kept London alive stops",
+   "why": "The cry cuts off on the bridge; shows how the narrator had leaned on the very sound he feared."
+  },
+  {
+   "frame": "Insert of crimson red weed clambering over a heap of fallen brick against a white stucco house front, its dark window openings above.",
+   "motion": "The camera rises above the half, travelling a forearm, across the whole shot; the dusk wind stirs the fleshy fronds over the bricks; the weed tendrils sway and reach up the wall.",
+   "camera": "On the pavement at knee height, a yard from the rubble heap, a 50mm lens; the violet dusk light comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the crimson red weed spilling over fallen brick across the BOTTOM half, its fleshy fronds glistening. The base of a white stucco house front rises at the RIGHT edge. The lower sill of a dark window opening sits at the TOP edge, a black hollow above the weed.",
+   "end": "The dark window openings of the white house fill the TOP half like the eye sockets of a skull, two black hollows side by side. The red weed heap sits at the BOTTOM third, the pale stucco between them.",
+   "changed": "dark windows stare like sockets",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 12,
+   "section": "spike",
+   "setup": "canal_bridge_road",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "All about me the red weed clambered among the ruins, writhing to get above me in the dimness",
+    "The windows in the white houses were like the eye sockets of skulls"
+   ],
+   "take": 0,
+   "beat_s": 1.5,
+   "coda_s": 2.94,
+   "cuts": [],
+   "path": 0.4,
+   "turn": "a living city -> a skull: the silence turns every window into an eye socket",
+   "why": "The second silent shot: with the cry gone only the weed moves, and London stares back at the narrator spectrally."
+  },
+  {
+   "frame": "Medium close of the narrator (face gaunt, grey eyes, sixteen days of grey-brown beard) on the black road at dusk as he whispers into the silence and terror takes him.",
+   "motion": "The camera holds a locked-off frame at the narrator's eye height across the whole shot; the narrator's head jerks from side to side along the dark windows; his shoulders swing round toward the black road behind him.",
+   "camera": "On the roadway a yard and a half in front of the narrator, at his eye height, a 50mm lens; the dusk light comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face at the CENTRE, his head a third of the frame's height, grey eyes wide and fixed past the LEFT edge of the frame. The white terrace fronts with their dark windows stand behind his RIGHT shoulder. The pale violet sky fills the TOP strip above the rooflines.",
+   "end": "The narrator's face sits at the RIGHT third, turned in profile, his head a third of the frame's height, his shoulders swung round. The white terrace fronts fill the LEFT half behind him, the dark windows in a row at the TOP.",
+   "changed": "he wheels round in fear",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 13,
+   "section": "spike",
+   "setup": "canal_bridge_road",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "Terror seized me, a horror of my temerity",
+    "I could not bring myself to go on"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.5,
+   "turn": "temerity -> terror: the man who walked into London alone cannot face a quiet road",
+   "why": "The low point, spoken on his own face: the stillness frightens him more than the cry did."
+  },
+  {
+   "frame": "Wide of Primrose Hill at first dawn from Albert Road, the narrator (battered brown felt hat, cracked black boots) small at the road's edge as the third fighting-machine stands on the summit against the fading stars.",
+   "motion": "The camera tilts up from the railings to the slope, travelling two strides at a walking pace, across the whole shot; the dawn light grows gold along the machine's long legs; the black birds wheel and circle around its the Martian fighting-machine.",
+   "camera": "On Albert Road at the south-west foot of the hill, at eye height, a 28mm lens; the pale dawn light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator standing at the LEFT third beside the iron park railings, a seventh of the frame's height, facing up the slope. The brown flood water runs at a walking pace across the BOTTOM fifth. The grass slope rises to the clay mounds at the CENTRE of the TOP half, the fighting-machine standing on them right of CENTRE, its the Martian fighting-machine near the TOP edge.",
+   "end": "The fighting-machine, a brazen cowled Martian fighting-machine on three long jointed brass legs, fills the frame right of CENTRE, two fifths of the frame tall, black birds circling its the Martian fighting-machine under the fading stars at the TOP. The narrator stands small at the LEFT edge.",
+   "changed": "the frame arrives on machine",
+   "crowd": "about forty black birds circling the hood",
+   "view": "",
+   "still": false,
+   "index": 14,
+   "section": "setup",
+   "setup": "primrose_hill_foot",
+   "size": "wide",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 40,
+   "sounds": [],
+   "source": [
+    "until long after midnight",
+    "But before the dawn my courage returned",
+    "On the summit, towering up to the fading stars, was a third Martian, erect and motionless like the others"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.0,
+   "turn": "night -> dawn: his courage returns, and a third Titan stands waiting on the hill",
+   "why": "Sets the last place and the last machine; shows the narrator back on the road toward the thing he fled."
+  },
+  {
+   "frame": "Medium from behind of the narrator (battered brown felt hat, Cream-and-blue striped flannel shirt torn at the shoulder) marching up the road toward the fighting-machine on the summit as black birds cluster on its the Martian fighting-machine.",
+   "motion": "The camera tracks behind the narrator a dozen strides at a walking pace up the road across the whole shot toward the fighting-machine on the summit; the narrator lifts his head to the black birds clustering on the machine's Martian fighting-machine; his march breaks into a run at a walking pace, arms pumping toward the hill.",
+   "camera": "Behind the narrator on the road, at shoulder height, three yards back, a 35mm lens; the dawn light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator striding at a walking pace at the CENTRE, seen from behind, his head a quarter of the frame's height, fists clenched at his sides. The grass slope rises ahead of him into the TOP half. The fighting-machine stands on the summit right of CENTRE near the TOP edge, black specks of birds around its the Martian fighting-machine.",
+   "end": "The narrator runs at a walking pace at the CENTRE, his figure a little smaller, arms pumping. The fighting-machine stands larger right of CENTRE near the TOP edge, the black birds clustering thick on its the Martian fighting-machine.",
+   "changed": "his march breaks into running at a walking pace",
+   "crowd": "about forty black birds circling the far hood",
+   "view": "",
+   "still": false,
+   "index": 15,
+   "section": "turn",
+   "setup": "primrose_hill_foot",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 40,
+   "sounds": [],
+   "source": [
+    "An insane resolve possessed me. I would die and end it.",
+    "I marched on recklessly towards this Titan",
+    "At that my heart gave a bound, and I began running along the road"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "a march to die -> a run of hope: the birds on the hood tell him the Titan is carrion",
+   "why": "The lead's choice: he walks at the machine to end it all, and the birds feeding on it turn his despair into a run."
+  },
+  {
+   "frame": "Medium of the narrator (face gaunt, sixteen days of grey-brown beard, battered brown felt hat) wading breast-high across the brown flood torrent below the hill.",
+   "motion": "The camera holds a locked-off frame; the brown torrent tears around his chest toward the road; the narrator drives his arms through the rushing water, spray flying.",
+   "camera": "On the roadside bank at chest height, three yards from the narrator, a 35mm lens, handheld; the dawn light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator standing breast-high in the brown flood water at the LEFT third, his head a quarter of the frame's height, his arms raised above the current. The iron park railings stand at the RIGHT edge. The crimson weed of St Edmund's Terrace fills the TOP half behind him.",
+   "end": "The narrator stands at the CENTRE, the water at his waist, his arms pushing through the current. The iron railings stand at the RIGHT third. The wet grass of the slope rises across the TOP half.",
+   "changed": "he reaches the shallower edge",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 16,
+   "section": "friction",
+   "setup": "primrose_hill_foot",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a man wading through a rushing flood torrent, heavy splashing",
+     "at": 0.3,
+     "seconds": 5.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "I waded breast-high across a torrent of water that was rushing down from the waterworks towards the Albert Road"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.35,
+   "turn": "the water holds him -> he breaks through to the grass",
+   "why": "The last obstacle is plain water; shows the narrator spending everything he has left to reach the machine."
+  },
+  {
+   "frame": "Insert of the fighting-machine's brass Martian fighting-machine at dawn, lank brown shreds hanging from it, black birds pecking and tearing at them.",
+   "motion": "The camera pulls back from the jointed brass leg across the whole shot, widening to show the cowled Martian fighting-machine and the birds on its rim; the black birds flap and hop along the Martian fighting-machine's rim; their beaks peck and tear at the hanging brown shreds.",
+   "camera": "On the summit mounds below the machine, at ground height, looking up, an 85mm lens; the dawn light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the jointed brass leg of the fighting-machine rising from the BOTTOM edge at the CENTRE, its rivets glinting in the dawn light. The underside of the cowled brass Martian fighting-machine sits at the TOP edge, lank brown shreds hanging down from its rim at the RIGHT third. Two black birds perch on the leg joint at the LEFT third.",
+   "end": "The cowled brass Martian fighting-machine fills the TOP half, hanging open, lank brown shreds trailing from its rim. A dozen black birds cling to the rim at the LEFT third and the RIGHT third, beaks tearing at the shreds against a pale gold sky.",
+   "changed": "birds tearing at the shreds",
+   "crowd": "a dozen black birds pecking along the hood's rim",
+   "view": "",
+   "still": false,
+   "index": 17,
+   "section": "payoff",
+   "setup": "primrose_hill_foot",
+   "size": "insert",
+   "faces": [],
+   "extras": 12,
+   "sounds": [
+    {
+     "sound": "crows cawing and wings flapping",
+     "at": 0.0,
+     "seconds": 4.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "I saw that a multitude of black birds was circling and clustering about the hood",
+    "Out of the hood hung lank shreds of brown, at which the hungry birds pecked and tore"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.6,
+   "turn": "a Titan -> a carcass: the birds feed on what drove the machine",
+   "why": "Shows, before anyone says it, that the Martian inside is dead."
+  },
+  {
+   "frame": "Medium of the narrator (face gaunt, grey eyes, sixteen days of grey-brown beard) climbing at a walking pace the wet grass slope toward the clay mounds, seen from a low angle.",
+   "motion": "The camera pushes in a hand's breadth toward the narrator across the whole shot; the narrator scrambles up the wet grass on hands and boots; his chest heaves with a wild, trembling laugh.",
+   "camera": "On the grass slope three yards above the narrator, a low angle from knee height looking at him and the sky, a 35mm lens; the dawn light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator climbing at a walking pace at the CENTRE, his head a quarter of the frame's height, mouth open in a breathless smile, his hands clawing at the wet grass. The slope falls away behind him to the BOTTOM edge. The pale gold dawn sky fills the TOP half, the brown flood road a strip at the LEFT edge.",
+   "end": "The narrator's head and shoulders fill the CENTRE, his head a third of the frame's height, his eyes lifted past the camera toward the summit. The gold sky fills the TOP half behind his battered brown felt hat.",
+   "changed": "his head grows in frame",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 18,
+   "section": "reaction",
+   "setup": "primrose_hill_foot",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "I felt no fear, only a wild, trembling exultation, as I ran up the hill towards the motionless monster"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.8,
+   "turn": "fear -> exultation: the thought that the Martians are dead grows real",
+   "why": "Pushes on the narrator as hope takes him; shows the fear of the night gone from his face."
+  },
+  {
+   "frame": "Wide from the rampart crest of the redoubt at sunrise, the narrator (battered brown felt hat, charcoal trousers caked with dried clay to the thigh) standing on the clay as the pit opens below him.",
+   "motion": "The camera rises a full storey above the narrator across the whole shot, looking down over the pit; the narrator steadies himself on the trodden clay crest; the dogs on the pit floor snarl and tug at dark shapes.",
+   "camera": "Behind the narrator on the rampart crest, a high angle from two yards above his head looking down into the pit, a 24mm lens; the rising sun comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator standing on the clay rampart crest at the BOTTOM centre, seen from behind, his figure a third of the frame's height. The shadowed pit opens across the CENTRE, the overturned fighting-machines at the LEFT third. the Martian flying-machine, a great flat Martian flying-machine craft of pale the Martian fighting-machine metal, a great flat craft of pale ribs and grey membrane, stretches along the far lip in the TOP third, the erect fighting-machine at the RIGHT edge.",
+   "end": "Seen from high above, the narrator is a small figure on the crest at the BOTTOM edge. The whole pit spreads below: overturned fighting-machines at the LEFT third, a crablike Martian handling-machine, a metallic Martian handling-machine-crab of a machine on folded jointed legs at the CENTRE, the flat Martian flying-machine of pale ribs and grey membrane along the TOP third, the erect brass fighting-machine at the RIGHT edge.",
+   "changed": "the whole redoubt spreads below",
+   "crowd": "a dozen dogs fighting on the shadowed pit floor",
+   "view": "",
+   "still": false,
+   "index": 19,
+   "section": "payoff",
+   "setup": "redoubt_pit",
+   "size": "wide",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 12,
+   "sounds": [
+    {
+     "sound": "a pack of dogs snarling and fighting",
+     "at": 1.0,
+     "seconds": 4.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "In another moment I had scrambled up the earthen rampart and stood upon its crest, and the interior of the redoubt was below me"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.0,
+   "turn": "a fortress -> a graveyard: the machines lie overturned in the pit",
+   "why": "Rises over the whole redoubt to show the scale of what has fallen, and the narrator standing above it."
+  },
+  {
+   "frame": "Medium of the dead Martian fighting-machine laid in a row on the yellow clay of the pit floor, each a rounded grey-brown bulk with two immense dark eyes.",
+   "motion": "The camera pans from the third to the eyes, travelling two strides at a walking pace, across the whole shot; the sunrise light spreads down the clay wall toward the bodies; the rim of gold light runs at a walking pace along the rampart crest above them.",
+   "camera": "On the pit floor at waist height, three yards from the row, a 50mm lens; the rising sun comes from the RIGHT, rimming the rampart above.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the nearest dead Martian fighting-machine at the LEFT third, a rounded grey-brown bulk with two immense dark eyes, four feet across, its slender grey whiplike the Martian handling-machine, a metallic Martian handling-machine-crab of a machine limp on the clay. Two more bodies rest beside it toward the CENTRE, and the row runs at a walking pace on toward the RIGHT edge. The sloped clay wall of the pit rises to a strip of gold sky at the TOP edge.",
+   "end": "The row of dead the Martian fighting-machine runs at a walking pace along the BOTTOM half from the LEFT edge to the RIGHT edge, a dozen rounded grey-brown bodies side by side. The clay wall rises behind them, a rim of sunlight along the rampart crest at the TOP.",
+   "changed": "the whole row slides in",
+   "crowd": "",
+   "view": "",
+   "still": true,
+   "index": 20,
+   "section": "answer",
+   "setup": "redoubt_pit",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "a dozen of them stark and silent and laid in a row, were the Martians",
+    "slain by the putrefactive and disease bacteria against which their systems were unprepared"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "invaders -> carrion: the masters of the world lie in a row, slain by the humblest things on earth",
+   "why": "The answer in pictures: the Martians are dead, and the narration names what killed them."
+  },
+  {
+   "frame": "Medium close of the narrator (face gaunt, grey eyes, sixteen days of grey-brown beard) on the rampart crest as he calls out over the pit of the dead.",
+   "motion": "The camera holds a locked-off frame at eye height across the whole shot; the narrator draws a long breath and calls out over the pit; his head tips back as a laugh shakes through his shoulders.",
+   "camera": "On the rampart crest two yards in front of the narrator, at his eye height, a 50mm lens; the rising sun comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face at the CENTRE, his head a third of the frame's height, grey eyes wide, lit gold on the RIGHT cheek by the rising sun. The battered brown felt hat sits on his head. The clay rampart runs at a walking pace along the BOTTOM edge and a strip of gold sky fills the TOP third behind him.",
+   "end": "The narrator's face at the CENTRE breaks into a wide, shaking smile, his head tipped back and a third of the frame's height, tears bright on his gaunt cheeks, the gold sky behind him at the TOP.",
+   "changed": "his face breaks into joy",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 21,
+   "section": "reaction",
+   "setup": "redoubt_pit",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "Here and there they were scattered, nearly fifty altogether",
+    "All I knew was that these things that had been alive and so terrible to men were dead"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.3,
+   "turn": "doubt -> certainty: he says aloud that they are dead",
+   "why": "The narrator shouts on camera; shows the hunted man become a witness."
+  },
+  {
+   "frame": "Insert of a heap of bright aluminium bars at the edge of the shadowed pit floor, the rising sun striking it to fire.",
+   "motion": "The camera pulls back from the aluminium bars across the whole shot, widening to show the shadowed pit floor and the sunlit machines; the rising sunlight spreads down the machines' brass legs; thin smoke curls up from the central mounds.",
+   "camera": "On the clay slope above the heap, at knee height, a yard from the bars, a 50mm lens; the rising sun comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the heap of bright aluminium bars at the CENTRE, its upper ends blazing white where the sun strikes from the RIGHT. Deep umber shadow fills the BOTTOM third below it. Yellow clay printed with dogs' paw tracks runs at a walking pace along the LEFT edge.",
+   "end": "The aluminium heap sits small at the CENTRE, glinting. The shadowed pit floor spreads around it to the LEFT edge and the BOTTOM edge, a crablike Martian handling-machine crouched on folded jointed legs at the LEFT third and the sunlit erect fighting-machine at the RIGHT edge rising to the TOP.",
+   "changed": "the sunlit pit opens around",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 22,
+   "section": "payoff",
+   "setup": "redoubt_pit",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "dogs snarling and fighting far below",
+     "at": 0.5,
+     "seconds": 4.0,
+     "gain_db": 0.0
+    },
+    {
+     "sound": "rooks cawing overhead",
+     "at": 3.0,
+     "seconds": 2.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "my heart lightened gloriously, even as the rising sun struck the world to fire about me with his rays",
+    "A multitude of dogs, I could hear, fought over the bodies that lay darkly in the depth of the pit, far below me",
+    "They glittered now, harmless tripod towers of shining metal"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.5,
+   "turn": "darkness -> fire: the sun lights the dead engines as his heart lightens",
+   "why": "Pulls back from the glitter to the harmless machines; shows the world itself turning to light around the narrator."
+  },
+  {
+   "frame": "Medium close of the narrator (face gaunt, grey eyes, sixteen days of grey-brown beard) on the crest from a low angle as he lifts both hands toward the sky.",
+   "motion": "The camera pushes in a hand's breadth toward the narrator's face across the whole shot; the narrator tilts his face up toward the sky; both his hands rise from his chest toward the sky, palms opening.",
+   "camera": "On the rampart crest a low angle from knee height, two yards in front of the narrator, looking up at him and the sky, a 50mm lens; the rising sun comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face at the CENTRE, his head a third of the frame's height, tilted up toward the sky. His hands are held at chest height at the BOTTOM edge, palms opening. The clear gold sky fills the TOP half behind him, a thread of smoke at the LEFT edge.",
+   "end": "The narrator's face sits at the CENTRE, his head half the frame's height, both hands raised beside his face at the LEFT third and the RIGHT third, palms toward the sky, his eyes shining.",
+   "changed": "his hands rise to heaven",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 23,
+   "section": "reaction",
+   "setup": "redoubt_pit",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "stretched the great Mother of Cities",
+    "The torment was over. Even that day the healing would begin."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.7,
+   "turn": "torment -> thanks: London is saved and its healing can begin",
+   "why": "The height of the triumph: the narrator sees the city saved and his hands rise of themselves."
+  },
+  {
+   "frame": "Medium close of the narrator (face gaunt, grey eyes, sixteen days of grey-brown beard) on the crest with both hands raised high as he gives thanks aloud.",
+   "motion": "The camera holds a locked-off frame at the narrator's chest height across the whole shot; the narrator speaks his thanks up toward the sky, both hands held high; his raised hands tremble and begin to sink toward his shoulders.",
+   "camera": "On the rampart crest two yards in front of the narrator, at his chest height, a 50mm lens; the rising sun comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face at the CENTRE, his head a third of the frame's height, lifted toward the sky, grey eyes wet. Both his hands are raised high at the LEFT third and the RIGHT third, palms open. The gold sky fills the TOP half behind his battered brown felt hat, the clay crest along the BOTTOM edge.",
+   "end": "The narrator's face sits at the CENTRE, his head a third of the frame's height, tilting down, his hands sinking to shoulder height at the LEFT third and the RIGHT third, the gold sky behind him at the TOP.",
+   "changed": "his raised hands begin sinking",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 24,
+   "section": "reaction",
+   "setup": "redoubt_pit",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "At the thought I extended my hands towards the sky and began thanking God"
+   ],
+   "take": 0,
+   "beat_s": 1.2,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.8,
+   "turn": "thanks -> doubt: the hands that rise in triumph begin to fall",
+   "why": "He thanks God aloud on his own face; the beat after it lets the joy hang before the cost arrives."
+  },
+  {
+   "frame": "Full of the narrator (battered brown felt hat, Cream-and-blue striped flannel shirt torn at the shoulder) alone on the rampart crest above the pit, his hands coming down to his sides.",
+   "motion": "The camera rises a full storey above the narrator across the whole shot, looking down over the pit; the narrator lowers his hands to his sides; his head bows and his shoulders shake with grief.",
+   "camera": "On the rampart crest four yards to the narrator's side, at chest height, a 35mm lens; the rising sun comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator standing on the clay crest at the LEFT third, his figure two thirds of the frame's height, both hands raised above his shoulders. The shadowed pit falls away across the RIGHT half below him. The erect fighting-machine stands at the RIGHT edge against the gold sky at the TOP.",
+   "end": "Seen from above, the narrator stands small on the crest at the LEFT third, his hands down at his sides, his head bowed. The whole shadowed pit spreads below him across the CENTRE, the overturned machines at the LEFT, the erect fighting-machine at the RIGHT edge.",
+   "changed": "his hands fall, head bowed",
+   "crowd": "a dozen dogs fighting on the shadowed pit floor far below",
+   "view": "",
+   "still": false,
+   "index": 25,
+   "section": "button",
+   "setup": "redoubt_pit",
+   "size": "full",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 12,
+   "sounds": [],
+   "source": [
+    "With overwhelming force came the thought of myself, of my wife, and the old life of hope and tender helpfulness that had ceased for ever."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 1.84,
+   "cuts": [],
+   "path": 0.9,
+   "turn": "triumph -> grief: the city may live again, his old life with his wife is gone",
+   "why": "The world's answer to his thanks: the thought of his wife returns, and the victory cannot repay what he has lost."
+  }
+ ],
+ "lines": [
+  {
+   "index": 0,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Past the bridge a man lay black with dust, too drunk to speak, swinging at my head.",
+   "shot": 0,
+   "delivery": ""
+  },
+  {
+   "index": 1,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Steady, man. Let me help you up.",
+   "shot": 1,
+   "delivery": ""
+  },
+  {
+   "index": 2,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The dust thickened toward Fulham. A dozen dead lay softened under it along the road.",
+   "shot": 2,
+   "delivery": "hushed"
+  },
+  {
+   "index": 3,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Gold chains lay on the pavement. I left them. Beyond, a woman slept on a doorstep, dead.",
+   "shot": 3,
+   "delivery": ""
+  },
+  {
+   "index": 4,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A white terrace burned, and its roar was a mercy.",
+   "shot": 4,
+   "delivery": ""
+  },
+  {
+   "index": 5,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Near South Kensington a sound rose. Two notes, sobbing, over and over.",
+   "shot": 5,
+   "delivery": "curious"
+  },
+  {
+   "index": 6,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "It was as though the empty houses had found a voice for their fear.",
+   "shot": 6,
+   "delivery": ""
+  },
+  {
+   "index": 7,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I slept in a public house, woke at dusk, and saw the crying giant above the park.",
+   "shot": 8,
+   "delivery": ""
+  },
+  {
+   "index": 8,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A dog ran past with red meat in its jaws, a starving pack behind it.",
+   "shot": 9,
+   "delivery": ""
+  },
+  {
+   "index": 9,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Too tired to fear, I went on, past a wrecked machine, toward a second silent giant.",
+   "shot": 10,
+   "delivery": ""
+  },
+  {
+   "index": 10,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "On the canal bridge, the cry stopped. The silence struck like thunder.",
+   "shot": 11,
+   "delivery": "hushed"
+  },
+  {
+   "index": 11,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "It has stopped. God help me, it has stopped.",
+   "shot": 13,
+   "delivery": "hushed"
+  },
+  {
+   "index": 12,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I hid in a cabmen's shelter till after midnight. Before dawn, a third machine stood on Primrose Hill.",
+   "shot": 14,
+   "delivery": ""
+  },
+  {
+   "index": 13,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I meant to die there. Then I saw the birds on its hood, and I ran.",
+   "shot": 15,
+   "delivery": "urgent"
+  },
+  {
+   "index": 14,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I waded breast-high through the flood.",
+   "shot": 16,
+   "delivery": ""
+  },
+  {
+   "index": 15,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Brown shreds hung from the hood, and the hungry birds tore at them.",
+   "shot": 17,
+   "delivery": ""
+  },
+  {
+   "index": 16,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Fear left me. Only a wild, trembling joy carried me up the hill.",
+   "shot": 18,
+   "delivery": "exultant"
+  },
+  {
+   "index": 17,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I scrambled up the rampart. Below me lay the pit, and its fallen machines.",
+   "shot": 19,
+   "delivery": ""
+  },
+  {
+   "index": 18,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The Martians lay dead. Earth's smallest things, its germs, had killed them where men failed.",
+   "shot": 20,
+   "delivery": ""
+  },
+  {
+   "index": 19,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Dead! They are dead, every one of them!",
+   "shot": 21,
+   "delivery": "exultant"
+  },
+  {
+   "index": 20,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The sun rose and set the dead engines glittering, and my heart lightened with it.",
+   "shot": 22,
+   "delivery": ""
+  },
+  {
+   "index": 21,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "London was saved, and its healing would begin that very day.",
+   "shot": 23,
+   "delivery": ""
+  },
+  {
+   "index": 22,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Thank God. Thank God, the torment is over.",
+   "shot": 24,
+   "delivery": "hushed"
+  },
+  {
+   "index": 23,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Then came the thought of my wife, and the old life gone for ever.",
+   "shot": 25,
+   "delivery": "grieving"
+  }
+ ],
+ "omit": [],
+ "beds": [
+  {
+   "from_shot": 0,
+   "tone": "grave"
+  },
+  {
+   "from_shot": 5,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 14,
+   "tone": "thrilling"
+  },
+  {
+   "from_shot": 18,
+   "tone": "light"
+  },
+  {
+   "from_shot": 22,
+   "tone": "grave"
+  }
+ ]
+}

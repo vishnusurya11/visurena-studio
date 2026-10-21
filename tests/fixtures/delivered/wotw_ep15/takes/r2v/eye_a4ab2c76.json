@@ -1,0 +1,161 @@
+{
+ "sha8": "a4ab2c76",
+ "verdict": "flagged",
+ "note": "frozen-whole at T00: 73% static, run 2.25s HARD: the whole frame stands still; frozen-whole at T03: 89% static, run 4.71s HARD: the whole frame stands still; content at T04: 0 figure(s) for 1 named: someone the shot casts is missing; content at T04: posture 'sitting': the shot asks for lying; frozen-whole at T05: 82% static, run 2.88s HARD: the whole frame stands still; content at T12: the hour reads 'day' and the shot is at night; content at T14: posture 'none': the shot asks for low; frozen-whole at T15: 95% static, run 5.88s HARD: the whole frame stands still; content at T15: banned from this book: mountain; content at T16: banned from this book: mountain; frozen-whole at T17: 91% static, run 1.29s HARD: the whole frame stands still; content at T18: banned from this book: mountain -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4"
+ ],
+ "signed_at": "2026-10-01T14:13:05Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "frozen-whole",
+   "where": "T00",
+   "evidence": {
+    "value": 0.729,
+    "penalty": 43.7,
+    "repeated": false,
+    "still": "storyboard/shot_00.png"
+   },
+   "severity": "normal",
+   "note": "73% static, run 2.25s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T03",
+   "evidence": {
+    "value": 0.887,
+    "penalty": 53.2,
+    "repeated": false,
+    "still": "storyboard/shot_03.png"
+   },
+   "severity": "normal",
+   "note": "89% static, run 4.71s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "content",
+   "where": "T04",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "0 figure(s) for 1 named: someone the shot casts is missing"
+  },
+  {
+   "kind": "content",
+   "where": "T04",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "posture 'sitting': the shot asks for lying"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T05",
+   "evidence": {
+    "value": 0.82,
+    "penalty": 49.2,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "82% static, run 2.88s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "content",
+   "where": "T12",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "the hour reads 'day' and the shot is at night"
+  },
+  {
+   "kind": "content",
+   "where": "T14",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "posture 'none': the shot asks for low"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T15",
+   "evidence": {
+    "value": 0.954,
+    "penalty": 57.2,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "95% static, run 5.88s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "content",
+   "where": "T15",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "content",
+   "where": "T16",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T17",
+   "evidence": {
+    "value": 0.911,
+    "penalty": 54.7,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "91% static, run 1.29s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "content",
+   "where": "T18",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  }
+ ],
+ "terminal": "still"
+}

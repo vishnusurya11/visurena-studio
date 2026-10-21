@@ -1,0 +1,73 @@
+{
+ "rounds": [
+  {
+   "why": "batched_cures: content, cut, cut-vote, frozen-at-start, frozen-share, frozen-whole, jump, last-vs-panel, leak",
+   "at": 1791489415.3,
+   "faults": {
+    "2": [
+     "content"
+    ],
+    "3": [
+     "content"
+    ],
+    "4": [
+     "frozen-at-start",
+     "frozen-share",
+     "frozen-whole"
+    ],
+    "5": [
+     "last-vs-panel"
+    ],
+    "6": [
+     "frozen-whole"
+    ],
+    "11": [
+     "cut-vote",
+     "jump",
+     "leak"
+    ],
+    "12": [
+     "cut",
+     "cut-vote",
+     "frozen-whole",
+     "jump",
+     "leak"
+    ],
+    "20": [
+     "frozen-whole"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: cut, cut-vote, frozen-whole, jump, leak",
+   "at": 1791491153.9,
+   "faults": {
+    "2": [
+     "content"
+    ],
+    "5": [
+     "last-vs-panel"
+    ],
+    "11": [
+     "cut",
+     "cut-vote",
+     "frozen-whole",
+     "jump",
+     "leak"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: last-vs-panel",
+   "at": 1791492984.8,
+   "faults": {
+    "2": [
+     "content"
+    ],
+    "5": [
+     "last-vs-panel"
+    ]
+   }
+  }
+ ]
+}

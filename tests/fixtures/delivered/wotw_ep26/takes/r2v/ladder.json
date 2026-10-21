@@ -1,0 +1,58 @@
+{
+ "rounds": [
+  {
+   "why": "batched_cures: churn, frozen-at-start, frozen-share, frozen-whole, last-vs-panel, lip-sync",
+   "at": 1791553141.0,
+   "faults": {
+    "3": [
+     "content"
+    ],
+    "6": [
+     "churn"
+    ],
+    "12": [
+     "last-vs-panel"
+    ],
+    "17": [
+     "frozen-at-start",
+     "frozen-share",
+     "frozen-whole"
+    ],
+    "20": [
+     "frozen-whole",
+     "last-vs-panel"
+    ],
+    "25": [
+     "lip-sync"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: frozen-whole",
+   "at": 1791554434.0,
+   "faults": {
+    "3": [
+     "content"
+    ],
+    "6": [
+     "churn"
+    ],
+    "12": [
+     "frozen-whole"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: frozen-whole",
+   "at": 1791556307.1,
+   "faults": {
+    "3": [
+     "content"
+    ],
+    "6": [
+     "frozen-whole"
+    ]
+   }
+  }
+ ]
+}

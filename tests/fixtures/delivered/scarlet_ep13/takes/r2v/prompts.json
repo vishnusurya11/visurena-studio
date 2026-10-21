@@ -1,0 +1,1022 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "station_desk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_station_desk.png",
+      "Q00_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q00_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.416667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 94000,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Interior, inside a small bare charge room at a London police station on a March night in 1881, the camera within the room with whitewashed brick walls closed on all four sides: a high dark wooden clerk's desk with a sloping top and a ledger open on it, a gas jet burning in a brass bracket on the left wall above the desk, a plain wooden bench along the right wall, a heavy panelled door in the far wall; the gas jet is the only light and it comes from the left, low and yellow, on the desk, the ledger and the faces nearest it, and leaves the right wall, the bench and the corners black <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide of the small charge room at night.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a wide of the small charge room at night: the white-faced Inspector behind the high wooden desk with a steel pen over the open ledger, Jefferson Hope in the long brownish driving coat standing before the desk with his wrists manacled in front of him, the gas jet burning above the desk at the left, the bench along the right wall black. The camera is at the panelled door at a standing man's eye, four long strides from the desk, a 35mm lens. The gas jet comes from the LEFT above the desk. At the first frame the high wooden desk stands at the LEFT third of the frame the height of the middle third with the Inspector behind it and the gas jet at the TOP LEFT. Jefferson Hope stands before the desk at the CENTRE of the frame. The camera pushes in on the desk across the whole shot, travelling a hand's breadth as the gas flame flutters in its bracket, from 00:00 to 00:02. At 00:02 a steel pen dips to the ledger. At 00:05 the manacles' chain swings a finger's breadth, and the swing continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "station_desk",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-police_inspector_indoor.png",
+      "Q01_0.png"
+    ],
+    "faces": [
+      "police_inspector"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q01_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l01.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.333333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 94001,
+    "prompt": "subject_definitions:\n<Subject 1> is Police Inspector in <Picture 1>: A man of about fifty, narrow-shouldered and upright, a long white bloodless face with pale thin lips, pale grey eyes under heavy lids, iron-grey hair parted and brushed flat, and iron-grey mutton-chop whiskers on a shaven chin. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of the police <Subject 1> behind the high desk.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 2>: a medium close shot of the police <Subject 1> behind the high desk, the long white bloodless face under the gas jet, the iron-grey mutton-chop whiskers, the dark blue frock coat buttoned to the throat, a steel pen over the open ledger. The camera is across the desk level with his eyes, two long strides from him, a 50mm lens. The gas jet comes from the LEFT onto his face. At the first frame the Inspector's head and shoulders fill the CENTRE of the frame from the TOP third to the desk at the BOTTOM edge. The camera pans right across the whole shot, travelling a finger's breadth as the gas jet keeps the top left corner and the black wall keeps the frame behind him, from 00:00 to 00:04. <Subject 1> (S1), on screen, a man of about fifty, with a clipped English voice at an even pace, says: <d>[English] Have you anything to say? It will be taken down.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his heavy lids lift on the words, then the pen comes up a finger's breadth off the ledger, and the movement continues to the last frame of the shot. By 00:05 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "station_desk",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_indoor.png",
+      "Q02_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q02_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l02.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.125,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 94002,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> before the desk in the long brownish driving coat.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 3.75-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 2>: a medium close shot of <Subject 1> before the desk in the long brownish driving coat, the dark fierce face and full black beard lit from the left, a faint smile, the manacled wrists raised to his chest. The camera is beside the desk level with his eyes, two long strides from him, a 50mm lens. The gas jet comes from the LEFT onto his face. At the first frame Jefferson Hope's head and shoulders fill the CENTRE of the frame from the TOP third to the manacled wrists at the BOTTOM edge. The camera pans left across the whole shot, travelling a finger's breadth as the black wall keeps the frame behind him, from 00:00 to 00:02. <Subject 1> (S1), on screen, a tall, with a clipped English voice at an even pace, says: <d>[English] I may never be tried.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, his mouth sets in a smile on the words, then his manacled hands lift a hand's breadth toward his chest, and the lift continues to the last frame of the shot. By 00:03 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "friction",
+    "setup": "station_desk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q03_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q03_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 94003,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on John Watson's bare sunburnt hand laid flat on the breast of Jefferson Hope's brownish driving coat.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in Interior. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:07. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 1>: an insert on John Watson's bare sunburnt hand laid flat on the breast of Jefferson Hope's brownish driving coat, the manacled wrists below it, the gas light from the left on the knuckles; only what <Picture 1> shows is in frame. The camera is beside the two men at the height of a man's chest, an arm's length from the hand, a 90mm lens. The gas jet comes from the LEFT onto the knuckles. At the first frame Watson's bare sunburnt hand lies flat across the CENTRE of the frame on the brownish cloth, the height of the middle third. The manacled wrists cross the BOTTOM third and the coat's far side is black at the RIGHT edge. The camera tilts down across the whole shot, travelling a finger's breadth as the coat's buttons keep the frame's centre, from 00:00 to 00:02. At 00:02 the chest under the hand lifts and falls. At 00:05 the hand presses a finger's breadth into the cloth, and the movement continues to the last frame of the shot. By 00:07 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "friction",
+    "setup": "station_desk",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "Q04_0.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q04_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l04.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.625,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 94004,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a tweed waistcoat with a watch chain over a white shirt with a white cravat pinned with a stud, and both hands bare to the wrist and sunburnt. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1>'s sunburnt face.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.17-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 2>: a close shot of <Subject 1>'s sunburnt face, the thin waxed moustache, the dark hair swept back, the eyes wide on the man before him, the gas light from the left. The camera is beside Hope's shoulder level with Watson's eyes, an arm's length from him, a 90mm lens. The gas jet comes from the LEFT onto his face. At the first frame John Watson's face fills the CENTRE of the frame, half the frame height, from the moustache at the BOTTOM third to the swept-back hair at the TOP edge. The camera pans right across the whole shot, travelling a finger's breadth as the black wall keeps the frame behind him, from 00:00 to 00:03. <Subject 1> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] You have an aortic aneurism!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his brows come up on the words. At 00:04 his head draws back a finger's breadth, and the movement continues to the last frame of the shot. By 00:05 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "transition",
+    "setup": "euston_platform",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_euston_platform.png",
+      "Q05_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q05_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.125,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 94005,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Interior, inside the great iron-roofed train shed of Euston Station on a March evening in 1881, the camera on the platform under the glass roof: a long stone platform beside a line of dark railway carriages, iron columns in a row down the platform's edge, a porter's barrow stacked with trunks, steam drifting under the roof; the gas lamps hung on the columns are the only light and they come from the right, low and yellow, on the steam, the trunks and the near faces, and leave the carriages, the roof ironwork and the far end of the shed black <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide down the long platform under the iron roof of Euston Station at evening.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a wide down the long platform under the iron roof of Euston Station at evening, the dark carriages along the left, steam drifting between the iron columns, the gas lamps on the columns at the right, travellers in dark coats walking in twos and threes, a porter's barrow of trunks in the foreground. The camera is on the platform beside the barrow at a standing man's eye, a 35mm lens. The gas lamps come from the RIGHT onto the steam. At the first frame the porter's barrow of trunks stands at the BOTTOM RIGHT of the frame the height of the middle third. The dark carriages run along the LEFT edge into the distance and the iron columns with their lamps stand down the RIGHT third. The platform runs to the black far end at the CENTRE. The camera pushes in along the platform across the whole shot, travelling a hand's breadth as steam rolls between the columns, from 00:00 to 00:03. At 00:03 the travellers walk on at a walking pace. At 00:05 a porter pushes the barrow a hand's breadth, and the push continues to the last frame of the shot. Beyond the foreground travellers in dark coats walk along the platform at a walking pace in twos and threes, from 00:00 to 00:08. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "transition",
+    "setup": "euston_platform",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_indoor.png",
+      "plate_euston_platform.png",
+      "Q06_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q06_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.208333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 94006,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: Interior, inside the great iron-roofed train shed of Euston Station on a March evening in 1881, the camera on the platform under the glass roof: a long stone platform beside a line of dark railway carriages, iron columns in a row down the platform's edge, a porter's barrow stacked with trunks, steam drifting under the roof; the gas lamps hung on the columns are the only light and they come from the right, low and yellow, on the steam, the trunks and the near faces, and leave the carriages, the roof ironwork and the far end of the shed black <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot of <Subject 1> bare-headed in the long brownish driving coat standing against an iron column on the platform.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, Interior. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 3>: a medium shot of <Subject 1> bare-headed in the long brownish driving coat standing against an iron column on the platform, the black beard, the dark eyes fixed along the platform, steam drifting past him, the gas lamp above him at the right. The camera is on the platform level with his eyes, three long strides from him, a 35mm lens. The gas lamp comes from the RIGHT onto his face. At the first frame Jefferson Hope stands at the CENTRE of the frame from the BOTTOM edge to the TOP third, his head a quarter of the frame height. The camera pans left across the whole shot, travelling a hand's breadth as the iron column keeps the right third, from 00:00 to 00:03. At 00:03 steam drifts across his chest. At 00:05 his head turns a finger's breadth along the platform, and the turn continues to the last frame of the shot. Behind <Subject 1> travellers in dark coats walk along the platform at a walking pace in twos and threes, a porter in a peaked cap pushes a barrow of trunks, and steam drifts between the iron columns, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his head turns a finger's breadth along the platform. By 00:08 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "euston_platform",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-enoch_j_drebber_indoor.png",
+      "plate_euston_platform.png",
+      "Q07_0.png"
+    ],
+    "faces": [
+      "enoch_j_drebber"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q07_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.416667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 94007,
+    "prompt": "subject_definitions:\n<Subject 1> is Enoch J Drebber in <Picture 1>: A thick-set man of about forty-four, heavy in the shoulder and belly, a coarse florid face puffy with drink, heavy jowls, small pale bleared eyes, a low forehead, short curly sandy hair thinning on top, and a short stubbly sandy beard along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: Interior, inside the great iron-roofed train shed of Euston Station on a March evening in 1881, the camera on the platform under the glass roof: a long stone platform beside a line of dark railway carriages, iron columns in a row down the platform's edge, a porter's barrow stacked with trunks, steam drifting under the roof; the gas lamps hung on the columns are the only light and they come from the right, low and yellow, on the steam, the trunks and the near faces, and leave the carriages, the roof ironwork and the far end of the shed black <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot of Enoch <Subject 1> bare-headed in the heavy black broadcloth frock coat walking up the platform through the steam at a walking pace.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, Interior. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 3>: a medium shot of Enoch <Subject 1> bare-headed in the heavy black broadcloth frock coat walking up the platform through the steam at a walking pace, the coarse florid face flushed and scowling, the gold watch chain across the waistcoat, the gas lamps at the right. The camera is on the platform at a standing man's eye, three long strides from him, a 35mm lens. The gas lamps come from the RIGHT onto his face. At the first frame Enoch Drebber stands at the CENTRE of the frame from the BOTTOM edge to the TOP third, his head a quarter of the frame height. The camera pans right across the whole shot, travelling a hand's breadth as the iron columns keep the right third, from 00:00 to 00:03. At 00:03 <Subject 1> walks along the platform to the barrier at a walking pace. At 00:05 his thick hand swings a hand's breadth, and the swing continues to the last frame of the shot. Behind <Subject 1> travellers in dark coats walk along the platform at a walking pace in twos and threes, a porter in a peaked cap pushes a barrow of trunks, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:07 while he walks along the platform to the barrier at a walking pace. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "transition",
+    "setup": "cab_night_rain",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_cab_night_rain.png",
+      "Q08_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q08_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.041667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 94008,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: A wet London street of dark brick houses at one in the morning in March 1881, blowing hard and raining in torrents: a four-wheeled cab with a dark bay horse standing at the kerb, the cabman hunched on the box, the cobbles running with water under a black night sky, a single gas lamp on an iron post at the kerb; the gas lamp is the only light and it comes from the right, low and yellow, on the wet cobbles, the slanting rain, the horse's streaming flank and the cab's wet panels, and leaves the house fronts and the far street black <Picture 1> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide of the wet street at night in driving rain.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, a wet London street of dark brick houses at one in the morning in March 1881. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas lamp from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a wide of the wet street at night in driving rain: the four-wheeled cab and its dark bay horse standing at the kerb under the gas lamp, Jefferson Hope in the low black cap hunched on the box with the reins, the brick house fronts black, the cobbles running with water. The camera is across the street at a standing man's eye, five long strides from the cab, a 35mm lens. The gas lamp comes from the RIGHT. At the first frame the cab and the bay horse stand along the kerb across the CENTRE of the frame the height of the middle third. The camera pans right across the whole shot, travelling a hand's breadth as the gas lamp keeps the right third, from 00:00 to 00:02. At 00:02 the rain slants through the lamplight. At 00:04 water runs off the cab's roof. At 00:06 the horse's head comes down a hand's breadth, and the movement continues to the last frame of the shot. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a wet London street of dark brick houses at one in the morning in March 1881 runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "cab_night_rain",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q09_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q09_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 94009,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on a small round wooden pill box open in Jefferson Hope's bare brown palm on the cab box.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in a wet London street of dark brick houses at one in the morning in March 1881. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:06. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas lamp from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 1>: an insert on a small round wooden pill box open in Jefferson Hope's bare brown palm on the cab box, two small white pills inside it, raindrops on the open lid, the wet coat sleeve at the edge; only what <Picture 1> shows is in frame. The camera is over his lap at the height of his chest, an arm's length from the palm, a 90mm lens. The gas lamp comes from the RIGHT onto the palm. At the first frame the open pill box sits in the bare palm at the CENTRE of the frame, the height of a hand, the two white pills plain in it. The wet brownish sleeve comes in from the LEFT edge and the street is black across the TOP third. The camera tilts down across the whole shot, travelling a finger's breadth as the open box keeps the frame's centre, from 00:00 to 00:02. At 00:02 a raindrop lands on the lid. At 00:04 the thumb closes the lid a finger's breadth, and the movement continues to the last frame of the shot. By 00:06 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a wet London street of dark brick houses at one in the morning in March 1881 runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "friction",
+    "setup": "cab_night_rain",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_cab_night_rain.png",
+      "Q10_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q10_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.916667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 94010,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: A wet London street of dark brick houses at one in the morning in March 1881, blowing hard and raining in torrents: a four-wheeled cab with a dark bay horse standing at the kerb, the cabman hunched on the box, the cobbles running with water under a black night sky, a single gas lamp on an iron post at the kerb; the gas lamp is the only light and it comes from the right, low and yellow, on the wet cobbles, the slanting rain, the horse's streaming flank and the cab's wet panels, and leaves the house fronts and the far street black <Picture 1> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium shot over Jefferson Hope's shoulder and low black cap on the box.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, a wet London street of dark brick houses at one in the morning in March 1881. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas lamp from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a medium shot over Jefferson Hope's shoulder and low black cap on the box, the reins in his bare hands, the bay horse's wet back and ears in the rain, and walking in the rain one on each side of the horse's head the pale figures of an old grey-bearded man in a brown felt hat and a young woman with long chestnut hair, both with their faces toward the cab, smiling. The camera is on the cab's roof behind the box at the height of his shoulder, an arm's length from his hat, a 35mm lens. The gas lamp comes from the RIGHT. At the first frame Jefferson Hope's hat and shoulder fill the BOTTOM LEFT corner of the frame. The camera pushes in over his shoulder across the whole shot, travelling a hand's breadth as the rain slants across the lamplight, from 00:00 to 00:02. At 00:02 the horse walks on at a walking pace. At 00:05 the two pale figures walk beside its head at a walking pace, and the walk continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a wet London street of dark brick houses at one in the morning in March 1881 runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "spike",
+    "setup": "cab_night_rain",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_cabman_outdoor.png",
+      "Q11_0.png"
+    ],
+    "faces": [
+      "jefferson_hope_cabman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q11_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.0,
+    "frames": 56,
+    "seconds": 2.33,
+    "steps": 8,
+    "seed": 94011,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope Cabman in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of Jefferson Hope's face on the box in the rain under the low black cap.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 2.33-second take of 1 shot in a wet London street of dark brick houses at one in the morning in March 1881. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:02. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas lamp from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:02. The shot begins from <Picture 2>: a close shot of Jefferson Hope's face on the box in the rain under the low black cap, the full black beard wet, the dark eyes fixed on the road, the lamplight from the right on the wet cheek. The camera is beside the box level with his eyes, an arm's length from him, a 90mm lens. The gas lamp comes from the RIGHT. At the first frame Jefferson Hope's face fills the CENTRE of the frame, half the frame height, from the wet beard at the BOTTOM third to the hat's brim at the TOP edge, lit from the RIGHT. The rain slants across the black street behind him. The camera pans left across the whole shot, travelling a finger's breadth as the black street keeps the frame behind him, from 00:00 to 00:01. At 00:01 rain runs off the hat's brim, then his chin lifts a finger's breadth, and the lift continues to the last frame of the shot. By 00:02 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a wet London street of dark brick houses at one in the morning in March 1881 runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "transition",
+    "setup": "cab_night_rain",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-enoch_j_drebber_outdoor.png",
+      "plate_cab_night_rain.png",
+      "Q12_0.png"
+    ],
+    "faces": [
+      "enoch_j_drebber"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q12_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.916667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 94012,
+    "prompt": "subject_definitions:\n<Subject 1> is Enoch J Drebber in <Picture 1>: A thick-set man of about forty-four, heavy in the shoulder and belly, a coarse florid face puffy with drink, heavy jowls, small pale bleared eyes, a low forehead, short curly sandy hair thinning on top, and a short stubbly sandy beard along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: A wet London street of dark brick houses at one in the morning in March 1881, blowing hard and raining in torrents: a four-wheeled cab with a dark bay horse standing at the kerb, the cabman hunched on the box, the cobbles running with water under a black night sky, a single gas lamp on an iron post at the kerb; the gas lamp is the only light and it comes from the right, low and yellow, on the wet cobbles, the slanting rain, the horse's streaming flank and the cab's wet panels, and leaves the house fronts and the far street black <Picture 2> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot of the open door of the four-wheeled cab in the rain.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, a wet London street of dark brick houses at one in the morning in March 1881. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas lamp from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 3>: a medium shot of the open door of the four-wheeled cab in the rain, Enoch <Subject 1> slumped asleep inside on the seat in his tall black hat and broadcloth coat, the florid face slack, and Jefferson Hope's bare brown hand on his arm in the doorway at the left. The camera is at the kerb beside the cab door at the height of a seated man's eye, two long strides from him, a 50mm lens. The gas lamp comes from the RIGHT into the cab. At the first frame Enoch Drebber sits slumped at the CENTRE of the frame inside the cab door, his head a quarter of the frame height under the top hat. The camera pushes in on the doorway across the whole shot, travelling a hand's breadth as rain drips off the door's edge, from 00:00 to 00:02. At 00:02 Hope's hand shakes <Subject 1>'s arm. At 00:05 <Subject 1>'s head lifts off the cushion, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his head lifts off the cushion. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a wet London street of dark brick houses at one in the morning in March 1881 runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "transition",
+    "setup": "brixton_front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q13_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q13_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 94013,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on a struck match flaring in Jefferson Hope's bare brown fingers as it touches the wick of a white wax candle in his other hand.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in Interior. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:07. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, wax candle, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 1>: an insert on a struck match flaring in Jefferson Hope's bare brown fingers as it touches the wick of a white wax candle in his other hand, the dark driving coat behind; only what <Picture 1> shows is in frame. The camera is beside his hands at the height of his chest, an arm's length from the candle, a 90mm lens. The match is the light, from the CENTRE. At the first frame the white candle and the flaring match fill the CENTRE of the frame, the height of the middle third, with the two bare hands round them. The dark coat is black across the BOTTOM third and both edges. The camera tilts up across the whole shot, travelling a finger's breadth as the candle keeps the frame's centre, from 00:00 to 00:02. At 00:02 the wick catches and the flame stands up a finger's breadth. At 00:05 the match comes away from the wick, and the movement continues to the last frame of the shot. By 00:07 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "spike",
+    "setup": "brixton_front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_brixton_front_room.png",
+      "Q14_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q14_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.583333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 94014,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Interior, inside the empty front room of a shut-up house in the Brixton Road at one in the morning, March 1881, the camera within the room with walls closed on all four sides: bare floorboards thick with dust, walls of cheap flaring yellow paper peeling in strips and blotched with mildew, a mantelpiece of imitation white marble on the left wall, a single tall curtainless window in the far wall black with night and streaming with rain, a panelled door in the right wall; a single wax candle in a man's hand is the only light and it comes from the candle alone, low and yellow, on the faces and hands nearest it and on the peeling paper beside it, and leaves the window, the corners and the ceiling black <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide of the empty front room by the light of one wax candle.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, wax candle, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a wide of the empty front room by the light of one wax candle: Jefferson Hope bare-headed in the long driving coat holding the lit candle up at the left, Enoch Drebber bare-headed and swaying in his broadcloth coat at the centre, the peeling yellow paper, the tall window streaming with rain in the far wall, the bare boards thick with dust. The camera is at the white marble mantelpiece at a standing man's eye, four long strides from the men, a 35mm lens. The candle is the light, from the LEFT. At the first frame Jefferson Hope stands at the LEFT third of the frame holding the candle at the height of his shoulder, Enoch Drebber at the CENTRE. The camera pushes in on the two men across the whole shot, travelling a hand's breadth as the candle flame leans and steadies, from 00:00 to 00:03. At 00:03 Drebber sways on his heels. At 00:05 Hope's candle lifts a hand's breadth, and the lift continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "turn",
+    "setup": "brixton_front_room",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_indoor.png",
+      "Q15_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q15_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l14.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.208333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 94015,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> holding the lit wax candle up beside his own face.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, wax candle, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a medium close shot of <Subject 1> holding the lit wax candle up beside his own face, the flame lighting the dark fierce face, the full black beard and the deep-set eyes from the left, the peeling yellow paper black behind him. The camera is across the bare boards level with his eyes, two long strides from him, a 50mm lens. The candle is the light. At the first frame Jefferson Hope's head and shoulders fill the CENTRE of the frame from the TOP third to the BOTTOM edge. The camera pans right across the whole shot, travelling a finger's breadth as the candle keeps the left third and the black wall keeps the frame behind him, from 00:00 to 00:05. <Subject 1> (S1), on screen, a tall, with a clipped English voice at an even pace, says: <d>[English] Now then, Enoch Drebber. Look at my face, and tell me who I am.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his lips part on the words, then the candle comes a hand's breadth nearer his face, and the movement continues to the last frame of the shot. By 00:06 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "reaction",
+    "setup": "brixton_front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-enoch_j_drebber_indoor.png",
+      "Q16_0.png"
+    ],
+    "faces": [
+      "enoch_j_drebber"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q16_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.333333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 94016,
+    "prompt": "subject_definitions:\n<Subject 1> is Enoch J Drebber in <Picture 1>: A thick-set man of about forty-four, heavy in the shoulder and belly, a coarse florid face puffy with drink, heavy jowls, small pale bleared eyes, a low forehead, short curly sandy hair thinning on top, and a short stubbly sandy beard along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of Enoch <Subject 1>'s coarse florid face in the candlelight.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, wax candle, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a close shot of Enoch <Subject 1>'s coarse florid face in the candlelight, the small bleared eyes wide with horror, sweat standing on the low forehead, the jowls slack, the curly hair damp. The camera is facing him level with his eyes, an arm's length from him, a 90mm lens. The candle is the light, from the LEFT. At the first frame Enoch Drebber's face fills the CENTRE of the frame, half the frame height, from the stubbly beard at the BOTTOM third to the curly hair at the TOP edge, lit from the LEFT. The window is black behind him. The camera pans left across the whole shot, travelling a finger's breadth as the black window keeps the frame behind him, from 00:00 to 00:02. At 00:02 sweat runs down his brow. At 00:04 his head pulls back a hand's breadth, and the pull continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his head pulls back a hand's breadth. By 00:06 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "friction",
+    "setup": "brixton_front_room",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-enoch_j_drebber_indoor.png",
+      "Q17_0.png"
+    ],
+    "faces": [
+      "enoch_j_drebber"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q17_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l16.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.5,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 94017,
+    "prompt": "subject_definitions:\n<Subject 1> is Enoch J Drebber in <Picture 1>: A thick-set man of about forty-four, heavy in the shoulder and belly, a coarse florid face puffy with drink, heavy jowls, small pale bleared eyes, a low forehead, short curly sandy hair thinning on top, and a short stubbly sandy beard along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of Enoch <Subject 1> backed against the rain-streaked window.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 3.04-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, wax candle, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 2>: a medium close shot of Enoch <Subject 1> backed against the rain-streaked window, both thick bare hands up before his chest, the florid face livid, the lips trembling, the candle's light from the left. The camera is across the room level with his eyes, two long strides from him, a 50mm lens. The candle is the light, from the LEFT. At the first frame Enoch Drebber's head and shoulders fill the CENTRE of the frame from the TOP third to his raised hands at the BOTTOM edge. The camera pans right across the whole shot, travelling a finger's breadth as the grey window keeps the frame behind him, from 00:00 to 00:02. <Subject 1> (S1), on screen, a thick-set man of about forty-four, with a clipped English voice at an even pace, says: <d>[English] Would you murder me?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, his lips tremble on the words, then his thick hands lift a hand's breadth before his chest, and the lift continues to the last frame of the shot. By 00:03 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "payoff",
+    "setup": "brixton_front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q18_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q18_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.5,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 94018,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on the small round wooden pill box out open in Jefferson Hope's bare brown hand toward the lens.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in Interior. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:08. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, wax candle, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 1>: an insert on the small round wooden pill box out open in Jefferson Hope's bare brown hand toward the lens, the two small white pills inside, the candle flame behind the hand at the left, the dark room beyond; only what <Picture 1> shows is in frame. The camera is facing the hand at the height of a man's chest, an arm's length from the box, a 90mm lens. The candle is the light. At the first frame the open pill box sits in the bare hand at the CENTRE of the frame, the height of a hand, the two white pills plain in it. The candle flame burns at the LEFT third and the room is black beyond. The camera tilts down across the whole shot, travelling a finger's breadth as the candle keeps the left third, from 00:00 to 00:03. At 00:03 the box comes forward a finger's breadth. At 00:05 the fingers tip the box a finger's breadth toward the lens, and the movement continues to the last frame of the shot. By 00:08 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "payoff",
+    "setup": "brixton_front_room",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_indoor.png",
+      "Q19_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q19_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l18.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.583333,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 94019,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1>'s face in profile turned toward the right of frame.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.17-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, wax candle, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 2>: a close shot of <Subject 1>'s face in profile turned toward the right of frame, the candle low under his chin lighting the full black beard and the jaw from beneath, the deep-set eye blazing, the rain-streaked window grey behind him. The camera is at his shoulder level with his cheek, an arm's length from him, a 90mm lens. The candle is the light, from BELOW at the CENTRE. At the first frame Jefferson Hope's profile fills the CENTRE of the frame, half the frame height, facing the RIGHT edge. The camera pans left across the whole shot, travelling a finger's breadth as the grey window keeps the frame behind him, from 00:00 to 00:04. <Subject 1> (S1), on screen, a tall, with a clipped English voice at an even pace, says: <d>[English] Let us see if there is justice upon the earth.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his jaw sets on the words, then his head comes forward a finger's breadth toward the right edge, and the movement continues to the last frame of the shot. By 00:05 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "payoff",
+    "setup": "brixton_front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q20_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q20_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.958333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 94020,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on a small plain gold wedding ring up between Jefferson Hope's bare brown finger and thumb in the candlelight.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in Interior. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:06. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, wax candle, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 1>: an insert on a small plain gold wedding ring up between Jefferson Hope's bare brown finger and thumb in the candlelight, Drebber's dark coat shoulder at the right edge of frame, the room black beyond; only what <Picture 1> shows is in frame. The camera is beside Drebber's shoulder at the height of his eyes, an arm's length from the ring, a 90mm lens. The candle is the light, from the LEFT. At the first frame the gold ring stands at the CENTRE of the frame between finger and thumb, the height of a finger, catching the flame. Drebber's dark shoulder fills the RIGHT edge and the room is black across the TOP third. The camera tilts up across the whole shot, travelling a finger's breadth as the ring keeps the frame's centre, from 00:00 to 00:02. At 00:02 the ring turns a finger's breadth and catches the flame. At 00:04 the fingers lift it a finger's breadth, and the lift continues to the last frame of the shot. By 00:06 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "payoff",
+    "setup": "brixton_front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_brixton_front_room.png",
+      "Q21_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q21_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.666667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 94021,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Interior, inside the empty front room of a shut-up house in the Brixton Road at one in the morning, March 1881, the camera within the room with walls closed on all four sides: bare floorboards thick with dust, walls of cheap flaring yellow paper peeling in strips and blotched with mildew, a mantelpiece of imitation white marble on the left wall, a single tall curtainless window in the far wall black with night and streaming with rain, a panelled door in the right wall; a single wax candle in a man's hand is the only light and it comes from the candle alone, low and yellow, on the faces and hands nearest it and on the peeling paper beside it, and leaves the window, the corners and the ceiling black <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide of the empty front room by candlelight.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, wax candle, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a wide of the empty front room by candlelight: Enoch Drebber's heavy body in the black broadcloth coat lying on its back on the dusty boards before the rain-streaked window, the thick hands flung out, Jefferson Hope standing over it at the left with the candle low. The camera is at the panelled door at a standing man's eye, four long strides from the window, a 35mm lens. The candle is the light, from the LEFT. At the first frame Enoch Drebber's body lies across the CENTRE of the lower third on the dusty boards, the height of a hand. Jefferson Hope stands at the LEFT third from the BOTTOM edge to the TOP third with the candle low. The rain-streaked window stands grey at the CENTRE of the upper third. The camera pushes in on the window across the whole shot, travelling a hand's breadth as the candle flame leans, from 00:00 to 00:02. At 00:02 rain runs down the window's panes. At 00:05 Hope's candle comes down a hand's breadth toward the boards, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "payoff",
+    "setup": "station_bench",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_indoor.png",
+      "plate_station_bench.png",
+      "Q22_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q22_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.333333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 94022,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: Interior, inside the small bare charge room of the police station on the same March night, seen toward its long wall, the camera within the room with whitewashed brick walls closed on all four sides: a plain wooden bench along the whitewashed wall, a small deal side table beside it with an open note-book and a pencil on it, a second gas jet in a brass bracket on the wall above the side table, a heavy panelled door at the left end of the wall with a brass bell-pull beside it; the gas jet is the only light and it comes from the right, low and yellow, on the table, the note-book and the faces nearest it, and leaves the bench's far end, the door and the corners black <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot of <Subject 1> sitting back on the wooden bench against the whitewashed wall in the long brownish driving coat.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, Interior. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 3>: a medium shot of <Subject 1> sitting back on the wooden bench against the whitewashed wall in the long brownish driving coat, the manacled wrists in his lap, the dark face tired and sweating under the gas light from the right. The camera is across the room at a seated man's eye, three long strides from him, a 35mm lens. The gas jet comes from the RIGHT onto his face. At the first frame Jefferson Hope sits at the CENTRE of the frame from the BOTTOM edge to the TOP third, his head a quarter of the frame height, lit from the RIGHT. The bench runs to the LEFT third into black and the whitewashed wall stands behind him. The camera pushes in on the bench across the whole shot, travelling a hand's breadth as the gas flame flutters, from 00:00 to 00:03. At 00:03 his head goes back against the wall. At 00:05 his manacled hands turn over in his lap, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:07 while his head goes back against the wall. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "payoff",
+    "setup": "station_bench",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q23_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q23_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.583333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 94023,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on a sallow hand moving a pencil across an open note-book on the small deal side table under the gas jet.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in Interior. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:07. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 1>: an insert on a sallow hand moving a pencil across an open note-book on the small deal side table under the gas jet, the page grey with close pencil strokes; only what <Picture 1> shows is in frame. The camera is over the side table at the height of a seated man's eye, an arm's length from the note-book, a 90mm lens. The gas jet comes from the RIGHT onto the page. At the first frame the open note-book lies at the CENTRE of the frame the height of the middle third with the sallow hand and the pencil on it. The gas light falls from the RIGHT and the table's far edge is black across the TOP third. The camera tilts down across the whole shot, travelling a finger's breadth as the note-book keeps the frame's centre, from 00:00 to 00:02. At 00:02 the pencil runs along the page a finger's breadth. At 00:05 the hand turns the page's corner up, and the turn continues to the last frame of the shot. By 00:07 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "payoff",
+    "setup": "station_bench",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "Q24_0.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q24_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.166667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 94024,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> standing by the side table in the bottle-green velvet jacket.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a medium close shot of <Subject 1> standing by the side table in the bottle-green velvet jacket, the lean pale face and the high forehead under the gas light from the right, the eyes keen on the man on the bench. The camera is beside the bench level with his eyes, two long strides from him, a 50mm lens. The gas jet comes from the RIGHT onto his face. At the first frame Sherlock Holmes's head and shoulders fill the CENTRE of the frame from the TOP third to the green velvet at the BOTTOM edge, his head a third of the frame's height. The camera pans left across the whole shot, travelling a finger's breadth as the gas jet keeps the top right corner and the whitewashed wall keeps the frame behind him, from 00:00 to 00:02. At 00:02 his brows lift a finger's breadth. At 00:04 his right hand comes up to his chin, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his brows lift a finger's breadth. By 00:06 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 25,
+    "shots": [
+      25
+    ],
+    "section": "payoff",
+    "setup": "station_bench",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_indoor.png",
+      "Q25_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q25_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l24.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.291667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 94025,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> on the bench.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 2>: a medium close shot of <Subject 1> on the bench, the dark fierce face turned up toward Holmes with a smile in the full black beard, the manacled wrists at the bottom of the frame, the gas light from the right. The camera is across from the bench level with his eyes, two long strides from him, a 50mm lens. The gas jet comes from the RIGHT onto his face. At the first frame Jefferson Hope's head and shoulders fill the CENTRE of the frame from the TOP third to the manacled wrists at the BOTTOM edge. The camera pans right across the whole shot, travelling a finger's breadth as the whitewashed wall keeps the frame behind him, from 00:00 to 00:04. <Subject 1> (S1), on screen, a tall, with a clipped English voice at an even pace, says: <d>[English] I can tell my own secrets, but not other people's.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, one eye closes in a wink on the words, then his manacled hands lift a finger's breadth off his knees, and the lift continues to the last frame of the shot. By 00:05 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 26,
+    "shots": [
+      26
+    ],
+    "section": "button",
+    "setup": "station_bench",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-police_inspector_indoor.png",
+      "Q26_0.png"
+    ],
+    "faces": [
+      "police_inspector"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q26_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l25.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 94026,
+    "prompt": "subject_definitions:\n<Subject 1> is Police Inspector in <Picture 1>: A man of about fifty, narrow-shouldered and upright, a long white bloodless face with pale thin lips, pale grey eyes under heavy lids, iron-grey hair parted and brushed flat, and iron-grey mutton-chop whiskers on a shaven chin. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of the police <Subject 1> standing by the panelled door with one bare hand on the brass bell-pull.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a medium close shot of the police <Subject 1> standing by the panelled door with one bare hand on the brass bell-pull, the long white face grave, the iron-grey mutton-chop whiskers, the dark blue frock coat buttoned to the throat, the gas light from the right. The camera is beside the side table level with his eyes, two long strides from him, a 50mm lens. The gas jet comes from the RIGHT onto his face. At the first frame the Inspector's head and shoulders fill the CENTRE of the frame from the TOP third to the BOTTOM edge. The camera pans left across the whole shot, travelling a finger's breadth as the black door keeps the frame behind him, from 00:00 to 00:05. <Subject 1> (S1), on screen, a man of about fifty, with a clipped English voice at an even pace, says: <d>[English] On Thursday he goes before the magistrates. Until then, he is mine.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his thin lips move on the words, then his hand pulls the bell-pull down a hand's breadth, and the pull continues to the last frame of the shot. By 00:06 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 27,
+    "shots": [
+      27
+    ],
+    "section": "runout",
+    "setup": "station_bench",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_station_bench.png",
+      "Q27_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q27_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.833333,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 94027,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Interior, inside the small bare charge room of the police station on the same March night, seen toward its long wall, the camera within the room with whitewashed brick walls closed on all four sides: a plain wooden bench along the whitewashed wall, a small deal side table beside it with an open note-book and a pencil on it, a second gas jet in a brass bracket on the wall above the side table, a heavy panelled door at the left end of the wall with a brass bell-pull beside it; the gas jet is the only light and it comes from the right, low and yellow, on the table, the note-book and the faces nearest it, and leaves the bench's far end, the door and the corners black <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide of the charge room by gas light.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 3.75-second take of 1 shot in <Subject 1>, Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, London, March 1881, gas jet from the right, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 2>: a wide of the charge room by gas light: Jefferson Hope in the long brownish driving coat walking at a walking pace between two warders in dark blue coats toward the open panelled door at the left, the manacled wrists in front of him, the side table and the bench at the right. The camera is beside the side table at a standing man's eye, four long strides from the door, a 35mm lens. The gas jet comes from the RIGHT. At the first frame Jefferson Hope walks at the CENTRE of the frame between the two warders from the BOTTOM edge to the TOP third, his head a fifth of the frame height. The open panelled door is black at the LEFT third. The camera pushes in on the doorway across the whole shot, travelling a hand's breadth as the gas flame flutters, from 00:00 to 00:01. At 00:01 the three men walk to the open door at a walking pace. At 00:02 the door swings a hand's breadth wider, and the swing continues to the last frame of the shot. By 00:03 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  }
+]

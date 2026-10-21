@@ -1,0 +1,57 @@
+{
+ "sha8": "977a7b3d",
+ "verdict": "flagged",
+ "note": "content at T02: text or lettering in the picture; last-vs-panel at T05: 0.13 -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4"
+ ],
+ "signed_at": "2026-10-08T20:35:53Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "content",
+   "where": "T02",
+   "evidence": {
+    "hard": true,
+    "repeated": true,
+    "still": "storyboard/shot_02.png"
+   },
+   "severity": "normal",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "last-vs-panel",
+   "where": "T05",
+   "evidence": {
+    "value": 0.134,
+    "penalty": 13.3,
+    "repeated": true,
+    "still": "storyboard/shot_05.png"
+   },
+   "severity": "normal",
+   "note": "0.13"
+  }
+ ],
+ "terminal": "still"
+}

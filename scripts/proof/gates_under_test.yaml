@@ -1,0 +1,139 @@
+# Every gate added since 2026-10-14 (2026-10-21_ep02_proof DESIGN 4.6), replayed by scripts/proof/gate_replay.py
+# over frozen delivered episodes.  Each gate: its dotted callable (module:attribute), the reader in
+# gate_replay.READERS that turns one frozen episode into the callable's inputs, the date and commit it
+# landed, the unit counted, the question its row answers, and `confirmed`: refusals confirmed as TRUE
+# faults, each with its source (listed apart from the false ones; only an owner's ruling confirms one).
+# A gate with no refusal to replay names `why_not_replayed` instead of a reader.  `counts` says what a hit
+# is: a refusal (the default), an advisory flag (log only) or a reworded row (a wording change).
+since: "2026-10-14"
+
+episodes:
+  - {slug: wotw, book: "20260827135508", numbers: "1-27"}
+  - {slug: scarlet, book: "20260822113400", numbers: "1-14"}
+  - {slug: jekyll, book: "20260827135504", numbers: "1", fixture: ep01}   # the existing fixture, read only
+
+gates:
+  - id: G-STANDING
+    callable: studio.standing_approval:ok
+    reader: standing
+    since: "2026-10-20"
+    commit: 62f7ae8
+    unit: episode
+    question: Q6
+    reads: the book's publish/standing.json (frozen into <fixture>/_book/)
+    confirmed: []
+
+  - id: G-META-CREDIT
+    callable: scripts.publish.metadata:credit_faults
+    reader: credit
+    since: "2026-10-20"
+    commit: 967597b
+    unit: episode
+    question: Q6
+    reads: youtube.json description
+    confirmed: []
+
+  - id: BRIEF-WITHHOLD-FACE
+    callable: studio.plan_brief:dialogue_words_max
+    since: "2026-10-20"
+    commit: 6c0123c
+    question: Q8
+    why_not_replayed: >-
+      the change is the writer's brief (the withhold-face picture rule and the dialogue ceiling in words);
+      it refuses nothing, so a delivered plan has no verdict to replay. Its effect is read only on a
+      writer run (staged run SR-2).
+
+  - id: ADVISORY-WORDING
+    callable: studio.stillness:advisory_note
+    reader: wording
+    since: "2026-10-20"
+    commit: 9119189
+    unit: dq row
+    question: Q6
+    counts: rewords
+    reads: takes/r2v/T<nn>.dq.json gates rows of kind frozen-whole that are advisory; a "refusal" is a
+      delivered row that printed HARD while it was not hard (what the new wording corrects)
+    confirmed: []
+
+  - id: A28-TINY-FACE
+    callable: studio.panel_dq:tiny_face_record
+    reader: tiny_face
+    since: "2026-10-21"
+    commit: fecdd4a
+    unit: panel
+    question: Q6
+    counts: flags
+    reads: storyboard/panel_dq.json face_h; an advisory flag counts as the refusal (log only)
+    confirmed: []
+
+  - id: OUTSIDE-UNREAD
+    callable: studio.face_refine:outside_refusal
+    reader: outside
+    since: "2026-10-20"
+    commit: 231071c
+    unit: kept paste
+    question: Q6
+    reads: takes/r2v/refine.json kept people rows' measures.outside
+    confirmed: []
+
+  - id: FACE-LIST
+    callable: studio.face_refine:face_list
+    reader: face_list
+    since: "2026-10-20"
+    commit: 4bc872a
+    unit: take
+    question: Q6
+    counts: flags
+    reads: prompts.json (else shots.json) cards, plan.json sizes, T<nn>.dq.json, refine.json, stat.json sha8;
+      a listed take counts as the refusal (log only)
+    confirmed: []
+
+  - id: MASTER-EYE-KEY
+    callable: studio.judges.master_eye:EyeCache
+    since: "2026-10-21"
+    commit: b008100
+    question: Q6
+    why_not_replayed: >-
+      a read-cache key (the take's bytes and frame, never the plan row); it refuses nothing. Its proof is
+      tests/test_the_master_eye_reads_only_the_changed_take.py.
+
+  - id: G-HOLE-SLACK
+    callable: studio.speech_gap:holes
+    reader: hole
+    since: "2026-10-19"
+    commit: cc5a260
+    unit: episode
+    question: Q8
+    reads: the MEASURED placed.json at HOLE_WALL_S + HOLE_SLACK_S (the plan gate reads the projection)
+    confirmed: []
+
+  - id: G-CROWD-ORPHAN
+    callable: studio.plan_gates:orphan_crowd_faults
+    reader: orphan_crowd
+    since: "2026-10-18"
+    commit: b2782b4
+    unit: setup
+    question: Q8
+    reads: plan.json setups and shots
+    confirmed: []
+
+  - id: L28-STYLE-LIGHT
+    callable: studio.episode_ref_official:l28_style_light
+    reader: style_light
+    since: "2026-10-18"
+    commit: b83eac4
+    unit: take
+    question: Q8
+    reads: takes/r2v/shots.json card prompts with their plan.json setup's night
+    confirmed: []
+
+  - id: LAUNCH-DRY-CHECK
+    callable: scripts.episode.regress_delivered:replay
+    reader: dry_check
+    since: "2026-10-20"
+    commit: 7e6ffe9
+    unit: take
+    question: Q6
+    reads: the frozen deciders' records in regress_delivered's stand-in, with the frozen plan.json beside them;
+      a take whose `held` action is not keep would make a launch refuse (repair_dry_check.preflight)
+    confirmed: []

@@ -1,0 +1,708 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "garden",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_00.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.75,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 90000,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, hazy sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide across a bleached lawn behind a brick villa on a hot hazy summer morning, the gravel path running along it, a low paling fence with a side gate at the far side, a dark cedar at one corner and the open heath and its pines lying flat and empty beyond the fence. The camera is on the lawn at a standing man's eye looking toward the fence, a 35mm lens. The light is high flat hazy sun from the TOP. At the first frame the gravel path runs from the BOTTOM CENTRE away to the white paling gate at the CENTRE LEFT, with mown lawn and flower borders on both sides of it in the BOTTOM half. The brick wall of the house fills the RIGHT third from the BOTTOM to the TOP with its sash windows in it, and a tall dark cedar stands against it at the CENTRE RIGHT. The low white paling runs across the CENTRE from the LEFT edge to the CENTRE RIGHT. The shot is inside this place: the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it, a low paling fence at the far side with a side gate in it, standard roses and a bed of stocks against the brick. The camera rises from the lawn with small amplitude until the fence, the gate and the flat heath beyond them all stand inside the picture as a lark goes on rising over the heath, from 00:00 to 00:04. At 00:04 the leaves of the cedar go on stirring a little in the hot air, and the movement continues to the last frame of the shot. By 00:08 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "garden",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_milkman/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_01.png"
+    ],
+    "faces": [
+      "unnamed_milkman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.458333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 90001,
+    "prompt": "subject_definitions:\n<Subject 1> is the milkman in <Picture 1>: Milkman, 44 years old, 5 ft 7 in, stocky and short-legged with strong shoulders. Round ruddy face, snub nose, cheerful creases at the eyes. Chestnut curly hair cut short. Thick chestnut walrus moustache covering the upper lip. Bright blue eyes. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, hazy sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on <Subject 1>, thick chestnut walrus moustache, brown felt pork-pie hat with a narrow brim, long white apron to the shin standing at the side gate in the low paling fence on a hot hazy morning with a brass milk can hooked on one finger, the gate half open against his hip and the flat empty heath running away behind him. The camera is at the fence level with his chest, four paces from him, a 50mm lens. The hazy sun comes from the TOP. At the first frame the milkman stands at the CENTRE LEFT with the white paling gate half open against his hip at the LEFT edge. The flat heather of the common and a line of pines lie behind him across the TOP third under a pale hazy sky. His head is a quarter of the frame's height. The shot is inside this place: the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it, a low paling fence at the far side with a side gate in it, standard roses and a bed of stocks against the brick. The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture as he goes on speaking and lifts the brass can a little as he does, from 00:00 to 00:04. At 00:04 the gate goes on resting against his hip, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he goes on speaking. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "garden",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_neighbour/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_02.png"
+    ],
+    "faces": [
+      "unnamed_neighbour"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.291667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 90002,
+    "prompt": "subject_definitions:\n<Subject 1> is the neighbour in <Picture 1>: Next-door neighbour, 48 years old, 5 ft 10 in, tall and spare with long arms and a slight stoop. Long face, hollow cheeks, prominent cheekbones. Fair weathered skin. Grey-brown hair receding at the temples. Short pointed grey goatee with shaved cheeks and lip. Mild hazel eyes. Wearing: Wide-brimmed straw gardening hat, collarless white shirt with sleeves rolled and sky-blue sleeve garters, tan canvas gardening apron, white flannel trousers, brown boots, a handful of strawberries. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, hazy sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on <Subject 1>, short pointed grey goatee, wide-brimmed straw gardening hat, tan canvas gardening apron leaning over the low paling fence with a handful of strawberries out across it, his ash stick hooked over the rail beside him and the hazy heath flat behind him. The camera is at the fence level with his chest, four paces from him, a 50mm lens. The hazy sun comes from the TOP. At the first frame the neighbour leans over the white paling at the CENTRE, the rail running across the frame at his waist from the LEFT edge to the RIGHT edge. The flat heather and the pines lie behind him across the TOP third. His head is a quarter of the frame's height. The shot is inside this place: the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it, a low paling fence at the far side with a side gate in it, standard roses and a bed of stocks against the brick. The camera tracks sideways to the right along the fence, a truck with small amplitude, until the side gate already in the picture is at the centre as he goes on holding the strawberries out across the rail and laughs as he speaks, from 00:00 to 00:04. At 00:04 his free hand goes on resting on the top of the paling, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he goes on holding the strawberries out across the rail. By 00:08 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "setup",
+    "setup": "garden",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_03.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.166667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 90003,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, hazy sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert past the paling fence at a flat haze of grey smoke standing over a line of pine woods far off across the heath on a hot hazy morning, the heather running away bleached and empty between, and the furze below the smoke standing green and unburnt; only that object and what touches it is in frame. The camera is at the fence looking out across the heath, an 85mm lens. The hazy sun comes from the TOP. At the first frame a pale hazy sky fills the TOP two thirds of the frame from the LEFT edge to the RIGHT edge, with the flat grey haze of smoke lying across the CENTRE above a dark line of pines. Bleached heather runs across the BOTTOM third. The shot is inside this place: the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it, a low paling fence at the far side with a side gate in it, standard roses and a bed of stocks against the brick. The camera tilts up from the heather to the haze of smoke already in the picture until the smoke stands in the middle of the frame as the haze goes on drifting sideways above the pines by a thumb’s width, from 00:00 to 00:04. At 00:04 the heather goes on stirring in the hot air, and the movement continues to the last frame of the shot. By 00:08 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "setup",
+    "setup": "bridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_04.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 90004,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, sun from the far end, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide on the road under a brick railway bridge at midday, the soot-blackened arch overhead, sappers in small round caps and dirty brick-red jackets unbuttoned over blue shirts sitting along the parapet and standing in the shade of it, and the pale dusty road running away bright through the opening beyond them. The camera is in the road at a standing man's eye, a 35mm lens. Hard white daylight stands in the opening at the CENTRE. At the first frame the sappers sit along the brick parapet across the CENTRE and stand in the shade of the arch at the LEFT third. The bright opening of the arch shows at the CENTRE RIGHT with the pale road going away through it. The shot is inside this place: the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road, the pale dusty road running through it, the canal running flat and green alongside below a towpath, hedges and elms on the far bank and the open common beyond. The camera pushes in along the road toward the bright opening of the arch with small amplitude as the men go on talking among themselves in the shade, from 00:00 to 00:04. At 00:04 one of them goes on turning a mess tin over in his hands, and the turn continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "bridge",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/snippy/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_05.png"
+    ],
+    "faces": [
+      "snippy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l05.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.625,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 90005,
+    "prompt": "subject_definitions:\n<Subject 1> is Snippy in <Picture 1>: Sapper, 26 years old, 5 ft 6 in, wiry and narrow-shouldered with quick hands. Long narrow face, sharp pointed nose, thin lips, prominent Adam's apple. Fair freckled skin, sunburnt at the neck. Sandy mouse-brown hair cropped short, clean-shaven. Pale grey eyes set close together. A small white scar through the right eyebrow. Wearing: Small round dark blue pillbox cap with a narrow yellow band worn on a chin strap, dirty brick-red serge jacket with garter-blue collar and cuffs hanging unbuttoned, blue-grey flannel shirt showing wide beneath, dark blue trousers, black leather boots reaching the calf, brown leather waist belt, short entrenching spade slung over one shoulder. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, sun from the far end, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot on <Subject 1> the sapper, sandy mouse-brown hair cropped short, clean-shaven, small round dark blue pillbox cap, dirty brick-red serge jacket sitting on the parapet in the shade of the arch with his forearms on his knees and his short entrenching spade leaning against the brick beside him, the dark brick of the arch close behind him. The camera is in the shade level with his eyes, three paces from him, an 85mm lens. The daylight comes out of the bright arch opening at the LEFT. At the first frame the brick parapet runs across the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The soot-blackened brick of the arch fills the LEFT half from the BOTTOM to the TOP behind it. The shot is inside this place: the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road, the pale dusty road running through it, the canal running flat and green alongside below a towpath, hedges and elms on the far bank and the open common beyond. The camera pushes in toward his face with small amplitude until his head fills the middle of the picture as he goes on speaking and opens one hand flat as he does, from 00:00 to 00:04. <Subject 1> (S1), on screen, sapper, with a clipped English voice at an even pace, says: <d>[English] What's cover against this heat? The sticks would cook you.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, he goes on knocking the back of that hand twice against his own knee, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "bridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_06.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.875,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 90006,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, sun from the far end, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot along the pale dusty road beyond the arch at a single soldier standing sentinel in the middle of it in the hard midday sun, his rifle grounded beside his boot, the hedges and elms running away on both sides and the empty road going on past him. The camera is in the road level with his chest, eight paces from him, an 85mm lens. Hard white sun comes from the CENTRE beyond the arch. At the first frame the sentinel stands in the middle of the pale road at the CENTRE, small against the hedges and elms that close both sides of it. The road runs away behind him into the TOP third. The shot is inside this place: the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road, the pale dusty road running through it, the canal running flat and green alongside below a towpath, hedges and elms on the far bank and the open common beyond. The camera pans to the right along the road until the sentinel already in the picture is at the centre as he goes on standing where he is and shifts his weight once, from 00:00 to 00:04. At 00:04 the dust goes on lifting off the road behind him, and the lift continues to the last frame of the shot. By 00:07 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "bridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_07.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 90007,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, sun from the far end, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot down at a soldier squatting on his heels in the dust of the road in the shade of the arch, scratching a long straight line and then a second beside it with the point of a stick, boots and puttees of other men standing round the edge of the drawing; only that object and what touches it is in frame. The camera is over his shoulder looking down at the road, a 50mm lens. The daylight comes from the CENTRE beyond the arch. At the first frame the pale dust of the road fills the whole frame from the LEFT edge to the RIGHT edge. The two scratched lines run across the CENTRE, the point of the stick is at the CENTRE RIGHT, and boots and puttees stand round the edge at the TOP LEFT and the TOP RIGHT. The shot is inside this place: the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road, the pale dusty road running through it, the canal running flat and green alongside below a towpath, hedges and elms on the far bank and the open common beyond. The camera tilts down from the standing men to the drawing in the dust already in the picture until the scratched lines are in the middle of the frame as the stick goes on drawing the second line, from 00:00 to 00:03. At 00:03 the dust goes on lifting where it drags, and the lift continues to the last frame of the shot. By 00:06 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "reaction",
+    "setup": "bridge",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/snippy/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_08.png"
+    ],
+    "faces": [
+      "snippy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l08.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.791667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 90008,
+    "prompt": "subject_definitions:\n<Subject 1> is Snippy in <Picture 1>: Sapper, 26 years old, 5 ft 6 in, wiry and narrow-shouldered with quick hands. Long narrow face, sharp pointed nose, thin lips, prominent Adam's apple. Fair freckled skin, sunburnt at the neck. Sandy mouse-brown hair cropped short, clean-shaven. Pale grey eyes set close together. A small white scar through the right eyebrow. Wearing: Small round dark blue pillbox cap with a narrow yellow band worn on a chin strap, dirty brick-red serge jacket with garter-blue collar and cuffs hanging unbuttoned, blue-grey flannel shirt showing wide beneath, dark blue trousers, black leather boots reaching the calf, brown leather waist belt, short entrenching spade slung over one shoulder. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, sun from the far end, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a close shot of the face of <Subject 1> the sapper, sandy mouse-brown hair cropped short, clean-shaven, small round dark blue pillbox cap, dirty brick-red serge jacket in the shade of the arch, his chin lifted and his cap pushed back off his forehead, the dark brick soft and out of focus behind him. The camera is in the shade level with his eyes, two paces from him, an 85mm lens. The daylight out of the bright arch opening at the LEFT falls on his face. At the first frame the brick parapet runs across the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The soot-blackened brick of the arch fills the LEFT half from the BOTTOM to the TOP behind it. The shot is inside this place: the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road, the pale dusty road running through it, the canal running flat and green alongside below a towpath, hedges and elms on the far bank and the open common beyond. The camera pushes in on his face with small amplitude until it fills the middle of the picture as he goes on speaking with his chin up, from 00:00 to 00:06. <Subject 1> (S1), on screen, sapper, with a clipped English voice at an even pace, says: <d>[English] Octopuses. Talk about fishers of men. Fighters of fish it is this time.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, his head goes on nodding once toward the common as he says it, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the road under a brick railway bridge on the Maybury road at midday in 1894: a low round brick arch with a soot-blackened underside carrying the railway embankment over the road runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "setup",
+    "setup": "pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_09.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.041667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 90009,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell Common, 1894, high sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide across dusty olive heather at the raw ring of flung yellow sand round the crater on a hot bright afternoon, one continuous grey streamer of smoke standing straight up out of it in the air, the heath running away flat to low pines, and the raw sand lying and bare inside its ring. The camera is on the heath at a standing man's eye, a 35mm lens. A hard high sun stands at the RIGHT. At the first frame Dusty olive heather fills the BOTTOM third of the frame from the LEFT edge to the RIGHT edge, with the shallow ditch and its thrown-up spoil running across the BOTTOM LEFT. The raw ring of flung yellow sand runs across the CENTRE, a tenth of the height of the frame, and the single grey streamer of smoke stands straight up out of it at the CENTRE into the TOP third. Low pines close the horizon behind the ring and a pale hot sky fills the TOP third. The shot is inside this place: the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater, a single continuous streamer of grey smoke standing straight up out of it in the air, knee-deep heather and dark furze running away flat to a horizon of low pines. The camera rises from the heather with small amplitude until the whole ring of sand and the standing streamer of smoke are inside the picture as the streamer goes on rising straight up out of the pit, from 00:00 to 00:03. At 00:03 the heather goes on stirring in the hot air, and the movement continues to the last frame of the shot. By 00:06 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "friction",
+    "setup": "pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_10.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.5,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 90010,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell Common, 1894, high sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot along a shallow ditch in the heather at a soldier lying flat in it on his elbows with a long pole in both hands and a white flag on the end of it up above the spoil, the raw sand ring of the pit far off standing quiet and unanswering far beyond him. The camera is at the lip of the ditch level with the spoil, five paces from him, a 50mm lens. A hard high sun stands at the RIGHT. At the first frame the soldier lies along the ditch across the BOTTOM third from the LEFT third to the CENTRE, the pole rising from his hands to the white flag at the CENTRE RIGHT. The raw sand ring of the pit stands far off in the TOP third at the CENTRE. The shot is inside this place: the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater, a single continuous streamer of grey smoke standing straight up out of it in the air, knee-deep heather and dark furze running away flat to a horizon of low pines. The camera tracks sideways to the right along the ditch, a truck with small amplitude, until the ring of sand already in the picture is at the centre as he goes on swinging the pole from side to side above the spoil through a hand’s breadth, from 00:00 to 00:04. At 00:04 the flag goes on turning over on itself as it swings, and the turn continues to the last frame of the shot. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "reaction",
+    "setup": "pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_11.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.458333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 90011,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell Common, 1894, high sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on the narrator, neat close-trimmed dark brown moustache, mid-grey herringbone tweed lounge suit standing bareheaded in the heather in the hard afternoon sun with his straw boater down in one hand and his hair flat with heat, looking out across the heath toward the raw ring of sand with his chin up, the flat common running away behind him. The camera is in the heather level with his chest, four paces from him, a 50mm lens. A hard high sun stands at the RIGHT. At the first frame the narrator stands at the CENTRE LEFT in the heather with his boater in his hand. The raw ring of sand and its streamer of smoke stand far off behind him at the CENTRE RIGHT. The shot is inside this place: the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater, a single continuous streamer of grey smoke standing straight up out of it in the air, knee-deep heather and dark furze running away flat to a horizon of low pines. The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture as he goes on looking out across the heath and turns the boater once right over in his hand, from 00:00 to 00:04. At 00:04 his shoulders go on standing square, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he goes on looking out across the heath. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the sand-pits on Horsell Common on a hot bright afternoon in 1894: the raw ring of flung yellow sand round the crater runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "setup",
+    "setup": "garden",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/characters/narrators_wife/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_12.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "narrators_wife"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.541667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 90012,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Wife in <Picture 2>: Oval face, wide hazel eyes, softly arched chestnut brows, small straight nose, full mouth. Fair skin with light freckles across the nose. Thick chestnut-auburn hair, waved and swept up into a soft pompadour with a knot at the crown. Slim hands with a plain gold wedding band. Wearing: Sage-green linen walking costume: short fitted jacket over a cream high-collared blouse, long sage-green skirt. Small sage-green felt toque with a cream ostrich tip pinned to the pompadour. Pale fawn linen dust coat over the shoulders for the dog-cart drive. <Picture 2> defines this woman alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury, Surrey, 1894, hazy sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on the narrator, neat close-trimmed dark brown moustache, mid-grey herringbone tweed lounge suit, straw boater with a black band and the narrator's wife, thick chestnut-auburn hair, sage-green linen walking costume, small sage-green felt toque with a cream ostrich tip sitting facing each other at a small table set out on their own lawn at six in the evening with a tea tray between them, both of them leaning in and talking, and the flower borders and the white paling gate behind them. The camera is on the lawn level with their shoulders, four paces from them, a 50mm lens. The low evening sun comes from the LEFT. At the first frame the narrator sits at the LEFT third and his wife at the RIGHT third. The shot is inside this place: the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it, a low paling fence at the far side with a side gate in it, standard roses and a bed of stocks against the brick. The camera tracks sideways to the left along the lawn, a truck with small amplitude, until both of them are in the middle of the picture as he goes on talking with one hand turned up on the table, from 00:00 to 00:04. At 00:04 she goes on holding her cup in both hands and nods once, and the movement continues to the last frame of the shot. By 00:08 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the garden behind a brick villa at Maybury on a hot close summer morning in 1894: a clipped lawn with a gravel path along it runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "spike",
+    "setup": "lawn",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_13.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.916667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 90013,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, fire, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide from the lawn across the paling at the tops of the trees about the Oriental College below and beyond it bursting into smoky red flame, the broken roof line of the college standing behind them, and black smoke going up off the whole of it into a sky already going dark. The camera is on the lawn at a standing man's eye looking over the paling, a 35mm lens. The light is low red firelight from the CENTRE LEFT. At the first frame the scorched lawn fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with broken red chimney brick scattered on it at the BOTTOM CENTRE and the BOTTOM RIGHT. The summerhouse stands at the LEFT third, the low brick garden wall runs across the CENTRE from the LEFT edge to the RIGHT edge with the white gate in it at the CENTRE RIGHT. The shot is inside this place: the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a white gate on the near lawn. The camera rises from the lawn with small amplitude until the burning treetops and the broken roof line behind them are both inside the picture as the flame goes on standing up out of the treetops, from 00:00 to 00:04. At 00:04 the smoke goes on rolling up off them into the sky, and the roll continues to the last frame of the shot. By 00:08 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "spike",
+    "setup": "lawn",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_14.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.083333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 90014,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, fire, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot across the paling at the tower of a little church beside the burning college, its masonry going out of line and sliding down into its own ruin, red flame standing up behind it and a column of dust lifting where it falls; only that object and what touches it is in frame. The camera is on the lawn looking over the paling, an 85mm lens. The light is red firelight from. At the first frame the burning church tower stands up the whole height of the frame at the CENTRE, its masonry going out of line at the CENTRE LEFT. Red flame fills the LEFT third and the RIGHT third behind it and dust lifts across the BOTTOM third. The shot is inside this place: the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a white gate on the near lawn. The camera pushes in on the falling masonry at the centre of the picture as the tower goes on sliding down into itself, from 00:00 to 00:03. At 00:03 the dust goes on lifting up out of it, and the lift continues to the last frame of the shot. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "spike",
+    "setup": "lawn",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_15.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.208333,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 90015,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall. [Shot 1] runs from 00:00 to 00:03. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, fire, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on an insert down at a flower bed under a study window with a heap of broken red chimney fragments lying fresh on the turned earth among the crushed stocks, more pieces lying along the roof tiles above, and red firelight coming across all of it from below the lawn; only that object and what touches it is in frame. The camera is at the flower bed looking down, a 50mm lens. The light is low red firelight from the CENTRE LEFT. At the first frame Turned earth and crushed stocks fill the whole frame from the LEFT edge to the RIGHT edge. The heap of broken red chimney brick lies at the CENTRE, more pieces at the BOTTOM RIGHT, and the sill of the study window closes the TOP third. The shot is inside this place: the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a white gate on the near lawn. The camera pushes in on the heap of red fragments at the centre of the picture as dust goes on sifting down onto the earth, from 00:00 to 00:02. At 00:02 a last fragment goes on rocking where it fell, and the movement continues to the last frame of the shot. By 00:03 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "turn",
+    "setup": "lawn",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/characters/narrators_wife/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_16.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "narrators_wife"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l15.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.458333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 90016,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Wife in <Picture 2>: Oval face, wide hazel eyes, softly arched chestnut brows, small straight nose, full mouth. Fair skin with light freckles across the nose. Thick chestnut-auburn hair, waved and swept up into a soft pompadour with a knot at the crown. Slim hands with a plain gold wedding band. Wearing: Sage-green linen walking costume: short fitted jacket over a cream high-collared blouse, long sage-green skirt. Small sage-green felt toque with a cream ostrich tip pinned to the pompadour. Pale fawn linen dust coat over the shoulders for the dog-cart drive. <Picture 2> defines this woman alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, fire, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot on the narrator, neat close-trimmed dark brown moustache, mid-grey herringbone tweed lounge suit, straw boater with a black band and the narrator's wife, thick chestnut-auburn hair, sage-green linen walking costume, small sage-green felt toque with a cream ostrich tip together on their own lawn in the red evening light, his hand closed hard round her upper arm and her shoulder already turning under it, both their faces in the picture and the smoke black behind their heads. The camera is on the lawn level with their eyes, three paces from them, an 85mm lens. The red firelight comes from the CENTRE LEFT. At the first frame the two heads fill the CENTRE of the frame side by side, his at the CENTRE LEFT and hers at the CENTRE RIGHT. The shot is inside this place: the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a white gate on the near lawn. The camera pushes in toward the two of them with small amplitude until both faces fill the middle of the picture as the narrator takes his wife by the arm and draws her round toward the road as he speaks, from 00:00 to 00:03. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] We can't possibly stay here.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, she goes on turning her shoulder under his hand and brings her foot round after it, and the turn continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "reaction",
+    "setup": "lawn",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_wife/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_17.png"
+    ],
+    "faces": [
+      "narrators_wife"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l16.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.375,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 90017,
+    "prompt": "subject_definitions:\n<Subject 1> is the Wife in <Picture 1>: Oval face, wide hazel eyes, softly arched chestnut brows, small straight nose, full mouth. Fair skin with light freckles across the nose. Thick chestnut-auburn hair, waved and swept up into a soft pompadour with a knot at the crown. Slim hands with a plain gold wedding band. Wearing: Sage-green linen walking costume: short fitted jacket over a cream high-collared blouse, long sage-green skirt. Small sage-green felt toque with a cream ostrich tip pinned to the pompadour. Pale fawn linen dust coat over the shoulders for the dog-cart drive. <Picture 1> defines this woman alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows her; <Picture 1> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, fire, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on the narrator's wife, thick chestnut-auburn hair, sage-green linen walking costume, small sage-green felt toque with a cream ostrich tip standing on the gravel drive in the red evening light with her apron on and her hands together in front of her, her face turned downhill and her pompadour loosened at the temples, the white gate behind her. The camera is on the drive level with her eyes, three paces from her, an 85mm lens. The red firelight comes from the CENTRE LEFT. At the first frame her head and shoulders fill the CENTRE of the frame. The white gate shows behind her at the RIGHT third. The shot is inside this place: the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a white gate on the near lawn. The camera pushes in toward her with small amplitude until her head and shoulders fill the middle of the picture as she goes on looking downhill and her hands go on gripping each other, from 00:00 to 00:02. <Subject 1> (S1), on screen, oval face, with a clipped English voice at an even pace, says: <d>[English] But where are we to go?</d> Her mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, she goes on turning her head further downhill as she speaks, and the turn continues to the last frame of the shot. By 00:05 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "friction",
+    "setup": "lawn",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_18.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.5,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 90018,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, fire, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide from the lawn at a bevy of hussars in dark blue passing along the road beyond the garden wall, six of them riding and two already dismounted and running from house to house at a normal trot, and the sun standing blood red in the smoke above the trees. The camera is at the gate looking downhill, a 35mm lens. The sun stands blood red in the smoke at the TOP CENTRE. At the first frame the scorched lawn fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with broken red chimney brick scattered on it at the BOTTOM CENTRE and the BOTTOM RIGHT. The summerhouse stands at the LEFT third, the low brick garden wall runs across the CENTRE from the LEFT edge to the RIGHT edge with the white gate in it at the CENTRE RIGHT, the broken roof line and the burning church tower stand above the wall at the CENTRE, and thick black smoke fills the TOP third from the CENTRE to the RIGHT edge. The shot is inside this place: the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a white gate on the near lawn. The camera pushes in toward the riders passing along beyond the garden wall as the riders go on cantering along beyond the wall, from 00:00 to 00:04. At 00:04 the two on foot go on running beside them, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "setup",
+    "setup": "inn",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_landlord/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_19.png"
+    ],
+    "faces": [
+      "unnamed_landlord"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.083333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 90019,
+    "prompt": "subject_definitions:\n<Subject 1> is the landlord in <Picture 1>: Landlord of the Spotted Dog, 52 years old, 5 ft 8 in, sturdy and barrel-chested with a thick neck and heavy forearms. Broad red face, fleshy nose, small shrewd blue eyes. Brown hair flecked with grey, thinning on the crown and brushed flat. Heavy grey-brown mutton-chop whiskers joined to a full moustache, short grey stubble on the chin. Wearing: Bare head, white cotton shirt with sleeves rolled to the elbow and black sleeve garters, black broadcloth waistcoat with brass watch chain, long tan leather cellarman's apron from chest to shin, ring of iron keys at the belt, black broadcloth trousers, black boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the bar of a small country public house on a summer evening in 1894: a scrubbed wooden counter along one side with beer engines and their brass handles standing on it. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the Spotted Dog, 1894, oil lamp, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on <Subject 1> of the Spotted Dog, heavy grey-brown mutton-chop whiskers joined to a full moustache, brown hair flecked with grey, thinning on the crown, long tan leather cellarman's apron behind the scrubbed counter of his bar under a hanging oil lamp with both hands spread flat on the wood, the brass beer-engine handles standing up beside him and the shelves of bottles and pewter behind, his weight settled back on his heels. The camera is at the counter level with his chest, four paces from him, a 50mm lens. The oil lamp hangs at the TOP CENTRE. At the first frame the landlord stands behind the counter at the CENTRE with both hands flat on the wood. The shot is inside this place: the bar of a small country public house on a summer evening in 1894: a scrubbed wooden counter along one side with beer engines and their brass handles standing on it, shelves of bottles and pewter behind, a settle and a plain table against the far wall, a bare board floor. The camera pushes in across the counter toward him with small amplitude until his head and shoulders fill the middle of the picture as he goes on speaking and lifts one hand off the wood to turn it palm up, from 00:00 to 00:03. At 00:03 his moustache goes on moving as he talks, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he goes on speaking. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the bar of a small country public house on a summer evening in 1894: a scrubbed wooden counter along one side with beer engines and their brass handles standing on it runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "friction",
+    "setup": "inn",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_20.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.125,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 90020,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the bar of a small country public house on a summer evening in 1894: a scrubbed wooden counter along one side with beer engines and their brass handles standing on it. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the Spotted Dog, 1894, oil lamp, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on the narrator, neat close-trimmed dark brown moustache, mid-grey herringbone tweed lounge suit, straw boater with a black band standing at the counter in the lamplight speaking past the shoulder of another man who stands with his back to the camera, the bottles on the shelves behind them, the narrator's two empty hands resting flat on the counter. The camera is at the counter level with his chest, four paces from him, a 50mm lens. The oil lamp hangs at the TOP CENTRE. At the first frame the narrator stands at the CENTRE RIGHT beside the counter, the other man's shoulder dark and near at the LEFT third. The bottles on the shelves fill the wall behind them. His head is a quarter of the frame's height. The shot is inside this place: the bar of a small country public house on a summer evening in 1894: a scrubbed wooden counter along one side with beer engines and their brass handles standing on it, shelves of bottles and pewter behind, a settle and a plain table against the far wall, a bare board floor. The camera tracks sideways to the right along the counter, a truck with small amplitude, until the brass handles already in the picture are at the centre as he goes on speaking across the other man's shoulder, from 00:00 to 00:03. At 00:03 the other man nods once as he listens, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he goes on speaking across the other man's shoulder. By 00:06 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the bar of a small country public house on a summer evening in 1894: a scrubbed wooden counter along one side with beer engines and their brass handles standing on it runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "answer",
+    "setup": "lawn",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep09/storyboard/h3/shot_21.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.875,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 90021,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, fire, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide from the road at a dog cart standing at a white gate in the red evening with a horse in the shafts and two women already up in it, a bundle tied in a tablecloth and a corded box on the tail of it, and the whole crest of the hill behind the house going up in thick streamers of black smoke shot through with threads of red fire. The camera is in the road at a standing man's eye, a 35mm lens. The light is red firelight from the CENTRE. At the first frame the scorched lawn fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with broken red chimney brick scattered on it at the BOTTOM CENTRE and the BOTTOM RIGHT. The summerhouse stands at the LEFT third. The shot is inside this place: the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a white gate on the near lawn. The camera rises from the road with small amplitude until the cart at the gate and the streaming smoke over the crest behind it are both inside the picture as the horse goes on shifting in the shafts, from 00:00 to 00:04. At 00:04 the streamers of smoke go on driving up off the crest, and the movement continues to the last frame of the shot. By 00:08 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "button",
+    "setup": "lawn",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_hussar/sheet.png",
+      "episodes/ep09/storyboard/h3/shot_22.png"
+    ],
+    "faces": [
+      "unnamed_hussar"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l21.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.291667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 90022,
+    "prompt": "subject_definitions:\n<Subject 1> is the hussar in <Picture 1>: Trooper of the 8th Hussars, 22 years old, 5 ft 8 in, lean horseman's build with long thighs, narrow hips and slightly bowed legs. Oval face, olive-tanned skin, straight nose. Brown curly hair cropped close to the skull. Dark brown eyes. A thin pale scar across the left eyebrow. Wearing: Dark green pillbox forage cap with yellow band on a chin strap, dark rifle-green serge hussar jacket with yellow cord frogging and yellow-edged collar, right sleeve torn and blackened with soot, dark green overalls with double yellow stripes mud-caked to the knee, black riding boots, steel spurs, cavalry sword on slings. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Maybury Hill, 1894, fire, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a close shot of the dismounted <Subject 1>, brown curly hair cropped close to the skull, clean-shaven boyish jaw, dark rifle-green serge <Subject 1> jacket with yellow cord frogging, right sleeve torn and blackened with soot stopped in the road in the red evening with his head turned back over his shoulder and his mouth open, shouting, the soot black across one cheek, and a whirl of black smoke already driving across the road behind him. The camera is in the road level with his eyes, three paces from him, an 85mm lens. The red firelight comes from the CENTRE LEFT. At the first frame his head fills the CENTRE of the frame from the TOP third to the BOTTOM third. The shot is inside this place: the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall, thick black smoke driving up off them across the whole sky, a wooden summerhouse and a white gate on the near lawn. The camera pans to the right along the road until his face already in the picture is at the centre as he goes on shouting back over his shoulder as he moves off, from 00:00 to 00:04. <Subject 1> (S1), on screen, trooper of the 8th Hussars, with a clipped English voice at an even pace, says: <d>[English] Crawling out in a thing like a dish cover!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, the whirl of black smoke goes on driving across behind him and takes him into it, and the movement continues to the last frame of the shot. By 00:06 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the same walled lawn on the crest of Maybury Hill with the valley below it on fire: the broken roof line of the Oriental College and a half-fallen church tower burning above the garden wall runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  }
+]

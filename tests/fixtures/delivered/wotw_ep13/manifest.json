@@ -1,0 +1,3431 @@
+{
+  "codex_id": "20260827135508",
+  "unit": "ep13",
+  "number": 13,
+  "master": "20260827135508_the-war-of-the-worlds/episodes/ep13/cut/master_r2v.mp4",
+  "qc": {
+    "passed": true,
+    "sha8": "3927e8c3",
+    "seconds": 161.41,
+    "planned_seconds": 156.708333,
+    "lufs": -14.12,
+    "true_peak": -1.45,
+    "longest_gap_s": 5.93,
+    "missing_cuts": [],
+    "takes": {
+      "pass": 25,
+      "of": 25,
+      "fail": [],
+      "budget_spent": [],
+      "worst": [
+        "T18",
+        67.9
+      ],
+      "unjudged": []
+    }
+  },
+  "steps": {
+    "01": "skipped",
+    "02": "skipped",
+    "03": "skipped",
+    "04": "skipped",
+    "05": "skipped",
+    "06": "skipped",
+    "07": "skipped",
+    "08": "skipped",
+    "09": "skipped",
+    "10": "skipped",
+    "11": "completed",
+    "12": "started"
+  },
+  "timing": {
+    "total_seconds": 76309.8,
+    "runs": 301,
+    "by_stage": {
+      "bind": 0.4,
+      "places": 0.2,
+      "lines": 609.7,
+      "speaker_check": 10.3,
+      "respot": 0.8,
+      "timeline": 1.5,
+      "prompts": 13.2,
+      "grids": 9077.7,
+      "panels": 357.1,
+      "panel_dq": 127.2,
+      "panel_content": 25805.8,
+      "no_last_frame": 3.0,
+      "takes": 18291.3,
+      "take_dq": 6122.4,
+      "take_content": 10198.4,
+      "strip": 5.4,
+      "title": 997.0,
+      "assemble": 884.4,
+      "qc": 3803.8,
+      "dossier": 0.2
+    }
+  },
+  "stage": "episode",
+  "inputs": [
+    {
+      "path": "analysis/characters/albin.json",
+      "sha8": "3bb0f273"
+    },
+    {
+      "path": "analysis/characters/artilleryman.json",
+      "sha8": "f02bfc55"
+    },
+    {
+      "path": "analysis/characters/astronomer_royal.json",
+      "sha8": "ef453242"
+    },
+    {
+      "path": "analysis/characters/captain.json",
+      "sha8": "41217686"
+    },
+    {
+      "path": "analysis/characters/curate.json",
+      "sha8": "a9c6cedd"
+    },
+    {
+      "path": "analysis/characters/denning.json",
+      "sha8": "cbdf4184"
+    },
+    {
+      "path": "analysis/characters/deputation.json",
+      "sha8": "95459542"
+    },
+    {
+      "path": "analysis/characters/four.json",
+      "sha8": "0510042f"
+    },
+    {
+      "path": "analysis/characters/god.json",
+      "sha8": "05cc30ae"
+    },
+    {
+      "path": "analysis/characters/gregg.json",
+      "sha8": "5732dbbe"
+    },
+    {
+      "path": "analysis/characters/gunners.json",
+      "sha8": "d9e90729"
+    },
+    {
+      "path": "analysis/characters/henderson.json",
+      "sha8": "16649368"
+    },
+    {
+      "path": "analysis/characters/hussars.json",
+      "sha8": "71517f9a"
+    },
+    {
+      "path": "analysis/characters/lavelle.json",
+      "sha8": "6c0df4bb"
+    },
+    {
+      "path": "analysis/characters/lord_garrick.json",
+      "sha8": "0b379975"
+    },
+    {
+      "path": "analysis/characters/lord_hilton.json",
+      "sha8": "52d2907c"
+    },
+    {
+      "path": "analysis/characters/major_eden.json",
+      "sha8": "054f179c"
+    },
+    {
+      "path": "analysis/characters/markham.json",
+      "sha8": "ea0f6e1b"
+    },
+    {
+      "path": "analysis/characters/marshall.json",
+      "sha8": "4c94c941"
+    },
+    {
+      "path": "analysis/characters/marshall_son.json",
+      "sha8": "dd991dc5"
+    },
+    {
+      "path": "analysis/characters/martians.json",
+      "sha8": "ca946f76"
+    },
+    {
+      "path": "analysis/characters/miss_elphinstone.json",
+      "sha8": "2af243bf"
+    },
+    {
+      "path": "analysis/characters/mormons.json",
+      "sha8": "ed903ada"
+    },
+    {
+      "path": "analysis/characters/mrs_elphinstone.json",
+      "sha8": "f44e6dcb"
+    },
+    {
+      "path": "analysis/characters/narrators_brother.json",
+      "sha8": "96410446"
+    },
+    {
+      "path": "analysis/characters/narrators_wife.json",
+      "sha8": "b9ec76da"
+    },
+    {
+      "path": "analysis/characters/ogilvy.json",
+      "sha8": "64023d62"
+    },
+    {
+      "path": "analysis/characters/police.json",
+      "sha8": "70d3e502"
+    },
+    {
+      "path": "analysis/characters/sappers.json",
+      "sha8": "c77b81e9"
+    },
+    {
+      "path": "analysis/characters/schiaparelli.json",
+      "sha8": "51b5a53f"
+    },
+    {
+      "path": "analysis/characters/snippy.json",
+      "sha8": "80e08c21"
+    },
+    {
+      "path": "analysis/characters/soldiers.json",
+      "sha8": "1c631052"
+    },
+    {
+      "path": "analysis/characters/stent.json",
+      "sha8": "e0448e1f"
+    },
+    {
+      "path": "analysis/characters/unnamed_cabmen.json",
+      "sha8": "bad67d93"
+    },
+    {
+      "path": "analysis/characters/unnamed_curate_companion.json",
+      "sha8": "0b3c51be"
+    },
+    {
+      "path": "analysis/characters/unnamed_first_person_narrator.json",
+      "sha8": "da2fb0fc"
+    },
+    {
+      "path": "analysis/characters/unnamed_gardener.json",
+      "sha8": "ffbc9672"
+    },
+    {
+      "path": "analysis/characters/unnamed_hussar.json",
+      "sha8": "31cbd835"
+    },
+    {
+      "path": "analysis/characters/unnamed_landlord.json",
+      "sha8": "45cec14a"
+    },
+    {
+      "path": "analysis/characters/unnamed_milkman.json",
+      "sha8": "edd78dba"
+    },
+    {
+      "path": "analysis/characters/unnamed_mounted_policeman.json",
+      "sha8": "03b4a8f0"
+    },
+    {
+      "path": "analysis/characters/unnamed_neighbour.json",
+      "sha8": "3e4ea3c5"
+    },
+    {
+      "path": "analysis/characters/unnamed_neighbours_wife.json",
+      "sha8": "73d3be30"
+    },
+    {
+      "path": "analysis/characters/unnamed_newspaper_boy.json",
+      "sha8": "998cd35a"
+    },
+    {
+      "path": "analysis/characters/unnamed_potman.json",
+      "sha8": "8efda479"
+    },
+    {
+      "path": "analysis/characters/unnamed_servant.json",
+      "sha8": "cb85f037"
+    },
+    {
+      "path": "analysis/characters/unnamed_shopman.json",
+      "sha8": "0c0c36cf"
+    },
+    {
+      "path": "analysis/characters/unnamed_sweetstuff_dealer.json",
+      "sha8": "527beb1f"
+    },
+    {
+      "path": "analysis/characters/unnamed_waggoner.json",
+      "sha8": "71ed2a83"
+    },
+    {
+      "path": "analysis/dq_rules.json",
+      "sha8": "7af298da"
+    },
+    {
+      "path": "analysis/locations/barnet.json",
+      "sha8": "f585aa72"
+    },
+    {
+      "path": "analysis/locations/barnet_crossroads.json",
+      "sha8": "e3f061fa"
+    },
+    {
+      "path": "analysis/locations/byfleet.json",
+      "sha8": "6c76a88f"
+    },
+    {
+      "path": "analysis/locations/chalk_farm_edgware.json",
+      "sha8": "92720848"
+    },
+    {
+      "path": "analysis/locations/colchester_road.json",
+      "sha8": "87ff6452"
+    },
+    {
+      "path": "analysis/locations/college_arms_lane.json",
+      "sha8": "643e8da0"
+    },
+    {
+      "path": "analysis/locations/cousins_house_leatherhead.json",
+      "sha8": "95b8642e"
+    },
+    {
+      "path": "analysis/locations/crammers_biology_class.json",
+      "sha8": "fec82a5c"
+    },
+    {
+      "path": "analysis/locations/earth_and_mars.json",
+      "sha8": "e1e83369"
+    },
+    {
+      "path": "analysis/locations/essex_coast_beach.json",
+      "sha8": "12748f8e"
+    },
+    {
+      "path": "analysis/locations/exhibition_road.json",
+      "sha8": "df97a92c"
+    },
+    {
+      "path": "analysis/locations/fulham_high_street.json",
+      "sha8": "a7473bab"
+    },
+    {
+      "path": "analysis/locations/hendersons_garden_woking.json",
+      "sha8": "fd8e93fe"
+    },
+    {
+      "path": "analysis/locations/high_barnet_grass_lane.json",
+      "sha8": "47640d9c"
+    },
+    {
+      "path": "analysis/locations/horsell_common.json",
+      "sha8": "7f820970"
+    },
+    {
+      "path": "analysis/locations/horsell_pit.json",
+      "sha8": "fde8d8ca"
+    },
+    {
+      "path": "analysis/locations/leatherhead.json",
+      "sha8": "af3faf1a"
+    },
+    {
+      "path": "analysis/locations/london.json",
+      "sha8": "84faf481"
+    },
+    {
+      "path": "analysis/locations/marylebone.json",
+      "sha8": "1e3b3940"
+    },
+    {
+      "path": "analysis/locations/marylebone_apartments.json",
+      "sha8": "4afd9f70"
+    },
+    {
+      "path": "analysis/locations/maybury_canal_bridge.json",
+      "sha8": "23097922"
+    },
+    {
+      "path": "analysis/locations/maybury_hill.json",
+      "sha8": "9ef98f17"
+    },
+    {
+      "path": "analysis/locations/mortlake_kitchen.json",
+      "sha8": "ba4540de"
+    },
+    {
+      "path": "analysis/locations/mortlake_pantry.json",
+      "sha8": "a00eb225"
+    },
+    {
+      "path": "analysis/locations/mortlake_pit.json",
+      "sha8": "893703d9"
+    },
+    {
+      "path": "analysis/locations/mortlake_scullery.json",
+      "sha8": "d43a5b68"
+    },
+    {
+      "path": "analysis/locations/narrators_dining_room.json",
+      "sha8": "f2143cfb"
+    },
+    {
+      "path": "analysis/locations/narrators_garden.json",
+      "sha8": "1d9276d6"
+    },
+    {
+      "path": "analysis/locations/narrators_home.json",
+      "sha8": "93edbff9"
+    },
+    {
+      "path": "analysis/locations/narrators_study.json",
+      "sha8": "8571c862"
+    },
+    {
+      "path": "analysis/locations/oriental_terrace.json",
+      "sha8": "c02afedb"
+    },
+    {
+      "path": "analysis/locations/ottershaw.json",
+      "sha8": "31e7ad42"
+    },
+    {
+      "path": "analysis/locations/ottershaw_observatory.json",
+      "sha8": "3a4beb52"
+    },
+    {
+      "path": "analysis/locations/paddle_steamer.json",
+      "sha8": "995a2556"
+    },
+    {
+      "path": "analysis/locations/pine_woods_maybury.json",
+      "sha8": "d7b8548d"
+    },
+    {
+      "path": "analysis/locations/primrose_hill.json",
+      "sha8": "651371da"
+    },
+    {
+      "path": "analysis/locations/primrose_hill_redoubt.json",
+      "sha8": "b1179c2a"
+    },
+    {
+      "path": "analysis/locations/putney_common.json",
+      "sha8": "1fabe145"
+    },
+    {
+      "path": "analysis/locations/putney_garden.json",
+      "sha8": "a5166b22"
+    },
+    {
+      "path": "analysis/locations/putney_hill_inn.json",
+      "sha8": "ec99f8cf"
+    },
+    {
+      "path": "analysis/locations/railway_carriage.json",
+      "sha8": "57427ddb"
+    },
+    {
+      "path": "analysis/locations/regents_canal_bridge.json",
+      "sha8": "9b348ee4"
+    },
+    {
+      "path": "analysis/locations/regents_park.json",
+      "sha8": "1d0e32da"
+    },
+    {
+      "path": "analysis/locations/richmond_hill_battery.json",
+      "sha8": "2b06c3c1"
+    },
+    {
+      "path": "analysis/locations/river_thames_walton.json",
+      "sha8": "5b20bee1"
+    },
+    {
+      "path": "analysis/locations/road_ockham_ripley_pyrford.json",
+      "sha8": "0d074caa"
+    },
+    {
+      "path": "analysis/locations/sheen.json",
+      "sha8": "736db83d"
+    },
+    {
+      "path": "analysis/locations/shepperton_lock.json",
+      "sha8": "4425c744"
+    },
+    {
+      "path": "analysis/locations/spotted_dog.json",
+      "sha8": "26e59222"
+    },
+    {
+      "path": "analysis/locations/st_johns_wood_house.json",
+      "sha8": "59171bc5"
+    },
+    {
+      "path": "analysis/locations/strand_trafalgar_square.json",
+      "sha8": "47a60fc7"
+    },
+    {
+      "path": "analysis/locations/sunbury_hampton_kew_route.json",
+      "sha8": "392b14e7"
+    },
+    {
+      "path": "analysis/locations/surrey.json",
+      "sha8": "8403a7e8"
+    },
+    {
+      "path": "analysis/locations/tillingham.json",
+      "sha8": "c544a1c8"
+    },
+    {
+      "path": "analysis/locations/unknown_location.json",
+      "sha8": "833d76d5"
+    },
+    {
+      "path": "analysis/locations/upper_halliford.json",
+      "sha8": "c2282e31"
+    },
+    {
+      "path": "analysis/locations/village_street.json",
+      "sha8": "1c2af496"
+    },
+    {
+      "path": "analysis/locations/walled_garden_near_kew.json",
+      "sha8": "b9bde10c"
+    },
+    {
+      "path": "analysis/locations/walton_middlesex_bank.json",
+      "sha8": "eccc5115"
+    },
+    {
+      "path": "analysis/locations/waterloo_road_bridge.json",
+      "sha8": "17a04aa3"
+    },
+    {
+      "path": "analysis/locations/waterloo_station.json",
+      "sha8": "55151017"
+    },
+    {
+      "path": "analysis/locations/wey_thames_confluence.json",
+      "sha8": "09c7c6f8"
+    },
+    {
+      "path": "analysis/locations/weybridge.json",
+      "sha8": "f758d2c0"
+    },
+    {
+      "path": "analysis/locations/white_house_mortlake.json",
+      "sha8": "f9eec89b"
+    },
+    {
+      "path": "analysis/locations/wimbledon_common.json",
+      "sha8": "c1bf2c0f"
+    },
+    {
+      "path": "analysis/locations/woking.json",
+      "sha8": "c964ccba"
+    },
+    {
+      "path": "analysis/locations/woking_junction.json",
+      "sha8": "aebdcc35"
+    },
+    {
+      "path": "analysis/scenes.json",
+      "sha8": "f943f951"
+    },
+    {
+      "path": "cast/artilleryman/voice/design.wav",
+      "sha8": "4c08dc41"
+    },
+    {
+      "path": "cast/curate/voice/design.wav",
+      "sha8": "e0ac1efd"
+    },
+    {
+      "path": "cast/henderson/voice/design.wav",
+      "sha8": "3d5e44a6"
+    },
+    {
+      "path": "cast/narrators_brother/voice/design.wav",
+      "sha8": "57287dd8"
+    },
+    {
+      "path": "cast/narrators_wife/voice/design.wav",
+      "sha8": "ade2f835"
+    },
+    {
+      "path": "cast/ogilvy/voice/design.wav",
+      "sha8": "8a3b27ad"
+    },
+    {
+      "path": "cast/snippy/voice/design.wav",
+      "sha8": "bc767f0e"
+    },
+    {
+      "path": "cast/stent/voice/design.wav",
+      "sha8": "83df76b4"
+    },
+    {
+      "path": "cast/unnamed_first_person_narrator/voice/design.wav",
+      "sha8": "33e1fd16"
+    },
+    {
+      "path": "cast/unnamed_hussar/voice/design.wav",
+      "sha8": "43a61cd5"
+    },
+    {
+      "path": "cast/unnamed_neighbour/voice/design.wav",
+      "sha8": "862b05de"
+    },
+    {
+      "path": "cast/unnamed_neighbours_wife/voice/design.wav",
+      "sha8": "1dbd0505"
+    },
+    {
+      "path": "cast/unnamed_newspaper_boy/voice/design.wav",
+      "sha8": "375c48b3"
+    },
+    {
+      "path": "cast/unnamed_shopman/voice/design.wav",
+      "sha8": "c42b807a"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l00.wav",
+      "sha8": "ecf47c70"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l01.wav",
+      "sha8": "53528014"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l02.wav",
+      "sha8": "f3efdea0"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l03.wav",
+      "sha8": "c7b315e8"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l04.wav",
+      "sha8": "d7b46cbd"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l05.wav",
+      "sha8": "bc73fb7f"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l06.wav",
+      "sha8": "fde10538"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l07.wav",
+      "sha8": "30a7d823"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l08.wav",
+      "sha8": "1f1cecc6"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l09.wav",
+      "sha8": "1f673dde"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l10.wav",
+      "sha8": "e3332fd2"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l11.wav",
+      "sha8": "63f2b819"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l12.wav",
+      "sha8": "22cd73c0"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l13.wav",
+      "sha8": "732ff56d"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l14.wav",
+      "sha8": "6b0159c0"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l15.wav",
+      "sha8": "1246d47c"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l16.wav",
+      "sha8": "7dbb20c1"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l17.wav",
+      "sha8": "9e16d88c"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l18.wav",
+      "sha8": "4f964176"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l19.wav",
+      "sha8": "fa59b0ae"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l20.wav",
+      "sha8": "abd22125"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l21.wav",
+      "sha8": "a313f22a"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l22.wav",
+      "sha8": "8f26837b"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/l23.wav",
+      "sha8": "349598cc"
+    },
+    {
+      "path": "episodes/ep13/audio/lines/lines.json",
+      "sha8": "0ee3d002"
+    },
+    {
+      "path": "episodes/ep13/cut/master_r2v.mp4",
+      "sha8": "3927e8c3"
+    },
+    {
+      "path": "episodes/ep13/placed.json",
+      "sha8": "b06c8cc6"
+    },
+    {
+      "path": "episodes/ep13/plan.json",
+      "sha8": "83bfe0a9"
+    },
+    {
+      "path": "episodes/ep13/plan.verdict.json",
+      "sha8": "ebf05593"
+    },
+    {
+      "path": "episodes/ep13/qc_r2v.json",
+      "sha8": "d61ea049"
+    },
+    {
+      "path": "episodes/ep13/review/eye_3927e8c3.json",
+      "sha8": "fd525927"
+    },
+    {
+      "path": "episodes/ep13/storyboard/eye_8359fd22.json",
+      "sha8": "818c18f3"
+    },
+    {
+      "path": "episodes/ep13/storyboard/eye_98b0c3b5.json",
+      "sha8": "05a412ed"
+    },
+    {
+      "path": "episodes/ep13/storyboard/eye_a5260433.json",
+      "sha8": "e2c016e3"
+    },
+    {
+      "path": "episodes/ep13/storyboard/eye_b4c110b8.json",
+      "sha8": "3bf5c506"
+    },
+    {
+      "path": "episodes/ep13/storyboard/eye_d6a87ec3.json",
+      "sha8": "5312995c"
+    },
+    {
+      "path": "episodes/ep13/storyboard/eye_f3ba61bc.json",
+      "sha8": "28a2ce3e"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_bank_1x1.png",
+      "sha8": "c3b98753"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_battery_1x1.png",
+      "sha8": "723d52ff"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_halliford_2x1.png",
+      "sha8": "dbb23a23"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s00.png",
+      "sha8": "025942a3"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s11.png",
+      "sha8": "32d8ab29"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s13.png",
+      "sha8": "5c0d4741"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s15.png",
+      "sha8": "fa21c451"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s17.png",
+      "sha8": "98e51a60"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s18.png",
+      "sha8": "6dd7eb6f"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s19.png",
+      "sha8": "5070018e"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s20.png",
+      "sha8": "e179147b"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s22.png",
+      "sha8": "ba61fc0f"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s24.png",
+      "sha8": "fc0b7ccb"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_3x2.png",
+      "sha8": "10a5d298"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_pit_2x1.png",
+      "sha8": "3e935835"
+    },
+    {
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_river_3x1.png",
+      "sha8": "494f25c4"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_00.png",
+      "sha8": "7d4b9c2c"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_01.png",
+      "sha8": "2e95503d"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_02.png",
+      "sha8": "995489c8"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_03.png",
+      "sha8": "9a8ee39a"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_04.png",
+      "sha8": "1c5b640f"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_05.png",
+      "sha8": "d36a1b24"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_06.png",
+      "sha8": "d379e8d3"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_07.png",
+      "sha8": "9e6bf56f"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_08.png",
+      "sha8": "31714895"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_09.png",
+      "sha8": "01a7e870"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_10.png",
+      "sha8": "f4111d49"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_11.png",
+      "sha8": "94adb572"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_12.png",
+      "sha8": "2c3e5ddd"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_13.png",
+      "sha8": "74d29f4e"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_14.png",
+      "sha8": "97a34b05"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_15.png",
+      "sha8": "83da8c67"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_16.png",
+      "sha8": "e02d2e06"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_17.png",
+      "sha8": "de3798c7"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_18.png",
+      "sha8": "76b5fcb7"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_19.png",
+      "sha8": "32f57a85"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_20.png",
+      "sha8": "38120f2a"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_21.png",
+      "sha8": "e848f636"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_22.png",
+      "sha8": "9fcbe8a9"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_23.png",
+      "sha8": "c8d1e257"
+    },
+    {
+      "path": "episodes/ep13/storyboard/shot_24.png",
+      "sha8": "6483664a"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T00.mp4",
+      "sha8": "9b2dc9a5"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T01.mp4",
+      "sha8": "5d4f3ab8"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T02.mp4",
+      "sha8": "fa504ccb"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T03.mp4",
+      "sha8": "52af179e"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T04.mp4",
+      "sha8": "65ca1e72"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T05.mp4",
+      "sha8": "43fd6012"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T06.mp4",
+      "sha8": "e58c3fd4"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T07.mp4",
+      "sha8": "148f1306"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T08.mp4",
+      "sha8": "7f96c9cf"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T09.mp4",
+      "sha8": "9f00213c"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T10.mp4",
+      "sha8": "daa8fc34"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T11.mp4",
+      "sha8": "73ba8f12"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T12.mp4",
+      "sha8": "ff62db74"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T13.mp4",
+      "sha8": "67914860"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T14.mp4",
+      "sha8": "5838a809"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T15.mp4",
+      "sha8": "590a89a9"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T16.mp4",
+      "sha8": "f545be2d"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T17.mp4",
+      "sha8": "cf773f89"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T18.mp4",
+      "sha8": "f0687a9a"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T19.mp4",
+      "sha8": "4051ab24"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T20.mp4",
+      "sha8": "f69e4bf0"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T21.mp4",
+      "sha8": "41d38f80"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T22.mp4",
+      "sha8": "f41ae748"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T23.mp4",
+      "sha8": "6fb4f2c8"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/T24.mp4",
+      "sha8": "00cab1a4"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/eye_219e6d72.json",
+      "sha8": "69ecb3ae"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/eye_249edde2.json",
+      "sha8": "39b76260"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/eye_54936cae.json",
+      "sha8": "1fed60b0"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/eye_8b8b82dd.json",
+      "sha8": "3cd8ef7e"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/eye_d1335f7d.json",
+      "sha8": "ab49bb1a"
+    },
+    {
+      "path": "episodes/ep13/takes/r2v/prompts.json",
+      "sha8": "8854ac00"
+    },
+    {
+      "path": "episodes/ep13/timing.jsonl",
+      "sha8": "92ce34ca"
+    },
+    {
+      "path": "refs/characters/albin/sheet.png",
+      "sha8": "f660564b"
+    },
+    {
+      "path": "refs/characters/artilleryman/sheet.png",
+      "sha8": "e528ee1c"
+    },
+    {
+      "path": "refs/characters/astronomer_royal/sheet.png",
+      "sha8": "332a1a4d"
+    },
+    {
+      "path": "refs/characters/captain/sheet.png",
+      "sha8": "aea926ba"
+    },
+    {
+      "path": "refs/characters/curate/sheet.png",
+      "sha8": "ae864384"
+    },
+    {
+      "path": "refs/characters/denning/sheet.png",
+      "sha8": "ff5d5962"
+    },
+    {
+      "path": "refs/characters/deputation/sheet.png",
+      "sha8": "98647c27"
+    },
+    {
+      "path": "refs/characters/four/sheet.png",
+      "sha8": "eea16acc"
+    },
+    {
+      "path": "refs/characters/gregg/sheet.png",
+      "sha8": "80e12cc6"
+    },
+    {
+      "path": "refs/characters/gunners/sheet.png",
+      "sha8": "382bef50"
+    },
+    {
+      "path": "refs/characters/henderson/sheet.png",
+      "sha8": "64a4d12a"
+    },
+    {
+      "path": "refs/characters/hussars/sheet.png",
+      "sha8": "aa03db0c"
+    },
+    {
+      "path": "refs/characters/lavelle/sheet.png",
+      "sha8": "90fda40c"
+    },
+    {
+      "path": "refs/characters/lord_garrick/sheet.png",
+      "sha8": "4cfa70be"
+    },
+    {
+      "path": "refs/characters/lord_hilton/sheet.png",
+      "sha8": "a40ecc0a"
+    },
+    {
+      "path": "refs/characters/major_eden/sheet.png",
+      "sha8": "946f288d"
+    },
+    {
+      "path": "refs/characters/markham/sheet.png",
+      "sha8": "0e7ea311"
+    },
+    {
+      "path": "refs/characters/marshall/sheet.png",
+      "sha8": "3b641016"
+    },
+    {
+      "path": "refs/characters/marshall_son/sheet.png",
+      "sha8": "f10ae6b6"
+    },
+    {
+      "path": "refs/characters/martians/sheet.png",
+      "sha8": "27e09adc"
+    },
+    {
+      "path": "refs/characters/miss_elphinstone/sheet.png",
+      "sha8": "3a8ff19c"
+    },
+    {
+      "path": "refs/characters/mrs_elphinstone/sheet.png",
+      "sha8": "9b4fd252"
+    },
+    {
+      "path": "refs/characters/narrators_brother/sheet.png",
+      "sha8": "23a6991b"
+    },
+    {
+      "path": "refs/characters/narrators_wife/sheet.png",
+      "sha8": "b1b6fa50"
+    },
+    {
+      "path": "refs/characters/ogilvy/sheet.png",
+      "sha8": "a60b84f1"
+    },
+    {
+      "path": "refs/characters/police/sheet.png",
+      "sha8": "bcca92ca"
+    },
+    {
+      "path": "refs/characters/sappers/sheet.png",
+      "sha8": "9aab68c6"
+    },
+    {
+      "path": "refs/characters/schiaparelli/sheet.png",
+      "sha8": "2ce62cd6"
+    },
+    {
+      "path": "refs/characters/snippy/sheet.png",
+      "sha8": "a7b48f16"
+    },
+    {
+      "path": "refs/characters/soldiers/sheet.png",
+      "sha8": "e13e1b72"
+    },
+    {
+      "path": "refs/characters/stent/sheet.png",
+      "sha8": "d3d44a3f"
+    },
+    {
+      "path": "refs/characters/unnamed_cabmen/sheet.png",
+      "sha8": "9600b5b0"
+    },
+    {
+      "path": "refs/characters/unnamed_curate_companion/sheet.png",
+      "sha8": "e8c1f575"
+    },
+    {
+      "path": "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "sha8": "f561b691"
+    },
+    {
+      "path": "refs/characters/unnamed_gardener/sheet.png",
+      "sha8": "6c3715bb"
+    },
+    {
+      "path": "refs/characters/unnamed_hussar/sheet.png",
+      "sha8": "28fa6bec"
+    },
+    {
+      "path": "refs/characters/unnamed_landlord/sheet.png",
+      "sha8": "f2a4dc19"
+    },
+    {
+      "path": "refs/characters/unnamed_milkman/sheet.png",
+      "sha8": "686b15cf"
+    },
+    {
+      "path": "refs/characters/unnamed_mounted_policeman/sheet.png",
+      "sha8": "5b6f490e"
+    },
+    {
+      "path": "refs/characters/unnamed_neighbour/sheet.png",
+      "sha8": "d061d3a3"
+    },
+    {
+      "path": "refs/characters/unnamed_neighbours_wife/sheet.png",
+      "sha8": "b9c9cd55"
+    },
+    {
+      "path": "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "sha8": "20c5da88"
+    },
+    {
+      "path": "refs/characters/unnamed_potman/sheet.png",
+      "sha8": "4dc548de"
+    },
+    {
+      "path": "refs/characters/unnamed_servant/sheet.png",
+      "sha8": "7042ba30"
+    },
+    {
+      "path": "refs/characters/unnamed_shopman/sheet.png",
+      "sha8": "6cfee865"
+    },
+    {
+      "path": "refs/characters/unnamed_sweetstuff_dealer/sheet.png",
+      "sha8": "343def01"
+    },
+    {
+      "path": "refs/characters/unnamed_waggoner/sheet.png",
+      "sha8": "992d61bb"
+    },
+    {
+      "path": "refs/locations/_rejected/halliford_nofire_v1.png",
+      "sha8": "df76b7f5"
+    },
+    {
+      "path": "refs/locations/_rejected/pit_droid_v1.png",
+      "sha8": "11f5b06d"
+    },
+    {
+      "path": "refs/locations/barnet/wide_east_barnet_railway.png",
+      "sha8": "0c4aab9d"
+    },
+    {
+      "path": "refs/locations/barnet/wide_hadley_brook.png",
+      "sha8": "59b5bef7"
+    },
+    {
+      "path": "refs/locations/barnet/wide_high_street.png",
+      "sha8": "8dce4949"
+    },
+    {
+      "path": "refs/locations/barnet_crossroads/medium_privet_corner_house.png",
+      "sha8": "9a1decf7"
+    },
+    {
+      "path": "refs/locations/barnet_crossroads/reverse.png",
+      "sha8": "bd3f1ee1"
+    },
+    {
+      "path": "refs/locations/barnet_crossroads/wide_lane_mouth.png",
+      "sha8": "5b38fc19"
+    },
+    {
+      "path": "refs/locations/barnet_crossroads/wide_main_road_londonward.png",
+      "sha8": "7373153d"
+    },
+    {
+      "path": "refs/locations/byfleet/wide_establishing.png",
+      "sha8": "27e3eafa"
+    },
+    {
+      "path": "refs/locations/byfleet/wide_road_bridge.png",
+      "sha8": "bf09f6f2"
+    },
+    {
+      "path": "refs/locations/byfleet/wide_road_to_maybury.png",
+      "sha8": "46e637be"
+    },
+    {
+      "path": "refs/locations/chalk_farm_edgware/insert_cycle_shop_window.png",
+      "sha8": "f15dc9d4"
+    },
+    {
+      "path": "refs/locations/chalk_farm_edgware/medium_edgware_inn.png",
+      "sha8": "4df37c6a"
+    },
+    {
+      "path": "refs/locations/chalk_farm_edgware/wide_chalk_farm_road.png",
+      "sha8": "7fcc63e7"
+    },
+    {
+      "path": "refs/locations/chalk_farm_edgware/wide_edgware_street.png",
+      "sha8": "770eed77"
+    },
+    {
+      "path": "refs/locations/colchester_road/wide_meadow_camp.png",
+      "sha8": "bee44108"
+    },
+    {
+      "path": "refs/locations/colchester_road/wide_road_east.png",
+      "sha8": "4c96d5ac"
+    },
+    {
+      "path": "refs/locations/colchester_road/wide_wheat_field.png",
+      "sha8": "0720f8e5"
+    },
+    {
+      "path": "refs/locations/college_arms_lane/medium_fence_palings.png",
+      "sha8": "22d64479"
+    },
+    {
+      "path": "refs/locations/college_arms_lane/reverse.png",
+      "sha8": "f05cbd50"
+    },
+    {
+      "path": "refs/locations/college_arms_lane/wide_establishing.png",
+      "sha8": "c80361e8"
+    },
+    {
+      "path": "refs/locations/college_arms_lane/wide_junction_college_arms.png",
+      "sha8": "fab6ff88"
+    },
+    {
+      "path": "refs/locations/cousins_house_leatherhead/interior_passage.png",
+      "sha8": "528e685b"
+    },
+    {
+      "path": "refs/locations/cousins_house_leatherhead/medium_lighted_doorway.png",
+      "sha8": "b6d45c7a"
+    },
+    {
+      "path": "refs/locations/cousins_house_leatherhead/wide_establishing.png",
+      "sha8": "d79f868b"
+    },
+    {
+      "path": "refs/locations/crammers_biology_class/insert_bench_microscope.png",
+      "sha8": "452f38f7"
+    },
+    {
+      "path": "refs/locations/crammers_biology_class/reverse.png",
+      "sha8": "5a5b97d0"
+    },
+    {
+      "path": "refs/locations/crammers_biology_class/wide_establishing.png",
+      "sha8": "759ef404"
+    },
+    {
+      "path": "refs/locations/earth_and_mars/insert_mars_limb_jet.png",
+      "sha8": "dc82af1a"
+    },
+    {
+      "path": "refs/locations/earth_and_mars/wide_mars_gun_pit.png",
+      "sha8": "80ba546d"
+    },
+    {
+      "path": "refs/locations/earth_and_mars/wide_space.png",
+      "sha8": "57b70d41"
+    },
+    {
+      "path": "refs/locations/essex_coast_beach/medium_surf_landing.png",
+      "sha8": "d28f2966"
+    },
+    {
+      "path": "refs/locations/essex_coast_beach/reverse.png",
+      "sha8": "784cfeea"
+    },
+    {
+      "path": "refs/locations/essex_coast_beach/wide_establishing.png",
+      "sha8": "ebe21552"
+    },
+    {
+      "path": "refs/locations/exhibition_road/medium_park_gate_bus.png",
+      "sha8": "f774f160"
+    },
+    {
+      "path": "refs/locations/exhibition_road/reverse.png",
+      "sha8": "62959cdb"
+    },
+    {
+      "path": "refs/locations/exhibition_road/wide_establishing.png",
+      "sha8": "2312d41f"
+    },
+    {
+      "path": "refs/locations/exhibition_road/wide_serpentine_bridge.png",
+      "sha8": "601a7916"
+    },
+    {
+      "path": "refs/locations/fulham_high_street/medium_bakers_shop.png",
+      "sha8": "d8a1f7f6"
+    },
+    {
+      "path": "refs/locations/fulham_high_street/medium_jeweller_doorstep.png",
+      "sha8": "7cab5862"
+    },
+    {
+      "path": "refs/locations/fulham_high_street/wide_fulham_road.png",
+      "sha8": "755e43c3"
+    },
+    {
+      "path": "refs/locations/fulham_high_street/wide_putney_bridge.png",
+      "sha8": "806fc0ec"
+    },
+    {
+      "path": "refs/locations/hendersons_garden_woking/insert_palings_spade.png",
+      "sha8": "d048a06a"
+    },
+    {
+      "path": "refs/locations/hendersons_garden_woking/reverse.png",
+      "sha8": "3c9b4a4c"
+    },
+    {
+      "path": "refs/locations/hendersons_garden_woking/wide_establishing.png",
+      "sha8": "57a2dde1"
+    },
+    {
+      "path": "refs/locations/high_barnet_grass_lane/medium_wayside_verge.png",
+      "sha8": "7d6f8d2f"
+    },
+    {
+      "path": "refs/locations/high_barnet_grass_lane/reverse.png",
+      "sha8": "6c1963c1"
+    },
+    {
+      "path": "refs/locations/high_barnet_grass_lane/wide_establishing.png",
+      "sha8": "fa69395f"
+    },
+    {
+      "path": "refs/locations/horsell_common/medium_knoll_heather.png",
+      "sha8": "ea328d08"
+    },
+    {
+      "path": "refs/locations/horsell_common/reverse.png",
+      "sha8": "37bd1866"
+    },
+    {
+      "path": "refs/locations/horsell_common/wide_bridge_night.png",
+      "sha8": "4557ec5a"
+    },
+    {
+      "path": "refs/locations/horsell_common/wide_establishing.png",
+      "sha8": "8ba100ac"
+    },
+    {
+      "path": "refs/locations/horsell_common/wide_horsell_bridge.png",
+      "sha8": "52b6d903"
+    },
+    {
+      "path": "refs/locations/horsell_common/wide_night.png",
+      "sha8": "0d5d6904"
+    },
+    {
+      "path": "refs/locations/horsell_common/wide_pit_day.png",
+      "sha8": "c00e7703"
+    },
+    {
+      "path": "refs/locations/horsell_common/wide_road_high_banks.png",
+      "sha8": "f9c6032c"
+    },
+    {
+      "path": "refs/locations/horsell_common/wide_sandpits_vehicles.png",
+      "sha8": "0cc3091a"
+    },
+    {
+      "path": "refs/locations/horsell_pit/insert_cylinder_surface.png",
+      "sha8": "a4e7fd82"
+    },
+    {
+      "path": "refs/locations/horsell_pit/low_inside_pit.png",
+      "sha8": "5067f812"
+    },
+    {
+      "path": "refs/locations/horsell_pit/medium_cylinder_end.png",
+      "sha8": "1fa9728a"
+    },
+    {
+      "path": "refs/locations/horsell_pit/reverse.png",
+      "sha8": "e18ab95d"
+    },
+    {
+      "path": "refs/locations/horsell_pit/wide_establishing.png",
+      "sha8": "5c99bcb3"
+    },
+    {
+      "path": "refs/locations/horsell_pit/wide_establishing_v1.png",
+      "sha8": "cfadbd99"
+    },
+    {
+      "path": "refs/locations/horsell_pit/wide_pit_sentinel_evening.png",
+      "sha8": "630d3edd"
+    },
+    {
+      "path": "refs/locations/leatherhead/wide_road_meadows.png",
+      "sha8": "821bac36"
+    },
+    {
+      "path": "refs/locations/leatherhead/wide_town_street.png",
+      "sha8": "b8dea94c"
+    },
+    {
+      "path": "refs/locations/london/wide_pool_of_london.png",
+      "sha8": "ce07cf40"
+    },
+    {
+      "path": "refs/locations/london/wide_skyline_thames.png",
+      "sha8": "aad665ae"
+    },
+    {
+      "path": "refs/locations/marylebone/wide_park_crescent.png",
+      "sha8": "6a726d11"
+    },
+    {
+      "path": "refs/locations/marylebone/wide_park_edge.png",
+      "sha8": "32f98df2"
+    },
+    {
+      "path": "refs/locations/marylebone/wide_portland_place.png",
+      "sha8": "e270dd50"
+    },
+    {
+      "path": "refs/locations/marylebone_apartments/medium_desk.png",
+      "sha8": "e888d145"
+    },
+    {
+      "path": "refs/locations/marylebone_apartments/reverse.png",
+      "sha8": "6d0f3ffe"
+    },
+    {
+      "path": "refs/locations/marylebone_apartments/wide_establishing.png",
+      "sha8": "7e49b2bf"
+    },
+    {
+      "path": "refs/locations/marylebone_apartments/wide_street_doorstep.png",
+      "sha8": "eaf9ba43"
+    },
+    {
+      "path": "refs/locations/marylebone_apartments/window_view_street.png",
+      "sha8": "9aef4e46"
+    },
+    {
+      "path": "refs/locations/maybury_canal_bridge/medium_roadside_verge.png",
+      "sha8": "1ec84e0d"
+    },
+    {
+      "path": "refs/locations/maybury_canal_bridge/reverse.png",
+      "sha8": "c5722ad0"
+    },
+    {
+      "path": "refs/locations/maybury_canal_bridge/wide_arch_day.png",
+      "sha8": "fbf88255"
+    },
+    {
+      "path": "refs/locations/maybury_canal_bridge/wide_establishing.png",
+      "sha8": "bf03b998"
+    },
+    {
+      "path": "refs/locations/maybury_canal_bridge/wide_night.png",
+      "sha8": "91ca24cf"
+    },
+    {
+      "path": "refs/locations/maybury_hill/insert_dogcart_wreck.png",
+      "sha8": "0d8f9f82"
+    },
+    {
+      "path": "refs/locations/maybury_hill/medium_hut_potato_garden.png",
+      "sha8": "f013e73a"
+    },
+    {
+      "path": "refs/locations/maybury_hill/medium_pool_furze.png",
+      "sha8": "59325de9"
+    },
+    {
+      "path": "refs/locations/maybury_hill/reverse.png",
+      "sha8": "0d34dc74"
+    },
+    {
+      "path": "refs/locations/maybury_hill/wide_establishing.png",
+      "sha8": "740476af"
+    },
+    {
+      "path": "refs/locations/maybury_hill/wide_lawn_burning.png",
+      "sha8": "4b619600"
+    },
+    {
+      "path": "refs/locations/maybury_hill/wide_lawn_evening.png",
+      "sha8": "9387d1ac"
+    },
+    {
+      "path": "refs/locations/maybury_hill/wide_night.png",
+      "sha8": "5b92a9c9"
+    },
+    {
+      "path": "refs/locations/maybury_hill/wide_road_dawn_deserted.png",
+      "sha8": "3eb7ec2d"
+    },
+    {
+      "path": "refs/locations/mortlake_kitchen/insert_floor_crockery.png",
+      "sha8": "a959c5b0"
+    },
+    {
+      "path": "refs/locations/mortlake_kitchen/medium_aperture.png",
+      "sha8": "52f99e30"
+    },
+    {
+      "path": "refs/locations/mortlake_kitchen/medium_dresser_range.png",
+      "sha8": "bd867856"
+    },
+    {
+      "path": "refs/locations/mortlake_kitchen/reverse.png",
+      "sha8": "748f2e83"
+    },
+    {
+      "path": "refs/locations/mortlake_kitchen/wide_establishing.png",
+      "sha8": "4548f9ee"
+    },
+    {
+      "path": "refs/locations/mortlake_pantry/insert_shelf_rations.png",
+      "sha8": "c76aad88"
+    },
+    {
+      "path": "refs/locations/mortlake_pantry/wide_empty.png",
+      "sha8": "c5b2a4ec"
+    },
+    {
+      "path": "refs/locations/mortlake_pantry/wide_establishing.png",
+      "sha8": "b730bb43"
+    },
+    {
+      "path": "refs/locations/mortlake_pit/peephole_pov.png",
+      "sha8": "b208daf5"
+    },
+    {
+      "path": "refs/locations/mortlake_pit/wide_establishing.png",
+      "sha8": "3d89738a"
+    },
+    {
+      "path": "refs/locations/narrators_garden/wide_lawn_palings_night.png",
+      "sha8": "f9966ac3"
+    },
+    {
+      "path": "refs/locations/narrators_garden/wide_morning.png",
+      "sha8": "9f682a11"
+    },
+    {
+      "path": "refs/locations/narrators_home/dining_room_unlit_night.png",
+      "sha8": "61b79942"
+    },
+    {
+      "path": "refs/locations/narrators_home/interior_hall_staircase.png",
+      "sha8": "9ea66a66"
+    },
+    {
+      "path": "refs/locations/narrators_home/medium_front_door_porch.png",
+      "sha8": "cb766769"
+    },
+    {
+      "path": "refs/locations/narrators_home/wide_dining_room.png",
+      "sha8": "5f75dcc3"
+    },
+    {
+      "path": "refs/locations/narrators_home/wide_establishing.png",
+      "sha8": "aca7476e"
+    },
+    {
+      "path": "refs/locations/narrators_study/interior_window_fire_night.png",
+      "sha8": "8f2bacb7"
+    },
+    {
+      "path": "refs/locations/narrators_study/interior_window_fire_night_v1.png",
+      "sha8": "5f447d30"
+    },
+    {
+      "path": "refs/locations/narrators_study/medium_writing_table.png",
+      "sha8": "159d1740"
+    },
+    {
+      "path": "refs/locations/narrators_study/wide_establishing.png",
+      "sha8": "26568d3c"
+    },
+    {
+      "path": "refs/locations/narrators_study/window_view_ashes_dawn.png",
+      "sha8": "47e5749f"
+    },
+    {
+      "path": "refs/locations/narrators_study/window_view_ashes_dawn_v1.png",
+      "sha8": "2857ce84"
+    },
+    {
+      "path": "refs/locations/narrators_study/window_view_panorama.png",
+      "sha8": "b35afbe1"
+    },
+    {
+      "path": "refs/locations/narrators_study/window_view_valley_fire_night.png",
+      "sha8": "6d8c6502"
+    },
+    {
+      "path": "refs/locations/narrators_study/window_view_valley_fire_night_v1.png",
+      "sha8": "b5e10b6f"
+    },
+    {
+      "path": "refs/locations/narrators_study/window_view_valley_fire_night_v2.png",
+      "sha8": "a7f88012"
+    },
+    {
+      "path": "refs/locations/ottershaw/medium_observatory_door.png",
+      "sha8": "b1780118"
+    },
+    {
+      "path": "refs/locations/ottershaw/reverse.png",
+      "sha8": "4927712d"
+    },
+    {
+      "path": "refs/locations/ottershaw/wide_establishing.png",
+      "sha8": "8660c983"
+    },
+    {
+      "path": "refs/locations/ottershaw_observatory/insert_eyepiece_field.png",
+      "sha8": "2c3c60c1"
+    },
+    {
+      "path": "refs/locations/ottershaw_observatory/medium_little_table.png",
+      "sha8": "6e25b59d"
+    },
+    {
+      "path": "refs/locations/ottershaw_observatory/reverse.png",
+      "sha8": "d1d7a524"
+    },
+    {
+      "path": "refs/locations/ottershaw_observatory/wide_establishing.png",
+      "sha8": "3b7503d1"
+    },
+    {
+      "path": "refs/locations/pine_woods_maybury/wide_clearing_morning.png",
+      "sha8": "c622d486"
+    },
+    {
+      "path": "refs/locations/railway_carriage/wide_establishing.png",
+      "sha8": "5d2305f7"
+    },
+    {
+      "path": "refs/locations/richmond_hill_battery/wide_copse_gun_twilight.png",
+      "sha8": "7554704b"
+    },
+    {
+      "path": "refs/locations/river_thames_walton/river_level_steam_afternoon.png",
+      "sha8": "08443543"
+    },
+    {
+      "path": "refs/locations/road_ockham_ripley_pyrford/wide_road_storm_night.png",
+      "sha8": "f4b72ca9"
+    },
+    {
+      "path": "refs/locations/spotted_dog/wide_bar.png",
+      "sha8": "5917b9b7"
+    },
+    {
+      "path": "refs/locations/upper_halliford/wide_riverfront_burning_afternoon.png",
+      "sha8": "bdaaaaec"
+    },
+    {
+      "path": "refs/locations/village_street/wide_establishing.png",
+      "sha8": "65497528"
+    },
+    {
+      "path": "refs/locations/walton_middlesex_bank/wide_hedge_sunset.png",
+      "sha8": "d7530ff2"
+    },
+    {
+      "path": "refs/locations/walton_middlesex_bank/wide_long_grass_afternoon.png",
+      "sha8": "2e0d662a"
+    },
+    {
+      "path": "refs/locations/wey_thames_confluence/river_level_midday.png",
+      "sha8": "b59952bd"
+    },
+    {
+      "path": "refs/locations/wey_thames_confluence/wide_ferry_crowd_midday.png",
+      "sha8": "365c70df"
+    },
+    {
+      "path": "refs/locations/weybridge/wide_street_packing_morning.png",
+      "sha8": "9405cc97"
+    },
+    {
+      "path": "refs/locations/woking_junction/wide_platform_night.png",
+      "sha8": "9e30915d"
+    },
+    {
+      "path": "refs/props/dog_cart/sheet.png",
+      "sha8": "ec44e362"
+    },
+    {
+      "path": "refs/props/fighting_machine/sheet.png",
+      "sha8": "ae301fef"
+    },
+    {
+      "path": "refs/props/martian_cylinder/sheet.png",
+      "sha8": "abe2e5eb"
+    },
+    {
+      "path": "refs/props/pit_mast_mirror/sheet.png",
+      "sha8": "7605e1ff"
+    },
+    {
+      "path": "refs/refs.json",
+      "sha8": "558d4320"
+    },
+    {
+      "path": "screenplay/feature/elements.json",
+      "sha8": "b3606203"
+    }
+  ],
+  "outputs": [
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l00.wav",
+      "sha8": "ecf47c70"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l01.wav",
+      "sha8": "53528014"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l02.wav",
+      "sha8": "f3efdea0"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l03.wav",
+      "sha8": "c7b315e8"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l04.wav",
+      "sha8": "d7b46cbd"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l05.wav",
+      "sha8": "bc73fb7f"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l06.wav",
+      "sha8": "fde10538"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l07.wav",
+      "sha8": "30a7d823"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l08.wav",
+      "sha8": "1f1cecc6"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l09.wav",
+      "sha8": "1f673dde"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l10.wav",
+      "sha8": "e3332fd2"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l11.wav",
+      "sha8": "63f2b819"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l12.wav",
+      "sha8": "22cd73c0"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l13.wav",
+      "sha8": "732ff56d"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l14.wav",
+      "sha8": "6b0159c0"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l15.wav",
+      "sha8": "1246d47c"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l16.wav",
+      "sha8": "7dbb20c1"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l17.wav",
+      "sha8": "9e16d88c"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l18.wav",
+      "sha8": "4f964176"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l19.wav",
+      "sha8": "fa59b0ae"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l20.wav",
+      "sha8": "abd22125"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l21.wav",
+      "sha8": "a313f22a"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l22.wav",
+      "sha8": "8f26837b"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/l23.wav",
+      "sha8": "349598cc"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/audio/lines/lines.json",
+      "sha8": "0ee3d002"
+    },
+    {
+      "kind": "edit",
+      "path": "episodes/ep13/cut/master_r2v.mp4",
+      "sha8": "3927e8c3"
+    },
+    {
+      "kind": "timeline",
+      "path": "episodes/ep13/placed.json",
+      "sha8": "b06c8cc6"
+    },
+    {
+      "kind": "plan",
+      "path": "episodes/ep13/plan.json",
+      "sha8": "83bfe0a9"
+    },
+    {
+      "kind": "plan",
+      "path": "episodes/ep13/plan.verdict.json",
+      "sha8": "ebf05593"
+    },
+    {
+      "kind": "qc",
+      "path": "episodes/ep13/qc_r2v.json",
+      "sha8": "d61ea049"
+    },
+    {
+      "kind": "qc",
+      "path": "episodes/ep13/review/eye_3927e8c3.json",
+      "sha8": "fd525927"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep13/review/speaker_check.json",
+      "sha8": "1cbfe651"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/contact.png",
+      "sha8": "5b3919a0"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/eye_8359fd22.json",
+      "sha8": "818c18f3"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/eye_98b0c3b5.json",
+      "sha8": "05a412ed"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/eye_a5260433.json",
+      "sha8": "e2c016e3"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/eye_b4c110b8.json",
+      "sha8": "3bf5c506"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/eye_d6a87ec3.json",
+      "sha8": "5312995c"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/eye_f3ba61bc.json",
+      "sha8": "28a2ce3e"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_bank_1x1.png",
+      "sha8": "c3b98753"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_battery_1x1.png",
+      "sha8": "723d52ff"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_halliford_2x1.png",
+      "sha8": "dbb23a23"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s00.png",
+      "sha8": "025942a3"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s11.png",
+      "sha8": "32d8ab29"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s13.png",
+      "sha8": "5c0d4741"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s15.png",
+      "sha8": "fa21c451"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s17.png",
+      "sha8": "98e51a60"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s18.png",
+      "sha8": "6dd7eb6f"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s19.png",
+      "sha8": "5070018e"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s20.png",
+      "sha8": "e179147b"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s22.png",
+      "sha8": "ba61fc0f"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_1x1_s24.png",
+      "sha8": "fc0b7ccb"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_hedge_3x2.png",
+      "sha8": "10a5d298"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_pit_2x1.png",
+      "sha8": "3e935835"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/grids/ep13_grid_river_3x1.png",
+      "sha8": "494f25c4"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep13/storyboard/layout.json",
+      "sha8": "97ecf19e"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/panel_content.json",
+      "sha8": "d9bf40e2"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/panel_dq.json",
+      "sha8": "12d1a13c"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_00.png",
+      "sha8": "7d4b9c2c"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_01.png",
+      "sha8": "2e95503d"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_02.png",
+      "sha8": "995489c8"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_03.png",
+      "sha8": "9a8ee39a"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_04.png",
+      "sha8": "1c5b640f"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_05.png",
+      "sha8": "d36a1b24"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_06.png",
+      "sha8": "d379e8d3"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_07.png",
+      "sha8": "9e6bf56f"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_08.png",
+      "sha8": "31714895"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_09.png",
+      "sha8": "01a7e870"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_10.png",
+      "sha8": "f4111d49"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_11.png",
+      "sha8": "94adb572"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_12.png",
+      "sha8": "2c3e5ddd"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_13.png",
+      "sha8": "74d29f4e"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_14.png",
+      "sha8": "97a34b05"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_15.png",
+      "sha8": "83da8c67"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_16.png",
+      "sha8": "e02d2e06"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_17.png",
+      "sha8": "de3798c7"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_18.png",
+      "sha8": "76b5fcb7"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_19.png",
+      "sha8": "32f57a85"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_20.png",
+      "sha8": "38120f2a"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_21.png",
+      "sha8": "e848f636"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_22.png",
+      "sha8": "9fcbe8a9"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_23.png",
+      "sha8": "c8d1e257"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep13/storyboard/shot_24.png",
+      "sha8": "6483664a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T00.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T00.dq.json",
+      "sha8": "2407f618"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T00.mp4",
+      "sha8": "9b2dc9a5"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T01.content.json",
+      "sha8": "1fae2440"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T01.dq.json",
+      "sha8": "561815aa"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T01.mp4",
+      "sha8": "5d4f3ab8"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T02.content.json",
+      "sha8": "1fae2440"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T02.dq.json",
+      "sha8": "393fe9ee"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T02.mp4",
+      "sha8": "fa504ccb"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T03.content.json",
+      "sha8": "964ed6b3"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T03.dq.json",
+      "sha8": "25a40763"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T03.mp4",
+      "sha8": "52af179e"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T04.content.json",
+      "sha8": "b03a6531"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T04.dq.json",
+      "sha8": "753a606e"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T04.mp4",
+      "sha8": "65ca1e72"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T05.content.json",
+      "sha8": "654f9f9d"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T05.dq.json",
+      "sha8": "0b7f61c0"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T05.mp4",
+      "sha8": "43fd6012"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T06.content.json",
+      "sha8": "b03a6531"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T06.dq.json",
+      "sha8": "37284fee"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T06.mp4",
+      "sha8": "e58c3fd4"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T07.content.json",
+      "sha8": "b03a6531"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T07.dq.json",
+      "sha8": "27cacb71"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T07.mp4",
+      "sha8": "148f1306"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T08.content.json",
+      "sha8": "654f9f9d"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T08.dq.json",
+      "sha8": "46ad9380"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T08.mp4",
+      "sha8": "7f96c9cf"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T09.content.json",
+      "sha8": "654f9f9d"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T09.dq.json",
+      "sha8": "5ec2a7e3"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T09.mp4",
+      "sha8": "9f00213c"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T10.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T10.dq.json",
+      "sha8": "b3e97f56"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T10.mp4",
+      "sha8": "daa8fc34"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T11.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T11.dq.json",
+      "sha8": "47ffe2f9"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T11.mp4",
+      "sha8": "73ba8f12"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T12.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T12.dq.json",
+      "sha8": "155843b9"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T12.mp4",
+      "sha8": "ff62db74"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T13.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T13.dq.json",
+      "sha8": "9f74d813"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T13.mp4",
+      "sha8": "67914860"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T14.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T14.dq.json",
+      "sha8": "27dccec7"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T14.mp4",
+      "sha8": "5838a809"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T15.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T15.dq.json",
+      "sha8": "4b84f4ec"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T15.mp4",
+      "sha8": "590a89a9"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T16.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T16.dq.json",
+      "sha8": "eb050c7a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T16.mp4",
+      "sha8": "f545be2d"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T17.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T17.dq.json",
+      "sha8": "108b94d7"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T17.mp4",
+      "sha8": "cf773f89"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T18.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T18.dq.json",
+      "sha8": "cbf390c1"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T18.mp4",
+      "sha8": "f0687a9a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T19.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T19.dq.json",
+      "sha8": "2404de38"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T19.mp4",
+      "sha8": "4051ab24"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T20.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T20.dq.json",
+      "sha8": "9887abe0"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T20.mp4",
+      "sha8": "f69e4bf0"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T21.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T21.dq.json",
+      "sha8": "12f19486"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T21.mp4",
+      "sha8": "41d38f80"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T22.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T22.dq.json",
+      "sha8": "1569cc08"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T22.mp4",
+      "sha8": "f41ae748"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T23.content.json",
+      "sha8": "1fae2440"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T23.dq.json",
+      "sha8": "68763127"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T23.mp4",
+      "sha8": "6fb4f2c8"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T24.content.json",
+      "sha8": "b651e957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T24.dq.json",
+      "sha8": "9973070a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/T24.mp4",
+      "sha8": "00cab1a4"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/eye_219e6d72.json",
+      "sha8": "69ecb3ae"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/eye_249edde2.json",
+      "sha8": "39b76260"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/eye_54936cae.json",
+      "sha8": "1fed60b0"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/eye_8b8b82dd.json",
+      "sha8": "3cd8ef7e"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep13/takes/r2v/eye_d1335f7d.json",
+      "sha8": "ab49bb1a"
+    },
+    {
+      "kind": "prompts",
+      "path": "episodes/ep13/takes/r2v/prompts.json",
+      "sha8": "8854ac00"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/_rejected/halliford_nofire_v1.png",
+      "sha8": "df76b7f5"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/_rejected/pit_droid_v1.png",
+      "sha8": "11f5b06d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/barnet/wide_east_barnet_railway.png",
+      "sha8": "0c4aab9d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/barnet/wide_hadley_brook.png",
+      "sha8": "59b5bef7"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/barnet/wide_high_street.png",
+      "sha8": "8dce4949"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/barnet_crossroads/medium_privet_corner_house.png",
+      "sha8": "9a1decf7"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/barnet_crossroads/reverse.png",
+      "sha8": "bd3f1ee1"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/barnet_crossroads/wide_lane_mouth.png",
+      "sha8": "5b38fc19"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/barnet_crossroads/wide_main_road_londonward.png",
+      "sha8": "7373153d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/byfleet/wide_establishing.png",
+      "sha8": "27e3eafa"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/byfleet/wide_road_bridge.png",
+      "sha8": "bf09f6f2"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/byfleet/wide_road_to_maybury.png",
+      "sha8": "46e637be"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/chalk_farm_edgware/insert_cycle_shop_window.png",
+      "sha8": "f15dc9d4"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/chalk_farm_edgware/medium_edgware_inn.png",
+      "sha8": "4df37c6a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/chalk_farm_edgware/wide_chalk_farm_road.png",
+      "sha8": "7fcc63e7"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/chalk_farm_edgware/wide_edgware_street.png",
+      "sha8": "770eed77"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/colchester_road/wide_meadow_camp.png",
+      "sha8": "bee44108"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/colchester_road/wide_road_east.png",
+      "sha8": "4c96d5ac"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/colchester_road/wide_wheat_field.png",
+      "sha8": "0720f8e5"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/college_arms_lane/medium_fence_palings.png",
+      "sha8": "22d64479"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/college_arms_lane/reverse.png",
+      "sha8": "f05cbd50"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/college_arms_lane/wide_establishing.png",
+      "sha8": "c80361e8"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/college_arms_lane/wide_junction_college_arms.png",
+      "sha8": "fab6ff88"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/cousins_house_leatherhead/interior_passage.png",
+      "sha8": "528e685b"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/cousins_house_leatherhead/medium_lighted_doorway.png",
+      "sha8": "b6d45c7a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/cousins_house_leatherhead/wide_establishing.png",
+      "sha8": "d79f868b"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/crammers_biology_class/insert_bench_microscope.png",
+      "sha8": "452f38f7"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/crammers_biology_class/reverse.png",
+      "sha8": "5a5b97d0"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/crammers_biology_class/wide_establishing.png",
+      "sha8": "759ef404"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/earth_and_mars/insert_mars_limb_jet.png",
+      "sha8": "dc82af1a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/earth_and_mars/wide_mars_gun_pit.png",
+      "sha8": "80ba546d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/earth_and_mars/wide_space.png",
+      "sha8": "57b70d41"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/essex_coast_beach/medium_surf_landing.png",
+      "sha8": "d28f2966"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/essex_coast_beach/reverse.png",
+      "sha8": "784cfeea"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/essex_coast_beach/wide_establishing.png",
+      "sha8": "ebe21552"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/exhibition_road/medium_park_gate_bus.png",
+      "sha8": "f774f160"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/exhibition_road/reverse.png",
+      "sha8": "62959cdb"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/exhibition_road/wide_establishing.png",
+      "sha8": "2312d41f"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/exhibition_road/wide_serpentine_bridge.png",
+      "sha8": "601a7916"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/fulham_high_street/medium_bakers_shop.png",
+      "sha8": "d8a1f7f6"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/fulham_high_street/medium_jeweller_doorstep.png",
+      "sha8": "7cab5862"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/fulham_high_street/wide_fulham_road.png",
+      "sha8": "755e43c3"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/fulham_high_street/wide_putney_bridge.png",
+      "sha8": "806fc0ec"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/hendersons_garden_woking/insert_palings_spade.png",
+      "sha8": "d048a06a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/hendersons_garden_woking/reverse.png",
+      "sha8": "3c9b4a4c"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/hendersons_garden_woking/wide_establishing.png",
+      "sha8": "57a2dde1"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/high_barnet_grass_lane/medium_wayside_verge.png",
+      "sha8": "7d6f8d2f"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/high_barnet_grass_lane/reverse.png",
+      "sha8": "6c1963c1"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/high_barnet_grass_lane/wide_establishing.png",
+      "sha8": "fa69395f"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_common/medium_knoll_heather.png",
+      "sha8": "ea328d08"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_common/reverse.png",
+      "sha8": "37bd1866"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_common/wide_bridge_night.png",
+      "sha8": "4557ec5a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_common/wide_establishing.png",
+      "sha8": "8ba100ac"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_common/wide_horsell_bridge.png",
+      "sha8": "52b6d903"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_common/wide_night.png",
+      "sha8": "0d5d6904"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_common/wide_pit_day.png",
+      "sha8": "c00e7703"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_common/wide_road_high_banks.png",
+      "sha8": "f9c6032c"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_common/wide_sandpits_vehicles.png",
+      "sha8": "0cc3091a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_pit/insert_cylinder_surface.png",
+      "sha8": "a4e7fd82"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_pit/low_inside_pit.png",
+      "sha8": "5067f812"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_pit/medium_cylinder_end.png",
+      "sha8": "1fa9728a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_pit/reverse.png",
+      "sha8": "e18ab95d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_pit/wide_establishing.png",
+      "sha8": "5c99bcb3"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_pit/wide_establishing_v1.png",
+      "sha8": "cfadbd99"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/horsell_pit/wide_pit_sentinel_evening.png",
+      "sha8": "630d3edd"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/leatherhead/wide_road_meadows.png",
+      "sha8": "821bac36"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/leatherhead/wide_town_street.png",
+      "sha8": "b8dea94c"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/london/wide_pool_of_london.png",
+      "sha8": "ce07cf40"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/london/wide_skyline_thames.png",
+      "sha8": "aad665ae"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/marylebone/wide_park_crescent.png",
+      "sha8": "6a726d11"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/marylebone/wide_park_edge.png",
+      "sha8": "32f98df2"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/marylebone/wide_portland_place.png",
+      "sha8": "e270dd50"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/marylebone_apartments/medium_desk.png",
+      "sha8": "e888d145"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/marylebone_apartments/reverse.png",
+      "sha8": "6d0f3ffe"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/marylebone_apartments/wide_establishing.png",
+      "sha8": "7e49b2bf"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/marylebone_apartments/wide_street_doorstep.png",
+      "sha8": "eaf9ba43"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/marylebone_apartments/window_view_street.png",
+      "sha8": "9aef4e46"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_canal_bridge/medium_roadside_verge.png",
+      "sha8": "1ec84e0d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_canal_bridge/reverse.png",
+      "sha8": "c5722ad0"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_canal_bridge/wide_arch_day.png",
+      "sha8": "fbf88255"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_canal_bridge/wide_establishing.png",
+      "sha8": "bf03b998"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_canal_bridge/wide_night.png",
+      "sha8": "91ca24cf"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_hill/insert_dogcart_wreck.png",
+      "sha8": "0d8f9f82"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_hill/medium_hut_potato_garden.png",
+      "sha8": "f013e73a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_hill/medium_pool_furze.png",
+      "sha8": "59325de9"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_hill/reverse.png",
+      "sha8": "0d34dc74"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_hill/wide_establishing.png",
+      "sha8": "740476af"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_hill/wide_lawn_burning.png",
+      "sha8": "4b619600"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_hill/wide_lawn_evening.png",
+      "sha8": "9387d1ac"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_hill/wide_night.png",
+      "sha8": "5b92a9c9"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/maybury_hill/wide_road_dawn_deserted.png",
+      "sha8": "3eb7ec2d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_kitchen/insert_floor_crockery.png",
+      "sha8": "a959c5b0"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_kitchen/medium_aperture.png",
+      "sha8": "52f99e30"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_kitchen/medium_dresser_range.png",
+      "sha8": "bd867856"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_kitchen/reverse.png",
+      "sha8": "748f2e83"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_kitchen/wide_establishing.png",
+      "sha8": "4548f9ee"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_pantry/insert_shelf_rations.png",
+      "sha8": "c76aad88"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_pantry/wide_empty.png",
+      "sha8": "c5b2a4ec"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_pantry/wide_establishing.png",
+      "sha8": "b730bb43"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_pit/peephole_pov.png",
+      "sha8": "b208daf5"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/mortlake_pit/wide_establishing.png",
+      "sha8": "3d89738a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_garden/wide_lawn_palings_night.png",
+      "sha8": "f9966ac3"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_garden/wide_morning.png",
+      "sha8": "9f682a11"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_home/dining_room_unlit_night.png",
+      "sha8": "61b79942"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_home/interior_hall_staircase.png",
+      "sha8": "9ea66a66"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_home/medium_front_door_porch.png",
+      "sha8": "cb766769"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_home/wide_dining_room.png",
+      "sha8": "5f75dcc3"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_home/wide_establishing.png",
+      "sha8": "aca7476e"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/interior_window_fire_night.png",
+      "sha8": "8f2bacb7"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/interior_window_fire_night_v1.png",
+      "sha8": "5f447d30"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/medium_writing_table.png",
+      "sha8": "159d1740"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/wide_establishing.png",
+      "sha8": "26568d3c"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/window_view_ashes_dawn.png",
+      "sha8": "47e5749f"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/window_view_ashes_dawn_v1.png",
+      "sha8": "2857ce84"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/window_view_panorama.png",
+      "sha8": "b35afbe1"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/window_view_valley_fire_night.png",
+      "sha8": "6d8c6502"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/window_view_valley_fire_night_v1.png",
+      "sha8": "b5e10b6f"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/narrators_study/window_view_valley_fire_night_v2.png",
+      "sha8": "a7f88012"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/ottershaw/medium_observatory_door.png",
+      "sha8": "b1780118"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/ottershaw/reverse.png",
+      "sha8": "4927712d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/ottershaw/wide_establishing.png",
+      "sha8": "8660c983"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/ottershaw_observatory/insert_eyepiece_field.png",
+      "sha8": "2c3c60c1"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/ottershaw_observatory/medium_little_table.png",
+      "sha8": "6e25b59d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/ottershaw_observatory/reverse.png",
+      "sha8": "d1d7a524"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/ottershaw_observatory/wide_establishing.png",
+      "sha8": "3b7503d1"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/pine_woods_maybury/wide_clearing_morning.png",
+      "sha8": "c622d486"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/railway_carriage/wide_establishing.png",
+      "sha8": "5d2305f7"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/richmond_hill_battery/wide_copse_gun_twilight.png",
+      "sha8": "7554704b"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/river_thames_walton/river_level_steam_afternoon.png",
+      "sha8": "08443543"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/road_ockham_ripley_pyrford/wide_road_storm_night.png",
+      "sha8": "f4b72ca9"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/spotted_dog/wide_bar.png",
+      "sha8": "5917b9b7"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/upper_halliford/wide_riverfront_burning_afternoon.png",
+      "sha8": "bdaaaaec"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/village_street/wide_establishing.png",
+      "sha8": "65497528"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/walton_middlesex_bank/wide_hedge_sunset.png",
+      "sha8": "d7530ff2"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/walton_middlesex_bank/wide_long_grass_afternoon.png",
+      "sha8": "2e0d662a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/wey_thames_confluence/river_level_midday.png",
+      "sha8": "b59952bd"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/wey_thames_confluence/wide_ferry_crowd_midday.png",
+      "sha8": "365c70df"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/weybridge/wide_street_packing_morning.png",
+      "sha8": "9405cc97"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/woking_junction/wide_platform_night.png",
+      "sha8": "9e30915d"
+    },
+    {
+      "kind": "bind",
+      "path": "refs/refs.json",
+      "sha8": "558d4320"
+    },
+    {
+      "kind": "edit",
+      "path": "title/ep13.mp4",
+      "sha8": "dc3c0dae"
+    }
+  ],
+  "verdicts": [
+    {
+      "gate": "PLAN",
+      "path": "episodes/ep13/plan.verdict.json",
+      "signed_by": "judge:plan@1",
+      "word": "APPROVE",
+      "terminal": ""
+    },
+    {
+      "gate": "EYE_PANELS",
+      "path": "episodes/ep13/storyboard/eye_8359fd22.json",
+      "signed_by": "judge:panel_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_PANELS",
+      "path": "episodes/ep13/storyboard/eye_98b0c3b5.json",
+      "signed_by": "judge:panel_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_PANELS",
+      "path": "episodes/ep13/storyboard/eye_a5260433.json",
+      "signed_by": "judge:panel_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_PANELS",
+      "path": "episodes/ep13/storyboard/eye_b4c110b8.json",
+      "signed_by": "judge:panel_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_PANELS",
+      "path": "episodes/ep13/storyboard/eye_d6a87ec3.json",
+      "signed_by": "judge:panel_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_PANELS",
+      "path": "episodes/ep13/storyboard/eye_f3ba61bc.json",
+      "signed_by": "judge:panel_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_TAKES",
+      "path": "episodes/ep13/takes/r2v/eye_219e6d72.json",
+      "signed_by": "judge:take_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_TAKES",
+      "path": "episodes/ep13/takes/r2v/eye_249edde2.json",
+      "signed_by": "judge:take_eye@1",
+      "word": "flagged",
+      "terminal": "still"
+    },
+    {
+      "gate": "EYE_TAKES",
+      "path": "episodes/ep13/takes/r2v/eye_54936cae.json",
+      "signed_by": "judge:take_eye@1",
+      "word": "flagged",
+      "terminal": "still"
+    },
+    {
+      "gate": "EYE_TAKES",
+      "path": "episodes/ep13/takes/r2v/eye_8b8b82dd.json",
+      "signed_by": "judge:take_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_TAKES",
+      "path": "episodes/ep13/takes/r2v/eye_d1335f7d.json",
+      "signed_by": "judge:take_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "MASTER",
+      "path": "episodes/ep13/review/eye_3927e8c3.json",
+      "signed_by": "judge:master_eye@1",
+      "word": "",
+      "terminal": "flag"
+    }
+  ],
+  "cost": {
+    "wall_seconds": 76309.8,
+    "gpu_seconds": 0.0,
+    "usd": 0.0
+  }
+}

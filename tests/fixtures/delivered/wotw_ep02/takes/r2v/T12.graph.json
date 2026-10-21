@@ -1,0 +1,323 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "sheet_575cb1ba.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "sheet_0e0eddf9.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is the waggoner in <Picture 1>: Waggoner, 50 years old, 5 ft 9 in, heavy-set and thick through the body with big hands. Weathered brick-red face, deep crow's feet, heavy jowls. Grey hair cut short. Squinting pale blue eyes. Wearing: Wide-brimmed black felt hat, oatmeal linen smock frock with dense smocking across chest and shoulders, brown corduroy trousers, brown leather gaiters buckled to the knee, hobnailed boots, long-lashed waggoner's whip over one shoulder. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Ogilvy in <Picture 2>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces, a pale sandy road crossing the heath at the left, and on the horizon the black roofs and church tower of Woking among scattered pines under a lemon-yellow sky; the low sun comes from BEHIND the far pines, gold on the sand heaps, and leaves the near heather black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 3>, Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from behind, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot over <Subject 2>'s shoulder toward <Subject 1> in the wide-brimmed black felt hat and the oatmeal linen smock frock, the long whip over his shoulder on the seat of his cart, the weathered brick-red face and squinting pale blue eyes turned down at <Subject 2>, the reins already in his fist. The camera is behind Ogilvy's shoulder on the road, looking up at the cart seat, two long strides from the waggoner, a 50mm lens. The low sun comes from BEHIND the waggoner. At the first frame the waggoner's head and shoulders fill the RIGHT half of the frame from his black hat at the TOP edge to the smock frock at the BOTTOM edge, his head a third of the frame's height. Ogilvy's shoulder and wild auburn hair fill the LEFT edge, dark against the lemon sky at the TOP LEFT. The shot is inside this place: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces. The camera keeps a locked-off frame over <Subject 2>'s shoulder toward <Subject 1> as <Subject 1> looks him up and down and shakes his head, from 00:00 to 00:04. At 00:04 he flicks the reins and the horse pulls the cart on along the road, and the pull continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he looks him up and down and shakes his head. By 00:07 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 175,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 83012
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_12",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "wide_establishing_9b71d848.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_12_9edf7e50.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "22": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "21",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

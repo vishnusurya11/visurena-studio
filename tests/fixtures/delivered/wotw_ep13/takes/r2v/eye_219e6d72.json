@@ -1,0 +1,59 @@
+{
+ "sha8": "219e6d72",
+ "verdict": "flagged",
+ "note": "lag at T00: -7f (-0.292s) corr 0.48; lag at T11: -12f (-0.500s) corr 0.47 -> keep_best",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4"
+ ],
+ "signed_at": "2026-09-28T03:06:11Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "lag",
+   "where": "T00",
+   "evidence": {
+    "value": -7,
+    "penalty": 30.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "-7f (-0.292s) corr 0.48"
+  },
+  {
+   "kind": "lag",
+   "where": "T11",
+   "evidence": {
+    "value": -12,
+    "penalty": 30.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "-12f (-0.500s) corr 0.47"
+  }
+ ],
+ "terminal": "keep_best"
+}

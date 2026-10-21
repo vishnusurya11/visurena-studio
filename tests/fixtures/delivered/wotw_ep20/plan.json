@@ -1,0 +1,1389 @@
+{
+ "number": 20,
+ "title": "The Days of Imprisonment",
+ "words_per_second": 2.4954674763792877,
+ "question": "Today, can the narrator find any hope of escape from the Martian pit?",
+ "where": "Surrey, 1894",
+ "light": "green firelight from below, black shadows",
+ "palette": "",
+ "look": "Angular stylised 3D animation, brush-stroke texture",
+ "aspect": "1:1",
+ "answer": "line 24",
+ "protagonist": "unnamed_first_person_narrator",
+ "setups": {
+  "scullery_door": {
+   "described": "A dark Victorian scullery seen from the north-west corner beside the brick copper. Across grey York stone flags stands the planked kitchen door, half open, with a faint grey rectangle of light beyond it; a meat chopper with a wooden handle hangs on a nail beside the doorframe. At the left stand a brown stone sink and the dark silhouette of a cast-iron pump with a long curved handle; at the right two closed plank doors with iron latches. Walls of limewashed brick rise to a cracked ceiling of whitewashed boards. Grey light falls from the kitchen doorway at the far end across the flags toward the camera. Grey daylight through the doorway at the LEFT, deep shadow.",
+   "cast": [
+    "unnamed_first_person_narrator",
+    "curate"
+   ],
+   "landmark": "the planked kitchen door with the meat chopper on its nail",
+   "landmark_at": "start",
+   "landmark_size": "medium",
+   "route": "from the kitchen door across the flags to the pump and sink",
+   "geometry": "The kitchen door stands at the far frame centre, a fifth of the frame's width, its grey rectangle the brightest area. The sink and pump fill the left frame edge near the camera at a sixth of the frame's width. The two plank doors fill the right frame edge. The flags run from the bottom frame edge up to the threshold of the kitchen door.",
+   "location": "mortlake_scullery",
+   "view": "reverse",
+   "crowd": "",
+   "outdoors": false,
+   "ambience": "muffled clank of metal through the earth, plaster dust ticking down, held breath",
+   "props": []
+  },
+  "pit_day": {
+   "described": "A small triangular hole in a ruined wall frames the view: a splintered beam crosses the top edge and broken bricks fill the bottom edge, with dark borders all around. Through it lies the far side of a vast pit of yellow clay and gravel, banked in terraces. A great opened metal cylinder lies at the centre, veils of bright green vapour drift above it, rods and plates lie in rows on a level shelf at the right, and a stack of white aluminium bars rises beside the shelf. On the far rim, among smashed shrubbery, a tall stiff three-legged machine stands against a warm blue sky. Gold light from the low sun falls from the right across the clay terraces.",
+   "cast": [],
+   "landmark": "the opened metal cylinder at the centre of the pit",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "from the splintered beam at the near edge across the pit floor to the cylinder at its centre",
+   "geometry": "The splintered beam crosses the top frame edge at a tenth of the frame's height. Broken bricks fill the bottom frame edge at a sixth of the frame's height. The opened cylinder lies at the frame centre, a quarter of the frame's width, with green vapour between it and the camera. The rods and plates run along the right frame edge on the level shelf, and the stack of bars rises at the right frame edge beside them. The three-legged machine stands at the far upper right, a tenth of the frame's height, on the rim.",
+   "location": "mortlake_pit",
+   "view": "peephole_pov",
+   "crowd": "",
+   "outdoors": true,
+   "ambience": "faint musical clinking of metal, a light wind over clay, the hiss of green vapour",
+   "props": [
+    "handling_machine"
+   ]
+  },
+  "scullery_copper": {
+   "described": "The north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar, showing dark wine bottles, tins of soup and salmon and two biscuit tins. Grey York stone flags run to the front edge of the picture, and limewashed brick walls rise behind. Faint grey light falls from the right, from the kitchen doorway, and lies along the flags. Low firelight from ahead, deep shadow.",
+   "cast": [
+    "unnamed_first_person_narrator",
+    "curate"
+   ],
+   "landmark": "the brick copper with its round wooden lid",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "from the deal cupboard at the right along the flags to the copper at the corner",
+   "geometry": "The brick copper stands at the frame centre, a third of the frame's width, its round lid at the upper centre. The firewood stack leans at the left of the copper, a sixth of the frame's width. The deal cupboard stands at the right frame edge, a quarter of the frame's width, its door ajar toward the camera. Flags fill the bottom third of the frame.",
+   "location": "mortlake_scullery",
+   "view": "medium_copper_firewood",
+   "crowd": "",
+   "outdoors": false,
+   "ambience": "muffled clank of metal through the earth, dust ticking down, hushed breathing",
+   "props": []
+  },
+  "pit_dusk": {
+   "described": "A small triangular hole in a ruined wall frames the view, a splintered beam across its top edge and broken bricks along its bottom edge. Through it lies the far side of a vast pit of yellow clay and gravel in twilight. The opened cylinder lies at the centre with bright green vapour drifting around it, a mound of bluish-grey powder rises in the far left corner, and rods and plates lie in rows on a level shelf at the right. A tall three-legged machine stands on the far rim among smashed shrubbery against the darkening sky. Green glow rises from the cylinder at the centre, and gold light falls from the right. Low firelight from ahead, deep shadow.",
+   "cast": [],
+   "landmark": "the opened metal cylinder at the centre of the pit",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "from the splintered beam at the near edge across the pit floor to the cylinder at its centre",
+   "geometry": "The beam crosses the top frame edge and the bricks cross the bottom frame edge. The cylinder lies at the frame centre, a quarter of the frame's width, with green vapour between it and the camera. The mound of bluish powder rises at the far left edge, a sixth of the frame's width. The three-legged machine stands at the far right, a tenth of the frame's height, on the rim. The shelf of rods runs along the right frame edge.",
+   "location": "mortlake_pit",
+   "view": "peephole_pov",
+   "crowd": "",
+   "outdoors": true,
+   "ambience": "clangour of machinery, crackling green fire, bats' wings, distant hooting",
+   "props": [
+    "handling_machine"
+   ]
+  },
+  "scullery_dig": {
+   "described": "A wide interior of a dark Victorian scullery lit by grey daylight that falls in from the kitchen doorway behind the camera across the flags. The floor is stone-flagged and the walls are limewashed brick. At the right a shallow brown stone sink stands under a window blocked with earth, with a black cast-iron pump and its long curved handle beside it. In the far corner stand a brick-built wash copper with a round wooden lid and a stack of split firewood, and a tall deal cupboard. At the left two plank doors stand side by side with iron latches, the pantry door nearest the camera.",
+   "cast": [
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the black cast-iron pump with its curved handle",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "from the kitchen doorway across the flags to the pantry door at the left",
+   "geometry": "The two plank doors fill the left frame edge, the nearer pantry door a fifth of the frame's width. The sink and pump fill the right frame edge at a quarter of the frame's width. The copper stands in the far corner at the frame centre, a sixth of the frame's width, with the firewood stack at its side. Flags run from the bottom frame edge to the far wall.",
+   "location": "mortlake_scullery",
+   "view": "wide_establishing",
+   "crowd": "",
+   "outdoors": false,
+   "ambience": "muffled thuds through the earth, plaster dust ticking down, a held breath",
+   "props": []
+  },
+  "pit_night": {
+   "described": "A small triangular hole in a ruined wall frames the view, a splintered beam across its top edge and broken bricks along its bottom edge. Through it lies the far side of a vast pit of yellow clay and gravel. The opened metal cylinder lies at the centre, a pale glowing machine stands at the foot of the near wall, bars of aluminium lie in bright patches, and a thin thread of green smoke rises at the right. A tall three-legged machine stands on the far bank against the sky. Pale light falls from the upper right across the clay terraces. Raking grey daylight from the LEFT, deep shadow.",
+   "cast": [],
+   "landmark": "the opened metal cylinder at the centre of the pit",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "from the splintered beam at the near edge across the pit floor to the far bank",
+   "geometry": "The beam crosses the top frame edge and the bricks cross the bottom frame edge. The pale glowing machine sits at the lower left, a sixth of the frame's width. The cylinder lies at the frame centre, a quarter of the frame's width. The thread of smoke rises at the right frame edge. The three-legged machine stands at the upper right, a tenth of the frame's height, on the far bank, with sky above it.",
+   "location": "mortlake_pit",
+   "view": "peephole_pov",
+   "crowd": "",
+   "outdoors": true,
+   "ambience": "a faint clinking of metal, night air over clay, a far-off dog",
+   "props": [
+    "handling_machine"
+   ]
+  }
+ },
+ "shots": [
+  {
+   "frame": "Medium across the dim scullery from the north-west corner: the narrator (grey eyes, cream flannel shirt with thin blue stripes) and the curate (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) stand together in the kitchen doorway at the far end, bent low.",
+   "motion": "The camera rises above the end, travelling two strides, across the whole shot; the narrator reaches the sink first; grey dust drifts down from the cracked ceiling boards.",
+   "camera": "Camera at the copper in the north-west corner at chest height, a 28mm lens, looking east. The light comes from the kitchen doorway at the far end.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the half-open kitchen door at the far end, a grey rectangle of light with the meat chopper hanging beside it; the narrator and the curate stand in the doorway; the sink and the pump stand at the LEFT frame edge.",
+   "end": "The narrator and the curate crouch together on the stone flags beside the pump at the left frame edge, the kitchen door at the far end a small grey rectangle.",
+   "changed": "Both men reach the pump",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 0,
+   "section": "hook",
+   "setup": "scullery_door",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator",
+    "curate"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "heavy metal footfalls of a tripod machine on gravel, thudding through the earth",
+     "at": 0.0,
+     "seconds": 3.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "The arrival of a second fighting-machine drove us from our peephole into the scullery, for we feared that from his elevation the Martian might see down upon us behind our barrier."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "safe at the wall -> hunted into the dark",
+   "why": "Shows that the Martians' height reaches their hiding place, and that the narrator and the curate share one fear."
+  },
+  {
+   "frame": "Medium across the dim scullery from the north-west corner: the narrator (grey eyes, cream flannel shirt with thin blue stripes) and the curate (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) stand together in the kitchen doorway at the far end, bent low.",
+   "motion": "The camera tracks behind the narrator, travelling two strides, across the whole shot; the narrator reaches the sink first; grey dust drifts down from the cracked ceiling boards.",
+   "camera": "Camera at the copper in the north-west corner at chest height, a 28mm lens, looking east. The light comes from the kitchen doorway at the far end.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the half-open kitchen door at the far end, a grey rectangle of light with the meat chopper hanging beside it; the narrator and the curate stand in the doorway; the sink and the pump stand at the LEFT frame edge.",
+   "end": "The narrator and the curate crouch together on the stone flags beside the pump at the left frame edge, the kitchen door at the far end a small grey rectangle.",
+   "changed": "Both men reach the pump",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 1,
+   "section": "setup",
+   "setup": "scullery_door",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator",
+    "curate"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "heavy metal footfalls of a tripod machine on gravel, thudding through the earth",
+     "at": 0.0,
+     "seconds": 3.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "The arrival of a second fighting-machine drove us from our peephole into the scullery, for we feared that from his elevation the Martian might see down upon us behind our barrier."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "safe at the wall -> hunted into the dark",
+   "why": "Shows that the Martians' height reaches their hiding place, and that the narrator and the curate share one fear."
+  },
+  {
+   "frame": "Wide through the triangular hole in the kitchen wall: the far side of the pit in gold light, a splintered beam across the top edge and broken bricks along the bottom edge, the opened cylinder at the centre, and a bright aluminium bar held on a jointed tentacle of the Martian handling-machine, a metallic spider-crab of a machine, a glittering crablike machine, above the clay terraces.",
+   "motion": "The camera tracks sideways to the right across the whole shot, past the splintered beam at the near edge, toward the stack of bars at the right frame edge; the Martian handling-machine swings the bar over to the stack; green vapour drifts across the cylinder.",
+   "camera": "Camera inside the kitchen at head height, a 35mm lens, looking south through the hole. The light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the jointed tentacle of the Martian handling-machine holding one bright aluminium bar above the clay at the RIGHT-CENTRE; the opened cylinder lies behind it at the CENTRE; the splintered beam crosses the TOP edge; a stack of aluminium bars rises at the RIGHT frame edge.",
+   "end": "The bar lies on top of the stack at the right frame edge, the Martian handling-machine stretched above it, the cylinder at the left-centre, the beam crossing the top edge.",
+   "changed": "Bar lands on the stack",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 2,
+   "section": "setup",
+   "setup": "pit_day",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "faint musical clinking of metal on metal",
+     "at": 0.5,
+     "seconds": 3.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "Yet terrible as was the danger we incurred, the attraction of peeping was for both of us irresistible."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "a ruined pit -> a working factory",
+   "why": "Opens on the Martians' orderly work seen through a hole in a wall; it shows the narrator as a watcher who risks his eye for a view."
+  },
+  {
+   "frame": "Insert through the triangular hole in the kitchen wall on a jointed tentacle of the Martian handling-machine, a metallic spider-crab of a machine, a glittering crablike machine, holding one bright aluminium bar above the clay terraces in gold light, the opened cylinder behind it and a splintered beam across the top edge.",
+   "motion": "The camera rises a hand's breadth above the bright bar across the whole shot; the Martian handling-machine swings the bar over to the stack; green vapour drifts across the cylinder.",
+   "camera": "Camera inside the kitchen at head height, a 35mm lens, looking south through the hole. The light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the jointed tentacle of the Martian handling-machine holding one bright aluminium bar above the clay at the RIGHT-CENTRE; the opened cylinder lies behind it at the CENTRE; the splintered beam crosses the TOP edge; a stack of aluminium bars rises at the RIGHT frame edge.",
+   "end": "The bar lies on top of the stack at the right frame edge, the Martian handling-machine stretched above it, the cylinder at the left-centre, the beam crossing the top edge.",
+   "changed": "Bar lands on the stack",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 3,
+   "section": "setup",
+   "setup": "pit_day",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "faint musical clinking of metal on metal",
+     "at": 0.5,
+     "seconds": 3.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "Yet terrible as was the danger we incurred, the attraction of peeping was for both of us irresistible."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "a ruined pit -> a working factory",
+   "why": "Opens on the Martians' orderly work seen through a hole in a wall; it shows the narrator as a watcher who risks his eye for a view."
+  },
+  {
+   "frame": "Medium of the narrator (grey eyes, cream flannel shirt with thin blue stripes) and the curate (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) struggling in the scullery by the kitchen doorway, the narrator's forearm across the curate's chest, the curate's boot lashing out, each head a quarter of the frame's height.",
+   "motion": "The camera tracks behind the narrator, travelling two strides, across the whole shot; the narrator thrusts the curate's shoulder against the doorframe; the curate's boot kicks out; grey dust falls from the doorframe.",
+   "camera": "Camera at the sink at chest height, a 35mm lens, looking east at the doorway. The grey light comes from the doorway behind them.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator, his fist gripping the curate's waistcoat at the doorway, each man's head a quarter of the frame's height; the planked door stands half open behind them; the sink edge at the left frame edge.",
+   "end": "The narrator pins the curate against the doorframe, the curate's arm flung toward the grey doorway, the meat chopper hanging on its nail beside them.",
+   "changed": "Curate pinned against the doorframe",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 4,
+   "section": "friction",
+   "setup": "scullery_door",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator",
+    "curate"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a scuffle of boots and bodies on stone flags",
+     "at": 0.5,
+     "seconds": 3.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "We would race across the kitchen in a grotesque way between eagerness and the dread of making a noise, and strike each other, and thrust and kick, within a few inches of exposure."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.4,
+   "turn": "shared fear -> a fight over a view",
+   "why": "Their terror turns on each other for the right to look; it shows the narrator as drawn to the sight as the curate."
+  },
+  {
+   "frame": "One single picture fills the whole frame edge to edge. Medium of the narrator (grey eyes, cream flannel shirt with thin blue stripes) and the curate (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) struggling in the scullery by the kitchen doorway, the narrator's forearm across the curate's chest, the curate's boot lashing out, each head a quarter of the frame's height.",
+   "motion": "The camera holds a locked-off frame; the narrator thrusts the curate's shoulder against the doorframe; the curate's boot kicks out; grey dust falls from the doorframe.",
+   "camera": "Camera at the sink at chest height, a 35mm lens, looking east at the doorway. The grey light comes from the doorway behind them.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator, his fist gripping the curate's waistcoat at the doorway, each man's head a quarter of the frame's height; the planked door stands half open behind them; the sink edge at the left frame edge.",
+   "end": "The narrator pins the curate against the doorframe, the curate's arm flung toward the grey doorway, the meat chopper hanging on its nail beside them.",
+   "changed": "Curate pinned against the doorframe",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 5,
+   "section": "friction",
+   "setup": "scullery_door",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator",
+    "curate"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a scuffle of boots and bodies on stone flags",
+     "at": 0.5,
+     "seconds": 3.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "We would race across the kitchen in a grotesque way between eagerness and the dread of making a noise, and strike each other, and thrust and kick, within a few inches of exposure."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "shared fear -> a fight over a view",
+   "why": "Their terror turns on each other for the right to look; it shows the narrator as drawn to the sight as the curate."
+  },
+  {
+   "frame": "One single picture fills the whole frame edge to edge. Every surface in the picture is plain, wordless paint. Insert on the open deal cupboard in the corner: two biscuit tins on the lower shelf, tins of salmon and soup above them, dark burgundy bottles on the top shelf.",
+   "motion": "The camera pushes in toward the lid of the nearest biscuit; a thread of grey plaster dust drifts down past the tins; grey light glints along the bottles.",
+   "camera": "Camera in the corner at shelf height, a 50mm lens, looking at the cupboard. The light comes from the RIGHT, from the kitchen doorway.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the lid of the nearest biscuit tin lying askew on the lower shelf; tins of soup stand above it; burgundy bottles stand on the TOP shelf at the TOP edge of the frame.",
+   "end": "The burgundy bottles fill the upper half of the frame with glints of grey light along their shoulders, the tins below them.",
+   "changed": "Frame rises to the bottles",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 6,
+   "section": "setup",
+   "setup": "scullery_copper",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "He ate and drank impulsively in heavy meals at long intervals."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "stores in hand -> stores draining",
+   "why": "Food is the narrator's clock; it shows him counting what the curate swallows."
+  },
+  {
+   "frame": "Only the named people stand in the picture and everything else is the place. Each person in the picture is a different man with his own face, build and dress. One single picture fills the whole frame edge to edge. Every surface in the picture is plain, wordless paint. Insert on the open deal cupboard in the dim corner of the scullery: two biscuit tins on the lower shelf, tins of salmon and soup above them, dark burgundy bottles on the top shelf, a line of grey light along the edge of the cupboard door.",
+   "motion": "The camera holds a locked-off frame across the whole shot; a thread of grey plaster dust drifts down past the tins; grey light glints along the bottles.",
+   "camera": "Camera in the corner at shelf height, a 50mm lens, looking at the cupboard. The light comes from the RIGHT, from the kitchen doorway.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the lid of the nearest biscuit tin lying askew on the lower shelf; tins of soup stand above it; burgundy bottles stand on the TOP shelf at the TOP edge of the frame.",
+   "end": "The burgundy bottles fill the upper half of the frame with glints of grey light along their shoulders, the tins below them.",
+   "changed": "Frame rises to the bottles",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 7,
+   "section": "setup",
+   "setup": "scullery_copper",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "He ate and drank impulsively in heavy meals at long intervals."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.09,
+   "cuts": [],
+   "path": null,
+   "turn": "stores in hand -> stores draining",
+   "why": "Food is the narrator's clock; it shows him counting what the curate swallows."
+  },
+  {
+   "frame": "One single picture fills the whole frame edge to edge. The named subject stands large at the CENTRE of the frame. Medium close on the narrator (grey eyes, cream flannel shirt with thin blue stripes) sitting against the brick copper in the dark, his jaw tight, his eyes lifted toward muffled weeping at the right.",
+   "motion": "The camera pulls back across the whole shot from the narrator's face, widening to show the copper, the firewood stack and the cupboard beside him; his hands press over his ears; grey dust drifts down through the light.",
+   "camera": "Camera at floor height, a 85mm lens, looking at the narrator. The grey light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face, his head a third of the frame's height, against the limewashed brick of the copper; the round wooden lid rises behind his shoulder; the stack of firewood stands at the LEFT.",
+   "end": "The narrator sits small against the brick copper at the frame centre, hands over his ears, the firewood stack at the left, the cupboard at the right.",
+   "changed": "Hands rise over his ears",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 8,
+   "section": "friction",
+   "setup": "scullery_copper",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "His endless muttering monologue vitiated every effort I made to think out a line of action"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "trying to think -> driven toward craziness",
+   "why": "The curate's noise defeats the narrator's thinking; it shows how thin his patience is."
+  },
+  {
+   "frame": "Medium close on the narrator (grey eyes, cream flannel shirt with thin blue stripes) sitting against the brick copper in the dark, his jaw tight, his eyes lifted toward muffled weeping at the right.",
+   "motion": "The camera tilts up from the face to the copper, travelling a forearm, across the whole shot; his hands press over his ears; grey dust drifts down through the light.",
+   "camera": "Camera at floor height, a 85mm lens, looking at the narrator. The grey light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face, his head a third of the frame's height, against the limewashed brick of the copper; the round wooden lid rises behind his shoulder; the stack of firewood stands at the LEFT.",
+   "end": "The narrator sits small against the brick copper at the frame centre, hands over his ears, the firewood stack at the left, the cupboard at the right.",
+   "changed": "Hands rise over his ears",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 9,
+   "section": "friction",
+   "setup": "scullery_copper",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "His endless muttering monologue vitiated every effort I made to think out a line of action"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "trying to think -> driven toward craziness",
+   "why": "The curate's noise defeats the narrator's thinking; it shows how thin his patience is."
+  },
+  {
+   "frame": "Medium through the triangular hole at twilight: the far side of the pit in gold and green light, the opened cylinder at the centre ringed by green vapour, a mound of bluish-grey powder at the far left, and a tall tripod fighting-machine on the far rim.",
+   "motion": "The camera pans across the whole shot from the mound of bluish powder at the left, arriving at the fighting-machine at the far right with its hood against the sky; green vapour drifts across the cylinder; green flames lift and fall along the clay.",
+   "camera": "Camera inside the kitchen at head height on the rubble, a 35mm lens, looking south. The light comes from the green glow at the centre and a low gold glow from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the opened cylinder at the CENTRE with green vapour around it; the mound of bluish powder lies at the LEFT edge; the fighting-machine, a tall tripod on three long jointed legs with a hood, stands in the far corner at the RIGHT against the sky.",
+   "end": "The fighting-machine fills the right half of the frame, its hood and a small cage on its back against the sky, the green glow beneath it, the cylinder at the left edge.",
+   "changed": "Frame arrives at the fighting-machine",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 10,
+   "section": "transition",
+   "setup": "pit_dusk",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a steady clangour of machinery",
+     "at": 0.0,
+     "seconds": 4.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "The twilight had now come, the stars were little and faint, but the pit was illuminated by the flickering green fire that came from the aluminium-making."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "calm work -> a watched threat",
+   "why": "Dusk and green fire change the pit into a stage; it shows the narrator climbing to look despite the curate's panic."
+  },
+  {
+   "frame": "Medium through the triangular hole at twilight: the far side of the pit in gold and green light, the opened cylinder at the centre ringed by green vapour, a mound of bluish-grey powder at the far left, and a tall tripod fighting-machine on the far rim.",
+   "motion": "The camera pulls back from the machine, travelling two strides, across the whole shot; green vapour drifts across the cylinder; green flames lift and fall along the clay.",
+   "camera": "Camera inside the kitchen at head height on the rubble, a 35mm lens, looking south. The light comes from the green glow at the centre and a low gold glow from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the opened cylinder at the CENTRE with green vapour around it; the mound of bluish powder lies at the LEFT edge; the fighting-machine, a tall tripod on three long jointed legs with a hood, stands in the far corner at the RIGHT against the sky.",
+   "end": "The fighting-machine fills the right half of the frame, its hood and a small cage on its back against the sky, the green glow beneath it, the cylinder at the left edge.",
+   "changed": "Frame arrives at the fighting-machine",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 11,
+   "section": "transition",
+   "setup": "pit_dusk",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a steady clangour of machinery",
+     "at": 0.0,
+     "seconds": 4.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "The twilight had now come, the stars were little and faint, but the pit was illuminated by the flickering green fire that came from the aluminium-making."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "calm work -> a watched threat",
+   "why": "Dusk and green fire change the pit into a stage; it shows the narrator climbing to look despite the curate's panic."
+  },
+  {
+   "frame": "Medium on the fighting-machine at the far corner of the pit, a tall tripod on three long jointed legs with a hood, a small cage hunched on its back and a long Martian handling-machine reaching over its shoulder, under a starry sky in green light.",
+   "motion": "The camera tilts up across the whole shot from the cage on the machine's back to the starry sky above its hood; the long Martian handling-machine reaches over the machine's shoulder and lifts a struggling man high against the stars; green flames flicker beneath.",
+   "camera": "Camera at the peephole at head height, a 85mm lens, looking south across the pit. The green light comes from the LEFT, from the aluminium fire.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the small cage on the machine's back, a long Martian handling-machine curled above its door; the hood above it gleams oily in the green light; the starry sky stands above the hood; the mound of bluish powder lies at the lower LEFT.",
+   "end": "A struggling man hangs high in the Martian handling-machine's grip against the stars above the hood, the cage below him, green glow along the machine's legs.",
+   "changed": "A man rises against stars",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 12,
+   "section": "spike",
+   "setup": "pit_dusk",
+   "size": "medium",
+   "faces": [],
+   "extras": 1,
+   "sounds": [
+    {
+     "sound": "a man's sudden yell",
+     "at": 1.0,
+     "seconds": 1.5,
+     "gain_db": 0.0
+    },
+    {
+     "sound": "shrieking and cheerful hooting from the pit",
+     "at": 6.0,
+     "seconds": 4.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "And suddenly I heard a yell, and saw a long tentacle reaching over the shoulder of the machine to the little cage that hunched upon its back."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "watching coolly -> witness to a killing",
+   "why": "The first prisoner is taken; it shows the narrator seeing what the curate fled from, and running."
+  },
+  {
+   "frame": "Medium on the fighting-machine at the far corner of the pit, a tall tripod on three long jointed legs with a hood, a small cage hunched on its back and a long Martian handling-machine reaching over its shoulder, under a starry sky in green light.",
+   "motion": "The camera pushes in toward the back, travelling two strides, across the whole shot; the long Martian handling-machine reaches over the machine's shoulder and lifts a struggling man high against the stars; green flames flicker beneath.",
+   "camera": "Camera at the peephole at head height, a 85mm lens, looking south across the pit. The green light comes from the LEFT, from the aluminium fire.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the small cage on the machine's back, a long Martian handling-machine curled above its door; the hood above it gleams oily in the green light; the starry sky stands above the hood; the mound of bluish powder lies at the lower LEFT.",
+   "end": "A struggling man hangs high in the Martian handling-machine's grip against the stars above the hood, the cage below him, green glow along the machine's legs.",
+   "changed": "A man rises against stars",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 13,
+   "section": "spike",
+   "setup": "pit_dusk",
+   "size": "medium",
+   "faces": [],
+   "extras": 1,
+   "sounds": [
+    {
+     "sound": "a man's sudden yell",
+     "at": 1.0,
+     "seconds": 1.5,
+     "gain_db": 0.0
+    },
+    {
+     "sound": "shrieking and cheerful hooting from the pit",
+     "at": 6.0,
+     "seconds": 4.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "And suddenly I heard a yell, and saw a long tentacle reaching over the shoulder of the machine to the little cage that hunched upon its back."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "watching coolly -> witness to a killing",
+   "why": "The first prisoner is taken; it shows the narrator seeing what the curate fled from, and running."
+  },
+  {
+   "frame": "Only the named people stand in the picture and everything else is the place. Each person in the picture is a different man with his own face, build and dress. Each person in the picture appears exactly once, with a face, hair and dress all his own. One single picture fills the whole frame edge to edge. Medium close on the curate (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) crouched on the flags, his arms lifting from over his head, his mouth open in a shout toward the dark doorway.",
+   "motion": "The camera pushes in toward the curate's face; the curate lowers his arms and shouts after the narrator; his hands reach out toward the dark; his chest heaves.",
+   "camera": "Camera at the pump at chest height, a 85mm lens, looking at the curate. The grey light comes from the kitchen doorway on the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the curate's face, his head a third of the frame's height, his arms over his head; the sink edge at the LEFT; the planked kitchen door a grey rectangle behind him at the RIGHT.",
+   "end": "The curate kneels with both hands stretched toward the grey doorway, his mouth wide, the sink at the left.",
+   "changed": "Arms drop, hands reach out",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 14,
+   "section": "reaction",
+   "setup": "scullery_door",
+   "size": "medium_close",
+   "faces": [
+    "curate"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "The curate, who had been crouching silently with his arms over his head, looked up as I passed, cried out quite loudly at my desertion of him, and came running after me."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.5,
+   "turn": "silent in terror -> loud and abandoned",
+   "why": "The curate's cry shows how far fear has taken him and how dangerous his noise is to them both."
+  },
+  {
+   "frame": "Medium close on the narrator (grey eyes, cream flannel shirt with thin blue stripes) seated against the brick copper, gripping his own forearms with both hands, his eyes fixed on the faint light of the kitchen door.",
+   "motion": "The camera pushes in a hand's breadth across the whole shot toward the narrator's face; his fingers tighten around his forearms; a thread of grey dust drifts down beside his shoulder.",
+   "camera": "Camera above the seated narrator at chest height, a 85mm lens, looking down at his face. The grey light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face, his head a third of the frame's height, his hands gripping his forearms; the copper's round wooden lid behind his shoulder; grey light lies along the flags at the RIGHT.",
+   "end": "The narrator's face fills the upper half of the frame, jaw set, grey eyes lifted toward the kitchen doorway, fingers white on his forearms.",
+   "changed": "His jaw sets with resolve",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 15,
+   "section": "transition",
+   "setup": "scullery_copper",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "afterwards, during the second day, I was able to consider our position with great clearness."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "despair -> a clear reckoning",
+   "why": "He takes hold of himself and weighs the chances; it shows the narrator choosing to think while the curate cannot."
+  },
+  {
+   "frame": "Medium close on the narrator (grey eyes, cream flannel shirt with thin blue stripes) seated against the brick copper, gripping his own forearms with both hands, his eyes fixed on the faint light of the kitchen door.",
+   "motion": "The camera tilts up from the face to the flags, travelling a forearm, across the whole shot; his fingers tighten around his forearms; a thread of grey dust drifts down beside his shoulder.",
+   "camera": "Camera above the seated narrator at chest height, a 85mm lens, looking down at his face. The grey light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face, his head a third of the frame's height, his hands gripping his forearms; the copper's round wooden lid behind his shoulder; grey light lies along the flags at the RIGHT.",
+   "end": "The narrator's face fills the upper half of the frame, jaw set, grey eyes lifted toward the kitchen doorway, fingers white on his forearms.",
+   "changed": "His jaw sets with resolve",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 16,
+   "section": "transition",
+   "setup": "scullery_copper",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "afterwards, during the second day, I was able to consider our position with great clearness."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "despair -> a clear reckoning",
+   "why": "He takes hold of himself and weighs the chances; it shows the narrator choosing to think while the curate cannot."
+  },
+  {
+   "frame": "Medium close on the narrator (grey eyes, cream flannel shirt with thin blue stripes) at the left, his fist gripping the dog collar of the curate (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) at the right, who hugs a biscuit tin to his chest; the narrator's other hand is raised.",
+   "motion": "The camera pushes in toward the narrator's face at the LEFT; the narrator hauls the curate's collar and strikes him on the cheek; the curate's head jerks and the biscuit tin drops from his arms; his breath comes in gasps.",
+   "camera": "Camera at chest height in front of the copper, a 85mm lens, looking at both men. The grey light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator's face at the LEFT, his head a third of the frame's height, his fist knotted in the curate's collar; the curate's face at the RIGHT, his head a third of the frame's height, hugging a biscuit tin; the copper's wooden lid behind them.",
+   "end": "The curate sags in the narrator's grip at the right, his cheek reddened, hands open, the biscuit tin on the flags at his feet; the narrator stands over him, fist lowered.",
+   "changed": "Curate sags under the blow",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 17,
+   "section": "turn",
+   "setup": "scullery_copper",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator",
+    "curate"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a hard blow landing on a cheek, a gasp",
+     "at": 4.0,
+     "seconds": 1.5,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "I had, much as I loathed doing it, to resort to threats, and at last to blows."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "the curate's carelessness -> the narrator's blows",
+   "why": "The narrator chooses threats and then blows to keep them both alive; it shows what he will do to keep the one chance of life."
+  },
+  {
+   "frame": "Medium close on the curate (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) sitting against the cupboard, one hand to his cheek, his eyes wide and wet.",
+   "motion": "The camera pushes in a hand's breadth across the whole shot toward the curate's face; his hand slides from his cheek to his mouth; tears run down his cheek.",
+   "camera": "Camera at floor height, a 85mm lens, looking at the curate. The grey light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the curate's face, his head a third of the frame's height, one hand pressed to his cheek; the deal cupboard door ajar behind his shoulder; the fallen biscuit tin on the flags at the lower RIGHT.",
+   "end": "The curate's face fills the frame, his hand over his mouth, pale blue eyes brimming, the dark cupboard behind him.",
+   "changed": "His hand covers his mouth",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 18,
+   "section": "payoff",
+   "setup": "scullery_copper",
+   "size": "medium_close",
+   "faces": [
+    "curate"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "That brought him to reason for a time."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "defiant carelessness -> cowed quiet",
+   "why": "The blow buys quiet at a price; it shows the narrator paying that price and owning it."
+  },
+  {
+   "frame": "Medium close on the curate (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) sitting against the deal cupboard in the dim scullery, one hand to his cheek, his eyes wide and wet, a line of grey light along his shoulder.",
+   "motion": "The camera holds a locked-off frame across the whole shot; his hand slides from his cheek to his mouth; tears run down his cheek.",
+   "camera": "Camera at floor height, a 85mm lens, looking at the curate. The grey light comes from the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the curate's face, his head a third of the frame's height, one hand pressed to his cheek; the deal cupboard door ajar behind his shoulder; the fallen biscuit tin on the flags at the lower RIGHT.",
+   "end": "The curate's face fills the frame, his hand over his mouth, pale blue eyes brimming, the dark cupboard behind him.",
+   "changed": "His hand covers his mouth",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 19,
+   "section": "payoff",
+   "setup": "scullery_copper",
+   "size": "medium_close",
+   "faces": [
+    "curate"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "That brought him to reason for a time."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "defiant carelessness -> cowed quiet",
+   "why": "The blow buys quiet at a price; it shows the narrator paying that price and owning it."
+  },
+  {
+   "frame": "Wide from the kitchen doorway across the scullery: the narrator (grey eyes, cream flannel shirt with thin blue stripes) kneels at the left in the pantry doorway, the pantry door lifted off and leaning on the wall beside him, his hatchet biting into the earth.",
+   "motion": "The camera pulls back across the whole shot from the hatchet, widening to show the sink, the copper and the deal cupboard; the narrator swings the hatchet into the earth; clods fall on the flags.",
+   "camera": "Camera in the kitchen doorway at chest height, a 28mm lens, looking west across the scullery. The grey daylight comes from BEHIND the camera.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator kneeling in the pantry doorway at the LEFT, hatchet raised; the lifted pantry door leans beside him; the black cast-iron pump and the brown stone sink stand at the RIGHT; the brick copper stands in the far corner.",
+   "end": "The narrator kneels small at the left edge in the pantry doorway, a shallow hole in the earth before him, the pump and sink at the right, the copper in the far corner.",
+   "changed": "A shallow hole opens up",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 20,
+   "section": "friction",
+   "setup": "scullery_dig",
+   "size": "wide",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "It was on the third day, if my memory serves me right, that I saw the lad killed.",
+    "I went into the scullery, removed the door, and spent some hours digging with my hatchet as silently as possible"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.7,
+   "turn": "hope in digging -> a hole begun",
+   "why": "After the lad's death he tries to dig out; it shows the narrator acting alone while the curate lies broken."
+  },
+  {
+   "frame": "Wide from the kitchen doorway across the scullery: the narrator (grey eyes, cream flannel shirt with thin blue stripes) kneels at the left in the pantry doorway, the pantry door lifted off and leaning on the wall beside him, his hatchet biting into the earth.",
+   "motion": "The camera tracks behind the narrator, travelling two strides, across the whole shot; the narrator swings the hatchet into the earth; clods fall on the flags.",
+   "camera": "Camera in the kitchen doorway at chest height, a 28mm lens, looking west across the scullery. The grey daylight comes from BEHIND the camera.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the narrator kneeling in the pantry doorway at the LEFT, hatchet raised; the lifted pantry door leans beside him; the black cast-iron pump and the brown stone sink stand at the RIGHT; the brick copper stands in the far corner.",
+   "end": "The narrator kneels small at the left edge in the pantry doorway, a shallow hole in the earth before him, the pump and sink at the right, the copper in the far corner.",
+   "changed": "A shallow hole opens up",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 21,
+   "section": "friction",
+   "setup": "scullery_dig",
+   "size": "wide",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "It was on the third day, if my memory serves me right, that I saw the lad killed.",
+    "I went into the scullery, removed the door, and spent some hours digging with my hatchet as silently as possible"
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "hope in digging -> a hole begun",
+   "why": "After the lad's death he tries to dig out; it shows the narrator acting alone while the curate lies broken."
+  },
+  {
+   "frame": "Insert on the hole in the earth at the pantry doorway: a hatchet handle wedged in the packed clay wall above a dark hole two feet deep, grey light along its edge.",
+   "motion": "The camera tracks sideways to the right across the whole shot, past the hatchet handle at the left edge, toward the dark hole at the centre; the overhanging earth shears loose and falls in; dust rises from the hole.",
+   "camera": "Camera at floor height, a 50mm lens, looking at the hole. The grey light comes from the LEFT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the hatchet handle wedged in the clay wall at the LEFT; the dark hole two feet deep lies at the CENTRE; loose earth overhangs its rim at the RIGHT.",
+   "end": "The hole is filled with loose clods to a hand's breadth below the rim, the hatchet handle at the left edge, a cloud of grey dust above.",
+   "changed": "Earth collapses into the hole",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 22,
+   "section": "payoff",
+   "setup": "scullery_dig",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "loose earth collapsing into a hole with a loud thud",
+     "at": 1.0,
+     "seconds": 2.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "when I had made a hole about a couple of feet deep the loose earth collapsed noisily, and I did not dare continue."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.8,
+   "turn": "a way out -> a hole filled",
+   "why": "The collapse ends the plan to dig; it shows the narrator's last practical hope buried."
+  },
+  {
+   "frame": "Insert through the triangular hole at night: the pale glowing Martian handling-machine at the foot of the near wall, white aluminium bars lying beside it in bright patches, a thread of green smoke rising.",
+   "motion": "The camera tracks beside the glowing Martian handling-machine to the; the thread of smoke climbs; the handling-machine's tentacle lifts beside the bars.",
+   "camera": "Camera at the peephole, a 50mm lens, looking south. The pale light comes from the upper RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the pale glow of the Martian handling-machine at the near corner of the pit floor; bars of aluminium lie in patches of light at the LEFT; the thin thread of green smoke rises at the RIGHT; the fighting-machine stands on the far bank at the TOP edge.",
+   "end": "The fighting-machine stands tall on the far bank at the upper centre of the frame, the pit floor in shadow below, the thread of smoke at the right.",
+   "changed": "Frame climbs to far bank",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 23,
+   "section": "transition",
+   "setup": "pit_night",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a dog howling in the far distance",
+     "at": 0.5,
+     "seconds": 4.0,
+     "gain_db": 0.0
+    }
+   ],
+   "source": [
+    "I heard a dog howling, and that familiar sound it was that made me listen."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 2.0,
+   "cuts": [],
+   "path": null,
+   "turn": "a dead pit -> a living sound",
+   "why": "A dog's howl is the first ordinary thing in days; it shows the narrator listening for the world outside."
+  },
+  {
+   "frame": "Wide through the triangular hole at night: the quiet pit, the pale glow of the Martian handling-machine at the near wall, the opened cylinder at the centre, bars of aluminium in patches of light, and the fighting-machine on the far bank.",
+   "motion": "The camera pushes in toward the pale glow of the Martian; the handling-machine's tentacle shifts beside the aluminium bars; a thread of green smoke rises.",
+   "camera": "Camera at the peephole at head height, a 35mm lens, looking south. The pale light comes from the upper RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the pale glow of the Martian handling-machine at the lower LEFT; the opened cylinder lies at the CENTRE; the fighting-machine stands on the far bank at the upper RIGHT with the pale sky above it.",
+   "end": "The fighting-machine stands tall at the right of the frame against the moonlit sky, the cylinder at the left edge, the pit floor dark below.",
+   "changed": "Frame arrives at the sky",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 24,
+   "section": "answer",
+   "setup": "pit_night",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 3.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 4.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 5.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 6.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 7.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 8.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    }
+   ],
+   "source": [
+    "Then I heard quite distinctly a booming exactly like the sound of great guns.",
+    "Six distinct reports I counted, and after a long interval six again."
+   ],
+   "take": 0,
+   "beat_s": 1.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "despair of rescue -> the sound of distant guns",
+   "why": "The guns answer the question: men are still fighting; it shows the narrator counting the reports."
+  },
+  {
+   "frame": "Wide through the triangular hole at night: the quiet pit, the pale glow of the Martian handling-machine at the near wall, the opened cylinder at the centre, bars of aluminium in patches of light, and the fighting-machine on the far bank.",
+   "motion": "The camera pushes in toward the pale glow of the Martian; the handling-machine's tentacle shifts beside the aluminium bars; a thread of green smoke rises.",
+   "camera": "Camera at the peephole at head height, a 35mm lens, looking south. The pale light comes from the upper RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the pale glow of the Martian handling-machine at the lower LEFT; the opened cylinder lies at the CENTRE; the fighting-machine stands on the far bank at the upper RIGHT with the pale sky above it.",
+   "end": "The fighting-machine stands tall at the right of the frame against the moonlit sky, the cylinder at the left edge, the pit floor dark below.",
+   "changed": "Frame arrives at the sky",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 25,
+   "section": "answer",
+   "setup": "pit_night",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 3.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 4.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 5.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 6.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 7.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    },
+    {
+     "sound": "a distant heavy gun report, a deep boom",
+     "at": 8.0,
+     "seconds": 1.0,
+     "gain_db": -4.0
+    }
+   ],
+   "source": [
+    "Then I heard quite distinctly a booming exactly like the sound of great guns.",
+    "Six distinct reports I counted, and after a long interval six again."
+   ],
+   "take": 0,
+   "beat_s": 1.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": null,
+   "turn": "despair of rescue -> the sound of distant guns",
+   "why": "The guns answer the question: men are still fighting; it shows the narrator counting the reports."
+  },
+  {
+   "frame": "One single picture fills the whole frame edge to edge. Medium close on the curate (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) sitting up on the flags near the kitchen doorway, head lifted, listening toward the far wall.",
+   "motion": "The camera pushes in toward the curate's face; the curate turns his head toward the wall and speaks; his hand rises to his lips; grey dust drifts down through the light.",
+   "camera": "Camera at the pump at chest height, a 85mm lens, looking at the curate. The grey light comes from the kitchen doorway on the RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the curate's face, his head a third of the frame's height, lifted; the kitchen door stands half open behind him at the right with grey light on its edge; the meat chopper hangs on its nail at the right frame edge.",
+   "end": "The curate's finger rests on his lips, his eyes wide toward the far wall, the half-open door behind him.",
+   "changed": "His hand rises to lips",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 26,
+   "section": "button",
+   "setup": "scullery_door",
+   "size": "medium_close",
+   "faces": [
+    "curate"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "And that was all."
+   ],
+   "take": 0,
+   "beat_s": 1.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.7,
+   "turn": "dumb despair -> a spark of hope",
+   "why": "The world's answer comes in the curate's own hushed voice: the guns are real and someone fights."
+  },
+  {
+   "frame": "Insert through the triangular hole at night on the white aluminium bars stacked at the foot of the near pit wall, patches of moonlight lying across them, the pale glow of the Martian handling-machine beside them and a thin thread of green smoke rising at the right.",
+   "motion": "The camera tracks sideways to the left across the whole shot, past the broken bricks at the bottom edge, toward the pale glow of the Martian handling-machine; the handling-machine's tentacle lifts beside the bars with a faint clink; the thread of green smoke runs up through the moonlight.",
+   "camera": "Camera at the peephole at head height, a 50mm lens, looking down and south into the pit. The pale moonlight comes from the upper RIGHT.",
+   "at_rest": "THE FOCUS OF THE PICTURE IS the stack of white aluminium bars at the CENTRE, each bar edged with moonlight; the pale glow of the Martian handling-machine lies at the LEFT edge of the frame; the broken bricks of the hole cross the BOTTOM edge; the thin thread of green smoke rises at the RIGHT third against the dark clay.",
+   "end": "The pale glow of the Martian handling-machine fills the left half of the frame, its tentacle raised beside the white bars at the centre, the thread of green smoke at the right edge, the broken bricks along the bottom edge.",
+   "changed": "Tentacle lifts beside the bars",
+   "crowd": "",
+   "view": "",
+   "still": false,
+   "index": 27,
+   "section": "runout",
+   "setup": "pit_night",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "faint musical clinking of metal",
+     "at": 1.0,
+     "seconds": 3.0,
+     "gain_db": -4.0
+    }
+   ],
+   "source": [
+    "That night was a beautiful serenity; save for one planet, the moon seemed to have the sky to herself."
+   ],
+   "take": 0,
+   "beat_s": 0.0,
+   "coda_s": 2.0,
+   "cuts": [],
+   "path": null,
+   "turn": "the guns fall quiet -> the pit works on",
+   "why": "Picture only after the button: the machine works on under the moon, setting the narrator's new hope against an enemy still at its labour."
+  }
+ ],
+ "lines": [
+  {
+   "index": 0,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A fighting-machine arrived, and fear drove us into the scullery.",
+   "shot": 0,
+   "delivery": ""
+  },
+  {
+   "index": 1,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "From that height, the Martian could see over our barrier.",
+   "shot": 1,
+   "delivery": ""
+  },
+  {
+   "index": 2,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Through the hole, I watched Martians make metal in the pit.",
+   "shot": 2,
+   "delivery": ""
+  },
+  {
+   "index": 3,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A tentacle placed a bright bar on the stack.",
+   "shot": 3,
+   "delivery": ""
+  },
+  {
+   "index": 4,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "We fought for the chance to look, kicking and thrusting near danger.",
+   "shot": 4,
+   "delivery": ""
+  },
+  {
+   "index": 5,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Starvation waited, yet we fought over the peephole.",
+   "shot": 5,
+   "delivery": ""
+  },
+  {
+   "index": 6,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "He ate heavily and wept for hours, trusting his tears to save him.",
+   "shot": 6,
+   "delivery": ""
+  },
+  {
+   "index": 7,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I counted every tin that still remained.",
+   "shot": 7,
+   "delivery": ""
+  },
+  {
+   "index": 8,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "His muttering drove me close to craziness; I could not think.",
+   "shot": 8,
+   "delivery": ""
+  },
+  {
+   "index": 9,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "He was weak, fearful, and false even to himself.",
+   "shot": 9,
+   "delivery": ""
+  },
+  {
+   "index": 10,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "At dusk, the whole pit glowed green with aluminium fire.",
+   "shot": 10,
+   "delivery": ""
+  },
+  {
+   "index": 11,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The curate slid down; I took his place and watched.",
+   "shot": 11,
+   "delivery": ""
+  },
+  {
+   "index": 12,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A tentacle reached into the cage and lifted a man against the stars.",
+   "shot": 12,
+   "delivery": ""
+  },
+  {
+   "index": 13,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Then hooting began; I ran into darkness.",
+   "shot": 13,
+   "delivery": ""
+  },
+  {
+   "index": 14,
+   "kind": "dialogue",
+   "speaker": "curate",
+   "text": "Do not leave me here! Come back, come back! I am alone in the dark with them near.",
+   "shot": 14,
+   "delivery": "shouting"
+  },
+  {
+   "index": 15,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Next day, I took hold of myself and weighed our chances.",
+   "shot": 15,
+   "delivery": ""
+  },
+  {
+   "index": 16,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "They might leave, or forget to guard the pit.",
+   "shot": 16,
+   "delivery": ""
+  },
+  {
+   "index": 17,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Be quiet. One more sound, and I will strike you to keep us alive here in hiding together.",
+   "shot": 17,
+   "delivery": "threatening"
+  },
+  {
+   "index": 18,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The blow quieted him; I am ashamed, yet I would strike again.",
+   "shot": 18,
+   "delivery": ""
+  },
+  {
+   "index": 19,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Those under such darkness may perhaps forgive me.",
+   "shot": 19,
+   "delivery": ""
+  },
+  {
+   "index": 20,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Days later, I watched a lad die before me.",
+   "shot": 20,
+   "delivery": ""
+  },
+  {
+   "index": 21,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I lifted the door and dug with my hatchet for hours.",
+   "shot": 21,
+   "delivery": ""
+  },
+  {
+   "index": 22,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Two feet down, the earth collapsed with a crash and stopped me.",
+   "shot": 22,
+   "delivery": ""
+  },
+  {
+   "index": 23,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I abandoned digging and lay on the flags.",
+   "shot": 23,
+   "delivery": ""
+  },
+  {
+   "index": 24,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Then came a booming: great guns, far off, and men were still fighting.",
+   "shot": 24,
+   "delivery": ""
+  },
+  {
+   "index": 25,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Six reports, then six more in reply.",
+   "shot": 25,
+   "delivery": ""
+  },
+  {
+   "index": 26,
+   "kind": "dialogue",
+   "speaker": "curate",
+   "text": "Guns. Those were guns. Someone still fights them out there.",
+   "shot": 26,
+   "delivery": "hushed"
+  }
+ ],
+ "omit": [],
+ "beds": [
+  {
+   "from_shot": 0,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 6,
+   "tone": "grave"
+  },
+  {
+   "from_shot": 10,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 12,
+   "tone": "grave"
+  },
+  {
+   "from_shot": 15,
+   "tone": "plain"
+  },
+  {
+   "from_shot": 17,
+   "tone": "grave"
+  },
+  {
+   "from_shot": 20,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 23,
+   "tone": "plain"
+  },
+  {
+   "from_shot": 24,
+   "tone": "thrilling"
+  },
+  {
+   "from_shot": 26,
+   "tone": "light"
+  }
+ ]
+}

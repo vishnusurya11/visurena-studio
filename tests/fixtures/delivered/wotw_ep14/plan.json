@@ -1,0 +1,1342 @@
+{
+ "number": 14,
+ "title": "The Great Panic",
+ "question": "Today, can George understand the danger and choose a road out of London?",
+ "where": "London, 1894",
+ "light": "violet lightning from the west, black shadows",
+ "palette": "soot grey, gaslight amber, dawn pink, river brown",
+ "look": "Angular stylised 3D animation, brush-stroke texture",
+ "aspect": "1:1",
+ "answer": "line 27",
+ "protagonist": "narrators_brother",
+ "setups": {
+  "biology_class": {
+   "described": "A first-floor biology classroom in a London crammer, with four rows of pine benches facing a blackboard, a demonstrator’s bench with brass microscopes and glass dissecting dishes, specimen cabinets, a rabbit skeleton, sash windows admitting north-east daylight from the street, a stair door, chalk dust, pine desks, ink wells, coat hooks, a gas bracket, a sink, preserved specimens in spirit jars, and students bending over their benches while flat morning light from the tall north-east windows crosses the room.",
+   "cast": [
+    "narrators_brother"
+   ],
+   "landmark": "the rabbit skeleton",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "door, benches, demonstrator’s bench, blackboard",
+   "geometry": "The south door fills the near frame edge; four pine bench rows run from the lower frame toward the far north wall; the demonstrator’s bench spans the far edge beneath the blackboard; the rabbit skeleton stands at the far-left edge beside the blackboard; coloured charts occupy the far-right edge; mahogany cabinets fill the left middle ground; tall sash windows occupy the right edge and send north-east daylight across the desks; students occupy the bench rows; examination papers lie on the sloping desks; coat hooks and the notice board mark the near wall.",
+   "location": "crammers_biology_class",
+   "view": "wide_establishing",
+   "crowd": "all students in the biology class, turning pages and leaning over desks",
+   "outdoors": false,
+   "ambience": "chalk, turning pages, chair legs, distant London carts",
+   "props": []
+  },
+  "waterloo_station": {
+   "described": "A soot-darkened Waterloo railway concourse beneath glass roofs, with timber platforms, iron gates, a telegraph counter, barrows, steam, gas pendants, a connecting line, an exit toward the wet cab road, waiting travelers, railway officials, luggage, iron columns, roof girders, rails, and hazy afternoon light from the south-west roof glazing falling through the structure onto the platforms and rails. Porters in dark uniforms stand by the barrows, and a crowd presses at the telegraph counter asking after the Chertsey line.",
+   "cast": [
+    "narrators_brother",
+    "police"
+   ],
+   "landmark": "the great station clock",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "cab road, concourse, platform gate, connecting line",
+   "geometry": "The cab road opens at the near exit; the concourse occupies the centre; the telegraph counter stands along the rear wall; the platform gate occupies the left middle ground; destination boards hang above the far platforms; the station clock hangs at the far roof centre; the connecting line crosses the east edge; south-west afternoon light enters through the roof glass; steam gathers beneath the girders; barrows line the platform edges; gas pendants hang above the waiting crowd.",
+   "location": "waterloo_station",
+   "view": "wide_establishing",
+   "crowd": "a number of people waiting for trains and railway officials arranging platforms",
+   "outdoors": false,
+   "ambience": "steam, gas pendants, whistles, footsteps, platform voices",
+   "props": []
+  },
+  "waterloo_bridge": {
+   "described": "A granite Waterloo Bridge above the brown Thames, with a granite parapet, Doric columns, the Clock Tower, Parliament, westering sunset light from the west, reddish-purple cloud bands, gas lamps, river haze, loafers along the bridge watching brown scum drift downstream, church bells, street traffic, stone coping, distant barges, the upstream railway bridge, and evening voices carried across the granite while the western sunset throws long shadows toward the river. Along the parapet the brother leans among the loafers, and newsboys run up from Wellington Street with damp pink sheets under their arms.",
+   "cast": [
+    "narrators_brother",
+    "unnamed_newspaper_boy"
+   ],
+   "landmark": "the Clock Tower",
+   "landmark_at": "far_end",
+   "landmark_size": "medium",
+   "route": "Waterloo Road, bridge approach, parapet, river view",
+   "geometry": "Waterloo Road enters at the near south edge; the granite parapet runs across the centre; the river occupies the lower frame; Doric columns descend at the lower-left edge; the Clock Tower stands at the far-left edge; Parliament occupies the far horizon; Wellington Street climbs from the far-right edge; west sunset light crosses the bridge and river; reddish-purple clouds span the upper frame; loafers stand along the parapet; brown scum forms patches below the bridge.",
+   "location": "waterloo_road_bridge",
+   "view": "wide_establishing",
+   "crowd": "a number of loafers watching patches of brown scum on the river",
+   "outdoors": true,
+   "ambience": "church bells, river water, carts, evening voices, wind over stone",
+   "props": []
+  },
+  "strand_square": {
+   "described": "Trafalgar Square and the eastern Strand with Nelson’s Column, the National Gallery, St Martin’s spire, fountains, the Eleanor Cross, shops, warm gaslight from the east-side roadside lamps, violet lightning from the west, omnibuses, carts, a hay waggon, pink newspapers, map displays, refugee furniture, boxes and bundles, Sunday crowds, stone paving, plate-glass windows, shop shutters, placard boards, and refugees arriving from West Surrey while the square opens eastward toward Wellington Street and the Strand carries news toward the river. The light comes from the gas lamps at the LEFT, throwing long black shadows of the crowd to the right across the paving.",
+   "cast": [
+    "narrators_brother",
+    "unnamed_newspaper_boy"
+   ],
+   "landmark": "Nelson’s Column",
+   "landmark_at": "start",
+   "landmark_size": "wide",
+   "route": "Trafalgar Square, map shop, Strand, Wellington Street",
+   "geometry": "Nelson’s Column fills the near-left edge; the National Gallery spans the far north edge; St Martin’s spire rises at the far-right edge; the fountains sit between column and gallery; the map shop occupies the right middle ground; the Strand runs toward the eastern edge; the cart occupies the lower roadway; the hay waggon follows behind it; roadside gas lamps cast warm pools along the shops; pink newspapers lie on the pavement; Wellington Street opens beyond the eastern corner; violet lightning from the west marks the upper sky.",
+   "location": "strand_trafalgar_square",
+   "view": "wide_establishing",
+   "crowd": "five or six respectable-looking people in a hay waggon traveling with boxes and bundles",
+   "outdoors": true,
+   "ambience": "omnibuses, hoofbeats, hawkers, gas lamps, street voices",
+   "props": []
+  },
+  "marylebone_route": {
+   "described": "A broad Marylebone road beside Regent’s Park railings, with white stucco terraces, amber gaslight from the east-side roadside lamps, Portland Place, dark park trees, granite setts, carts, Sunday-night promenaders, silent couples, distant southern gunfire beneath the night sky, gas lamps along the pavement, black railings, lit windows, a church spire, a red pillar box, a horse omnibus, park paths, and the lamps marking the route toward the brother’s lodging house. Lamplight falls from the LEFT across the setts, throwing the railings' long black shadows over the pavement toward his lodgings.",
+   "cast": [
+    "narrators_brother"
+   ],
+   "landmark": "the green cabmen’s shelter",
+   "landmark_at": "start",
+   "landmark_size": "medium",
+   "route": "Marylebone Road, Portland Place, Regent’s Park railings",
+   "geometry": "The green shelter fills the near-left edge; Marylebone Road runs through the centre; park railings occupy the right edge; dark trees stand beyond them; amber gas lamps diminish along the pavement; terraces frame the opposite side; Portland Place opens through the far centre; carts use the roadway; promenaders fill the pavements; southern flashes show above the far rooftops; scattered couples walk beside the park railings.",
+   "location": "marylebone",
+   "view": "wide_park_edge",
+   "crowd": "one or two cartloads of refugees, Sunday-night promenaders, and silent couples traveling and watching the road",
+   "outdoors": true,
+   "ambience": "gas lamps, hoofbeats, distant guns, park wind, Sunday voices",
+   "props": []
+  },
+  "attic_room": {
+   "described": "A small attic room in a Marylebone lodging house, with a dormer window facing the eastern street, a sloping yellow-sprigged ceiling, an iron bed, a marble washstand, a deal table, a paraffin lamp, examination notes, textbooks, a money drawer, a trunk, a landing door, red dawn light from the east dormer, yellow windows shining across the street, residents opening doors below, a water trough, a church spire, stair boards, loose papers, a folded newspaper, a brass bed rail, a basin, a towel rail, a cabin trunk, and the street awakening beneath the attic while dawn light crosses the room.",
+   "cast": [
+    "narrators_brother",
+    "police",
+    "unnamed_newspaper_boy"
+   ],
+   "landmark": "the dormer window",
+   "landmark_at": "far_end",
+   "landmark_size": "wide",
+   "route": "bed, deal table, dormer window, landing door, street",
+   "geometry": "The iron bed fills the near-left edge; the deal table stands at centre; the washstand occupies the north wall; the dormer window fills the far-east edge; the landing door stands on the south wall; textbooks line the wall; the trunk rests below the table; red dawn light from the east dormer crosses the room; yellow windows form a line across the opposite houses; the water trough stands up the street; the street door and stairs open beyond the landing; the paraffin lamp marks the table.",
+   "location": "marylebone_apartments",
+   "view": "wide_establishing",
+   "crowd": "a dozen residents at windows opening doors and watching the street",
+   "outdoors": false,
+   "ambience": "bells, drumming, running feet, door knockers, carts and voices",
+   "props": []
+  }
+ },
+ "shots": [
+  {
+   "frame": "Every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) leans over the front bench with both hands flat on its lid; pine desks, sash windows and the biology class recede behind him.",
+   "motion": "The camera pushes in toward The brother leans over the front bench with both hands flat on the bench; his head occupies one fifth of the frame height; sash windows occupy the right edge; pine benches fill the centre; the blackboard stands at the far edge; the door occupies the near edge; the rabbit skeleton stands at the far-left edge; the brother straightens; his hands leave the bench.",
+   "camera": "At the back door of the classroom, chest height, looking along the benches.",
+   "at_rest": "The brother leans over the front bench with both hands flat on the bench; his head occupies one fifth of the frame height; sash windows occupy the right edge; pine benches fill the centre; the blackboard stands at the far edge; the door occupies the near edge; the rabbit skeleton stands at the far-left edge.",
+   "end": "The brother straightens above the front bench, with the blackboard, rabbit skeleton and sash windows behind him.",
+   "changed": "Paper opens above the front bench",
+   "crowd": "all students in the biology class turning toward the brother and the headlines",
+   "view": "biology_class",
+   "still": false,
+   "index": 0,
+   "section": "hook",
+   "setup": "biology_class",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "My younger brother was in London when the Martians fell at Woking."
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.1,
+   "turn": "before: George trusts the ordinary Saturday; after: the paper places Woking inside his day.",
+   "why": "The paper brings the invasion into George’s hands and shows his attention turning before London reacts."
+  },
+  {
+   "frame": "A folded newspaper lies beside a brass microscope, a glass dissecting dish and examination notes; the brother’s hand enters from the lower edge.",
+   "motion": "The camera tracks sideways past the brass microscope across the whole shot, with the newspaper behind it; the brother’s hand spreads the paper; his fingers lift the telegram column.",
+   "camera": "Beside the demonstrator’s bench, hand height above the newspaper.",
+   "at_rest": "The folded newspaper lies beside the microscope on the black-stained bench; sash windows occupy the far-right edge; the microscope fills the left edge; the brother’s hand rests at the lower centre; the dissecting dish stands at the near-right edge. Glass specimen jars line a shelf above the bench, their labels turned toward the empty classroom.",
+   "end": "The telegram column lies open beside the microscope, with the headline above the brief report.",
+   "changed": "Telegram column opens beside microscope",
+   "crowd": "all students in the biology class bending over open papers",
+   "view": "biology_class",
+   "still": false,
+   "index": 1,
+   "section": "setup",
+   "setup": "biology_class",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "The morning papers on Saturday contained, in addition to lengthy special articles on the planet Mars, on life in the planets, and so forth, a brief and vaguely worded telegram, all the more striking for its brevity."
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "before: the report seems remote; after: its short telegram demands attention.",
+   "why": "The insert makes the small report outweigh the surrounding study material."
+  },
+  {
+   "frame": "The brother (grey eyes, Dark brown hair worn fuller on top) writes on a telegram form at the front bench, examination notes beside his elbow.",
+   "motion": "The camera pushes toward the telegram across the whole shot; the brother’s hand guides the pen across the form; his fingers press the pen into the paper.",
+   "camera": "Beside the front bench, chest height, facing the brother and the blackboard.",
+   "at_rest": "The brother’s head spans one third of the frame height; his pen rests above the blank telegram form on the bench; the form occupies the lower centre; the blackboard fills the far edge; the rabbit skeleton stands at the far-left edge; sash windows occupy the right edge; examination notes fill the near-left edge.",
+   "end": "The brother presses the pen into the final line while the folded paper lies open beside his hand.",
+   "changed": "Telegram gains its final line",
+   "crowd": "all students in the biology class reading and discussing the reports",
+   "view": "biology_class",
+   "still": false,
+   "index": 2,
+   "section": "setup",
+   "setup": "biology_class",
+   "size": "medium_close",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "He dispatched a telegram"
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.3,
+   "turn": "before: George plans a visit; after: he commits the plan to a message.",
+   "why": "George acts on concern for the narrator, while the unanswered form foreshadows separation."
+  },
+  {
+   "frame": "Every surface in the picture is plain, wordless paint. The telegram form fills the front bench while the brother’s hand folds it beside the examination notes.",
+   "motion": "The camera tilts up from the telegram form across the whole shot to the brother; his hand folds the telegram; his fingers tuck the paper beside the notes.",
+   "camera": "At the front bench, chest height, facing the brother and the blackboard.",
+   "at_rest": "The brother’s head spans one third of the frame height; the telegram form lies on the front bench; the brother’s hand rests beside it; the blackboard fills the far edge; the rabbit skeleton stands at the far-left edge; the sash windows occupy the right edge; the south door appears at the rear-left edge.",
+   "end": "The brother holds the folded telegram beside the examination notes, with the benches and blackboard behind him.",
+   "changed": "Telegram folds beside examination notes",
+   "crowd": "all students in the biology class gathering around the newspaper",
+   "view": "biology_class",
+   "still": false,
+   "index": 3,
+   "section": "transition",
+   "setup": "biology_class",
+   "size": "medium_close",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "He dispatched a telegram, which never reached me, about four o’clock",
+    "which never reached me"
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.35,
+   "turn": "before: George waits for the message to connect London and Woking; after: the paper remains in his hand while the connection fails.",
+   "why": "The separate beat makes the failed message visible before George leaves the classroom."
+  },
+  {
+   "frame": "Every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) crosses the classroom toward the south door with his coat over his arm; benches and blackboard fill the room behind him.",
+   "motion": "The camera tracks behind the brother toward the south door across the whole shot; the brother pulls on his coat; his shoulder turns toward the landing.",
+   "camera": "Behind the brother at shoulder height, aligned with the classroom route.",
+   "at_rest": "The brother stands beside the front bench with his coat over his right arm; the south door occupies the far edge; examination notes rest at the near bench edge; sash windows fill the right edge; the blackboard occupies the upper edge; the rabbit skeleton stands at the left edge.",
+   "end": "The brother reaches the south door buttoning his coat, with the benches behind him.",
+   "changed": "Brother reaches the classroom door",
+   "crowd": "all students in the biology class gathering around the newspaper",
+   "view": "biology_class",
+   "still": false,
+   "index": 4,
+   "section": "transition",
+   "setup": "biology_class",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "He made up his mind to run down that night to me"
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.4,
+   "turn": "before: the visit is a hopeful errand; after: George carries it toward the first practical obstacle.",
+   "why": "The route leaves the familiar classroom and points George toward the first practical obstacle."
+  },
+  {
+   "frame": "Every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) stands beneath the glass roof beside the stopped platform train; the wet cab road glints beyond the exit.",
+   "motion": "The camera holds a locked-off frame; the brother looks down the empty line; rain threads past the station lamps.",
+   "camera": "At platform-gate height, facing the dark Woking board and the exit.",
+   "at_rest": "The brother stands before the stopped platform train with his hands in his coat pockets; his head occupies one fifth of the frame height; gas pendants hang from the far roof girders; the wet cab road opens at the right edge; platform gates occupy the left edge; the exit arches occupy the near edge; the telegraph counter stands behind him.",
+   "end": "The stopped platform train and wet cab road fill the station view around the brother.",
+   "changed": "The blocked route fills Waterloo",
+   "crowd": "a few passengers waiting beneath the station roof",
+   "view": "waterloo_station",
+   "still": false,
+   "index": 5,
+   "section": "friction",
+   "setup": "waterloo_station",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "In London, also, on Saturday night there was a thunderstorm, and my brother reached Waterloo in a cab."
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.1,
+   "turn": "before: George expects a midnight train; after: Waterloo presents a closed route.",
+   "why": "The station makes the first failure visible and turns a planned journey into waiting."
+  },
+  {
+   "frame": "Every surface in the picture is plain, wordless paint. A platform gate and its dark Woking, Windsor and Chertsey boards fill the station view, with steam beneath the glass roof and the great clock above.",
+   "motion": "The camera pushes in toward The iron platform gate fills the lower centre; dark Woking; the brother turns the paper in his hand; steam rises beyond the boards.",
+   "camera": "At the platform gate, chest height, facing the destination boards.",
+   "at_rest": "The iron platform gate fills the lower centre; dark Woking, Windsor and Chertsey boards occupy the middle frame; the station clock hangs above them; steam gathers beneath the roof; the telegraph counter stands at the left rear edge. Porters in dark uniforms wait beside luggage barrows, and passengers crowd the counter asking for trains.",
+   "end": "The dark destination boards and the great clock occupy the upper station frame above the gate.",
+   "changed": "Dark boards meet the station clock",
+   "crowd": "a number of travelers and railway officials waiting beside the gate",
+   "view": "waterloo_station",
+   "still": false,
+   "index": 6,
+   "section": "friction",
+   "setup": "waterloo_station",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "he learned, after some waiting, that an accident prevented trains from reaching Woking that night"
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "before: the route might open after waiting; after: the boards make the interruption visible.",
+   "why": "The station detail turns uncertainty into a clear physical barrier."
+  },
+  {
+   "frame": "Each person in the picture is a different man with his own face, build and dress. The brother (grey eyes, Dark brown hair worn fuller on top) faces the telegraph counter and dark boards, with a telegram sheet on the counter behind him.",
+   "motion": "The camera holds a locked-off frame; the brother turns the paper in his hand; steam rises beyond the boards.",
+   "camera": "At a high angle above the telegraph counter, looking down on the brother’s face and the dark platform boards.",
+   "at_rest": "The brother’s head spans one third of the frame height; the telegram sheet lies on the counter at the left edge; the brother stands before the gate; dark boards occupy the upper frame; the telegraph grille fills the near side; the station clock occupies the far roof centre; the platform gate runs along the lower-right edge.",
+   "end": "The brother faces the dark boards with the telegram sheet and telegraph counter behind him.",
+   "changed": "Broken lines face George",
+   "crowd": "quite a number of travelers waiting for friends and reading the boards",
+   "view": "waterloo_station",
+   "still": false,
+   "index": 7,
+   "section": "friction",
+   "setup": "waterloo_station",
+   "size": "medium_close",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "At the station he heard for the first time that the Windsor and Chertsey lines were now interrupted."
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.4,
+   "turn": "before: communication might reopen; after: the broken lines confirm a wider failure.",
+   "why": "George finds the interruption has spread beyond Woking, enlarging the danger through a single station detail."
+  },
+  {
+   "frame": "Every surface in the picture is plain, wordless paint. The gun train enters beneath Waterloo’s glass roof, with huge field guns on carriage trucks, soldiers behind them and steam rising to the girders.",
+   "motion": "The camera tracks sideways past a cast-iron column across the whole shot, with the gun train behind it; wheels roll beneath the roof; steam rises toward the girders.",
+   "camera": "At platform height beside the connecting line, facing east along the rails.",
+   "at_rest": "The gun carriage waits at the connecting line beside the platform barrier; gas pendants hang above the far centre; the cast-iron column fills the left edge; gun wheels occupy the right middle ground; the police barrier stands at the near-right edge. Soldiers in blue coats stand along the platform beside the gun carriage, their rifles slung at their shoulders.",
+   "end": "The gun carriage rolls beneath the glass roof while soldiers fill the adjoining carriages.",
+   "changed": "Gun train enters public station",
+   "crowd": "a gathering crowd watching soldiers and guns pass through the station",
+   "view": "waterloo_station",
+   "still": false,
+   "index": 8,
+   "section": "spike",
+   "setup": "waterloo_station",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "carriage trucks bearing huge guns, iron wheels grinding on rails",
+     "at": 0.5,
+     "seconds": 3.0,
+     "gain_db": -2.0
+    }
+   ],
+   "source": [
+    "the passage of carriage trucks bearing huge guns and carriages crammed with soldiers"
+   ],
+   "take": 1,
+   "beat_s": 0.6,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.6,
+   "turn": "before: the station hides the scale of the trouble; after: military material crosses into public view.",
+   "why": "The guns give the rumors weight and show George that the authorities are preparing for a major attack."
+  },
+  {
+   "frame": "Every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) stands near the platform barrier as the police (Weather-reddened English faces) drive the public away from the rails.",
+   "motion": "The camera tracks beside the brother as he walks toward the exit across the whole shot; the police press people back from the barrier; George’s shoulders turn toward the street.",
+   "camera": "At face height beside the barrier, facing the exit.",
+   "at_rest": "The brother stands beside the platform barrier with his hands at his sides; the police occupy the middle ground beside the rails; the exit arches fill the far frame; the gun train occupies the left edge; steam hangs above the rear platform.",
+   "end": "The brother reaches the exit while the police hold the barrier and the gun train passes behind them.",
+   "changed": "Police clear George from guns",
+   "crowd": "a gathering crowd backing away from the rails",
+   "view": "waterloo_station",
+   "still": false,
+   "index": 9,
+   "section": "transition",
+   "setup": "waterloo_station",
+   "size": "medium",
+   "faces": [
+    "narrators_brother",
+    "police"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "a squad of police came into the station and began to clear the public off the platforms"
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.8,
+   "turn": "before: George watches the military preparations; after: police push him into the street.",
+   "why": "The platform barrier turns George from observer into a traveler forced onward."
+  },
+  {
+   "frame": "The brother (grey eyes, Dark brown hair worn fuller on top) stands at the Waterloo parapet with Parliament beyond and brown scum drifting below.",
+   "motion": "The camera rises above the parapet across the whole shot, looking down over the river; the brother leans toward the water; brown patches drift across the current.",
+   "camera": "At parapet height on Waterloo Bridge, facing upstream toward Parliament.",
+   "at_rest": "The brother stands at the parapet with one hand on the granite coping; the Clock Tower stands at the far-left edge; Parliament occupies the far horizon; the river fills the lower frame; the paired Doric columns descend at the lower-left edge. Loafers lean along the parapet beside him, and a steamboat funnel trails grey smoke across the water.",
+   "end": "The brown river patches occupy the lower frame while the brother and Parliament remain above them.",
+   "changed": "River scum enters George’s view",
+   "crowd": "a number of loafers watching the water and the drifting patches",
+   "view": "waterloo_bridge",
+   "still": false,
+   "index": 10,
+   "section": "reaction",
+   "setup": "waterloo_bridge",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "On the bridge a number of loafers were watching a curious brown scum that came drifting down the stream in patches"
+   ],
+   "take": 1,
+   "beat_s": 0.38,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "before: the riverside keeps its peaceful appearance; after: the water carries an ominous sign.",
+   "why": "The calm view makes the danger stranger and shows George reading meaning into ordinary London sights."
+  },
+  {
+   "frame": "The newspaper boy (Narrow freckled face, Tousled mousy-brown hair) raises a damp pink sheet beside the Wellington Street placard board.",
+   "motion": "The camera pans from the river parapet across the whole shot to the Wellington Street corner; the newspaper boy raises the sheet; his fingers lift the placard paper.",
+   "camera": "At face height beside the Wellington Street placard board.",
+   "at_rest": "The newspaper boy’s head spans one third of the frame height; the river parapet occupies the near-left edge; the Wellington Street corner and placard board stand at the far-right edge; the newspaper boy faces the street at the lower centre; the Clock Tower remains at the distant left; the bridge route occupies the lower frame.",
+   "end": "The placard board, damp newspaper and Wellington Street route fill the frame beyond the newspaper boy.",
+   "changed": "News reaches Wellington Street",
+   "crowd": "a number of people reading newspapers and looking toward the street",
+   "view": "waterloo_bridge",
+   "still": false,
+   "index": 11,
+   "section": "setup",
+   "setup": "waterloo_bridge",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_newspaper_boy"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "In Wellington Street my brother met a couple of sturdy roughs who had just been rushed out of Fleet Street with still-wet newspapers and staring placards."
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.7,
+   "turn": "before: the river scene remains quiet; after: the route toward the Strand carries urgent news.",
+   "why": "The route continues from the bridge toward the hawkers and the wider city alarm."
+  },
+  {
+   "frame": "The newspaper boy (Narrow freckled face, Tousled mousy-brown hair) raises a damp pink sheet beside the Wellington Street placard board.",
+   "motion": "The camera pushes in toward his face until it fills the middle of the picture, travelling a hand's breadth; the newspaper boy shouts; the damp paper flutters toward the Strand.",
+   "camera": "At face height beside the Wellington Street placard board.",
+   "at_rest": "The newspaper boy’s head is half the frame's height; the newspaper boy stands beside the placard board with a damp pink sheet at chest height; Wellington Street fills the background; the bridge parapet occupies the far-left edge; the Strand route occupies the right edge.",
+   "end": "The newspaper boy faces the route with the damp sheet raised and the placard board behind him.",
+   "changed": "Hawker raises catastrophe sheet",
+   "crowd": "a number of people reading the damp sheets and turning toward the hawker",
+   "view": "waterloo_bridge",
+   "still": false,
+   "index": 12,
+   "section": "spike",
+   "setup": "waterloo_bridge",
+   "size": "close",
+   "faces": [
+    "unnamed_newspaper_boy"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "“Dreadful catastrophe!” they bawled one to the other down Wellington Street."
+   ],
+   "take": 25,
+   "beat_s": 0.2,
+   "coda_s": 0.1,
+   "cuts": [],
+   "path": 0.8,
+   "turn": "before: the report remains distant; after: the street sells catastrophe as immediate news.",
+   "why": "The hawker’s face and raised paper make the danger public and urgent."
+  },
+  {
+   "frame": "A map shop window fills the Strand view, with Surrey maps fastened to the glass, gaslight and damp pink sheets on the pavement.",
+   "motion": "The camera holds a locked-off frame; a draft lifts the maps against the glass; a newspaper sheet skitters along the pavement.",
+   "camera": "At window height on the Strand, facing the map shop.",
+   "at_rest": "The map shop window occupies the centre; Surrey maps cover the glass; the gas lamp stands at the left edge; damp pink sheets lie on the pavement; the Strand runs toward the far-right edge; the Eleanor Cross occupies the distant edge.",
+   "end": "The Surrey maps cover the window while the Strand route and gas lamps extend eastward.",
+   "changed": "Maps cover the shop window",
+   "crowd": "five or six respectable-looking people in a hay waggon traveling with boxes and bundles",
+   "view": "strand_square",
+   "still": false,
+   "index": 13,
+   "section": "payoff",
+   "setup": "strand_square",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "The shutters of a map shop in the Strand were being taken down, my brother said, and a man in his Sunday raiment, lemon-yellow gloves even, was visible inside the window hastily fastening maps of Surrey to the glass."
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.1,
+   "turn": "before: London watches from a distance; after: maps bring Surrey into the street.",
+   "why": "The maps connect the battlefield to London and show the invasion entering public thought."
+  },
+  {
+   "frame": "The brother (grey eyes, Dark brown hair worn fuller on top) walks beside a refugee cart while a hay waggon occupies the Strand behind him.",
+   "motion": "The camera tracks beside the brother as he walks toward Trafalgar Square across the whole shot; the brother turns toward the cart; his hand touches the folded paper against his jacket.",
+   "camera": "At the Strand kerb, chest height, facing east toward Trafalgar Square.",
+   "at_rest": "The brother stands beside the refugee cart with his paper folded against his jacket; the map shop window occupies the far-right edge; the hay waggon fills the rear centre; Nelson’s Column rises at the far-left edge; the Eleanor Cross occupies the eastern edge.",
+   "end": "The brother faces the refugee cart, the hay waggon and the map-covered shop window.",
+   "changed": "Refugee traffic reaches George",
+   "crowd": "a man with his wife and two boys in a cart traveling with furniture",
+   "view": "strand_square",
+   "still": false,
+   "index": 14,
+   "section": "payoff",
+   "setup": "strand_square",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 3,
+   "sounds": [],
+   "source": [
+    "There was a man with his wife and two boys and some articles of furniture in a cart such as greengrocers use."
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.4,
+   "turn": "before: George seeks precise news; after: the refugees offer frightened fragments and possessions.",
+   "why": "The cart makes flight tangible and shows George surrounded by people carrying their homes eastward."
+  },
+  {
+   "frame": "The brother (grey eyes, Dark brown hair worn fuller on top) stands near the Strand placard board as the newspaper boy (Narrow freckled face, Tousled mousy-brown hair) raises a wet sheet.",
+   "motion": "The camera pushes in toward the cart across the whole shot to the newspaper boy; the newspaper boy raises the sheet; George turns toward the headline.",
+   "camera": "At face height beside the Strand placard board, facing the newspaper boy and George.",
+   "at_rest": "The newspaper boy’s head spans one third of the frame height; the brother’s head spans one fifth of the frame height; the newspaper boy stands beside the placard board with a wet sheet at chest height; the brother stands behind him near the cart; the map shop occupies the far-right edge; Nelson’s Column occupies the distant edge; the cart fills the lower-left edge.",
+   "end": "The newspaper boy faces George with the wet sheet raised while the cart and map window remain behind them.",
+   "changed": "Hawker announces London danger",
+   "crowd": "a number of people watching carts and reading damp newspapers",
+   "view": "strand_square",
+   "still": false,
+   "index": 15,
+   "section": "spike",
+   "setup": "strand_square",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_newspaper_boy",
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "“Fighting at Weybridge! Full description! Repulse of the Martians! London in Danger!”"
+   ],
+   "take": 1,
+   "beat_s": 0.6,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.6,
+   "turn": "before: the refugees carry private fear; after: the hawker names danger to London.",
+   "why": "The shouted headline makes George’s city part of the threatened landscape."
+  },
+  {
+   "frame": "The brother (grey eyes, Dark brown hair worn fuller on top) walks beside the Marylebone railings beneath gas lamps, with a cartload of refugees on the road.",
+   "motion": "The camera tracks beside the brother toward the park railings across the whole shot; the brother looks toward the south; refugee cart wheels turn beside the pavement.",
+   "camera": "At pavement height on Marylebone Road, moving beside the brother.",
+   "at_rest": "The brother walks beside the park railings with the newspaper against his jacket; the green cabmen’s shelter stands at the near-left edge; terraces occupy the far-right edge; the cart fills the rear roadway; gas lamps line the route; Portland Place opens at the far edge.",
+   "end": "As the cart passes beneath the gas lamps, the brother reaches the park railings and turns his head toward the south.",
+   "changed": "George walks north among refugees",
+   "crowd": "one or two cartloads of refugees and Sunday-night promenaders traveling and watching",
+   "view": "marylebone_route",
+   "still": false,
+   "index": 16,
+   "section": "runout",
+   "setup": "marylebone_route",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "There were one or two cartloads of refugees passing along Oxford Street, and several in the Marylebone Road"
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.2,
+   "turn": "before: George remains among ordinary London traffic; after: refugees share his road home.",
+   "why": "The route carries the invasion toward his lodgings while familiar promenaders continue around it."
+  },
+  {
+   "frame": "The brother (grey eyes, Dark brown hair worn fuller on top) pauses beside the park railings beneath gas lamps, with southern flashes beyond the terraces.",
+   "motion": "The camera pans from the gas lamps across the whole shot to the southern roofline; the brother turns his head toward the south; distant guns flash above the roofline.",
+   "camera": "At shoulder height on the Marylebone pavement, facing the brother and the southern sky.",
+   "at_rest": "The brother stands beside the railings with one hand gripping the newspaper; gas lamps line the left edge; park trees fill the right edge; terraces stand at the far side; the southern roofline occupies the upper edge; Portland Place opens beyond the far-right terrace.",
+   "end": "The brother faces the southern roofline as the gas lamps glow beside the park.",
+   "changed": "Gunfire reaches northern streets",
+   "crowd": "silent couples and Sunday-night promenaders walking at a normal pace beneath the gas lamps",
+   "view": "marylebone_route",
+   "still": false,
+   "index": 17,
+   "section": "reaction",
+   "setup": "marylebone_route",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "heavy field guns firing across south London",
+     "at": 0.6,
+     "seconds": 3.0,
+     "gain_db": -3.0
+    }
+   ],
+   "source": [
+    "About eight o’clock a noise of heavy firing was distinctly audible all over the south of London"
+   ],
+   "take": 1,
+   "beat_s": 0.38,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.5,
+   "turn": "before: the trouble belongs to Surrey; after: gunfire enters George’s London walk.",
+   "why": "The sound crosses the city and shows the scale of the danger George can no longer keep distant."
+  },
+  {
+   "frame": "Every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) sits beside the deal table in the attic, newspaper and examination notes under the paraffin lamp.",
+   "motion": "The camera pulls back from the newspaper across the whole shot, widening to show the attic; the brother turns toward the dormer; the paraffin flame leans beside the notes.",
+   "camera": "Beside the deal table, waist height, facing the brother, bed and dormer window.",
+   "at_rest": "The brother sits at the deal table with the newspaper open before him; the bed fills the near-left edge; the dormer window occupies the far-east edge; the landing door stands at the rear; examination notes rest beside the lamp; the money drawer occupies the lower-right edge.",
+   "end": "The bed, table, dormer window and yellow-sprigged ceiling share the attic frame.",
+   "changed": "Restless room surrounds George",
+   "crowd": "a dozen residents at windows watching the dark street",
+   "view": "attic_room",
+   "still": false,
+   "index": 18,
+   "section": "setup",
+   "setup": "attic_room",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "He read and re-read the paper, fearing the worst had happened to me. He was restless, and after supper prowled out again aimlessly."
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.1,
+   "turn": "before: George believes the danger can remain at a distance; after: the paper and window make private preparation urgent.",
+   "why": "The attic compresses George’s worry into a room where the paper, notes and window compete for his attention."
+  },
+  {
+   "frame": "The police (Weather-reddened English faces) hammer the lodging-house door below while the brother (grey eyes, Dark brown hair worn fuller on top) leans from the dormer above.",
+   "motion": "The camera holds a locked-off frame; the police hammer the door as George leans from the dormer; George’s hand grips the sill.",
+   "camera": "At face height level with George’s face, facing the dormer and the street door.",
+   "at_rest": "The police head spans one fifth of the frame height; the brother’s head spans one fifth of the frame height; the police stand at the lodging-house door on the lower-left edge with one fist raised; the brother leans from the dormer at the upper-right edge; the landing fills the middle ground; red ceiling reflections occupy the top frame; the door occupies the lower edge; the dormer sill runs along the upper-right edge.",
+   "end": "The police strike the door beneath the brother’s open dormer and the lit street.",
+   "changed": "George meets official warning",
+   "crowd": "a dozen residents at windows opening doors and watching the constable",
+   "view": "attic_room",
+   "still": false,
+   "index": 19,
+   "section": "turn",
+   "setup": "attic_room",
+   "size": "medium_close",
+   "faces": [
+    "police",
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "police fist hammering on a lodging-house door",
+     "at": 0.3,
+     "seconds": 2.0,
+     "gain_db": -1.0
+    }
+   ],
+   "source": [
+    "“They are coming!” bawled a policeman, hammering at the door; “the Martians are coming!”"
+   ],
+   "take": 1,
+   "beat_s": 0.6,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.3,
+   "turn": "private safety -> immediate flight",
+   "why": "The police act on George’s doorway while George leans toward the warning, showing his choice shift from observation to action."
+  },
+  {
+   "frame": "Every edge in the picture is crisp and sharp. The dormer window looks over flashing yellow-lit houses; a closed carriage and two cabs cross the street toward Chalk Farm.",
+   "motion": "The camera tracks beside the yellow-lit houses across the whole shot to the closed carriage; the carriage gallops beneath the dormer; cab lamps bob behind it.",
+   "camera": "At the dormer window, looking down the street toward the church spire.",
+   "at_rest": "The yellow-lit houses fill the opposite terrace; the closed carriage stands at the far street corner; the cabs line the roadway behind it; the church spire rises at the right edge; the dormer sill occupies the lower edge; the street doors stand open along the opposite pavement. Night-dressed neighbours lean out of the lit windows opposite, and a policeman's lantern swings along the pavement.",
+   "end": "The carriage reaches the centre of the street with the cabs following toward the far end.",
+   "changed": "Vehicles rush toward Chalk Farm",
+   "crowd": "people at open windows leaning out and watching the vehicles",
+   "view": "attic_room",
+   "still": false,
+   "index": 20,
+   "section": "spike",
+   "setup": "attic_room",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "closed carriage hooves clattering on granite setts",
+     "at": 0.4,
+     "seconds": 3.0,
+     "gain_db": -2.0
+    },
+    {
+     "sound": "two cabs rattling behind the carriage",
+     "at": 1.0,
+     "seconds": 2.5,
+     "gain_db": -3.0
+    }
+   ],
+   "source": [
+    "Up the street came galloping a closed carriage, bursting abruptly into noise at the corner, rising to a clattering climax under the window, and dying away slowly in the distance."
+   ],
+   "take": 1,
+   "beat_s": 0.6,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.5,
+   "turn": "before: Sunday traffic fills the street; after: every vehicle points toward evacuation.",
+   "why": "The moving vehicles reveal a city beginning to flee before George has chosen his own road."
+  },
+  {
+   "frame": "The brother (grey eyes, Dark brown hair worn fuller on top) pulls on his Norfolk jacket beside the dormer; the landing door and deal table stand behind him.",
+   "motion": "The camera tracks beside the brother as he walks toward the dormer across the whole shot; the brother lifts the jacket toward his shoulders; his hand carries the sleeve toward his shoulders.",
+   "camera": "Inside the attic beside the bed, face height level with the brother’s face, facing the dormer and landing door.",
+   "at_rest": "The brother stands beside the bed with his jacket across his forearms; the dormer window occupies the right edge; the landing door stands at the rear; the deal table fills the left edge; red ceiling reflection occupies the upper edge; the bed rail runs along the lower-left edge.",
+   "end": "The brother reaches the window in his jacket while the street movement fills the dormer view.",
+   "changed": "Brother dresses beside window",
+   "crowd": "people at open windows dressing and watching the street",
+   "view": "attic_room",
+   "still": false,
+   "index": 21,
+   "section": "reaction",
+   "setup": "attic_room",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "bells and distant drumming across London",
+     "at": 0.4,
+     "seconds": 3.5,
+     "gain_db": -2.0
+    }
+   ],
+   "source": [
+    "My brother answered him vaguely and began to dress, running with each garment to the window in order to miss nothing of the growing excitement."
+   ],
+   "take": 1,
+   "beat_s": 0.38,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.7,
+   "turn": "before: George observes from the attic; after: he dresses to act within the panic.",
+   "why": "George’s repeated trips to the window show observation becoming preparation."
+  },
+  {
+   "frame": "The newspaper boy (Narrow freckled face, Tousled mousy-brown hair) runs beneath the attic window with damp papers; yellow windows and open doors fill the street behind him.",
+   "motion": "The camera pans from the lodging-house doorstep across the whole shot to the newspaper boy; the newspaper boy lifts a sheet; the damp paper flutters above his shoulder.",
+   "camera": "At the lodging-house doorstep, face height, looking along the dawn street and toward the attic.",
+   "at_rest": "The newspaper boy’s head spans one third of the frame height; the newspaper boy runs at the lower-left edge with a bundle of wet papers; yellow windows occupy the opposite terrace; open doors line the far pavement; the pink sky fills the upper edge; the church spire stands at the right; the doorstep occupies the near edge; the water trough stands up the street.",
+   "end": "The newspaper boy reaches the lower centre beneath the pink dawn while carts and people fill the road.",
+   "changed": "Dawn seller enters panic",
+   "crowd": "people in the houses opposite opening windows and asking questions",
+   "view": "attic_room",
+   "still": false,
+   "index": 22,
+   "section": "spike",
+   "setup": "attic_room",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_newspaper_boy"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "newspaper seller shouting through the dawn street",
+     "at": 0.4,
+     "seconds": 3.0,
+     "gain_db": -1.0
+    }
+   ],
+   "source": [
+    "And presently men selling unnaturally early newspapers came bawling into the street"
+   ],
+   "take": 1,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "path": 0.8,
+   "turn": "before: the street carries scattered warnings; after: printed danger reaches every doorway.",
+   "why": "The seller brings the city’s alarm directly beneath George’s window."
+  },
+  {
+   "frame": "Every surface in the picture is plain, wordless paint. A damp newspaper lies open on the deal table beneath the paraffin lamp, with the Black Smoke headline above examination notes and the money drawer.",
+   "motion": "The camera tracks laterally past the paraffin lamp across the whole shot, with the newspaper behind it; the brother’s hand lifts the page at the final dispatch; the lamp flame bends beside the drawer.",
+   "camera": "Beside the deal table, waist height, facing the open newspaper.",
+   "at_rest": "The damp newspaper rests open above the deal table; the Black Smoke headline occupies the upper page; the money drawer stands at the lower-left edge; examination notes rest beside the lamp; the newspaper fills half the frame; the lamp stands at the right edge; the brother’s hand enters from the upper edge.",
+   "end": "The final dispatch occupies the newspaper while the money drawer and examination notes sit beside it.",
+   "changed": "Black Smoke dispatch fills paper",
+   "crowd": "people in the street running beneath the attic window",
+   "view": "attic_room",
+   "still": false,
+   "index": 23,
+   "section": "answer",
+   "setup": "attic_room",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "And from this paper my brother read that catastrophic dispatch of the Commander-in-Chief:"
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.9,
+   "turn": "before: George searches for a route to the narrator; after: the dispatch makes flight the urgent route.",
+   "why": "The paper answers George’s practical question by replacing travel toward Woking with immediate escape."
+  },
+  {
+   "frame": "The brother (grey eyes, Dark brown hair worn fuller on top) reads the catastrophic dispatch beside the deal table, with the Black Smoke headline above the examination notes.",
+   "motion": "The camera pushes in toward the open newspaper across the whole shot to George; the brother lowers the page toward the final instruction; his fingers hover above the money drawer.",
+   "camera": "At the deal table, face height level with the brother’s face, looking level with the brother and the open newspaper.",
+   "at_rest": "The brother’s head spans one third of the frame height; the brother holds the newspaper above the deal table; the money drawer occupies the lower-left edge; the landing door stands at the rear; the paraffin lamp glows at the right edge; the newspaper occupies the lower edge; examination notes fill the centre-left edge.",
+   "end": "The brother reads the final dispatch while the money drawer and examination notes sit beside his elbow.",
+   "changed": "Dispatch replaces examination notes",
+   "crowd": "people in the street running beneath the attic window",
+   "view": "attic_room",
+   "still": false,
+   "index": 24,
+   "section": "answer",
+   "setup": "attic_room",
+   "size": "medium_close",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "There is no safety from the Black Smoke but in instant flight."
+   ],
+   "take": 1,
+   "beat_s": 0.22,
+   "coda_s": 0.15,
+   "cuts": [],
+   "path": 0.95,
+   "turn": "before: George weighs news against his examination plans; after: the dispatch makes immediate flight his chosen road.",
+   "why": "The final instruction answers George’s question and leaves him with one practical choice."
+  },
+  {
+   "frame": "The deal-table drawer stands open with notes and coins inside, beside the paraffin lamp and examination papers.",
+   "motion": "The camera pushes toward the open drawer across the whole shot; the brother’s hand gathers the notes; his fingers lift the notes from the drawer.",
+   "camera": "Beside the deal table, waist height, facing the drawer and lamp.",
+   "at_rest": "The notes and coins lie inside the open drawer at the lower centre; the deal table fills the foreground; the paraffin lamp occupies the right edge; the bed fills the left edge; examination papers lie across the table’s rear edge; the brother’s hand enters from above. A folded railway timetable lies beside the drawer, and a candle stub stands in a brass holder.",
+   "end": "The notes rise from the drawer beside the lamp while examination papers remain across the table.",
+   "changed": "Money leaves the drawer",
+   "crowd": "a dozen residents at windows opening doors and watching the street",
+   "view": "attic_room",
+   "still": false,
+   "index": 25,
+   "section": "runout",
+   "setup": "attic_room",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "put all his available money—some ten pounds altogether—into his pockets"
+   ],
+   "take": 1,
+   "beat_s": 0.6,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.96,
+   "turn": "before: George carries papers and plans; after: he reaches for money and prepares to leave.",
+   "why": "George’s hand begins the practical choice that turns alarm into movement."
+  },
+  {
+   "frame": "The brother’s hand gathers notes and coins beside the open deal-table drawer, the paraffin lamp and examination papers.",
+   "motion": "The camera holds a locked-off frame across the whole shot; the brother’s hand lifts the notes and coins; his fingers close around the money.",
+   "camera": "At waist height beside the deal table, facing the drawer and lamp.",
+   "at_rest": "The open drawer occupies the lower centre; notes and coins rest inside it; the paraffin lamp stands at the right edge; the bed fills the left edge; examination papers fill the rear table edge; the brother’s hand enters from above. A folded railway timetable lies beside the drawer, and a candle stub stands in a brass holder.",
+   "end": "The brother’s hand carries the notes and coins above the table while the open drawer remains below.",
+   "changed": "George gathers the travel money",
+   "crowd": "a dozen residents at windows opening doors and watching the street",
+   "view": "attic_room",
+   "still": false,
+   "index": 26,
+   "section": "runout",
+   "setup": "attic_room",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "some ten pounds altogether"
+   ],
+   "take": 2,
+   "beat_s": 0.8,
+   "coda_s": 1.7,
+   "cuts": [],
+   "path": 0.97,
+   "turn": "before: the money remains in the room; after: George holds the means to enter the fleeing city.",
+   "why": "The second money beat completes the practical choice inside a single take."
+  },
+  {
+   "frame": "The brother (grey eyes, Dark brown hair worn fuller on top) reaches the open lodging-house doorway with money in his jacket; the dawn street and fleeing people fill the far view.",
+   "motion": "The camera tracks behind the brother toward the open doorway across the whole shot; the brother presses the money into his pocket; his hand leaves the doorframe.",
+   "camera": "Behind the brother at shoulder height, aligned from the deal table toward the landing door.",
+   "at_rest": "The brother stands beside the deal table with the notes in his right hand; the open drawer occupies the lower-left edge; the landing door fills the far-right edge; the dormer window glows at the rear; the stairs occupy the lower edge; the cabin trunk stands beside the doorway.",
+   "end": "The brother reaches the landing doorway with the money in his jacket and the drawer open behind him.",
+   "changed": "George reaches the landing door",
+   "crowd": "a dozen residents at windows opening doors and watching the street",
+   "view": "attic_room",
+   "still": false,
+   "index": 27,
+   "section": "runout",
+   "setup": "attic_room",
+   "size": "medium",
+   "faces": [
+    "narrators_brother"
+   ],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "As my brother began to realise the import of all these things, he turned hastily to his own room, put all his available money—some ten pounds altogether—into his pockets"
+   ],
+   "take": 1,
+   "beat_s": 0.6,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.98,
+   "turn": "before: George gathers money inside the room; after: he carries it toward the public street.",
+   "why": "The movement completes George’s preparation and places the exit within reach."
+  },
+  {
+   "frame": "The open lodging-house doorway looks onto the pink dawn street, with yellow windows, open doors and fleeing people beyond the threshold.",
+   "motion": "The camera cranes up above the doorway across the whole shot, looking down over the street; the brother’s hand leaves the doorframe; the dawn crowd runs toward the river.",
+   "camera": "At the lodging-house threshold, looking down the dawn street from chest height.",
+   "at_rest": "The open doorway occupies the near edge; the pink dawn street runs toward the distant church spire; yellow windows fill the opposite terrace; open doors line the far pavement; fleeing people fill the lower road; the stone steps fill the lower centre; the water trough stands up the street. Laden carts and cabs crowd the roadway, and a newsboy runs along the pavement waving a pink sheet.",
+   "end": "The open doorway and fleeing dawn street share the frame as London moves toward safety.",
+   "changed": "Flight fills the dawn street",
+   "crowd": "people in the street running toward the river and carrying newspapers",
+   "view": "attic_room",
+   "still": false,
+   "index": 28,
+   "section": "transition",
+   "setup": "attic_room",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "sounds": [],
+   "source": [
+    "and went out again into the streets"
+   ],
+   "take": 1,
+   "beat_s": 1.0,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 0.99,
+   "turn": "before: George stands at the lodging-house threshold; after: the street carries his choice into the city.",
+   "why": "The doorway opens the private decision onto the public flight."
+  },
+  {
+   "frame": "The newspaper boy (Narrow freckled face, Tousled mousy-brown hair) faces the pink dawn street with a wet paper raised; fleeing people occupy the road behind him.",
+   "motion": "The camera tracks sideways to the right across the whole shot, past the lodging-house doorstep, with the newspaper boy behind it; the newspaper boy raises the wet paper; the dawn crowd streams toward the river.",
+   "camera": "At a high angle above the lodging-house threshold, looking down the dawn street from above the newspaper boy.",
+   "at_rest": "The newspaper boy’s head spans one third of the frame height; the newspaper boy stands at the centre of the threshold with the wet paper against his chest; yellow windows fill the opposite terrace; the pink sky crowns the upper edge; the street runs toward the distant church spire; the doorstep occupies the near edge; open doors line the far pavement; fleeing people fill the lower road.",
+   "end": "The raised paper and the fleeing street share the dawn frame as London moves toward safety.",
+   "changed": "Flight fills the dawn street",
+   "crowd": "people in the street running toward the river and carrying newspapers",
+   "view": "attic_room",
+   "still": false,
+   "index": 29,
+   "section": "button",
+   "setup": "attic_room",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_newspaper_boy"
+   ],
+   "extras": 0,
+   "sounds": [
+    {
+     "sound": "many street voices shouting Black Smoke",
+     "at": 0.4,
+     "seconds": 2.0,
+     "gain_db": -1.0
+    }
+   ],
+   "source": [
+    "It was the dawn of the great panic. London, which had gone to bed on Sunday night oblivious and inert, was awakened, in the small hours of Monday morning, to a vivid sense of danger."
+   ],
+   "take": 2,
+   "beat_s": 0.6,
+   "coda_s": 0.3,
+   "cuts": [],
+   "path": 1.0,
+   "turn": "before: George leaves the room alone; after: the city carries him into its mass flight.",
+   "why": "The final movement reaches the chapter’s public panic and keeps the city moving after George’s choice."
+  }
+ ],
+ "lines": [
+  {
+   "index": 0,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I follow George from borrowed certainty toward a city learning the news.",
+   "shot": 0,
+   "delivery": "curious"
+  },
+  {
+   "index": 1,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Saturday’s papers gave him a brief report, while their leaders comforted London.",
+   "shot": 1,
+   "delivery": ""
+  },
+  {
+   "index": 2,
+   "kind": "dialogue",
+   "speaker": "narrators_brother",
+   "text": "I will run down tonight.",
+   "shot": 2,
+   "delivery": ""
+  },
+  {
+   "index": 3,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "George sent a telegram at four, then prepared to travel south that night.",
+   "shot": 3,
+   "delivery": ""
+  },
+  {
+   "index": 4,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "His plan carried him from the classroom toward Waterloo and the waiting trains.",
+   "shot": 4,
+   "delivery": ""
+  },
+  {
+   "index": 5,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A storm brought George to Waterloo, where the Woking route had already failed.",
+   "shot": 5,
+   "delivery": ""
+  },
+  {
+   "index": 6,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The dark boards turned a promised journey into a fixed station view.",
+   "shot": 6,
+   "delivery": "hushed"
+  },
+  {
+   "index": 7,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Windsor and Chertsey had joined Woking in the railway’s spreading interruption.",
+   "shot": 7,
+   "delivery": "urgent"
+  },
+  {
+   "index": 8,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Then guns and soldiers entered the station, giving the rumors military weight.",
+   "shot": 8,
+   "delivery": "urgent"
+  },
+  {
+   "index": 9,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The police cleared the platform, and George was driven back into London.",
+   "shot": 9,
+   "delivery": "urgent"
+  },
+  {
+   "index": 10,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "On the bridge, brown scum crossed the peaceful river beneath the sunset.",
+   "shot": 10,
+   "delivery": "hushed"
+  },
+  {
+   "index": 11,
+   "kind": "dialogue",
+   "speaker": "unnamed_newspaper_boy",
+   "text": "Dreadful catastrophe!",
+   "shot": 11,
+   "delivery": "shouting"
+  },
+  {
+   "index": 12,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "From Wellington Street came damp sheets, placards, and the first public cry.",
+   "shot": 11,
+   "delivery": ""
+  },
+  {
+   "index": 13,
+   "kind": "dialogue",
+   "speaker": "unnamed_newspaper_boy",
+   "text": "Fighting at Weybridge! Full description!",
+   "shot": 12,
+   "delivery": "shouting"
+  },
+  {
+   "index": 14,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The cry carried catastrophe east.",
+   "shot": 12,
+   "delivery": "urgent"
+  },
+  {
+   "index": 15,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Surrey maps spread across glass as the battlefield entered London’s streets.",
+   "shot": 13,
+   "delivery": ""
+  },
+  {
+   "index": 16,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Refugees carried furniture, boxes, children, and frightened fragments of news.",
+   "shot": 14,
+   "delivery": "urgent"
+  },
+  {
+   "index": 17,
+   "kind": "dialogue",
+   "speaker": "unnamed_newspaper_boy",
+   "text": "Fighting at Weybridge! Full description! Repulse of the Martians! London in Danger!",
+   "shot": 15,
+   "delivery": "shouting"
+  },
+  {
+   "index": 18,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "George walked north, fearing for me while ordinary promenaders continued around him.",
+   "shot": 16,
+   "delivery": "grieving"
+  },
+  {
+   "index": 19,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Heavy firing crossed the city and reached George beside Regent’s Park.",
+   "shot": 17,
+   "delivery": "hushed"
+  },
+  {
+   "index": 20,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "He reread the paper, prowled outside, studied, and finally went to bed.",
+   "shot": 18,
+   "delivery": ""
+  },
+  {
+   "index": 21,
+   "kind": "dialogue",
+   "speaker": "police",
+   "text": "They are coming!",
+   "shot": 19,
+   "delivery": "shouting"
+  },
+  {
+   "index": 22,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The warning changed George’s private watch into preparation for the public emergency.",
+   "shot": 20,
+   "delivery": "urgent"
+  },
+  {
+   "index": 23,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Bells, feet, red light, and racing vehicles awakened the streets before dawn.",
+   "shot": 21,
+   "delivery": "urgent"
+  },
+  {
+   "index": 24,
+   "kind": "dialogue",
+   "speaker": "unnamed_newspaper_boy",
+   "text": "London in danger of suffocation! Defences forced!",
+   "shot": 22,
+   "delivery": "shouting"
+  },
+  {
+   "index": 25,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The morning paper carried a dispatch that turned alarm into a direction.",
+   "shot": 23,
+   "delivery": "urgent"
+  },
+  {
+   "index": 26,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The dispatch made instant flight George’s only practical road.",
+   "shot": 24,
+   "delivery": "urgent"
+  },
+  {
+   "index": 27,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "He gathered the money that could carry him into the streets.",
+   "shot": 25,
+   "delivery": "urgent"
+  },
+  {
+   "index": 28,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "George reached the doorway, while London’s panic gathered beyond the threshold.",
+   "shot": 27,
+   "delivery": "urgent"
+  },
+  {
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "shot": 28,
+   "text": "All six million of London were stirring, slipping, running.",
+   "index": 29
+  },
+  {
+   "index": 30,
+   "kind": "dialogue",
+   "speaker": "unnamed_newspaper_boy",
+   "text": "Black Smoke!",
+   "shot": 29,
+   "delivery": "shouting"
+  }
+ ],
+ "omit": [],
+ "beds": [
+  {
+   "from_shot": 0,
+   "tone": "plain"
+  },
+  {
+   "from_shot": 5,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 8,
+   "tone": "alarm"
+  },
+  {
+   "from_shot": 13,
+   "tone": "dread"
+  },
+  {
+   "from_shot": 19,
+   "tone": "panic"
+  },
+  {
+   "from_shot": 23,
+   "tone": "flight"
+  },
+  {
+   "from_shot": 29,
+   "tone": "stark"
+  }
+ ]
+}

@@ -1,0 +1,48 @@
+{
+ "sha8": "33985a27",
+ "verdict": "flagged",
+ "note": "last-vs-panel at T07: 0.19 -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T07.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4",
+  "T25.mp4"
+ ],
+ "signed_at": "2026-10-10T22:14:26Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "last-vs-panel",
+   "where": "T07",
+   "evidence": {
+    "value": 0.189,
+    "penalty": 10.55,
+    "repeated": false,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "0.19"
+  }
+ ],
+ "terminal": "still"
+}

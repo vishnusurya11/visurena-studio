@@ -1,0 +1,436 @@
+{
+  "take": 19,
+  "attempt": 0,
+  "file": "T19.mp4",
+  "seconds": 7.79,
+  "lane": "narration",
+  "gates": [
+    {
+      "name": "frozen-at-start",
+      "value": 0.0,
+      "ok": true,
+      "hard": true,
+      "note": "0.0s",
+      "penalty": 0.0
+    },
+    {
+      "name": "frozen-share",
+      "value": 0.0,
+      "ok": true,
+      "hard": false,
+      "note": "0%",
+      "penalty": 0.0
+    },
+    {
+      "name": "foreign",
+      "value": 0,
+      "ok": true,
+      "hard": true,
+      "note": "0",
+      "penalty": 0.0
+    },
+    {
+      "name": "cut-landing",
+      "value": 0,
+      "ok": false,
+      "hard": true,
+      "note": "2/2 on pin +1 unplanned",
+      "penalty": 15.0
+    },
+    {
+      "name": "drift",
+      "value": 0.544,
+      "ok": false,
+      "hard": false,
+      "note": "0.54",
+      "penalty": 8.239999999999998
+    },
+    {
+      "name": "lip-sync",
+      "value": 0.0,
+      "ok": true,
+      "hard": true,
+      "note": "n/a narration",
+      "penalty": 0.0
+    },
+    {
+      "name": "identity",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured",
+      "penalty": 0.0
+    },
+    {
+      "name": "wardrobe",
+      "value": null,
+      "ok": true,
+      "hard": false,
+      "note": "not measured",
+      "penalty": 0.0
+    }
+  ],
+  "segments": [
+    {
+      "cell": "Q19_0.png",
+      "target": "Q19_0E.png",
+      "start_s": 0.0,
+      "end_s": 3.75,
+      "lead_in_s": 0.0,
+      "still_share": 0.0,
+      "kind": "hold",
+      "start_sim": 0.999,
+      "end_sim": 0.544,
+      "landed": true,
+      "offset": 0
+    },
+    {
+      "cell": "Q19_1.png",
+      "target": "Q19_1.png",
+      "start_s": 3.75,
+      "end_s": 7.792,
+      "lead_in_s": 0.0,
+      "still_share": 0.0,
+      "kind": "hold",
+      "start_sim": 0.998,
+      "end_sim": 0.009,
+      "landed": true,
+      "offset": 0
+    }
+  ],
+  "frozen_spans": [],
+  "energy_q": [
+    3.7,
+    4.3,
+    5.2,
+    4.7,
+    6.7,
+    8.7,
+    10.5,
+    9.6,
+    5.6,
+    5.6,
+    9.7,
+    12.2,
+    11.0,
+    7.3,
+    19.9,
+    1.6,
+    2.4,
+    3.0,
+    3.3,
+    4.0,
+    20.0,
+    13.5,
+    11.9,
+    11.5,
+    11.1,
+    13.9,
+    14.8,
+    16.3,
+    15.3,
+    13.2,
+    13.9
+  ],
+  "score": 76.8,
+  "passed": false,
+  "verdict_line": "T19 a0 FAIL 77/100 | frozen-at-start 0.0s | frozen-share 0% | foreign 0 | cut-landing 2/2 on pin +1 unplanned HARD | drift 0.54 adv | lip-sync n/a narration | identity not measured | wardrobe not measured",
+  "attempts": [
+    {
+      "take": 19,
+      "attempt": 0,
+      "file": "T19.mp4",
+      "seconds": 7.79,
+      "lane": "narration",
+      "gates": [
+        {
+          "name": "frozen-at-start",
+          "value": 0.0,
+          "ok": true,
+          "hard": true,
+          "note": "0.0s",
+          "penalty": 0.0
+        },
+        {
+          "name": "frozen-share",
+          "value": 0.0,
+          "ok": true,
+          "hard": false,
+          "note": "0%",
+          "penalty": 0.0
+        },
+        {
+          "name": "foreign",
+          "value": 0,
+          "ok": true,
+          "hard": true,
+          "note": "0",
+          "penalty": 0.0
+        },
+        {
+          "name": "cut-landing",
+          "value": 0,
+          "ok": false,
+          "hard": true,
+          "note": "2/2 on pin +1 unplanned",
+          "penalty": 15.0
+        },
+        {
+          "name": "drift",
+          "value": 0.544,
+          "ok": false,
+          "hard": false,
+          "note": "0.54",
+          "penalty": 8.239999999999998
+        },
+        {
+          "name": "lip-sync",
+          "value": 0.0,
+          "ok": true,
+          "hard": true,
+          "note": "n/a narration",
+          "penalty": 0.0
+        },
+        {
+          "name": "identity",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured",
+          "penalty": 0.0
+        },
+        {
+          "name": "wardrobe",
+          "value": null,
+          "ok": true,
+          "hard": false,
+          "note": "not measured",
+          "penalty": 0.0
+        }
+      ],
+      "segments": [
+        {
+          "cell": "Q19_0.png",
+          "target": "Q19_0E.png",
+          "start_s": 0.0,
+          "end_s": 3.75,
+          "lead_in_s": 0.0,
+          "still_share": 0.0,
+          "kind": "hold",
+          "start_sim": 0.999,
+          "end_sim": 0.544,
+          "landed": true,
+          "offset": 0
+        },
+        {
+          "cell": "Q19_1.png",
+          "target": "Q19_1.png",
+          "start_s": 3.75,
+          "end_s": 7.792,
+          "lead_in_s": 0.0,
+          "still_share": 0.0,
+          "kind": "hold",
+          "start_sim": 0.998,
+          "end_sim": 0.009,
+          "landed": true,
+          "offset": 0
+        }
+      ],
+      "frozen_spans": [],
+      "energy_q": [
+        3.7,
+        4.3,
+        5.2,
+        4.7,
+        6.7,
+        8.7,
+        10.5,
+        9.6,
+        5.6,
+        5.6,
+        9.7,
+        12.2,
+        11.0,
+        7.3,
+        19.9,
+        1.6,
+        2.4,
+        3.0,
+        3.3,
+        4.0,
+        20.0,
+        13.5,
+        11.9,
+        11.5,
+        11.1,
+        13.9,
+        14.8,
+        16.3,
+        15.3,
+        13.2,
+        13.9
+      ],
+      "foreign": [
+        {
+          "at": 0.0,
+          "own": "Q19_0.png",
+          "score": 0.999,
+          "other": "Q01_0.png",
+          "other_score": 0.458,
+          "foreign": false
+        },
+        {
+          "at": 1.12,
+          "own": "Q19_0.png",
+          "score": 0.952,
+          "other": "Q01_0.png",
+          "other_score": 0.461,
+          "foreign": false
+        },
+        {
+          "at": 2.21,
+          "own": "Q19_0.png",
+          "score": 0.89,
+          "other": "Q01_0.png",
+          "other_score": 0.465,
+          "foreign": false
+        },
+        {
+          "at": 3.33,
+          "own": "Q19_0.png",
+          "score": 0.83,
+          "other": "Q01_0.png",
+          "other_score": 0.483,
+          "foreign": false
+        },
+        {
+          "at": 4.42,
+          "own": "Q19_1.png",
+          "score": 0.961,
+          "other": "Q24_0.png",
+          "other_score": 0.415,
+          "foreign": false
+        },
+        {
+          "at": 5.54,
+          "own": "Q19_0.png",
+          "score": 0.568,
+          "other": "Q01_0.png",
+          "other_score": 0.497,
+          "foreign": false
+        },
+        {
+          "at": 6.62,
+          "own": "Q19_0.png",
+          "score": 0.525,
+          "other": "Q01_0.png",
+          "other_score": 0.527,
+          "foreign": false
+        },
+        {
+          "at": 7.75,
+          "own": "Q19_0.png",
+          "score": 0.54,
+          "other": "Q01_0.png",
+          "other_score": 0.526,
+          "foreign": false
+        }
+      ],
+      "score": 76.8,
+      "passed": false,
+      "verdict_line": "T19 a0 FAIL 77/100 | frozen-at-start 0.0s | frozen-share 0% | foreign 0 | cut-landing 2/2 on pin +1 unplanned HARD | drift 0.54 adv | lip-sync n/a narration | identity not measured | wardrobe not measured"
+    }
+  ],
+  "budget_spent": false,
+  "foreign_samples": [
+    {
+      "at": 0.0,
+      "own": "Q19_0.png",
+      "score": 0.999,
+      "other": "Q01_0.png",
+      "other_score": 0.458,
+      "foreign": false
+    },
+    {
+      "at": 1.12,
+      "own": "Q19_0.png",
+      "score": 0.952,
+      "other": "Q01_0.png",
+      "other_score": 0.461,
+      "foreign": false
+    },
+    {
+      "at": 2.21,
+      "own": "Q19_0.png",
+      "score": 0.89,
+      "other": "Q01_0.png",
+      "other_score": 0.465,
+      "foreign": false
+    },
+    {
+      "at": 3.33,
+      "own": "Q19_0.png",
+      "score": 0.83,
+      "other": "Q01_0.png",
+      "other_score": 0.483,
+      "foreign": false
+    },
+    {
+      "at": 4.42,
+      "own": "Q19_1.png",
+      "score": 0.961,
+      "other": "Q24_0.png",
+      "other_score": 0.415,
+      "foreign": false
+    },
+    {
+      "at": 5.54,
+      "own": "Q19_0.png",
+      "score": 0.568,
+      "other": "Q01_0.png",
+      "other_score": 0.497,
+      "foreign": false
+    },
+    {
+      "at": 6.62,
+      "own": "Q19_0.png",
+      "score": 0.525,
+      "other": "Q01_0.png",
+      "other_score": 0.527,
+      "foreign": false
+    },
+    {
+      "at": 7.75,
+      "own": "Q19_0.png",
+      "score": 0.54,
+      "other": "Q01_0.png",
+      "other_score": 0.526,
+      "foreign": false
+    }
+  ],
+  "foreign": 0,
+  "off_beat": 0,
+  "audio": {
+    "lag_s": 0.0,
+    "lag_ok": true,
+    "lag_measured": false
+  },
+  "camera": {
+    "scale_curve": [
+      1.0,
+      1.02,
+      1.04,
+      1.06,
+      1.06,
+      1.04,
+      0.96,
+      1.14
+    ],
+    "max_scale_per_s": 1.16,
+    "scene_events": [
+      5.25
+    ],
+    "camera_ok": false
+  },
+  "strip": "D:\\Projects\\KingdomOfViSuReNa\\alpha\\visurena_studio\\library\\20260822113400_a-study-in-scarlet\\episodes\\ep02\\work_r2v\\dq\\take_T19.png"
+}

@@ -1,0 +1,272 @@
+{
+ "sha8": "e3eec490",
+ "verdict": "flagged",
+ "note": "content at T00: text or lettering in the picture; content at T05: banned from this book: mountain; content at T05: posture 'standing': the shot asks for lying; content at T06: text or lettering in the picture; cut at T07: 88.6; jump at T07: -0.19 HARD: another picture; leak at T07: 4 frames of plate before the panel; cut-vote at T07: jump+step+scene HARD: an unplanned cut; content at T09: black hair where the row says otherwise; cut at T16: 56.8; jump at T16: -0.15 HARD: another picture; leak at T16: 12 frames of plate before the panel; cut-vote at T16: jump+step+scene HARD: an unplanned cut; cut at T17: 52.3; jump at T17: -0.13 HARD: another picture; leak at T17: 7 frames of plate before the panel; cut-vote at T17: jump+step+scene HARD: an unplanned cut; content at T23: banned from this book: mountain; letterbox at T24: 3/3 frames letterboxed; content at T24: banned from this book: mountain; content at T25: banned from this book: mountain -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4",
+  "T25.mp4"
+ ],
+ "signed_at": "2026-10-03T22:13:48Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "content",
+   "where": "T00",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_00.png"
+   },
+   "severity": "normal",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "content",
+   "where": "T05",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_05.png"
+   },
+   "severity": "normal",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "content",
+   "where": "T05",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_05.png"
+   },
+   "severity": "normal",
+   "note": "posture 'standing': the shot asks for lying"
+  },
+  {
+   "kind": "content",
+   "where": "T06",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "cut",
+   "where": "T07",
+   "evidence": {
+    "value": 88.6,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "88.6"
+  },
+  {
+   "kind": "jump",
+   "where": "T07",
+   "evidence": {
+    "value": -0.19,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "-0.19 HARD: another picture"
+  },
+  {
+   "kind": "leak",
+   "where": "T07",
+   "evidence": {
+    "value": 4,
+    "penalty": 20.0,
+    "repeated": true,
+    "frames": 4,
+    "covers": true
+   },
+   "severity": "high",
+   "note": "4 frames of plate before the panel"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T07",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  },
+  {
+   "kind": "content",
+   "where": "T09",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "black hair where the row says otherwise"
+  },
+  {
+   "kind": "cut",
+   "where": "T16",
+   "evidence": {
+    "value": 56.8,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "56.8"
+  },
+  {
+   "kind": "jump",
+   "where": "T16",
+   "evidence": {
+    "value": -0.153,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "-0.15 HARD: another picture"
+  },
+  {
+   "kind": "leak",
+   "where": "T16",
+   "evidence": {
+    "value": 12,
+    "penalty": 40.0,
+    "repeated": true,
+    "frames": 12,
+    "covers": true
+   },
+   "severity": "high",
+   "note": "12 frames of plate before the panel"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T16",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  },
+  {
+   "kind": "cut",
+   "where": "T17",
+   "evidence": {
+    "value": 52.3,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "52.3"
+  },
+  {
+   "kind": "jump",
+   "where": "T17",
+   "evidence": {
+    "value": -0.128,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "-0.13 HARD: another picture"
+  },
+  {
+   "kind": "leak",
+   "where": "T17",
+   "evidence": {
+    "value": 7,
+    "penalty": 35.0,
+    "repeated": true,
+    "frames": 7,
+    "covers": true
+   },
+   "severity": "high",
+   "note": "7 frames of plate before the panel"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T17",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  },
+  {
+   "kind": "content",
+   "where": "T23",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "letterbox",
+   "where": "T24",
+   "evidence": {
+    "value": 3,
+    "penalty": 60.0,
+    "repeated": false,
+    "still": "storyboard/shot_24.png"
+   },
+   "severity": "normal",
+   "note": "3/3 frames letterboxed"
+  },
+  {
+   "kind": "content",
+   "where": "T24",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_24.png"
+   },
+   "severity": "normal",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "content",
+   "where": "T25",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  }
+ ],
+ "terminal": "still"
+}

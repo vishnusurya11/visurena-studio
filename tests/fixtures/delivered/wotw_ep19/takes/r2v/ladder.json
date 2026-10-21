@@ -1,0 +1,61 @@
+{
+ "rounds": [
+  {
+   "why": "batched_cures: content, cut, cut-vote, frozen-whole, jump, leak",
+   "at": 1791397590.3,
+   "faults": {
+    "2": [
+     "frozen-whole"
+    ],
+    "7": [
+     "clones"
+    ],
+    "10": [
+     "cut",
+     "cut-vote",
+     "jump"
+    ],
+    "16": [
+     "frozen-whole"
+    ],
+    "17": [
+     "content"
+    ],
+    "18": [
+     "content",
+     "cut",
+     "cut-vote",
+     "jump",
+     "leak"
+    ],
+    "19": [
+     "content",
+     "frozen-whole"
+    ]
+   }
+  },
+  {
+   "why": "batched_cures: content, frozen-share, frozen-whole",
+   "at": 1791398956.8,
+   "faults": {
+    "7": [
+     "clones"
+    ],
+    "10": [
+     "frozen-share",
+     "frozen-whole"
+    ],
+    "17": [
+     "content"
+    ],
+    "18": [
+     "content",
+     "frozen-whole"
+    ],
+    "19": [
+     "content"
+    ]
+   }
+  }
+ ]
+}

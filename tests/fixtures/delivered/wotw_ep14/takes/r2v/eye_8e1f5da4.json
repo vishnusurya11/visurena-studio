@@ -1,0 +1,146 @@
+{
+ "sha8": "8e1f5da4",
+ "verdict": "flagged",
+ "note": "content at T03: 15 figure(s) for 0 declared (0 cast + 0 extras), 3 of them copies of another; last-vs-panel at T04: 0.14; content at T04: text or lettering in the picture; content at T05: text or lettering in the picture; look at T10: no floor p5 26 black 0.05 hue 0.70; pass-through at T11: 0.88 of the body rode with the camera over 471px HARD: the set slides through the person; content at T13: text or lettering in the picture; content at T19: mustache on a clean-shaven character; content at T19: 5 figure(s) for 2 declared (2 cast + 0 extras), 4 of them copies of another; held at T22: 0.86 over 767px HARD: the set slides through the person -> keep_best",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4",
+  "T25.mp4",
+  "T26.mp4",
+  "T27.mp4",
+  "T28.mp4",
+  "T29.mp4"
+ ],
+ "signed_at": "2026-09-30T08:57:56Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "content",
+   "where": "T03",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "15 figure(s) for 0 declared (0 cast + 0 extras), 3 of them copies of another"
+  },
+  {
+   "kind": "last-vs-panel",
+   "where": "T04",
+   "evidence": {
+    "value": 0.138,
+    "penalty": 13.1,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "0.14"
+  },
+  {
+   "kind": "content",
+   "where": "T04",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "content",
+   "where": "T05",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "look",
+   "where": "T10",
+   "evidence": {
+    "value": 26.14,
+    "penalty": 30.0,
+    "repeated": true
+   },
+   "severity": "normal",
+   "note": "no floor p5 26 black 0.05 hue 0.70"
+  },
+  {
+   "kind": "pass-through",
+   "where": "T11",
+   "evidence": {
+    "value": 0.88,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "0.88 of the body rode with the camera over 471px HARD: the set slides through the person"
+  },
+  {
+   "kind": "content",
+   "where": "T13",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "content",
+   "where": "T19",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "mustache on a clean-shaven character"
+  },
+  {
+   "kind": "content",
+   "where": "T19",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "5 figure(s) for 2 declared (2 cast + 0 extras), 4 of them copies of another"
+  },
+  {
+   "kind": "held",
+   "where": "T22",
+   "evidence": {
+    "value": 0.86,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "0.86 over 767px HARD: the set slides through the person"
+  }
+ ],
+ "terminal": "keep_best"
+}

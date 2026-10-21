@@ -1,0 +1,993 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "heather",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "episodes/ep05/storyboard/h3/shot_00.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.375,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 86000,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin black band of heads and shoulders along its far rim and a thin jointed mast standing above it, the old sand-pits at the far LEFT with a row of deserted flys and a basket-chaise on their gravel floor, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> (the storyboard frame): weak_reference - it shows the location, the people and the clothes they wear. The framing, the camera position and the movement come from the camera sentence below, which owns the viewpoint.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a wide of Horsell Common with the sun going down: a black furze bush filling the near left of the picture, <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat beyond it standing knee-deep in the purple-brown heather with his back three-quarters to the camera and both hands open at his sides, and past him the low raw ring of flung yellow sand a hundred yards off with a thin black band of heads along its far rim. The camera is on the heather two long strides behind him at a standing man's eye, a 35mm lens. The low sun comes from the LEFT. At the first frame a black furze bush fills the LEFT third of the frame from the TOP third to the BOTTOM edge. The Narrator stands at the CENTRE beyond it from his straw boater at the CENTRE to the heather at the BOTTOM third. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it. The camera tracks sideways to the right, a truck with small amplitude past the black furze bush until <Subject 1> stands clear of it with the ring of sand beyond him, travelling one short stride as he drags a breath in with his chest lifting and his gaze fixed out on the black band of heads, from 00:00 to 00:02. At 00:02 the heather springs against his knees and his shoulders come round a hand's breadth toward the sand, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he drags a breath in with his chest lifting. By 00:05 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.16,
+    "render_s": 159.3,
+    "waited_s": 155.7,
+    "rel_path": "episodes/ep05/takes/r2v/T00.mp4"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "reaction",
+    "setup": "heather",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "episodes/ep05/storyboard/h3/shot_01.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 86001,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin black band of heads and shoulders along its far rim and a thin jointed mast standing above it, the old sand-pits at the far LEFT with a row of deserted flys and a basket-chaise on their gravel floor, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> (the storyboard frame): weak_reference - it shows the location, the people and the clothes they wear. The framing, the camera position and the movement come from the camera sentence below, which owns the viewpoint.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat in the heather at sunset, turned three-quarters toward the camera with the level light along one cheek, his lips parted, the sand ring small and soft behind his shoulder. The camera is on the heather level with his eyes, two paces from him, a 50mm lens. He has turned back toward the sun in the west. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from his straw boater at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height, lit from the RIGHT. Dark heather crosses the BOTTOM edge, the pale sand ring shows small and soft at the LEFT third, and the burning sky fills the TOP and the RIGHT edge. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it. The camera keeps a static shot on <Subject 1>, keeping his face in the centre of frame as a breath goes out of him and his eyes travel along the far rim, from 00:00 to 00:02. At 00:02 his collar shifts at his throat and he brings his chin round a finger's breadth to follow what he is watching, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his collar shifts at his throat. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.16,
+    "render_s": 173.3,
+    "waited_s": 175.8,
+    "rel_path": "episodes/ep05/takes/r2v/T01.mp4"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "spike",
+    "setup": "heather",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "episodes/ep05/storyboard/h3/shot_02.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 86002,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin black band of heads and shoulders along its far rim and a thin jointed mast standing above it, the old sand-pits at the far LEFT with a row of deserted flys and a basket-chaise on their gravel floor, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> (the storyboard frame): weak_reference - it shows the location, the people and the clothes they wear. The framing, the camera position and the movement come from the camera sentence below, which owns the viewpoint.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on an insert on the burning sunset sky above the raw sand heaps: the black top of a young Scots pine at the left of the picture, and out beyond it a bunch of black tentacles rooted together at one point in the sand, each one a different length and each one curling over on itself at a different height, like the arms of an octopus up against the lemon-yellow light in flat silhouette, the dark line of the heaps running across the bottom; only that object and what touches it is in frame. The camera is on the heather looking out over the heaps at the sky, a 135mm lens. The low sun stands beyond the sand at the LEFT. At the first frame the burning lemon-yellow sky fills the TOP two thirds of the frame from the LEFT edge to the RIGHT edge. The black top of a young Scots pine stands at the LEFT edge and the dark line of the sand heaps runs across the BOTTOM third. The bunch of black tentacles stands up from one root at the CENTRE RIGHT against the sky. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it. The camera pans right with small amplitude from the black top of the young Scots pine across to the tentacles above the sand, travelling a finger's breadth as the bunch of tentacles uncurls out across the sky, each one whipping out from the same root at its own speed and to its own height, from 00:00 to 00:03. At 00:03 the light runs along their backs and the whole bunch draws down a thumb's width toward the sand, and the movement continues to the last frame of the shot. By 00:06 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 194.6,
+    "waited_s": 195.8,
+    "rel_path": "episodes/ep05/takes/r2v/T02.mp4"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "spike",
+    "setup": "heather",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png",
+      "episodes/ep05/storyboard/h3/shot_03.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 86003,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin black band of heads and shoulders along its far rim and a thin jointed mast standing above it, the old sand-pits at the far LEFT with a row of deserted flys and a basket-chaise on their gravel floor, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> (the storyboard frame): weak_reference - it shows the location, the people and the clothes they wear. The framing, the camera position and the movement come from the camera sentence below, which owns the viewpoint.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on the raw yellow sand heaps against the sunset: the first joint of the thin jointed mast with its wobbling mirror standing a hand's height clear of the rim, a dark bronze rod in telescoping segments with the polished silver disk lying folded against it, and a black band of heads and shoulders small along the rim below. The camera is on the heather looking out across the heaps, a 135mm lens. The low sun comes from the LEFT along the rod. At the first frame the raw yellow sand heaps cross the CENTRE of the frame from the LEFT edge to the RIGHT edge with a black band of heads and shoulders small along them. The first joint of the thin jointed mast stands up at the CENTRE a hand's height above the rim with the folded disk against it. Knee-deep black heather fills the BOTTOM third and the burning lemon-yellow sky fills the TOP half. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it. The camera tilts up with large amplitude from the black band of heads on the rim to the top of the mast, travelling two long strides as the mast drives out joint after joint from within and rides higher over the sand, and the disk at its apex swings over and begins to turn, from 00:00 to 00:03. At 00:03 the light flares off the silver and the whole rod leans a hand's breadth toward the camera, and the lean continues to the last frame of the shot. By 00:06 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 257.2,
+    "waited_s": 256.1,
+    "rel_path": "episodes/ep05/takes/r2v/T03.mp4"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "setup",
+    "setup": "knoll",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png",
+      "episodes/ep05/storyboard/h3/shot_04.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.333333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 86004,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin black band of heads and shoulders along its far rim and a thin jointed mast standing above it, the old sand-pits at the far LEFT with a row of deserted flys and a basket-chaise on their gravel floor, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 4> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 4> (the storyboard frame): weak_reference - it shows the location, the people and the clothes they wear. The framing, the camera position and the movement come from the camera sentence below, which owns the viewpoint.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a wide of the open heather in the level sunset light: <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat walking away from the camera in a long curve through the knee-deep heather, his boater pushed back, a dark knot of standing people small at the left toward Woking and a second knot at the right toward Chobham, the ring of sand between them with the thin mast standing above it. The camera is on the heather three long strides behind him at a standing man's eye, a 35mm lens. The low sun comes from the LEFT. At the first frame the Narrator walks at the LEFT third of the frame, his back to the camera, from his straw boater at the TOP third to the heather at the BOTTOM edge. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it. The camera tracks behind <Subject 1> at a walking pace with large amplitude, coming round with the curve of his track until the ring of sand stands at the centre of the picture, travelling four long strides as he swings his weight from one boot to the other through the heather, his head turned out to the sand all the way, from 00:00 to 00:02. At 00:02 the furze drags at his trouser leg and his right arm comes up across his chest, and the movement continues to the last frame of the shot. By 00:05 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 188.9,
+    "waited_s": 191.0,
+    "rel_path": "episodes/ep05/takes/r2v/T04.mp4"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "knoll",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_neighbour/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [
+      "unnamed_neighbour"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.5,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 86005,
+    "prompt": "subject_definitions:\n<Subject 1> is Unnamed Neighbour in <Picture 1>:  <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin black band of heads and shoulders along its far rim and a thin jointed mast standing above it, the old sand-pits at the far LEFT with a row of deserted flys and a basket-chaise on their gravel floor, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot on the heather in the level sunset light: the neighbour, a tall spare stooping man of forty-eight in a cream straw panama and a sky-blue-and-white striped flannel blazer over white flannel trousers, his hollow cheeks and short pointed grey goatee, an ash walking stick in one fist standing alone among the furze with both fists on the head of his stick, his panama tipped forward, his face turned out at the sand heaps, the burning sky behind him. The camera is on the heather at a standing man's eye, two long strides from him, a 50mm lens. The low sun comes from the LEFT onto his shoulder. At the first frame a black furze bush crosses the BOTTOM LEFT of the frame. The neighbour stands at the CENTRE from his cream straw panama at the TOP third to the furze at the BOTTOM edge. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it. The camera tracks sideways to the left, a truck with small amplitude past a black furze bush in the foreground until the neighbour stands clear of it, travelling one short stride as he leans his weight forward onto the stick and drives its ferrule down into the sand of the track, from 00:00 to 00:04. At 00:04 his blazer swings open at the hem and he shakes his head twice, and the swing continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he leans his weight forward onto the stick. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 236.4,
+    "waited_s": 240.7,
+    "rel_path": "episodes/ep05/takes/r2v/T05.mp4"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "knoll",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_neighbour/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [
+      "unnamed_neighbour"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l05.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.416667,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 86006,
+    "prompt": "subject_definitions:\n<Subject 1> is Unnamed Neighbour in <Picture 1>:  <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin black band of heads and shoulders along its far rim and a thin jointed mast standing above it, the old sand-pits at the far LEFT with a row of deserted flys and a basket-chaise on their gravel floor, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of the neighbour, a tall spare stooping man of forty-eight in a cream straw panama and a sky-blue-and-white striped flannel blazer over white flannel trousers, his hollow cheeks and short pointed grey goatee, an ash walking stick in one fist turned three-quarters toward the camera with the level light on his hollow cheek, his mouth open, both fists on the head of his stick, the heather black behind him. The camera is on the heather level with his eyes, two paces from him, a 50mm lens. He has turned back toward the sun in the west. At the first frame the neighbour's head and shoulders fill the CENTRE of the frame from his cream straw panama at the TOP third to the striped flannel at the BOTTOM edge. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it. The camera keeps a static shot on the neighbour, keeping his face in the centre of frame as he hauls a breath in, throws his chin up at the sand heaps with his goatee working, and speaks at the camera, from 00:00 to 00:04. <Subject 1> (S1), on screen, a person, with a clipped English voice at an even pace, says: <d>[English] What ugly brutes. Good God, what ugly brutes.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, one fist comes up off the stick and turns over in the air, and the turn continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.16,
+    "render_s": 186.3,
+    "waited_s": 185.6,
+    "rel_path": "episodes/ep05/takes/r2v/T06.mp4"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "knoll",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "episodes/ep05/storyboard/h3/shot_07.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l06.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.916667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 86007,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin black band of heads and shoulders along its far rim and a thin jointed mast standing above it, the old sand-pits at the far LEFT with a row of deserted flys and a basket-chaise on their gravel floor, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> (the storyboard frame): weak_reference - it shows the location, the people and the clothes they wear. The framing, the camera position and the movement come from the camera sentence below, which owns the viewpoint.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot over the neighbour's striped flannel shoulder and the back of his cream straw panama toward <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat, <Subject 1> square in the right of the picture with the level light on his face, the heather running away behind him. The camera is behind the neighbour's shoulder on the heather, two long strides from the Narrator, a 50mm lens. The low sun comes from the LEFT. At the first frame the Narrator's head and shoulders fill the RIGHT half of the frame from his straw boater at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height. The neighbour's striped flannel shoulder and the back of his panama fill the LEFT edge dark against the sky. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it. The camera keeps over the neighbour's shoulder, a static shot with <Subject 1>'s face in the right of frame as <Subject 1> brings his chin round from the sand heaps to the lens and asks his question, his brows driving together, from 00:00 to 00:04. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Did you see a man in the pit? Did anybody fetch him out?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his hand lifts from his side and opens out toward the pit, and the lift continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 177.7,
+    "waited_s": 175.8,
+    "rel_path": "episodes/ep05/takes/r2v/T07.mp4"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "reaction",
+    "setup": "knoll",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/characters/unnamed_neighbour/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "episodes/ep05/storyboard/h3/shot_08.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "unnamed_neighbour"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.666667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 86008,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Unnamed Neighbour in <Picture 2>:  <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin black band of heads and shoulders along its far rim and a thin jointed mast standing above it, the old sand-pits at the far LEFT with a row of deserted flys and a basket-chaise on their gravel floor, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 4> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 3>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 4> (the storyboard frame): weak_reference - it shows the location, the people and the clothes they wear. The framing, the camera position and the movement come from the camera sentence below, which owns the viewpoint.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on low medium from the heather looking up at the little heathery knoll: nearest the camera at the left the neighbour, a tall spare stooping man of forty-eight in a cream straw panama and a sky-blue-and-white striped flannel blazer over white flannel trousers, his hollow cheeks and short pointed grey goatee, an ash walking stick in one fist, the blue and white stripes of his flannel blazer bright against the burning sky and his ash stick planted in the sand at his boot; further off at the right and much smaller, <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat, his face turned out at the sand heaps. The camera is in the heather below the knoll looking up, two long strides from the neighbour and five from the Narrator, a 35mm lens, a low angle. The low sun comes from the LEFT. At the first frame the neighbour stands nearest at the LEFT third of the frame from his cream straw panama at the TOP third to the heather at the BOTTOM edge. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera, two young Scots pines standing clear of it. The camera keeps low under the knoll, a static shot from the height of the heather with the striped blazer nearest at the left as the neighbour brings his stick across to his other fist and leans his weight down onto it, the striped sleeve swinging at his hip, from 00:00 to 00:04. At 00:04 further off <Subject 1> turns his grey tweed shoulders a hand's breadth toward the sand heaps, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the neighbour brings his stick across to his other fist. By 00:07 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze running back from the camera runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 226.4,
+    "waited_s": 226.0,
+    "rel_path": "episodes/ep05/takes/r2v/T08.mp4"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "transition",
+    "setup": "dusk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png",
+      "episodes/ep05/storyboard/h3/shot_09.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.083333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 86009,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a straggling line of dark figures spread across the heather between the camera and the sand, the old sand-pits at the far LEFT with cabs and feeding horses on their gravel floor, and the roofs of Woking black on the horizon; the last daylight comes low from the LEFT under a pale greenish-blue sky, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> (the storyboard frame): weak_reference - it shows the location, the people and the clothes they wear. The framing, the camera position and the movement come from the camera sentence below, which owns the viewpoint.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, last daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide from the little heathery knoll at twilight: the common going grey-blue, the black tops of two young Scots pines at the left, the raw ring of sand quiet a hundred yards off with the thin mast standing above it, a long black band of people grown along the skyline beyond, and a pale straw panama showing small among the heather between. The camera is above the knoll looking out over the heather, a 35mm lens. The last daylight comes low from the LEFT. At the first frame the long black band of people runs across the CENTRE of the frame on the skyline from the LEFT edge to the RIGHT third. The raw ring of flung yellow sand lies below it at the CENTRE RIGHT, a tenth of the height of the frame. The shot is inside this place: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera rises above the heather with large amplitude until the black pine tops at the left and the ring of sand both stand inside the picture, travelling one long stride as the band on the skyline thickens as more figures come up onto it from the Woking side, from 00:00 to 00:04. At 00:04 the heather runs grey-blue under the lens and the pale panama travels on across the ground toward the band, and the movement continues to the last frame of the shot. By 00:08 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 236.5,
+    "waited_s": 235.9,
+    "rel_path": "episodes/ep05/takes/r2v/T09.mp4"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "transition",
+    "setup": "dusk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "episodes/ep05/storyboard/h3/shot_10.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.625,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 86010,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a straggling line of dark figures spread across the heather between the camera and the sand, the old sand-pits at the far LEFT with cabs and feeding horses on their gravel floor, and the roofs of Woking black on the horizon; the last daylight comes low from the LEFT under a pale greenish-blue sky, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 1>, Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> (the storyboard frame): weak_reference - it shows the location, the people and the clothes they wear. The framing, the camera position and the movement come from the camera sentence below, which owns the viewpoint.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, last daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot across the darkening heather at twilight: a grey-bearded carter in a moleskin waistcoat turning back toward Chobham with his coat over one arm, a bonneted farmwife behind him gathering a shawl under her chin, and a bare-headed young shopkeeper in a high celluloid collar standing on with his hands in his pockets. The camera is on the heather at a standing man's eye, three long strides from them, a 50mm lens. The last daylight comes low from the LEFT. At the first frame the grey-bearded carter fills the LEFT third of the frame from his bare head at the TOP third to the heather at the BOTTOM edge, his head a quarter of the height of the frame. The bonneted farmwife stands at the CENTRE with her shawl in both fists, the young shopkeeper at the RIGHT third with his hands in his pockets, black heather fills the BOTTOM third. The shot is inside this place: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera pans left with small amplitude from the young shopkeeper across to the carter, travelling one short stride as the carter swings his coat up onto his shoulder at a walking pace and heads off toward Chobham with the farmwife after him, from 00:00 to 00:02. At 00:02 the heather whips shut behind her skirts and the shopkeeper turns his head back toward the sand, and the turn continues to the last frame of the shot. By 00:05 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 164.1,
+    "waited_s": 165.7,
+    "rel_path": "episodes/ep05/takes/r2v/T10.mp4"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "friction",
+    "setup": "dusk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.083333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 86011,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a straggling line of dark figures spread across the heather between the camera and the sand, the old sand-pits at the far LEFT with cabs and feeding horses on their gravel floor, and the roofs of Woking black on the horizon; the last daylight comes low from the LEFT under a pale greenish-blue sky, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, last daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on an insert on the pale greenish afterglow above the sand: the polished silver disk at the apex of the thin jointed mast with its wobbling mirror, tilted over on its short yoke, the top joint of the dark bronze rod under it, the sky bare behind them; only that object and what touches it is in frame. The camera is on the heather looking out over the heaps at the sky, a 300mm lens. The last daylight stands low from the LEFT beyond the rod. At the first frame the pale greenish-blue afterglow fills the frame from the LEFT edge to the RIGHT edge and from the TOP edge to the BOTTOM edge. The polished silver disk stands at the CENTRE LEFT, a fifth of the height of the frame. The shot is inside this place: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera tracks sideways to the right, a truck with small amplitude along the sky until the disk stands at the centre of the picture, travelling a finger's breadth as the disk swings round on its yoke and wobbles as it turns, the rim catching the afterglow once each turn, from 00:00 to 00:03. At 00:03 the rod under it leans a thumb's width and the disk goes on turning above it, and the lean continues to the last frame of the shot. By 00:06 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 209.5,
+    "waited_s": 210.5,
+    "rel_path": "episodes/ep05/takes/r2v/T11.mp4"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "friction",
+    "setup": "dusk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.625,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 86012,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a straggling line of dark figures spread across the heather between the camera and the sand, the old sand-pits at the far LEFT with cabs and feeding horses on their gravel floor, and the roofs of Woking black on the horizon; the last daylight comes low from the LEFT under a pale greenish-blue sky, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 1>, Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, last daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on low medium across the darkening heather: people coming on toward the sand in ones and twos, a stout washerwoman in a black straw bonnet with a shawl gripped under her chin, a thin governess in grey halted with one boot up on a tussock, and a bricklayer in a flat cap with a cold clay pipe in his teeth further back, both hands in his belt. The camera is in the heather below them looking up, three long strides from the washerwoman, a 35mm lens, a low angle. The last daylight comes low from the LEFT. At the first frame the washerwoman in the black straw bonnet stands at the CENTRE of the frame from her bonnet at the TOP third to the heather at the BOTTOM edge. The shot is inside this place: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera keeps low under the walkers, a static shot from the height of the heather with all of them against the sky as the washerwoman comes on at a walking pace, halts dead with her shawl bunched in her fist, then starts forward again toward the sand, from 00:00 to 00:02. At 00:02 the heather whips shut behind her skirts and the governess takes her boot off the tussock and follows, and the movement continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 188.3,
+    "waited_s": 190.7,
+    "rel_path": "episodes/ep05/takes/r2v/T12.mp4"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "friction",
+    "setup": "dusk",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l12.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.875,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 86013,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a straggling line of dark figures spread across the heather between the camera and the sand, the old sand-pits at the far LEFT with cabs and feeding horses on their gravel floor, and the roofs of Woking black on the horizon; the last daylight comes low from the LEFT under a pale greenish-blue sky, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 2>, Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, last daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 1> in the grey flat cap and the oversized ginger corduroy jacket with patched elbows, his freckled face and gapped front teeth at the gravel mouth of the old sand-pits at twilight, straightened up over the shafts of a low green barrow heaped with apples, turned toward the camera with his cap shoved back, the raw yellow digging face behind him. The camera is on the gravel floor of the sand-pits level with his eyes, two paces from him, a 50mm lens. The last daylight comes low from the RIGHT. At the first frame the boy's head and shoulders fill the CENTRE of the frame from his grey flat cap at the TOP third to the ginger corduroy at the BOTTOM edge. The shot is inside this place: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera keeps a static shot on the <Subject 1>, keeping his face in the centre of frame as he hauls the shafts up against his thighs, throws his chin up and calls to the camera over the top of the apples, from 00:00 to 00:04. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] They are all in close now. Nobody is minding a barrow tonight.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his cap slides forward on his forehead and one hand comes off the shaft and swings back at the heather behind him, and the swing continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.16,
+    "render_s": 183.3,
+    "waited_s": 180.7,
+    "rel_path": "episodes/ep05/takes/r2v/T13.mp4"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "friction",
+    "setup": "dusk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.916667,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 86014,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a straggling line of dark figures spread across the heather between the camera and the sand, the old sand-pits at the far LEFT with cabs and feeding horses on their gravel floor, and the roofs of Woking black on the horizon; the last daylight comes low from the LEFT under a pale greenish-blue sky, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in <Subject 1>, Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black. [Shot 1] runs from 00:00 to 00:04. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, last daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on an insert on the gravel floor of the sand-pits at twilight: the black shape of a cab horse's head down in a nosebag against the pale gravel, its ears standing up, the line of its bridle and a hank of mane over the strap, the black shaft of the hansom crossing behind it; only that object and what touches it is in frame. The camera is on the gravel at the height of the horse's head, two paces from its head, a 50mm lens. The last daylight comes low from the LEFT behind it. At the first frame the horse's head fills the CENTRE and the RIGHT half of the frame from its ears at the TOP third to the nosebag at the BOTTOM edge, black against the ground. The line of the bridle runs down the CENTRE with a hank of mane over it. The shot is inside this place: Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black, two young Scots pines standing black against the sky, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera tracks sideways to the left, a truck with small amplitude along the horse's head until the black shaft crosses behind it, travelling a finger's breadth as the horse works its jaw in the nosebag, throws its head up against the strap and drives its nose back down into the bag, from 00:00 to 00:02. At 00:02 the mane swings over the strap and both ears come round toward the heather, and the swing continues to the last frame of the shot. By 00:04 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at twilight in 1894: knee-deep purple-brown heather and dark furze reading near-black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 4.45,
+    "render_s": 156.7,
+    "waited_s": 160.4,
+    "rel_path": "episodes/ep05/takes/r2v/T14.mp4"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "reaction",
+    "setup": "flag",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.125,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 86015,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a small wedge of dark figures out on the heather beyond the sand with a square of white linen on a long pale pole at its apex, a broken ring of other dark figures spread wide across the heather behind them, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon; the last of the daylight stands low from the LEFT alone, the linen reads bright, the sky above is deep blue, and the heather, the pines and the figures read black to the horizon <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat at dusk on the black heather, turned square to the camera with the last light along one side of his bare head, his hair flat where the hat has been, the straw boater down in his fist low at the left of the picture. The camera is on the heather level with his eyes, two paces from him, a 50mm lens. The last daylight comes low from the RIGHT. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from his bare head at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height, lit from the RIGHT, the straw boater down in his fist at the BOTTOM LEFT. Black heather crosses the BOTTOM edge and the LEFT third. The shot is inside this place: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera keeps a static shot on <Subject 1>, keeping his face in the centre of frame as he pulls a breath in, brings his fist up with the boater in it and sets the hat back on his head, from 00:00 to 00:03. At 00:03 his hand comes down off the brim and his shoulders square toward the camera, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he pulls a breath in. By 00:06 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 214.8,
+    "waited_s": 215.5,
+    "rel_path": "episodes/ep05/takes/r2v/T15.mp4"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "turn",
+    "setup": "flag",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 86016,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a small wedge of dark figures out on the heather beyond the sand with a square of white linen on a long pale pole at its apex, a broken ring of other dark figures spread wide across the heather behind them, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon; the last of the daylight stands low from the LEFT alone, the linen reads bright, the sky above is deep blue, and the heather, the pines and the figures read black to the horizon <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot of <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat at dusk walking away from the camera into the black heather toward the raw ring of sand, seen from behind at the waist up, other dark figures out on the heather to either side of him going the same way, the pale sand ring beyond. The camera is on the heather two long strides behind him at a standing man's chest, a 35mm lens. The last daylight comes low from the LEFT. At the first frame the Narrator fills the CENTRE of the frame from his straw boater at the TOP third to the heather at the BOTTOM edge. The shot is inside this place: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera tracks behind <Subject 1> at a walking pace with large amplitude, coming on through the heather until the ring of sand stands at the centre of the picture, travelling two long strides as he drives one boot and then the other forward through the heather and lengthens his stride as the sand comes up, from 00:00 to 00:04. At 00:04 the heather rakes past his thighs and his right arm swings up across his chest, and the swing continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he drives one boot and then the other forward through the heather. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 236.3,
+    "waited_s": 235.5,
+    "rel_path": "episodes/ep05/takes/r2v/T16.mp4"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "spike",
+    "setup": "flag",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.875,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 86017,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a small wedge of dark figures out on the heather beyond the sand with a square of white linen on a long pale pole at its apex, a broken ring of other dark figures spread wide across the heather behind them, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon; the last of the daylight stands low from the LEFT alone, the linen reads bright, the sky above is deep blue, and the heather, the pines and the figures read black to the horizon <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide across the black heather at dusk: two black pine tops at the left of the picture, a little wedge of dark figures out beyond the raw ring of sand walking in toward it with a white fleck of linen carried above them as wide as one of their heads, and a broken ring of other dark figures spread wide across the heather behind. The camera is on the heather at a standing man's eye, out across the heather to the wedge, a 35mm lens. The last of the daylight stands low from the LEFT. At the first frame Black heather fills the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. Two black pine tops stand at the LEFT edge. The raw ring of flung yellow sand lies across the CENTRE. The shot is inside this place: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera pans right with large amplitude from the black pine tops at the left across the heather to the wedge of figures under the white fleck, travelling three long strides as the wedge comes on toward the sand at a walking pace, the fleck swaying over it at each stride, from 00:00 to 00:04. At 00:04 the heather closes behind them and the broken ring of figures behind draws in after them, and the movement continues to the last frame of the shot. By 00:07 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 226.6,
+    "waited_s": 225.8,
+    "rel_path": "episodes/ep05/takes/r2v/T17.mp4"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "spike",
+    "setup": "flag",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.666667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 86018,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a small wedge of dark figures out on the heather beyond the sand with a square of white linen on a long pale pole at its apex, a broken ring of other dark figures spread wide across the heather behind them, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon; the last of the daylight stands low from the LEFT alone, the linen reads bright, the sky above is deep blue, and the heather, the pines and the figures read black to the horizon <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on the white flag out over the heather at dusk: the small square of white linen on the top of a long pale pole standing against the deep blue sky, the dark shoulders and hat of the bearer small below it, black heather across the bottom of the picture. The camera is on the heather looking out at the bearer, a 300mm lens. The last of the daylight stands low from the LEFT. At the first frame the square of white linen stands at the CENTRE of the frame just below the TOP third, an eighth of the height of the frame. The pale pole runs down from it to the bearer's dark shoulders and hat at the BOTTOM third, black heather crosses the BOTTOM edge, and the deep blue sky fills the TOP and both edges. The shot is inside this place: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera tilts up with large amplitude from the bearer's dark shoulders to the linen at the top of the pole, travelling two long strides as the pole swings over to the right and the linen runs out flat, then hauls back to the left and the linen cracks over, from 00:00 to 00:03. At 00:03 the cord snaps taut where it is lashed and the pole leans a forearm further out over the heather, and the lean continues to the last frame of the shot. By 00:06 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 200.4,
+    "waited_s": 200.6,
+    "rel_path": "episodes/ep05/takes/r2v/T18.mp4"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "friction",
+    "setup": "flag",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.916667,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 86019,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a small wedge of dark figures out on the heather beyond the sand with a square of white linen on a long pale pole at its apex, a broken ring of other dark figures spread wide across the heather behind them, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon; the last of the daylight stands low from the LEFT alone, the linen reads bright, the sky above is deep blue, and the heather, the pines and the figures read black to the horizon <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in <Subject 2>, Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black. [Shot 1] runs from 00:00 to 00:04. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on a medium shot along the black heather at dusk with the ring of sand beyond: a thin governess in grey standing with both hands at her throat, a heavy carter in a bowler two paces in front of her with his fists at his sides, and a <Subject 1> in a sailor collar crouched in the heather at their feet, all three faces turned out at the sand. The camera is on the heather at a standing man's eye, two long strides from the governess, a 50mm lens. The last of the daylight stands low from the LEFT. At the first frame the heavy carter in the bowler stands at the CENTRE of the frame from his hat at the TOP third to the heather at the BOTTOM edge, his head a quarter of the height of the frame. The thin governess in grey stands at the LEFT third. The shot is inside this place: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera tracks sideways to the right, a truck with small amplitude past the governess until the carter in the bowler stands at the centre of the picture, travelling one short stride as the carter goes two paces further out toward the sand at a walking pace and halts with his chin up, from 00:00 to 00:02. At 00:02 the governess follows with her skirt gathered in one fist and the <Subject 1> climbs onto his knees in the heather, and the climb continues to the last frame of the shot. By 00:04 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 4.45,
+    "render_s": 159.0,
+    "waited_s": 160.3,
+    "rel_path": "episodes/ep05/takes/r2v/T19.mp4"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "spike",
+    "setup": "flag",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.458333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 86020,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it, a small wedge of dark figures out on the heather beyond the sand with a square of white linen on a long pale pole at its apex, a broken ring of other dark figures spread wide across the heather behind them, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon; the last of the daylight stands low from the LEFT alone, the linen reads bright, the sky above is deep blue, and the heather, the pines and the figures read black to the horizon <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert on the deep blue sky above the raw ring of sand at dusk: one puff of luminous greenish smoke standing clear of the sand in the air, its edges bright, the black line of the sand heaps running across the bottom of the picture; only that object and what touches it is in frame. The camera is on the heather looking out over the heaps at the sky, a 135mm lens. The last of the daylight stands low from the LEFT. At the first frame the deep blue sky fills the frame from the LEFT edge to the RIGHT edge and from the TOP edge to the BOTTOM third. One puff of luminous greenish smoke stands at the CENTRE just above the sand, a fifth of the height of the frame, and the black line of the sand heaps runs across the BOTTOM third. The shot is inside this place: Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a thin jointed mast standing above it. The camera rises above the heather with small amplitude, coming up with the smoke until three puffs stand one above another inside the picture, travelling a finger's breadth as a second puff and then a third drive up out of the sand and go on up into the air, from 00:00 to 00:04. At 00:04 the smoke spreads and goes thin at the top of the frame and the sky behind it darkens, and the movement continues to the last frame of the shot. By 00:07 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at dusk in 1894: knee-deep heather and dark furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 212.0,
+    "waited_s": 210.7,
+    "rel_path": "episodes/ep05/takes/r2v/T20.mp4"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "spike",
+    "setup": "ray",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.291667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 86021,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at nightfall in 1894: the heather and the furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a smooth humped dome lifting over its rim and a thin jointed mast beside it, a scattered wedge of small dark figures out on the heather beyond the sand, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon under mustering stars; the last greenish daylight stands low from the LEFT, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, Horsell Common at nightfall in 1894: the heather and the furze reading black. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, greenish daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on the raw ring of sand at nightfall: the crown of a smooth humped black dome just showing over the rim out of the pit, the thin jointed mast standing beside it against the last greenish light, the heather black across the bottom of the picture. The camera is on the heather looking out across the heaps, a 135mm lens. The last greenish daylight stands low from the LEFT. At the first frame the black heather crosses the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The raw ring of flung yellow sand runs across the CENTRE. The shot is inside this place: Horsell Common at nightfall in 1894: the heather and the furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a smooth humped dome lifting over its rim and a thin jointed mast beside it, a scattered wedge of small dark figures out on the heather beyond the sand. The camera tilts up with small amplitude from the black heather to the rim of the sand, travelling a hand's breadth as the dome rides up over the rim until its shallow funnel mouth is clear, swings the mouth round toward the heather, and a pale flicker runs out of it and travels over the ground, from 00:00 to 00:03. At 00:03 the sand streams off the dome's flank and the mast leans after it, and the lean continues to the last frame of the shot. By 00:06 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at nightfall in 1894: the heather and the furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 195.9,
+    "waited_s": 195.5,
+    "rel_path": "episodes/ep05/takes/r2v/T21.mp4"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "spike",
+    "setup": "ray",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.375,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 86022,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at nightfall in 1894: the heather and the furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a smooth humped dome lifting over its rim and a thin jointed mast beside it, a scattered wedge of small dark figures out on the heather beyond the sand, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon under mustering stars; the last greenish daylight stands low from the LEFT, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 1>, Horsell Common at nightfall in 1894: the heather and the furze reading black. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, greenish daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on the men out beyond the sand at nightfall: a scattered wedge of small dark figures halted on the black heather under the white fleck of linen on its pole, a tall bare-headed one with an arm half raised, a stooped one leaning on a stick, a square one in a bowler with both fists on the pole, all their faces turned back toward the pit. The camera is on the heather looking out at the wedge, a 300mm lens. The last greenish daylight stands low from the LEFT with a green glare off the pit. At the first frame the scattered dark figures stand at the CENTRE and the RIGHT third of the frame from their hats at the CENTRE to the heather at the BOTTOM third. The shot is inside this place: Horsell Common at nightfall in 1894: the heather and the furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a smooth humped dome lifting over its rim and a thin jointed mast beside it, a scattered wedge of small dark figures out on the heather beyond the sand. The camera keeps a static shot on the wedge of men, keeping the white fleck in the upper centre of frame as a green glare washes over them and the whole wedge flashes out pale and goes dark again, and the tall bare-headed one brings his raised arm down across his chest, from 00:00 to 00:04. At 00:04 the linen goes slack on its cord and the pole swings back toward the pit, and the swing continues to the last frame of the shot. By 00:08 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at nightfall in 1894: the heather and the furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 233.8,
+    "waited_s": 235.6,
+    "rel_path": "episodes/ep05/takes/r2v/T22.mp4"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "answer",
+    "setup": "ray",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.5,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 86023,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common at nightfall in 1894: the heather and the furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a smooth humped dome lifting over its rim and a thin jointed mast beside it, a scattered wedge of small dark figures out on the heather beyond the sand, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon under mustering stars; the last greenish daylight stands low from the LEFT, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 1>, Horsell Common at nightfall in 1894: the heather and the furze reading black. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, greenish daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot on the black heather beyond the sand at nightfall: a heavy figure in a frock coat standing dark among the others with both arms at his sides, two smaller dark shapes behind him, the white linen up on its pole at the left of the picture. The camera is on the heather looking out over the heaps, a 300mm lens. The last greenish daylight stands low from the LEFT. At the first frame the heavy figure in the frock coat stands at the CENTRE of the frame from his head at the CENTRE to the heather at the BOTTOM third, a fifth of the height of the frame, dark against the ground. Two smaller dark shapes stand at the RIGHT third. The shot is inside this place: Horsell Common at nightfall in 1894: the heather and the furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a smooth humped dome lifting over its rim and a thin jointed mast beside it, a scattered wedge of small dark figures out on the heather beyond the sand. The camera tracks sideways to the left, a truck with small amplitude along the wedge until the heavy figure stands at the centre of the picture, travelling one short stride as white flame springs up his coat from his knees to his collar and he drops onto one hip in the heather, from 00:00 to 00:02. At 00:02 the furze under him takes fire with a flat thud and the two shapes behind drive their heels into the ground, and the movement continues to the last frame of the shot. By 00:05 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at nightfall in 1894: the heather and the furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 182.1,
+    "waited_s": 180.7,
+    "rel_path": "episodes/ep05/takes/r2v/T23.mp4"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "answer",
+    "setup": "ray",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.166667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 86024,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common at nightfall in 1894: the heather and the furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a smooth humped dome lifting over its rim and a thin jointed mast beside it, a scattered wedge of small dark figures out on the heather beyond the sand, two young Scots pines black at the LEFT, and the roofs of Woking black on the horizon under mustering stars; the last greenish daylight stands low from the LEFT, the sand ring reads pale grey and the heather, the pines and the figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, Horsell Common at nightfall in 1894: the heather and the furze reading black. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, greenish daylight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert low in the knee-deep heather at nightfall: the black knees and boots of <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat standing at the left of the picture, a dry furze bush at the centre with its spines standing out black, the ground smoking in a curving line through the heather between them, and the pale blur of the sand ring beyond; only that object and what touches it is in frame. The camera is in the heather at the height of a kneeling man, two long strides from the bush, a 50mm lens. White flame breaks out at the CENTRE. At the first frame the Narrator's black knees and boots stand at the LEFT third of the frame from the TOP third to the BOTTOM edge. The dry furze bush stands at the CENTRE from the CENTRE to the BOTTOM edge. The shot is inside this place: Horsell Common at nightfall in 1894: the heather and the furze reading black, a low raw ring of flung yellow sand round the crater a hundred yards off with a smooth humped dome lifting over its rim and a thin jointed mast beside it, a scattered wedge of small dark figures out on the heather beyond the sand. The camera pans right with small amplitude from <Subject 1>'s black knees across to the furze bush, travelling a finger's breadth as the whole bush takes fire at once with a flat thud and burns white from the middle out, and the heather beyond it smokes and cracks along the same curving line, from 00:00 to 00:04. At 00:04 the flame throws up a sheet of sparks and the burnt heather stems curl over toward the camera, and the movement continues to the last frame of the shot. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at nightfall in 1894: the heather and the furze reading black runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 247.4,
+    "waited_s": 250.7,
+    "rel_path": "episodes/ep05/takes/r2v/T24.mp4"
+  },
+  {
+    "index": 25,
+    "shots": [
+      25
+    ],
+    "section": "runout",
+    "setup": "dark",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.083333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 86025,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather, blackened patches smoking and glowing away over the ground, a low raw ring of flung yellow sand a hundred yards off at the CENTRE with a thin jointed mast standing black above it, a pale sandy road running grey across the middle distance, and the roofs of Woking black on the horizon with spires of flame going up from the houses beyond them; the pale bright greenish afterglow stands low on the LEFT behind the black tops of the pines under mustering stars, and the heather and the road banks are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the mast and wobbling mirror over the Horsell pit in <Picture 2>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low fire from the left, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide of the common in the dark: the heather black right to the horizon, a pale sandy road running grey across the middle distance, the thin jointed mast with its wobbling mirror standing alone above the sand ring beyond it, burning furze bushes glowing here and there over the ground, and spires of flame going up from the houses beyond Woking under the first stars. The camera is above the heather looking out over the road to the sand ring, a 35mm lens. A low fire of burning furze stands at the LEFT. At the first frame Black heather fills the BOTTOM half of the frame from the LEFT edge to the RIGHT edge with a burning furze bush at the LEFT third. The pale sandy road runs grey across the CENTRE. The shot is inside this place: Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather, blackened patches smoking and glowing away over the ground, a low raw ring of flung yellow sand a hundred yards off at the CENTRE with a thin jointed mast standing black above it. The camera rises above the black heather with large amplitude until the pale road and the ring of sand both stand inside the picture, travelling two long strides as the fires along the ground burn up higher as the wind comes over the heath, and the disk at the top of the mast turns over against the afterglow, from 00:00 to 00:03. At 00:03 the smoke off the burning bushes runs across the pale road, and the movement continues to the last frame of the shot. By 00:06 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 198.7,
+    "waited_s": 196.0,
+    "rel_path": "episodes/ep05/takes/r2v/T25.mp4"
+  },
+  {
+    "index": 26,
+    "shots": [
+      26
+    ],
+    "section": "runout",
+    "setup": "dark",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.375,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 86026,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather, blackened patches smoking and glowing away over the ground, a low raw ring of flung yellow sand a hundred yards off at the CENTRE with a thin jointed mast standing black above it, a pale sandy road running grey across the middle distance, and the roofs of Woking black on the horizon with spires of flame going up from the houses beyond them; the pale bright greenish afterglow stands low on the LEFT behind the black tops of the pines under mustering stars, and the heather and the road banks are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low fire from the left, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on low medium close of <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat on the black heather with the firelight on one side of his face, his straw boater jammed down over his hair, his mouth open, the pale afterglow behind him. The camera is in the heather below him looking up at his face, two paces from him, a 50mm lens, a low angle. A low fire of burning furze stands at the LEFT. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from his straw boater at the TOP third to the grey tweed at the BOTTOM edge. The shot is inside this place: Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather, blackened patches smoking and glowing away over the ground, a low raw ring of flung yellow sand a hundred yards off at the CENTRE with a thin jointed mast standing black above it. The camera keeps low under <Subject 1>, a static shot from the height of the heather with his face in the centre of frame as his head comes round off the sand ring and his whole body follows it, his shoulders driving forward as he throws his weight off his back foot, from 00:00 to 00:04. At 00:04 the heather tears past his thighs and both his arms come up in front of him, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his head comes round off the sand ring. By 00:08 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 246.5,
+    "waited_s": 250.7,
+    "rel_path": "episodes/ep05/takes/r2v/T26.mp4"
+  },
+  {
+    "index": 27,
+    "shots": [
+      27
+    ],
+    "section": "button",
+    "setup": "dark",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_neighbour/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png",
+      "refs/props/pit_mast_mirror/sheet.png"
+    ],
+    "faces": [
+      "unnamed_neighbour"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l24.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 86027,
+    "prompt": "subject_definitions:\n<Subject 1> is Unnamed Neighbour in <Picture 1>:  <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather, blackened patches smoking and glowing away over the ground, a low raw ring of flung yellow sand a hundred yards off at the CENTRE with a thin jointed mast standing black above it, a pale sandy road running grey across the middle distance, and the roofs of Woking black on the horizon with spires of flame going up from the houses beyond them; the pale bright greenish afterglow stands low on the LEFT behind the black tops of the pines under mustering stars, and the heather and the road banks are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the mast and wobbling mirror over the Horsell pit in <Picture 3>: A thin jointed metal rod rising joint by joint out of the sand-pit, bearing at its apex a circular disk the size of a cartwheel that turns with a wobbling motion and catches the light like a mirror. Below it the humped black back of a Martian appliance lifts over the rim of the pit, a smooth dark dome with a shallow funnel mouth set in its front. The mast stands about three times a man's height above the pit rim. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the mast and wobbling mirror over the Horsell pit in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low fire from the left, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot of the neighbour, a tall spare stooping man of forty-eight in a cream straw panama and a sky-blue-and-white striped flannel blazer over white flannel trousers, his hollow cheeks and short pointed grey goatee, an ash walking stick in one fist on the pale sandy road in the dark, his head bare and his grey hair wild, one shoulder of his blazer torn open, the firelight full on his hollow face, a burning furze bush at the left of the picture behind him. The camera is on the road level with his eyes, two paces from him, a 50mm lens. A low fire of burning furze stands at the LEFT. At the first frame the neighbour's head and shoulders fill the CENTRE of the frame from his wild grey hair at the TOP third to the torn striped flannel at the BOTTOM edge. The shot is inside this place: Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather, blackened patches smoking and glowing away over the ground, a low raw ring of flung yellow sand a hundred yards off at the CENTRE with a thin jointed mast standing black above it. The camera keeps a static shot on the neighbour, keeping his face in the centre of frame as he comes up out of the heather onto the road with his chest heaving and says it at the lens with his stride going, from 00:00 to 00:04. <Subject 1> (S1), on screen, a person, with a clipped English voice at an even pace, says: <d>[English] What ugly brutes. Good God, what ugly brutes.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his torn shoulder comes round past the camera and the ash stick swings forward and goes down into the sand of the road, and the swing continues to the last frame of the shot. By 00:07 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common in the dark in 1894: a low fire of burning furze on the LEFT throws hard black shadow across knee-deep heather runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 229.8,
+    "waited_s": 230.6,
+    "rel_path": "episodes/ep05/takes/r2v/T27.mp4"
+  }
+]

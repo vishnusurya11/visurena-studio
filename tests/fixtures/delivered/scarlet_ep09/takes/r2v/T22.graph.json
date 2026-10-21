@@ -1,0 +1,372 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "char-jefferson_hope_indoor_dd298c29.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "char-john_ferrier_indoor_08172159.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is John Ferrier in <Picture 2>: A tall spare man in his middle fifties, a massive framework of bones under lean weathered muscle, a long face with sun-darkened skin drawn tight over projecting cheekbones, deep-set grey eyes under heavy brows, iron-grey hair cut square to the collar, and a full brown beard worn long, iron-grey through the moustache and white at the chin. <Picture 2> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 3> is the location in <Picture 3>: Interior, inside the parlour of John Ferrier's log villa on a summer evening, 1860, the camera standing within the room with squared white-chinked log walls closed on all four sides and a low plank ceiling overhead: a stone hearth with a low fire burning in it, a scrubbed pine table under a hanging oil lamp, ladder-back chairs, a rag rug on the board floor, one deep window in the far wall open on the blue dusk outside; the hanging oil lamp is the light in the room and the window a pale rectangle <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium two-shot across the pine table.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.17-second take of 1 shot in <Subject 3>, Interior. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, Warm high-summer palette of gold ripe wheat, red road dust and deep green pine, hard blue shadow under a clear bleached sky; the Utah valley and Salt Lake City, June 1860; American frontier, sunlight and lamplight only., 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 4>: a medium two-shot across the pine table: <Subject 1> leaning in on his forearms with his hat off and the black hair flat, <Subject 2> opposite him bare-headed in his dark waistcoat with the iron-grey hair combed back, the lamp hanging between them. The camera is at the table end level with a seated man's eye, two long strides from the near chair, a 50mm lens. The hanging lamp is over the table between them. The camera pushes in on the two men across the whole shot, travelling one long stride as <Subject 1> opens one brown hand flat on the boards toward <Subject 2>, from 00:00 to 00:02. At 00:02 <Subject 2> puts his chin down and draws his beard through his fingers, and the movement continues to the last frame of the shot. Behind them Moths cross the lamp glass in ones and twos and the low fire settles in the hearth., from 00:00 to 00:05. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he opens one brown hand flat on the boards toward <Subject 2>. By 00:05, both men stand half again as large with the lamp carried out above the top edge.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 124,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ],
+      "ref_images.ref_image_3": [
+        "21",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "25",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 90022
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_22",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "plate_farm_parlour_81d44d16.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q22_0_d7fcce6f.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_4"
+    }
+  },
+  "22": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q22_0_d7fcce6f.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q22_0_d7fcce6f.png @ 0"
+    }
+  },
+  "23": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "22",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor image @ 0"
+    }
+  },
+  "24": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_22_93a8a876.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "25": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "23",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "24",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

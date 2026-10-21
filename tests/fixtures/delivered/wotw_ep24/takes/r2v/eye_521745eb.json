@@ -1,0 +1,103 @@
+{
+ "sha8": "521745eb",
+ "verdict": "flagged",
+ "note": "cut at T02: 37.9; jump at T02: -0.14 HARD: another picture; leak at T02: 8 frames of plate before the panel; cut-vote at T02: jump+step+scene HARD: an unplanned cut; content at T06: posture 'standing': the shot asks for low; face-at-end at T19: 0.79 clipped top -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4"
+ ],
+ "signed_at": "2026-10-09T02:05:36Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "cut",
+   "where": "T02",
+   "evidence": {
+    "value": 37.9,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "37.9"
+  },
+  {
+   "kind": "jump",
+   "where": "T02",
+   "evidence": {
+    "value": -0.144,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "-0.14 HARD: another picture"
+  },
+  {
+   "kind": "leak",
+   "where": "T02",
+   "evidence": {
+    "value": 8,
+    "penalty": 40.0,
+    "repeated": true,
+    "frames": 8,
+    "covers": true
+   },
+   "severity": "high",
+   "note": "8 frames of plate before the panel"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T02",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  },
+  {
+   "kind": "content",
+   "where": "T06",
+   "evidence": {
+    "hard": true,
+    "repeated": true,
+    "still": "storyboard/shot_06.png"
+   },
+   "severity": "normal",
+   "note": "posture 'standing': the shot asks for low"
+  },
+  {
+   "kind": "face-at-end",
+   "where": "T19",
+   "evidence": {
+    "value": 0.786,
+    "penalty": 30.0,
+    "repeated": false,
+    "still": "storyboard/shot_19.png"
+   },
+   "severity": "normal",
+   "note": "0.79 clipped top"
+  }
+ ],
+ "terminal": "still"
+}

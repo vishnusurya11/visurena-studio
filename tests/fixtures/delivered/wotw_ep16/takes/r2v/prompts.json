@@ -1,0 +1,807 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "london_exodus",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_00.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.416667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 104919,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the river fills the picture from lower left to lower right. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide over the river from the bank at morning: a stone bridge stands across the river with black smoke rising beyond it, and the water below it is jammed with barges and steamers packed with people. The camera is on the stone river stairs at the height of a standing man, two hundred yards from the bridge, a 35mm lens. The morning sun comes from the RIGHT behind thin smoke. At the first frame tHE FOCUS OF THE PICTURE IS THE STONE BRIDGE: its two grey towers stand at the CENTRE of the TOP third with the high walkway between them. Black smoke rises behind it into the TOP edge. Barges crowded with people fill the river from the LEFT edge to the RIGHT edge across the BOTTOM third, and the wet stone stairs run across the BOTTOM edge. Coal smoke from the steamers drifts low across the water at the CENTRE. The camera pushes in toward the bridge across the whole shot as the crowded barges drift on the current, from 00:00 to 00:04. At 00:04 the black smoke rolls upward behind the towers, and the roll continues to the last frame of the shot. Beyond the foreground people fighting savagely for standing-room in the carriages, from 00:00 to 00:07. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "london_exodus",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_01.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.208333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 104920,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the river fills the picture from lower left to lower right. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide down the river beneath the stone bridge: steamers and barges lie side by side so close that people climb from deck to deck toward the shore at a normal walking pace. The camera is on a wharf platform above the water, fifty yards from the nearest steamer, a 35mm lens. The sun comes from the RIGHT and lights the funnels. At the first frame tHE FOCUS OF THE PICTURE IS A PADDLE STEAMER at the CENTRE, its decks black with people and its funnel smoking. Barges crowd against it from the LEFT edge, the bridge arches stand across the TOP third, and the brown water shows in a narrow strip along the BOTTOM edge. Ropes hang from the steamer's rail at the LEFT third, and gulls wheel low over the water at the TOP RIGHT. The camera tracks sideways to the right along the wharf across the whole shot as the steamer's funnel puffs smoke, from 00:00 to 00:04. At 00:04 people step from one deck to the next, and the step continues to the last frame of the shot. Beyond the foreground people fighting savagely for standing-room in the carriages, from 00:00 to 00:08. By 00:08 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "london_exodus",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_02.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.666667,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 104921,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in the river fills the picture from lower left to lower right. [Shot 1] runs from 00:00 to 00:09. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on a medium shot on a constable at the foot of a wharf gate trying to keep back a pressing crowd with his arms spread, his helmet knocked crooked. The camera is on the cobbles four paces from the constable at chest height, a 50mm lens. The light comes from the LEFT off the river. At the first frame tHE FOCUS OF THE PICTURE IS THE CONSTABLE at the CENTRE, his dark blue tunic and crooked helmet in the brightest light, both arms out. Shoulders and hats of the crowd press in from the RIGHT edge, the iron wharf gate stands at the LEFT edge, and the river shows grey at the TOP third. Torn handbills lie on the wet cobbles at the BOTTOM edge, and a lamp post rises at the LEFT third behind the gate. The camera tilts up to the helmet across the whole shot as the crowd surges against his arms, from 00:00 to 00:04. At 00:04 his helmet slips further over one ear, and the movement continues to the last frame of the shot. Beyond the foreground the chapter's people press among the river craft and wharves, from 00:00 to 00:09. By 00:09 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "friction",
+    "setup": "london_exodus",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_03.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.125,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 104922,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in the river fills the picture from lower left to lower right. [Shot 1] runs from 00:00 to 00:05. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on an insert on the river surface under the bridge as a low bank of black vapour rolls across the water toward the camera; only that object and what touches it is in frame. The camera is at water level on a barge deck, ten yards from the vapour, a 35mm lens. Grey daylight comes from the TOP. At the first frame tHE FOCUS OF THE PICTURE IS THE BANK OF BLACK VAPOUR at the CENTRE, low and heavy on the water. The underside of a bridge arch closes the TOP third, the brown water fills the BOTTOM third, and an empty rowing boat drifts at the RIGHT edge. Floating straw and a broken oar drift on the water at the BOTTOM RIGHT, and the arch's dark stone shows wet and dripping. The camera pushes in toward THE FOCUS OF THE PICTURE IS as the black vapour rolls forward over the water, from 00:00 to 00:02. At 00:02 the empty boat rocks and turns at the right edge, and the turn continues to the last frame of the shot. By 00:05 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "friction",
+    "setup": "london_exodus",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_04.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.75,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 104923,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the river fills the picture from lower left to lower right. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide from a hill above the roads: every road out of the city is a dark moving line of people and carts heading north under a smoky sky. The camera is on a hilltop pasture at the height of a standing man, a mile from the roads, a 35mm lens. The sun comes from the LEFT through haze. At the first frame tHE FOCUS OF THE PICTURE IS THE MAIN ROAD running from the BOTTOM edge up to the CENTRE, packed with a dark moving line of carts and people. Smaller roads join it from the LEFT edge and the RIGHT edge, rooftops fill the BOTTOM third, and smoke hangs across the TOP third. Hedgerows divide the fields at the BOTTOM third, and church spires rise above the rooftops at the LEFT third. The camera cranes up across the whole shot as the dark lines on the roads move north, from 00:00 to 00:04. At 00:04 the smoke drifts across the sky, and the movement continues to the last frame of the shot. Beyond the foreground a little island of survivors on Castle Hill, from 00:00 to 00:07. By 00:07 the camera is craning up through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "setup",
+    "setup": "chalk_escape",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_05.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.333333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 104924,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in Chalk Farm Road runs diagonally through the picture between the yellow-brick goods-yard wall at the left edge and the three-storey shop fronts at the right edge. Cast-iron gates and the round engine house sit along the left side. The cycle shop window occupies the near right edge with black bicycles behind broken glass. Haverstock Hill rises at the far end beneath hazy morning light. <Subject 1>'s route crosses from the goods yard toward the shop terrace. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, morning sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on <Subject 1> in a shop doorway at Chalk Farm, lifting a bicycle out through the broken glass of the window. The camera is on the pavement three paces from him at chest height, a 50mm lens. Morning sun comes from the RIGHT down the street. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the CENTRE, both hands on the bicycle handlebars, the broken shop window behind him. Glass lies on the pavement at the BOTTOM edge, the empty street runs away at the RIGHT edge, and brick shopfronts close the LEFT edge. A brass shop bell hangs over the doorway at the TOP third, and a handcart lies tipped on its side at the RIGHT edge. The camera pushes in on <Subject 1> across the whole shot as he lifts the bicycle clear of the window frame, from 00:00 to 00:03. At 00:03 the front wheel spins as it comes free, and the movement continues to the last frame of the shot. Behind <Subject 1> many fugitives cross among vehicles and bicycles, from 00:00 to 00:06. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he lifts the bicycle clear of the window frame. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "transition",
+    "setup": "chalk_escape",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_06.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.125,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 104925,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in Chalk Farm Road runs diagonally through the picture between the yellow-brick goods-yard wall at the left edge and the three-storey shop fronts at the right edge. Cast-iron gates and the round engine house sit along the left side. The cycle shop window occupies the near right edge with black bicycles behind broken glass. Haverstock Hill rises at the far end beneath hazy morning light. The brother's route crosses from the goods yard toward the shop terrace. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, morning sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on an insert on the front wheel of the bicycle on a dusty road at Edgware, the rim bent out of true, a man's boots beside it; only that object and what touches it is in frame. The camera is at road level two paces from the wheel, a 50mm lens. Midday sun comes from the TOP LEFT. At the first frame tHE FOCUS OF THE PICTURE IS THE BENT FRONT WHEEL at the CENTRE, its rim buckled. Dusty road fills the BOTTOM third, a man's brown boots stand at the RIGHT edge, and shopfronts show soft along the TOP third. A dropped bundle tied with string lies in the dust at the LEFT edge, and the chain hangs loose from the sprocket. The camera tilts up to the front wheel across the whole shot as the wheel turns once and stops against the buckle, from 00:00 to 00:03. At 00:03 dust lifts from the road, and the lift continues to the last frame of the shot. By 00:06 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "runout",
+    "setup": "chalk_escape",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_07.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.25,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 104926,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in Chalk Farm Road runs diagonally through the picture between the yellow-brick goods-yard wall at the left edge and the three-storey shop fronts at the right edge. Cast-iron gates and the round engine house sit along the left side. The cycle shop window occupies the near right edge with black bicycles behind broken glass. Haverstock Hill rises at the far end beneath hazy morning light. <Subject 1>'s route crosses from the goods yard toward the shop terrace. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, morning sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on <Subject 1> at the counter of an abandoned inn at Edgware, eating bread from a plate with his bandaged hand; only that object and what touches it is in frame. The camera is inside the inn doorway three paces from him at chest height, a 50mm lens. Daylight comes from the LEFT through the doorway. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the CENTRE, bread in his hand, the bare wooden counter in front of him. The open doorway and the bright road show at the LEFT edge, empty shelves stand along the RIGHT edge, and the plate sits on the counter at the BOTTOM third. A cold teapot and two cups stand at the RIGHT third of the counter, and sunlight falls in a bright bar across the floor. The camera pushes in toward THE FOCUS OF THE PICTURE IS as <Subject 1> tears the bread and eats, from 00:00 to 00:03. At 00:03 he turns his head toward the doorway, and the turn continues to the last frame of the shot. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "setup",
+    "setup": "grass_lane_rescue",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_08.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.125,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 104927,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the grass lane runs from the stile at the left edge around the old oak in the middle distance and toward the pony-chaise on the right-hand verge. Hawthorn hedges fill both side edges. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, morning sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide down a green lane past Barnet: <Subject 1> vaults a stile toward a pony-chaise at the far bend, where two men struggle with the women at the wheels and a third keeps the pony's head. The camera is at the stile at the height of a standing man, thirty yards from the chaise, a 35mm lens. Morning sun comes from the RIGHT through the hedge tops in bright bands. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the LEFT third, one leg over the wooden stile. The pony-chaise stands small at the far bend at the CENTRE with two women in it and three men at its wheels. Hawthorn hedges close both the LEFT edge and the RIGHT edge. The camera pans to the right with <Subject 1> across the whole shot as he drops from the stile and runs toward the chaise, from 00:00 to 00:04. At 00:04 the pony throws its head, and the movement continues to the last frame of the shot. Behind <Subject 1> three men struggle beside the chaise while two women sit inside, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he drops from the stile and runs toward the chaise. By 00:08 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "grass_lane_rescue",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_09.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.375,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 104928,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the grass lane runs from the stile at the left edge around the old oak in the middle distance and toward the pony-chaise on the right-hand verge. Hawthorn hedges fill both side edges. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, morning sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on <Subject 1> beside the chaise wheel driving a robber in a black reefer jacket back against the hedge with his fists. The camera is in the lane four paces from the fight at chest height, a 50mm lens. Sun comes from the RIGHT through the hedge. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the CENTRE, his fist raised, his torn cuff and bandaged wrist in the light. The robber in a black reefer jacket stumbles back at the RIGHT edge, the chaise wheel fills the LEFT edge, and the hawthorn hedge closes the TOP third. The pony's harness shines at the TOP LEFT, and trampled dog-roses lie in the grass at the BOTTOM edge. The camera pushes in toward the right with the struggle across as <Subject 1> drives the robber back into the hedge, from 00:00 to 00:04. At 00:04 the robber's bowler falls, and the movement continues to the last frame of the shot. Behind <Subject 1> three men struggle beside the chaise while two women sit inside, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he drives the robber back into the hedge. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "payoff",
+    "setup": "grass_lane_rescue",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/miss_elphinstone/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_10.png"
+    ],
+    "faces": [
+      "miss_elphinstone"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l10.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.791667,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 112848,
+    "prompt": "subject_definitions:\n<Subject 1> is Miss Elphinstone in <Picture 1>: Oval face with high cheekbones, dark brown eyes under straight black brows, firm mouth. Clear olive-pale skin. Thick near-black hair worn in a low coiled chignon at the nape. Wearing: Dark aubergine serge travelling costume: fitted jacket with narrow puffed shoulders over a white high-collared blouse, long gored skirt to the ankle. Black felt hat with a wide brim turned up on one side and a black cock feather. Black gauntlet gloves. Carriage whip in one hand, black revolver in the other. <Picture 1> defines this woman alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in the grass lane runs from the stile at the left edge around the old oak in the middle distance and toward the pony-chaise on the right-hand verge. Hawthorn hedges fill both side edges. [Shot 1] runs from 00:00 to 00:04. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows her; <Picture 1> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, morning sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on a close shot of <Subject 1> in the chaise seat, a black revolver out level in her hand, her face set. The camera is beside the chaise at her shoulder height, one pace away, an 85mm lens. Sun comes from the LEFT and lights her face. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'S FACE at the CENTRE, her head half the frame's height, her eyes along the barrel. The revolver crosses the RIGHT third, the red-lined seat shows at the BOTTOM edge, and green hedge fills the LEFT edge and the TOP edge. A strand of her dark hair has come loose at her temple. The camera pushes in on <Subject 1> across the whole shot as she raises the revolver, from 00:00 to 00:01. <Subject 1> (S1), on screen, oval face with high cheekbones, with a clipped English voice at an even pace, says: <d>[English] Take this!</d> Her mouth shapes every syllable as the line is heard and closes on the last word. At 00:01, as the line ends, her finger tightens on the trigger as she speaks, and the movement continues to the last frame of the shot. Behind <Subject 1> three men struggle beside the chaise while two women sit inside, from 00:00 to 00:04. By 00:04 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "reaction",
+    "setup": "grass_lane_rescue",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/miss_elphinstone/sheet_front.png",
+      "refs/characters/narrators_brother/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_11.png"
+    ],
+    "faces": [
+      "miss_elphinstone",
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l11.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.0,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 104930,
+    "prompt": "subject_definitions:\n<Subject 1> is Miss Elphinstone in <Picture 1>: Oval face with high cheekbones, dark brown eyes under straight black brows, firm mouth. Clear olive-pale skin. Thick near-black hair worn in a low coiled chignon at the nape. Wearing: Dark aubergine serge travelling costume: fitted jacket with narrow puffed shoulders over a white high-collared blouse, long gored skirt to the ankle. Black felt hat with a wide brim turned up on one side and a black cock feather. Black gauntlet gloves. Carriage whip in one hand, black revolver in the other. <Picture 1> defines this woman alone; each shot keeps the framing its own words describe.\n<Subject 2> is the brother in <Picture 2>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the grass lane runs from the stile at the left edge around the old oak in the middle distance and toward the pony-chaise on the right-hand verge. Hawthorn hedges fill both side edges. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows her; <Picture 1> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, morning sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot on <Subject 1> and <Subject 2> side by side on the chaise seat as she hands him the reins and the chaise starts down the lane. The camera is on the lane in front of the pony at seat height, two paces away, a 50mm lens. Sun comes from the RIGHT and lights both faces. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the LEFT third, her head a third of the frame's height. The camera pulls back ahead of the chaise across the whole shot as <Subject 1> passes the reins to <Subject 2>, from 00:00 to 00:02. <Subject 1> (S1), on screen, oval face with high cheekbones, with a clipped English voice at an even pace, says: <d>[English] Give me the reins.</d> Her mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, the chaise rolls forward, and the roll continues to the last frame of the shot. Behind them three men struggle beside the chaise while two women sit inside, from 00:00 to 00:07. <Subject 1>'s mouth is closed from 00:02 to 00:07 while he passes the reins to <Subject 2>. By 00:07 the camera is pulling back through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "setup",
+    "setup": "barnet_crossing",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_12.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.708333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 104931,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the narrow sandy lane enters the main road through the centre of the picture. A tall clipped privet hedge fills the left edge and ends at the white gate of the red-brick corner house. The opposite villa wall keeps the right edge. Beyond the opening. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide from the hill above Barnet: the great north road below is one solid torrent of carts, cabs and people, with villas burning beyond it under rolling smoke. The camera is at the top of the lane where it meets the hill, at the height of a standing man, two hundred yards from the road, a 35mm lens. The sun comes from the RIGHT through the smoke in a hot orange haze. At the first frame tHE FOCUS OF THE PICTURE IS THE TORRENT ON THE MAIN ROAD running across the CENTRE from the LEFT edge to the RIGHT edge. Burning villas send smoke into the TOP third, the green slope of the lane fills the BOTTOM third, and a small pony-chaise stands at the BOTTOM LEFT where the lane drops to the road. A church tower stands dark against the smoke at the TOP RIGHT, and a broken fence runs down the slope at the BOTTOM RIGHT. The camera cranes up over the torrent across the whole shot as the torrent on the road flows on, from 00:00 to 00:04. At 00:04 flames lift above the villa roofs, and the lift continues to the last frame of the shot. Beyond the foreground a boiling stream of people, from 00:00 to 00:08. By 00:08 the camera is craning up through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "friction",
+    "setup": "barnet_crossing",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/mrs_elphinstone/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_13.png"
+    ],
+    "faces": [
+      "mrs_elphinstone"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l14.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.541667,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 104932,
+    "prompt": "subject_definitions:\n<Subject 1> is Mrs. Elphinstone in <Picture 1>: Woman of 41, 5 ft 1 in, short and plump with a soft rounded figure. Round face with full cheeks, small pale blue eyes, small mouth. Fair pink skin freckled across the nose. Light brown hair threaded with grey, worn in a smooth bun at the crown. Wearing: White muslin summer dress with high lace collar, full puffed sleeves and a white satin sash, long white skirt. Wide white straw hat trimmed with white ribbon and a short veil. White kid gloves. Brown leather travelling bag clutched on her lap. <Picture 1> defines this woman alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in the narrow sandy lane enters the main road through the centre of the picture. A tall clipped privet hedge fills the left edge and ends at the white gate of the red-brick corner house. The opposite villa wall keeps the right edge. Beyond the opening. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows her; <Picture 1> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> in the back of the chaise, clutching her white skirt and staring at the road ahead. The camera is beside the chaise at her eye level, two paces away, a 50mm lens. The orange light of the fires comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'S FACE at the CENTRE, her head a third of the frame's height, her mouth open. Her hands rest in her lap at the BOTTOM third, the black chaise hood rises behind her at the LEFT edge, and grey smoke fills the TOP RIGHT. Her straw hat sits askew on her hair. The camera pushes in on <Subject 1> across the whole shot as she grips her skirt tighter, from 00:00 to 00:03. <Subject 1> (S1), on screen, woman of 41, with a clipped English voice at an even pace, says: <d>[English] Good heavens! What is this you are driving us into?</d> Her mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, she turns her head toward the road as she speaks, and the turn continues to the last frame of the shot. Behind <Subject 1> many refugees, carts, horses, and pedestrians stream north along the road, from 00:00 to 00:05. By 00:05 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "spike",
+    "setup": "barnet_crossing",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_14.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.541667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 104933,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the narrow sandy lane enters the main road through the centre of the picture. A tall clipped privet hedge fills the left edge and ends at the white gate of the red-brick corner house. The opposite villa wall keeps the right edge. Beyond the opening. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on <Subject 1> at the hedge by the road, lifting a fallen child from the dust as carts roll past behind him. The camera is on the verge four paces from him at waist height, a 50mm lens. Hazy sun comes from the LEFT and lights his back. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the CENTRE, bent over the small child in the dust. The tall hedge closes the LEFT edge, a cart wheel and a horse's legs pass at the RIGHT edge, and dust hangs across the TOP third. A child's dropped cap lies in the dust at the BOTTOM RIGHT, and the hedge leaves are grey with dust at the LEFT edge. The camera orbits to the left around <Subject 1> across the whole shot as <Subject 1> lifts the child out of the dust, from 00:00 to 00:04. At 00:04 a cart wheel rolls past behind him, and the roll continues to the last frame of the shot. Behind <Subject 1> many refugees, carts, horses, and pedestrians stream north along the road, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he lifts the child out of the dust. By 00:08 the camera is orbiting through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "reaction",
+    "setup": "barnet_crossing",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/characters/lord_garrick/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_15.png"
+    ],
+    "faces": [
+      "narrators_brother",
+      "lord_garrick"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l16.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.791667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 104934,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Lord Garrick in <Picture 2>: Large square pale face with heavy jowls, strong hooked nose, deep-set dark eyes. Thick silver-white hair brushed straight back from a high forehead. Short square-cut white chin beard along the jaw with a shaven upper lip. Soft white hands with swollen knuckles. Wearing: Deep claret quilted silk dressing gown with a black silk cord belt, over a white linen nightshirt soaked at the collar, black leather slippers. Gold signet ring on the left little finger. Bareheaded, lying on a white canvas stretcher, face ashen. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the narrow sandy lane enters the main road through the centre of the picture. A tall clipped privet hedge fills the left edge and ends at the white gate of the red-brick corner house. The opposite villa wall keeps the right edge. Beyond the opening. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot on <Subject 1> crouched at the roadside beside <Subject 2> on his stretcher, speaking anxiously to him over the noise of the road. The camera is at crouching height on the verge, two paces from them, a 50mm lens. Hazy light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'S FACE at the RIGHT third, his head a third of the frame's height, turned toward the stretcher. <Subject 2> lies on the stretcher at the LEFT third in his claret dressing gown, the stretcher poles run along the BOTTOM edge. The camera pushes in on <Subject 1> across the whole shot as he leans toward the stretcher as he speaks, from 00:00 to 00:05. <Subject 1> (S1), on screen, long face with a square jaw and a small cleft chin; long straight nose, with a clipped English voice at an even pace, says: <d>[English] There may be a tap. We have no water. I dare not leave my people.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, <Subject 2> lifts one hand from the blanket, and the lift continues to the last frame of the shot. Behind them many refugees, carts, horses, and pedestrians stream north along the road, from 00:00 to 00:06. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "spike",
+    "setup": "barnet_crossing",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_16.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 9.0,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 104935,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in the narrow sandy lane enters the main road through the centre of the picture. A tall clipped privet hedge fills the left edge and ends at the white gate of the red-brick corner house. The opposite villa wall keeps the right edge. Beyond the opening. [Shot 1] runs from 00:00 to 00:09. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on an insert on the road at hoof level: gold sovereigns scattered in the dust under a horse's hooves and a cart wheel, a man's hand reaching for them; only that object and what touches it is in frame. The camera is at road level one pace from the coins, a 50mm lens. Dusty sun comes from the TOP LEFT. At the first frame tHE FOCUS OF THE PICTURE IS THE SCATTERED SOVEREIGNS at the CENTRE, bright in the dust. A horse's hooves stamp at the TOP third, a cart wheel turns at the RIGHT edge, and a man's hand reaches in from the LEFT edge. Hoof prints and wheel ruts score the dust at the BOTTOM edge, and a dropped purse lies open at the RIGHT third. The camera keeps a locked-off frame as the hand reaches toward the coins, from 00:00 to 00:04. At 00:04 the cart wheel rolls past the coins in the dust, and the roll continues to the last frame of the shot. By 00:09 the action of that shot continues through the last frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "friction",
+    "setup": "barnet_crossing",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_17.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 1.416667,
+    "frames": 56,
+    "seconds": 2.33,
+    "steps": 8,
+    "seed": 112855,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 2.33-second take of 1 shot in the narrow sandy lane enters the main road through the centre of the picture. A tall clipped privet hedge fills the left edge and ends at the white gate of the red-brick corner house. The opposite villa wall keeps the right edge. Beyond the opening. [Shot 1] runs from 00:00 to 00:02. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:02. The shot opens on a medium shot on <Subject 1> at the pony's head, turning the frightened animal back toward the lane while the traffic presses past. The camera is on the road four paces from him at chest height, a 50mm lens. Hazy sun comes from the RIGHT and lights his face. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the CENTRE, his hand at the pony's head. The pony's head fills the LEFT third, the black chaise stands behind him at the RIGHT third, and carts and dust pass across the TOP third. The pony's blinkers and brass harness catch the light at the LEFT third, and dust drifts across the road at the TOP RIGHT. The camera keeps a locked-off frame as he turns the pony's head back toward the lane, from 00:00 to 00:01. At 00:01 the pony tosses its mane, and the movement continues to the last frame of the shot. Behind <Subject 1> many refugees, carts, horses, and pedestrians stream north along the road, from 00:00 to 00:02. By 00:02 the action of that shot continues through the last frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "turn",
+    "setup": "barnet_crossing",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/characters/miss_elphinstone/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_18.png"
+    ],
+    "faces": [
+      "narrators_brother",
+      "miss_elphinstone"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l18.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.75,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 104937,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Miss Elphinstone in <Picture 2>: Oval face with high cheekbones, dark brown eyes under straight black brows, firm mouth. Clear olive-pale skin. Thick near-black hair worn in a low coiled chignon at the nape. Wearing: Dark aubergine serge travelling costume: fitted jacket with narrow puffed shoulders over a white high-collared blouse, long gored skirt to the ankle. Black felt hat with a wide brim turned up on one side and a black cock feather. Black gauntlet gloves. Carriage whip in one hand, black revolver in the other. <Picture 2> defines this woman alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the narrow sandy lane enters the main road through the centre of the picture. A tall clipped privet hedge fills the left edge and ends at the white gate of the red-brick corner house. The opposite villa wall keeps the right edge. Beyond the opening. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Hertfordshire, 1894, summer sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot on <Subject 1> standing at the chaise and <Subject 2> on its seat, pointing across the road toward a gap in the traffic. The camera is on the road at the chaise's step at chest height, two paces away, a 50mm lens. Hazy sun comes from the LEFT and lights both faces. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the LEFT third, his head a third of the frame's height, his arm pointing to the RIGHT. <Subject 2> sits on the chaise seat at the RIGHT third, the black chaise fills the BOTTOM RIGHT. The camera pushes in on <Subject 1> across the whole shot as <Subject 1> points across the road, from 00:00 to 00:02. <Subject 1> (S1), on screen, long face with a square jaw and a small cleft chin; long straight nose, with a clipped English voice at an even pace, says: <d>[English] We must go that way.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, <Subject 2> turns her head to look, and the turn continues to the last frame of the shot. Behind them many refugees, carts, horses, and pedestrians stream north along the road, from 00:00 to 00:08. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "runout",
+    "setup": "hadley_water",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_19.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.5,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 104938,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the Hadley road runs from the lower left toward the far right beside a shallow gravelly brook. Pollard willows form a broken line along the right edge. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Barnet, 1894, afternoon sunlight from the west, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide over the brook at Hadley: the chaise stands on the road beyond the willows while refugees kneel at the water to drink. The camera is on the far bank of the brook at the height of a standing man, thirty yards from the chaise, a 35mm lens. Afternoon sun comes from the LEFT through the willows. At the first frame tHE FOCUS OF THE PICTURE IS THE SHALLOW BROOK running from the BOTTOM edge to the CENTRE, with refugees kneeling at its edge. The black pony-chaise stands small on the road at the LEFT third, pollard willows line the RIGHT edge, and the church tower rises at the TOP LEFT. A dropped bundle lies on the bank at the BOTTOM RIGHT, and willow leaves trail into the water at the RIGHT third. The camera tracks sideways to the right along the bank across the whole shot as the refugees cup water to their mouths, from 00:00 to 00:04. At 00:04 the pony lowers its head toward the brook, and the movement continues to the last frame of the shot. Beyond the foreground people kneel, drink, and push toward the brook, from 00:00 to 00:08. By 00:08 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "reaction",
+    "setup": "east_barnet_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_20.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.458333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 104939,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the East Barnet field fills the foreground with a hedge and field gate along the lower edge. The railway cutting runs horizontally through the middle distance. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Barnet, 1894, evening sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert on two trains passing one after the other through a cutting at dusk, their carriage roofs crowded with people; only that object and what touches it is in frame. The camera is on the embankment above the cutting at the height of a standing man, twenty yards from the line, a 35mm lens. The last sunset light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS THE NEAREST ENGINE at the CENTRE, smoke pouring from its funnel. The second train runs along the RIGHT edge, the rails fill the BOTTOM third, and the evening sky fills the TOP third. Grass grows along the cutting at the BOTTOM LEFT, and smoke trails behind the engines across the TOP RIGHT. The camera pans to the left with the trains across the whole shot as the engines drive forward, from 00:00 to 00:04. At 00:04 smoke streams back over the crowded roofs, and the movement continues to the last frame of the shot. By 00:08 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "reaction",
+    "setup": "east_barnet_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_21.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.333333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 104940,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the East Barnet field fills the foreground with a hedge and field gate along the lower edge. The railway cutting runs horizontally through the middle distance. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Barnet, 1894, evening sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on <Subject 1> standing by the halted chaise in a field near East Barnet at dusk, looking back down the road. The camera is on the grass verge four paces from him at chest height, a 50mm lens. The last light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the CENTRE, standing with his bandaged hand at his side. The chaise stands at the LEFT third, the wooden gate closes the RIGHT edge, and the darkening sky fills the TOP third. The pony stands with lowered head behind the chaise at the LEFT edge, and the road runs pale into the dusk at the RIGHT third. The camera pulls back from <Subject 1> to the chaise across the whole shot as he turns his head to look back down the road, from 00:00 to 00:03. At 00:03 the pony shifts its weight behind him, and the movement continues to the last frame of the shot. Behind <Subject 1> many fugitives pass the field and railway embankment toward the east, from 00:00 to 00:06. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he turns his head to look back down the road. By 00:06 the camera is pulling back through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "runout",
+    "setup": "east_barnet_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/characters/miss_elphinstone/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_22.png"
+    ],
+    "faces": [
+      "narrators_brother",
+      "miss_elphinstone"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.25,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 104941,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Miss Elphinstone in <Picture 2>: Oval face with high cheekbones, dark brown eyes under straight black brows, firm mouth. Clear olive-pale skin. Thick near-black hair worn in a low coiled chignon at the nape. Wearing: Dark aubergine serge travelling costume: fitted jacket with narrow puffed shoulders over a white high-collared blouse, long gored skirt to the ankle. Black felt hat with a wide brim turned up on one side and a black cock feather. Black gauntlet gloves. Carriage whip in one hand, black revolver in the other. <Picture 2> defines this woman alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the East Barnet field fills the foreground with a hedge and field gate along the lower edge. The railway cutting runs horizontally through the middle distance. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Barnet, 1894, evening sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot on <Subject 1> and <Subject 2> standing beside the halted chaise in the cold dusk, he keeping watch beside her. The camera is on the verge at the chaise step at chest height, two paces away, a 50mm lens. The last light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 2> at the LEFT third, her head a third of the frame's height, standing beside the chaise. <Subject 1> stands at the RIGHT third, his head a third of the frame's height, watching the road, and the dusk sky fills the TOP third. The chaise's dark hood rises behind her at the LEFT edge, and the field gate shows dim beyond him at the RIGHT edge. The camera cranes up across the whole shot as <Subject 1> keeps his eyes on the road, from 00:00 to 00:03. At 00:03 <Subject 2> draws her coat tighter against the cold, and the movement continues to the last frame of the shot. Behind them many fugitives pass the field and railway embankment toward the east, from 00:00 to 00:06. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he keeps his eyes on the road. By 00:06 the camera is craning up through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "runout",
+    "setup": "east_barnet_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_23.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 9.125,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 104942,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in the East Barnet field fills the foreground with a hedge and field gate along the lower edge. The railway cutting runs horizontally through the middle distance. [Shot 1] runs from 00:00 to 00:09. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Barnet, 1894, evening sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on an insert on the road beside the hedge at evening as a few fugitives walk past into the dark; only that object and what touches it is in frame. The camera is at the gate post at waist height, ten yards from the road, a 35mm lens. Deep blue dusk light comes from the TOP. At the first frame tHE FOCUS OF THE PICTURE IS THE PALE ROAD running from the BOTTOM edge to the CENTRE. The hedge fills the LEFT edge, walkers pass small at the CENTRE, and the deep blue sky fills the TOP third. Hedges line both sides of the road at the LEFT and RIGHT thirds, and a lantern glows small among the walkers at the CENTRE. The camera pushes in toward THE FOCUS OF THE PICTURE IS as the walkers move along the road toward the dark, from 00:00 to 00:04. At 00:04 a lantern swings in one walker's hand, and the walk continues to the last frame of the shot. By 00:09 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "transition",
+    "setup": "east_barnet_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep16/storyboard/h3/shot_24.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 1.625,
+    "frames": 56,
+    "seconds": 2.33,
+    "steps": 8,
+    "seed": 112862,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 2.33-second take of 1 shot in the East Barnet field fills the foreground with a hedge and field gate along the lower edge. The railway cutting runs horizontally through the middle distance. [Shot 1] runs from 00:00 to 00:02. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Barnet, 1894, evening sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:02. The shot opens on an insert on the dark field beyond the hedge under the first stars, the road and passing fugitives beyond the chaise; only that object and what touches it is in frame. The camera is low in the grass at knee height, twenty yards from the chaise, a 35mm lens. Starlight. At the first frame tHE FOCUS OF THE PICTURE IS THE CHAise at the CENTRE beside the hedge. Dark grass fills the BOTTOM third, the hedge stands at the LEFT edge, and the first stars show across the TOP third. The pony stands dark beside the chaise at the RIGHT third, and the road runs pale along the BOTTOM RIGHT toward the gate. A thin mist lies over the grass at the CENTRE, and the black hedge line closes the far horizon. The camera cranes up across the whole shot as the grass stirs in the night wind, from 00:00 to 00:01. At 00:01 the pony shifts beside the chaise, and the movement continues to the last frame of the shot. By 00:02 the camera is craning up through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 25,
+    "shots": [
+      25
+    ],
+    "section": "button",
+    "setup": "east_barnet_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet_front.png",
+      "refs/characters/miss_elphinstone/sheet_front.png",
+      "episodes/ep16/storyboard/h3/shot_25.png"
+    ],
+    "faces": [
+      "narrators_brother",
+      "miss_elphinstone"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.375,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 104944,
+    "prompt": "subject_definitions:\n<Subject 1> is the brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone Norfolk jacket torn at the right cuff, left wrist bound in a blood-stiffened white handkerchief, fawn trousers dusty to the knee, maroon tie loosened. Split lower lip, swollen bruised jaw, bloodstained knuckles, thin red whip welt across the cheek and the backs of both hands. Brown flat cloth cap. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Miss Elphinstone in <Picture 2>: Oval face with high cheekbones, dark brown eyes under straight black brows, firm mouth. Clear olive-pale skin. Thick near-black hair worn in a low coiled chignon at the nape. Wearing: Dark aubergine serge travelling costume: fitted jacket with narrow puffed shoulders over a white high-collared blouse, long gored skirt to the ankle. Black felt hat with a wide brim turned up on one side and a black cock feather. Black gauntlet gloves. Carriage whip in one hand, black revolver in the other. <Picture 2> defines this woman alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the East Barnet field fills the foreground with a hedge and field gate along the lower edge. The railway cutting runs horizontally through the middle distance. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the woman in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows her; <Picture 2> serves as a definition of the woman and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\nEvery background figure is a stranger with their own face, build and dress, each one distinct from every Subject and from every named character.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Barnet, 1894, evening sunlight from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on <Subject 1> and <Subject 2> standing awake beside the chaise in the cold night, he standing guard beside her. The camera is on the verge four paces from them at chest height, a 50mm lens. Faint starlight comes from the RIGHT and edges both faces. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> at the RIGHT third, standing, his bandaged hand at his side. <Subject 2> stands at the LEFT third beside the black chaise, the black chaise fills the LEFT edge, and the dark road runs away across the TOP third. Starlight edges the chaise's iron wheel at the BOTTOM LEFT, and the dark field gate stands at the RIGHT edge. The camera pulls back from the chaise across the whole shot as <Subject 1> looks out at the dark road, from 00:00 to 00:04. At 00:04 <Subject 2> pulls her shawl around her shoulders, and the pull continues to the last frame of the shot. Behind them many fugitives pass the field and railway embankment toward the east, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he looks out at the dark road. By 00:08 the camera is pulling back through the last frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  }
+]

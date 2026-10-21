@@ -1,0 +1,421 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "char-john_watson_corridor.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "char-stamford.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: A long stone corridor inside Saint Bartholomew's Hospital, 1881: flagstone floor worn hollow, whitewashed walls stained with damp, dun-coloured doors, tall barred windows on one side throwing cold grey daylight in bars across the floor, unlit gas brackets, an open doorway to a dissecting room with a slab under a high window, and at the far end a low arched passage. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium shot from behind at the corridor's near end.\n<Picture 5> is the first frame of [Shot 2], a close shot of <Subject 2> in strict profile walking.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 3>, a long stone corridor inside Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: a medium shot from behind at the corridor's near end: <Subject 2> a pace ahead in the black frock coat, <Subject 1> bareheaded, the brown bowler in the hand on the left of frame, the black stick swinging in the bare hand on the right of frame; bars of window light on the flagstones ahead. The camera tracks behind them at <Subject 2>'s normal walking pace for the whole shot as <Subject 1> limps along on his stick at a normal walking pace while <Subject 2> walks at a normal pace a step ahead of him, from 00:00 to 00:01. At 00:01 both men advance three full strides down the corridor and the bars of window light pass under their boots. At 00:02 <Subject 2>'s head turns back over his shoulder to <Subject 1> and forward again, and the turn continues to the last frame of the shot. Behind them two porters in leather aprons halted at the left-hand wall with a covered wheeled trolley between them, and a nurse in a white cap and long apron at a dun-coloured door beyond them with a folded pile of linen level in both arms, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he limps along on his stick at a normal walking pace.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to a close shot of <Subject 2> in strict profile walking, beginning from <Picture 5>: a quarter of the way down the corridor, dark hair, round clean-shaven face, mouth closed, eyes ahead; whitewashed wall passing behind. The camera is against the window wall on the RIGHT-hand side of the corridor. The camera tracks beside him in profile at his normal walking pace for the whole shot as the whitewashed wall and its damp stains stream past behind him as he walks limping on his stick, from 00:03 to 00:06. At 00:06 he turns his head toward <Subject 1> beside him and faces ahead again, and the turn continues to the last frame of the shot. Behind him one student in a black coat holding an open folio in both hands at the whitewashed wall, and a charwoman kneeling at its foot with a zinc pail beside her, from 00:03 to 00:08. <Subject 2>'s mouth is closed from 00:03 to 00:06 while he turns his head toward <Subject 1> beside him and faces ahead again.\n\noverall_soundscape: The ambience of a long stone corridor inside Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 1344,
+      "length": 175,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ],
+      "ref_images.ref_image_3": [
+        "21",
+        0
+      ],
+      "ref_images.ref_image_4": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "28",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 82009
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_09",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "plate_corridor.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q09_0.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_4"
+    }
+  },
+  "22": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q09_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_5"
+    }
+  },
+  "23": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q09_0.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q09_0.png @ 0"
+    }
+  },
+  "24": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "23",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor image @ 0"
+    }
+  },
+  "25": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q09_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q09_1.png @ 77"
+    }
+  },
+  "26": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "24",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "25",
+        0
+      ],
+      "frame_idx": 77
+    },
+    "_meta": {
+      "title": "anchor image @ 77"
+    }
+  },
+  "27": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_09.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "28": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "26",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "27",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

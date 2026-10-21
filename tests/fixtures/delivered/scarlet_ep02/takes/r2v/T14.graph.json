@@ -1,0 +1,407 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "char-john_watson_indoor.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "plate_doorway.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is the location in <Picture 2>: The panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast, standing half open onto the dim landing beyond, its brass knob and finger plate catching the light, a mahogany hat stand with a brown bowler on its peg beside the architrave and a folded grey wool shawl two hands long over the peg below it, the red Turkey carpet running up to the threshold, and two light sources on the leaf, the grey window light of the room and the landing's own amber gas bracket burning on the wall beyond the open leaf, each panel naming which of the two lies on the door. A caller in a shabby grey coat and a battered black felt hat stands on the landing boards at the threshold with his back to the camera in the panels that show him, the back of his grey collar and his hat brim the only things of him in frame. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot on the panelled landing door standing half open at the RIGHT of frame.\n<Picture 4> is the first frame of [Shot 2], an insert on the mahogany hat stand beside the door architrave.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 2>, the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 4> and runs from 00:04 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 3>: a medium shot on the panelled landing door standing half open at the RIGHT of frame: a shabby grey-coated back and a battered black felt hat halted on the landing boards at the threshold, the back of the grey collar and the hat brim the only things of him in frame, the mahogany hat stand in the RIGHT corner, the red Turkey carpet running to the bottom LEFT, amber gaslight from the landing bracket along the open leaf and the two broad sash windows small and black at the TOP LEFT. The camera is at the carpet's centre twelve feet six inches back from the threshold at hip height, three feet nine inches above the carpet. The camera pushes in a foot and a half toward the threshold as the grey-coated shoulder turns a quarter turn on the landing boards toward the open leaf, from 00:00 to 00:04.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to an insert on the mahogany hat stand beside the door architrave, beginning from <Picture 4>: a brown bowler hanging by its brim on the upper peg, its crown as wide as a spread hand and a quarter of the frame's width, a folded grey wool shawl two hands long over the peg below it, the turned mahogany upright filling the CENTRE of frame, the brass finger plate of the panelled door bright at the RIGHT, buff striped wallpaper behind, amber gaslight from the landing along the LEFT; only what <Picture 4> shows is in frame. The camera is at the carpet's centre six feet back from the architrave at chest height. At the first frame The brown bowler hangs by its brim on the upper peg at the CENTRE of frame, its crown as wide as a spread hand. The camera pushes in a hand's breadth on the brown bowler's crown as the grey shawl swings a thumb's width on its peg, from 00:04 to 00:08.\n\noverall_soundscape: The ambience of the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 175,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ],
+      "ref_images.ref_image_3": [
+        "21",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "27",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 83014
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_14",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q14_0.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q14_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_4"
+    }
+  },
+  "22": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q14_0.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q14_0.png @ 0"
+    }
+  },
+  "23": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "22",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor image @ 0"
+    }
+  },
+  "24": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q14_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q14_1.png @ 90"
+    }
+  },
+  "25": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "23",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "24",
+        0
+      ],
+      "frame_idx": 90
+    },
+    "_meta": {
+      "title": "anchor image @ 90"
+    }
+  },
+  "26": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_14.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "27": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "25",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "26",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

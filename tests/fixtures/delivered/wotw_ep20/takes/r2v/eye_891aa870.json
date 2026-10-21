@@ -1,0 +1,155 @@
+{
+ "sha8": "891aa870",
+ "verdict": "flagged",
+ "note": "content at T05: 3 figure(s) for 2 declared (2 cast + 0 extras), 2 of them copies of another; content at T06: text or lettering in the picture; content at T07: text or lettering in the picture; letterbox at T11: 3/3 frames letterboxed; letterbox at T13: 1/3 frames letterboxed; letterbox at T23: 2/3 frames letterboxed; frozen-whole at T24: 98% static, run 4.12s HARD: the whole frame stands still; letterbox at T25: 3/3 frames letterboxed; frozen-whole at T25: 100% static, run 5.62s HARD: the whole frame stands still; letterbox at T27: 3/3 frames letterboxed -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4",
+  "T25.mp4",
+  "T26.mp4",
+  "T27.mp4"
+ ],
+ "signed_at": "2026-10-08T02:12:02Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "content",
+   "where": "T05",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_05.png"
+   },
+   "severity": "normal",
+   "note": "3 figure(s) for 2 declared (2 cast + 0 extras), 2 of them copies of another"
+  },
+  {
+   "kind": "content",
+   "where": "T06",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "content",
+   "where": "T07",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_07.png"
+   },
+   "severity": "normal",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "letterbox",
+   "where": "T11",
+   "evidence": {
+    "value": 3,
+    "penalty": 60.0,
+    "repeated": false,
+    "still": "storyboard/shot_11.png"
+   },
+   "severity": "normal",
+   "note": "3/3 frames letterboxed"
+  },
+  {
+   "kind": "letterbox",
+   "where": "T13",
+   "evidence": {
+    "value": 1,
+    "penalty": 60.0,
+    "repeated": false,
+    "still": "storyboard/shot_13.png"
+   },
+   "severity": "normal",
+   "note": "1/3 frames letterboxed"
+  },
+  {
+   "kind": "letterbox",
+   "where": "T23",
+   "evidence": {
+    "value": 2,
+    "penalty": 60.0,
+    "repeated": true,
+    "still": "storyboard/shot_23.png"
+   },
+   "severity": "normal",
+   "note": "2/3 frames letterboxed"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T24",
+   "evidence": {
+    "value": 0.982,
+    "penalty": 58.9,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "98% static, run 4.12s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "letterbox",
+   "where": "T25",
+   "evidence": {
+    "value": 3,
+    "penalty": 60.0,
+    "repeated": true,
+    "still": "storyboard/shot_25.png"
+   },
+   "severity": "normal",
+   "note": "3/3 frames letterboxed"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T25",
+   "evidence": {
+    "value": 1.0,
+    "penalty": 60.0,
+    "repeated": true,
+    "still": "storyboard/shot_25.png"
+   },
+   "severity": "normal",
+   "note": "100% static, run 5.62s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "letterbox",
+   "where": "T27",
+   "evidence": {
+    "value": 3,
+    "penalty": 60.0,
+    "repeated": false,
+    "still": "storyboard/shot_27.png"
+   },
+   "severity": "normal",
+   "note": "3/3 frames letterboxed"
+  }
+ ],
+ "terminal": "still"
+}

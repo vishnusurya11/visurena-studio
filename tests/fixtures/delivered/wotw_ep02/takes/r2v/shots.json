@@ -1,0 +1,882 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "study",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/narrators_study/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.25,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 83000,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the narrator's upstairs study at Maybury at night in 1894, the camera within the room with walls closed on all sides: a mahogany writing-table with a green leather top and stacked manuscript sheets, a brass inkstand, a green-shaded brass oil lamp, a pair of glazed French windows with a low iron rail and a raised cream blind showing the starry night sky and dark beech tops, oak bookcases and a globe; the green-shaded lamp is the only light and it comes from low at the right onto the table and the pages, and leaves the bookcases, the corners and the night in the windows black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, inside the narrator's upstairs study at Maybury at night in 1894. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lamp from the right, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide of the dark study at night: <Subject 1> in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left bent over the writing-table in the green lamplight with his back to the tall French windows, his pen already moving across the page, and through the glass behind him a green-white streak of flame crossing the starry sky from the right toward the left. The camera is inside the study by the bookcase at a standing man's eye, four long strides from the table, a 35mm lens. The lamp comes from LOW at the RIGHT. At the first frame the tall French windows fill the LEFT half of the frame, the starry sky and the dark beech tops in the glass and the green-white streak crossing it at the TOP. The Narrator sits bent at the writing-table at the CENTRE, his back three-quarters to the windows, his head a fifth of the frame's height. The green lamp glows at the RIGHT third and the bookcase is black at the RIGHT edge. The shot is inside this place: Interior, inside the narrator's upstairs study at Maybury at night in 1894, the camera within the room with walls closed on all sides: a mahogany writing-table with a green leather top and stacked manuscript sheets, a brass inkstand, a green-shaded brass oil lamp. The camera pans from the green lamp across to the French windows as the green-white streak of flame races across the starry sky beyond the glass and leaves a glowing green trail, from 00:00 to 00:04. At 00:04 <Subject 1>'s hand drives the pen along the line of writing, and the movement continues to the last frame of the shot. By 00:08 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the narrator's upstairs study at Maybury at night in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 415.6,
+    "waited_s": 411.4,
+    "rel_path": "episodes/ep02/takes/r2v/T00.mp4"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "study",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/narrators_study/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.708333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83001,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Interior, inside the narrator's upstairs study at Maybury at night in 1894, the camera within the room with walls closed on all sides: a mahogany writing-table with a green leather top and stacked manuscript sheets, a brass inkstand, a green-shaded brass oil lamp, a pair of glazed French windows with a low iron rail and a raised cream blind showing the starry night sky and dark beech tops, oak bookcases and a globe; the green-shaded lamp is the only light and it comes from low at the right onto the table and the pages, and leaves the bookcases, the corners and the night in the windows black <Picture 2> defines this room alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, inside the narrator's upstairs study at Maybury at night in 1894. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, lamp from the right, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left at the writing-table under the green-shaded lamp, the long oval face bent to the manuscript, the steel pen already moving along a line, a green flicker of light on the window glass behind his shoulder. The camera is across the writing-table level with his eyes, an arm's length from him, a 50mm lens. The lamp comes from LOW at the RIGHT. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from his dark parted hair at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height, bent to the page. The dark window glass stands behind his LEFT shoulder and the green lamp glows at the RIGHT edge. The shot is inside this place: Interior, inside the narrator's upstairs study at Maybury at night in 1894, the camera within the room with walls closed on all sides: a mahogany writing-table with a green leather top and stacked manuscript sheets, a brass inkstand, a green-shaded brass oil lamp. The camera keeps a locked-off frame as he dips the pen in the brass inkstand and writes on along the line, from 00:00 to 00:03. At 00:03 a green glow washes across the window glass behind him and fades, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he dips the pen in the brass inkstand. By 00:06 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of inside the narrator's upstairs study at Maybury at night in 1894 runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 236.9,
+    "waited_s": 240.7,
+    "rel_path": "episodes/ep02/takes/r2v/T01.mp4"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "heath",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83002,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces, a pale sandy road crossing the heath at the left, and on the horizon the black roofs and church tower of Woking among scattered pines under a lemon-yellow sky; the low sun comes from BEHIND the far pines, gold on the sand heaps, and leaves the near heather black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from behind, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide of Horsell Common at sunrise: <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee small among the knee-deep heather, already wading toward the raw mound of flung yellow sand a hundred yards off, a thin blue smoke rising from burning heather beyond it and the church tower of Woking on the horizon under the lemon sky. The camera is on the heath at a standing man's eye, far behind him, a 35mm lens. The low sun comes from BEHIND the far pines. At the first frame the raw mound of flung yellow sand lies across the CENTRE of the frame, the height of a fingernail, the blue smoke rising behind it. Ogilvy wades in the heather at the LEFT third, the height of a finger, his back to the camera. The two young pines stand at the LEFT edge and the RIGHT third, and the lemon sky fills the TOP half. The shot is inside this place: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces. The camera descends from the lemon sky over the far pines to the heather as <Subject 1> wades on through the heather toward the sand mound, from 00:00 to 00:03. At 00:03 the thin blue smoke rises and drifts to the right, and the movement continues to the last frame of the shot. By 00:06 the camera is descending through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 263.4,
+    "waited_s": 260.6,
+    "rel_path": "episodes/ep02/takes/r2v/T02.mp4"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "setup",
+    "setup": "heath",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.25,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83003,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces, a pale sandy road crossing the heath at the left, and on the horizon the black roofs and church tower of Woking among scattered pines under a lemon-yellow sky; the low sun comes from BEHIND the far pines, gold on the sand heaps, and leaves the near heather black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from behind, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot of <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee striding through the knee-deep heather at dawn, turned three-quarters toward the camera, one hand pushing a furze bush aside, his eyes on the heaps of flung sand ahead. The camera is beside him in the heather at his shoulder height, three long strides from him, a 35mm lens. The low sun comes from BEHIND him onto his hair. At the first frame Ogilvy strides at the CENTRE of the frame from the heather at the BOTTOM edge to his wild auburn hair at the TOP third, his head a quarter of the frame's height, turned three-quarters toward the camera. The flung yellow sand heaps rise at the RIGHT third and the lemon sky fills the TOP edge. The shot is inside this place: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces. The camera tracks beside <Subject 1> as he strides at a normal walking pace through the heather toward the flung sand as the furze springs back behind his hand, from 00:00 to 00:03. At 00:03 his head lifts toward the smoke, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his head lifts toward the smoke. By 00:06 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 241.9,
+    "waited_s": 245.7,
+    "rel_path": "episodes/ep02/takes/r2v/T03.mp4"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "setup",
+    "setup": "pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83206,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the far rim under a pale gold dawn sky with thin blue smoke rising; the low sun comes from the LEFT over the far rim, hard and yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on high wide looking down into the raw pit at sunrise: the huge crusted cylinder lying half-buried across it, its huge circular end tilted up out of the sand, splintered fir wood on the gravel, and at the charred rim at the bottom left the small figure of <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee standing and staring, the curved crusted hull towering many times his height and running out of the frame at both sides. The camera is high on the rim of the pit looking down into it, a 35mm lens, a high angle. The low sun comes from the LEFT. At the first frame the crusted circular end of the cylinder fills the CENTRE of the frame, half the frame's height, tilted up out of the sand. The yellow sand walls slope in from the LEFT edge and the RIGHT edge. The shot is inside this place: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand. The camera tilts down from the pines on the far rim to the crusted circular end of the cylinder as a thin haze of heat shimmers off the crust, from 00:00 to 00:04. At 00:04 <Subject 1> leans forward over the rim, and the lean continues to the last frame of the shot. By 00:07 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "iter3: the pit's one picture redrawn (v1 drew a short fat patchwork coin about two men tall; v2 is one long crusted hull, the chapter's sunrise); every take that stages it is re-rendered",
+    "measured_seconds": 7.29,
+    "render_s": 524.3,
+    "waited_s": 526.6,
+    "rel_path": "episodes/ep02/takes/r2v/T04.mp4"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "setup",
+    "setup": "pit",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l05.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.5,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 83005,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, its huge circular end tilted up out of the sand, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the far rim under a pale sky; the low sun comes from the LEFT over the far rim, hard and yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee at the edge of the pit, sweat on his broad ruddy face, the full auburn beard, his spectacles pushed up on his forehead, the crusted curve of the cylinder filling the pit behind him. The camera is on the rim of the pit level with his eyes, an arm's length from him, a 50mm lens. The low sun comes from the LEFT onto his face. At the first frame Ogilvy's head and shoulders fill the CENTRE of the frame from his wild auburn hair at the TOP third to the mustard-ochre tweed at the BOTTOM edge. The shot is inside this place: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, its huge circular end tilted up out of the sand. The camera keeps a locked-off frame as he draws his spectacles down onto his nose and stares at the cylinder, from 00:00 to 00:05. <Subject 1> (S1), on screen, broad ruddy face, with a clipped English voice at an even pace, says: <d>[English] Good Lord. No meteorite was ever that shape.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, he shakes his head and drags the back of his hand across his forehead, and the movement continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 252.5,
+    "waited_s": 250.8,
+    "rel_path": "episodes/ep02/takes/r2v/T05.mp4"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "setup",
+    "setup": "pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 83410,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the far rim under a pale gold dawn sky with thin blue smoke rising; the low sun comes from the LEFT over the far rim, hard and yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian cylinder in <Picture 2>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 1>, a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on an insert on the crusted rim of the cylinder's circular end in the low sun: the thick dun-grey clinker already cracking and flaking off the curved edge, grey flakes dropping onto the yellow sand below; only that object and what touches it is in frame. The camera is at the foot of the circular end looking up at its rim, an arm's length from the crust, a 90mm lens. The low sun comes from the LEFT along the rim. At the first frame the curved crusted rim of the circular end crosses the frame from the LEFT edge to the RIGHT edge across the TOP half, thick dun-grey clinker cracked along it. Grey flakes hang in the air at the CENTRE and the yellow sand lies across the BOTTOM third with fallen flakes on it. The shot is inside this place: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand. The camera tracks sideways to the left along the crusted rim of the circular end, past the falling flakes as grey clinker flakes rain off the rim in a steady shower, from 00:00 to 00:02. At 00:02 the flakes pile into a grey drift on the sand, and the movement continues to the last frame of the shot. By 00:05 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 4,
+    "retake_why": "iter3: the pit's one picture redrawn (v1 drew a short fat patchwork coin about two men tall; v2 is one long crusted hull, the chapter's sunrise); every take that stages it is re-rendered",
+    "measured_seconds": 5.16,
+    "render_s": 216.7,
+    "waited_s": 215.5,
+    "rel_path": "episodes/ep02/takes/r2v/T06.mp4"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "setup",
+    "setup": "pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.708333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83209,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the far rim under a pale gold dawn sky with thin blue smoke rising; the low sun comes from the LEFT over the far rim, hard and yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on low medium from the pit floor of <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee already half-way down the sand wall, upright on his feet and stepping down it sideways, one arm out for balance, the crusted curve of the cylinder rising at the right. The camera is on the gravel floor of the pit at knee height looking up the sand wall, three long strides from him, a 35mm lens, a low angle. The low sun comes from the LEFT onto his back. At the first frame Ogilvy stands upright on the yellow sand wall at the LEFT third of the frame, his head a quarter of the frame's height. The shot is inside this place: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand. The camera tilts up from the grey gravel of the pit floor to <Subject 1> on the sand wall as he steps down the sand sideways at a normal walking pace, from 00:00 to 00:03. At 00:03 a shower of sand runs down beside his boots, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he steps down the sand sideways at a normal walking pace. By 00:06 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "iter3: the pit's one picture redrawn (v1 drew a short fat patchwork coin about two men tall; v2 is one long crusted hull, the chapter's sunrise); every take that stages it is re-rendered",
+    "measured_seconds": 6.58,
+    "render_s": 269.8,
+    "waited_s": 270.7,
+    "rel_path": "episodes/ep02/takes/r2v/T07.mp4"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "setup",
+    "setup": "floor",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.166667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 83210,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the far rim under a pale gold dawn sky with thin blue smoke rising; the low sun comes from the LEFT over the far rim, hard and yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian cylinder in <Picture 2>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in <Subject 1>, a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert on the upper edge of the cylinder's crusted circular end, which stands tilted up out of the sand like a wall facing the camera, a black scorch mark the size of a hand on its rim and the thin bright seam between the lid and the body curving across it; only that object and what touches it is in frame. The camera is at the foot of the cylinder, an arm's length from the rim, a 90mm lens. The low sun comes from the LEFT along the seam. At the first frame the crusted rim of the lid crosses the frame from the LEFT edge to the RIGHT edge through the CENTRE, the thin dark seam running under it. The black scorch mark sits at the RIGHT third of the rim, the size of a hand, and grey clinker lies on the sand at the BOTTOM edge. The shot is inside this place: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand. The camera keeps a locked-off frame as dust trickles off the rim as the whole crusted lid turns on its body, carrying the black mark along the rim from the right toward the left, from 00:00 to 00:04. At 00:04 dust spurts from the seam as the lid jerks and the black mark jumps forward, and the movement continues to the last frame of the shot. By 00:08 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "iter4: T11 pan became an arc around him (DQ 36), now a follow; T08 lid drawn as a flat disc lying down, the other pit shots have the end tilted up like a wall",
+    "measured_seconds": 8.7,
+    "render_s": 302.0,
+    "waited_s": 305.9,
+    "rel_path": "episodes/ep02/takes/r2v/T08.mp4"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "reaction",
+    "setup": "floor",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l08.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.583333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 83312,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the far rim under a pale gold dawn sky with thin blue smoke rising; the low sun comes from the LEFT over the far rim, hard and yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on low medium close of <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee already crouched at the foot of the cylinder, the broad ruddy face streaming with sweat and the small hazel eyes wide behind the steel spectacles, the crusted metal filling the frame behind him. The camera is on the gravel below him looking up at his face, an arm's length from him, a 50mm lens, a low angle. The low sun comes from the LEFT onto his face. At the first frame Ogilvy's head and shoulders fill the CENTRE of the frame from his wild auburn hair at the TOP third to the mustard-ochre tweed at the BOTTOM edge, his head a third of the frame's height. The shot is inside this place: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand. The camera keeps a locked-off frame as his eyes go wide, from 00:00 to 00:05. <Subject 1> (S1), on screen, broad ruddy face, with a clipped English voice at an even pace, says: <d>[English] Good heavens! A man in it, half roasted!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his mouth opens on the words and his hand rises to his spectacles, and the opening continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 3,
+    "retake_why": "iter3: the pit's one picture redrawn (v1 drew a short fat patchwork coin about two men tall; v2 is one long crusted hull, the chapter's sunrise); every take that stages it is re-rendered",
+    "measured_seconds": 5.87,
+    "render_s": 237.2,
+    "waited_s": 235.7,
+    "rel_path": "episodes/ep02/takes/r2v/T09.mp4"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "reaction",
+    "setup": "floor",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83212,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the far rim under a pale gold dawn sky with thin blue smoke rising; the low sun comes from the LEFT over the far rim, hard and yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot of <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee at the foot of the huge crusted lid, both hands already reaching out toward the glowing metal, heat haze rising off it around his fingers, the curved crusted hull towering many times his height and running out of the frame at both sides. The camera is on the pit floor at a standing man's eye, three long strides from him, a 35mm lens. The low sun comes from the LEFT onto the crust. At the first frame Ogilvy stands at the CENTRE of the frame from the gravel at the BOTTOM edge to the TOP third, his head a quarter of the frame's height. The shot is inside this place: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand. The camera pulls back from <Subject 1>'s outstretched hands, widening to show the whole crusted end of the cylinder above him as he snatches his hands back from the heat and shakes them, from 00:00 to 00:04. At 00:04 he turns and scrambles up the sand wall, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he snatches his hands back from the heat and shakes them. By 00:07 the camera is pulling back through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "iter3: the pit's one picture redrawn (v1 drew a short fat patchwork coin about two men tall; v2 is one long crusted hull, the chapter's sunrise); every take that stages it is re-rendered",
+    "measured_seconds": 7.29,
+    "render_s": 273.4,
+    "waited_s": 275.7,
+    "rel_path": "episodes/ep02/takes/r2v/T10.mp4"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "friction",
+    "setup": "heath",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/characters/unnamed_waggoner/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy",
+      "unnamed_waggoner"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.708333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83213,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the waggoner in <Picture 2>: Waggoner, 50 years old, 5 ft 9 in, heavy-set and thick through the body with big hands. Weathered brick-red face, deep crow's feet, heavy jowls. Grey hair cut short. Squinting pale blue eyes. Wearing: Wide-brimmed black felt hat, oatmeal linen smock frock with dense smocking across chest and shoulders, brown corduroy trousers, brown leather gaiters buckled to the knee, hobnailed boots, long-lashed waggoner's whip over one shoulder. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces, a pale sandy road crossing the heath at the left, and on the horizon the black roofs and church tower of Woking among scattered pines under a lemon-yellow sky; the low sun comes from BEHIND the far pines, gold on the sand heaps, and leaves the near heather black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 3>, Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from behind, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot of <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee already running hatless through the knee-deep heather toward the pale sandy road, both arms flung up, and behind him on the road <Subject 2> in the wide-brimmed black felt hat and the oatmeal linen smock frock, the long whip over his shoulder on the seat of a horse-drawn cart, the church tower of Woking on the horizon. The camera is on the heath at his shoulder height, three long strides from him, a 35mm lens. The low sun comes from BEHIND the far pines. At the first frame Ogilvy runs through the heather at the CENTRE of the frame from the BOTTOM edge to the TOP third, his head a quarter of the frame's height. The shot is inside this place: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces. The camera tracks beside <Subject 1> as he runs through the heather toward the pale sandy road as he waves both arms at the cart, from 00:00 to 00:03. At 00:03 the horse pulls the cart on along the road, and the pull continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he waves both arms at the cart. By 00:06 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "iter4: T11 pan became an arc around him (DQ 36), now a follow; T08 lid drawn as a flat disc lying down, the other pit shots have the end tilted up like a wall",
+    "measured_seconds": 6.58,
+    "render_s": 233.7,
+    "waited_s": 230.9,
+    "rel_path": "episodes/ep02/takes/r2v/T11.mp4"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "friction",
+    "setup": "heath",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_waggoner/sheet.png",
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_waggoner",
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83012,
+    "prompt": "subject_definitions:\n<Subject 1> is the waggoner in <Picture 1>: Waggoner, 50 years old, 5 ft 9 in, heavy-set and thick through the body with big hands. Weathered brick-red face, deep crow's feet, heavy jowls. Grey hair cut short. Squinting pale blue eyes. Wearing: Wide-brimmed black felt hat, oatmeal linen smock frock with dense smocking across chest and shoulders, brown corduroy trousers, brown leather gaiters buckled to the knee, hobnailed boots, long-lashed waggoner's whip over one shoulder. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Ogilvy in <Picture 2>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces, a pale sandy road crossing the heath at the left, and on the horizon the black roofs and church tower of Woking among scattered pines under a lemon-yellow sky; the low sun comes from BEHIND the far pines, gold on the sand heaps, and leaves the near heather black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 3>, Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from behind, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot over <Subject 2>'s shoulder toward <Subject 1> in the wide-brimmed black felt hat and the oatmeal linen smock frock, the long whip over his shoulder on the seat of his cart, the weathered brick-red face and squinting pale blue eyes turned down at <Subject 2>, the reins already in his fist. The camera is behind Ogilvy's shoulder on the road, looking up at the cart seat, two long strides from the waggoner, a 50mm lens. The low sun comes from BEHIND the waggoner. At the first frame the waggoner's head and shoulders fill the RIGHT half of the frame from his black hat at the TOP edge to the smock frock at the BOTTOM edge, his head a third of the frame's height. Ogilvy's shoulder and wild auburn hair fill the LEFT edge, dark against the lemon sky at the TOP LEFT. The shot is inside this place: Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze, two young Scots pines in the foreground, low raw mounds of flung yellow sand and grey gravel ringing a crater a hundred yards off, a thin blue smoke rising from burning heather to the east, the old sand-pits with yellow digging faces. The camera keeps a locked-off frame over <Subject 2>'s shoulder toward <Subject 1> as <Subject 1> looks him up and down and shakes his head, from 00:00 to 00:04. At 00:04 he flicks the reins and the horse pulls the cart on along the road, and the pull continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he looks him up and down and shakes his head. By 00:07 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common at sunrise in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 279.3,
+    "waited_s": 280.6,
+    "rel_path": "episodes/ep02/takes/r2v/T12.mp4"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "friction",
+    "setup": "garden",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/henderson/sheet.png",
+      "refs/locations/hendersons_garden_woking/wide_establishing.png"
+    ],
+    "faces": [
+      "henderson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.166667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83013,
+    "prompt": "subject_definitions:\n<Subject 1> is Henderson in <Picture 1>: Man of 38, 5 ft 10 in, lean and wiry with quick narrow shoulders. Narrow sharp face with a pointed nose, pale brown eyes, sallow skin. Mid-brown hair receding at the temples and oiled flat. Clean-shaven, a long lean jaw. Wearing: White shirt with sleeves rolled and collar stud showing, black-and-grey striped waistcoat, grey trousers soiled at the knee, brown boots dusty with garden soil. Garden spade in one hand; black-and-white shepherd's-check jacket snatched up in the other. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof, a gabled wooden porch over a green door and a bay window, a cast-iron gas lamp at the kerb and flagstones on the pavement; the low sun comes from the RIGHT, raking across the palings and the rows, and leaves the porch, the bay window and the shadows of the palings black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot of <Subject 1> in white shirtsleeves rolled to the elbow and the black-and-grey striped waistcoat, bare-headed, his brown hair oiled flat bent over his spade among the rows of peas behind the white palings, already turning the dark soil, the gabled porch of the yellow-brick villa behind him. The camera is on the pavement at a standing man's eye, three long strides from the palings, a 35mm lens. The low sun comes from the RIGHT across the palings. At the first frame the white pointed palings cross the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. Henderson digs behind them at the CENTRE among the peas on sticks, his head a quarter of the frame's height. The gabled porch and green door stand at the LEFT third and the villa's brick fills the TOP. The shot is inside this place: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof. The camera tracks sideways to the right along the white palings, past the wicket gate, with <Subject 1> digging behind it as he drives the spade into the soil and turns it over, from 00:00 to 00:03. At 00:03 a clod of dark soil tumbles off the blade of his spade, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he drives the spade into the soil and turns it over. By 00:06 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 252.8,
+    "waited_s": 250.6,
+    "rel_path": "episodes/ep02/takes/r2v/T13.mp4"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "friction",
+    "setup": "garden",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/hendersons_garden_woking/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l13.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.0,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83115,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof, a gabled wooden porch over a green door and a bay window, a cast-iron gas lamp at the kerb and flagstones on the pavement; the low sun comes from the RIGHT, raking across the palings and the rows, and leaves the porch, the bay window and the shadows of the palings black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot of <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee on the pavement outside the white palings, turned three-quarters toward the camera, both hands gripping the pointed tops, leaning over them into the garden, breathless, sand on his tweed and in his beard. The camera is on the pavement beside him level with his eyes, an arm's length from him, looking along the palings, a 50mm lens. The low sun comes from the RIGHT onto his face. At the first frame Ogilvy's head and shoulders fill the LEFT half of the frame from his wild auburn hair at the TOP third to his gripping hands on the palings at the BOTTOM edge, his head a third of the frame's height. The shot is inside this place: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof. The camera keeps a locked-off frame as he leans over the palings and calls out, from 00:00 to 00:06. <Subject 1> (S1), on screen, broad ruddy face, with a clipped English voice at an even pace, says: <d>[English] Henderson! That shooting star: it is out on Horsell Common!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, his hand shakes the pointed tops, and the movement continues to the last frame of the shot. By 00:07 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter2 eye review: T09 invented cut + overran push; T11 letterboxed; T17 rack focus ignored, face 0.05; T20 churn 7.8; T06 lid split open; T07 reclined; T14/T16 staged inside the garden; T21/T22 legible gibberish masthead / pull-back; T04/T10/T18 cylinder read a man's height",
+    "measured_seconds": 7.29,
+    "render_s": 278.0,
+    "waited_s": 280.7,
+    "rel_path": "episodes/ep02/takes/r2v/T14.mp4"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "friction",
+    "setup": "garden",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/henderson/sheet.png",
+      "refs/locations/hendersons_garden_woking/wide_establishing.png"
+    ],
+    "faces": [
+      "henderson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l14.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.291667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 83015,
+    "prompt": "subject_definitions:\n<Subject 1> is Henderson in <Picture 1>: Man of 38, 5 ft 10 in, lean and wiry with quick narrow shoulders. Narrow sharp face with a pointed nose, pale brown eyes, sallow skin. Mid-brown hair receding at the temples and oiled flat. Clean-shaven, a long lean jaw. Wearing: White shirt with sleeves rolled and collar stud showing, black-and-grey striped waistcoat, grey trousers soiled at the knee, brown boots dusty with garden soil. Garden spade in one hand; black-and-white shepherd's-check jacket snatched up in the other. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof, a gabled wooden porch over a green door and a bay window, a cast-iron gas lamp at the kerb and flagstones on the pavement; the low sun comes from the RIGHT, raking across the palings and the rows, and leaves the porch, the bay window and the shadows of the palings black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 1> in white shirtsleeves rolled to the elbow and the black-and-grey striped waistcoat, bare-headed, his brown hair oiled flat straightening up among the peas, the narrow sharp face with its pointed nose turning toward the palings, the spade upright in his hand. The camera is among the peas at the height of his chest, an arm's length from him, a 50mm lens. The low sun comes from the RIGHT onto his face. At the first frame Henderson's head and shoulders fill the CENTRE of the frame from his oiled brown hair at the TOP third to the striped waistcoat at the BOTTOM edge, his head a third of the frame's height, lit from the RIGHT. The spade handle rises at the LEFT third and the green porch door is dark at the TOP LEFT. The shot is inside this place: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof. The camera tilts up from the spade blade in the dark soil to <Subject 1>'s face as he straightens with a quick grin, from 00:00 to 00:05. <Subject 1> (S1), on screen, man of 38, with a clipped English voice at an even pace, says: <d>[English] Good Lord! A fallen meteorite! That is good.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, he plants the spade in the soil, and the step continues to the last frame of the shot. By 00:05 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 228.7,
+    "waited_s": 225.6,
+    "rel_path": "episodes/ep02/takes/r2v/T15.mp4"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "turn",
+    "setup": "garden",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/hendersons_garden_woking/wide_establishing.png"
+    ],
+    "faces": [
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l15.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.833333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83117,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof, a gabled wooden porch over a green door and a bay window, a cast-iron gas lamp at the kerb and flagstones on the pavement; the low sun comes from the RIGHT, raking across the palings and the rows, and leaves the porch, the bay window and the shadows of the palings black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot of <Subject 1>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee on the pavement leaning hard over the white palings into the garden, turned three-quarters toward the camera, one hand chopping the air, the low sun full on his broad ruddy face. The camera is on the pavement beside him level with his eyes, an arm's length from him, looking along the palings, a 50mm lens. The low sun comes from the RIGHT onto his face. At the first frame Ogilvy's head and shoulders fill the LEFT half of the frame from his wild auburn hair at the TOP third to his hand on the palings at the BOTTOM edge. The shot is inside this place: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof. The camera pushes in toward <Subject 1>'s face as he slaps the palings with his open hand, from 00:00 to 00:05. <Subject 1> (S1), on screen, broad ruddy face, with a clipped English voice at an even pace, says: <d>[English] It is an artificial cylinder, man!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, he leans in over the palings and jabs his arm back toward the common, and the lean continues to the last frame of the shot. By 00:06 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter2 eye review: T09 invented cut + overran push; T11 letterboxed; T17 rack focus ignored, face 0.05; T20 churn 7.8; T06 lid split open; T07 reclined; T14/T16 staged inside the garden; T21/T22 legible gibberish masthead / pull-back; T04/T10/T18 cylinder read a man's height",
+    "measured_seconds": 6.58,
+    "render_s": 251.8,
+    "waited_s": 250.7,
+    "rel_path": "episodes/ep02/takes/r2v/T16.mp4"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "reaction",
+    "setup": "garden",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/henderson/sheet.png",
+      "refs/locations/hendersons_garden_woking/wide_establishing.png"
+    ],
+    "faces": [
+      "henderson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l16.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83118,
+    "prompt": "subject_definitions:\n<Subject 1> is Henderson in <Picture 1>: Man of 38, 5 ft 10 in, lean and wiry with quick narrow shoulders. Narrow sharp face with a pointed nose, pale brown eyes, sallow skin. Mid-brown hair receding at the temples and oiled flat. Clean-shaven, a long lean jaw. Wearing: White shirt with sleeves rolled and collar stud showing, black-and-grey striped waistcoat, grey trousers soiled at the knee, brown boots dusty with garden soil. Garden spade in one hand; black-and-white shepherd's-check jacket snatched up in the other. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof, a gabled wooden porch over a green door and a bay window, a cast-iron gas lamp at the kerb and flagstones on the pavement; the low sun comes from the RIGHT, raking across the palings and the rows, and leaves the porch, the bay window and the shadows of the palings black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on low medium close of <Subject 1> in white shirtsleeves rolled to the elbow and the black-and-grey striped waistcoat, bare-headed, his brown hair oiled flat among the peas, one hand already cupped behind his ear, his narrow face turned toward the palings, the spade loose in his other hand. The camera is among the peas at knee height looking up at him, an arm's length from him, a 50mm lens, a low angle. The low sun comes from the RIGHT onto his face. At the first frame Henderson's head and shoulders fill the CENTRE of the frame from his oiled brown hair at the TOP third to the striped waistcoat at the BOTTOM edge. The shot is inside this place: A quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks, lettuces and runner beans on canes, the dug soil dark, a semi-detached yellow-brick villa with a slate roof. The camera keeps a locked-off frame as he cups his hand to his ear and leans in over the peas, from 00:00 to 00:02. <Subject 1> (S1), on screen, man of 38, with a clipped English voice at an even pace, says: <d>[English] What is that?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, he lets the spade fall into the peas, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:03 to 00:05 while he cups his hand to his ear and leans in over the peas. By 00:06 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a quiet street in Woking at half past six on an early summer morning in 1894: a waist-high fence of white-painted pointed palings with a wicket gate fronting a small vegetable garden of peas on sticks runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter2 eye review: T09 invented cut + overran push; T11 letterboxed; T17 rack focus ignored, face 0.05; T20 churn 7.8; T06 lid split open; T07 reclined; T14/T16 staged inside the garden; T21/T22 legible gibberish masthead / pull-back; T04/T10/T18 cylinder read a man's height",
+    "measured_seconds": 6.58,
+    "render_s": 272.5,
+    "waited_s": 275.5,
+    "rel_path": "episodes/ep02/takes/r2v/T17.mp4"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "answer",
+    "setup": "floor",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/henderson/sheet.png",
+      "refs/characters/ogilvy/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "henderson",
+      "ogilvy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.916667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83220,
+    "prompt": "subject_definitions:\n<Subject 1> is Henderson in <Picture 1>: Man of 38, 5 ft 10 in, lean and wiry with quick narrow shoulders. Narrow sharp face with a pointed nose, pale brown eyes, sallow skin. Mid-brown hair receding at the temples and oiled flat. Clean-shaven, a long lean jaw. Wearing: White shirt with sleeves rolled and collar stud showing, black-and-grey striped waistcoat, grey trousers soiled at the knee, brown boots dusty with garden soil. Garden spade in one hand; black-and-white shepherd's-check jacket snatched up in the other. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Ogilvy in <Picture 2>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, jacket buttoned one hole out, trousers wet with dew to the knee, brown boots gritty with sand. Round steel-rimmed spectacles. Bareheaded, auburn hair blown wild. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the far rim under a pale gold dawn sky with thin blue smoke rising; the low sun comes from the LEFT over the far rim, hard and yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 4> is the Martian cylinder in <Picture 4>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 4> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 3>, a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 4> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 4> carry into every shot that shows it; <Picture 4> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot of <Subject 2>, bare-headed with his auburn hair blown wild, in the mustard-ochre tweed suit and round steel spectacles, his trousers dark with dew to the knee and <Subject 1>, now in his black-and-white shepherd's-check jacket, hurrying down the sand wall side by side toward the crusted cylinder, <Subject 1> with a walking stick in his hand, the curved crusted hull towering many times their height and running out of the frame at both sides. The camera is behind them on the sand wall at a standing man's eye, three long strides from them, a 35mm lens. The low sun comes from the LEFT onto their backs. At the first frame Ogilvy walks at the LEFT third and Henderson at the RIGHT third of the frame, their backs to the camera, heads a quarter of the frame's height. The crusted circular end of the cylinder fills the TOP half ahead of them from the LEFT edge to the RIGHT edge and the yellow sand runs across the BOTTOM. The shot is inside this place: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand. The camera tracks behind <Subject 2> and <Subject 1> as they walk down the sand at a normal walking pace toward the cylinder as <Subject 1> raps the crust with his stick, from 00:00 to 00:04. At 00:04 both men lean their heads toward the metal to listen, and the lean continues to the last frame of the shot. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "iter3: the pit's one picture redrawn (v1 drew a short fat patchwork coin about two men tall; v2 is one long crusted hull, the chapter's sunrise); every take that stages it is re-rendered",
+    "measured_seconds": 7.29,
+    "render_s": 288.6,
+    "waited_s": 290.8,
+    "rel_path": "episodes/ep02/takes/r2v/T18.mp4"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "answer",
+    "setup": "floor",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83120,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its whole skin caked in a scaly dun-grey crust of clinker; pines and purple heather stand on the far rim under a pale gold dawn sky with thin blue smoke rising; the low sun comes from the LEFT over the far rim, hard and yellow on the crust, and leaves the pit's near wall and the underside of the cylinder black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian cylinder in <Picture 2>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert on the thin circle of bright yellowish-white metal showing in the seam between the crusted lid and the body of the cylinder, a faint shimmer of hissing air along it, the tip of a walking stick resting against the crust; only that object and what touches it is in frame. The camera is close over the rim of the lid looking down, an arm's length from the seam, a 90mm lens. The low sun comes from the LEFT. At the first frame the bright ring of pale metal curves across the CENTRE of the frame from the LEFT edge to the RIGHT edge, the thickness of a finger. The dun-grey crust fills the TOP half above it and the BOTTOM third below it, and the stick's tip rests on the crust at the BOTTOM RIGHT. The shot is inside this place: A great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel, a charred rim ringed with flung heaps of spoil, splintered fir wood on the gravel floor, and lying half-buried across the pit a colossal cylinder thirty yards across, one long continuous hull running back deep into the sand. The camera rises above the bright seam, looking down over the crusted lid and the sand around it as a thin wisp of air shimmers out of the seam, from 00:00 to 00:04. At 00:04 the stick taps the crust twice, and the movement continues to the last frame of the shot. By 00:07 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of a great raw crater on Horsell Common at sunrise in 1894: sloping walls of loose yellow sand and grey gravel runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter3: the pit's one picture redrawn (v1 drew a short fat patchwork coin about two men tall; v2 is one long crusted hull, the chapter's sunrise); every take that stages it is re-rendered",
+    "measured_seconds": 7.29,
+    "render_s": 264.4,
+    "waited_s": 265.7,
+    "rel_path": "episodes/ep02/takes/r2v/T19.mp4"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "runout",
+    "setup": "home",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/narrators_home/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy",
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.083333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83222,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed black boots, canvas newspaper bag on a strap across the chest stuffed with folded Daily Chronicles. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Narrator in <Picture 2>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: The front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch, a canted bay window with white sashes, a knee-high red-brick wall with a black wrought-iron gate, clipped laurels and a privet hedge, a gravel road climbing to the right, tall beech trees downhill at the left and a green boarded side gate; the morning sun comes from the LEFT, warm on the brick, and leaves the porch, the laurels and the shade under the beeches black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 3>, the front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, morning sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide of the narrator's red-brick villa at a quarter to nine in bright morning sun: <Subject 1> in the grey flat cap and the ginger corduroy jacket with patched elbows, the canvas bag on its strap across his chest already running up the gravel road toward the iron gate, and far off in the black doorway under the porch <Subject 2> in the grey herringbone tweed suit and straw boater with a black band standing with one hand on the door. The camera is on the gravel road at a standing man's eye, far down the hill, a 35mm lens. The morning sun comes from the LEFT onto the brick. At the first frame the red-brick villa fills the CENTRE of the frame with the black front door under its red-tiled porch. The newspaper boy runs on the gravel road at the LEFT third toward the iron gate. The shot is inside this place: The front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch, a canted bay window with white sashes, a knee-high red-brick wall with a black wrought-iron gate, clipped laurels and a privet hedge, a gravel road climbing to the right. The camera pans from the tall beeches at the left across to the iron gate as <Subject 1> runs up the gravel to the iron gate, from 00:00 to 00:03. At 00:03 far off in the doorway <Subject 2> lifts his hand, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he runs up the gravel to the iron gate. By 00:06 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "iter2 round 2: T06 opened on the pit plate then cut (cut 60.5 HARD); T09 push began on a full-length sheet pose and overran (1.97x); T20 churn 6.5 HARD, the Narrator walked into the lens",
+    "measured_seconds": 6.58,
+    "render_s": 259.0,
+    "waited_s": 260.6,
+    "rel_path": "episodes/ep02/takes/r2v/T20.mp4"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "runout",
+    "setup": "home",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/locations/narrators_home/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.708333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83122,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the newspaper boy in <Picture 2>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed black boots, canvas newspaper bag on a strap across the chest stuffed with folded Daily Chronicles. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: The front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch, a canted bay window with white sashes, a knee-high red-brick wall with a black wrought-iron gate, clipped laurels and a privet hedge, a gravel road climbing to the right, tall beech trees downhill at the left and a green boarded side gate; the morning sun comes from the LEFT, warm on the brick, and leaves the porch, the laurels and the shade under the beeches black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 3>, the front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, morning sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert across the top of the black wrought-iron gate: <Subject 2>'s inky fingers passing a newspaper folded tight in quarters, its plain grey folded edge toward the camera, over the gate into <Subject 1>'s hand in its grey tweed cuff; only that object and what touches it is in frame. The camera is beside the gate at the height of the gate top, an arm's length from the paper, a 90mm lens. The morning sun comes from the LEFT onto the paper. At the first frame the black iron gate top crosses the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The tight-folded newspaper passes over it edge-on at the CENTRE, the boy's hand at the LEFT third and the Narrator's grey tweed cuff at the RIGHT third. The dark laurels fill the TOP half behind. The shot is inside this place: The front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch, a canted bay window with white sashes, a knee-high red-brick wall with a black wrought-iron gate, clipped laurels and a privet hedge, a gravel road climbing to the right. The camera tracks sideways to the left along the top of the iron gate, past the passing newspaper as a grey tweed cuff reaches in and takes the folded paper, from 00:00 to 00:04. At 00:04 inky fingers point away down the road, and the movement continues to the last frame of the shot. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter2 eye review: T09 invented cut + overran push; T11 letterboxed; T17 rack focus ignored, face 0.05; T20 churn 7.8; T06 lid split open; T07 reclined; T14/T16 staged inside the garden; T21/T22 legible gibberish masthead / pull-back; T04/T10/T18 cylinder read a man's height",
+    "measured_seconds": 7.29,
+    "render_s": 282.6,
+    "waited_s": 280.7,
+    "rel_path": "episodes/ep02/takes/r2v/T21.mp4"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "button",
+    "setup": "home",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/locations/narrators_home/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l22.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.083333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 83123,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed black boots, canvas newspaper bag on a strap across the chest stuffed with folded Daily Chronicles. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch, a canted bay window with white sashes, a knee-high red-brick wall with a black wrought-iron gate, clipped laurels and a privet hedge, a gravel road climbing to the right, tall beech trees downhill at the left and a green boarded side gate; the morning sun comes from the LEFT, warm on the brick, and leaves the porch, the laurels and the shade under the beeches black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, morning sun from the left, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot of <Subject 1> in the grey flat cap and the ginger corduroy jacket with patched elbows, the canvas bag on its strap across his chest at the black iron gate in the morning sun, the narrow freckled face flushed from running, gap-toothed and grinning, one hand pointing away down the road toward the common. The camera is on the garden path level with his eyes, an arm's length from him, a 50mm lens. The morning sun comes from the LEFT onto his face. At the first frame the newspaper boy's head and shoulders fill the CENTRE of the frame from his grey flat cap at the TOP third to the canvas bag strap at the BOTTOM edge, his head a third of the frame's height. The shot is inside this place: The front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch, a canted bay window with white sashes, a knee-high red-brick wall with a black wrought-iron gate, clipped laurels and a privet hedge, a gravel road climbing to the right. The camera keeps a locked-off frame as he points down the road toward the common, from 00:00 to 00:04. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] Dead men from Mars, sir! Out at the sand-pits!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, he bounces on his toes as he tells it, and the movement continues to the last frame of the shot. By 00:06 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the front of the narrator's red-brick villa at Maybury at a quarter to nine on a clear summer morning in 1894: a black front door under a small red-tiled porch runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter2 eye review: T09 invented cut + overran push; T11 letterboxed; T17 rack focus ignored, face 0.05; T20 churn 7.8; T06 lid split open; T07 reclined; T14/T16 staged inside the garden; T21/T22 legible gibberish masthead / pull-back; T04/T10/T18 cylinder read a man's height",
+    "measured_seconds": 6.58,
+    "render_s": 252.9,
+    "waited_s": 255.5,
+    "rel_path": "episodes/ep02/takes/r2v/T22.mp4"
+  }
+]

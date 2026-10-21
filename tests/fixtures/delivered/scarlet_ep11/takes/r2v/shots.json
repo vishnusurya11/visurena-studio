@@ -1,0 +1,1060 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "farm_gate_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_farm_gate_day.png",
+      "Q00_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q00_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 92101,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The road outside the gate of John Ferrier's farm on a warm afternoon, 1860: a five-bar gate between two square posts, the rail fence running off both ways, the shingly path beyond it up between cut stubble to the long log house and its porch, the pine hills dark behind the roof; the low afternoon sun comes from the left, hard and yellow, raking across the road and the stubble, and it throws the two posts' shadows long and black across the road to the right, leaves the near side of every post black, and puts the porch and the house front in the black of their own shadow under the roof <Picture 1> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide of the gate of Ferrier's farm on a warm afternoon.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the road outside the gate of John Ferrier's farm on a warm afternoon. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, sun from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a wide of the gate of Ferrier's farm on a warm afternoon, a farm gate of five rough grey split-rail timbers, weathered wood pegged to two square timber posts, two saddled horses hitched one to each post, the shingly path beyond running up to the log house, the posts' shadows black across the road. The camera is on the road at a standing man's eye, three long strides from the gate, a 35mm lens. The low afternoon sun comes from the LEFT. At the first frame the two square gate posts stand in the CENTRE of the frame the height of half the frame with a saddled horse hitched to each. The road crosses the BOTTOM third. The posts' black shadows lie across the RIGHT half of the road and the sunlit stubble fills the LEFT third. The log house is small at the CENTRE of the upper third. The camera pans right across the whole shot, travelling a finger's breadth as the posts' black shadows keep the road's right half and the gate keeps the frame's centre, from 00:00 to 00:02. At 00:02 the near horse tosses its head. At 00:05 the reins swing against the post, and the swing continues to the last frame of the shot. By 00:07 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the road outside the gate of John Ferrier's farm on a warm afternoon runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "ep11 round 1: the turn (T13) re-staged its night into a lit garden, the paper push (T08) clipped the crown, the placard (T10) vanished from its own insert, the exit (T06) cut hard to an empty room, the loaf tilt (T16) lost the plate, three pull-backs on closes (T03 0.71x, T09 0.43x, T19 0.58x) left their panels, the boots insert (T20) re-staged, T07 froze 1.5 s at the start, T00 lost its black floor; every motion is now a pan with an edge object kept, no face takes a push or a pull-back",
+    "measured_seconds": 7.29,
+    "render_s": 412.7,
+    "waited_s": 411.1,
+    "rel_path": "episodes/ep11/takes/r2v/T00.mp4"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "farm_gate_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_ferrier_outdoor.png",
+      "plate_farm_gate_day.png",
+      "Q01_0.png"
+    ],
+    "faces": [
+      "john_ferrier"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q01_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.5,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 92001,
+    "prompt": "subject_definitions:\n<Subject 1> is John Ferrier in <Picture 1>: A tall spare man in his middle fifties, a massive framework of bones under lean weathered muscle, a long face with sun-darkened skin drawn tight over projecting cheekbones, deep-set grey eyes under heavy brows, iron-grey hair cut square to the collar, and a full brown beard worn long, iron-grey through the moustache and white at the chin. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: The road outside the gate of John Ferrier's farm on a warm afternoon, 1860: a five-bar gate between two square posts, the rail fence running off both ways, the shingly path beyond it up between cut stubble to the long log house and its porch, the pine hills dark behind the roof; the low afternoon sun comes from the left, hard and yellow, raking across the road and the stubble, and it throws the two posts' shadows long and black across the road to the right, leaves the near side of every post black, and puts the porch and the house front in the black of their own shadow under the roof <Picture 2> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot of <Subject 1> drawing rein at his own gate on a bay horse.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, the road outside the gate of John Ferrier's farm on a warm afternoon. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, sun from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 3>: a medium shot of <Subject 1> drawing rein at his own gate on a bay horse, in his brown felt hat and fawn coat, the two strange horses at the posts beyond him, the low sun from the left hard on his face. The camera is on the road beside the gate at the height of a mounted man's chest, two long strides from him, a 50mm lens. The low sun comes from the LEFT. At the first frame John Ferrier sits his horse in the CENTRE of the frame from the horse's shoulder at the BOTTOM edge to the hat at the TOP third. The camera pushes in on <Subject 1> across the whole shot, travelling a hand's breadth as his horse's head comes up, from 00:00 to 00:02. At 00:02 his bare hand tightens on the rein. At 00:05 his head turns a finger's breadth to the horses at the posts, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his horse's head comes up. By 00:07 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the road outside the gate of John Ferrier's farm on a warm afternoon runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 288.0,
+    "waited_s": 290.9,
+    "rel_path": "episodes/ep11/takes/r2v/T01.mp4"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "farm_parlour_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-joseph_stangerson_young_indoor.png",
+      "char-enoch_drebber_young_indoor.png",
+      "plate_farm_parlour_day.png",
+      "Q02_0.png"
+    ],
+    "faces": [
+      "joseph_stangerson_young",
+      "enoch_drebber_young"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q02_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.5,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 92002,
+    "prompt": "subject_definitions:\n<Subject 1> is Joseph Stangerson Young in <Picture 1>: A young man of about twenty-five, tall and spare with narrow shoulders, a long pale clean-shaven face with a high forehead, thin fair hair combed back flat, pale brows over light deep-set eyes and a thin mouth. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is Enoch Drebber Young in <Picture 2>: A thick-set young man of about twenty-four with a bull neck, a broad coarse florid face with heavy jowls and small pale eyes, a low forehead and short curly sandy hair, clean-shaven, heavy in the shoulder and belly. <Picture 2> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 3> is the location in <Picture 3>: Interior, inside the sitting-room of John Ferrier's log villa on a warm afternoon, 1860, the camera within the room with squared white-chinked log walls closed on all four sides and a low plank ceiling of pale boards: one deep window in the left wall is the only source, and the light comes from the left window alone, a hard slab of afternoon sun lying across the scrubbed pine table and the board floor and leaving the far corners, the black iron stove on the far wall and the space under the ceiling in deep shadow; a wooden rocking-chair beside the stove, two ladder-back chairs at the table, a small square looking-glass on the wall beside the window, a rag rug on the boards, the log walls warm where the slab touches them and black beyond it <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium shot of the sitting-room with two young men in possession of it.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in <Subject 3>, Interior. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, window from the left, deep shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 4>: a medium shot of the sitting-room with two young men in possession of it: a long pale fair-haired young man leaning back in the rocking-chair with his boots up on the black stove, and a bull-necked sandy-haired youth standing at the window with his hands in his pockets, the window sun across the table. The camera is at the door end of the room level with a standing man's chest, three long strides from the table, a 35mm lens. The window sun comes from the LEFT across the table. At the first frame the pale young man in the rocking-chair fills the RIGHT third of the frame with his boots on the black stove at the RIGHT edge. The bull-necked youth stands at the LEFT third against the bright window. The sunlit pine table crosses the BOTTOM third between them and the ceiling boards close the TOP edge in shadow. The camera pushes in on the two men across the whole shot, travelling a hand's breadth as the rocking-chair rocks back a hand's breadth under the pale young man, from 00:00 to 00:04. At 00:04 the youth's fingers drum the window sill, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 316.9,
+    "waited_s": 316.0,
+    "rel_path": "episodes/ep11/takes/r2v/T02.mp4"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "setup",
+    "setup": "farm_parlour_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-enoch_drebber_young_indoor.png",
+      "Q03_0.png"
+    ],
+    "faces": [
+      "enoch_drebber_young"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q03_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.375,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 92104,
+    "prompt": "subject_definitions:\n<Subject 1> is Enoch Drebber Young in <Picture 1>: A thick-set young man of about twenty-four with a bull neck, a broad coarse florid face with heavy jowls and small pale eyes, a low forehead and short curly sandy hair, clean-shaven, heavy in the shoulder and belly. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of the bull-necked youth's broad florid face smirking at his own reflection in the small looking-glass on the wall beside the window.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, window from the left, deep shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a close shot of the bull-necked youth's broad florid face smirking at his own reflection in the small looking-glass on the wall beside the window, the window sun hard on the near cheek, the far cheek in the black of the log wall. The camera is at the wall beside the looking-glass level with his eyes, an arm's length from him, a 90mm lens. The window sun comes from the RIGHT, past the looking-glass. At the first frame the youth's florid face fills the CENTRE of the frame, half the frame height, from the loose black tie at the BOTTOM edge to the sandy curls at the TOP edge. The camera pans right across the whole shot, travelling a finger's breadth as the looking-glass keeps the right edge and the log wall keeps the left edge, from 00:00 to 00:02. At 00:02 the smirk widens. At 00:05 his hand lifts to smooth the sandy curls, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his hand lifts to smooth the sandy curls. By 00:07 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "ep11 round 1: the turn (T13) re-staged its night into a lit garden, the paper push (T08) clipped the crown, the placard (T10) vanished from its own insert, the exit (T06) cut hard to an empty room, the loaf tilt (T16) lost the plate, three pull-backs on closes (T03 0.71x, T09 0.43x, T19 0.58x) left their panels, the boots insert (T20) re-staged, T07 froze 1.5 s at the start, T00 lost its black floor; every motion is now a pan with an edge object kept, no face takes a push or a pull-back",
+    "measured_seconds": 7.29,
+    "render_s": 260.1,
+    "waited_s": 260.5,
+    "rel_path": "episodes/ep11/takes/r2v/T03.mp4"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4,
+      5
+    ],
+    "section": "friction",
+    "setup": "farm_parlour_day",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_ferrier_indoor.png",
+      "Q04_0.png",
+      "Q05_0.png"
+    ],
+    "faces": [
+      "john_ferrier"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q04_0.png",
+        0
+      ],
+      [
+        "Q05_0.png",
+        166
+      ]
+    ],
+    "audio": [
+      [
+        "l04.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.916667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 92004,
+    "prompt": "subject_definitions:\n<Subject 1> is John Ferrier in <Picture 1>: A tall spare man in his middle fifties, a massive framework of bones under lean weathered muscle, a long face with sun-darkened skin drawn tight over projecting cheekbones, deep-set grey eyes under heavy brows, iron-grey hair cut square to the collar, and a full brown beard worn long, iron-grey through the moustache and white at the chin. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> bare-headed in the open doorway of the sitting-room.\n<Picture 3> is the first frame of [Shot 2], a close shot of <Subject 1>'s savage brown face.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 2 shots in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07; [Shot 2] begins from <Picture 3> and runs from 00:07 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1] and [Shot 2]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, window from the left, deep shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a medium close shot of <Subject 1> bare-headed in the open doorway of the sitting-room, the riding whip in his bare hand, his long sun-darkened face and iron-grey beard hard in the window light, the room's black behind him. The camera is at the table end of the room level with a standing man's eye, two long strides from the door, a 50mm lens. The window sun comes from the LEFT. At the first frame John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP third to the rolled sleeves at the BOTTOM edge. The camera pans left across the whole shot, travelling a hand's breadth as the whip's stock comes up to his chest, from 00:00 to 00:06. <Subject 1> (S1), on screen, a tall spare man in his middle fifties, with a clipped English voice at an even pace, says: <d>[English] This room has two ways out. The door, or the window.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, his jaw sets, then his head comes forward a finger's breadth, and the movement continues to the last frame of the shot. By 00:07 the camera is panning left through the last frame, and the action continues with it.\n[Shot 2] From 00:07 to 00:08. At 00:07 the shot cuts to a close shot of <Subject 1>'s savage brown face, beginning from <Picture 3>: the iron-grey beard, the deep-set eyes narrowed, the whip's stock across the bottom of the frame in his knuckles, the window light hard on the left side of the face and the right side black. The camera is at the table end of the room level with his eyes, an arm's length from him, a 90mm lens. The window sun comes from the LEFT. At the first frame John Ferrier's face fills the CENTRE of the frame, half the frame height, from the beard at the BOTTOM third to the iron-grey hair at the TOP edge, the LEFT half in window light and the RIGHT half black. The whip's stock crosses the BOTTOM edge in his knuckles and the dark log wall fills both edges. The camera pulls back from <Subject 1>'s face across the whole shot, travelling a hand's breadth as his brows draw down, from 00:07 to 00:08. Then his mouth sets hard after the words, then the whip's stock lifts a finger's breadth, and the lift continues to the last frame of the shot. By 00:08 the camera is pulling back through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.7,
+    "render_s": 334.6,
+    "waited_s": 331.3,
+    "rel_path": "episodes/ep11/takes/r2v/T04.mp4"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "reaction",
+    "setup": "farm_parlour_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_farm_parlour_day.png",
+      "Q06_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q06_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.416667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 92208,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Interior, inside the sitting-room of John Ferrier's log villa on a warm afternoon, 1860, the camera within the room with squared white-chinked log walls closed on all four sides and a low plank ceiling of pale boards: one deep window in the left wall is the only source, and the light comes from the left window alone, a hard slab of afternoon sun lying across the scrubbed pine table and the board floor and leaving the far corners, the black iron stove on the far wall and the space under the ceiling in deep shadow; a wooden rocking-chair beside the stove, two ladder-back chairs at the table, a small square looking-glass on the wall beside the window, a rag rug on the boards, the log walls warm where the slab touches them and black beyond it <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium shot of the open door from inside the room with the two young men going out through it.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 1 shot in <Subject 1>, Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, window from the left, deep shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 2>: a medium shot of the open door from inside the room with the two young men going out through it, their backs to the camera, hats in their hands, the tall pale one ducking under the lintel and the bull-necked one a step behind, the black of the hall beyond them. The camera is at the window end of the room level with a standing man's chest, three long strides from the door, a 35mm lens. The window sun comes from the LEFT across the table. At the first frame the open door fills the CENTRE of the frame from the BOTTOM edge to the TOP edge with the two men's backs in it. The camera pans right across the whole shot, travelling a finger's breadth as the door jambs keep the frame's centre and the sunlit log wall keeps the left edge, from 00:00 to 00:02. At 00:02 the pale one's hat comes off in his hand. At 00:03 the door leaf swings a hand's breadth toward the jamb behind them, and the swing continues to the last frame of the shot. By 00:05 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "ep11 round 2, the last: the turn (T13) re-staged its night twice (off-board 0.64, 0.70) -- its line is shorter so churn has less time; the exit (T06) dissolved and cut twice (0.66, foreign 2) -- the men stay in the doorway and the door leaf moves; every other fail settles by best-of-N under the pan-aware off-board wall and the day-floor calibration",
+    "measured_seconds": 5.87,
+    "render_s": 500.7,
+    "waited_s": 501.5,
+    "rel_path": "episodes/ep11/takes/r2v/T06.mp4"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "farm_parlour_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q07_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q07_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.25,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 92108,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on a small square of paper in John Ferrier's bare fingers over the sunlit pine table.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in Interior. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:08. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, window from the left, deep shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 1>: an insert on a small square of paper in John Ferrier's bare fingers over the sunlit pine table, its blank back to the lens, a pin through one corner, the window sun hard on the paper; only what <Picture 1> shows is in frame. The camera is over the table at the height of a seated man's chest, an arm's length from the paper, a 90mm lens. The window sun comes from the LEFT onto the paper. At the first frame the square of paper fills the CENTRE of the frame the height of a hand with the bare fingers holding its LEFT edge, the window's light on it from the LEFT edge and the paper's shadow lying to the RIGHT on the table. The sunlit pine table fills the BOTTOM half and the black of the room fills the TOP third. The camera tilts down across the whole shot, travelling a finger's breadth as the fingers turn the paper a hand's breadth, from 00:00 to 00:03. At 00:03 the thumb presses its corner flat. At 00:05 the pin glints once, and the movement continues to the last frame of the shot. By 00:08 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "ep11 round 1: the turn (T13) re-staged its night into a lit garden, the paper push (T08) clipped the crown, the placard (T10) vanished from its own insert, the exit (T06) cut hard to an empty room, the loaf tilt (T16) lost the plate, three pull-backs on closes (T03 0.71x, T09 0.43x, T19 0.58x) left their panels, the boots insert (T20) re-staged, T07 froze 1.5 s at the start, T00 lost its black floor; every motion is now a pan with an edge object kept, no face takes a push or a pull-back",
+    "measured_seconds": 8.0,
+    "render_s": 270.3,
+    "waited_s": 270.7,
+    "rel_path": "episodes/ep11/takes/r2v/T07.mp4"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "friction",
+    "setup": "farm_parlour_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_ferrier_indoor.png",
+      "Q08_0.png"
+    ],
+    "faces": [
+      "john_ferrier"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q08_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 92109,
+    "prompt": "subject_definitions:\n<Subject 1> is John Ferrier in <Picture 1>: A tall spare man in his middle fifties, a massive framework of bones under lean weathered muscle, a long face with sun-darkened skin drawn tight over projecting cheekbones, deep-set grey eyes under heavy brows, iron-grey hair cut square to the collar, and a full brown beard worn long, iron-grey through the moustache and white at the chin. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> at the pine table reading the small square of paper.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, window from the left, deep shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a medium close shot of <Subject 1> at the pine table reading the small square of paper, bare-headed, his brows drawn together, the window sun from the left on the paper and on one side of his face. The camera is at the table's far end level with his eyes, two long strides from him, a 50mm lens. The window sun comes from the LEFT. At the first frame John Ferrier's head and shoulders fill the CENTRE of the frame from the TOP third to the sunlit table at the BOTTOM edge, his head a third of the frame's height. The camera pans left across the whole shot, travelling a hand's breadth as the window keeps the left edge and the paper keeps his two hands at the bottom centre, from 00:00 to 00:02. At 00:02 his eyes go down the paper. At 00:03 his fist closes on it. At 00:04 his head bows a finger's breadth, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his eyes go down the paper. By 00:06 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "ep11 round 1: the turn (T13) re-staged its night into a lit garden, the paper push (T08) clipped the crown, the placard (T10) vanished from its own insert, the exit (T06) cut hard to an empty room, the loaf tilt (T16) lost the plate, three pull-backs on closes (T03 0.71x, T09 0.43x, T19 0.58x) left their panels, the boots insert (T20) re-staged, T07 froze 1.5 s at the start, T00 lost its black floor; every motion is now a pan with an edge object kept, no face takes a push or a pull-back",
+    "measured_seconds": 6.58,
+    "render_s": 236.5,
+    "waited_s": 235.6,
+    "rel_path": "episodes/ep11/takes/r2v/T08.mp4"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "farm_parlour_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-lucy_ferrier_indoor.png",
+      "Q09_0.png"
+    ],
+    "faces": [
+      "lucy_ferrier"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q09_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.541667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 92110,
+    "prompt": "subject_definitions:\n<Subject 1> is Lucy Ferrier in <Picture 1>: A young woman of about twenty, slight and straight-backed with a lithe girlish figure, a fair oval face burnt a little ruddy across the cheekbones by the open air, clear hazel eyes, a straight nose and a wide mouth, and long chestnut hair parted in the centre and worn loose down her back to below the shoulder blades. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1> at breakfast in the grey-blue house dress.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, window from the left, deep shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a close shot of <Subject 1> at breakfast in the grey-blue house dress, her chestnut hair gathered back, her face turned up to the ceiling and her bare hand coming up to point, the window sun on one cheek and the other in shadow. The camera is across the table level with her eyes, an arm's length from her, a 90mm lens. The window sun comes from the LEFT. At the first frame Lucy's face fills the CENTRE of the frame, half the frame height, from the white collar at the BOTTOM edge to the chestnut hair at the TOP edge. The camera pans right across the whole shot, travelling a finger's breadth as the log wall keeps the frame behind her and the table's edge keeps the bottom edge, from 00:00 to 00:02. At 00:02 her eyes widen. At 00:04 her lips part. At 00:05 her pointing finger rises a hand's breadth, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while the log wall keeps the frame behind her. By 00:07 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "ep11 round 1: the turn (T13) re-staged its night into a lit garden, the paper push (T08) clipped the crown, the placard (T10) vanished from its own insert, the exit (T06) cut hard to an empty room, the loaf tilt (T16) lost the plate, three pull-backs on closes (T03 0.71x, T09 0.43x, T19 0.58x) left their panels, the boots insert (T20) re-staged, T07 froze 1.5 s at the start, T00 lost its black floor; every motion is now a pan with an edge object kept, no face takes a push or a pull-back",
+    "measured_seconds": 7.29,
+    "render_s": 253.1,
+    "waited_s": 255.6,
+    "rel_path": "episodes/ep11/takes/r2v/T09.mp4"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "friction",
+    "setup": "farm_gate_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q10_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q10_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.541667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 92111,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on a small square placard nailed to the top rail of the gate in the low sun.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in the road outside the gate of John Ferrier's farm on a warm afternoon. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:07. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, sun from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 1>: an insert on a small square placard nailed to the top rail of the gate in the low sun, its face blank to the lens, John Ferrier's bare hand flat on the rail beside it, a rider's dust drifting on the road beyond; only what <Picture 1> shows is in frame. The camera is at the gate at the height of the top rail, an arm's length from the placard, a 90mm lens. The low sun comes from the LEFT onto the placard. At the first frame the placard is a pale square in the CENTRE of the frame the height of a hand on the gate's top rail. The camera pans right across the whole shot, travelling a finger's breadth as the placard keeps its nails in the top rail at the frame's centre and the post keeps the right edge, from 00:00 to 00:02. At 00:02 dust drifts across the empty road behind the gate. At 00:04 the bare hand pulls along the rail a hand's breadth and closes on the placard's corner. At 00:05 the corner tears a finger's breadth, and the movement continues to the last frame of the shot. By 00:07 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the road outside the gate of John Ferrier's farm on a warm afternoon runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "ep11 round 1: the turn (T13) re-staged its night into a lit garden, the paper push (T08) clipped the crown, the placard (T10) vanished from its own insert, the exit (T06) cut hard to an empty room, the loaf tilt (T16) lost the plate, three pull-backs on closes (T03 0.71x, T09 0.43x, T19 0.58x) left their panels, the boots insert (T20) re-staged, T07 froze 1.5 s at the start, T00 lost its black floor; every motion is now a pan with an edge object kept, no face takes a push or a pull-back",
+    "measured_seconds": 7.29,
+    "render_s": 246.9,
+    "waited_s": 245.5,
+    "rel_path": "episodes/ep11/takes/r2v/T10.mp4"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "spike",
+    "setup": "parlour_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_ferrier_indoor.png",
+      "Q11_0.png"
+    ],
+    "faces": [
+      "john_ferrier"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q11_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.083333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 92011,
+    "prompt": "subject_definitions:\n<Subject 1> is John Ferrier in <Picture 1>: A tall spare man in his middle fifties, a massive framework of bones under lean weathered muscle, a long face with sun-darkened skin drawn tight over projecting cheekbones, deep-set grey eyes under heavy brows, iron-grey hair cut square to the collar, and a full brown beard worn long, iron-grey through the moustache and white at the chin. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> alone at the pine table by the low lamp late at night.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, oil lamp, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a medium close shot of <Subject 1> alone at the pine table by the low lamp late at night, bare-headed, his head sinking toward his folded arms on the table, the lamp warm on one side of the face and the room black. The camera is at the table's far end level with the lamp chimney, two long strides from him, a 50mm lens. The lamp is the light, from the LEFT. At the first frame John Ferrier's bowed head and shoulders fill the CENTRE of the frame from the TOP third to the table at the BOTTOM edge, his head a third of the frame's height. The camera pushes in on <Subject 1> across the whole shot, travelling a hand's breadth as his head sinks the last hand's breadth onto his arms, from 00:00 to 00:03. At 00:03 his shoulders shake once. At 00:05 the lamp flame leans, and the lean continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his head sinks the last hand's breadth onto his arms. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 293.3,
+    "waited_s": 291.3,
+    "rel_path": "episodes/ep11/takes/r2v/T11.mp4"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "spike",
+    "setup": "farm_door_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_farm_door_night.png",
+      "Q12_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q12_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 9.041667,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 92012,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Interior, the narrow hall inside the front door of John Ferrier's log villa at night, 1860, the camera within the hall with squared log walls closed on both sides and the heavy plank door ahead with its iron bolt across it at the height of a man's chest: one candle burning in a tin holder on a shelf behind the camera is the only light and it comes from behind the camera alone, low and yellow, on the door planks, the bolt and a man's back, throwing his shadow huge and black up the door; when the door stands open, the night beyond is blue-black under bright stars with the pale garden path, the fence and the gate faint in it and the threshold boards a pale strip <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium shot of John Ferrier standing in the narrow hall facing the heavy plank door with its iron bolt.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 9.42-second take of 1 shot in <Subject 1>, Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:09. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, candle from behind, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:09. The shot begins from <Picture 2>: a medium shot of John Ferrier standing in the narrow hall facing the heavy plank door with its iron bolt, his back to the camera, the candle behind the camera on his shoulders and on the door, his shadow huge and black up the planks. The camera is in the hall behind him at the height of his shoulders, two long strides from the door, a 35mm lens. The candle behind the camera is the light. At the first frame the plank door fills the CENTRE of the frame from the BOTTOM edge to the TOP edge with the iron bolt across it at the CENTRE line. John Ferrier's back stands at the LEFT third from the BOTTOM edge to the TOP third with his shadow huge up the RIGHT half of the door. The camera pushes in on the door across the whole shot, travelling a hand's breadth as Ferrier's head tilts a finger's breadth to listen, from 00:00 to 00:03. At 00:03 his hand comes up toward the bolt. At 00:06 his shadow climbs the planks with it at a normal walking pace, and the climb continues to the last frame of the shot. By 00:09 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 9.41,
+    "render_s": 344.0,
+    "waited_s": 346.0,
+    "rel_path": "episodes/ep11/takes/r2v/T12.mp4"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "turn",
+    "setup": "farm_door_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_ferrier_indoor.png",
+      "Q13_0.png"
+    ],
+    "faces": [
+      "john_ferrier"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q13_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.166667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 92215,
+    "prompt": "subject_definitions:\n<Subject 1> is John Ferrier in <Picture 1>: A tall spare man in his middle fifties, a massive framework of bones under lean weathered muscle, a long face with sun-darkened skin drawn tight over projecting cheekbones, deep-set grey eyes under heavy brows, iron-grey hair cut square to the collar, and a full brown beard worn long, iron-grey through the moustache and white at the chin. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> in the thrown-open doorway.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, candle from behind, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a medium close shot of <Subject 1> in the thrown-open doorway, bare-headed, the candle from behind the camera hard on his face, his iron-grey beard, his eyes level on the empty night beyond the fence, the starry black behind him. The camera is in the hall level with his eyes, two long strides from him, a 50mm lens. The candle behind the camera is the light. At the first frame John Ferrier's head sits at the CENTRE of the frame a third of the frame's height, his collar at the BOTTOM third, lit from the front. The camera tilts down across the whole shot, travelling a finger's breadth as both black jambs keep the frame edges and the starry blue-black keeps the frame behind his head, from 00:00 to 00:02. At 00:02 his eyes drop to the threshold. At 00:04 his bare hand goes to his throat. At 00:06 his mouth opens a finger's breadth, and the opening continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his eyes drop to the threshold. By 00:08 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "ep11 round 2, the last: the turn (T13) re-staged its night twice (off-board 0.64, 0.70) -- its line is shorter so churn has less time; the exit (T06) dissolved and cut twice (0.66, foreign 2) -- the men stay in the doorway and the door leaf moves; every other fail settles by best-of-N under the pan-aware off-board wall and the day-floor calibration",
+    "measured_seconds": 8.0,
+    "render_s": 284.2,
+    "waited_s": 285.7,
+    "rel_path": "episodes/ep11/takes/r2v/T13.mp4"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "reaction",
+    "setup": "farm_door_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q14_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q14_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 92014,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert looking down at a man's bare brown hand flat on the threshold boards beside the sprawled sleeve of a brown driving coat.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in Interior. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:07. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, candle from behind, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 1>: an insert looking down at a man's bare brown hand flat on the threshold boards beside the sprawled sleeve of a brown driving coat, the candle from the hall hard on the knuckles, the starlit garden path pale beyond the fingers; only what <Picture 1> shows is in frame. The camera is in the hall at the height of a standing man's knee looking down, an arm's length from the threshold, a 90mm lens. The candle behind the camera is the light. At the first frame the bare hand fills the CENTRE of the frame the width of a third of the frame with the fingers toward the BOTTOM edge. The threshold board crosses the frame at the CENTRE line. The brown coat sleeve comes in from the RIGHT edge and the pale path fills the TOP third. The camera tilts down across the whole shot, travelling a finger's breadth as the fingers spread and grip the board's edge, from 00:00 to 00:02. At 00:02 the coat sleeve drags forward a hand's breadth over the sill. At 00:05 the knuckles whiten, and the movement continues to the last frame of the shot. By 00:07 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 268.5,
+    "waited_s": 270.6,
+    "rel_path": "episodes/ep11/takes/r2v/T14.mp4"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "reaction",
+    "setup": "farm_door_night",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_indoor.png",
+      "Q15_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q15_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l14.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.25,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 92116,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1>'s fierce sun-browned face come up into the candlelight inside the shut door.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, candle from behind, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a close shot of <Subject 1>'s fierce sun-browned face come up into the candlelight inside the shut door, the black beard cut close, the deep-set dark eyes on Ferrier, the hair damp and flat, the planks of the door black behind his head. The camera is in the hall level with his eyes, an arm's length from him, a 90mm lens. The candle behind the camera is the light. At the first frame Jefferson Hope's face fills the CENTRE of the frame, half the frame height. The camera pulls back from <Subject 1>'s face across the whole shot, travelling a hand's breadth as his jaw sets, from 00:00 to 00:04. <Subject 1> (S1), on screen, a tall, with a clipped English voice at an even pace, says: <d>[English] Food first. Nothing for two days.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his hand comes up to wipe his mouth. At 00:06 his chin lifts a finger's breadth, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:04 to 00:07 while his jaw sets. By 00:08 the camera is pulling back through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "ep11 length round: two lines were edited after the render and their takes are shorter than their shots (T15 5.16 s against 8.25 s placed, T19 6.58 against 7.08); the pictures are unchanged, the lengths are not",
+    "measured_seconds": 8.7,
+    "render_s": 557.2,
+    "waited_s": 561.6,
+    "rel_path": "episodes/ep11/takes/r2v/T15.mp4"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "payoff",
+    "setup": "parlour_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q16_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q16_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.125,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 92117,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on Jefferson Hope's two brown hands tearing a loaf over a plate of cold meat on the pine table beside the low lamp.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in Interior. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:06. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, oil lamp, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 1>: an insert on Jefferson Hope's two brown hands tearing a loaf over a plate of cold meat on the pine table beside the low lamp, the brown wool cuffs of his driving coat, the lamp's light hard on the knuckles and the table's far edge black; only what <Picture 1> shows is in frame. The camera is over the table at the height of the lamp chimney, an arm's length from the plate, a 90mm lens. The lamp is the light, from the LEFT. At the first frame the two hands and the loaf fill the CENTRE of the frame the height of the middle third over the plate at the BOTTOM CENTRE. The lamp's foot is a bright column at the LEFT edge. The pine table fills the BOTTOM half and the black of the room fills the TOP third. The camera pans right across the whole shot, travelling a finger's breadth as the plate keeps the bottom centre and the lamp's foot keeps the left edge, from 00:00 to 00:02. At 00:02 one hand carries the torn half up out of the TOP edge. At 00:03 the other hand keeps the plate. At 00:04 a crumb falls to the table, and the movement continues to the last frame of the shot. By 00:06 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "ep11 round 1: the turn (T13) re-staged its night into a lit garden, the paper push (T08) clipped the crown, the placard (T10) vanished from its own insert, the exit (T06) cut hard to an empty room, the loaf tilt (T16) lost the plate, three pull-backs on closes (T03 0.71x, T09 0.43x, T19 0.58x) left their panels, the boots insert (T20) re-staged, T07 froze 1.5 s at the start, T00 lost its black floor; every motion is now a pan with an edge object kept, no face takes a push or a pull-back",
+    "measured_seconds": 6.58,
+    "render_s": 242.1,
+    "waited_s": 245.6,
+    "rel_path": "episodes/ep11/takes/r2v/T16.mp4"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "payoff",
+    "setup": "parlour_night",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_indoor.png",
+      "Q17_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q17_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l16.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 92017,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1>'s face over the plate.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.17-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, oil lamp, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 2>: a close shot of <Subject 1>'s face over the plate, the black beard, the dark eyes off to the left of the lens, the lamp warm on the near side of the face and the far side black, a crust in his fist. The camera is across the table level with his eyes, an arm's length from him, a 90mm lens. The lamp is the light, from the LEFT. At the first frame Jefferson Hope's face fills the CENTRE of the frame, half the frame height. The camera pulls back from <Subject 1>'s face across the whole shot, travelling a hand's breadth as his eyes come round into the lens on the words, from 00:00 to 00:04. <Subject 1> (S1), on screen, a tall, with a clipped English voice at an even pace, says: <d>[English] The house is watched. So I came in on my belly.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his chin comes up a finger's breadth, then the crust lifts to his mouth, and the lift continues to the last frame of the shot. By 00:05 the camera is pulling back through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.16,
+    "render_s": 212.7,
+    "waited_s": 210.5,
+    "rel_path": "episodes/ep11/takes/r2v/T17.mp4"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "payoff",
+    "setup": "parlour_night",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_indoor.png",
+      "Q18_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q18_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l17.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 92018,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> on his feet by the table.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.17-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, oil lamp, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 2>: a medium close shot of <Subject 1> on his feet by the table, the brown driving coat open over the revolver butt at the front of his belt, his fierce face turned to Ferrier at the right of frame, the lamp warm on one side and the room black. The camera is at the window end of the room level with his eyes, two long strides from him, a 50mm lens. The lamp is the light, from the LEFT. At the first frame Jefferson Hope's head and shoulders fill the CENTRE of the frame from the TOP edge to the belt at the BOTTOM edge. The camera pans right across the whole shot, travelling a hand's breadth as his eyes keep the lens, from 00:00 to 00:04. <Subject 1> (S1), on screen, a tall, with a clipped English voice at an even pace, says: <d>[English] Tomorrow is your last day. We ride tonight.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his hand slaps the revolver butt once, then his head comes forward a finger's breadth on the words, and the movement continues to the last frame of the shot. By 00:05 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.16,
+    "render_s": 209.7,
+    "waited_s": 210.5,
+    "rel_path": "episodes/ep11/takes/r2v/T18.mp4"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "payoff",
+    "setup": "parlour_night",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_ferrier_indoor.png",
+      "Q19_0.png"
+    ],
+    "faces": [
+      "john_ferrier"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q19_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l19.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.083333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 92221,
+    "prompt": "subject_definitions:\n<Subject 1> is John Ferrier in <Picture 1>: A tall spare man in his middle fifties, a massive framework of bones under lean weathered muscle, a long face with sun-darkened skin drawn tight over projecting cheekbones, deep-set grey eyes under heavy brows, iron-grey hair cut square to the collar, and a full brown beard worn long, iron-grey through the moustache and white at the chin. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1>'s face at the blue-black window glass.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in Interior. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, oil lamp, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a close shot of <Subject 1>'s face at the blue-black window glass, bare-headed, the iron-grey beard, his eyes on the dark fields beyond the glass, the lamp's low light from the left on one cheek and the near side of the face black against the glass. The camera is at the window level with his eyes, an arm's length from him, a 90mm lens. The lamp is the light, from the LEFT. At the first frame John Ferrier's face fills the CENTRE of the frame, half the frame height. The camera pans left across the whole shot, travelling a finger's breadth as the blue-black glass keeps the right third and the sill keeps the bottom edge, from 00:00 to 00:06. <Subject 1> (S1), on screen, a tall spare man in his middle fifties, with a clipped English voice at an even pace, says: <d>[English] Then we ride tonight. Every acre of it can stay.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, his eyes come round from the glass to the lens. At 00:07 his jaw sets on the words, then his hand lifts off the sill and closes, and the lift continues to the last frame of the shot. By 00:08 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Interior runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "ep11 length round: two lines were edited after the render and their takes are shorter than their shots (T15 5.16 s against 8.25 s placed, T19 6.58 against 7.08); the pictures are unchanged, the lengths are not",
+    "measured_seconds": 8.0,
+    "render_s": 290.1,
+    "waited_s": 290.7,
+    "rel_path": "episodes/ep11/takes/r2v/T19.mp4"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "spike",
+    "setup": "garden_hedge_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q20_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q20_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.708333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 92121,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert by starlight on the side window's sill with a woman's small boot coming down over it onto the dug earth.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in the little front garden of John Ferrier's log villa at night. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:07. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, low sidelong light, deep black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 1>: an insert by starlight on the side window's sill with a woman's small boot coming down over it onto the dug earth, Jefferson Hope's two bare hands under the boot, the hem of her skirt, the house wall black; only what <Picture 1> shows is in frame. The camera is in the garden at the height of the sill, an arm's length from it, a 90mm lens. The starlight comes from ABOVE and behind the camera, cold. At the first frame the sill crosses the frame at the TOP third with the boot and the two hands at the CENTRE of the frame the height of the middle third. The dug earth fills the BOTTOM third and the house wall is black across the TOP edge and the RIGHT edge. The camera pans left across the whole shot, travelling a finger's breadth as the sill keeps the top third and the black house wall keeps the right edge, from 00:00 to 00:02. At 00:02 the boot comes down the last hand's breadth onto the earth. At 00:04 the hands let go. At 00:05 the skirt's hem falls over the boot, and the movement continues to the last frame of the shot. By 00:07 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the little front garden of John Ferrier's log villa at night runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "ep11 round 1: the turn (T13) re-staged its night into a lit garden, the paper push (T08) clipped the crown, the placard (T10) vanished from its own insert, the exit (T06) cut hard to an empty room, the loaf tilt (T16) lost the plate, three pull-backs on closes (T03 0.71x, T09 0.43x, T19 0.58x) left their panels, the boots insert (T20) re-staged, T07 froze 1.5 s at the start, T00 lost its black floor; every motion is now a pan with an edge object kept, no face takes a push or a pull-back",
+    "measured_seconds": 7.29,
+    "render_s": 238.7,
+    "waited_s": 240.4,
+    "rel_path": "episodes/ep11/takes/r2v/T20.mp4"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "spike",
+    "setup": "garden_hedge_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_outdoor.png",
+      "Q21_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q21_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.083333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 92021,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of <Subject 1> flat against the black side of the hedge.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in the little front garden of John Ferrier's log villa at night. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, low sidelong light, deep black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a medium close shot of <Subject 1> flat against the black side of the hedge, the sombrero's brim over his eyes, one bare hand pressing Lucy's bowed head down beside him, her loose chestnut hair over her collar, his face turned to the gap in the hedge at the right of frame where two shadowy figures stand against the pale field. The camera is at the foot of the hedge at the height of a crouching man's eye, two long strides from him, a 50mm lens. The starlight from ABOVE is the light. At the first frame Jefferson Hope's hat and shoulders fill the LEFT third of the frame from the BOTTOM edge to the CENTRE line. The camera pans right across the whole shot, travelling a hand's breadth as the two shadowy figures at the gap part and go their ways left and right, from 00:00 to 00:03. At 00:03 <Subject 1>'s hand is flat on her hair. At 00:05 his chin lifts a finger's breadth, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his hand is flat on her hair. By 00:08 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the little front garden of John Ferrier's log villa at night runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 293.4,
+    "waited_s": 295.6,
+    "rel_path": "episodes/ep11/takes/r2v/T21.mp4"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "friction",
+    "setup": "eagle_canyon_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_eagle_canyon_night.png",
+      "Q22_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q22_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.75,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 92022,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The Eagle Canyon in the Utah mountains by night, 1860: a narrow rock trail along the bed of a dried watercourse between great boulders, a black crag towering up on the left with long basalt ribs down its face, a chaos of boulders and scree on the right, the sky a strip of stars above; a low moon behind the crag to the left is the only light and it comes from behind and the left, rimming the boulders and the crag's ribs in cold silver, throwing every shadow across the trail toward the right, and leaving the faces of the riders black under their hat brims and the trail itself pale dust between black rocks <Picture 1> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide up the canyon trail.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the Eagle Canyon in the Utah mountains by night. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, moon from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a wide up the canyon trail: the file small on the pale dust below, and above them on a rock that overhangs the trail a solitary sentinel standing dark and plain against the strip of stars, a rifle upright in his hands, the moon behind the crag rimming the rock's edge. The camera is on the trail behind the file at a standing man's eye, a 35mm lens. The moon comes from behind and the LEFT. At the first frame the sentinel stands on his rock at the CENTRE of the upper third against the strip of stars, the height of a finger, the rifle upright beside him. The black crag fills the LEFT third to the TOP edge. The three riders' backs fill the BOTTOM half of the frame on the pale dust between black boulders. The camera tilts up across the whole shot, travelling a hand's breadth as the sentinel on the rock raises the rifle a hand's breadth, from 00:00 to 00:02. At 00:02 the file below halts. At 00:05 a horse's head comes up, and the movement continues to the last frame of the shot. By 00:07 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the Eagle Canyon in the Utah mountains by night runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 269.1,
+    "waited_s": 270.6,
+    "rel_path": "episodes/ep11/takes/r2v/T22.mp4"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "friction",
+    "setup": "eagle_canyon_night",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-unnamed_sentinel_outdoor.png",
+      "Q23_0.png"
+    ],
+    "faces": [
+      "unnamed_sentinel"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q23_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l22.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.458333,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 92023,
+    "prompt": "subject_definitions:\n<Subject 1> is Unnamed Sentinel in <Picture 1>: A lean weathered man of about thirty-five, a long-jawed sun-darkened face with a short dark beard, narrow watchful eyes under heavy brows, and dark hair to the collar. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot of the sentinel on his rock from below.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.17-second take of 1 shot in the Eagle Canyon in the Utah mountains by night. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, moon from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 2>: a medium close shot of the sentinel on his rock from below, a lean weathered bearded man in a battered black slouch hat and a long dark coat, the rifle upright in both bare hands, the moon behind the crag rimming his hat and shoulders and leaving his face black but for the eyes. The camera is on the trail below the rock at the height of a mounted man's eye looking up, three long strides from him, a 50mm lens. The moon comes from behind and the LEFT. At the first frame the sentinel's hat and shoulders fill the CENTRE of the frame from the BOTTOM third to the TOP edge. The camera pans left across the whole shot, travelling a hand's breadth as the rifle's muzzle comes down a hand's breadth toward the trail, from 00:00 to 00:04. <Subject 1> (S1), on screen, a lean weathered man of about thirty-five, with a clipped English voice at an even pace, says: <d>[English] Who goes there? Nine from seven.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his head bends a finger's breadth to peer down, then his mouth opens on the words, and the opening continues to the last frame of the shot. By 00:05 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the Eagle Canyon in the Utah mountains by night runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.16,
+    "render_s": 210.7,
+    "waited_s": 210.5,
+    "rel_path": "episodes/ep11/takes/r2v/T23.mp4"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "friction",
+    "setup": "eagle_canyon_night",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-jefferson_hope_outdoor.png",
+      "Q24_0.png"
+    ],
+    "faces": [
+      "jefferson_hope"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q24_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l23.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.083333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 92024,
+    "prompt": "subject_definitions:\n<Subject 1> is Jefferson Hope in <Picture 1>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1>'s face under the sombrero's brim looking up at the rock.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 1 shot in the Eagle Canyon in the Utah mountains by night. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, moon from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 2>: a close shot of <Subject 1>'s face under the sombrero's brim looking up at the rock, the black beard, his bare hand on the rifle at his saddle at the bottom of the frame, the moon from behind and the left rimming the brim and the cheekbone and leaving the face black but for the eyes. The camera is beside the horse level with his eyes, an arm's length from him, a 90mm lens. The moon comes from behind and the LEFT. At the first frame Jefferson Hope's face fills the CENTRE of the frame, half the frame height. The camera pulls back from <Subject 1>'s face across the whole shot, travelling a hand's breadth as his eyes are up on the rock, from 00:00 to 00:04. <Subject 1> (S1), on screen, a tall, with a clipped English voice at an even pace, says: <d>[English] Travellers for Nevada. Seven from five.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his hand slides a hand's breadth up the rifle's stock, then his chin lifts a finger's breadth on the words, and the lift continues to the last frame of the shot. By 00:05 the camera is pulling back through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the Eagle Canyon in the Utah mountains by night runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 216.5,
+    "waited_s": 215.5,
+    "rel_path": "episodes/ep11/takes/r2v/T24.mp4"
+  },
+  {
+    "index": 25,
+    "shots": [
+      25,
+      26
+    ],
+    "section": "button",
+    "setup": "eagle_canyon_night",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-unnamed_sentinel_outdoor.png",
+      "plate_eagle_canyon_night.png",
+      "Q25_0.png",
+      "Q26_0.png"
+    ],
+    "faces": [
+      "unnamed_sentinel"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q25_0.png",
+        0
+      ],
+      [
+        "Q26_0.png",
+        98
+      ]
+    ],
+    "audio": [
+      [
+        "l24.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.333333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 92025,
+    "prompt": "subject_definitions:\n<Subject 1> is Unnamed Sentinel in <Picture 1>: A lean weathered man of about thirty-five, a long-jawed sun-darkened face with a short dark beard, narrow watchful eyes under heavy brows, and dark hair to the collar. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: The Eagle Canyon in the Utah mountains by night, 1860: a narrow rock trail along the bed of a dried watercourse between great boulders, a black crag towering up on the left with long basalt ribs down its face, a chaos of boulders and scree on the right, the sky a strip of stars above; a low moon behind the crag to the left is the only light and it comes from behind and the left, rimming the boulders and the crag's ribs in cold silver, throwing every shadow across the trail toward the right, and leaving the faces of the riders black under their hat brims and the trail itself pale dust between black rocks <Picture 2> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a close shot of the sentinel's bearded face under the slouch hat's brim from below.\n<Picture 4> is the first frame of [Shot 2], a wide from the sentinel's rock looking down into the canyon.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 2 shots in <Subject 2>, the Eagle Canyon in the Utah mountains by night. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 4> and runs from 00:04 to 00:06. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal live-action, Ferrier's farm, Utah, 1860, moon from the left, black shadow, 35 mm film grain.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 3>: a close shot of the sentinel's bearded face under the slouch hat's brim from below, his chin on his two bare hands folded over the rifle's muzzle, the moon's silver rim along the brim and the cheekbone from behind and the left, the rest of the face black, the stars behind. The camera is on the trail below the rock at the height of a mounted man's eye looking up, three long strides from him, a 50mm lens. The moon comes from behind and the LEFT. At the first frame the sentinel's face fills the CENTRE of the frame, half the frame height. The camera pulls back from the sentinel across the whole shot, travelling a hand's breadth as his hand lifts off the muzzle and waves once down the trail, a hand's breadth, from 00:00 to 00:03. <Subject 1> (S1), on screen, a lean weathered man of about thirty-five, with a clipped English voice at an even pace, says: <d>[English] Pass on, then, and the Lord go with you.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his head nods once, then the coat skirt stirs, and the movement continues to the last frame of the shot. By 00:04 the camera is pulling back through the last frame, and the action continues with it.\n[Shot 2] From 00:04 to 00:06. At 00:04 the shot cuts to a wide from the sentinel's rock looking down into the canyon, beginning from <Picture 4>: the three riders going away from the camera at a trot down the pale dust between the black boulders, small and black, the rifle's muzzle and the sentinel's coat sleeve in the near left corner, the moon rimming the far crag. The camera is on the sentinel's rock HIGH ABOVE the trail, looking steeply DOWN so the riders' hat crowns and the horses' backs are seen from above, a 35mm lens. The moon comes from behind and the LEFT. At the first frame the three riders are small at the CENTRE of the lower third going away down the pale trail. The camera tilts down across the whole shot, travelling a hand's breadth as the three riders go away down the trail at a trot growing smaller, from 00:04 to 00:05. At 00:05 the coat sleeve in the near corner lifts a hand's breadth, then dust drifts off the trail to the right, and the movement continues to the last frame of the shot. By 00:06 the camera is tilting down through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the Eagle Canyon in the Utah mountains by night runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 262.1,
+    "waited_s": 265.6,
+    "rel_path": "episodes/ep11/takes/r2v/T25.mp4"
+  }
+]

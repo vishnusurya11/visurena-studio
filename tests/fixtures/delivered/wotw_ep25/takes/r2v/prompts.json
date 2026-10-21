@@ -1,0 +1,819 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "fulham_road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/fulham_high_street/wide_fulham_road.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.875,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 106000,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. On the north pavement a jeweller's window gapes broken above scattered gold chains and a pocket watch; beside it a doorstep keeps a smashed champagne magnum in a dark pool. On the south side stands a small baker's shop with its door ajar. Far down the road a white stucco terrace burns, grey smoke rising from its windows. Hard afternoon sunlight falls from the upper left, throwing the shadows of the fascias across the black-dusted roadway toward the right kerb, deep black shadow under every shop front. Grey daylight through the window at the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, a London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot of <Subject 1> (face gaunt, grey eyes, battered brown felt hat) at the corner of the lane among shuttered shops as a man black as a sweep with dust lunges up at him from the kerb. The camera is On the setts three yards east of the lane corner, at chest height, a 35mm lens; the afternoon sun comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> (face gaunt, grey eyes, battered brown felt hat) standing at the RIGHT third, his head a quarter of the frame's height, looking down at the kerb. The dust-blackened man sprawls on his side against the kerb at the LEFT third, one arm propped on the black-powdered setts. A shuttered shopfront with a painted fascia fills the TOP half behind them. The shot is inside this place: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. The camera pushes in toward <Subject 1> across the whole shot as the dust-blackened man heaves up off the kerb and swings a fist at <Subject 1>'s head, from 00:00 to 00:04. At 00:04 <Subject 1> leans back with one hand raised as the man's arm keeps swinging through the air, and the lean continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:07 while he leans back with one hand raised as the man's arm keeps swinging through the air. By 00:07 the camera is pushing in through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "friction",
+    "setup": "fulham_road",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/fulham_high_street/wide_fulham_road.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l01.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.541667,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 106001,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. On the north pavement a jeweller's window gapes broken above scattered gold chains and a pocket watch; beside it a doorstep keeps a smashed champagne magnum in a dark pool. On the south side stands a small baker's shop with its door ajar. Far down the road a white stucco terrace burns, grey smoke rising from its windows. Hard afternoon sunlight falls from the upper left, throwing the shadows of the fascias across the black-dusted roadway toward the right kerb, deep black shadow under every shop front. Grey daylight through the window at the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in <Subject 2>, a London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides. [Shot 1] runs from 00:00 to 00:04. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:04. The shot opens on a medium close shot of <Subject 1> (face gaunt, grey eyes, sixteen days of grey-brown beard) at the lane corner, looking down past the LEFT edge toward the kerb as he speaks to the drunk man. The camera is On the setts a yard and a half in front of <Subject 1>, at his eye height, a 50mm lens; the afternoon sun comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face at the CENTRE, his head a third of the frame's height, bent a little forward, grey eyes looking down past the LEFT edge toward the kerb. A shuttered shopfront with a painted green fascia fills the TOP half behind him. Black powder dusts the brim of his battered brown felt hat, and the sun falls across his LEFT cheek. The shot is inside this place: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. The camera keeps a locked-off frame at <Subject 1>'s eye height across the whole shot as <Subject 1> speaks down toward the kerb with one open hand out, from 00:00 to 00:03. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Steady, man. Let me help you up.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his shoulders draw back as he straightens up away from the kerb, and the movement continues to the last frame of the shot. By 00:04 the action of that shot continues through the last frame, with <Subject 1>'s face now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "fulham_road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/fulham_high_street/wide_fulham_road.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.041667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 106002,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. On the north pavement a jeweller's window gapes broken above scattered gold chains and a pocket watch; beside it a doorstep keeps a smashed champagne magnum in a dark pool. On the south side stands a small baker's shop with its door ajar. Far down the road a white stucco terrace burns, grey smoke rising from its windows. Hard afternoon sunlight falls from the upper left, throwing the shadows of the fascias across the black-dusted roadway toward the right kerb, deep black shadow under every shop front. Grey daylight through the window at the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, a London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot from behind of <Subject 1> (battered brown felt hat, charcoal trousers caked with dried clay to the thigh) walking at a walking pace east along the black-dusted Fulham Road between shuttered shops. The camera is Behind <Subject 1> on the roadway, at shoulder height, three yards back, a 35mm lens; the sun comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> walking at a walking pace at the CENTRE of the frame, seen from behind and the left, his figure two thirds of the frame's height, his boots pressing prints into the black powder. Shuttered shopfronts with blinded upper windows run at a walking pace along the LEFT third and the RIGHT third. Grey smoke from the far burning terrace rises at the TOP of the roadway. The shot is inside this place: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. The camera tracks behind <Subject 1> a full shopfront's width across the whole shot as he walks at a walking pace east toward the far smoke as his cracked black boots press prints into the black powder, from 00:00 to 00:03. At 00:03 the dry wind lifts the dust in small puffs around his heels, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his cracked black boots press prints into the black powder. By 00:06 the camera is tracking through the last frame, with <Subject 1> walks now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "friction",
+    "setup": "fulham_road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/fulham_high_street/wide_fulham_road.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.916667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 106003,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. On the north pavement a jeweller's window gapes broken above scattered gold chains and a pocket watch; beside it a doorstep keeps a smashed champagne magnum in a dark pool. On the south side stands a small baker's shop with its door ajar. Far down the road a white stucco terrace burns, grey smoke rising from its windows. Hard afternoon sunlight falls from the upper left, throwing the shadows of the fascias across the black-dusted roadway toward the right kerb, deep black shadow under every shop front. Grey daylight through the window at the LEFT, deep shadow. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in <Subject 1>, a London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert of the jeweller's doorstep on the north pavement: gold chains and a pocket watch scattered on black-dusted stone beside a broken champagne magnum in a dark pool; only that object and what touches it is in frame. The camera is On the north pavement two feet above the stone, a yard from the doorstep, a 50mm lens; the sun comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS a tangle of gold chains and a pocket watch on the black-powdered pavement at the LEFT third, glinting in the sun. The broken frame of the jeweller's window rises at the TOP edge above them. The edge of the next doorstep sits at the RIGHT edge, its stone step dark and wet, a green glass shard near its corner. The shot is inside this place: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. The camera tracks sideways to the right a yard across the whole shot, past the gold chains, toward the next doorstep as the dry wind ruffles the black powder over the pocket watch, from 00:00 to 00:04. At 00:04 the wind rolls a green glass shard across the paving toward the dark pool, and the roll continues to the last frame of the shot. By 00:08 the camera is tracking through the last frame, with the pocket watch now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "transition",
+    "setup": "fulham_road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/fulham_high_street/wide_fulham_road.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.625,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 106004,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. On the north pavement a jeweller's window gapes broken above scattered gold chains and a pocket watch; beside it a doorstep keeps a smashed champagne magnum in a dark pool. On the south side stands a small baker's shop with its door ajar. Far down the road a white stucco terrace burns, grey smoke rising from its windows. Hard afternoon sunlight falls from the upper left, throwing the shadows of the fascias across the black-dusted roadway toward the right kerb, deep black shadow under every shop front. Grey daylight through the window at the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 2>, a London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a wide of the Fulham Road looking east, <Subject 1> (battered brown felt hat, charcoal trousers caked with dried clay to the thigh) small on the black setts as the white terrace burns at the far end. The camera is In the middle of the roadway at eye height, twenty yards behind <Subject 1>, a 28mm lens; the sun comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> walking at a walking pace at the LEFT third, a sixth of the frame's height, beside the shuttered north terrace. The black-dusted setts fill the BOTTOM half. The burning white stucco terrace stands at the CENTRE, a tenth of the frame tall, grey smoke rising from its windows toward the TOP edge. Two stray dogs nose along the far kerb at the RIGHT third. The shot is inside this place: A London shopping street of the 1890s seen east along its length toward Walham Green. Three-storey brick terraces with painted shop fascias line both sides, every shop shuttered and every upper window blinded. A fine film of black powder covers the granite setts and York stone pavements and softens every kerb and doorstep. The camera pans from <Subject 1> across to the burning white terrace, a third of the frame, across the whole shot as flames lick out of the terrace windows, from 00:00 to 00:02. At 00:02 grey smoke rolls up from the roof into the blue sky, and the roll continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while flames lick out of the terrace windows. By 00:05 the camera is panning through the last frame, with the burning white terrace now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "setup",
+    "setup": "exhibition_road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/exhibition_road/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.0,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 106005,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions, and behind them the tall pale stone tower of the Imperial Institute with its copper cupola. Wide pavements and iron lamp posts line both sides. Every window keeps a drawn blind. At the far end of the road stand the tall black iron gates of Hyde Park on stone piers, with green park trees behind them. Hard noon sunlight falls from the upper right over the museum roofline, laying the shadows of the lamp posts across the setts toward the left pavement. A haze of smoke hangs above the park trees. Raking grey daylight from the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide of Exhibition Road looking north to the park gates, <Subject 1> (battered brown felt hat, cracked black boots) small on the setts as the howl sweeps down the road. The camera is On the roadway near the south end, at eye height, thirty yards behind <Subject 1>, a 28mm lens; the noon sun comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> standing at the CENTRE of the roadway, an eighth of the frame's height, facing the park gates. The red-brick museum front fills the RIGHT third. The stucco mansions and the institute tower fill the LEFT third. The black iron park gates stand at the far CENTRE under a strip of blue sky at the TOP, three pigeons pecking near the LEFT kerb. The shot is inside this place: On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions, and behind them the tall pale stone tower of the Imperial Institute with its copper cupola. Wide pavements and iron lamp posts line both sides. Every window keeps a drawn blind. The camera rises one whole storey above <Subject 1> across the whole shot, looking down over the road to the park gates as <Subject 1> turns his head from side to side toward the sound, from 00:00 to 00:04. At 00:04 three pigeons flap up from the setts and circle above the left kerb, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:07 while he turns his head from side to side toward the sound. By 00:07 the camera is rising through the last frame, with seen now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "exhibition_road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/exhibition_road/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.916667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 106006,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions, and behind them the tall pale stone tower of the Imperial Institute with its copper cupola. Wide pavements and iron lamp posts line both sides. Every window keeps a drawn blind. At the far end of the road stand the tall black iron gates of Hyde Park on stone piers, with green park trees behind them. Hard noon sunlight falls from the upper right over the museum roofline, laying the shadows of the lamp posts across the setts toward the left pavement. A haze of smoke hangs above the park trees. Raking grey daylight from the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 1> (face gaunt, grey eyes, sixteen days of grey-brown beard) stopped on the setts, staring north toward the park as the wailing rolls over him. The camera is On the roadway two yards in front of <Subject 1>, at his eye height, a 50mm lens; the noon sun comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face at the CENTRE of the frame, his head a third of the frame's height, grey eyes lifted past the camera toward the north. The red-brick museum wall fills the LEFT third behind him, an arched window with a drawn blind at the TOP edge. Noon sunlight falls across his RIGHT cheek and the brim of his battered brown felt hat. The shot is inside this place: On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions, and behind them the tall pale stone tower of the Imperial Institute with its copper cupola. Wide pavements and iron lamp posts line both sides. Every window keeps a drawn blind. The camera pushes in toward <Subject 1>'s face across the whole shot as <Subject 1> tilts his head to listen, from 00:00 to 00:02. At 00:02 his head turns north toward the sound as his shoulders rise with a quick breath, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he tilts his head to listen. By 00:05 the camera is pushing in through the last frame, with <Subject 1>'s face now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "transition",
+    "setup": "exhibition_road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/exhibition_road/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.958333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 106007,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions, and behind them the tall pale stone tower of the Imperial Institute with its copper cupola. Wide pavements and iron lamp posts line both sides. Every window keeps a drawn blind. At the far end of the road stand the tall black iron gates of Hyde Park on stone piers, with green park trees behind them. Hard noon sunlight falls from the upper right over the museum roofline, laying the shadows of the lamp posts across the setts toward the left pavement. A haze of smoke hangs above the park trees. Raking grey daylight from the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot from behind of <Subject 1> (battered brown felt hat, charcoal trousers caked with dried clay to the thigh) walking at a walking pace north up Exhibition Road toward the park gates past shuttered mansions. The camera is On the roadway behind <Subject 1>, at shoulder height, three yards back, a 35mm lens; the sun comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> walking at a walking pace at the LEFT third, seen from behind, his figure two thirds of the frame's height. The stucco mansion fronts with drawn blinds run at a walking pace along the LEFT edge. The red-brick museum front fills the RIGHT third. The black iron park gates stand small at the CENTRE at the far end of the road. The shot is inside this place: On the right side stands the long red-brick and terracotta museum front with rows of arched windows. On the left side rise great brick and stucco mansions, and behind them the tall pale stone tower of the Imperial Institute with its copper cupola. Wide pavements and iron lamp posts line both sides. Every window keeps a drawn blind. The camera tracks behind <Subject 1> a full mansion's width across the whole shot as he walks at a walking pace north toward the park gates as his cracked black boots strike the setts at a normal walking pace, from 00:00 to 00:02. At 00:02 his shadow swings along the setts beside him, and the swing continues to the last frame of the shot. By 00:05 the camera is tracking through the last frame, with <Subject 1> walks now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "setup",
+    "setup": "regents_park_corner",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/regents_park/wide_establishing.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.958333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 106008,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The top of Baker Street where it meets Regent's Park in the 1890s, seen north-east over the park. In the foreground lies a granite-kerbed street corner with an unlit gas lamp and the black iron railings of the park. Beyond the railings, lawns stretch out to a dark mass of plane and elm trees, a clear amber and violet sky above the treetops. Cream stucco terrace fronts with columned porticoes and dark windows stand at the left. Black powder lies in the gutters. The last clear sunset light falls from the left, from the west behind the terraces, gilding the elm tops and laying the long shadow of the lamp across the kerb toward the right, deep black shadow under the porticoes. Raking grey daylight from the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian fighting-machine in <Picture 3>: A walking engine of glittering metal, higher than many houses: three very long jointed metal legs like a great insect's, striding at a normal pace with a rolling, heeling gait. On top sits a great brazen hood of dark burnished copper-bronze, shaped like a huge bell or cowl, that turns to and fro like a head looking about, smooth and blank all round. Long flexible glittering jointed tentacles swing from beneath the hood like whips, and puffs of green smoke squirt from the joints of the legs. One tentacle carries a short tube, the Heat-Ray. About a hundred feet high. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the top of Baker Street where it meets Regent's Park in the 1890s. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide of the top of Baker Street at sunset, <Subject 1> (battered brown felt hat, cracked black boots) by the gas lamp as the fighting-machine, a brazen cowled Martian fighting-machine, a walking at a walking pace engine of glittering metal on tall jointed brass legs, stands far off above the park trees. The camera is On the pavement at the street corner, at eye height, four yards from the gas lamp, a 35mm lens; the sunset comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> standing beside the unlit gas lamp at the RIGHT third, his figure half the frame's height, facing the park. The black iron park railings cross the lower third from the LEFT edge. The dark mass of trees fills the middle band. The shot is inside this place: The top of Baker Street where it meets Regent's Park in the 1890s, seen north-east over the park. In the foreground lies a granite-kerbed street corner with an unlit gas lamp and the black iron railings of the park. Beyond the railings, lawns stretch out to a dark mass of plane and elm trees. The camera pulls back from <Subject 1> at the gas lamp across the whole shot, widening to show the park railings, the trees and the fighting-machine above them as <Subject 1> lifts his face toward the brass Martian fighting-machine, from 00:00 to 00:03. At 00:03 the sunset light runs at a walking pace gold along the Martian fighting-machine's rim, and the walk continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he lifts his face toward the brass Martian fighting-machine. By 00:06 the camera is pulling back through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "regents_park_corner",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/regents_park/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.416667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 106009,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The top of Baker Street where it meets Regent's Park in the 1890s, seen north-east over the park. In the foreground lies a granite-kerbed street corner with an unlit gas lamp and the black iron railings of the park. Beyond the railings, lawns stretch out to a dark mass of plane and elm trees, a clear amber and violet sky above the treetops. Cream stucco terrace fronts with columned porticoes and dark windows stand at the left. Black powder lies in the gutters. The last clear sunset light falls from the left, from the west behind the terraces, gilding the elm tops and laying the long shadow of the lamp across the kerb toward the right, deep black shadow under the porticoes. Raking grey daylight from the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, the top of Baker Street where it meets Regent's Park in the 1890s. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot of <Subject 1> (face gaunt, grey eyes, battered brown felt hat) on the kerb as a dog with red meat in its jaws races past him, a pack of mongrels at its heels. The camera is On the pavement under the terraces, at waist height, three yards from <Subject 1>, a 35mm lens; the sunset comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> standing at the LEFT third, his head a quarter of the frame's height, close by the black park railings. The roadway runs at a walking pace across the BOTTOM half, black powder in the gutter. A lean brown dog with a scrap of red meat in its jaws bounds along the far kerb at the RIGHT edge, six mongrels behind it. The shot is inside this place: The top of Baker Street where it meets Regent's Park in the 1890s, seen north-east over the park. In the foreground lies a granite-kerbed street corner with an unlit gas lamp and the black iron railings of the park. Beyond the railings, lawns stretch out to a dark mass of plane and elm trees. The camera keeps a locked-off frame at waist height across the whole shot as the lean brown dog curves wide around <Subject 1> with the red meat in its jaws, from 00:00 to 00:02. At 00:02 the six mongrels jostle and yelp across the centre of the road behind it, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the lean brown dog curves wide around <Subject 1> with the red meat in its jaws. By 00:05 the action of that shot continues through the last frame, and <Subject 1> stands at the LEFT third, turned toward the RIGHT. The lean brown dog curves past him across the CENTRE, and six mongrels run at a walking pace along the BOTTOM half behind it, dust kicking up from their paws.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "friction",
+    "setup": "regents_park_corner",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/regents_park/wide_establishing.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.416667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 106010,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The top of Baker Street where it meets Regent's Park in the 1890s, seen north-east over the park. In the foreground lies a granite-kerbed street corner with an unlit gas lamp and the black iron railings of the park. Beyond the railings, lawns stretch out to a dark mass of plane and elm trees, a clear amber and violet sky above the treetops. Cream stucco terrace fronts with columned porticoes and dark windows stand at the left. Black powder lies in the gutters. The last clear sunset light falls from the left, from the west behind the terraces, gilding the elm tops and laying the long shadow of the lamp across the kerb toward the right, deep black shadow under the porticoes. Raking grey daylight from the LEFT, deep shadow. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian fighting-machine in <Picture 2>: A walking engine of glittering metal, higher than many houses: three very long jointed metal legs like a great insect's, striding at a normal pace with a rolling, heeling gait. On top sits a great brazen hood of dark burnished copper-bronze, shaped like a huge bell or cowl, that turns to and fro like a head looking about, smooth and blank all round. Long flexible glittering jointed tentacles swing from beneath the hood like whips, and puffs of green smoke squirt from the joints of the legs. One tentacle carries a short tube, the Heat-Ray. About a hundred feet high. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the top of Baker Street where it meets Regent's Park in the 1890s. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert of the spiked tops of the park railings at dusk with the far fighting-machine's brazen the Martian fighting-machine, a walking at a walking pace engine of glittering metal framed above the black trees; only that object and what touches it is in frame. The camera is On the kerb a foot from the railings, at hip height, an 85mm lens; the last light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the row of black iron railing spikes across the BOTTOM half, sharp against the dusk, black powder along the stone kerb at the BOTTOM edge. A dark band of elm and plane trees fills the CENTRE behind them, the brazen Martian fighting-machine of the fighting-machine a small gold glint above the trees at the TOP third. The shot is inside this place: The top of Baker Street where it meets Regent's Park in the 1890s, seen north-east over the park. In the foreground lies a granite-kerbed street corner with an unlit gas lamp and the black iron railings of the park. Beyond the railings, lawns stretch out to a dark mass of plane and elm trees. The camera tilts up from the railing spikes to the brass Martian fighting-machine above the trees, a third of the frame, across the whole shot as the dusk wind stirs the elm tops, from 00:00 to 00:04. At 00:04 the last light runs at a walking pace along the Martian fighting-machine's brass rim, and the walk continues to the last frame of the shot. By 00:07 the camera is tilting up through the last frame, with the railing spikes now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "friction",
+    "setup": "canal_bridge_road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/regents_canal_bridge/reverse_road_north.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.791667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 106011,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road, 1890s. In the foreground stands the cast-iron parapet railing of the bridge with an unlit gas lamp standard. Ahead, tall white stucco terraces line both sides of the road, faint and tall and dim, their windows dark hollow openings like the sockets of skulls. The roadway ahead lies pitch-black with fallen powder, as if tarred. Crimson red weed clambers over heaps of fallen brick against the house fronts. Dark park trees stand at the right edge. The last violet dusk light falls from the upper left behind the western terrace, leaving the road in deep black shadow and paling the stucco fronts on the right. Moonlight from the LEFT, black shadows. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, a London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot of <Subject 1> (face gaunt, battered brown felt hat, charcoal trousers caked with dried clay to the thigh) crossing the canal bridge beside its iron railing at dusk. The camera is On the bridge roadway, at chest height, three yards to <Subject 1>'s side, a 35mm lens; the violet dusk light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> walking at a walking pace at the LEFT third beside the cast-iron bridge railing, his head a quarter of the frame's height. The unlit gas lamp stands at the LEFT edge. The black road and the white stucco terraces recede to the CENTRE behind him, dim under the violet sky at the TOP. The shot is inside this place: A London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road, 1890s. In the foreground stands the cast-iron parapet railing of the bridge with an unlit gas lamp standard. Ahead, tall white stucco terraces line both sides of the road, faint and tall and dim. The camera tracks sideways to the right with <Subject 1> across the whole shot, past the gas lamp on the parapet as <Subject 1> halts in mid-stride at a walking pace as the howl cuts off, from 00:00 to 00:03. At 00:03 his head turns back over his shoulder toward the park, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he halts in mid-stride at a walking pace as the howl cuts off. By 00:06 the camera is tracking through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "spike",
+    "setup": "canal_bridge_road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/regents_canal_bridge/reverse_road_north.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.958333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 106012,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: A London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road, 1890s. In the foreground stands the cast-iron parapet railing of the bridge with an unlit gas lamp standard. Ahead, tall white stucco terraces line both sides of the road, faint and tall and dim, their windows dark hollow openings like the sockets of skulls. The roadway ahead lies pitch-black with fallen powder, as if tarred. Crimson red weed clambers over heaps of fallen brick against the house fronts. Dark park trees stand at the right edge. The last violet dusk light falls from the upper left behind the western terrace, leaving the road in deep black shadow and paling the stucco fronts on the right. Moonlight from the LEFT, black shadows. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 1>, a London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on an insert of crimson red weed clambering over a heap of fallen brick against a white stucco house front, its dark window openings above; only that object and what touches it is in frame. The camera is On the pavement at knee height, a yard from the rubble heap, a 50mm lens; the violet dusk light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the crimson red weed spilling over fallen brick across the BOTTOM half, its fleshy fronds glistening. The base of a white stucco house front rises at the RIGHT edge. The lower sill of a dark window opening sits at the TOP edge, a black hollow above the weed. The shot is inside this place: A London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road, 1890s. In the foreground stands the cast-iron parapet railing of the bridge with an unlit gas lamp standard. Ahead, tall white stucco terraces line both sides of the road, faint and tall and dim. The camera rises above the half, across the whole shot as the dusk wind stirs the fleshy fronds over the bricks, from 00:00 to 00:02. At 00:02 the weed tendrils sway and reach up the wall, and the reach continues to the last frame of the shot. By 00:05 the camera is rising through the last frame, with the dark window openings now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "spike",
+    "setup": "canal_bridge_road",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/regents_canal_bridge/reverse_road_north.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l11.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.541667,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 106013,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: A London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road, 1890s. In the foreground stands the cast-iron parapet railing of the bridge with an unlit gas lamp standard. Ahead, tall white stucco terraces line both sides of the road, faint and tall and dim, their windows dark hollow openings like the sockets of skulls. The roadway ahead lies pitch-black with fallen powder, as if tarred. Crimson red weed clambers over heaps of fallen brick against the house fronts. Dark park trees stand at the right edge. The last violet dusk light falls from the upper left behind the western terrace, leaving the road in deep black shadow and paling the stucco fronts on the right. Moonlight from the LEFT, black shadows. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in <Subject 2>, a London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 1> (face gaunt, grey eyes, sixteen days of grey-brown beard) on the black road at dusk as he whispers into the silence and terror takes him. The camera is On the roadway a yard and a half in front of <Subject 1>, at his eye height, a 50mm lens; the dusk light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face at the CENTRE, his head a third of the frame's height, grey eyes wide and fixed past the LEFT edge of the frame. The white terrace fronts with their dark windows stand behind his RIGHT shoulder. The pale violet sky fills the TOP strip above the rooflines. The shot is inside this place: A London road at dusk running at a walking pace north from the low yellow-brick bridge over the Regent's Canal toward St John's Wood Road, 1890s. In the foreground stands the cast-iron parapet railing of the bridge with an unlit gas lamp standard. Ahead, tall white stucco terraces line both sides of the road, faint and tall and dim. The camera keeps a locked-off frame at <Subject 1>'s eye height across the whole shot as <Subject 1>'s head jerks from side to side along the dark windows, from 00:00 to 00:04. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] It has stopped. God help me, it has stopped.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his shoulders swing round toward the black road behind him, and the swing continues to the last frame of the shot. By 00:05 the action of that shot continues through the last frame, with <Subject 1>'s face now in frame.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "setup",
+    "setup": "primrose_hill_foot",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/primrose_hill/wide_establishing.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.625,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 106014,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. At the left the stucco houses of St Edmund's Terrace rise out of breast-high crimson weed. Pale gold dawn light falls from the right, from the eastern sky, rimming the machine's legs and laying their long black shadows across the grass toward the left. Raking grey daylight from the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian fighting-machine in <Picture 3>: A walking engine of glittering metal, higher than many houses: three very long jointed metal legs like a great insect's, striding at a normal pace with a rolling, heeling gait. On top sits a great brazen hood of dark burnished copper-bronze, shaped like a huge bell or cowl, that turns to and fro like a head looking about, smooth and blank all round. Long flexible glittering jointed tentacles swing from beneath the hood like whips, and puffs of green smoke squirt from the joints of the legs. One tentacle carries a short tube, the Heat-Ray. About a hundred feet high. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, Primrose Hill at first dawn in the 1890s. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide of Primrose Hill at first dawn from Albert Road, <Subject 1> (battered brown felt hat, cracked black boots) small at the road's edge as the third fighting-machine stands on the summit against the fading stars. The camera is On Albert Road at the south-west foot of the hill, at eye height, a 28mm lens; the pale dawn light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> standing at the LEFT third beside the iron park railings, a seventh of the frame's height, facing up the slope. The brown flood water runs at a walking pace across the BOTTOM fifth. The grass slope rises to the clay mounds at the CENTRE of the TOP half, the fighting-machine standing on them right of CENTRE, its the Martian fighting-machine near the TOP edge. The shot is inside this place: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. The camera tilts up from the railings to the slope at a walking pace, across the whole shot as the dawn light grows gold along the machine's long legs, from 00:00 to 00:04. At 00:04 the black birds wheel and circle around its the Martian fighting-machine, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:07 while the dawn light grows gold along the machine's long legs. By 00:08 the camera is tilting up through the last frame, with the fighting-machine now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "turn",
+    "setup": "primrose_hill_foot",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/primrose_hill/wide_establishing.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.333333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 106015,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. At the left the stucco houses of St Edmund's Terrace rise out of breast-high crimson weed. Pale gold dawn light falls from the right, from the eastern sky, rimming the machine's legs and laying their long black shadows across the grass toward the left. Raking grey daylight from the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian fighting-machine in <Picture 3>: A walking engine of glittering metal, higher than many houses: three very long jointed metal legs like a great insect's, striding at a normal pace with a rolling, heeling gait. On top sits a great brazen hood of dark burnished copper-bronze, shaped like a huge bell or cowl, that turns to and fro like a head looking about, smooth and blank all round. Long flexible glittering jointed tentacles swing from beneath the hood like whips, and puffs of green smoke squirt from the joints of the legs. One tentacle carries a short tube, the Heat-Ray. About a hundred feet high. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, Primrose Hill at first dawn in the 1890s. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot from behind of <Subject 1> (battered brown felt hat, Cream-and-blue striped flannel shirt torn at the shoulder) marching up the road toward the fighting-machine on the summit as black birds cluster on its the Martian fighting-machine. The camera is Behind <Subject 1> on the road, at shoulder height, three yards back, a 35mm lens; the dawn light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> striding at a walking pace at the CENTRE, seen from behind, his head a quarter of the frame's height, fists clenched at his sides. The grass slope rises ahead of him into the TOP half. The fighting-machine stands on the summit right of CENTRE near the TOP edge. The shot is inside this place: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. The camera tracks behind <Subject 1> a dozen strides at a walking pace up the road across the whole shot toward the fighting-machine on the summit as <Subject 1> lifts his head to the black birds clustering on the machine's Martian fighting-machine, from 00:00 to 00:02. At 00:02 his march breaks into a run at a walking pace, arms pumping toward the hill, and the walk continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he lifts his head to the black birds clustering on the machine's Martian fighting-machine. By 00:05 the camera is tracking through the last frame, with <Subject 1> runs now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "friction",
+    "setup": "primrose_hill_foot",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/primrose_hill/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.25,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 106016,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. At the left the stucco houses of St Edmund's Terrace rise out of breast-high crimson weed. Pale gold dawn light falls from the right, from the eastern sky, rimming the machine's legs and laying their long black shadows across the grass toward the left. Raking grey daylight from the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in <Subject 2>, Primrose Hill at first dawn in the 1890s. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on a medium shot of <Subject 1> (face gaunt, sixteen days of grey-brown beard, battered brown felt hat) wading breast-high across the brown flood torrent below the hill. The camera is On the roadside bank at chest height, three yards from <Subject 1>, a 35mm lens, handheld; the dawn light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> standing breast-high in the brown flood water at the LEFT third, his head a quarter of the frame's height, his arms raised above the current. The iron park railings stand at the RIGHT edge. The crimson weed of St Edmund's Terrace fills the TOP half behind him. The shot is inside this place: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. The camera tilts up from the third to the current at a walking pace, across the whole shot as the brown torrent tears around his chest toward the road, from 00:00 to 00:02. At 00:02 <Subject 1> drives his arms through the rushing water, spray flying, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he drives his arms through the rushing water. By 00:03 the camera is tilting up through the last frame, and the action continues with it, and <Subject 1> stands at the CENTRE, the water at his waist, his arms pushing through the current. The iron railings stand at the RIGHT third. The wet grass of the slope rises across the TOP half.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "payoff",
+    "setup": "primrose_hill_foot",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/primrose_hill/wide_establishing.png",
+      "refs/props/fighting_machine/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.125,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 106017,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. At the left the stucco houses of St Edmund's Terrace rise out of breast-high crimson weed. Pale gold dawn light falls from the right, from the eastern sky, rimming the machine's legs and laying their long black shadows across the grass toward the left. Raking grey daylight from the LEFT, deep shadow. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian fighting-machine in <Picture 2>: A walking engine of glittering metal, higher than many houses: three very long jointed metal legs like a great insect's, striding at a normal pace with a rolling, heeling gait. On top sits a great brazen hood of dark burnished copper-bronze, shaped like a huge bell or cowl, that turns to and fro like a head looking about, smooth and blank all round. Long flexible glittering jointed tentacles swing from beneath the hood like whips, and puffs of green smoke squirt from the joints of the legs. One tentacle carries a short tube, the Heat-Ray. About a hundred feet high. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 1>, Primrose Hill at first dawn in the 1890s. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on an insert of the fighting-machine's brass Martian fighting-machine at dawn, lank brown shreds hanging from it, black birds pecking and tearing at them; only that object and what touches it is in frame. The camera is On the summit mounds below the machine, at ground height, looking up, an 85mm lens; the dawn light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the jointed brass leg of the fighting-machine rising from the BOTTOM edge at the CENTRE, its rivets glinting in the dawn light. The underside of the cowled brass Martian fighting-machine sits at the TOP edge, lank brown shreds hanging down from its rim at the RIGHT third. Two black birds perch on the leg joint at the LEFT third. The shot is inside this place: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. The camera pulls back from the jointed brass leg across the whole shot, widening to show the cowled Martian fighting-machine and the birds on its rim as the black birds flap and hop along the Martian fighting-machine's rim, from 00:00 to 00:02. At 00:02 their beaks peck and tear at the hanging brown shreds, and the movement continues to the last frame of the shot. By 00:05 the camera is pulling back through the last frame, with the cowled brass Martian fighting-machine now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "reaction",
+    "setup": "primrose_hill_foot",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/primrose_hill/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.5,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 106018,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. At the left the stucco houses of St Edmund's Terrace rise out of breast-high crimson weed. Pale gold dawn light falls from the right, from the eastern sky, rimming the machine's legs and laying their long black shadows across the grass toward the left. Raking grey daylight from the LEFT, deep shadow. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, Primrose Hill at first dawn in the 1890s. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, low sun raking from the, deep black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot of <Subject 1> (face gaunt, grey eyes, sixteen days of grey-brown beard) climbing at a walking pace the wet grass slope toward the clay mounds, seen from a low angle. The camera is On the grass slope three yards above <Subject 1>, a low angle from knee height looking at him and the sky, a 35mm lens; the dawn light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> climbing at a walking pace at the CENTRE, his head a quarter of the frame's height, mouth open in a breathless smile, his hands clawing at the wet grass. The slope falls away behind him to the BOTTOM edge. The pale gold dawn sky fills the TOP half, the brown flood road a strip at the LEFT edge. The shot is inside this place: Primrose Hill at first dawn in the 1890s, seen from Albert Road at its south-west foot. A wet grass slope rises to a summit crowned with heaped yellow clay mounds, thin smoke rising behind them. In the foreground a torrent of brown flood water crosses the road beside iron park railings and a gas lamp standard. The camera pushes in toward <Subject 1> across the whole shot as <Subject 1> scrambles up the wet grass on hands and boots, from 00:00 to 00:02. At 00:02 his chest heaves with a wild, trembling laugh, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he scrambles up the wet grass on hands and boots. By 00:05 the camera is pushing in through the last frame, with <Subject 1>'s head and shoulders now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "payoff",
+    "setup": "redoubt_pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/primrose_hill_redoubt/wide_establishing.png",
+      "refs/props/fighting_machine/sheet.png",
+      "refs/props/flying_machine/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.708333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 106019,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The rising sun falls from the right, from the east, striking the tops of the machines gold while the pit floor is in black shadow; thin smoke rises from the central mounds. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian fighting-machine in <Picture 3>: A walking engine of glittering metal, higher than many houses: three very long jointed metal legs like a great insect's, striding at a normal pace with a rolling, heeling gait. On top sits a great brazen hood of dark burnished copper-bronze, shaped like a huge bell or cowl, that turns to and fro like a head looking about, smooth and blank all round. Long flexible glittering jointed tentacles swing from beneath the hood like whips, and puffs of green smoke squirt from the joints of the legs. One tentacle carries a short tube, the Heat-Ray. About a hundred feet high. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Subject 4> is the Martian flying-machine in <Picture 4>: A great flat broad craft of pale Martian metal, shaped like an enormous shallow disc drawn out into a blunt wing, its upper face smooth and faintly ribbed, its underside hung with folded jointed limbs. In flight it rushes slantingly upward and sweeps round in a vast curve, raining down darkness upon the land. At rest it lies flat and vast and strange across the lip of the redoubt pit. Very large: roughly as long as a railway train of six carriages and about as thick as a man is tall. <Picture 4> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the interior of the great clay earthwork on the summit of Primrose Hill at sunrise. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Subject 4> (the Martian flying-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 4> carry into every shot that shows it; <Picture 4> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, rising sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide from the rampart crest of the redoubt at sunrise, <Subject 1> (battered brown felt hat, charcoal trousers caked with dried clay to the thigh) standing on the clay as the pit opens below him. The camera is Behind <Subject 1> on the rampart crest, a high angle from two yards above his head looking down into the pit, a 24mm lens; the rising sun comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> standing on the clay rampart crest at the BOTTOM centre, seen from behind, his figure a third of the frame's height. The shadowed pit opens across the CENTRE, the overturned fighting-machines at the LEFT third. the Martian flying-machine, a great flat Martian flying-machine craft of pale the Martian fighting-machine metal, a great flat craft of pale ribs and grey membrane, stretches along the far lip in the TOP third, the erect fighting-machine at the RIGHT edge. The shot is inside this place: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The camera rises a full storey above <Subject 1> across the whole shot, looking down over the pit as <Subject 1> steadies himself on the trodden clay crest, from 00:00 to 00:03. At 00:03 the dogs on the pit floor snarl and tug at dark shapes, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he steadies himself on the trodden clay crest. By 00:06 the camera is rising through the last frame, with seen now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "answer",
+    "setup": "redoubt_pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/primrose_hill_redoubt/wide_establishing.png",
+      "refs/props/fighting_machine/sheet.png",
+      "refs/props/handling_machine/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.833333,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 106020,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The rising sun falls from the right, from the east, striking the tops of the machines gold while the pit floor is in black shadow; thin smoke rises from the central mounds. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian fighting-machine in <Picture 2>: A walking engine of glittering metal, higher than many houses: three very long jointed metal legs like a great insect's, striding at a normal pace with a rolling, heeling gait. On top sits a great brazen hood of dark burnished copper-bronze, shaped like a huge bell or cowl, that turns to and fro like a head looking about, smooth and blank all round. Long flexible glittering jointed tentacles swing from beneath the hood like whips, and puffs of green smoke squirt from the joints of the legs. One tentacle carries a short tube, the Heat-Ray. About a hundred feet high. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian handling-machine in <Picture 3>: A metallic spider-crab of a machine: a low rounded body with a glittering grey-brown shiny integument like wet leather, carried on five jointed, agile legs, with an extraordinary number of jointed levers, bars and reaching, clutching tentacles folded about it. A glass plate near the edge of the body shows the Martian's face and great dark eyes inside. Three long tentacles fish rods, plates and bars; one extends telescope-fashion into a long metallic snake that taps and feels its way with a faint ringing like keys on a split-ring. Body about as wide as a hansom cab and carried at about head height. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in <Subject 1>, the interior of the great clay earthwork on the summit of Primrose Hill at sunrise. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian fighting-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian handling-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, rising sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot of the dead Martian fighting-machine laid in a row on the yellow clay of the pit floor, each a rounded grey-brown bulk with two immense dark eyes. The camera is On the pit floor at waist height, three yards from the row, a 50mm lens; the rising sun comes from the RIGHT, rimming the rampart above. At the first frame tHE FOCUS OF THE PICTURE IS the nearest dead Martian fighting-machine at the LEFT third, a rounded grey-brown bulk with two immense dark eyes, four feet across, its slender grey whiplike the Martian handling-machine, a metallic Martian handling-machine-crab of a machine limp on the clay. Two more bodies rest beside it toward the CENTRE, and the row runs at a walking pace on toward the RIGHT edge. The sloped clay wall of the pit rises to a strip of gold sky at the TOP edge. The shot is inside this place: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The camera pans from the third to the eyes at a walking pace, across the whole shot as the sunrise light spreads down the clay wall toward the bodies, from 00:00 to 00:04. At 00:04 the rim of gold light runs at a walking pace along the rampart crest above them, and the walk holds to the last frame. By 00:08 the camera is panning through the last frame, with the row now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "reaction",
+    "setup": "redoubt_pit",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/primrose_hill_redoubt/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l19.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.0,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 106021,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The rising sun falls from the right, from the east, striking the tops of the machines gold while the pit floor is in black shadow; thin smoke rises from the central mounds. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in <Subject 2>, the interior of the great clay earthwork on the summit of Primrose Hill at sunrise. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, rising sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:03. The shot opens on a medium close shot of <Subject 1> (face gaunt, grey eyes, sixteen days of grey-brown beard) on the rampart crest as he calls out over the pit of the dead. The camera is On the rampart crest two yards in front of <Subject 1>, at his eye height, a 50mm lens; the rising sun comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face at the CENTRE, his head a third of the frame's height, grey eyes wide, lit gold on the RIGHT cheek by the rising sun. The battered brown felt hat sits on his head. The clay rampart runs at a walking pace along the BOTTOM edge and a strip of gold sky fills the TOP third behind him. The shot is inside this place: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The camera keeps a locked-off frame at eye height across the whole shot as <Subject 1> draws a long breath and calls out over the pit, from 00:00 to 00:03. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Dead! They are dead, every one of them!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his head tips back as a laugh shakes through his shoulders, and the movement continues to the last frame of the shot. By 00:03 the action of that shot continues through the last frame, and <Subject 1>'s face at the CENTRE breaks into a wide, shaking smile, his head tipped back and a third of the frame's height, tears bright on his gaunt cheeks, the gold sky behind him at the TOP.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "payoff",
+    "setup": "redoubt_pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/primrose_hill_redoubt/wide_establishing.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.208333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 106022,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The rising sun falls from the right, from the east, striking the tops of the machines gold while the pit floor is in black shadow; thin smoke rises from the central mounds. <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 1>, the interior of the great clay earthwork on the summit of Primrose Hill at sunrise. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, rising sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on an insert of a heap of bright aluminium bars at the edge of the shadowed pit floor, the rising sun striking it to fire; only that object and what touches it is in frame. The camera is On the clay slope above the heap, at knee height, a yard from the bars, a 50mm lens; the rising sun comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the heap of bright aluminium bars at the CENTRE, its upper ends blazing white where the sun strikes from the RIGHT. Deep umber shadow fills the BOTTOM third below it. Yellow clay printed with dogs' paw tracks runs at a walking pace along the LEFT edge. The shot is inside this place: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The camera pulls back from the aluminium bars across the whole shot, widening to show the shadowed pit floor and the sunlit machines as the rising sunlight spreads down the machines' brass legs, from 00:00 to 00:02. At 00:02 thin smoke curls up from the central mounds, and the movement continues to the last frame of the shot. By 00:05 the camera is pulling back through the last frame, with the aluminium heap now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "reaction",
+    "setup": "redoubt_pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/primrose_hill_redoubt/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.041667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 106023,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The rising sun falls from the right, from the east, striking the tops of the machines gold while the pit floor is in black shadow; thin smoke rises from the central mounds. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, the interior of the great clay earthwork on the summit of Primrose Hill at sunrise. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, rising sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 1> (face gaunt, grey eyes, sixteen days of grey-brown beard) on the crest from a low angle as he lifts both hands toward the sky. The camera is On the rampart crest a low angle from knee height, two yards in front of <Subject 1>, looking up at him and the sky, a 50mm lens; the rising sun comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face at the CENTRE, his head a third of the frame's height, tilted up toward the sky. His hands are at chest height at the BOTTOM edge, palms opening. The clear gold sky fills the TOP half behind him, a thread of smoke at the LEFT edge. The shot is inside this place: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The camera pushes in toward <Subject 1>'s face across the whole shot as <Subject 1> tilts his face up toward the sky, from 00:00 to 00:02. At 00:02 both his hands rise from his chest toward the sky, palms opening, and the opening continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he tilts his face up toward the sky. By 00:05 the camera is pushing in through the last frame, and the action continues with it, and <Subject 1>'s face sits at the CENTRE, his head half the frame's height, both hands raised beside his face at the LEFT third and the RIGHT third, palms toward the sky, his eyes shining.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "reaction",
+    "setup": "redoubt_pit",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/primrose_hill_redoubt/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l22.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.875,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 106024,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The rising sun falls from the right, from the east, striking the tops of the machines gold while the pit floor is in black shadow; thin smoke rises from the central mounds. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the interior of the great clay earthwork on the summit of Primrose Hill at sunrise. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, rising sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot of <Subject 1> (face gaunt, grey eyes, sixteen days of grey-brown beard) on the crest with both hands raised high as he gives thanks aloud. The camera is On the rampart crest two yards in front of <Subject 1>, at his chest height, a 50mm lens; the rising sun comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face at the CENTRE, his head a third of the frame's height, lifted toward the sky, grey eyes wet. Both his hands are raised high at the LEFT third and the RIGHT third, palms open. The gold sky fills the TOP half behind his battered brown felt hat, the clay crest along the BOTTOM edge. The shot is inside this place: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The camera keeps a locked-off frame at <Subject 1>'s chest height across the whole shot as <Subject 1> speaks his thanks up toward the sky, both hands high, from 00:00 to 00:04. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Thank God. Thank God, the torment is over.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his raised hands tremble and begin to sink toward his shoulders, and the lift continues to the last frame of the shot. By 00:06 the action of that shot continues through the last frame, and <Subject 1>'s face sits at the CENTRE, his head a third of the frame's height, tilting down, his hands sinking to shoulder height at the LEFT third and the RIGHT third, the gold sky behind him at the TOP.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 25,
+    "shots": [
+      25
+    ],
+    "section": "button",
+    "setup": "redoubt_pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/locations/primrose_hill_redoubt/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 106025,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Cream-and-blue striped flannel shirt torn at the shoulder and stiff with black-brown earth, charcoal trousers caked with dried clay to the thigh, cracked black boots, battered brown felt hat. Hair turned ash-grey throughout and grown shaggy over the ears; sixteen days of grey-brown beard; face gaunt, cheekbones sharp. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The rising sun falls from the right, from the east, striking the tops of the machines gold while the pit floor is in black shadow; thin smoke rises from the central mounds. <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, the interior of the great clay earthwork on the summit of Primrose Hill at sunrise. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1890s, rising sun from the right, black shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a full shot of <Subject 1> (battered brown felt hat, Cream-and-blue striped flannel shirt torn at the shoulder) alone on the rampart crest above the pit, his hands coming down to his sides. The camera is On the rampart crest four yards to <Subject 1>'s side, at chest height, a 35mm lens; the rising sun comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> standing on the clay crest at the LEFT third, his figure two thirds of the frame's height, both hands raised above his shoulders. The shadowed pit falls away across the RIGHT half below him. The erect fighting-machine stands at the RIGHT edge against the gold sky at the TOP. The shot is inside this place: The interior of the great clay earthwork on the summit of Primrose Hill at sunrise, seen from the crest of its south-west rampart looking down into a circular pit forty feet deep. The rampart crest of heaped yellow-brown clay, trodden flat, crosses the foreground. The pit floor lies in deep shadow. On the right lip one brass fighting-machine stands erect. The camera rises a full storey above <Subject 1> across the whole shot, looking down over the pit as <Subject 1> lowers his hands to his sides, from 00:00 to 00:04. At 00:04 his head bows and his shoulders shake with grief, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he lowers his hands to his sides. By 00:07 the camera is rising through the last frame, with seen now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  }
+]

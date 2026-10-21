@@ -1,0 +1,108 @@
+{
+ "sha8": "e8789136",
+ "verdict": "flagged",
+ "note": "content at T05: text or lettering in the picture; content at T06: blonde hair where the row says otherwise; content at T14: posture 'standing': the shot asks for low; letterbox at T27: 1/3 frames letterboxed; letterbox at T30: 3/3 frames letterboxed; content at T31: posture 'sitting': the shot asks for lying -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4",
+  "T25.mp4",
+  "T26.mp4",
+  "T27.mp4",
+  "T28.mp4",
+  "T29.mp4",
+  "T30.mp4",
+  "T31.mp4"
+ ],
+ "signed_at": "2026-10-08T14:10:39Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "content",
+   "where": "T05",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "text or lettering in the picture"
+  },
+  {
+   "kind": "content",
+   "where": "T06",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "blonde hair where the row says otherwise"
+  },
+  {
+   "kind": "content",
+   "where": "T14",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "posture 'standing': the shot asks for low"
+  },
+  {
+   "kind": "letterbox",
+   "where": "T27",
+   "evidence": {
+    "value": 1,
+    "penalty": 60.0,
+    "repeated": false,
+    "still": "storyboard/shot_27.png"
+   },
+   "severity": "normal",
+   "note": "1/3 frames letterboxed"
+  },
+  {
+   "kind": "letterbox",
+   "where": "T30",
+   "evidence": {
+    "value": 3,
+    "penalty": 60.0,
+    "repeated": false,
+    "still": "storyboard/shot_30.png"
+   },
+   "severity": "normal",
+   "note": "3/3 frames letterboxed"
+  },
+  {
+   "kind": "content",
+   "where": "T31",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "posture 'sitting': the shot asks for lying"
+  }
+ ],
+ "terminal": "still"
+}

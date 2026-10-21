@@ -1,0 +1,91 @@
+{
+ "sha8": "344c28b2",
+ "verdict": "flagged",
+ "note": "clones at T07: two faces read as one man (facenet 0.765); clones at T07: two faces read as one man (facenet 0.757); clones at T07: two faces read as one man (facenet 0.78); content at T17: 2 figure(s) for 0 declared (0 cast + 0 extras), 0 of them copies of another; content at T18: 1 figure(s) for 0 declared (0 cast + 0 extras), 0 of them copies of another -> keep_best",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4"
+ ],
+ "signed_at": "2026-10-08T00:39:27Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "clones",
+   "where": "T07",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.765,
+    "by": "facenet",
+    "frame": 0
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.765)"
+  },
+  {
+   "kind": "clones",
+   "where": "T07",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.757,
+    "by": "facenet",
+    "frame": 1
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.757)"
+  },
+  {
+   "kind": "clones",
+   "where": "T07",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.78,
+    "by": "facenet",
+    "frame": 2
+   },
+   "severity": "high",
+   "note": "two faces read as one man (facenet 0.78)"
+  },
+  {
+   "kind": "content",
+   "where": "T17",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "2 figure(s) for 0 declared (0 cast + 0 extras), 0 of them copies of another"
+  },
+  {
+   "kind": "content",
+   "where": "T18",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "1 figure(s) for 0 declared (0 cast + 0 extras), 0 of them copies of another"
+  }
+ ],
+ "terminal": "keep_best"
+}

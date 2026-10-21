@@ -1,0 +1,81 @@
+{
+ "sha8": "d1335f7d",
+ "verdict": "flagged",
+ "note": "lag at T00: -8f (-0.333s) corr 0.46; lip-sync at T11: mux lag +1.080s wer 0.00; lag at T11: +19f (+0.792s) corr 0.64; rotation at T21: 6.4deg turned, no roll planned -> keep_best",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4"
+ ],
+ "signed_at": "2026-09-27T21:44:06Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "lag",
+   "where": "T00",
+   "evidence": {
+    "value": -8,
+    "penalty": 30.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "-8f (-0.333s) corr 0.46"
+  },
+  {
+   "kind": "lip-sync",
+   "where": "T11",
+   "evidence": {
+    "value": 1.08,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "mux lag +1.080s wer 0.00"
+  },
+  {
+   "kind": "lag",
+   "where": "T11",
+   "evidence": {
+    "value": 19,
+    "penalty": 30.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "+19f (+0.792s) corr 0.64"
+  },
+  {
+   "kind": "rotation",
+   "where": "T21",
+   "evidence": {
+    "value": 6.39,
+    "penalty": 20.0,
+    "repeated": true
+   },
+   "severity": "low",
+   "note": "6.4deg turned, no roll planned"
+  }
+ ],
+ "terminal": "keep_best"
+}

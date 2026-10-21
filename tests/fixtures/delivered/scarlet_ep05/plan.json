@@ -1,0 +1,822 @@
+{
+ "number": 5,
+ "title": "Our Advertisement Brings a Visitor",
+ "question": "Tonight, can the man who set the trap tell the bait from the trapper?",
+ "aspect": "1:1",
+ "protagonist": "john_watson",
+ "setups": {
+  "sofa_day": {
+   "described": "The sofa corner of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. The horsehair sofa stands along the near RIGHT wall with its buttoned black seat and rolled arms under a brown rug, the violin and its bow lie on a chair beside it, and the grey light of a March afternoon comes flat through the two windows and the black grate stands cold and swept",
+   "cast": [
+    "john_watson"
+   ],
+   "landmark": "the drawn heavy red curtain at the head of the sofa",
+   "landmark_at": "far_end",
+   "landmark_size": "is the height of a hand",
+   "route": "from the hearth rug to the head of the horsehair sofa under the drawn red curtain",
+   "geometry": "The horsehair sofa runs along the RIGHT half of frame with the drawn heavy red curtain behind its head at the RIGHT edge, the two broad sash windows stand in the FAR wall across the TOP CENTRE with flat grey afternoon light coming through them, the black iron grate is cold at the LEFT edge, and the red Turkey carpet holds the BOTTOM of frame",
+   "outdoors": false
+  },
+  "dinner_night": {
+   "described": "The dinner table of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. IT IS NIGHT: the two sash windows stand black with the dark street behind the glass and heavy red curtains drawn over them, and the only light in the room is one gas bracket burning amber on the wall and a low red coal fire in the grate. A round table under a white cloth stands in the middle with the dishes pushed back, a folded evening paper on the cloth and two bentwood chairs drawn up to it",
+   "cast": [
+    "john_watson",
+    "sherlock_holmes"
+   ],
+   "landmark": "the gas bracket burning amber on the wall above the table",
+   "landmark_at": "far_end",
+   "landmark_size": "is the height of a finger",
+   "route": "from the landing door to the far chair at the round table",
+   "geometry": "The round table under its white cloth stands across the CENTRE at the height of a man's hip, the two curtained windows fill the FAR wall behind it across the TOP, the gas bracket burns amber on the LEFT wall at the height of a finger, the black grate with a low fire holds the LEFT edge, and the red Turkey carpet holds the BOTTOM",
+   "outdoors": false
+  },
+  "hearth_night": {
+   "described": "The hearth of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. IT IS NIGHT: the two sash windows stand black with the dark street behind the glass, and the only light in the room is a coal fire burning red in the black iron grate and one gas jet burning low amber on the chimney breast. A brass fender and an iron poker stand on the tiled kerb under the white marble mantelpiece, and a worn leather basket chair is drawn up square to the fire",
+   "cast": [
+    "john_watson",
+    "sherlock_holmes"
+   ],
+   "landmark": "the white marble mantelpiece over the black iron grate",
+   "landmark_at": "far_end",
+   "landmark_size": "is half the height of the frame",
+   "route": "from the round table to the worn leather basket chair at the hearth",
+   "geometry": "The black iron grate with its red coal fire holds the LEFT edge under the white marble mantelpiece, the worn leather basket chair stands square to it in the CENTRE, the gas jet burns low amber on the chimney breast at the TOP LEFT at the height of a thumbnail, the curtained windows stand dark in the FAR wall at the RIGHT, and the red Turkey carpet holds the BOTTOM of frame",
+   "outdoors": false
+  },
+  "doorway_night": {
+   "described": "The panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. IT IS NIGHT: the two sash windows stand black with the dark street behind the glass, and the room is lit only by amber gas. The door stands half open onto the dim landing beyond with its brass knob and finger plate catching the light, a colder gas bracket burns on the landing wall through the opening, a mahogany hat stand stands beside the architrave, and the red Turkey carpet runs up to the threshold",
+   "cast": [
+    "john_watson",
+    "sherlock_holmes",
+    "madame_sawyer"
+   ],
+   "landmark": "the panelled landing door and its brass knob",
+   "landmark_at": "far_end",
+   "landmark_size": "is half the height of the frame",
+   "route": "from the hearth rug to the threshold of the panelled landing door",
+   "geometry": "The panelled landing door stands half open in the RIGHT half of frame with its brass knob at the height of a man's hip, the dim landing lies beyond it through the opening, the mahogany hat stand stands against the architrave at the RIGHT edge, the amber gas of the room falls from the LEFT, and the red Turkey carpet runs to the threshold across the BOTTOM of frame",
+   "outdoors": false
+  },
+  "baker_street_night": {
+   "described": "Baker Street below the windows of 221B at nine at night, 1881: a wet roadway with the opposite pavement and its iron railings beyond, plain brick house fronts rising across the way, a cast-iron street lamp burning yellow through a thin fog on the far kerb, and the lit first-floor windows of the near side falling on the flags",
+   "cast": [
+    "sherlock_holmes",
+    "madame_sawyer"
+   ],
+   "landmark": "the cast-iron street lamp burning on the far kerb",
+   "landmark_at": "far_end",
+   "landmark_size": "is half the height of the frame",
+   "route": "from the door of 221B along the near pavement to the street lamp on the far kerb",
+   "geometry": "The wet roadway runs across the CENTRE of frame with the far pavement and its iron railings beyond it, the plain brick house fronts rise across the whole TOP, the cast-iron street lamp burns yellow at the RIGHT at half the height of the frame, the thin fog stands grey along the roadway, and the near kerb holds the BOTTOM edge",
+   "outdoors": true
+  },
+  "hearth_late": {
+   "described": "The hearth of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. IT IS CLOSE UPON MIDNIGHT and the room is nearly dark: the two sash windows stand black with the night behind the glass, the coal in the black iron grate is burnt down to a red smoulder, and the gas on the chimney breast is turned down to a single small bead. The worn leather basket chair stands drawn up to the grate with a pipe and a brown-backed book on its arm, and the far side of the room lies in deep shadow",
+   "cast": [
+    "john_watson",
+    "sherlock_holmes"
+   ],
+   "landmark": "the white marble mantelpiece over the smouldering grate",
+   "landmark_at": "far_end",
+   "landmark_size": "is half the height of the frame",
+   "route": "from the landing door to the worn leather basket chair at the smouldering hearth",
+   "geometry": "The black iron grate with its red smoulder holds the LEFT edge under the white marble mantelpiece, the worn leather basket chair stands square to it in the CENTRE with a pipe and a brown-backed book on its arm, the gas bead burns small on the chimney breast at the TOP LEFT at the height of a thumbnail, the room stands dark at the RIGHT, and the red Turkey carpet holds the BOTTOM of frame",
+   "outdoors": false
+  }
+ },
+ "shots": [
+  {
+   "beat_s": 1.2,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "hook",
+   "setup": "sofa_day",
+   "size": "medium",
+   "faces": [
+    "john_watson"
+   ],
+   "path": 0.0,
+   "frame": "Medium on the horsehair sofa from the hearth rug: Watson bare-headed in shirtsleeves and a grey waistcoat, his thin waxed moustache dark against his sunburnt face, lying back along the buttoned seat with one arm over his eyes and a brown rug across his legs, the drawn red curtain behind his head at the RIGHT.",
+   "motion": "The camera pushes in on the sofa across the whole shot, travelling two long strides; Watson's arm comes down off his eyes onto his chest; his head turns on the cushion toward the grey windows.",
+   "camera": "on the red Turkey carpet at the hearth rug, level with the seated man's chest and two long strides from the sofa, a 35mm lens turned along the sofa. The flat grey afternoon light falls from the windows at the LEFT",
+   "at_rest": "A man lies back along the buttoned black seat of a horsehair sofa in the RIGHT half of frame, bare-headed in shirtsleeves and a grey waistcoat with a thin waxed moustache, one bare sunburnt arm across his chest and a brown rug over his legs, the drawn heavy red curtain standing behind his head at the RIGHT edge, the two sash windows in the FAR wall at the TOP CENTRE with flat grey light in them, and the cold black grate at the LEFT edge",
+   "turn": "an exertion -> a sleeplessness",
+   "why": "The chapter opens on a man who cannot rest, and the picture says it before the words do.",
+   "index": 0
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "setup",
+   "setup": "sofa_day",
+   "size": "close",
+   "faces": [
+    "john_watson"
+   ],
+   "path": 0.2,
+   "frame": "Close on Watson bare-headed in shirtsleeves and a grey waistcoat, his thin waxed moustache dark against his sunburnt face, his eyes shut and the lids moving, his head turned on the cushion with the grey window light across one cheek.",
+   "motion": "Watson's shut eyes tighten and open, and the camera pushes in a hand's breadth onto his face.",
+   "camera": "beside the head of the sofa, level with the lying man's eyes and a forearm from him, a 85mm lens turned down on his face. The flat grey afternoon light falls from the LEFT",
+   "at_rest": "A man's face fills the CENTRE of frame lying on a cushion, bare-headed with a thin waxed moustache and sunburnt skin, his eyes shut, the buttoned black horsehair of the sofa behind his head, the drawn red curtain out of focus beyond it at the RIGHT, and the grey window light lying along one cheek from the LEFT",
+   "turn": "a rest -> a face he cannot shut out",
+   "why": "The thing that keeps him awake is a face, so the shot is a face.",
+   "index": 1
+  },
+  {
+   "beat_s": 0.8,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "setup",
+   "setup": "sofa_day",
+   "size": "insert",
+   "faces": [],
+   "path": 0.3,
+   "frame": "Insert on Watson's bare sunburnt hand hanging off the edge of the horsehair sofa above the red Turkey carpet, the fingers loose and the knuckles down.",
+   "motion": "The camera pushes in on the hanging hand across the whole shot, travelling a forearm; the loose fingers draw in toward the palm; the hand turns over on its back against the seat.",
+   "camera": "at the side of the horsehair sofa, level with the hanging hand and a forearm from it, a 85mm lens turned down on the fingers. The flat grey afternoon light falls from the LEFT",
+   "at_rest": "A bare sunburnt hand hangs off the rolled edge of a horsehair sofa at the CENTRE of frame with the fingers loose and half curled, the white cuff of a shirtsleeve turned back above the wrist, the skin of the hand darker than the linen, the buttoned black horsehair of the seat running away behind it out of focus, the turned wooden foot of the sofa standing at the RIGHT edge, the red patterned Turkey carpet lying below and far out of focus, and the flat grey afternoon light coming across the knuckles from the LEFT",
+   "turn": "a face -> a body that will not settle",
+   "why": "A hand that will not lie still says sleeplessness without a word of it.",
+   "index": 2
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "dinner_night",
+   "size": "full",
+   "faces": [
+    "john_watson",
+    "sherlock_holmes"
+   ],
+   "path": 0.0,
+   "frame": "Full of the round table under the gas: Holmes bare-headed, the bottle-green velvet at his open coat over a white shirt collar taking the far chair with his back half to the curtained windows, Watson bare-headed in shirtsleeves and a grey waistcoat, his thin waxed moustache dark against his sunburnt face in the near chair with the dishes pushed back between them and a folded evening paper on the white cloth.",
+   "motion": "Holmes draws the far chair back and sits down to the table; Watson turns his head to him across the cloth.",
+   "camera": "at the landing door, level with a standing man's chest and three long strides from the table, a 35mm lens turned across the room. The amber gas falls from the bracket at the LEFT",
+   "at_rest": "A round table under a white cloth stands across the CENTRE of frame at the height of a man's hip with the dishes pushed back and a folded newspaper lying on it, a man in a bottle-green velvet jacket sits in the far chair with his back half to the curtained windows, a man in shirtsleeves and a grey waistcoat sits in the near chair with his back three-quarters to the camera, the gas bracket burns amber on the LEFT wall at the height of a finger, and the red Turkey carpet holds the BOTTOM of frame",
+   "turn": "an empty afternoon -> a companion home late",
+   "why": "The scene changes when the other man walks in, and a wide says the room has two people in it again.",
+   "index": 3
+  },
+  {
+   "beat_s": 1.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "dinner_night",
+   "size": "medium_close",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.3,
+   "frame": "Medium close across the white cloth on Holmes bare-headed, the bottle-green velvet at his open coat over a white shirt collar, his head a third of the frame's height, the curtained window standing dark behind his shoulder at the RIGHT.",
+   "motion": "Holmes lifts his chin off his hand and his face comes round to Watson across the cloth; his hand comes down off his chin onto the white cloth; his fingers spread once on the cloth beside the plate.",
+   "camera": "at the near chair over Watson's shoulder, level with the seated man's eyes and a long stride from him, a 50mm lens turned across the table. The amber gas falls from the LEFT",
+   "at_rest": "A seated man fills the RIGHT half of frame behind a white cloth, bare-headed with the bottle-green velvet at his open coat and a white shirt collar at his throat, his head a third of the frame's height, the curtained window standing dark behind his shoulder at the RIGHT, the near man's out-of-focus shoulder holding the LEFT edge, and the amber gaslight on his face from the LEFT",
+   "turn": "a dinner -> a case",
+   "why": "The turn from music to the Brixton Road happens on his face, so the face is the shot.",
+   "index": 4
+  },
+  {
+   "beat_s": 1.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "dinner_night",
+   "size": "medium_close",
+   "faces": [
+    "john_watson"
+   ],
+   "path": 0.4,
+   "frame": "Medium close over Holmes's shoulder on Watson bare-headed in shirtsleeves and a grey waistcoat, his thin waxed moustache dark against his sunburnt face, his head a quarter of the frame's height, the black grate with its low fire at the LEFT edge behind him.",
+   "motion": "Watson sets his glass down on the cloth and his eyes come up to Holmes; his hand comes away from the glass onto the edge of the table; his shoulders come back against the chair.",
+   "camera": "at the far chair over Holmes's shoulder, level with the seated man's eyes and a long stride from him, a 50mm lens turned back across the table. The amber gas falls from behind the camera",
+   "at_rest": "A seated man fills the CENTRE of frame behind a white cloth, bare-headed in shirtsleeves and a grey waistcoat with a thin waxed moustache, his head a quarter of the frame's height, the far man's dark out-of-focus shoulder holding the whole RIGHT edge, the black grate with a low red fire at the LEFT edge behind him, and the amber gaslight across his face",
+   "turn": "a case -> a man it has upset",
+   "why": "Holmes reads Watson before he reads the paper, and the reader must see what he sees.",
+   "index": 5
+  },
+  {
+   "beat_s": 0.9,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "dinner_night",
+   "size": "insert",
+   "faces": [],
+   "path": 0.5,
+   "frame": "Insert on the folded evening paper travelling across the white cloth under the gas, its columns standing as fine close grey lines at this distance.",
+   "motion": "The folded paper slides across the white cloth and comes to rest against the edge of a plate.",
+   "camera": "above the round table, level with the cloth and a forearm above it, a 50mm lens turned straight down on the sliding paper. The amber gas falls from the LEFT",
+   "at_rest": "A folded newspaper lies at the CENTRE of a white tablecloth with its columns standing as fine close grey lines and its fold running from the TOP LEFT to the BOTTOM RIGHT, the rim of a white plate standing against it at the RIGHT at the height of a thumb, a crumb of bread lying on the cloth beside it, the white cloth filling every edge of the frame with the weave of the linen just readable, and the amber gaslight lying across the paper from the LEFT",
+   "turn": "a word -> a thing on the table",
+   "why": "The advertisement is the engine of the chapter, and it crosses the table in one movement.",
+   "index": 6
+  },
+  {
+   "beat_s": 0.8,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "dinner_night",
+   "size": "insert",
+   "faces": [],
+   "path": 0.6,
+   "frame": "Insert on Holmes's bare forefinger with its small white sticking plaster laid on one column of the open paper, the print standing as fine close grey lines under it.",
+   "motion": "The finger comes down onto the column and stops, and the camera pushes in a hand's breadth on it.",
+   "camera": "above the round table, level with the paper and a hand's breadth above it, a 100mm lens turned down on the finger. The amber gas falls from the LEFT",
+   "at_rest": "A bare finger with a small white sticking plaster wound round its middle joint rests on a newspaper column at the CENTRE of frame, the nail cut short and the knuckle standing above it, the grey close print standing as fine lines under and around the fingertip, the rule between two columns running away toward the TOP of frame, the folded edge of the paper lying across the BOTTOM, the white tablecloth standing at the LEFT and RIGHT edges out of focus, and the amber gaslight falling across the paper from the LEFT",
+   "turn": "a paper -> a trap",
+   "why": "One finger on one column is the whole plot, and the plaster says whose finger it is.",
+   "index": 7
+  },
+  {
+   "beat_s": 0.8,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "dinner_night",
+   "size": "insert",
+   "faces": [],
+   "path": 0.7,
+   "frame": "Insert on a plain gold wedding ring standing on the white cloth between two bare fingers, the gold catching the gaslight and the cloth filling the frame behind it.",
+   "motion": "The ring turns over once between the finger and thumb and settles flat on the cloth.",
+   "camera": "above the round table, level with the ring and a hand's breadth from it, a 100mm lens turned on the gold. The amber gas falls from the LEFT",
+   "at_rest": "A plain gold wedding ring stands between a bare finger and thumb at the CENTRE of frame with the amber gaslight lying along its rim, the plain unengraved band a thumbnail across, the white tablecloth filling the frame behind and below it out of focus with the weave of the linen just readable, the dark edge of a plate standing at the BOTTOM RIGHT, the curtained window dark and far out of focus across the TOP, and the amber light falling from the LEFT",
+   "turn": "a description -> a bait",
+   "why": "The ring is the hook in the water; it has to be seen to be believed in.",
+   "index": 8
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "hearth_night",
+   "size": "medium",
+   "faces": [
+    "john_watson"
+   ],
+   "path": 0.0,
+   "frame": "Medium at the hearth: Watson bare-headed in shirtsleeves and a grey waistcoat, his thin waxed moustache dark against his sunburnt face standing over the basket chair with a service revolver broken open across both bare hands, the red coal fire at the LEFT and the white mantelpiece above it.",
+   "motion": "Watson turns the broken revolver over on his palms and his thumb runs along the barrel.",
+   "camera": "on the red Turkey carpet in front of the hearth, level with a standing man's chest and two long strides from him, a 50mm lens turned on his hands. The red firelight comes from the LEFT and the low gas from above",
+   "at_rest": "A standing man fills the CENTRE of frame holding a service revolver broken open across both bare sunburnt hands, bare-headed in shirtsleeves and a grey waistcoat, the black iron grate with its red coal fire at the LEFT edge under the white marble mantelpiece, the worn leather basket chair standing below him at the BOTTOM, and the dark curtained window at the RIGHT",
+   "turn": "a bait -> a danger",
+   "why": "The chapter says clean it and load it; the picture says what kind of evening this is.",
+   "index": 9
+  },
+  {
+   "beat_s": 0.7,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "hearth_night",
+   "size": "insert",
+   "faces": [],
+   "path": 0.2,
+   "frame": "Insert on a brass cartridge going into the chamber of the broken revolver above the red firelight, the bare fingers dark against the brass.",
+   "motion": "The cartridge goes down into the chamber and the fingers come away from it.",
+   "camera": "at the hearth, level with the revolver and a hand's breadth from it, a 100mm lens turned on the chamber. The red firelight falls from the LEFT",
+   "at_rest": "A brass cartridge stands in the chamber of a broken service revolver at the CENTRE of frame with two bare sunburnt fingers above it, the rim of the cartridge catching the firelight, the blued steel of the barrel running away out of focus at the RIGHT, the knurled edge of the cylinder standing below at the height of a thumbnail, the white cuff of a shirtsleeve holding the TOP LEFT corner, the red firelight lying along the brass from the LEFT, and the dark of the low room closing every edge of the frame",
+   "turn": "a revolver -> a loaded one",
+   "why": "One cartridge is the whole preparation, and it is a sound as much as a picture.",
+   "index": 10
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "hearth_night",
+   "size": "full",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.5,
+   "frame": "Full of the basket chair at the fire: Holmes bare-headed, the bottle-green velvet at his open coat over a white shirt collar sitting back in it with the violin under his chin and the bow across the strings, the white mantelpiece above him and the red fire at the LEFT.",
+   "motion": "The bow draws once across the strings and Holmes's head comes down over the violin.",
+   "camera": "on the red Turkey carpet by the round table, level with the seated man's chest and three long strides from him, a 35mm lens turned on the chair. The red firelight comes from the LEFT and the low gas from above",
+   "at_rest": "A seated man fills the CENTRE of frame in a worn leather basket chair with a violin under his chin and a bow across its strings, bare-headed with the bottle-green velvet at his open coat, the black iron grate with its red coal fire at the LEFT edge, the white marble mantelpiece above it, the gas jet small and amber on the chimney breast at the TOP LEFT, and the red Turkey carpet at the BOTTOM",
+   "turn": "a preparation -> a man at his ease",
+   "why": "Doyle puts the violin here on purpose: the trap is set and its setter is playing.",
+   "index": 11
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "hearth_night",
+   "size": "medium_close",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.6,
+   "frame": "Medium close on Holmes bare-headed, the bottle-green velvet at his open coat over a white shirt collar over the violin, his head a third of the frame's height, the fire small and red at the LEFT edge behind him.",
+   "motion": "Holmes lifts the bow off the strings and his head comes up off the violin toward the door.",
+   "camera": "beside the basket chair, level with the seated man's eyes and a long stride from him, a 85mm lens turned on his face. The red firelight falls from the LEFT",
+   "at_rest": "A seated man's head and shoulders fill the RIGHT half of frame, bare-headed with the bottle-green velvet at his open coat, his head a third of the frame's height, the scroll of a violin standing at his collar, the red coal fire burning small at the LEFT edge behind him, the white mantelpiece above, and the dark room beyond",
+   "turn": "an ease -> a bell",
+   "why": "The turn of the episode is a sound, and it lands on the face that was waiting for it.",
+   "index": 12
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "doorway_night",
+   "size": "wide",
+   "faces": [
+    "john_watson",
+    "sherlock_holmes"
+   ],
+   "path": 0.0,
+   "frame": "Wide from the hearth rug: the panelled landing door standing half open in the RIGHT half with the dim landing beyond it, Watson bare-headed in shirtsleeves and a grey waistcoat, his thin waxed moustache dark against his sunburnt face on his feet in the CENTRE and Holmes bare-headed, the bottle-green velvet at his open coat over a white shirt collar seated at the LEFT with the violin across his knees.",
+   "motion": "Watson crosses to the open door at a walking pace and Holmes's chair turns a hand's breadth after him; Watson's hand comes up to the edge of the door.",
+   "camera": "at the hearth rug, level with a standing man's chest and four long strides from the door, a 35mm lens turned across the room. The amber gas falls from the LEFT",
+   "at_rest": "A panelled door stands half open in the RIGHT half of frame with its brass knob at hip height and the dim landing beyond, a standing man in shirtsleeves and a grey waistcoat holds the CENTRE, a seated man in bottle-green velvet holds the LEFT with a violin across his knees, the mahogany hat stand stands at the RIGHT edge, and the red Turkey carpet runs to the threshold across the BOTTOM",
+   "turn": "a bell -> a threshold",
+   "why": "Two men and an open door is the whole shape of the scene that follows.",
+   "index": 13
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "turn",
+   "setup": "doorway_night",
+   "size": "medium",
+   "faces": [
+    "madame_sawyer"
+   ],
+   "path": 0.4,
+   "frame": "Medium on the threshold: the old woman in her black straw bonnet and brown shawl, her face deeply wrinkled, standing small in the open doorway with the landing's colder gas behind her and the room's amber light on her face.",
+   "motion": "The old woman comes forward off the threshold onto the carpet and drops into a curtsey.",
+   "camera": "on the red Turkey carpet two strides inside the room, level with the old woman's eyes and two long strides from her, a 50mm lens turned on the doorway. The amber gas falls from the LEFT and the landing's colder gas from behind her",
+   "at_rest": "A very old and deeply wrinkled woman stands at the CENTRE of frame in a black straw bonnet tied under the chin and a brown shawl crossed over her chest, a long dark skirt to the boot, both hands bare and knuckled, the panelled door standing open behind her with the dim landing beyond, the brass knob at the height of her hip at the RIGHT, and the red Turkey carpet under her boots at the BOTTOM",
+   "turn": "a man of violence -> an old woman",
+   "why": "Doyle's joke is the whole chapter, and it only works if she is exactly what she appears.",
+   "index": 14
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "doorway_night",
+   "size": "medium_close",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.5,
+   "frame": "Medium close on Holmes bare-headed, the bottle-green velvet at his open coat over a white shirt collar risen from the chair, his head a quarter of the frame's height, his face long and heavy with disappointment and the dark room behind him.",
+   "motion": "Holmes's face comes round from the doorway to Watson and the line of his mouth goes down.",
+   "camera": "beside the basket chair, level with the standing man's eyes and two long strides from him, a 85mm lens turned on his face. The amber gas falls from the RIGHT",
+   "at_rest": "A standing man's head and shoulders fill the LEFT half of frame, bare-headed with the bottle-green velvet at his open coat and a white shirt collar, his head a quarter of the frame's height, the dark of the room standing behind him, the amber gaslight on one side of his face from the RIGHT, and the open doorway out of focus at the RIGHT edge",
+   "turn": "an expectation -> a disconsolate face",
+   "why": "The funniest line in the chapter is Watson keeping a straight face at this one.",
+   "index": 15
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "doorway_night",
+   "size": "close",
+   "faces": [
+    "madame_sawyer"
+   ],
+   "path": 0.6,
+   "frame": "Close on the old woman in her black straw bonnet and brown shawl, her face deeply wrinkled, her head half the frame's height, her little red-rimmed eyes blinking in the sudden light.",
+   "motion": "The old woman's bleared eyes come up off the carpet and fix on the camera.",
+   "camera": "a stride inside the doorway, level with the old woman's eyes and a forearm from her, a 85mm lens turned on her face. The amber gas falls from the LEFT",
+   "at_rest": "A very old and deeply wrinkled face fills the CENTRE of frame under a black straw bonnet tied at the chin, the eyes small and red-rimmed under heavy lids, a brown shawl at the shoulders below, the dim landing out of focus behind at the RIGHT, and the amber gaslight across the face from the LEFT",
+   "turn": "a curtsey -> a pair of eyes",
+   "why": "The thing that gives her away is her eyes, so the audience is shown them early and told nothing.",
+   "index": 16
+  },
+  {
+   "beat_s": 0.8,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "doorway_night",
+   "size": "insert",
+   "faces": [],
+   "path": 0.7,
+   "frame": "Insert on a knuckled old hand holding an evening paper out at arm's length, one finger on a column, the print standing as fine close grey lines.",
+   "motion": "The knuckled finger comes down onto the column and the paper turns a hand's breadth toward the camera.",
+   "camera": "on the red Turkey carpet in front of the old woman, level with the held-out paper and a forearm from it, a 85mm lens turned on the hand. The amber gas falls from the LEFT",
+   "at_rest": "A knuckled old bare hand holds an open newspaper at the CENTRE of frame with one finger laid on a column, the grey close print standing as fine lines around it, the brown wool of a shawl standing out of focus behind, and the amber gaslight across the paper from the LEFT",
+   "turn": "an old woman -> the advertisement answered",
+   "why": "She brings the trap back to the man who set it, and the picture is her finger on his own words.",
+   "index": 17
+  },
+  {
+   "beat_s": 1.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "doorway_night",
+   "size": "medium_close",
+   "faces": [
+    "john_watson"
+   ],
+   "path": 0.8,
+   "frame": "Medium close on Watson bare-headed in shirtsleeves and a grey waistcoat, his thin waxed moustache dark against his sunburnt face with the gold ring held up between finger and thumb, his head a third of the frame's height, the hat stand standing behind him at the RIGHT.",
+   "motion": "Watson brings the ring up between finger and thumb and turns it out toward the old woman; his other hand comes up under it with the palm open; the ring goes down onto that open palm.",
+   "camera": "beside the open door, level with the standing man's eyes and a long stride from him, a 50mm lens turned on him. The amber gas falls from the LEFT",
+   "at_rest": "A standing man fills the CENTRE of frame holding a plain gold ring up between a bare finger and thumb, bare-headed in shirtsleeves and a grey waistcoat with a thin waxed moustache, his head a third of the frame's height, the mahogany hat stand standing behind him at the RIGHT, the buff striped wallpaper beyond, and the amber gaslight on his face from the LEFT",
+   "turn": "a claim -> a handing over",
+   "why": "The ring changes hands here and the whole pursuit follows it out of the door.",
+   "index": 18
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "doorway_night",
+   "size": "medium",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.9,
+   "frame": "Medium on Holmes bare-headed, the bottle-green velvet at his open coat over a white shirt collar at the mantel with an ulster half on one shoulder and a cravat in his hand, the open doorway standing empty at the RIGHT.",
+   "motion": "The camera tracks with Holmes across the whole shot toward the open door, travelling two long strides; he swings the ulster up onto his shoulder; his free hand comes out to the edge of the door.",
+   "camera": "on the red Turkey carpet by the hearth, level with a standing man's chest and two long strides from him, a 50mm lens turned on him. The amber gas falls from the LEFT",
+   "at_rest": "A standing man holds the LEFT half of frame with a heavy ulster half onto one shoulder and a cravat in one bare hand, bare-headed with the bottle-green velvet at his open coat beneath, the white marble mantelpiece behind him at the LEFT, the panelled door standing open and empty at the RIGHT with the dim landing beyond, and the red Turkey carpet at the BOTTOM",
+   "turn": "a visitor gone -> a pursuit",
+   "why": "He is out of the chair and into a coat in one movement, which is the man all over.",
+   "index": 19
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "baker_street_night",
+   "size": "wide",
+   "faces": [
+    "sherlock_holmes",
+    "madame_sawyer"
+   ],
+   "path": 0.2,
+   "frame": "Wide of Baker Street from the first-floor window: the wet roadway below, the old woman going small and bent in her brown shawl along the far pavement at the CENTRE with the lit street lamp ahead of her at the RIGHT, and Holmes in his heavy ulster following at the LEFT a good way back along the same pavement.",
+   "motion": "The old woman moves along the far pavement from the CENTRE toward the lamp at the RIGHT and Holmes comes on after her from the LEFT at a walking pace; the gap between them holds.",
+   "camera": "at the nearer sash window of the sitting-room, level with a standing man's eyes and a hand from the glass, a 35mm lens turned down into the street. The yellow lamplight comes from the far kerb and the thin fog stands between",
+   "at_rest": "A wet roadway runs across the CENTRE of frame with the far pavement and its iron railings beyond, the old woman stands small and bent in her brown shawl on the far flags at the CENTRE at the height of a finger with the lamp ahead of her, Holmes stands in his heavy ulster at the LEFT of frame on the same flags at the same height with the whole width of two shop fronts between them, the cast-iron street lamp burns yellow at the RIGHT at half the height of frame, the plain brick house fronts rise across the whole TOP, and the near kerb holds the BOTTOM",
+   "turn": "a room -> a street",
+   "why": "The one shot that leaves the room, and it is the one where the case walks away.",
+   "index": 20
+  },
+  {
+   "beat_s": 0.9,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "baker_street_night",
+   "size": "insert",
+   "faces": [],
+   "path": 0.6,
+   "frame": "Insert on the rear wheel of a four-wheeler turning away over the wet cobbles under the street lamp, the yellow light running across its wet spokes.",
+   "motion": "The tall wheel turns away over the wet cobbles at a trotting pace for the whole shot and the camera holds level with its hub; the lamplight runs across the spokes as they come round; the wheel carries out past the RIGHT edge of frame.",
+   "camera": "at the kerb of the far pavement, level with the wheel hub and a long stride from it, a 85mm lens turned square on the wheel. The yellow lamplight falls from the street lamp at the RIGHT",
+   "at_rest": "The tall spoked rear wheel of a four-wheeler stands at the CENTRE of frame filling two thirds of its height, its iron tyre on the wet cobbles at the BOTTOM and its wet spokes running out from a dark hub, the black panelled body of the cab standing above and behind it across the TOP of frame, the yellow lamplight lying along the upper spokes from the RIGHT, the wet cobbles running away to the LEFT edge, and the fog standing grey beyond the light",
+   "turn": "a pursuit -> a trail",
+   "why": "A print filling with water is the chapter's whole answer: she was never there.",
+   "index": 21
+  },
+  {
+   "beat_s": 1.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "friction",
+   "setup": "hearth_late",
+   "size": "full",
+   "faces": [
+    "john_watson",
+    "sherlock_holmes"
+   ],
+   "path": 0.0,
+   "frame": "Full of the smouldering hearth: Watson bare-headed in shirtsleeves and a grey waistcoat, his thin waxed moustache dark against his sunburnt face in the basket chair with a pipe in his hand, Holmes bare-headed, the bottle-green velvet at his open coat over a white shirt collar standing over the chair opposite with his ulster still on and one hand on its back, the grate burnt down red at the LEFT.",
+   "motion": "The camera pushes in on the two chairs across the whole shot, travelling a long stride; Holmes drops into the chair opposite and throws his head back; Watson's pipe comes down off his mouth onto the arm of his chair.",
+   "camera": "on the red Turkey carpet by the landing door, level with a seated man's chest and three long strides from the hearth, a 35mm lens turned on the two chairs. The red smoulder comes from the LEFT and one small gas bead from above",
+   "at_rest": "Two worn chairs stand square to a black iron grate across the CENTRE of frame with the coal burnt down to a red smoulder in it at the LEFT, a man in shirtsleeves and a grey waistcoat sits in the near one with a briar pipe in one bare hand, a man in a heavy ulster over a bottle-green velvet jacket stands on his feet behind the far one with one bare hand on its back, the white marble mantelpiece stands above the grate, the gas bead burns small on the chimney breast at the TOP LEFT, and the room stands dark at the RIGHT",
+   "turn": "a wait -> a return",
+   "why": "The last movement of the chapter is a man coming home beaten and laughing about it.",
+   "index": 22
+  },
+  {
+   "beat_s": 1.0,
+   "coda_s": 0.0,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "button",
+   "setup": "hearth_late",
+   "size": "close",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.4,
+   "frame": "Close on Holmes bare-headed, the bottle-green velvet at his open coat over a white shirt collar thrown back in the chair, his head half the frame's height, the red smoulder of the grate on one side of his face.",
+   "motion": "Holmes's head comes forward off the chair back and his eyes come round to Watson; his hand comes up off the arm of the chair to the collar of the ulster; the collar comes open under his fingers.",
+   "camera": "beside the far chair at the hearth, level with the seated man's eyes and a forearm from him, a 85mm lens turned on his face. The red smoulder falls from the LEFT and the gas bead from above",
+   "at_rest": "A man's head and shoulders fill the CENTRE of frame thrown back against the leather of a chair, bare-headed with the collar of a heavy ulster standing at his throat over bottle-green velvet, his head half the frame's height, the red smoulder of a grate lying along one side of his face from the LEFT, and the dark room standing behind him",
+   "turn": "a chagrin -> a laugh",
+   "why": "The button of the episode is his own joke against himself, and it has to land on his face.",
+   "index": 23
+  },
+  {
+   "beat_s": 0.0,
+   "coda_s": 2.6,
+   "crowd": "",
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0,
+   "section": "answer",
+   "setup": "hearth_late",
+   "size": "medium",
+   "faces": [],
+   "path": 0.8,
+   "frame": "Medium of the smouldering grate from the dark of the room, the violin and its bow lying across the arm of the empty basket chair and the gas bead burnt down small above.",
+   "motion": "The coal settles in the grate and a red light moves once across the strings of the violin.",
+   "camera": "on the red Turkey carpet in the dark of the room, level with a seated man's chest and three long strides from the hearth, a 50mm lens turned on the chair and the grate. The red smoulder comes from the LEFT",
+   "at_rest": "A black iron grate with its coal burnt down to a red smoulder holds the LEFT of frame under a white marble mantelpiece, a worn leather basket chair stands empty and square to it in the CENTRE with a violin and its bow lying across the arm, the gas bead burns small on the chimney breast at the TOP LEFT at the height of a thumbnail, and the rest of the room stands dark to the RIGHT and along the BOTTOM",
+   "turn": "a laugh -> a long night",
+   "why": "Doyle ends on the violin and the fire, and so does the episode.",
+   "index": 24
+  }
+ ],
+ "lines": [
+  {
+   "index": 0,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Our morning's exertions had been too much for me, and by afternoon I was tired out.",
+   "shot": 0
+  },
+  {
+   "index": 1,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Every time I closed my eyes I saw the dead man's distorted face before me.",
+   "shot": 1
+  },
+  {
+   "index": 2,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "If ever human features bespoke vice of the most malignant type, they were certainly his.",
+   "shot": 2
+  },
+  {
+   "index": 3,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Holmes was very late in returning. Dinner was on the table before he appeared.",
+   "shot": 3
+  },
+  {
+   "index": 4,
+   "kind": "dialogue",
+   "speaker": "sherlock_holmes",
+   "text": "What's the matter? You are not looking quite yourself. This Brixton Road affair has upset you.",
+   "shot": 4
+  },
+  {
+   "index": 5,
+   "kind": "dialogue",
+   "speaker": "john_watson",
+   "text": "To tell the truth, it has. I ought to be more case-hardened after Afghanistan.",
+   "shot": 5
+  },
+  {
+   "index": 6,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "The papers had not mentioned the wedding ring that fell when the body was raised.",
+   "shot": 6
+  },
+  {
+   "index": 7,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "He had sent the advertisement to every paper that morning, and signed it with my name.",
+   "shot": 7
+  },
+  {
+   "index": 8,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "He handed me a plain gold band. It was, he said, almost a facsimile.",
+   "shot": 8
+  },
+  {
+   "index": 9,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "He told me to clean my old service revolver and load it, and I did.",
+   "shot": 9
+  },
+  {
+   "index": 10,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "The man would be desperate, he said, and it was as well to be ready.",
+   "shot": 10
+  },
+  {
+   "index": 11,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "When I came back the table was cleared and he was scraping upon his violin.",
+   "shot": 11
+  },
+  {
+   "index": 12,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "At eight o'clock there was a sharp ring at the bell, and he rose softly.",
+   "shot": 12
+  },
+  {
+   "index": 13,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "The footfall on the stair was an uncertain and shuffling one, and it came slowly.",
+   "shot": 13
+  },
+  {
+   "index": 14,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Instead of the man of violence we expected, a very old and wrinkled woman hobbled in.",
+   "shot": 14
+  },
+  {
+   "index": 15,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "My companion's face had gone so disconsolate that I could hardly keep my countenance.",
+   "shot": 15
+  },
+  {
+   "index": 16,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "She stood blinking at us with her bleared eyes, fumbling in her pocket with shaky fingers.",
+   "shot": 16
+  },
+  {
+   "index": 17,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "She drew out an evening paper and pointed at our advertisement with one knuckled finger.",
+   "shot": 17
+  },
+  {
+   "index": 18,
+   "kind": "dialogue",
+   "speaker": "john_watson",
+   "text": "Here is your ring, Mrs Sawyer. I am glad to restore it to its owner.",
+   "shot": 18
+  },
+  {
+   "index": 19,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "She had hardly shuffled off before he was into an ulster and down the stair.",
+   "shot": 19
+  },
+  {
+   "index": 20,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "From the window I could see her walking feebly, her pursuer some little distance behind.",
+   "shot": 20
+  },
+  {
+   "index": 21,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "She hailed a four-wheeler, he said, and called her address across the whole street.",
+   "shot": 21
+  },
+  {
+   "index": 22,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "When the driver opened the door at Houndsditch, there was nobody inside the cab at all.",
+   "shot": 22
+  },
+  {
+   "index": 23,
+   "kind": "dialogue",
+   "speaker": "sherlock_holmes",
+   "text": "Old woman be damned. We were the old women, to be so taken in by an actor.",
+   "shot": 23
+  }
+ ]
+}

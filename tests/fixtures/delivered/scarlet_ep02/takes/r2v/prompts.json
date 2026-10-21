@@ -1,0 +1,861 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0,
+      1
+    ],
+    "section": "hook",
+    "setup": "stair",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "plate_stair.png",
+      "Q00_0.png",
+      "Q00_1.png",
+      "Q01_0.png",
+      "Q01_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q00_0.png",
+        0
+      ],
+      [
+        "Q00_1.png",
+        73
+      ],
+      [
+        "Q01_0.png",
+        141
+      ],
+      [
+        "Q01_1.png",
+        217
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 11.791666,
+    "frames": 294,
+    "seconds": 12.25,
+    "steps": 8,
+    "seed": 83000,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is the location in <Picture 2>: The staircase and first-floor landing of 221B Baker Street, 1881: seventeen treads in two flights with a half-landing between them, a mahogany banister and turned balusters running up the RIGHT hand, brown patterned stair carpet down by brass rods, buff striped paper on the walls, a tall sash window on the half-landing giving grey London daylight, a brass gas bracket burning low on the upper wall, and the panelled sitting-room door standing at the head of the flight. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot square photograph up the lower flight of the seventeen treads.\n<Picture 4> is the first frame of [Shot 2], an insert square photograph on the third tread.\n<Picture 5> is the first frame of [Shot 3], a medium close shot square photograph of <Subject 1> at the half-landing turn.\n<Picture 6> is the first frame of [Shot 4], an insert square photograph at the half-landing.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 12.25-second take of 4 shots in <Subject 2>, the staircase and first-floor landing of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 4> and runs from 00:03 to 00:06; [Shot 3] begins from <Picture 5> and runs from 00:06 to 00:09; [Shot 4] begins from <Picture 6> and runs from 00:09 to 00:13. The take carries <Subject 1> through [Shot 1], [Shot 2], [Shot 3] and [Shot 4] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (the location behind [Shot 1], [Shot 2], [Shot 3] and [Shot 4]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 3] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 4] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 3>: a medium shot square photograph up the lower flight of the seventeen treads: three roped deal boxes and a corded black portmanteau stand on the lower treads, one bare sunburnt hand closed on the mahogany banister at the RIGHT edge, the panelled sitting-room door a hand wide at the TOP of frame, cold grey daylight from the half-landing window crossing the brown carpet. The camera is Chest height above the third tread, four treads back from the hand. At the first frame The sunburnt bare hand rests closed round the mahogany rail at the RIGHT edge, a palm's length above the newel. The corded black portmanteau, the length of a man's arm, stands square on the third tread. Three roped deal boxes, each the size of a seat cushion. The camera rises one tread behind it and the sitting-room door widens at the top of frame as the sunburnt hand slides one baluster's width up the mahogany rail, from 00:00 to 00:03.\n[Shot 2] From 00:03 to 00:06. At 00:03 the shot cuts to an insert square photograph on the third tread, beginning from <Picture 4>: a corded black portmanteau, the length of a man's arm, set down square on the brown patterned stair carpet, its two leather straps buckled and a rope tied round its middle, a brass rod bright along the tread's edge across the BOTTOM of frame, cold grey daylight from the half-landing window lying along the leather; only what <Picture 4> shows is in frame. The camera is Knee height above the first tread, an arm's length down the flight from the portmanteau. At the first frame The corded black portmanteau sits flat on the brown carpet of the third tread, its four corners squared, the rope tied round its middle as thick as a thumb. The camera pushes a hand's breadth closer as the near corner of the portmanteau tips two inches up off the brown carpet as a bare sunburnt hand takes its strap, from 00:03 to 00:06.\n[Shot 3] From 00:06 to 00:09. At 00:06 the shot cuts to a medium close shot square photograph of <Subject 1> at the half-landing turn, beginning from <Picture 5>: bare-headed, dark hair swept back, a thin waxed moustache on a sunburnt face, a brown tweed jacket over a tweed waistcoat and a white cravat, his bare sunburnt hand on the silver ball knob of the black walking stick at the RIGHT, the tall sash window grey at the LEFT, the sitting-room door half the frame's width at the TOP. The camera is Shoulder height eight treads below the half-landing, eight feet back from Watson. The camera pushes a hand's breadth closer to his face as <Subject 1>'s head turns a quarter turn down from the stair above him to the stick under his hand, from 00:06 to 00:09. <Subject 1>'s mouth is closed from 00:06 to 00:09 while his head turns a quarter turn down from the stair above him to the stick under his hand as the camera pushes a hand's breadth closer to his face.\n[Shot 4] From 00:09 to 00:13. At 00:09 the shot cuts to an insert square photograph at the half-landing, beginning from <Picture 6>: the polished silver ball knob of a black walking stick, the knob the size of a plum, standing over the brown patterned carpet with the shaft plumb beside a brown boot, the shaft as thick as one finger, cold grey light from the tall sash window lying along the silver and the boot's toecap; only what <Picture 6> shows is in frame. The camera is Hip height on the half-landing, an arm's length from the stick. At the first frame The bare sunburnt hand is closed round the silver ball knob at the TOP CENTRE, the thumb across the polish and the knuckles up. The black shaft stands plumb down the CENTRE. The camera tilts down one hand's breadth along the shaft as the silver knob turns a quarter turn under the bare sunburnt hand closed on it, from 00:09 to 00:13.\n\noverall_soundscape: The ambience of the staircase and first-floor landing of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "friction",
+    "setup": "sofa",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "plate_sofa.png",
+      "Q02_0.png",
+      "Q02_1.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q02_0.png",
+        0
+      ],
+      [
+        "Q02_1.png",
+        81
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 7.583333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 83002,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 2> is the location in <Picture 2>: The sofa corner of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. The horsehair sofa stands along the near RIGHT wall with a drawn heavy red curtain behind its head, its buttoned black seat and rolled arms under a brown rug, and the violin and its bow lie on the seat cushion; the room is dim with the curtain across the nearer window and one low gas jet amber on the wall above. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot along the horsehair sofa.\n<Picture 4> is the first frame of [Shot 2], an insert along the buttoned black seat.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 2 shots in <Subject 2>, the sofa corner of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 4> and runs from 00:03 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 3>: a medium shot along the horsehair sofa: <Subject 1> lies along the buttoned black seat under a brown rug, bare-headed, dark hair swept back, his bottle-green velvet sleeve along his side, his stockinged heels at the LEFT edge and his pale face on the rolled arm at the RIGHT at a sixth of the frame's height, the drawn heavy red curtain behind his head, low amber gaslight lying along the buttoned seat. The camera is on the red Turkey carpet at the room's centre, chest height above the seat, eight feet out, a 40mm lens square across the sofa. The sofa runs from the LEFT edge of frame to the RIGHT edge. The camera pushes in a stride along the sofa toward his head at the RIGHT as <Subject 1>'s chest rises once under the brown rug, a thumb's width, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his chest rises once under the brown rug.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to an insert along the buttoned black seat, beginning from <Picture 4>: <Subject 1>'s two stockinged heels lie together at the CENTRE of frame, each heel a fist wide, the brown rug's hem across the ankles a hand above them, the violin's tailpiece and the bow's frog beyond them at his hip, low amber gaslight in stripes along the black horsehair; only what <Picture 4> shows is in frame. The camera is on the red Turkey carpet at the room's centre, a hand above the seat, three feet from the heels at the foot end of the sofa, a 50mm lens turned square along the cushion. The two stockinged heels keep the CENTRE of frame. At the first frame Holmes's two stockinged heels lie together on the buttoned black seat at the CENTRE of frame. The camera pushes in a hand's breadth along the seat toward the rug's hem as one stockinged toe turns a quarter turn on the buttoned black seat, from 00:03 to 00:08.\n\noverall_soundscape: The ambience of the sofa corner of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "friction",
+    "setup": "sofa",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "Q03_0.png",
+      "Q03_1.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q03_0.png",
+        0
+      ],
+      [
+        "Q03_1.png",
+        85
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.75,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83003,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1>'s face on the rolled sofa arm, bare-headed, dark hair back from the temple.\n<Picture 3> is the first frame of [Shot 2], an insert on the sofa cushion.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in the sofa corner of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: a close shot of <Subject 1>'s face on the rolled sofa arm, bare-headed, dark hair back from the temple: the pale high forehead, the sharp grey eyes open and hard on the ceiling under level brows, the thin hawk nose, the lips together, the amber gas jet's light on the near cheek, the buttoned black horsehair back behind him. The camera is on the red Turkey carpet at the room's centre, level with the rolled arm, five feet from the face, a 100mm lens turned on the head. The face fills the middle third of frame from brow to chin. The camera pushes in a hand's breadth to keep the open eyes alone as <Subject 1>'s eyes travel one inch across the ceiling toward the TOP of frame, from 00:00 to 00:04. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his eyes travel one inch across the ceiling toward the TOP of frame.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to an insert on the sofa cushion, beginning from <Picture 3>: <Subject 1>'s thin right hand lies open palm up on the buttoned black horsehair, the long fingers ink-blotted and chemical-stained, a small white sticking plaster wound round the middle joint of the right forefinger, the brown rug's hem at the wrist, the red curtain's hem along the TOP edge in amber gaslight; only what <Picture 3> shows is in frame. The camera is on the red Turkey carpet at the room's centre, a foot above the seat, two feet out, a 50mm lens angled down on the cushion at the head end of the sofa. The open hand fills the CENTRE of frame seven tenths of its width. The camera pushes in a hand's breadth as the right forefinger with the white plaster on it lifts a finger's width off the cushion and settles back, from 00:04 to 00:08.\n\noverall_soundscape: The ambience of the sofa corner of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "friction",
+    "setup": "sofa",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "Q04_0.png",
+      "Q04_1.png",
+      "Q04_1E.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q04_0.png",
+        0
+      ],
+      [
+        "Q04_1.png",
+        85
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.75,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83004,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Picture 2> is the first frame of [Shot 1], an insert across the sofa seat.\n<Picture 3> is the first frame of [Shot 2], a medium close shot on <Subject 1> half raised against the rolled sofa arm, bare-headed, dark hair swept back.\n<Picture 4> is the last frame of [Shot 2], a medium close shot with Holmes's shut eyes at the CENTRE of frame and his head at half its height: the pale forehead and the dark hair swept back stand against the buff striped wallpaper at the TOP LEFT, the violin's chinrest and his jaw at the CENTRE, the bow's hair two inches further along the strings with his right hand and its white-plastered forefinger at the RIGHT of centre, the bottle-green velvet shoulder across the BOTTOM edge, and the drawn red curtain in the RIGHT quarter from the top edge to the sofa back.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in the sofa corner of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: an insert across the sofa seat: the violin stands with its chinrest under a pale jaw at the TOP of frame, its body the length of a forearm, the scroll of its neck at the LEFT, the bow laid across the strings at the CENTRE a hand's span longer than the violin; <Subject 1>'s thin pale left hand is closed round that neck, the shirt cuff turned back at the wrist, amber gaslight along the varnish; only what <Picture 2> shows is in frame. The camera is on the red Turkey carpet at the room's centre, a hand above the seat, three feet from the violin. At the first frame The violin stands with its chinrest under Holmes's jaw at the TOP of frame and its scroll out at the LEFT, the four strings and the bridge across its belly. The camera tilts up a hand's breadth toward the sofa back as the left fingers drop a finger's width down the violin's neck toward the nut, from 00:00 to 00:04.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to a medium close shot on <Subject 1> half raised against the rolled sofa arm, bare-headed, dark hair swept back, beginning from <Picture 3>: the violin under his chin, his left hand round the neck, the bow on the strings in his right hand with the white plaster on the forefinger, the eyes shut, the bottle-green velvet shoulder in the lower LEFT, the drawn heavy red curtain behind his head, amber gaslight on his cheek from off the LEFT edge. The camera is on the red Turkey carpet at the room's centre, a little below his shoulder, five feet from the head of the sofa. At the first frame Holmes sits half up with his back against the rolled arm at the RIGHT. The camera pushes in a foot toward his shut eyes and the sofa back as the bow draws two inches along the strings, from 00:04 to 00:08. <Subject 1>'s mouth is closed from 00:04 to 00:05 while he bow draws two inches along the strings.\n\noverall_soundscape: The ambience of the sofa corner of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "hearth",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "Q05_0.png",
+      "Q05_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q05_0.png",
+        0
+      ],
+      [
+        "Q05_1.png",
+        73
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.5,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83005,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Picture 2> is the first frame of [Shot 1], an insert down onto the wicker arm of the basket chair in the firelight.\n<Picture 3> is the first frame of [Shot 2], a close shot of <Subject 1> from the height of the brass fender.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in the hearth of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 3> and runs from 00:03 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 2>: an insert down onto the wicker arm of the basket chair in the firelight: a stack of loose papers a thumb deep lies squared on the woven arm across the lower CENTRE of frame, one yellow pencil the length of a finger resting across its topmost sheet, and the bare sunburnt fingers of <Subject 1>'s right hand stand open a thumb's width above that pencil. Amber firelight crosses the wicker from the LEFT edge; only what <Picture 2> shows is in frame. The camera is on the carpet's centre at the near side of the room, at the height of the seated man's elbow and angled down onto the arm of his chair, a forearm's length from the stack of papers. The camera pushes in a hand's breadth over the wicker arm as the bare sunburnt fingers close on the yellow pencil and lift it a thumb's width off the stack of papers, from 00:00 to 00:03.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to a close shot of <Subject 1> from the height of the brass fender, beginning from <Picture 3>: his sunburnt face turned down over his own knee and lit amber from beneath by the low red coals, bare-headed, dark hair swept back, a thin waxed moustache, his head a third of the frame's height at the upper CENTRE. The iron poker stands up the LEFT edge as a dark bar as long as a forearm. Buff striped wallpaper fills the ground behind his shoulders. The camera is on the red Turkey carpet at the near side of the room. The camera pushes in a hand's breadth from the brass fender as <Subject 1>'s eyes come up off his own knee to the low red coals at the LEFT, from 00:03 to 00:08. <Subject 1>'s mouth is closed from 00:03 to 00:05 while his eyes come up off his own knee to the low red coals at the LEFT as the camera pushes in a hand's breadth from the brass fender.\n\noverall_soundscape: The ambience of the hearth of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "hearth",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "Q06_0.png",
+      "Q06_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q06_0.png",
+        0
+      ],
+      [
+        "Q06_1.png",
+        85
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 9.583333,
+    "frames": 243,
+    "seconds": 10.12,
+    "steps": 8,
+    "seed": 83006,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Picture 2> is the first frame of [Shot 1], a close shot from above on <Subject 1> in the worn leather basket chair.\n<Picture 3> is the first frame of [Shot 2], an insert square onto the pencilled list up in the bare sunburnt hand.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 10.12-second take of 2 shots in the hearth of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:11. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: a close shot from above on <Subject 1> in the worn leather basket chair, bare-headed, dark hair swept back, a thin waxed moustache on a sunburnt face, his head a third of the frame's height at the upper CENTRE, his eyes down at the topmost pencilled heading. The white top edge of the sheet crosses the BOTTOM third of frame as a bright bar a spread hand wide. Cold grey daylight lies along his crown. The camera is on the carpet's centre at the near side of the room. At the first frame Watson sits forward in the worn leather basket chair. The camera pushes in a hand's breadth over his crown as <Subject 1>'s eyes travel an inch down the sheet from its topmost heading to its foot, from 00:00 to 00:04. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his eyes travel an inch down the sheet from its topmost heading to its foot as the camera pushes in a hand's breadth over his crown.\n[Shot 2] From 00:04 to 00:11. At 00:04 the shot cuts to an insert square onto the pencilled list up in the bare sunburnt hand, beginning from <Picture 3>: a single sheet of white writing paper filling the frame from the LEFT edge to the RIGHT edge, five pencilled headings standing in a column down it with a number against each, the thumb and two fingers of the sunburnt hand along the bottom edge, amber firelight across the paper from the LEFT; only what <Picture 3> shows is in frame. The camera is on the carpet's centre at the near side of the room, a pace and a half out from the basket chair toward the tiled kerb, at the seated man's chest height. The camera pushes in a hand's breadth onto the pencilled column as the paper tips a quarter turn flat toward the camera as the sunburnt hand lifts it a thumb's width, from 00:04 to 00:11.\n\noverall_soundscape: The ambience of the hearth of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "payoff",
+    "setup": "hearth",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "Q07_0.png",
+      "Q07_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q07_0.png",
+        0
+      ],
+      [
+        "Q07_1.png",
+        94
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 8.166667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 83007,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Picture 2> is the first frame of [Shot 1], an insert into the black iron grate.\n<Picture 3> is the first frame of [Shot 2], a medium close shot on <Subject 1> leaned back in the worn leather basket chair.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 2 shots in the hearth of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:09. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: an insert into the black iron grate: the folded pencilled sheet lying flat on the low red coals at the CENTRE of frame, a spread hand wide and four fifths of the frame's width, one corner of the paper brown and curled, the black iron bars of the grate holding the LEFT and the TOP edges, the brass fender bright across the BOTTOM edge, the coal glow lighting the sheet from beneath; only what <Picture 2> shows is in frame. The camera is on the carpet's centre at the near side of the room, level with the tiled kerb, a stride out from the basket chair, at hearth height three feet six inches from the grate mouth. The camera pushes in a hand's breadth on the coals as the curled corner of the paper takes flame and the fire runs an inch across the sheet, from 00:00 to 00:04.\n[Shot 2] From 00:04 to 00:09. At 00:04 the shot cuts to a medium close shot on <Subject 1> leaned back in the worn leather basket chair, beginning from <Picture 3>: bare-headed, dark hair swept back, a thin waxed moustache, his open sunburnt hand lying palm down on the chair's wicker arm, low firelight amber under his chin and jaw, his head a fifth of the frame's height, the white marble mantelpiece at the LEFT edge and the two dark grey windows small at the TOP RIGHT. The camera is on the carpet's centre at the near side of the room, level with the tiled kerb. The camera pulls back a hand's breadth and the chair's far arm comes into the RIGHT edge as <Subject 1>'s open hand closes into a fist on the wicker arm of the chair, from 00:04 to 00:09. <Subject 1>'s mouth is closed from 00:04 to 00:06 while his open hand closes into a fist on the wicker arm of the chair as the camera pulls back a hand's breadth.\n\noverall_soundscape: The ambience of the hearth of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8,
+      9
+    ],
+    "section": "friction",
+    "setup": "breakfast",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "plate_breakfast.png",
+      "Q08_0.png",
+      "Q08_1.png",
+      "Q09_0.png",
+      "Q09_1.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q08_0.png",
+        0
+      ],
+      [
+        "Q08_1.png",
+        64
+      ],
+      [
+        "Q09_0.png",
+        124
+      ],
+      [
+        "Q09_1.png",
+        196
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 10.791667,
+    "frames": 277,
+    "seconds": 11.54,
+    "steps": 8,
+    "seed": 83008,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 2> is the location in <Picture 2>: The breakfast table of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast, standing in front of the two broad windows on the morning of the fourth of March: a round table under a white cloth with a toast rack, a coffee pot, two cups, a boiled egg in a cup with a spoon beside it, a butter dish and a folded illustrated magazine; two bentwood chairs drawn up to it, and cold grey window light from behind the table lying along the cloth. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot across the breakfast table.\n<Picture 4> is the first frame of [Shot 2], a medium close shot past the bent hoop of the near chair back.\n<Picture 5> is the first frame of [Shot 3], an insert straight down on the illustrated magazine open flat on the white cloth beside the toast rack.\n<Picture 6> is the first frame of [Shot 4], an insert raked low along the open page from its outer edge.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 11.54-second take of 4 shots in <Subject 2>, the breakfast table of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 4> and runs from 00:03 to 00:05; [Shot 3] begins from <Picture 5> and runs from 00:05 to 00:08; [Shot 4] begins from <Picture 6> and runs from 00:08 to 00:12. The take carries <Subject 1> through [Shot 1], [Shot 2], [Shot 3] and [Shot 4] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (the location behind [Shot 1], [Shot 2], [Shot 3] and [Shot 4]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 3] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 4] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 3>: a medium shot across the breakfast table: the white cloth fills the bottom half of frame with a wire toast rack two fists wide and the coffee pot at the CENTRE and the folded illustrated magazine at the near LEFT, one grey pencil stroke ruled along the heading on its uppermost page. <Subject 1> sits in the far bentwood chair beyond it against the grey sash windows, bare-headed, dark hair swept back, bottle-green velvet jacket, open white collar, his face a fifth of the frame's height, a round of toast in his right hand with the white plaster round its forefinger. The camera pushes in a hand's breadth toward the far chair as <Subject 1>'s plastered right hand carries the round of toast an inch up from his plate and his jaw closes on its edge, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his plastered right hand carries the round of toast an inch up from his plate.\n[Shot 2] From 00:03 to 00:05. At 00:03 the shot cuts to a medium close shot past the bent hoop of the near chair back, beginning from <Picture 4>: the dark bentwood hoop crosses the BOTTOM of frame as a curved bar a thumb thick, and beyond it <Subject 1> sits at the far side of the white cloth, bare-headed, dark hair swept back over a pale forehead, the bottle-green velvet shoulder under an open white collar, his face a quarter of the frame's height at the upper CENTRE and turned down to his own crumbed plate, a round of toast with one bite out of its near edge in his plastered right hand at his chin. The camera is on the near side of the carpet at the room's centre. The camera pushes in a hand's breadth past the bentwood hoop as <Subject 1> carries the round of toast two inches up to his mouth and bites its near edge, from 00:03 to 00:05. <Subject 1>'s mouth is closed from 00:03 to 00:04 while he carries the round of toast two inches up to his mouth.\n[Shot 3] From 00:05 to 00:08. At 00:05 the shot cuts to an insert straight down on the illustrated magazine open flat on the white cloth beside the toast rack, beginning from <Picture 5>: its two pages filling the frame, a column of print reading as even grey bands of fine paper grain, a grey pencil stroke ruled along one heading, a bare sunburnt hand flat on the cloth at the page's near edge; only what <Picture 5> shows is in frame. The camera is over the near side of the table at the room's centre, three feet above the white cloth. At the first frame The magazine lies open on the cloth, each page as wide as a spread hand and half again as tall. The camera pushes straight down a hand's breadth on the marked heading as the bare sunburnt hand slides the open page a thumb's width across the cloth toward the camera, from 00:05 to 00:08.\n[Shot 4] From 00:08 to 00:12. At 00:08 the shot cuts to an insert raked low along the open page from its outer edge, beginning from <Picture 6>: the heading in heavy type runs across the upper third with the grey pencil stroke ruled under it half the frame's width, the printed lines below reading as level grey bands of tone and grain, the page's fold standing as a shadowed valley at the RIGHT edge, the cloth's white weave a strip along the TOP and the bottom edges in the grey window light; only what <Picture 6> shows is in frame. The camera is over the near side of the table at the room's centre, two feet above the open magazine and over the page's outer edge. At the first frame The heading sits in heavy type across the upper third of frame. The camera pushes in a hand's breadth along the paper onto the ruled heading, and one page corner lifts a thumb's width in the draught at the RIGHT edge, from 00:08 to 00:12.\n\noverall_soundscape: The ambience of the breakfast table of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10,
+      11
+    ],
+    "section": "friction",
+    "setup": "breakfast",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "char-sherlock_holmes_indoor.png",
+      "plate_breakfast.png",
+      "Q10_0.png",
+      "Q10_1.png",
+      "Q11_0.png"
+    ],
+    "faces": [
+      "john_watson",
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q10_0.png",
+        0
+      ],
+      [
+        "Q10_1.png",
+        77
+      ],
+      [
+        "Q11_0.png",
+        170
+      ]
+    ],
+    "audio": [
+      [
+        "l11.wav",
+        7.291
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 12.0,
+    "frames": 294,
+    "seconds": 12.25,
+    "steps": 8,
+    "seed": 83010,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Sherlock Holmes in <Picture 2>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 3> is the location in <Picture 3>: The breakfast table of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast, standing in front of the two broad windows on the morning of the fourth of March: a round table under a white cloth with a toast rack, a coffee pot, two cups, a boiled egg in a cup with a spoon beside it, a butter dish and a folded illustrated magazine; two bentwood chairs drawn up to it, and cold grey window light from behind the table lying along the cloth. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a close shot from above on <Subject 1> at the near side of the table.\n<Picture 5> is the first frame of [Shot 2], a medium shot angled down across the white cloth.\n<Picture 6> is the first frame of [Shot 3], a medium close shot on <Subject 2> in the far bentwood chair against the grey sash windows.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:07, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 12.25-second take of 3 shots in <Subject 3>, the breakfast table of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:07; [Shot 3] begins from <Picture 6> and runs from 00:07 to 00:13. The take carries <Subject 1>, <Subject 2> through [Shot 1], [Shot 2] and [Shot 3] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 2], [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1], [Shot 2] and [Shot 3]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 3] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: a close shot from above on <Subject 1> at the near side of the table, bare-headed, dark hair swept back, thin waxed moustache, his sunburnt face turned down to the magazine and his jaw set, the grey window light coming over the camera's shoulder flat across his cheek, the magazine open in his bare sunburnt hand at the bottom of frame a hand's breadth above the white cloth. The camera is on the near side of the carpet at the room's centre, a head above Watson's crown and four feet out from his shoulder. At the first frame Watson sits square in the near bentwood chair with his face down over the page. The camera pushes in a hand's breadth on his face as <Subject 1>'s bare sunburnt hand folds the magazine shut and brings it down flat onto the white cloth beside the toast rack, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his bare sunburnt hand folds the magazine shut.\n[Shot 2] From 00:03 to 00:07. At 00:03 the shot cuts to a medium shot angled down across the white cloth, beginning from <Picture 5>: the magazine lying shut and flat beside the toast rack, an egg spoon standing in the boiled egg's cup, <Subject 1>'s bare sunburnt hand flat on the closed cover at the bottom LEFT, <Subject 2>'s bottle-green velvet sleeve with its turned-back white cuff beyond at the far chair, grey window glow along the top edge. The camera is on the near side of the carpet at the room's centre, two hands above the seated man's shoulder height, half a pace out from the near edge of the cloth. At the first frame The magazine lies shut on the cloth at the bottom LEFT. The camera pulls back a hand's breadth from the tabletop as <Subject 1>'s bare hand lifts off the closed magazine and settles on the cloth a hand's breadth beside it, from 00:03 to 00:07. <Subject 1>'s mouth is closed from 00:03 to 00:06 while his bare hand lifts off the closed magazine.\n[Shot 3] From 00:07 to 00:13. At 00:07 the shot cuts to a medium close shot on <Subject 2> in the far bentwood chair against the grey sash windows, beginning from <Picture 6>: bare-headed, dark hair swept back, bottle-green velvet lapel and open white collar, his face two fifths of the frame's height and rimmed by the window light, the white coffee cup as wide as a fist at chest height in his plastered right hand, his eyes level across the cloth, his lips together with the line on them. The camera pushes in twenty inches across the table toward his face as <Subject 2> lowers the white coffee cup two inches toward the cloth, from 00:07 to 00:11. <Subject 2> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] You would lose your money. I wrote that article myself.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:11, as the line ends, his shoulders drop back into the bentwood chair and his eyes travel once across the cloth, and the drop continues to the last frame of the shot.\n\noverall_soundscape: The ambience of the breakfast table of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "reaction",
+    "setup": "breakfast",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "Q12_0.png",
+      "Q12_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q12_0.png",
+        0
+      ],
+      [
+        "Q12_1.png",
+        64
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 5.25,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 83012,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1> at the near side of the table in three-quarter profile.\n<Picture 3> is the first frame of [Shot 2], an insert low along the white cloth on the boiled egg in its cup.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 2 shots in the breakfast table of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 3> and runs from 00:03 to 00:06. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 2>: a close shot of <Subject 1> at the near side of the table in three-quarter profile, bare-headed, sunburnt, thin waxed moustache, his eyes down on the opened egg and one eyebrow up in scorn, the egg spoon level in his bare sunburnt hand at the bottom of frame, the grey window light flat on his cheek, the white marble mantelpiece behind his shoulder at the LEFT edge. The camera is on the near side of the carpet at the room's centre, at the chin height of a seated man, five feet out from Watson's left shoulder. At the first frame Watson is seated in the near bentwood chair turned a quarter toward the mantelpiece. The camera pushes in a hand's breadth on his face as <Subject 1>'s bare sunburnt hand comes down two inches and stands the egg spoon upright in the opened shell, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his bare sunburnt hand comes down two inches.\n[Shot 2] From 00:03 to 00:06. At 00:03 the shot cuts to an insert low along the white cloth on the boiled egg in its cup, beginning from <Picture 3>: the egg spoon standing upright in the opened shell, a bare sunburnt hand closed round the spoon's handle at the RIGHT, the shut magazine lying flat at the LEFT, the grey window light behind them turning the cup's rim bright; only what <Picture 3> shows is in frame. The camera is at the near edge of the table on the near side of the carpet, two fingers above the white cloth, on a normal lens turned level at the egg cup. The egg cup and its spoon stand at the CENTRE against the grey window light. At the first frame The white egg cup stands at the CENTRE of frame as tall as a thumb. The camera pushes in a hand's breadth along the cloth onto the cup as the bare sunburnt hand lifts the egg spoon a thumb's length above the shell's broken crown, from 00:03 to 00:06.\n\noverall_soundscape: The ambience of the breakfast table of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "friction",
+    "setup": "hearth",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "Q13_0.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q13_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l13.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 4.958333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 83013,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Picture 2> is the first frame of [Shot 1], a medium close shot on <Subject 1> risen from the basket chair.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 1 shot in the hearth of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a medium close shot on <Subject 1> risen from the basket chair, bare-headed, the white shirt collar open at his throat above the bottle-green velvet lapel, a briar pipe at chest height in his right hand with the white shirt cuff turned back off that wrist and a small white sticking plaster round the middle joint of that RIGHT forefinger, his head two fifths of the frame's height, the white marble mantelpiece at the LEFT edge, cold grey daylight on his face, his lips together with the line on them. The camera pushes in a hand's breadth toward his face as <Subject 1> carries the briar pipe up two inches from his chest and brings its bowl up to his collarbone as he speaks the line, from 00:00 to 00:04. <Subject 1> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] I am a consulting detective. The only one in the world.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, the grey smoke drifts up past the white marble mantelpiece behind him, and the movement continues to the last frame of the shot.\n\noverall_soundscape: The ambience of the hearth of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "friction",
+    "setup": "doorway",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "plate_doorway.png",
+      "Q14_0.png",
+      "Q14_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q14_0.png",
+        0
+      ],
+      [
+        "Q14_1.png",
+        90
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.708333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 83014,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is the location in <Picture 2>: The panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast, standing half open onto the dim landing beyond, its brass knob and finger plate catching the light, a mahogany hat stand with a brown bowler on its peg beside the architrave and a folded grey wool shawl two hands long over the peg below it, the red Turkey carpet running up to the threshold, and two light sources on the leaf, the grey window light of the room and the landing's own amber gas bracket burning on the wall beyond the open leaf, each panel naming which of the two lies on the door. A caller in a shabby grey coat and a battered black felt hat stands on the landing boards at the threshold with his back to the camera in the panels that show him, the back of his grey collar and his hat brim the only things of him in frame. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot on the panelled landing door standing half open at the RIGHT of frame.\n<Picture 4> is the first frame of [Shot 2], an insert on the mahogany hat stand beside the door architrave.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 2>, the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 4> and runs from 00:04 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 3>: a medium shot on the panelled landing door standing half open at the RIGHT of frame: a shabby grey-coated back and a battered black felt hat halted on the landing boards at the threshold, the back of the grey collar and the hat brim the only things of him in frame, the mahogany hat stand in the RIGHT corner, the red Turkey carpet running to the bottom LEFT, amber gaslight from the landing bracket along the open leaf and the two broad sash windows small and black at the TOP LEFT. The camera is at the carpet's centre twelve feet six inches back from the threshold at hip height, three feet nine inches above the carpet. The camera pushes in a foot and a half toward the threshold as the grey-coated shoulder turns a quarter turn on the landing boards toward the open leaf, from 00:00 to 00:04.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to an insert on the mahogany hat stand beside the door architrave, beginning from <Picture 4>: a brown bowler hanging by its brim on the upper peg, its crown as wide as a spread hand and a quarter of the frame's width, a folded grey wool shawl two hands long over the peg below it, the turned mahogany upright filling the CENTRE of frame, the brass finger plate of the panelled door bright at the RIGHT, buff striped wallpaper behind, amber gaslight from the landing along the LEFT; only what <Picture 4> shows is in frame. The camera is at the carpet's centre six feet back from the architrave at chest height. At the first frame The brown bowler hangs by its brim on the upper peg at the CENTRE of frame, its crown as wide as a spread hand. The camera pushes in a hand's breadth on the brown bowler's crown as the grey shawl swings a thumb's width on its peg, from 00:04 to 00:08.\n\noverall_soundscape: The ambience of the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "turn",
+    "setup": "window",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "plate_window.png",
+      "Q15_0.png",
+      "Q15_1.png",
+      "Q15_0E.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q15_0.png",
+        0
+      ],
+      [
+        "Q15_1.png",
+        102
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 8.125,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 83015,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is the location in <Picture 2>: The nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast, seen from inside the room: twelve panes in two sashes, a brass catch at the meeting rail, heavy red curtains drawn back to either side, a low sill with a plant pot on it, and beyond the glass the roadway of Baker Street below with the opposite pavement, its railings and the plain brick house fronts across the way in grey morning light. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium close shot on <Subject 1> at the nearer broad window.\n<Picture 4> is the first frame of [Shot 2], a medium shot from the height of the low sill.\n<Picture 5> is the last frame of [Shot 1], watson's sunburnt face fills the LEFT half of frame at two-fifths of its height, bare-headed, the dark hair swept back, the thin waxed moustache level under the nose. His bare sunburnt right forefinger stands extended flat against the glass at the CENTRE, level with the meeting rail, the fingertip the width of the thumb-length brass catch beside it. The twelve-paned sash keeps the CENTRE and the RIGHT, a red curtain along the RIGHT edge, and below the frame's horizon the grey roadway and the opposite pavement lie small through the lower panes.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 2 shots in <Subject 2>, the nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 4> and runs from 00:04 to 00:09. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 3>: a medium close shot on <Subject 1> at the nearer broad window, three-quarters to the camera, bare-headed, dark hair swept back, a thin waxed moustache, his sunburnt face a third of the frame's height in the LEFT half. The twelve-paned sash keeps the CENTRE and the RIGHT, cold grey light along its bars, the roadway small and far below through the lower panes. His sunburnt jaw is set hard and his eyes are down on the painted sill, his bare sunburnt right hand shut into a fist at waist height with the knuckles up. The camera pushes in a hand's breadth as <Subject 1>'s shut fist opens and one sunburnt forefinger extends to the height of the meeting rail toward the glass, from 00:00 to 00:04. Behind him Two hansom cabs at a brisk roll on the roadway below, the nearer one a thumb long at the LEFT of the lower panes; one woman with a covered basket on her arm carries it along the opposite pavement, and one crossing-sweeper works his broom at the railings., from 00:00 to 00:04. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his shut fist opens.\n[Shot 2] From 00:04 to 00:09. At 00:04 the shot cuts to a medium shot from the height of the low sill, beginning from <Picture 4>: <Subject 1> stands over the clay plant pot with his back three-quarters to the camera, bare-headed, dark hair swept back, his sunburnt face at a fifth of the frame's height in the upper LEFT, his bare sunburnt right hand flat on the pane at the height of the meeting rail with the fingers spread a hand's width. The brick house fronts across the way stand through the upper panes in the grey morning. The camera pulls back a hand's breadth along the carpet from the clay plant pot as <Subject 1>'s spread fingers close a finger's width against the pane, from 00:04 to 00:09. Behind him Two hansom cab roofs pass along the lowest panes at a brisk roll at the BOTTOM of the glass, and one crossing-sweeper stooping over his broom works the iron railings across the way, his shoulders level with the sill line., from 00:04 to 00:09. <Subject 1>'s mouth is closed from 00:04 to 00:07 while his spread fingers close a finger's width against the pane as the camera pulls back a hand's breadth along the carpet from the clay plant pot.\n\noverall_soundscape: The ambience of the nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16,
+      17
+    ],
+    "section": "spike",
+    "setup": "window",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "char-john_watson_indoor.png",
+      "Q16_0.png",
+      "Q16_1.png",
+      "Q17_0.png",
+      "Q16_1E.png"
+    ],
+    "faces": [
+      "sherlock_holmes",
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q16_0.png",
+        0
+      ],
+      [
+        "Q16_1.png",
+        90
+      ],
+      [
+        "Q17_0.png",
+        162
+      ]
+    ],
+    "audio": [
+      [
+        "l17.wav",
+        6.917
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 10.958334,
+    "frames": 277,
+    "seconds": 11.54,
+    "steps": 8,
+    "seed": 83016,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 2> is John Watson in <Picture 2>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Picture 3> is the first frame of [Shot 1], an insert through the lower panes down into Baker Street, seen steeply from above.\n<Picture 4> is the first frame of [Shot 2], an insert through one lower pane onto the large blue paper envelope.\n<Picture 5> is the first frame of [Shot 3], a medium close shot on <Subject 1> come up to the window at <Subject 2>'s shoulder.\n<Picture 6> is the last frame of [Shot 2], the large blue paper envelope fills the CENTRE of frame at two thirds of its width, its long edge level, the broad reddened thumb standing on its face an inch nearer the upper corner and the thick fingers under its lower edge. The dark brown coat cloth keeps the LEFT and the TOP with one horn button bright at the RIGHT, and the flagstones of the opposite pavement lie soft along the BOTTOM edge in the cold grey daylight.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:07, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 11.54-second take of 3 shots in the nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 4> and runs from 00:04 to 00:07; [Shot 3] begins from <Picture 5> and runs from 00:07 to 00:12. The take carries <Subject 1>, <Subject 2> through [Shot 1], [Shot 2] and [Shot 3] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 3] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 2] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 3>: an insert through the lower panes down into Baker Street, seen steeply from above: a stalwart man stands at half the frame's height on the opposite pavement, his boots a quarter up from the BOTTOM edge and his crown three quarters up, bare-headed, close-cropped grizzled grey hair, heavy square shoulders back in a dark brown sack coat buttoned high, a blue paper envelope as wide as his own spread hand in his broad reddened right hand, his chin lifted toward the house numbers; only what <Picture 3> shows is in frame. The camera is Standing eye height on the carpet's centre, a pace back from the sill. At the first frame The man stands on the flagstones of the opposite pavement at the CENTRE. The camera pushes in a hand's breadth through the lower panes as the man's chin comes down a quarter turn from the house numbers to the blue envelope at his breast, from 00:00 to 00:04.\n[Shot 2] From 00:04 to 00:07. At 00:04 the shot cuts to an insert through one lower pane onto the large blue paper envelope, beginning from <Picture 4>: it stands flat against the breast of the dark brown sack coat at the CENTRE of frame, as wide as the spread hand that keeps it and half the frame's width, its long edge level and its corners square, the broad reddened bare fingers across its lower corner, the coat's horn buttons in a row at the RIGHT, cold grey daylight flat along the paper; only what <Picture 4> shows is in frame. The camera is Standing eye height on the carpet's centre, a pace back from the sill, a 200 mm lens turned down through one lower pane at the coat breast across the way. The blue envelope keeps the CENTRE at half the frame's width. The camera pushes in a hand's breadth through the lower pane as the broad reddened thumb slides an inch across the blue envelope toward its upper corner, from 00:04 to 00:07.\n[Shot 3] From 00:07 to 00:12. At 00:07 the shot cuts to a medium close shot on <Subject 1> come up to the window at <Subject 2>'s shoulder, beginning from <Picture 5>: bare-headed, pale, dark hair swept back from a high forehead, clean-shaven, the open white shirt collar standing above the bottle-green velvet lapel, his face two-fifths of the frame's height in the RIGHT half. The twelve-paned glass and the grey street keep the LEFT. His eyes are down at the roadway, his lips together with the line on them. The camera pushes in a hand's breadth on his face as <Subject 1>'s eyes come up off the roadway to the middle distance and he speaks the line, from 00:07 to 00:10. <Subject 1> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] You mean the retired sergeant of Marines.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:10, as the line ends, his jaw closes and his shoulder comes back a thumb's width from the glass, and the movement continues to the last frame of the shot. Behind them Two hansom cabs are at a brisk roll away up the roadway through the lower panes at the LEFT, and one crossing-sweeper works his broom along the railings behind them., from 00:07 to 00:12.\n\noverall_soundscape: The ambience of the nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "reaction",
+    "setup": "window",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "Q18_0.png",
+      "Q18_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q18_0.png",
+        0
+      ],
+      [
+        "Q18_1.png",
+        85
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 7.041667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 83018,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1> turned from the glass.\n<Picture 3> is the first frame of [Shot 2], an insert square on the lower pane of the nearer sash.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 2 shots in the nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: a close shot of <Subject 1> turned from the glass, bare-headed, dark hair swept back, a thin waxed moustache on a sunburnt face that fills half the frame's height at the CENTRE. The twelve panes and the grey street lie soft behind his right shoulder at the LEFT, the heavy red curtain soft at the RIGHT edge. His eyes are narrowed and his mouth closed on a thought. The camera is Standing eye height on the carpet's centre. The camera pushes in a hand's breadth on his face as <Subject 1>'s eyes leave the glass and come round toward the room, from 00:00 to 00:04. Behind him One hansom cab is at a brisk roll away up the roadway through the lower panes at the LEFT, a thumb long and soft, and one crossing-sweeper's grey shape stoops at the railings behind it., from 00:00 to 00:04. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his eyes leave the glass.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to an insert square on the lower pane of the nearer sash, beginning from <Picture 3>: one sunburnt fingerprint stands on the glass a thumbnail wide at the CENTRE, the grey roadway and the opposite pavement soft and far beyond it through the glass, the thumb-length brass catch bright at the TOP of frame on the meeting rail, cold grey light flat along the glass; only what <Picture 3> shows is in frame. The camera is Meeting-rail height on the carpet's centre, a foot back from the nearer sash and tipped down a little at its lower pane, a 50 mm lens on the fingerprint. One pane of the lower sash fills the whole frame. At the first frame One sunburnt fingerprint stands on the inner face of the lower pane at the CENTRE of frame, a thumbnail wide. The camera pushes in a hand's breadth on the mark as a bare sunburnt thumb comes onto the glass a thumb's width beside the fingerprint, from 00:04 to 00:08.\n\noverall_soundscape: The ambience of the nearer of the two broad sash windows of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "runout",
+    "setup": "stair",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_stair.png",
+      "Q19_0.png",
+      "Q19_1.png",
+      "Q19_0E.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q19_0.png",
+        0
+      ],
+      [
+        "Q19_1.png",
+        90
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 7.791667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 83019,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The staircase and first-floor landing of 221B Baker Street, 1881: seventeen treads in two flights with a half-landing between them, a mahogany banister and turned balusters running up the RIGHT hand, brown patterned stair carpet down by brass rods, buff striped paper on the walls, a tall sash window on the half-landing giving grey London daylight, a brass gas bracket burning low on the upper wall, and the panelled sitting-room door standing at the head of the flight. <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium shot square photograph up the upper flight.\n<Picture 3> is the first frame of [Shot 2], an insert square photograph on the mahogany rail near the head of the upper flight.\n<Picture 4> is the last frame of [Shot 1], a medium shot square photograph up the upper flight: the leading heavy brown boot stands one whole tread higher in the RIGHT half of frame, its nailed sole toward the camera, and the second boot stands on the tread it left. The broad reddened bare RIGHT hand keeps the mahogany rail at the RIGHT edge with the large blue paper envelope flat against it. The panelled sitting-room door fills half the frame's width across the TOP, its brass knob a bead of light and its panel mouldings plain in the grey daylight.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 2 shots in <Subject 1>, the staircase and first-floor landing of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:09. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: a medium shot square photograph up the upper flight: heavy brown boots and dark brown trouser legs stand on the treads in the RIGHT half of frame with their heels toward the camera, his broad reddened bare RIGHT hand closed on the mahogany banister at the RIGHT edge, the panelled sitting-room door across the TOP of frame at two fifths of its width, cold grey late-morning daylight on the brown carpet. The camera is Hip height above the second tread of the upper flight, five treads back from the boots, a 35mm lens turned square up the flight at the sitting-room door. The mahogany banister and its turned balusters keep the RIGHT edge. The camera rises one tread with it and the sitting-room door widens a hand's breadth at the top of frame as the leading boot lifts and sets down one whole tread higher, from 00:00 to 00:04.\n[Shot 2] From 00:04 to 00:09. At 00:04 the shot cuts to an insert square photograph on the mahogany rail near the head of the upper flight, beginning from <Picture 3>: a broad reddened hand, the dark brown sack-coat cuff at its wrist, closed round the rail, a large blue paper envelope as wide as that spread hand flat against the mahogany under the thumb, the turned balusters below it, the panelled sitting-room door filling the TOP of frame edge to edge in cold grey daylight; only what <Picture 3> shows is in frame. The camera is Rail height on the middle of the third tread below the head of the flight, a forearm's length out from the mahogany. At the first frame The broad reddened bare hand is closed round the mahogany rail at the CENTRE of frame. The camera rises one tread with it and the panelled door widens to the frame's full width as the broad hand slides two balusters' width up the mahogany rail toward the door, from 00:04 to 00:09.\n\noverall_soundscape: The ambience of the staircase and first-floor landing of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20,
+      21
+    ],
+    "section": "runout",
+    "setup": "doorway",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-unnamed_retired_marine_sergeant_indoor.png",
+      "char-john_watson_indoor.png",
+      "Q20_0.png",
+      "Q21_0.png"
+    ],
+    "faces": [
+      "unnamed_retired_marine_sergeant",
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q20_0.png",
+        0
+      ],
+      [
+        "Q21_0.png",
+        94
+      ]
+    ],
+    "audio": [
+      [
+        "l20.wav",
+        0.25
+      ],
+      [
+        "l21.wav",
+        4.042
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 8.208334,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 83020,
+    "prompt": "subject_definitions:\n<Subject 1> is Unnamed Retired Marine Sergeant in <Picture 1>: A broad, thick-set CLEAN-SHAVEN man of about forty-five with a heavy jaw and a thick neck, a little under six feet, with heavy square shoulders squared back and a weather-beaten red-brown face, the skin coarse across the cheekbones; close-cropped grizzled grey hair stands short over a high forehead and his small steady dark eyes sit under heavy brows. He wears a plain dark brown sack coat of heavy cloth buttoned high to a stand collar with a black neckerchief knotted at the throat, and heavy brown boots. Both his hands are bare, broad and thick-fingered, the skin reddened to the wrist.\n<Subject 2> is John Watson in <Picture 2>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Picture 3> is the first frame of [Shot 1], a medium close shot on the commissionaire one whole pace inside the panelled landing door.\n<Picture 4> is the first frame of [Shot 2], a medium close shot on <Subject 2> a pace inside the room.\n<Audio 1> is the take's complete audio track: the 2 lines spoken on camera at their own times, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 2 shots in the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 4> and runs from 00:04 to 00:09. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 3>: a medium close shot on the commissionaire one whole pace inside the panelled landing door, bare-headed, a broad weather-beaten red-brown face under close-cropped grizzled grey hair, a heavy clean-shaven jaw and a thick neck, a plain dark brown sack coat buttoned high to a stand collar over a knotted black neckerchief, the large blue paper envelope level in his broad reddened right hand at the bottom CENTRE, his lips together with the line on them. The camera pushes in a hand's breadth on his face as the commissionaire's broad right hand carries the blue envelope forward to arm's length as he speaks the line, from 00:00 to 00:03. <Subject 1> (S1), on screen, a broad, with a clipped English voice at an even pace, says: <d>[English] For Mr. Sherlock Holmes.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his arm carries the envelope an inch further forward and his eyes lift to the man before him, and the lift continues to the last frame of the shot.\n[Shot 2] From 00:04 to 00:09. At 00:04 the shot cuts to a medium close shot on <Subject 2> a pace inside the room, beginning from <Picture 4>: bare-headed with his dark hair swept back, a thin waxed moustache on a sunburnt face, his eyebrows mild and his eyes turned a little to the RIGHT of frame, a tweed waistcoat with a watch chain and a white cravat at his throat, the white marble mantelpiece and its dark grate at the LEFT edge behind his shoulder with the two broad sash windows small and grey at the TOP LEFT, his lips together with the line on them. The camera pulls back a hand's breadth until the marble mantelpiece stands clear at the LEFT edge as <Subject 2>'s eyes come a thumb's width further to the RIGHT of frame as he speaks the line, from 00:04 to 00:07. <Subject 2> (S2), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] And what is your trade, my lad?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:07, as the line ends, his chin comes down a quarter inch and his open hand settles against his waistcoat, and the opening continues to the last frame of the shot.\n\noverall_soundscape: The ambience of the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22,
+      23
+    ],
+    "section": "answer",
+    "setup": "doorway",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-unnamed_retired_marine_sergeant_indoor.png",
+      "char-john_watson_indoor.png",
+      "Q22_0.png",
+      "Q23_0.png"
+    ],
+    "faces": [
+      "unnamed_retired_marine_sergeant",
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q22_0.png",
+        0
+      ],
+      [
+        "Q23_0.png",
+        141
+      ]
+    ],
+    "audio": [
+      [
+        "l22.wav",
+        0.25
+      ],
+      [
+        "l23.wav",
+        6.042
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 9.916667,
+    "frames": 260,
+    "seconds": 10.83,
+    "steps": 8,
+    "seed": 83022,
+    "prompt": "subject_definitions:\n<Subject 1> is Unnamed Retired Marine Sergeant in <Picture 1>: A broad, thick-set CLEAN-SHAVEN man of about forty-five with a heavy jaw and a thick neck, a little under six feet, with heavy square shoulders squared back and a weather-beaten red-brown face, the skin coarse across the cheekbones; close-cropped grizzled grey hair stands short over a high forehead and his small steady dark eyes sit under heavy brows. He wears a plain dark brown sack coat of heavy cloth buttoned high to a stand collar with a black neckerchief knotted at the throat, and heavy brown boots. Both his hands are bare, broad and thick-fingered, the skin reddened to the wrist.\n<Subject 2> is John Watson in <Picture 2>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Picture 3> is the first frame of [Shot 1], a close shot of the commissionaire's broad weather-beaten red-brown face turned a quarter to the LEFT in three-quarter profile.\n<Picture 4> is the first frame of [Shot 2], a medium close shot on <Subject 2> with the white marble mantelpiece and the bookshelf of the chimney breast at the LEFT edge behind him.\n<Audio 1> is the take's complete audio track: the 2 lines spoken on camera at their own times, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 10.83-second take of 2 shots in the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:06; [Shot 2] begins from <Picture 4> and runs from 00:06 to 00:11. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 3>: a close shot of the commissionaire's broad weather-beaten red-brown face turned a quarter to the LEFT in three-quarter profile, his heavy clean-shaven jaw and thick neck, close-cropped grizzled grey hair standing short with a thumb's width of buff striped paper above his crown, small steady dark eyes under heavy brows looking off the LEFT edge, the knotted black neckerchief and the stand collar of the plain dark brown sack coat across the BOTTOM of frame, the dim landing filling the RIGHT third behind his shoulder, his lips together with the line on them. The camera pushes in a hand's breadth on his three-quarter profile as the commissionaire's chin comes down an inch toward the stand collar as he speaks the line, from 00:00 to 00:04. <Subject 1> (S1), on screen, a broad, with a clipped English voice at an even pace, says: <d>[English] Commissionaire, sir. Uniform away for repairs.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his shoulders square a thumb's width under the plain brown coat, and the movement continues to the last frame of the shot.\n[Shot 2] From 00:06 to 00:11. At 00:06 the shot cuts to a medium close shot on <Subject 2> with the white marble mantelpiece and the bookshelf of the chimney breast at the LEFT edge behind him, beginning from <Picture 4>: bare-headed, his dark hair swept back, a thin waxed moustache on a sunburnt face, his mouth closed and level under it, the white cravat at his throat, his RIGHT shoulder alone in frame at the bottom, his lips together with the line on them. The camera pushes in a hand's breadth as the corner of <Subject 2>'s mouth lifts a quarter inch and his head tips an inch toward the man as he speaks the line, from 00:06 to 00:08. <Subject 2> (S2), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] And before that, my lad?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:08, as the line ends, the smile widens a fraction at one corner and his head tips a further inch, and the movement continues to the last frame of the shot.\n\noverall_soundscape: The ambience of the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "button",
+    "setup": "doorway",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-unnamed_retired_marine_sergeant_indoor.png",
+      "Q24_0.png"
+    ],
+    "faces": [
+      "unnamed_retired_marine_sergeant"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q24_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l24.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 7.708333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 83024,
+    "prompt": "subject_definitions:\n<Subject 1> is Unnamed Retired Marine Sergeant in <Picture 1>: A broad, thick-set CLEAN-SHAVEN man of about forty-five with a heavy jaw and a thick neck, a little under six feet, with heavy square shoulders squared back and a weather-beaten red-brown face, the skin coarse across the cheekbones; close-cropped grizzled grey hair stands short over a high forehead and his small steady dark eyes sit under heavy brows. He wears a plain dark brown sack coat of heavy cloth buttoned high to a stand collar with a black neckerchief knotted at the throat, and heavy brown boots. Both his hands are bare, broad and thick-fingered, the skin reddened to the wrist.\n<Picture 2> is the first frame of [Shot 1], a close shot of the commissionaire's broad weather-beaten red-brown face and squared shoulders.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a close shot of the commissionaire's broad weather-beaten red-brown face and squared shoulders, bare-headed with close-cropped grizzled grey hair, a heavy clean-shaven jaw and a thick neck, his small dark eyes straight into the camera, the plain dark brown sack coat buttoned high to the stand collar with the black neckerchief knotted at his throat, the open door leaf behind him at the RIGHT with a finger's width of the dim landing beyond its edge, his lips together with the line on them. The camera pushes in a hand's breadth as the commissionaire's broad reddened right hand comes up flat to his brow in a salute as he speaks the line, from 00:00 to 00:04. <Subject 1> (S1), on screen, a broad, with a clipped English voice at an even pace, says: <d>[English] A sergeant, sir. Royal Marine Light Infantry, sir.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his fingertips press flat against his brow and his chin lifts a quarter inch, and the lift continues to the last frame of the shot.\n\noverall_soundscape: The ambience of the panelled landing door in the RIGHT wall of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  }
+]

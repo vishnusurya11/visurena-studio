@@ -1,0 +1,781 @@
+{
+ "number": 11,
+ "title": "At the Window",
+ "question": "What happened in the last seven hours?",
+ "aspect": "1:1",
+ "where": "Surrey, 1894",
+ "light": "red firelight from the valley, deep black shadows",
+ "look": "Angular stylised 3D animation, brush-stroke texture",
+ "protagonist": "unnamed_first_person_narrator",
+ "answer": "shot 17",
+ "beds": [
+  {
+   "from_shot": 0,
+   "tone": "grave"
+  },
+  {
+   "from_shot": 9,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 15,
+   "tone": "grave"
+  }
+ ],
+ "setups": {
+  "study": {
+   "described": "a tall open sash window glowing red with fire, seen across the narrator's dark study at Maybury at night in 1894: the window frame full of flat country burning orange and red far below, out to a low flat dark horizon under rolling red smoke, a writing desk and a turned desk chair black against it, bookshelves along the left wall lost in shadow, and the red reflections of a nearer fire dancing on the wall and the ceiling; the light is the red glare through the open window AHEAD, so the window reads red, the desk and chair read as black shapes against it and the room reads black",
+   "cast": [
+    "unnamed_first_person_narrator"
+   ],
+   "landmark": "the open window with the burning valley in it",
+   "landmark_at": "far_end",
+   "landmark_size": "is half the height of the frame",
+   "route": "from the dark doorway across the study to the open window",
+   "geometry": "The open sash window fills the CENTRE from the TOP third to the BOTTOM third, the burning valley glowing red inside its frame. The desk and the turned chair stand black against it at the BOTTOM CENTRE, the dark bookshelves fill the LEFT third, and red reflections dance on the wall at the RIGHT third. The dark floorboards run from the BOTTOM edge to the window, and the black ceiling crosses the TOP edge with the red light flickering on it.",
+   "crowd": "",
+   "outdoors": false,
+   "props": [],
+   "location": "narrators_study",
+   "view": "interior_window_fire_night"
+  },
+  "valley": {
+   "described": "flat Surrey country on fire at night in 1894, seen from a hillside window at Maybury: a long low slope and the level fields beyond set thick with tongues of orange flame out to a low flat dark horizon, a wrecked train burning with a vivid glare on the railway near an arch at the centre, the houses about Woking station glowing as red ruins at the left, the far common about the sand-pits lit blood red, black smoke rolling up red-lit into the sky, and the dark tops of trees and the railway line in the foreground; the light is the red glare of the fires AHEAD and below, so the smoke reads red, the country reads black and the sky reads dark red",
+   "cast": [],
+   "landmark": "the burning train on the railway",
+   "landmark_at": "far_end",
+   "landmark_size": "is a tenth of the height of the frame",
+   "route": "from the tree tops below the window out over the burning valley to the common",
+   "geometry": "The dark tree tops cross the BOTTOM third from the LEFT edge to the RIGHT edge. The burning level fields fill the CENTRE with its small tongues of flame, the glowing ruins about the station stand at the LEFT third, the burning train lies at the CENTRE on the railway, the red-lit common lies far off at the RIGHT third, and red smoke fills the TOP third.",
+   "crowd": "a line of small black figures running across the railway",
+   "outdoors": true,
+   "props": [
+    "fighting_machine"
+   ],
+   "location": "narrators_study",
+   "view": "window_view_valley_fire_night"
+  },
+  "garden": {
+   "described": "the narrator's back garden at Maybury at night in 1894 after a storm, seen from an upstairs window: a small dark lawn trampled and wet, broken rose trees along its edge, a weathered paling fence at the far end with dark shrubs beyond it, and the pale corner of the house at the near right; the light is the faint red glare of the fires in the sky BEHIND the fence, so the palings read black against it, the lawn reads dark grey and the house corner reads pale",
+   "cast": [
+    "unnamed_first_person_narrator",
+    "artilleryman"
+   ],
+   "landmark": "the black paling fence at the end of the lawn",
+   "landmark_at": "far_end",
+   "landmark_size": "is a fifth of the height of the frame",
+   "route": "from the paling fence across the dark lawn to the corner of the house",
+   "geometry": "The dark trampled lawn fills the BOTTOM half, the black paling fence runs across the CENTRE from the LEFT edge to the RIGHT edge with the faint red glare above it, the broken rose trees stand at the LEFT third, and the pale corner of the house stands at the RIGHT edge. Dark shrubs stand beyond the fence at the TOP third, and wet footprints cross the lawn from the fence to the BOTTOM RIGHT.",
+   "crowd": "",
+   "outdoors": true,
+   "props": [],
+   "location": "narrators_garden",
+   "view": "wide_lawn_palings_night"
+  },
+  "dining": {
+   "described": "the narrator's dining room at Maybury at night in 1894, dark, every lamp cold: a mahogany table with a whisky decanter and glasses on it, two dining chairs pulled out, a sideboard against the far wall, dark patterned wallpaper, and a curtained window at the left edge where a faint red glare comes in; the light is that red glare through the gap in the curtains from the LEFT, so the glass and the edge of the table read red and the rest of the room reads black",
+   "cast": [
+    "unnamed_first_person_narrator",
+    "artilleryman"
+   ],
+   "landmark": "the curtained window with its thin red glare",
+   "landmark_at": "far_end",
+   "landmark_size": "is a third of the height of the frame",
+   "route": "from the door along the dark table to the curtained window",
+   "geometry": "The dark table runs across the BOTTOM half with the decanter and glasses at the CENTRE, the sideboard stands against the far wall at the TOP third, the chairs stand at the LEFT third and the RIGHT third, and the curtained window with its thin red glare stands at the LEFT edge. The dark patterned wallpaper fills the RIGHT edge, and the red light lies in a thin line along the edge of the table from the LEFT third to the CENTRE.",
+   "crowd": "",
+   "outdoors": false,
+   "props": [],
+   "location": "narrators_home",
+   "view": "dining_room_unlit_night"
+  },
+  "dawn": {
+   "described": "the view from a hillside study window at Maybury at dawn in 1894 over a valley of ashes: grey streamers of smoke rising from the countless ruins of gutted houses and blackened trees, a white railway signal standing untouched amid the wreckage, the blackened level common beyond, out to a low flat horizon, with the pit at the centre, three tall metallic tripods standing about it with their hooded heads turned, puffs of green vapour rising out of the pit, and pillars of red smoke far off; the light is the grey dawn in the east AHEAD at the RIGHT, so the smoke reads grey, the country reads black and the sky reads pale and cold",
+   "cast": [
+    "unnamed_first_person_narrator",
+    "artilleryman"
+   ],
+   "landmark": "the pit with the three tripods about it",
+   "landmark_at": "far_end",
+   "landmark_size": "is a tenth of the height of the frame",
+   "route": "from the window sill out over the valley of ashes to the pit",
+   "geometry": "The blackened country fills the BOTTOM half with grey streamers of smoke rising from its ruins, the pit lies at the CENTRE with three tall tripods standing about it, green vapour rising between them, the white railway signal stands at the LEFT third, and the pale dawn sky fills the TOP third above a low flat horizon, with red pillars of smoke at the RIGHT edge. The gutted shells of houses stand along the BOTTOM third, and the end of a white greenhouse stands at the BOTTOM RIGHT.",
+   "crowd": "",
+   "outdoors": true,
+   "props": [
+    "fighting_machine"
+   ],
+   "location": "narrators_study",
+   "view": "window_view_ashes_dawn"
+  }
+ },
+ "shots": [
+  {
+   "index": 0,
+   "section": "hook",
+   "setup": "study",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.1,
+   "frame": "Wide on the narrator's dark study at night, its tall window standing wide open in the far wall and a whole valley burning red far below inside the frame of it, the desk and turned chair black against the glare.",
+   "motion": "The camera rises from the dark floorboards with small amplitude until the open window already in the picture stands at the centre, travelling one short stride; the red glare goes on flickering on the wall; the smoke goes on rolling across the window.",
+   "camera": "in the dark doorway at a standing man's eye, a 35mm lens. The red glare comes through the window AHEAD at the CENTRE; the window reads red and the room reads black",
+   "at_rest": "The open sash window fills the CENTRE from the TOP third to the BOTTOM third, the burning valley glowing red inside its frame. The desk and the turned chair stand black against it at the BOTTOM CENTRE, the dark bookshelves fill the LEFT third, and red reflections dance on the wall at the RIGHT third. The dark floorboards run from the BOTTOM edge to the window, and the black ceiling crosses the TOP edge with the red light flickering on it.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "The passage was dark, and the side of the room seemed impenetrably dark.",
+   "cuts": []
+  },
+  {
+   "index": 1,
+   "section": "setup",
+   "setup": "study",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.4,
+   "frame": "Medium close on the narrator (neat close-trimmed dark brown moustache, hatless, his dark brown hair combed smooth and parted on the left, a dry second suit in the same mid-grey herringbone tweed) stopped short in the dark doorway of his study at night, one hand on the door frame, the red glare of the window falling across his face.",
+   "motion": "The camera holds a locked-off frame; he stares at the window and his breath catches; his hand goes on gripping the door frame.",
+   "camera": "in the passage level with his eyes, three paces from him, an 85mm lens. The red glare comes from the window at the RIGHT; his face reads red and the passage reads black",
+   "at_rest": "The narrator stands at the CENTRE LEFT in the dark doorway of the study, one hand on the door frame, the red glare of the open window falling across his face from the RIGHT. The dark passage fills the LEFT edge. His head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "I stopped short in the doorway.",
+   "cuts": []
+  },
+  {
+   "index": 2,
+   "section": "setup",
+   "setup": "valley",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.2,
+   "frame": "Wide from a hillside window at night over flat country on fire, the level fields set with small tongues of flame out to a low flat horizon, the station ruins glowing and red smoke rolling over it all.",
+   "motion": "The camera pans from the burning fields across to the station ruins already in the picture until the ruins are at the centre, travelling a hand's breadth; the small flames go on swaying; the red smoke goes on rolling across the sky.",
+   "camera": "at the open window at a standing man's eye, a 35mm lens. The red glare comes from the fires BELOW; the smoke reads red and the country reads black",
+   "at_rest": "The dark tree tops cross the BOTTOM third from the LEFT edge to the RIGHT edge. The burning level fields fill the CENTRE with its small tongues of flame, the glowing ruins about the station stand at the LEFT third, the burning train lies at the CENTRE on the railway, the red-lit common lies far off at the RIGHT third, and red smoke fills the TOP third.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "It seemed indeed as if the whole country in that direction was on fire.",
+   "cuts": []
+  },
+  {
+   "index": 3,
+   "section": "spike",
+   "setup": "valley",
+   "size": "medium",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.4,
+   "frame": "Medium across the red glare at night on three huge black tripods far off on the common, moving busily to and fro across the light like grotesque shapes.",
+   "motion": "The camera tracks sideways to the right past the dark tree tops, a truck with small amplitude, until the three tripods already in the picture stand at the centre, travelling one short stride; the three tripods go on striding to and fro across the glare; the flames go on leaping below them.",
+   "camera": "at the open window looking out over the valley, a 135mm lens. The red glare comes from the fires BEHIND them; the tripods read black and the glare reads red",
+   "at_rest": "Three huge black tripods stand far off across the red light at the CENTRE, each a sixth of the height of the frame, their legs black against the glare. The burning hillside fills the BOTTOM half with its small flames and red smoke drifts across the TOP third.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "Across the light huge black shapes, grotesque and strange, moved busily to and fro.",
+   "cuts": []
+  },
+  {
+   "index": 4,
+   "section": "spike",
+   "setup": "valley",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.55,
+   "frame": "Insert at night on a wrecked train on the railway below the hill, its fore part a black heap in a vivid glare and its hinder carriages a row of lit yellow windows.",
+   "motion": "The camera tilts up from the dark railway line to the burning train already in the picture until the train stands in the middle of the frame, travelling a forearm; the glare goes on flaring; the red smoke goes on rising.",
+   "camera": "at the window looking down the hill, a 135mm lens. The glare comes from the burning engine at the LEFT; the carriages read yellow and the embankment reads black",
+   "at_rest": "The wrecked train lies along the railway at the CENTRE, its fore part a black heap in a vivid orange glare at the LEFT third and its hinder carriages a row of lit yellow windows at the RIGHT third. The dark railway line runs across the BOTTOM third and red smoke fills the TOP third.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "Then I perceived this was a wrecked train, the fore part smashed and on fire.",
+   "cuts": []
+  },
+  {
+   "index": 5,
+   "section": "friction",
+   "setup": "valley",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.7,
+   "frame": "Wide at night over the railway below the hill, where a line of small black figures hurries one after another across the line against the red glow of the station ruins.",
+   "motion": "The camera rises above the embankment with small amplitude until the line of black figures already in the picture stands at the centre, travelling one short stride; the figures go on hurrying across the line; the station ruins go on glowing.",
+   "camera": "at the window looking down over the railway, a 85mm lens. The red glow comes from the station ruins BEHIND the figures; the figures read black and the glow reads red",
+   "at_rest": "A line of small black figures hurries across the railway at the CENTRE against the red glow of the station ruins behind them, which fill the TOP half. The dark embankment crosses the BOTTOM third from the LEFT edge to the RIGHT edge.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "I saw against the light of Woking station a number of black figures hurrying across the line.",
+   "cuts": []
+  },
+  {
+   "index": 6,
+   "section": "friction",
+   "setup": "study",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.6,
+   "frame": "Medium on the narrator (neat close-trimmed dark brown moustache, hatless, his dark brown hair combed smooth and parted on the left, a dry second suit in the same mid-grey herringbone tweed) sitting in his desk chair turned to the open window at night, staring out at the blackened country, his elbows on his knees.",
+   "motion": "The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture, travelling a hand's breadth; he goes on staring out at the valley; his head goes on turning after the far shapes.",
+   "camera": "in the study level with his chest, four paces from him, a 50mm lens. The red glare comes from the window at the RIGHT; his face reads red and the shelves read black",
+   "at_rest": "The narrator sits at the CENTRE in the desk chair turned to the open window, seen from the side, his elbows on his knees, the red glare of the window at the RIGHT third lighting his face and the dark bookshelves behind him at the LEFT third. His head is a fifth of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "I turned my desk chair to the window, sat down, and stared at the blackened country.",
+   "cuts": []
+  },
+  {
+   "index": 7,
+   "section": "friction",
+   "setup": "study",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.75,
+   "frame": "Insert at night on a man's two hands gripping the wooden arms of a desk chair, lit red by the window, the knuckles pale.",
+   "motion": "The camera pushes in on the hands at the centre of the picture, travelling a hand's breadth; the fingers go on tightening on the chair arms; the red light goes on flickering over them.",
+   "camera": "beside the chair looking down, a 50mm lens. The red glare comes from the window at the RIGHT; the knuckles read pale and the wood reads black",
+   "at_rest": "Two hands grip the dark wooden arms of the desk chair at the CENTRE, lit red from the RIGHT by the window, a grey herringbone tweed cuff at the LEFT third and the dark floor across the BOTTOM third. Red firelight falls across the dark panelled wall at the RIGHT third, and the dark legs of the desk stand behind the chair at the TOP third.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "Did a Martian sit within each, ruling, directing, using?",
+   "cuts": []
+  },
+  {
+   "index": 8,
+   "section": "reaction",
+   "setup": "valley",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.9,
+   "frame": "Insert at night on the little red pinpoint of Mars dropping into the west, low in a clear dark sky over the smoke of the burning land.",
+   "motion": "The camera tilts up from the red smoke to the red point of Mars already in the picture until the point stands in the middle of the frame, travelling a forearm; the red smoke goes on rolling up below it; the flames go on flickering along the bottom of the smoke.",
+   "camera": "at the window looking up into the west, a 135mm lens. The only light is the red glow of the fires from BELOW; the sky reads black and the point reads red",
+   "at_rest": "A single small red point of light stands low in the clear dark sky at the CENTRE LEFT. The red smoke of the burning land crosses the BOTTOM third and the dark clear sky fills the TOP half. A few faint stars stand at the TOP RIGHT, and the red glow of the fires lights the underside of the smoke from the BOTTOM edge.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "Over the smoke the little fading pinpoint of Mars was dropping into the west.",
+   "cuts": []
+  },
+  {
+   "index": 9,
+   "section": "friction",
+   "setup": "garden",
+   "size": "medium",
+   "faces": [
+    "artilleryman"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.2,
+   "frame": "Medium seen from an upstairs window at night on the artilleryman (full black moustache, thick straight black hair cut short at the sides and falling forward over the brow and eyes, royal horse artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned, uniform and face blackened with ash and soot) clambering over the black paling fence into the dark garden, one leg over the top.",
+   "motion": "The camera tilts down from the faint red glare to the fence already in the picture until the fence stands in the middle of the frame, travelling a hand's breadth; he goes on swinging his leg over the palings; his open jacket goes on flapping.",
+   "camera": "a high angle from the upstairs window looking down on the lawn, a 50mm lens. The faint red glare comes from BEHIND the fence; the palings read black and the lawn reads dark grey",
+   "at_rest": "The artilleryman clambers over the black paling fence at the CENTRE, seen from above, one leg over, his open jacket hanging, the dark lawn below him across the BOTTOM half and the faint red glare above the fence at the TOP third. His head is a sixth of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "A soldier came into my garden, clambering over the palings.",
+   "cuts": []
+  },
+  {
+   "index": 10,
+   "section": "friction",
+   "setup": "garden",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.4,
+   "frame": "Medium close seen from the lawn at night on the narrator (neat close-trimmed dark brown moustache, hatless, his dark brown hair combed smooth and parted on the left, a dry second suit in the same mid-grey herringbone tweed) leaning out of the open window above, eager, whispering down into the dark.",
+   "motion": "The camera holds a locked-off frame from below; he leans out over the sill and whispers; his hand goes on gripping the window frame.",
+   "camera": "a low angle from the lawn looking up at the window, three paces from the wall, an 85mm lens. The faint red glare comes from BEHIND the camera; his face reads pale and the wall reads grey",
+   "at_rest": "The narrator leans out of the open window at the CENTRE, seen from the lawn below, his head and shoulders over the sill, the pale wall of the house around him and the dark sky with a faint red glare at the TOP third. His head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 1.5,
+   "coda_s": 1.5,
+   "turn": "",
+   "why": "At the sight of another human being my torpor passed, and I leaned out.",
+   "cuts": []
+  },
+  {
+   "index": 11,
+   "section": "friction",
+   "setup": "garden",
+   "size": "medium_close",
+   "faces": [
+    "artilleryman"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.55,
+   "frame": "Medium close seen from the window above at night on the artilleryman (full black moustache, thick straight black hair cut short at the sides and falling forward over the brow and eyes, royal horse artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned, uniform and face blackened with ash and soot) standing under the window, his blackened face turned up, peering and whispering.",
+   "motion": "The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture, travelling a hand's breadth; he whispers up at the window; his head goes on turning along the dark wall.",
+   "camera": "above him looking down from the window, three paces up, an 85mm lens. The faint red glare comes from BEHIND him at the TOP; his face reads grey and the lawn reads black",
+   "at_rest": "The artilleryman stands at the CENTRE under the window, seen from above, his blackened face turned up, the dark lawn around him and the broken rose trees at the LEFT third. His head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 1.5,
+   "coda_s": 1.5,
+   "turn": "",
+   "why": "'Who's there?' he said, also whispering, standing under the window and peering up.",
+   "cuts": []
+  },
+  {
+   "index": 12,
+   "section": "friction",
+   "setup": "garden",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.7,
+   "frame": "Medium close seen from the lawn at night on the narrator (neat close-trimmed dark brown moustache, hatless, his dark brown hair combed smooth and parted on the left, a dry second suit in the same mid-grey herringbone tweed) at the open window above, whispering down, his hands on the sill.",
+   "motion": "The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture, travelling a hand's breadth; he asks his question in a whisper; his hand goes on gripping the sill.",
+   "camera": "a low angle from the lawn looking up, three paces from the wall, an 85mm lens. The faint red glare comes from BEHIND the camera; his face reads pale and the wall reads grey",
+   "at_rest": "The narrator leans out of the open window at the CENTRE, seen from the lawn below, his head and shoulders over the sill, the pale wall of the house around him and the dark sky with a faint red glare at the TOP third. His head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "'Where are you going?' I asked. 'Are you trying to hide?'",
+   "cuts": []
+  },
+  {
+   "index": 13,
+   "section": "friction",
+   "setup": "garden",
+   "size": "close",
+   "faces": [
+    "artilleryman"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.85,
+   "frame": "Close seen from above at night on the blackened face of the artilleryman (full black moustache, thick straight black hair cut short at the sides and falling forward over the brow and eyes, royal horse artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned, uniform and face blackened with ash and soot) under the window, turned up, exhausted, whispering his answer.",
+   "motion": "The camera holds a locked-off frame; he whispers and nods; his head goes on turning to the fence behind him.",
+   "camera": "above him looking down from the window, two paces up, an 85mm lens. The faint red glare comes from BEHIND him at the TOP; his face reads grey and his hair reads black",
+   "at_rest": "The artilleryman stands at the CENTRE under the window, seen from above, his blackened face turned up, the dark lawn around him and the broken rose trees at the LEFT third. His head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 1.5,
+   "coda_s": 1.5,
+   "turn": "",
+   "why": "'God knows.' ... 'That's it.'",
+   "cuts": []
+  },
+  {
+   "index": 14,
+   "section": "turn",
+   "setup": "garden",
+   "size": "close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.95,
+   "frame": "Close seen from the lawn at night on the face of the narrator (neat close-trimmed dark brown moustache, hatless, his dark brown hair combed smooth and parted on the left, a dry second suit in the same mid-grey herringbone tweed) at the open window, deciding, then beckoning him in.",
+   "motion": "The camera pushes in toward his face with small amplitude until it fills the middle of the picture, travelling a hand's breadth; he whispers and beckons; his hand goes on waving toward the door below.",
+   "camera": "a low angle from the lawn looking up, two paces from the wall, an 85mm lens. The faint red glare comes from BEHIND the camera; his face reads pale and the window reads black",
+   "at_rest": "The narrator leans out of the open window at the CENTRE, seen from the lawn below, his head and shoulders over the sill, the pale wall of the house around him and the dark sky with a faint red glare at the TOP third. His head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "a man watching his world burn -> a man taking a stranger in",
+   "why": "'Come into the house,' I said.",
+   "cuts": []
+  },
+  {
+   "index": 15,
+   "section": "reaction",
+   "setup": "dining",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.3,
+   "frame": "Medium close in the dark dining room at night on the narrator (neat close-trimmed dark brown moustache, hatless, his dark brown hair combed smooth and parted on the left, a dry second suit in the same mid-grey herringbone tweed) pouring a stiff dose of whisky from the decanter into a glass, lit only by a thin red glare from the curtains.",
+   "motion": "The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture, travelling a hand's breadth; he speaks as he goes on pouring the whisky; the red glare goes on glinting in the glass.",
+   "camera": "at the table level with his eyes, three paces from him, an 85mm lens. The thin red glare comes through the curtains from the LEFT; his face reads red and the room reads black",
+   "at_rest": "The narrator stands at the CENTRE RIGHT at the dark table, pouring whisky from the decanter into a glass at the CENTRE, the red glare through the curtains at the LEFT edge lighting the glass and his hands. His head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "'Take some whisky,' I said, pouring out a stiff dose.",
+   "cuts": []
+  },
+  {
+   "index": 16,
+   "section": "reaction",
+   "setup": "dining",
+   "size": "medium",
+   "faces": [
+    "artilleryman"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.5,
+   "frame": "Medium in the dark dining room at night on the artilleryman (full black moustache, thick straight black hair cut short at the sides and falling forward over the brow and eyes, royal horse artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned, uniform and face blackened with ash and soot) sitting at the table with his head down on his folded arms, his shoulders shaking, a glass beside his elbow.",
+   "motion": "The camera rises above the table with small amplitude until the artilleryman already in the picture sits at the centre, travelling a hand's breadth; he goes on sobbing into his arms; his shoulders go on shaking.",
+   "camera": "at the table level with his head, four paces from him, a 50mm lens. The thin red glare comes through the curtains from the LEFT; his jacket reads dark blue and the room reads black",
+   "at_rest": "The artilleryman sits at the CENTRE at the dark table with his head down on his folded arms, his shoulders shaking, a glass beside his elbow at the RIGHT third, the thin red glare from the curtains at the LEFT edge. His head is a quarter of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "He put his head on his arms, and began to sob and weep like a little boy.",
+   "cuts": []
+  },
+  {
+   "index": 17,
+   "section": "answer",
+   "setup": "dining",
+   "size": "close",
+   "faces": [
+    "artilleryman"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.7,
+   "frame": "Close in the dark dining room at night on the blackened, haggard face of the artilleryman (full black moustache, thick straight black hair cut short at the sides and falling forward over the brow and eyes, royal horse artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned, uniform and face blackened with ash and soot), lifted from his arms, his eyes wet, telling it.",
+   "motion": "The camera pushes in toward his face with small amplitude until it fills the middle of the picture, travelling a hand's breadth; he speaks; his head goes on shaking from side to side.",
+   "camera": "at the table level with his eyes, two paces from him, an 85mm lens. The thin red glare comes from the curtain gap at the LEFT; his face reads black and red and the room reads black",
+   "at_rest": "The artilleryman's blackened face fills the CENTRE, lit red from the LEFT by the curtain gap, his black hair falling over his brow, the dark room behind him. His head is half the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "'They wiped us out -- simply wiped us out,' he repeated again and again.",
+   "cuts": []
+  },
+  {
+   "index": 18,
+   "section": "reaction",
+   "setup": "dining",
+   "size": "medium_close",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.8,
+   "frame": "Medium close in the dark dining room at night on the narrator (neat close-trimmed dark brown moustache, hatless, his dark brown hair combed smooth and parted on the left, a dry second suit in the same mid-grey herringbone tweed) standing and listening, his face turned down toward the table, lit red from one side.",
+   "motion": "The camera pushes in toward him with small amplitude until his head and shoulders fill the middle of the picture, travelling a hand's breadth; he goes on listening; his hand goes on gripping the back of a chair.",
+   "camera": "in the dining room level with his eyes, three paces from him, an 85mm lens. The thin red glare comes from the curtain gap at the LEFT; his face reads red and the sideboard reads black",
+   "at_rest": "The narrator stands at the CENTRE in the dark dining room, his face turned down and to the LEFT, lit red from the LEFT by the curtain gap, the dark sideboard behind him at the RIGHT third. His head is a third of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "He was a driver in the artillery, and had only come into action about seven.",
+   "cuts": []
+  },
+  {
+   "index": 19,
+   "section": "reaction",
+   "setup": "dining",
+   "size": "insert",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.9,
+   "frame": "Insert at night on a plate of cold mutton and a loaf of bread on the dark table, two hands reaching in from either side and touching over it in the dark.",
+   "motion": "The camera pushes in on the bread at the centre of the picture, travelling a hand's breadth; the two hands go on tearing at the bread; the red glint goes on shining in the glasses.",
+   "camera": "above the table looking down, a 50mm lens. The thin red glare comes from the LEFT; the bread reads pale and the table reads black",
+   "at_rest": "A plate of cold mutton and a loaf of bread lie at the CENTRE on the dark table, two hands reaching into the frame from the LEFT edge and the RIGHT edge, the glasses at the TOP third catching a thin red light from the LEFT.",
+   "end": "",
+   "changed": "",
+   "beat_s": 0.8,
+   "coda_s": 0.9,
+   "turn": "",
+   "why": "We lit no lamp, and ever and again our hands would touch upon bread or meat.",
+   "cuts": []
+  },
+  {
+   "index": 20,
+   "section": "runout",
+   "setup": "dawn",
+   "size": "medium",
+   "faces": [
+    "unnamed_first_person_narrator"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.3,
+   "frame": "Medium over the shoulder of the narrator (neat close-trimmed dark brown moustache, hatless, his dark brown hair combed smooth and parted on the left, a dry second suit in the same mid-grey herringbone tweed) at the open study window at dawn, seen from behind with his hands on the sill, the valley of ashes beyond him smoking grey.",
+   "motion": "The camera pushes in past his shoulder toward the valley already in the picture with small amplitude, travelling one short stride; the grey smoke goes on rising from the ruins; he goes on gripping the sill.",
+   "camera": "behind him in the study at a standing man's eye, three paces from him, a 35mm lens. The grey dawn comes from AHEAD at the RIGHT; the smoke reads grey and his back reads dark",
+   "at_rest": "The narrator stands at the CENTRE LEFT at the open study window at dawn, seen from behind over his shoulder, his hands on the sill, the valley of ashes filling the window at the CENTRE RIGHT with grey smoke rising from it. His head is a quarter of the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 1.0,
+   "coda_s": 1.4,
+   "turn": "",
+   "why": "In one night the valley had become a valley of ashes.",
+   "cuts": []
+  },
+  {
+   "index": 21,
+   "section": "button",
+   "setup": "dawn",
+   "size": "close",
+   "faces": [
+    "artilleryman"
+   ],
+   "extras": 0,
+   "view": "",
+   "path": 0.6,
+   "frame": "Close at dawn on the streaked face of the artilleryman (full black moustache, thick straight black hair cut short at the sides and falling forward over the brow and eyes, royal horse artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned, uniform and face blackened with ash and soot) turned from the study window toward the camera, looking straight ahead, the valley of ashes over his shoulder, dawn light on his face.",
+   "motion": "The camera holds a locked-off frame; he speaks quietly, facing the camera; his head goes on lowering toward his chest.",
+   "camera": "in the study level with his eyes, two paces from him, an 85mm lens. The grey dawn comes from the window at the RIGHT onto his face; his skin reads pale through streaks of soot and his hair reads black",
+   "at_rest": "The artilleryman's streaked face fills the CENTRE, lit pale from the RIGHT by the dawn through the window, his black hair falling over his brow, the pale window at the RIGHT third. His head is half the frame's height.",
+   "end": "",
+   "changed": "",
+   "beat_s": 1.0,
+   "coda_s": 1.0,
+   "turn": "",
+   "why": "'Just like parade it had been a minute before -- then stumble, bang, swish!'",
+   "cuts": []
+  },
+  {
+   "index": 22,
+   "section": "runout",
+   "setup": "dawn",
+   "size": "wide",
+   "faces": [],
+   "extras": 0,
+   "view": "",
+   "path": 0.9,
+   "frame": "Wide at dawn over the valley of ashes to the pit, where three tall tripods stand about it with their hooded heads turning and puffs of green vapour rise out of it into the grey sky.",
+   "motion": "The camera rises above the ruins with small amplitude until the three tripods already in the picture stand at the centre, travelling one short stride; their hooded heads go on turning; the green vapour goes on rising from the pit.",
+   "camera": "at the window at a standing man's eye, a 50mm lens. The grey dawn comes from the RIGHT; the smoke reads grey, the tripods read metal and the country reads black",
+   "at_rest": "The blackened country fills the BOTTOM half with grey streamers of smoke rising from its ruins, the pit lies at the CENTRE with three tall tripods standing about it, green vapour rising between them, the white railway signal stands at the LEFT third, and the pale dawn sky fills the TOP third above a low flat horizon, with red pillars of smoke at the RIGHT edge. The gutted shells of houses stand along the BOTTOM third, and the end of a white greenhouse stands at the BOTTOM RIGHT.",
+   "end": "",
+   "changed": "",
+   "beat_s": 1.5,
+   "coda_s": 1.5,
+   "turn": "",
+   "why": "Three of the metallic giants stood about the pit, their cowls rotating.",
+   "cuts": []
+  }
+ ],
+ "lines": [
+  {
+   "index": 0,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Then, why I do not know, I went up to my study.",
+   "shot": 0
+  },
+  {
+   "index": 1,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "It is all on fire.",
+   "shot": 1
+  },
+  {
+   "index": 2,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "The storm had passed. The whole country toward the common was on fire.",
+   "shot": 2
+  },
+  {
+   "index": 3,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Across the red light, huge black shapes, grotesque and strange, went busily to and fro.",
+   "shot": 3
+  },
+  {
+   "index": 4,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "A glare on the railway. A wrecked train, its fore part burning.",
+   "shot": 4
+  },
+  {
+   "index": 5,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Later, against the light of the station, black figures hurried across the line.",
+   "shot": 5
+  },
+  {
+   "index": 6,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I turned my chair to the window, and sat, and stared at the blackened country.",
+   "shot": 6
+  },
+  {
+   "index": 7,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Did a Martian sit within each, ruling it as a brain rules a body?",
+   "shot": 7
+  },
+  {
+   "index": 8,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Over the smoke, the small red point of Mars was sinking west.",
+   "shot": 8
+  },
+  {
+   "index": 9,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Then, near dawn, a soldier came clambering into my garden, over the palings.",
+   "shot": 9
+  },
+  {
+   "index": 10,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "You there, in the garden! Up here!",
+   "shot": 10
+  },
+  {
+   "index": 11,
+   "kind": "dialogue",
+   "speaker": "artilleryman",
+   "text": "Who is that? Who is there?",
+   "shot": 11
+  },
+  {
+   "index": 12,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Are you trying to hide?",
+   "shot": 12
+  },
+  {
+   "index": 13,
+   "kind": "dialogue",
+   "speaker": "artilleryman",
+   "text": "God knows. That is it.",
+   "shot": 13
+  },
+  {
+   "index": 14,
+   "kind": "dialogue",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "Come into the house.",
+   "shot": 14
+  },
+  {
+   "index": 15,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "I poured him out a stiff dose of whisky, and he drank it down.",
+   "shot": 15
+  },
+  {
+   "index": 16,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "He sat down, put his head on his arms, and wept like a little boy.",
+   "shot": 16
+  },
+  {
+   "index": 17,
+   "kind": "dialogue",
+   "speaker": "artilleryman",
+   "text": "They wiped us out. Simply wiped us out.",
+   "shot": 17
+  },
+  {
+   "index": 18,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "He was a driver in the artillery. Nothing living was left upon the common.",
+   "shot": 18
+  },
+  {
+   "index": 19,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "We lit no lamp. Our hands would touch upon bread, or meat.",
+   "shot": 19
+  },
+  {
+   "index": 20,
+   "kind": "narration",
+   "speaker": "unnamed_first_person_narrator",
+   "text": "At dawn we went up again. The valley was a valley of ashes.",
+   "shot": 20
+  },
+  {
+   "index": 21,
+   "kind": "dialogue",
+   "speaker": "artilleryman",
+   "text": "Just like parade, a minute before.",
+   "shot": 21
+  }
+ ]
+}

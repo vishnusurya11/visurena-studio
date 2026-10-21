@@ -1,0 +1,864 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "scullery_door",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/characters/curate/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_00.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.791667,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 101000,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the curate in <Picture 2>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Black clerical waistcoat grey with plaster dust over a torn grimy white shirt, dog collar sprung open and hanging from one stud. Right hand bound in a filthy rag. Black trousers torn at the knee, black boots. Bareheaded, curls matted, pale stubble. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a dark Victorian scullery seen from the north-west corner beside the brick copper. Across grey York stone flags stands the planked kitchen door. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot across the dim scullery from the north-west corner: <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) and <Subject 2> (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) stand together in the kitchen doorway at the far end, bent low. The camera is Camera at the copper in the north-west corner at chest height, a 28mm lens, looking east. The light comes from the kitchen doorway at the far end. At the first frame tHE FOCUS OF THE PICTURE IS the half-open kitchen door at the far end, a grey rectangle of light with the meat chopper hanging beside it; <Subject 1> and <Subject 2> stand in the doorway; the sink and the pump stand at the LEFT frame edge. The camera rises above the end, across the whole shot as <Subject 1> reaches the sink first, from 00:00 to 00:02. At 00:02 grey dust drifts down from the cracked ceiling boards, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he reaches the sink first. By 00:05 the camera is rising through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "scullery_door",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/characters/curate/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_01.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 101001,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the curate in <Picture 2>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Black clerical waistcoat grey with plaster dust over a torn grimy white shirt, dog collar sprung open and hanging from one stud. Right hand bound in a filthy rag. Black trousers torn at the knee, black boots. Bareheaded, curls matted, pale stubble. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a dark Victorian scullery seen from the north-west corner beside the brick copper. Across grey York stone flags stands the planked kitchen door. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot across the dim scullery from the north-west corner: <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) and <Subject 2> (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) stand together in the kitchen doorway at the far end, bent low. The camera is Camera at the copper in the north-west corner at chest height, a 28mm lens, looking east. The light comes from the kitchen doorway at the far end. At the first frame tHE FOCUS OF THE PICTURE IS the half-open kitchen door at the far end, a grey rectangle of light with the meat chopper hanging beside it; <Subject 1> and <Subject 2> stand in the doorway; the sink and the pump stand at the LEFT frame edge. The camera tracks behind <Subject 1>, across the whole shot as <Subject 1> reaches the sink first, from 00:00 to 00:02. At 00:02 grey dust drifts down from the cracked ceiling boards, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he reaches the sink first. By 00:05 the camera is tracking through the last frame, with <Subject 1> now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "pit_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/handling_machine/sheet.png",
+      "episodes/ep20/storyboard/h3/shot_02.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.416667,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 101002,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian handling-machine in <Picture 1>: A metallic spider-crab of a machine: a low rounded body with a glittering grey-brown shiny integument like wet leather, carried on five jointed, agile legs, with an extraordinary number of jointed levers, bars and reaching, clutching tentacles folded about it. A glass plate near the edge of the body shows the Martian's face and great dark eyes inside. Three long tentacles fish rods, plates and bars; one extends telescope-fashion into a long metallic snake that taps and feels its way with a faint ringing like keys on a split-ring. Body about as wide as a hansom cab and carried at about head height. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:05. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian handling-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a wide through the triangular hole in the kitchen wall: the far side of the pit in gold light, a splintered beam across the top edge and broken bricks along the bottom edge, the opened cylinder at the centre, and a bright aluminium bar on a jointed tentacle of the Martian handling-machine, a metallic spider-crab of a machine, a glittering crablike machine, above the clay terraces. The camera is Camera inside the kitchen at head height, a 35mm lens, looking south through the hole. The light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the jointed tentacle of the Martian handling-machine holding one bright aluminium bar above the clay at the RIGHT-CENTRE. The camera tracks sideways to the right across the whole shot, past the splintered beam at the near edge, toward the stack of bars at the right frame edge as the Martian handling-machine swings the bar over to the stack, from 00:00 to 00:02. At 00:02 green vapour drifts across the cylinder, and the movement continues to the last frame of the shot. By 00:05 the camera is tracking through the last frame, with the bar now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "setup",
+    "setup": "pit_day",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/handling_machine/sheet.png",
+      "episodes/ep20/storyboard/h3/shot_03.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.625,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 101003,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian handling-machine in <Picture 1>: A metallic spider-crab of a machine: a low rounded body with a glittering grey-brown shiny integument like wet leather, carried on five jointed, agile legs, with an extraordinary number of jointed levers, bars and reaching, clutching tentacles folded about it. A glass plate near the edge of the body shows the Martian's face and great dark eyes inside. Three long tentacles fish rods, plates and bars; one extends telescope-fashion into a long metallic snake that taps and feels its way with a faint ringing like keys on a split-ring. Body about as wide as a hansom cab and carried at about head height. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:04. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian handling-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low sun from the right, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on an insert through the triangular hole in the kitchen wall on a jointed tentacle of the Martian handling-machine, a metallic spider-crab of a machine, a glittering crablike machine, holding one bright aluminium bar above the clay terraces in gold light, the opened cylinder behind it and a splintered beam across the top edge; only that object and what touches it is in frame. The camera is Camera inside the kitchen at head height, a 35mm lens, looking south through the hole. The light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the jointed tentacle of the Martian handling-machine holding one bright aluminium bar above the clay at the RIGHT-CENTRE; the opened cylinder lies behind it at the CENTRE; the splintered beam crosses the TOP edge; a stack of aluminium bars rises at the RIGHT frame edge. The camera rises above the bright bar across the whole shot as the Martian handling-machine swings the bar over to the stack, from 00:00 to 00:02. At 00:02 green vapour drifts across the cylinder, and the movement continues to the last frame of the shot. By 00:04 the camera is rising through the last frame, with the bar now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "friction",
+    "setup": "scullery_door",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/characters/curate/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_04.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.625,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 101004,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the curate in <Picture 2>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Black clerical waistcoat grey with plaster dust over a torn grimy white shirt, dog collar sprung open and hanging from one stud. Right hand bound in a filthy rag. Black trousers torn at the knee, black boots. Bareheaded, curls matted, pale stubble. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a dark Victorian scullery seen from the north-west corner beside the brick copper. Across grey York stone flags stands the planked kitchen door. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot of <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) and <Subject 2> (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) struggling in the scullery by the kitchen doorway, <Subject 1>'s forearm across <Subject 2>'s chest, <Subject 2>'s boot lashing out, each head a quarter of the frame's height. The camera is Camera at the sink at chest height, a 35mm lens, looking east at the doorway. The grey light comes from the doorway behind them. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>, his fist gripping <Subject 2>'s waistcoat at the doorway, each man's head a quarter of the frame's height; the planked door stands half open behind them; the sink edge at the left frame edge. The camera tracks behind <Subject 1>, across the whole shot as <Subject 1> thrusts <Subject 2>'s shoulder against the doorframe, from 00:00 to 00:02. At 00:02 <Subject 2>'s boot kicks out. At 00:03 grey dust falls from the doorframe, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he thrusts <Subject 2>'s shoulder against the doorframe. By 00:05 the camera is tracking through the last frame, and the action continues with it, and <Subject 1> pins <Subject 2> against the doorframe, <Subject 2>'s arm flung toward the grey doorway, the meat chopper hanging on its nail beside them.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "scullery_door",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/characters/curate/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_05.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.375,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 101005,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the curate in <Picture 2>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Black clerical waistcoat grey with plaster dust over a torn grimy white shirt, dog collar sprung open and hanging from one stud. Right hand bound in a filthy rag. Black trousers torn at the knee, black boots. Bareheaded, curls matted, pale stubble. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a dark Victorian scullery seen from the north-west corner beside the brick copper. Across grey York stone flags stands the planked kitchen door. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on one single picture fills the whole frame edge to edge. Medium of <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) and <Subject 2> (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) struggling in the scullery by the kitchen doorway, <Subject 1>'s forearm across <Subject 2>'s chest, <Subject 2>'s boot lashing out, each head a quarter of the frame's height. The camera is Camera at the sink at chest height, a 35mm lens, looking east at the doorway. The grey light comes from the doorway behind them. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>, his fist gripping <Subject 2>'s waistcoat at the doorway, each man's head a quarter of the frame's height; the planked door stands half open behind them. The camera keeps a locked-off frame as <Subject 1> thrusts <Subject 2>'s shoulder against the doorframe, from 00:00 to 00:02. At 00:02 <Subject 2>'s boot kicks out. At 00:03 grey dust falls from the doorframe, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he thrusts <Subject 2>'s shoulder against the doorframe. By 00:05 the action of that shot continues through the last frame, and <Subject 1> pins <Subject 2> against the doorframe, <Subject 2>'s arm flung toward the grey doorway, the meat chopper hanging on its nail beside them.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "setup",
+    "setup": "scullery_copper",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep20/storyboard/h3/shot_06.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.25,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 101006,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in the north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar. [Shot 1] runs from 00:00 to 00:05. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on one single picture fills the whole frame edge to edge. Every surface in the picture is plain, wordless paint. Insert on the open deal cupboard in the corner: two biscuit tins on the lower shelf, tins of salmon and soup above them, dark burgundy bottles on the top shelf; only that object and what touches it is in frame. The camera is Camera in the corner at shelf height, a 50mm lens, looking at the cupboard. The light comes from the RIGHT, from the kitchen doorway. At the first frame tHE FOCUS OF THE PICTURE IS the lid of the nearest biscuit tin lying askew on the lower shelf; tins of soup stand above it; burgundy bottles stand on the TOP shelf at the TOP edge of the frame. The camera pushes in toward the lid of the nearest biscuit as a thread of grey plaster dust drifts down past the tins, from 00:00 to 00:02. At 00:02 grey light glints along the bottles, and the movement continues to the last frame of the shot. By 00:05 the camera is pushing in through the last frame, with the burgundy bottles now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "setup",
+    "setup": "scullery_copper",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep20/storyboard/h3/shot_07.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.916667,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 101007,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in the north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar. [Shot 1] runs from 00:00 to 00:04. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on only the named people stand in the picture and everything else is the place. Each person in the picture is a different man with his own face, build and dress. One single picture fills the whole frame edge to edge. Every surface in the picture is plain, wordless paint. Insert on the open deal cupboard in the dim corner of the scullery: two biscuit tins on the lower shelf, tins of salmon and soup above them, dark burgundy bottles on the top shelf, a line of grey light along the edge of the cupboard door; only that object and what touches it is in frame. The camera is Camera in the corner at shelf height, a 50mm lens, looking at the cupboard. The light comes from the RIGHT, from the kitchen doorway. At the first frame tHE FOCUS OF THE PICTURE IS the lid of the nearest biscuit tin lying askew on the lower shelf. The camera keeps a locked-off frame across the whole shot as a thread of grey plaster dust drifts down past the tins, from 00:00 to 00:02. At 00:02 grey light glints along the bottles, and the movement continues to the last frame of the shot. By 00:04 the action of that shot continues through the last frame, with the burgundy bottles now in frame.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "friction",
+    "setup": "scullery_copper",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_08.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.291667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 101008,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in the north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on one single picture fills the whole frame edge to edge. The named subject stands large at the CENTRE of the frame. Medium close on <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) sitting against the brick copper in the dark, his jaw tight, his eyes lifted toward muffled weeping at the right. The camera is Camera at floor height, a 85mm lens, looking at <Subject 1>. The grey light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face, his head a third of the frame's height, against the limewashed brick of the copper; the round wooden lid rises behind his shoulder. The camera pulls back across the whole shot from <Subject 1>'s face, widening to show the copper, the firewood stack and the cupboard beside him as his hands press over his ears, from 00:00 to 00:02. At 00:02 grey dust drifts down through the light, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his hands press over his ears. By 00:05 the camera is pulling back through the last frame, and the action continues with it, and <Subject 1> sits small against the brick copper at the frame centre, hands over his ears, the firewood stack at the left, the cupboard at the right.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "scullery_copper",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_09.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.0,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 101009,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in the north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) sitting against the brick copper in the dark, his jaw tight, his eyes lifted toward muffled weeping at the right. The camera is Camera at floor height, a 85mm lens, looking at <Subject 1>. The grey light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face, his head a third of the frame's height, against the limewashed brick of the copper; the round wooden lid rises behind his shoulder; the stack of firewood stands at the LEFT. The camera tilts up from the face to the copper, across the whole shot as his hands press over his ears, from 00:00 to 00:02. At 00:02 grey dust drifts down through the light, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his hands press over his ears. By 00:05 the camera is tilting up through the last frame, and the action continues with it, and <Subject 1> sits small against the brick copper at the frame centre, hands over his ears, the firewood stack at the left, the cupboard at the right.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "transition",
+    "setup": "pit_dusk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep20/storyboard/h3/shot_10.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.583333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 101010,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:05. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot through the triangular hole at twilight: the far side of the pit in gold and green light, the opened cylinder at the centre ringed by green vapour, a mound of bluish-grey powder at the far left, and a tall tripod fighting-machine on the far rim. The camera is Camera inside the kitchen at head height on the rubble, a 35mm lens, looking south. The light comes from the green glow at the centre. At the first frame tHE FOCUS OF THE PICTURE IS the opened cylinder at the CENTRE with green vapour around it; the mound of bluish powder lies at the LEFT edge; the fighting-machine, a tall tripod on three long jointed legs with a hood. The camera pans across the whole shot from the mound of bluish powder at the left, arriving at the fighting-machine at the far right with its hood against the sky as green vapour drifts across the cylinder, from 00:00 to 00:02. At 00:02 green flames lift and fall along the clay, and the lift continues to the last frame of the shot. By 00:05 the camera is panning through the last frame, with the fighting-machine now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "transition",
+    "setup": "pit_dusk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep20/storyboard/h3/shot_11.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.208333,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 101011,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:04. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on a medium shot through the triangular hole at twilight: the far side of the pit in gold and green light, the opened cylinder at the centre ringed by green vapour, a mound of bluish-grey powder at the far left, and a tall tripod fighting-machine on the far rim. The camera is Camera inside the kitchen at head height on the rubble, a 35mm lens, looking south. The light comes from the green glow at the centre. At the first frame tHE FOCUS OF THE PICTURE IS the opened cylinder at the CENTRE with green vapour around it; the mound of bluish powder lies at the LEFT edge; the fighting-machine, a tall tripod on three long jointed legs with a hood, stands in the far corner at the RIGHT against the sky. The camera pulls back from the machine, across the whole shot as green vapour drifts across the cylinder, from 00:00 to 00:02. At 00:02 green flames lift and fall along the clay, and the lift continues to the last frame of the shot. By 00:04 the camera is pulling back through the last frame, with the fighting-machine now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "spike",
+    "setup": "pit_dusk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/handling_machine/sheet.png",
+      "episodes/ep20/storyboard/h3/shot_12.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.333333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 101012,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian handling-machine in <Picture 1>: A metallic spider-crab of a machine: a low rounded body with a glittering grey-brown shiny integument like wet leather, carried on five jointed, agile legs, with an extraordinary number of jointed levers, bars and reaching, clutching tentacles folded about it. A glass plate near the edge of the body shows the Martian's face and great dark eyes inside. Three long tentacles fish rods, plates and bars; one extends telescope-fashion into a long metallic snake that taps and feels its way with a faint ringing like keys on a split-ring. Body about as wide as a hansom cab and carried at about head height. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:05. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian handling-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium shot on the fighting-machine at the far corner of the pit, a tall tripod on three long jointed legs with a hood, a small cage hunched on its back and a long Martian handling-machine reaching over its shoulder, under a starry sky in green light. The camera is Camera at the peephole at head height, a 85mm lens, looking south across the pit. The green light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the small cage on the machine's back, a long Martian handling-machine curled above its door; the hood above it gleams oily in the green light; the starry sky stands above the hood; the mound of bluish powder lies at the lower LEFT. The camera tilts up across the whole shot from the cage on the machine's back to the starry sky above its hood as the long Martian handling-machine reaches over the machine's shoulder and lifts a struggling man high against the stars, from 00:00 to 00:02. At 00:02 green flames flicker beneath, and the movement continues to the last frame of the shot. By 00:05 the camera is tilting up through the last frame, and the action continues with it, and a struggling man hangs high in the Martian handling-machine's grip against the stars above the hood, the cage below him, green glow along the machine's legs.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "spike",
+    "setup": "pit_dusk",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/handling_machine/sheet.png",
+      "episodes/ep20/storyboard/h3/shot_13.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.125,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 101013,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian handling-machine in <Picture 1>: A metallic spider-crab of a machine: a low rounded body with a glittering grey-brown shiny integument like wet leather, carried on five jointed, agile legs, with an extraordinary number of jointed levers, bars and reaching, clutching tentacles folded about it. A glass plate near the edge of the body shows the Martian's face and great dark eyes inside. Three long tentacles fish rods, plates and bars; one extends telescope-fashion into a long metallic snake that taps and feels its way with a faint ringing like keys on a split-ring. Body about as wide as a hansom cab and carried at about head height. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:04. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian handling-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on a medium shot on the fighting-machine at the far corner of the pit, a tall tripod on three long jointed legs with a hood, a small cage hunched on its back and a long Martian handling-machine reaching over its shoulder, under a starry sky in green light. The camera is Camera at the peephole at head height, a 85mm lens, looking south across the pit. The green light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the small cage on the machine's back, a long Martian handling-machine curled above its door; the hood above it gleams oily in the green light; the starry sky stands above the hood; the mound of bluish powder lies at the lower LEFT. The camera pushes in toward the back, across the whole shot as the long Martian handling-machine reaches over the machine's shoulder and lifts a struggling man high against the stars, from 00:00 to 00:02. At 00:02 green flames flicker beneath, and the movement continues to the last frame of the shot. By 00:04 the camera is pushing in through the last frame, and the action continues with it, and a struggling man hangs high in the Martian handling-machine's grip against the stars above the hood, the cage below him, green glow along the machine's legs.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "reaction",
+    "setup": "scullery_door",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/curate/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_14.png"
+    ],
+    "faces": [
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l14.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.0,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 101014,
+    "prompt": "subject_definitions:\n<Subject 1> is the curate in <Picture 1>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Black clerical waistcoat grey with plaster dust over a torn grimy white shirt, dog collar sprung open and hanging from one stud. Right hand bound in a filthy rag. Black trousers torn at the knee, black boots. Bareheaded, curls matted, pale stubble. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a dark Victorian scullery seen from the north-west corner beside the brick copper. Across grey York stone flags stands the planked kitchen door. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on only the named people stand in the picture and everything else is the place. Each person in the picture is a different man with his own face, build and dress. Each person in the picture appears exactly once, with a face, hair and dress all his own. One single picture fills the whole frame edge to edge. Medium close on <Subject 1> (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) crouched on the flags, his arms lifting from over his head, his mouth open in a shout toward the dark doorway. The camera is Camera at the pump at chest height, a 85mm lens, looking at <Subject 1>. The grey light comes from the kitchen doorway on the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face, his head a third of the frame's height, his arms over his head. The camera pushes in toward <Subject 1>'s face as <Subject 1> lowers his arms and shouts after the narrator, from 00:00 to 00:07. <Subject 1> (S1), on screen, man of 34, with a clipped English voice at an even pace, says: <d>[English] Do not leave me here! Come back, come back! I am alone in the dark with them near.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:07, as the line ends, his hands reach out toward the dark, then his chest heaves, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it, and <Subject 1> kneels with both hands stretched toward the grey doorway, his mouth wide, the sink at the left.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "transition",
+    "setup": "scullery_copper",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_15.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.833333,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 101015,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in the north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) seated against the brick copper, gripping his own forearms with both hands, his eyes fixed on the faint light of the kitchen door. The camera is Camera above the seated <Subject 1> at chest height, a 85mm lens, looking down at his face. The grey light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face, his head a third of the frame's height, his hands gripping his forearms; the copper's round wooden lid behind his shoulder; grey light lies along the flags at the RIGHT. The camera pushes in across the whole shot toward <Subject 1>'s face as his fingers tighten around his forearms, from 00:00 to 00:02. At 00:02 a thread of grey dust drifts down beside his shoulder, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his fingers tighten around his forearms. By 00:05 the camera is pushing in through the last frame, with <Subject 1>'s face now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "transition",
+    "setup": "scullery_copper",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_16.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.041667,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 101016,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in the north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar. [Shot 1] runs from 00:00 to 00:04. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on a medium close shot on <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) seated against the brick copper, gripping his own forearms with both hands, his eyes fixed on the faint light of the kitchen door. The camera is Camera above the seated <Subject 1> at chest height, a 85mm lens, looking down at his face. The grey light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face, his head a third of the frame's height, his hands gripping his forearms; the copper's round wooden lid behind his shoulder; grey light lies along the flags at the RIGHT. The camera tilts up from the face to the flags, across the whole shot as his fingers tighten around his forearms, from 00:00 to 00:02. At 00:02 a thread of grey dust drifts down beside his shoulder, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his fingers tighten around his forearms. By 00:04 the camera is tilting up through the last frame, with <Subject 1>'s face now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "turn",
+    "setup": "scullery_copper",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "refs/characters/curate/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_17.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l17.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.875,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 101017,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the curate in <Picture 2>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Black clerical waistcoat grey with plaster dust over a torn grimy white shirt, dog collar sprung open and hanging from one stud. Right hand bound in a filthy rag. Black trousers torn at the knee, black boots. Bareheaded, curls matted, pale stubble. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot on <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) at the left, his fist gripping the dog collar of <Subject 2> (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) at the right, who hugs a biscuit tin to his chest; <Subject 1>'s other hand is raised. The camera is Camera at chest height in front of the copper, a 85mm lens, looking at both men. The grey light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face at the LEFT, his head a third of the frame's height. The camera pushes in toward <Subject 1>'s face at the LEFT as <Subject 1> hauls <Subject 2>'s collar and strikes him on the cheek, from 00:00 to 00:06. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Be quiet. One more sound, and I will strike you to keep us alive here in hiding together.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, <Subject 2>'s head jerks and the biscuit tin drops from his arms, then his breath comes in gasps, and the movement continues to the last frame of the shot. By 00:06 the camera is pushing in through the last frame, and the action continues with it, and <Subject 2> sags in <Subject 1>'s grip at the right, his cheek reddened, hands open, the biscuit tin on the flags at his feet; <Subject 1> stands over him, fist lowered.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "payoff",
+    "setup": "scullery_copper",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/curate/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_18.png"
+    ],
+    "faces": [
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.208333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 101018,
+    "prompt": "subject_definitions:\n<Subject 1> is the curate in <Picture 1>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Black clerical waistcoat grey with plaster dust over a torn grimy white shirt, dog collar sprung open and hanging from one stud. Right hand bound in a filthy rag. Black trousers torn at the knee, black boots. Bareheaded, curls matted, pale stubble. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in the north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot on <Subject 1> (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) sitting against the cupboard, one hand to his cheek, his eyes wide and wet. The camera is Camera at floor height, a 85mm lens, looking at <Subject 1>. The grey light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face, his head a third of the frame's height, one hand pressed to his cheek; the deal cupboard door ajar behind his shoulder; the fallen biscuit tin on the flags at the lower RIGHT. The camera pushes in across the whole shot toward <Subject 1>'s face as his hand slides from his cheek to his mouth, from 00:00 to 00:02. At 00:02 tears run down his cheek, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his hand slides from his cheek to his mouth. By 00:05 the camera is pushing in through the last frame, with <Subject 1>'s face now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "payoff",
+    "setup": "scullery_copper",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/curate/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_19.png"
+    ],
+    "faces": [
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.208333,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 101019,
+    "prompt": "subject_definitions:\n<Subject 1> is the curate in <Picture 1>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Black clerical waistcoat grey with plaster dust over a torn grimy white shirt, dog collar sprung open and hanging from one stud. Right hand bound in a filthy rag. Black trousers torn at the knee, black boots. Bareheaded, curls matted, pale stubble. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in the north-west corner of a dim Victorian scullery. A brick-built wash copper rendered in limewash stands with a round wooden lid and a small iron fire door. A stack of split firewood leans beside it. A tall deal cupboard stands with its door ajar. [Shot 1] runs from 00:00 to 00:04. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on a medium close shot on <Subject 1> (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) sitting against the deal cupboard in the dim scullery, one hand to his cheek, his eyes wide and wet, a line of grey light along his shoulder. The camera is Camera at floor height, a 85mm lens, looking at <Subject 1>. The grey light comes from the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face, his head a third of the frame's height, one hand pressed to his cheek; the deal cupboard door ajar behind his shoulder; the fallen biscuit tin on the flags at the lower RIGHT. The camera keeps a locked-off frame across the whole shot as his hand slides from his cheek to his mouth, from 00:00 to 00:02. At 00:02 tears run down his cheek, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his hand slides from his cheek to his mouth. By 00:04 the action of that shot continues through the last frame, with <Subject 1>'s face now in frame.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "friction",
+    "setup": "scullery_dig",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_20.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 101020,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a wide interior of a dark Victorian scullery lit by grey daylight that falls in from the kitchen doorway behind the camera across the flags. The floor is stone-flagged and the walls are limewashed brick. At the right a shallow brown stone sink stands under a window blocked with earth. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, grey daylight from behind, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a wide from the kitchen doorway across the scullery: <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) kneels at the left in the pantry doorway, the pantry door lifted off and leaning on the wall beside him, his hatchet biting into the earth. The camera is Camera in the kitchen doorway at chest height, a 28mm lens, looking west across the scullery. The grey daylight comes from BEHIND the camera. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> kneeling in the pantry doorway at the LEFT, hatchet raised; the lifted pantry door leans beside him; the black cast-iron pump and the brown stone sink stand at the RIGHT; the brick copper stands in the far corner. The camera pulls back across the whole shot from the hatchet, widening to show the sink, the copper and the deal cupboard as <Subject 1> swings the hatchet into the earth, from 00:00 to 00:02. At 00:02 clods fall on the flags, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he swings the hatchet into the earth. By 00:05 the camera is pulling back through the last frame, with <Subject 1> kneels small now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "friction",
+    "setup": "scullery_dig",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_21.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.291667,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 101021,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Found cream flannel shirt with thin blue stripes, sleeves rolled, over the charcoal-grey worsted trousers and found black boots. Brown felt hat with a dented crown, a size large. Everything powdered with grey plaster dust and brick grit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a wide interior of a dark Victorian scullery lit by grey daylight that falls in from the kitchen doorway behind the camera across the flags. The floor is stone-flagged and the walls are limewashed brick. At the right a shallow brown stone sink stands under a window blocked with earth. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, grey daylight from behind, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a wide from the kitchen doorway across the scullery: <Subject 1> (grey eyes, cream flannel shirt with thin blue stripes) kneels at the left in the pantry doorway, the pantry door lifted off and leaning on the wall beside him, his hatchet biting into the earth. The camera is Camera in the kitchen doorway at chest height, a 28mm lens, looking west across the scullery. The grey daylight comes from BEHIND the camera. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1> kneeling in the pantry doorway at the LEFT, hatchet raised; the lifted pantry door leans beside him; the black cast-iron pump and the brown stone sink stand at the RIGHT; the brick copper stands in the far corner. The camera tracks behind <Subject 1>, across the whole shot as <Subject 1> swings the hatchet into the earth, from 00:00 to 00:02. At 00:02 clods fall on the flags, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he swings the hatchet into the earth. By 00:05 the camera is tracking through the last frame, with <Subject 1> kneels small now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "payoff",
+    "setup": "scullery_dig",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep20/storyboard/h3/shot_22.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 101022,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a wide interior of a dark Victorian scullery lit by grey daylight that falls in from the kitchen doorway behind the camera across the flags. The floor is stone-flagged and the walls are limewashed brick. At the right a shallow brown stone sink stands under a window blocked with earth. [Shot 1] runs from 00:00 to 00:05. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, grey daylight from behind, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on an insert on the hole in the earth at the pantry doorway: a hatchet handle wedged in the packed clay wall above a dark hole two feet deep, grey light along its edge; only that object and what touches it is in frame. The camera is Camera at floor height, a 50mm lens, looking at the hole. The grey light comes from the LEFT. At the first frame tHE FOCUS OF THE PICTURE IS the hatchet handle wedged in the clay wall at the LEFT; the dark hole two feet deep lies at the CENTRE; loose earth overhangs its rim at the RIGHT. The camera tracks sideways to the right across the whole shot, past the hatchet handle at the left edge, toward the dark hole at the centre as the overhanging earth shears loose and falls in, from 00:00 to 00:02. At 00:02 dust rises from the hole, and the movement continues to the last frame of the shot. By 00:05 the camera is tracking through the last frame, with the hole now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "transition",
+    "setup": "pit_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/handling_machine/sheet.png",
+      "episodes/ep20/storyboard/h3/shot_23.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.708333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 101023,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian handling-machine in <Picture 1>: A metallic spider-crab of a machine: a low rounded body with a glittering grey-brown shiny integument like wet leather, carried on five jointed, agile legs, with an extraordinary number of jointed levers, bars and reaching, clutching tentacles folded about it. A glass plate near the edge of the body shows the Martian's face and great dark eyes inside. Three long tentacles fish rods, plates and bars; one extends telescope-fashion into a long metallic snake that taps and feels its way with a faint ringing like keys on a split-ring. Body about as wide as a hansom cab and carried at about head height. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian handling-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on an insert through the triangular hole at night: the pale glowing Martian handling-machine at the foot of the near wall, white aluminium bars lying beside it in bright patches, a thread of green smoke rising; only that object and what touches it is in frame. The camera is Camera at the peephole, a 50mm lens, looking south. The pale light comes from the upper RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the pale glow of the Martian handling-machine at the near corner of the pit floor; bars of aluminium lie in patches of light at the LEFT; the thin thread of green smoke rises at the RIGHT; the fighting-machine stands on the far bank at the TOP edge. The camera tracks beside the glowing Martian handling-machine to the as the thread of smoke climbs, from 00:00 to 00:03. At 00:03 the handling-machine's tentacle lifts beside the bars, and the lift continues to the last frame of the shot. By 00:06 the camera is tracking through the last frame, and the action continues with it, and the fighting-machine stands tall on the far bank at the upper centre of the frame, the pit floor in shadow below, the thread of smoke at the right.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "answer",
+    "setup": "pit_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/handling_machine/sheet.png",
+      "episodes/ep20/storyboard/h3/shot_24.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.0,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 101024,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian handling-machine in <Picture 1>: A metallic spider-crab of a machine: a low rounded body with a glittering grey-brown shiny integument like wet leather, carried on five jointed, agile legs, with an extraordinary number of jointed levers, bars and reaching, clutching tentacles folded about it. A glass plate near the edge of the body shows the Martian's face and great dark eyes inside. Three long tentacles fish rods, plates and bars; one extends telescope-fashion into a long metallic snake that taps and feels its way with a faint ringing like keys on a split-ring. Body about as wide as a hansom cab and carried at about head height. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian handling-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide through the triangular hole at night: the quiet pit, the pale glow of the Martian handling-machine at the near wall, the opened cylinder at the centre, bars of aluminium in patches of light, and the fighting-machine on the far bank. The camera is Camera at the peephole at head height, a 35mm lens, looking south. The pale light comes from the upper RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the pale glow of the Martian handling-machine at the lower LEFT; the opened cylinder lies at the CENTRE; the fighting-machine stands on the far bank at the upper RIGHT with the pale sky above it. The camera pushes in toward the pale glow of the Martian as the handling-machine's tentacle shifts beside the aluminium bars, from 00:00 to 00:04. At 00:04 a thread of green smoke rises, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, with the fighting-machine now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 25,
+    "shots": [
+      25
+    ],
+    "section": "answer",
+    "setup": "pit_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/handling_machine/sheet.png",
+      "episodes/ep20/storyboard/h3/shot_25.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.666667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 101025,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian handling-machine in <Picture 1>: A metallic spider-crab of a machine: a low rounded body with a glittering grey-brown shiny integument like wet leather, carried on five jointed, agile legs, with an extraordinary number of jointed levers, bars and reaching, clutching tentacles folded about it. A glass plate near the edge of the body shows the Martian's face and great dark eyes inside. Three long tentacles fish rods, plates and bars; one extends telescope-fashion into a long metallic snake that taps and feels its way with a faint ringing like keys on a split-ring. Body about as wide as a hansom cab and carried at about head height. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian handling-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide through the triangular hole at night: the quiet pit, the pale glow of the Martian handling-machine at the near wall, the opened cylinder at the centre, bars of aluminium in patches of light, and the fighting-machine on the far bank. The camera is Camera at the peephole at head height, a 35mm lens, looking south. The pale light comes from the upper RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the pale glow of the Martian handling-machine at the lower LEFT; the opened cylinder lies at the CENTRE; the fighting-machine stands on the far bank at the upper RIGHT with the pale sky above it. The camera pushes in toward the pale glow of the Martian as the handling-machine's tentacle shifts beside the aluminium bars, from 00:00 to 00:03. At 00:03 a thread of green smoke rises, and the movement continues to the last frame of the shot. By 00:06 the camera is pushing in through the last frame, with the fighting-machine now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 26,
+    "shots": [
+      26
+    ],
+    "section": "button",
+    "setup": "scullery_door",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/curate/sheet_front.png",
+      "episodes/ep20/storyboard/h3/shot_26.png"
+    ],
+    "faces": [
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l26.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.0,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 101026,
+    "prompt": "subject_definitions:\n<Subject 1> is the curate in <Picture 1>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Black clerical waistcoat grey with plaster dust over a torn grimy white shirt, dog collar sprung open and hanging from one stud. Right hand bound in a filthy rag. Black trousers torn at the knee, black boots. Bareheaded, curls matted, pale stubble. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a dark Victorian scullery seen from the north-west corner beside the brick copper. Across grey York stone flags stands the planked kitchen door. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, green firelight from below, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on one single picture fills the whole frame edge to edge. Medium close on <Subject 1> (rather large pale blue eyes, black clerical waistcoat grey with plaster dust) sitting up on the flags near the kitchen doorway, head lifted, listening toward the far wall. The camera is Camera at the pump at chest height, a 85mm lens, looking at <Subject 1>. The grey light comes from the kitchen doorway on the RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS <Subject 1>'s face, his head a third of the frame's height, lifted. The camera pushes in toward <Subject 1>'s face as <Subject 1> turns his head toward the wall and speaks, from 00:00 to 00:06. <Subject 1> (S1), on screen, man of 34, with a clipped English voice at an even pace, says: <d>[English] Guns. Those were guns. Someone still fights them out there.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, his hand rises to his lips, then grey dust drifts down through the light, and the movement continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it, and <Subject 1>'s finger rests on his lips, his eyes wide toward the far wall, the half-open door behind him.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 27,
+    "shots": [
+      27
+    ],
+    "section": "runout",
+    "setup": "pit_night",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/props/handling_machine/sheet.png",
+      "episodes/ep20/storyboard/h3/shot_27.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.5,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 101027,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian handling-machine in <Picture 1>: A metallic spider-crab of a machine: a low rounded body with a glittering grey-brown shiny integument like wet leather, carried on five jointed, agile legs, with an extraordinary number of jointed levers, bars and reaching, clutching tentacles folded about it. A glass plate near the edge of the body shows the Martian's face and great dark eyes inside. Three long tentacles fish rods, plates and bars; one extends telescope-fashion into a long metallic snake that taps and feels its way with a faint ringing like keys on a split-ring. Body about as wide as a hansom cab and carried at about head height. <Picture 1> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in a small triangular hole in a ruined wall frames the view. [Shot 1] runs from 00:00 to 00:03. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the Martian handling-machine in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, grey daylight from the left, deep shadow.\n[Shot 1] From 00:00 to 00:03. The shot opens on an insert through the triangular hole at night on the white aluminium bars stacked at the foot of the near pit wall, patches of moonlight lying across them, the pale glow of the Martian handling-machine beside them and a thin thread of green smoke rising at the right; only that object and what touches it is in frame. The camera is Camera at the peephole at head height, a 50mm lens, looking down and south into the pit. The pale moonlight comes from the upper RIGHT. At the first frame tHE FOCUS OF THE PICTURE IS the stack of white aluminium bars at the CENTRE, each bar edged with moonlight. The camera tracks sideways to the left across the whole shot, past the broken bricks at the bottom edge, toward the pale glow of the Martian handling-machine as the handling-machine's tentacle lifts beside the bars with a faint clink, from 00:00 to 00:02. At 00:02 the thread of green smoke runs up through the moonlight, and the movement continues to the last frame of the shot. By 00:03 the camera is tracking through the last frame, with the pale glow now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  }
+]

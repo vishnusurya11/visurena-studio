@@ -1,0 +1,870 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.75,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85000,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it, a pale sandy road at the far left lined with deserted cabs and a lordly carriage, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide of Horsell Common with the sun going down: <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat seen from behind, walking over the heather along a sandy track toward the raw ring of flung yellow sand a hundred yards off, where a black band of heads and shoulders stands along the rim against a burning sky. The camera is on the sandy track at a standing man's eye, four long strides behind him, a 35mm lens. The low sun comes from the LEFT, level and lemon-yellow. At the first frame the raw ring of flung yellow sand lies across the CENTRE and the RIGHT third of the frame a hundred yards off. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it. The camera tracks behind <Subject 1>, a tracking shot at a walking pace with large amplitude, keeping his back in the lower left of frame and the ring of sand in the centre as he lengthens his stride as the band of heads on the rim grows ahead of him, his gaze out ahead of him, and he plants a boot into the loose sand of the track and pushes off it, from 00:00 to 00:03. At 00:03 the heather drags at his trouser leg and he pushes his boater back off his forehead, and the push continues to the last frame of the shot. By 00:06 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 694.5,
+    "waited_s": 174.5,
+    "rel_path": "episodes/ep04/takes/r2v/T00.mp4"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "road",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.083333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85001,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it, a pale sandy road at the far left lined with deserted cabs and a lordly carriage, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on the heather track in the level sunset light: a stout woman in a black straw bonnet hurrying toward the camera with her skirts gathered in both fists, behind her a young clerk in a high celluloid collar wheeling a bicycle with a buckled front wheel, and further back a bearded carter in a red waistcoat walking fast with his coat over his arm. The camera is on the heather track at a standing woman's eye, two long strides from her, a 35mm lens. The low sun comes from the LEFT along the track. At the first frame the woman in the black straw bonnet fills the CENTRE of the frame from her bonnet at the TOP third to her gathered skirts at the BOTTOM edge. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it. The camera tracks sideways to the right, a truck with small amplitude past the hurrying woman, keeping the clerk and his bicycle in the right of frame as the woman catches her hem on the furze, hauls her skirts higher with her jaw set hard and comes on at a hurrying walk at a normal walking pace, and the clerk swings the buckled wheel round the same bush behind her, from 00:00 to 00:03. At 00:03 the furze springs back and dust lifts off the track under her boots as she comes on, and the lift continues to the last frame of the shot. By 00:06 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 483.1,
+    "waited_s": 707.7,
+    "rel_path": "episodes/ep04/takes/r2v/T01.mp4"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "road",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l02.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.875,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85002,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it, a pale sandy road at the far left lined with deserted cabs and a lordly carriage, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot of <Subject 1> in the grey flat cap and the oversized ginger corduroy jacket with patched elbows, his freckled face and gapped front teeth running up the heather track straight at the camera, his flat cap shoved back off his forehead, his mouth open, both fists down at his sides, the ring of sand small behind him. The camera is on the heather track level with his eyes, an arm's length from him, a 50mm lens. The low sun comes from the LEFT onto his face. At the first frame the boy's head and shoulders fill the CENTRE of the frame from his grey flat cap at the TOP third to the ginger corduroy at the BOTTOM edge. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it. The camera keeps a static shot on the <Subject 1>, keeping his head in the upper centre of frame as he throws one arm back at the pit behind him, drops his shoulder into the run and shouts at the camera as he comes, from 00:00 to 00:05. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] The thing is moving! Screwing and screwing its way out!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his cap slides forward over his eyebrows, he drags it down with the other hand and his breath saws in his open mouth, and the opening continues to the last frame of the shot. By 00:06 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 196.8,
+    "waited_s": 196.0,
+    "rel_path": "episodes/ep04/takes/r2v/T02.mp4"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "friction",
+    "setup": "rim",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.25,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85003,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian cylinder in <Picture 2>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on high wide looking down into the pit from the rim with the sun going down: the huge crusted cylinder lying half-buried across the dug sand, its huge circular end tilted up, and along the near rim a ragged band of hats, bonnets and shoulders leaning out over the edge, faces turned down into the pit, with a broken length of new white railing trodden flat into the sand under their boots. The camera is high on the near rim of the pit looking down into it, a 35mm lens, a high angle. The low sun comes from the LEFT along the crust. At the first frame the crusted circular end of the cylinder fills the CENTRE of the frame, half the frame's height. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera keeps high above the rim, a static shot looking down over the band of hats with the crusted end in the centre of frame as the band leans further out over the lip, the loose sand under it gives, and a man's bowler tips off and rolls down the wall to the gravel, from 00:00 to 00:03. At 00:03 the sand runs after it in a thin sheet and a dozen heads crane down after the hat, and the movement continues to the last frame of the shot. By 00:06 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 206.0,
+    "waited_s": 205.9,
+    "rel_path": "episodes/ep04/takes/r2v/T03.mp4"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "friction",
+    "setup": "rim",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/stent/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "stent"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l04.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.083333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 85105,
+    "prompt": "subject_definitions:\n<Subject 1> is Stent in <Picture 1>: Stent, the Astronomer Royal, 48 years old, 6 ft 2 in, tall and long-limbed with an upright bearing. Long narrow face, high forehead, straight nose. Pale blue-grey eyes. Fair straw-blond hair cut short and thinning at the crown. Fair clipped moustache and a shaven chin. Fair freckled skin that the sun reddens to crimson. Wearing: Black silk top hat, black frock coat with silk-faced lapels and tails flapping, black waistcoat, white shirt with wing collar and black silk cravat, dark grey striped trousers powdered with sand, black boots, rolled sheet of notes in one hand. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on low medium close of <Subject 1>, the tall fair-haired Astronomer Royal, in the black frock coat and the black silk top hat, his long face crimson and streaming with sweat, a rolled sheet of notes in one fist standing on the heaped spoil at the rim, turned three-quarters toward the camera, both arms down at his sides, his top hat tipped back off his crimson forehead, the burning sky behind him. The camera is on the heaped spoil below him looking up at his face, an arm's length from him, a 50mm lens, a low angle. The low sun comes from the LEFT. At the first frame Stent's head and shoulders fill the CENTRE of the frame from his black silk top hat at the TOP third to the black frock coat at the BOTTOM edge. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera keeps a static shot low under <Subject 1> from the height of the heaped sand as a shove runs through the people below him and he rocks a half-step on the loose sand, from 00:00 to 00:04. <Subject 1> (S1), on screen, stent, with a clipped English voice at an even pace, says: <d>[English] Keep back, there! Keep back from the edge, all of you!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, he sets one boot wide and lifts his arm out over the crowd, and the lift continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter3: a moving camera told to keep a subject centred is ep01's orbit in gerund form - T18 churn 7.8 + cut, T09/T21 twelve blur dips; T04/T19 last clause left the frame",
+    "measured_seconds": 5.87,
+    "render_s": 505.9,
+    "waited_s": 506.6,
+    "rel_path": "episodes/ep04/takes/r2v/T04.mp4"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "rim",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.833333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85005,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot along the packed lip of the pit in the level sunset light: a big red-faced carter in a moleskin waistcoat pressed shoulder to shoulder against a thin governess in grey who keeps her hat on with one hand, and at their feet a small <Subject 1> in a sailor collar squeezing between their legs toward the edge of the sand. The camera is on the rim at a standing man's eye, two long strides from the carter, a 35mm lens. The low sun comes from the LEFT along their faces. At the first frame the carter fills the LEFT third of the frame from his bare head at the TOP third to his moleskin waistcoat at the BOTTOM edge. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera pans right with small amplitude from the carter's moleskin shoulder across to the <Subject 1> at the lip, keeping the governess in the centre of frame as the carter shoves forward into her, she rocks back on her heels onto the <Subject 1>'s hand and grabs a fistful of his sailor collar to haul him up, her hat brim tipping over her eyes, from 00:00 to 00:03. At 00:03 the <Subject 1>'s knees drag through the sand and his sailor collar rides up over his ears at a normal trot, and the movement continues to the last frame of the shot. By 00:06 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 228.0,
+    "waited_s": 225.7,
+    "rel_path": "episodes/ep04/takes/r2v/T05.mp4"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "rim",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/ogilvy/sheet.png",
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "ogilvy",
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l06.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.416667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 85006,
+    "prompt": "subject_definitions:\n<Subject 1> is Ogilvy in <Picture 1>: Broad ruddy face, small bright hazel eyes, short snub nose. Thick auburn hair greying at the temples, brushed straight back. Full close-cut auburn beard shot with grey. Wearing: Mustard-ochre tweed lounge suit, the jacket open over the ochre waistcoat, white shirt dark with sweat at the collar, trousers powdered with sand, brown boots. Round steel-rimmed spectacles. Bare-headed, auburn hair damp and pushed back. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Narrator in <Picture 2>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the location in <Picture 3>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 3> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 4> is the Martian cylinder in <Picture 4>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 4> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 3>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 4> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 4> carry into every shot that shows it; <Picture 4> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot over <Subject 2>'s grey tweed shoulder and the back of his straw boater toward <Subject 1>, bare-headed with his auburn hair damp and pushed back, in the mustard-ochre tweed suit with the jacket open over the ochre waistcoat, round steel spectacles, sand on his trousers down on the sand below him, <Subject 1>'s face turned up at the rim, both hands spread at his sides. The camera is behind the Narrator's shoulder on the rim, two long strides from Ogilvy, a 50mm lens. The low sun comes from the LEFT onto Ogilvy's face. At the first frame Ogilvy's head and shoulders fill the RIGHT half of the frame from his damp auburn hair at the TOP third to the open ochre jacket at the BOTTOM edge. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera keeps over <Subject 2>'s shoulder, a static shot with <Subject 1>'s face in the right of frame as a fall of sand comes down the wall beside <Subject 1>, he steps out from under it at a normal walking pace, jerks both hands up at the rim above with his gaze on the lens and calls up through them, from 00:00 to 00:05. <Subject 1> (S1), on screen, broad ruddy face, with a clipped English voice at an even pace, says: <d>[English] I say! Help me keep these idiots back, will you?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, the loose sand smokes off his sleeve and he shoves his spectacles back up his nose, and the movement continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 203.2,
+    "waited_s": 205.6,
+    "rel_path": "episodes/ep04/takes/r2v/T06.mp4"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "rim",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_shopman/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "unnamed_shopman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.916667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85007,
+    "prompt": "subject_definitions:\n<Subject 1> is the shopman in <Picture 1>: Young shop assistant from Woking, 21 years old, 5 ft 7 in, slight and narrow-shouldered with a thin neck. Oval face, pale indoor complexion, weak chin, prominent ears. Dark brown hair cut short with a brushed-up quiff at the front. Brown eyes. Wearing: Brown cloth cap, high white celluloid collar, violet satin tie with a pin, black alpaca shop jacket with black sateen sleeve protectors, black-and-white pinstriped trousers, black boots, all smeared with yellow gravel and sand from the pit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot of the young Woking <Subject 1> in the brown cloth cap, the high white celluloid collar and violet tie, and the shiny black alpaca shop jacket with black sleeve protectors, his pinstriped trousers smeared with yellow sand down in the pit, standing on the curved crusted flank of the cylinder with his cap knocked askew, one boot planted flat on the crust, both arms out at his sides for balance, the dug sand wall rising behind him to the band of hats along the far rim. The camera is on the near lip of the pit looking down across the hull at him, a 135mm lens. The low sun comes from the LEFT along the crust. At the first frame the shopman stands on the crusted flank at the CENTRE of the frame from his brown cloth cap at the TOP third to his boots at the BOTTOM third. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera tilts up with large amplitude from <Subject 1> on the crusted flank to the ragged band of hats along the far rim above him, keeping his cap in the lower centre of frame as his boot skids down the curve, he drops onto one knee on the crust, throws a hand at the sand wall and drags a furrow down it, from 00:00 to 00:03. At 00:03 the loose sand runs over his sleeve protector, his mouth opens and he cranes his face up at the rim, and the opening continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his boot skids down the curve. By 00:06 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 211.3,
+    "waited_s": 210.8,
+    "rel_path": "episodes/ep04/takes/r2v/T07.mp4"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "setup",
+    "setup": "mouth",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.5,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 85008,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian cylinder in <Picture 2>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert on the crusted circular end of the cylinder in the level sunset light: the thin bright seam at its rim standing open a hand's width, and out of it nearly two feet of shining yellowish-white screw thread standing clear of the crust, grey gravel below; only that object and what touches it is in frame. The camera is on the near lip of the pit looking down at the crusted end, a 300mm lens. The low sun comes from the LEFT. At the first frame the scaly dun-grey crust fills the frame from the LEFT edge to the RIGHT edge and from the TOP edge to the BOTTOM edge. The thin bright seam curves across the CENTRE, standing open a hand's width. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera keeps a static shot on the end of the cylinder, keeping the bright screw in the centre of frame as the screw turns on its thread from within, rides further out of the crust and the open seam behind it widens, from 00:00 to 00:04. At 00:04 rust-brown clinker cracks off the rim where the thread bears on it and runs down the curve onto the gravel, and the movement continues to the last frame of the shot. By 00:07 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 214.2,
+    "waited_s": 215.8,
+    "rel_path": "episodes/ep04/takes/r2v/T08.mp4"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "spike",
+    "setup": "mouth",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.5,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 85110,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian cylinder in <Picture 2>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot of the crusted circular end of the cylinder from the lip of the pit: the shining screw standing clear at its centre with the last thread of it loose, grey gravel and splintered fir wood across the pit floor below, the dug sand wall behind. The camera is on the near lip of the pit looking down at the crusted end, a 135mm lens. The low sun comes from the LEFT along the crust. At the first frame the crusted circular end stands at the CENTRE and the RIGHT half of the frame, two-thirds of the frame's height, its bright seam curving round it. The shining screw stands out of its centre at the CENTRE, the grey gravel and splintered fir wood cross the BOTTOM third from the LEFT edge to the RIGHT edge, and the dug sand wall and a strip of burning sky fill the TOP LEFT. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera pulls out from the loose screw with large amplitude, widening to the whole crusted end above the gravel as the screw turns a half turn further out of its thread and grey clinker crumbles from the rim onto the sand, from 00:00 to 00:07. By 00:07 the camera is pulling out through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter3: a moving camera told to keep a subject centred is ep01's orbit in gerund form - T18 churn 7.8 + cut, T09/T21 twelve blur dips; T04/T19 last clause left the frame",
+    "measured_seconds": 7.29,
+    "render_s": 226.1,
+    "waited_s": 225.7,
+    "rel_path": "episodes/ep04/takes/r2v/T09.mp4"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "reaction",
+    "setup": "mouth",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85010,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat packed in the crush at the lip of the pit, turned three-quarters toward the camera, his boater knocked forward over one eye, a stranger's dark shoulder hard against his own, hats crowding the frame behind him. The camera is on the rim level with his eyes, an arm's length from him, a 50mm lens. The low sun comes from the LEFT onto his face. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from his straw boater at the TOP third to the grey tweed at the BOTTOM edge. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera keeps a static shot on <Subject 1>, keeping his face in the centre of frame as the press behind him shoves, his boot slides on the lip and he goes a half-step out over the sand, then digs his elbow back into the man behind him and hauls himself square again, from 00:00 to 00:03. At 00:03 sand spills from under his boot down the wall, he shoves his boater straight and turns his face down at the gravel below, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the press behind him shoves. By 00:06 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 189.6,
+    "waited_s": 190.6,
+    "rel_path": "episodes/ep04/takes/r2v/T10.mp4"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "spike",
+    "setup": "mouth",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 85011,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian cylinder in <Picture 2>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert on the open mouth of the cylinder: a black circular cavity in the crusted end, the thin bright rim of the seam curving round it, the low sun flaring white along the top of the crust above it; only that object and what touches it is in frame. The camera is on the near lip of the pit looking down at the open end, a 135mm lens. The low sun comes from the LEFT across the crust. At the first frame the black circular cavity fills the CENTRE of the frame, half the frame's height. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera tracks sideways to the left, a truck with small amplitude along the bright rim of the cavity, keeping the black mouth in the centre of frame as the flare of the low sun runs off the crust as the frame travels, the cavity comes round square to the lens and reads flat black, from 00:00 to 00:04. At 00:04 a thread of grey vapour lifts out of the mouth and drifts along the crust toward the seam, and the lift continues to the last frame of the shot. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 555.1,
+    "waited_s": 556.9,
+    "rel_path": "episodes/ep04/takes/r2v/T11.mp4"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "spike",
+    "setup": "opening",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.041667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85012,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian cylinder in <Picture 2>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 1>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium shot on the lower rim of the open black mouth of the cylinder: inside the shadow a greyish billowy mass lying low in the opening, and set wide apart in it two dim luminous disks turned out at the camera. The camera is on the near lip of the pit looking down at the lower rim of the aperture, a 300mm lens. The low sun comes from the LEFT across the rim. At the first frame the black cavity fills the frame from the LEFT edge to the RIGHT edge and from the TOP edge down to the bright lower rim, which curves across the BOTTOM third. The greyish billowy mass lies low in the opening at the CENTRE, four feet across. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera pans left with small amplitude from the bright seam across to the open black mouth, keeping the mouth in the centre of frame as the greyish mass heaves up inside the shadow, rides forward against the rim and the two luminous disks come with it to the edge of the light, from 00:00 to 00:03. At 00:03 the light takes the wet of them and the mass goes on swelling out against the metal, and the movement continues to the last frame of the shot. By 00:06 the camera is panning left through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 146.2,
+    "waited_s": 330.7,
+    "rel_path": "episodes/ep04/takes/r2v/T12.mp4"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "spike",
+    "setup": "opening",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 85013,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian cylinder in <Picture 2>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 2> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 1>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 2> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on an insert at the bright rim of the cavity: a little grey snake as thick as a walking stick coiled up over the metal edge out of the writhing shadow inside, its tip lifted a hand above the rim, the black cavity behind it; only that object and what touches it is in frame. The camera is on the near lip of the pit looking down at the lower rim of the aperture, a 300mm lens. The low sun comes from the LEFT. At the first frame the bright metal rim curves across the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The grey tentacle rises from it at the CENTRE. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera tilts up with small amplitude from the bright metal rim to the raised tip of the grey tentacle, keeping the coil on the rim in the lower centre of frame as the tentacle takes a grip on the metal, unrolls a further length out of the shadow and wriggles in the air toward the lens, from 00:00 to 00:04. At 00:04 a second tentacle comes up over the rim beside it, the metal wets where they cross it and the first tip curls back on itself, and the crossing continues to the last frame of the shot. By 00:07 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 161.9,
+    "waited_s": 166.1,
+    "rel_path": "episodes/ep04/takes/r2v/T13.mp4"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "turn",
+    "setup": "opening",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.458333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 85014,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat squared to the lip of the pit with a bonnet brim hard against his shoulder, his face down at the cylinder below, black hats and bonnets packed close behind him. The camera is behind his shoulder on the rim at a standing man's eye, an arm's length from him, a 50mm lens. The low sun comes from the LEFT onto his cheek. At the first frame the Narrator's head and shoulder fill the CENTRE and the RIGHT third of the frame from his straw boater at the TOP third to the grey tweed at the BOTTOM edge. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera tracks behind <Subject 1>'s shoulder, a tracking shot with small amplitude, keeping his face in the right of frame as the sight of the rim takes him, he drops his shoulder and drives backward into the packed hats, brings his free hand up behind him and pushes a man's chest out of his road, from 00:00 to 00:02. At 00:02 the man gives, <Subject 1>'s boater tips on his head and he swings his face back round over his shoulder at the cylinder, and the swing continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the sight of the rim takes him. By 00:05 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 128.6,
+    "waited_s": 125.5,
+    "rel_path": "episodes/ep04/takes/r2v/T14.mp4"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "reaction",
+    "setup": "opening",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/stent/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "stent"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l15.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.291667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 85015,
+    "prompt": "subject_definitions:\n<Subject 1> is Stent in <Picture 1>: Stent, the Astronomer Royal, 48 years old, 6 ft 2 in, tall and long-limbed with an upright bearing. Long narrow face, high forehead, straight nose. Pale blue-grey eyes. Fair straw-blond hair cut short and thinning at the crown. Fair clipped moustache and a shaven chin. Fair freckled skin that the sun reddens to crimson. Wearing: Black silk top hat, black frock coat with silk-faced lapels and tails flapping, black waistcoat, white shirt with wing collar and black silk cravat, dark grey striped trousers powdered with sand, black boots, rolled sheet of notes in one hand. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on a medium close shot of <Subject 1>, the tall fair-haired Astronomer Royal, in the black frock coat and the black silk top hat, his long face crimson and streaming with sweat, a rolled sheet of notes in one fist on the lip of the pit, turned three-quarters toward the camera, his black silk top hat shoved back and crooked on his head, his shoulder wedged deep in a packed band of hats and bonnets behind him. The camera is on the lip of the pit level with his eyes, a 135mm lens. The low sun comes from the LEFT. At the first frame Stent's head and shoulders fill the CENTRE of the frame from his black silk top hat at the TOP third to the black frock coat at the BOTTOM edge. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera keeps a static shot on <Subject 1>, keeping his face in the centre of frame as what he sees below the rim takes him, his eyebrows drive up, he wrenches his shoulder out of the press and shouts back along the rim at the hats behind him, from 00:00 to 00:04. <Subject 1> (S1), on screen, stent, with a clipped English voice at an even pace, says: <d>[English] Get away from it! For God's sake, run, all of you!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, his coat tails swing round after him and the loose sand of the edge goes out from under his boot, and the swing continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 144.3,
+    "waited_s": 145.4,
+    "rel_path": "episodes/ep04/takes/r2v/T15.mp4"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "spike",
+    "setup": "opening",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.125,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85016,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on low medium from the lip of the pit: <Subject 1>, a greyish rounded bulk the size of a bear that is wholly head, its oily grey-brown hide glistening like wet leather, two immense glossy black eyes set wide above a quivering V-shaped lipless mouth, sixteen whip tentacles hanging in two bunches rising out of the black mouth of the cylinder, its hide wet and shining in the level sun, one lank tentacle hooked over the bright rim, the crusted end filling the frame around it. The camera is on the near lip of the pit looking down at the lower rim of the aperture, a 300mm lens, a low angle on the bulk. The low sun comes from the LEFT. At the first frame the grey bulk fills the CENTRE of the frame, half the frame's height and about four feet across. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera keeps low on the bulk in the mouth of the cylinder, a static shot from the near lip with the grey bulk in the centre of frame as the hooked tentacle takes the weight on the rim, the bulk labours up against the earth's pull and bulges out over the metal, and it rides forward until the light runs across the whole wet curve of it, from 00:00 to 00:03. At 00:03 the hide sheets with wet where it catches the sun, sand dust smokes off the rim under the tentacle and the whole mass pulses, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the hooked tentacle takes the weight on the rim. By 00:06 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 150.0,
+    "waited_s": 150.5,
+    "rel_path": "episodes/ep04/takes/r2v/T16.mp4"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "spike",
+    "setup": "opening",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "refs/locations/horsell_pit/wide_establishing.png",
+      "refs/props/martian_cylinder/sheet.png"
+    ],
+    "faces": [
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.125,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 85017,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip, and lying half-buried across the pit a colossal cylinder thirty yards across, one long hull running back into the sand, its huge circular end tilted up out of it and ringed by a thin bright seam, its skin caked in a scaly dun-grey crust of clinker; a ragged band of hats, bonnets and shoulders lines the rim above, faces turned down into the pit; the low sun comes from the LEFT, level and lemon-yellow, the sand reads bleached and the crust matte, and the near wall and the underside of the hull are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian cylinder in <Picture 3>: A colossal hollow cylinder of yellowish-white unearthly metal, its flat circular end as broad as a village green, lying half-buried in a crater of flung sand and gravel. Its whole skin wears a thick scaly dun-coloured incrustation of grey clinker, flaking at the edges like a rusty gas float. The circular top is a separate screw-lid, joined to the body by a fine seam where bright metal gleams; a single black mark sits on its rim. Circular end about thirty yards across - roughly fifteen standing men laid end to end. <Picture 3> defines this object alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in <Subject 2>, the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Subject 3> (the Martian cylinder in [Shot 1]): partially_preserved - the shape, surface and scale of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the object and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot of <Subject 1>'s face above the rim of the cylinder: two immense glossy black eyes set wide apart in the wet grey-brown hide, below them the quivering V-shaped lipless mouth with its pointed upper lip, and the whip tentacles hanging in two bunches on either side of it. The camera is on the near lip of the pit looking down at the lower rim of the aperture, a 300mm lens. The low sun comes from the LEFT. At the first frame the Martian's face fills the CENTRE of the frame, the bulk half the frame's height and about four feet across. The shot is inside this place: The great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades, a charred rim of blackened turf heaped with spoil, planks and pickaxes on the gravel floor, a broken length of new white railing trodden flat into the sand along the near lip. The camera keeps a static shot on <Subject 1>'s face, keeping the two black eyes in the upper centre of frame as the lipless mouth opens under the eyes, pants against the strange air and the wedge of the lower lip drives down, and a thread of saliva swings off its brim and runs onto the metal with the two black eyes on the lens, from 00:00 to 00:04. At 00:04 the whole bulk heaves once with the breath and the two bunches of tentacles sway across the wet hide, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the lipless mouth opens under the eyes. By 00:08 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the great raw crater on Horsell Common with the sun going down in 1894: walls of loose yellow sand and grey gravel dug back and scored by spades runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 187.3,
+    "waited_s": 190.5,
+    "rel_path": "episodes/ep04/takes/r2v/T17.mp4"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "spike",
+    "setup": "flight",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.708333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85119,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it, a pale sandy road at the far left lined with deserted cabs and a lordly carriage, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a wide of the heather between the pit and the pines with the sun going down: <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat running across the frame through the knee-deep heather with his boater crushed in one fist and his head twisted back over his shoulder, small black figures scattered far apart on the heath behind him, the stand of young Scots pines dark at the right. The camera is on the heather at a standing man's eye, abreast of him, a 35mm lens. The low sun comes from the LEFT along the heather. At the first frame the Narrator runs at the CENTRE of the frame, side on to the camera, his head a fifth of the frame's height. The stand of young Scots pines stands dark at the RIGHT third, the raw ring of sand lies small at the LEFT edge with its black band of heads. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it. The camera tracks right across the whole shot, travelling a forearm, past the furze and the pines as <Subject 1> runs through the frame ahead of it, his boot catches a furze root and he pitches forward onto his hands, from 00:00 to 00:03. At 00:03 he comes up again and runs on, and the movement continues to the last frame of the shot. By 00:06 the camera is tracking right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter3: a moving camera told to keep a subject centred is ep01's orbit in gerund form - T18 churn 7.8 + cut, T09/T21 twelve blur dips; T04/T19 last clause left the frame",
+    "measured_seconds": 6.58,
+    "render_s": 200.6,
+    "waited_s": 200.8,
+    "rel_path": "episodes/ep04/takes/r2v/T18.mp4"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "runout",
+    "setup": "pines",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.875,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 85120,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Mid-grey herringbone tweed lounge suit: single-breasted jacket, matching waistcoat with a silver watch chain, narrow trousers. White shirt with starched turn-down collar, dark green knitted tie. Brown leather lace-up boots. Small black notebook and pencil in the breast pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it, a pale sandy road at the far left lined with deserted cabs and a lordly carriage, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a medium close shot of <Subject 1> in the grey herringbone tweed suit and the straw boater with a black band, his dark moustache neat among the young pines and the furze, his back against a pine trunk and his shoulder turned three-quarters toward the camera, his boater crushed in one fist, his collar sprung open, his chest working. The camera is among the pines level with his eyes, an arm's length from him, a 50mm lens. The low sun comes from the LEFT onto his face. At the first frame the Narrator's head and shoulders fill the CENTRE of the frame from his dark hair at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height, lit from the LEFT. A dark pine trunk fills the RIGHT edge, furze crosses the BOTTOM LEFT, and the burning sky shows between the branches across the TOP. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it. The camera keeps a static shot on <Subject 1> as he drags a long breath in against the trunk and the crushed boater swings down at his knee, from 00:00 to 00:03. At 00:03 he pushes off the trunk with one hand and straightens his shoulders, and the push continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he drags a long breath in against the trunk. By 00:06 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter3: a moving camera told to keep a subject centred is ep01's orbit in gerund form - T18 churn 7.8 + cut, T09/T21 twelve blur dips; T04/T19 last clause left the frame",
+    "measured_seconds": 6.58,
+    "render_s": 192.7,
+    "waited_s": 195.8,
+    "rel_path": "episodes/ep04/takes/r2v/T19.mp4"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "runout",
+    "setup": "pines",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.625,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 85020,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it, a pale sandy road at the far left lined with deserted cabs and a lordly carriage, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide of the common round the sand-pits with the sun going down: watchers standing far apart in a great ragged circle, a man up on the bars of a field gate at the left, a woman lying in a ditch with only her head above the bank, a <Subject 1> at the corner of a hedge on the right, every face turned in at the heaps of yellow sand where the pit lies. The camera is on the heath at a standing man's eye, rising, a 35mm lens. The low sun stands level beyond the heaped sand. At the first frame the heaped yellow sand of the pit lies at the CENTRE of the frame a hundred yards off. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it. The camera rises above the heather, a pedestal up with large amplitude looking down over the ragged circle, keeping the heaped sand in the centre of frame as the field gate takes weight and its top bar bends down, a head and shoulders rise out of the ditch bank behind it, and a grey sleeve comes out round the corner of the hedge, from 00:00 to 00:04. At 00:04 the gate bars shift under the boots on them and the ditch weeds close over the bank, and the movement continues to the last frame of the shot. By 00:07 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 152.6,
+    "waited_s": 155.4,
+    "rel_path": "episodes/ep04/takes/r2v/T20.mp4"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "runout",
+    "setup": "pines",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_shopman/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_shopman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.458333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 85122,
+    "prompt": "subject_definitions:\n<Subject 1> is the shopman in <Picture 1>: Young shop assistant from Woking, 21 years old, 5 ft 7 in, slight and narrow-shouldered with a thin neck. Oval face, pale indoor complexion, weak chin, prominent ears. Dark brown hair cut short with a brushed-up quiff at the front. Brown eyes. Wearing: Brown cloth cap, high white celluloid collar, violet satin tie with a pin, black alpaca shop jacket with black sateen sleeve protectors, black-and-white pinstriped trousers, black boots, all smeared with yellow gravel and sand from the pit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it, a pale sandy road at the far left lined with deserted cabs and a lordly carriage, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide of the heaped gravel at the edge of the pit seen out through the pine branches: the round black head of the young Woking <Subject 1> in the brown cloth cap, the high white celluloid collar and violet tie, and the shiny black alpaca shop jacket with black sleeve protectors, his pinstriped trousers smeared with yellow sand showing above the sand with one hand and a shoulder up over the lip, the rest of him below the gravel, the burning sky behind. The camera is among the pines at a standing man's eye, out across the heather to the heaped sand, a 35mm lens. The low sun stands level beyond the heaped gravel. At the first frame the heaped grey gravel crosses the CENTRE of the frame from the LEFT edge to the RIGHT edge. The shopman's round black head shows above it at the CENTRE. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it. The camera pans right across the whole shot, travelling a hand's breadth, from a dark pine branch to the sand lip as <Subject 1> gets a shoulder and then a knee over the lip, from 00:00 to 00:04. At 00:04 he drags himself forward through the heather on his elbows, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he gets a shoulder and then a knee over the lip. By 00:07 the camera is panning right through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "iter3: a moving camera told to keep a subject centred is ep01's orbit in gerund form - T18 churn 7.8 + cut, T09/T21 twelve blur dips; T04/T19 last clause left the frame",
+    "measured_seconds": 7.29,
+    "render_s": 208.4,
+    "waited_s": 205.6,
+    "rel_path": "episodes/ep04/takes/r2v/T21.mp4"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "button",
+    "setup": "pines",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l22.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.625,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 85022,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the location in <Picture 2>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it, a pale sandy road at the far left lined with deserted cabs and a lordly carriage, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 2> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in <Subject 2>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on low medium close of <Subject 1> in the grey flat cap and the oversized ginger corduroy jacket with patched elbows, his freckled face and gapped front teeth crouched in the furze among the pines, his flat cap pushed back, his knees drawn up under his chin, his face turned out across the heather at the pit. The camera is in the furze below him looking up at his face, an arm's length from him, a 50mm lens, a low angle. The low sun comes from the LEFT onto his face. At the first frame the boy's head and shoulders fill the CENTRE of the frame from his grey flat cap at the TOP third to his drawn-up knees at the BOTTOM edge. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it. The camera keeps low under the <Subject 1>, a static shot from the height of the furze with his face in the centre of frame as he jerks his chin out at the heaps of sand, speaks at the camera out of the side of his mouth with his eyes out at the pit, and pulls his knees in tighter against himself, from 00:00 to 00:04. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] He went down a long while back. Nobody has fetched him.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, the furze springs against his shoulder and both arms wrap round his shins, and the movement continues to the last frame of the shot. By 00:05 the camera is keeping through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 123.2,
+    "waited_s": 125.4,
+    "rel_path": "episodes/ep04/takes/r2v/T22.mp4"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "runout",
+    "setup": "pines",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/locations/horsell_common/wide_establishing.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.5,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 85023,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it, a pale sandy road at the far left lined with deserted cabs and a lordly carriage, and the black roofs and church tower of Woking small on the horizon; the low sun comes from the LEFT, level and lemon-yellow, the heather reads dark and matte against a burning sky, and the pines and the standing figures are black <Picture 1> defines this place alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in <Subject 1>, Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, low sun from the left, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on an insert on the pale sandy road by the sand-pits with the sun going down: a ginger-beer barrow standing derelict on its shafts with a cloth laid over its bottles, black against the burning sky, and beyond it the wheel of a deserted cab with a horse at a nosebag; only that object and what touches it is in frame. The camera is on the sandy road at the height of the barrow's wheel, an arm's length from it, a 50mm lens. The low sun comes from the LEFT behind the barrow. At the first frame the ginger-beer barrow stands black at the CENTRE and the LEFT half of the frame, two-thirds of the frame's height. The shot is inside this place: Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze, a stand of young Scots pines, a low raw ring of flung yellow sand round the crater a hundred yards off with a black band of heads and shoulders standing along it. The camera tracks sideways to the right, a truck with small amplitude past the barrow's black wheel, keeping the barrow in the left of frame and the cab wheel in the right as the wind comes off the heath, takes the cloth over the bottles and lifts one corner of it clear of the glass, from 00:00 to 00:02. At 00:02 the cloth falls back across the necks, the horse at the nosebag paws the sand and the sand drifts along the road, and the movement continues to the last frame of the shot. By 00:03 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of Horsell Common with the sun going down in 1894: knee-deep purple-brown heather and dark furze runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 3.75,
+    "render_s": 59.2,
+    "waited_s": 55.2,
+    "rel_path": "episodes/ep04/takes/r2v/T23.mp4"
+  }
+]

@@ -1,0 +1,1081 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "biology_class",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_00.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.583333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 103020,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a first-floor biology classroom in a London crammer. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the crammer’s biology class, 1894, windows, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) leans over the front bench with both hands flat on its lid; pine desks, sash windows and the biology class recede behind him. The camera is At the back door of the classroom, chest height, looking along the benches. At the first frame the brother leans over the front bench with both hands flat on the bench; his head occupies one fifth of the frame height. The camera pushes in toward The brother leans over the front bench with both hands flat on the bench as his head occupies one fifth of the frame height, from 00:00 to 00:01. At 00:01 sash windows occupy the right edge. At 00:02 pine benches fill the centre. At 00:03 the blackboard stands at the far edge. At 00:04 the door occupies the near edge, then the rabbit skeleton stands at the far-left edge, then the brother straightens, then his hands leave the bench, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his head occupies one fifth of the frame height. By 00:05 the camera is pushing in through the last frame, and the action continues with it, and the brother straightens above the front bench, with the blackboard, rabbit skeleton and sash windows behind him.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "move_type: frozen-whole, held, last-vs-panel",
+    "measured_seconds": 5.87,
+    "render_s": 492.6,
+    "waited_s": 489.9,
+    "rel_path": "episodes/ep14/takes/r2v/T00.mp4"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "biology_class",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_01.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.0,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 102920,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a first-floor biology classroom in a London crammer. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the crammer’s biology class, 1894, windows, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a folded newspaper lies beside a brass microscope, a glass dissecting dish and examination notes; the brother’s hand enters from the lower edge; only that object and what touches it is in frame. The camera is Beside the demonstrator’s bench, hand height above the newspaper. At the first frame the folded newspaper lies beside the microscope on the black-stained bench; sash windows occupy the far-right edge; the microscope fills the left edge; the brother’s hand rests at the lower centre; the dissecting dish stands at the near-right edge. Glass specimen jars line a shelf above the bench, their labels turned toward the empty classroom. The camera tracks sideways past the brass microscope across the whole shot, with the newspaper behind it as the brother’s hand spreads the paper, from 00:00 to 00:03. At 00:03 his fingers lift the telegram column, and the lift continues to the last frame of the shot. By 00:06 the camera is tracking through the last frame, and the action continues with it, and the telegram column lies open beside the microscope, with the headline above the brief report.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 248.4,
+    "waited_s": 249.0,
+    "rel_path": "episodes/ep14/takes/r2v/T01.mp4"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "biology_class",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_02.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l02.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.666667,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 102921,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in a first-floor biology classroom in a London crammer. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the crammer’s biology class, 1894, windows, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on the brother (grey eyes, Dark brown hair worn fuller on top) writes on a telegram form at the front bench, examination notes beside his elbow. The camera is Beside the front bench, chest height, facing the brother and the blackboard. At the first frame the brother’s head spans one third of the frame height; his pen rests above the blank telegram form on the bench; the form occupies the lower centre; the blackboard fills the far edge; the rabbit skeleton stands at the far-left edge; sash windows occupy the right edge. The camera pushes toward the telegram across the whole shot as the brother’s hand guides the pen across the form, from 00:00 to 00:02. <Subject 1> (S1), on screen, long face with a square jaw and a small cleft chin; long straight nose, with a clipped English voice at an even pace, says: <d>[English] I will run down tonight.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, his fingers press the pen into the paper, and the movement continues to the last frame of the shot. Behind <Subject 1> all students in the biology class reading and discussing the reports, from 00:00 to 00:03. By 00:03 the camera is pushing through the last frame, and the action continues with it, and the brother presses the pen into the final line while the folded paper lies open beside his hand.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 3.04,
+    "render_s": 310.5,
+    "waited_s": 309.2,
+    "rel_path": "episodes/ep14/takes/r2v/T02.mp4"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "transition",
+    "setup": "biology_class",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_03.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.458333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 102922,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a first-floor biology classroom in a London crammer. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the crammer’s biology class, 1894, windows, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on every surface in the picture is plain, wordless paint. The telegram form fills the front bench while the brother’s hand folds it beside the examination notes. The camera is At the front bench, chest height, facing the brother and the blackboard. At the first frame the brother’s head spans one third of the frame height; the telegram form lies on the front bench; the brother’s hand rests beside it; the blackboard fills the far edge; the rabbit skeleton stands at the far-left edge; the sash windows occupy the right edge; the south door appears at the rear-left edge. The camera tilts up from the telegram form across the whole shot to the brother as his hand folds the telegram, from 00:00 to 00:04. At 00:04 his fingers tuck the paper beside the notes, and the movement continues to the last frame of the shot. Beyond the foreground all students in the biology class gathering around the newspaper, from 00:00 to 00:07. By 00:07 the camera is tilting up through the last frame, and the action continues with it, and the brother keeps the folded telegram beside the examination notes, with the benches and blackboard behind him.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 506.8,
+    "waited_s": 507.0,
+    "rel_path": "episodes/ep14/takes/r2v/T03.mp4"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "transition",
+    "setup": "biology_class",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_04.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.291667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 102923,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a first-floor biology classroom in a London crammer. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, the crammer’s biology class, 1894, windows, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) crosses the classroom toward the south door with his coat over his arm; benches and blackboard fill the room behind him. The camera is Behind the brother at shoulder height, aligned with the classroom route. At the first frame the brother stands beside the front bench with his coat over his right arm; the south door occupies the far edge; examination notes rest at the near bench edge; sash windows fill the right edge; the blackboard occupies the upper edge; the rabbit skeleton stands at the left edge. The camera tracks behind the brother toward the south door across the whole shot as the brother pulls on his coat, from 00:00 to 00:03. At 00:03 his shoulder turns toward the landing, and the turn continues to the last frame of the shot. Behind <Subject 1> all students in the biology class gathering around the newspaper, from 00:00 to 00:06. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his shoulder turns toward the landing. By 00:06 the camera is tracking through the last frame, and the action continues with it, and the brother reaches the south door buttoning his coat, with the benches behind him.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 275.5,
+    "waited_s": 276.1,
+    "rel_path": "episodes/ep14/takes/r2v/T04.mp4"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "waterloo_station",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_05.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.75,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 103025,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a soot-darkened Waterloo railway concourse beneath glass roofs. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Waterloo Station, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) stands beneath the glass roof beside the stopped platform train; the wet cab road glints beyond the exit. The camera is At platform-gate height, facing the dark Woking board and the exit. At the first frame the brother stands before the stopped platform train with his hands in his coat pockets; his head occupies one fifth of the frame height; gas pendants hang from the far roof girders; the wet cab road opens at the right edge; platform gates occupy the left edge; the exit arches occupy the near edge; the telegraph counter stands behind him. The camera keeps a locked-off frame as the brother looks down the empty line, from 00:00 to 00:03. At 00:03 rain threads past the station lamps, and the movement continues to the last frame of the shot. Behind <Subject 1> a few passengers waiting beneath the station roof, from 00:00 to 00:06. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the brother looks down the empty line. By 00:06 the action of that shot continues through the last frame, with the stopped platform train and wet cab road now in frame.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "replan_cell: content",
+    "measured_seconds": 6.58,
+    "render_s": 516.8,
+    "waited_s": 516.5,
+    "rel_path": "episodes/ep14/takes/r2v/T05.mp4"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "waterloo_station",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_06.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.125,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 103026,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a soot-darkened Waterloo railway concourse beneath glass roofs. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Waterloo Station, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on every surface in the picture is plain, wordless paint. A platform gate and its dark Woking, Windsor and Chertsey boards fill the station view, with steam beneath the glass roof and the great clock above; only that object and what touches it is in frame. The camera is At the platform gate, chest height, facing the destination boards. At the first frame the iron platform gate fills the lower centre; dark Woking, Windsor and Chertsey boards occupy the middle frame; the station clock hangs above them; steam gathers beneath the roof; the telegraph counter stands at the left rear edge. Porters in dark uniforms stand beside luggage barrows, and passengers crowd the counter asking for trains. The camera pushes in toward The iron platform gate fills the lower centre as dark Woking, from 00:00 to 00:02. At 00:02 the brother turns the paper in his hand. At 00:04 steam rises beyond the boards, and the movement continues to the last frame of the shot. By 00:06 the camera is pushing in through the last frame, and the action continues with it, and the dark destination boards and the great clock occupy the upper station frame above the gate.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "move_type: frozen-whole, held, last-vs-panel",
+    "measured_seconds": 6.58,
+    "render_s": 266.2,
+    "waited_s": 266.9,
+    "rel_path": "episodes/ep14/takes/r2v/T06.mp4"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "waterloo_station",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_07.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.291667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 102926,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a soot-darkened Waterloo railway concourse beneath glass roofs. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Waterloo Station, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on each person in the picture is a different man with his own face, build and dress. The brother (grey eyes, Dark brown hair worn fuller on top) faces the telegraph counter and dark boards, with a telegram sheet on the counter behind him. The camera is At a high angle above the telegraph counter, looking down on the brother’s face and the dark platform boards. At the first frame the brother’s head spans one third of the frame height; the telegram sheet lies on the counter at the left edge; the brother stands before the gate; dark boards occupy the upper frame; the telegraph grille fills the near side; the station clock occupies the far roof centre; the platform gate runs along the lower-right edge. The camera keeps a locked-off frame as the brother turns the paper in his hand, from 00:00 to 00:02. At 00:02 steam rises beyond the boards, and the movement continues to the last frame of the shot. Behind <Subject 1> quite a number of travelers waiting for friends and reading the boards, from 00:00 to 00:05. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the brother turns the paper in his hand. By 00:05 the action of that shot continues through the last frame, and the brother faces the dark boards with the telegram sheet and telegraph counter behind him.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 491.3,
+    "waited_s": 492.4,
+    "rel_path": "episodes/ep14/takes/r2v/T07.mp4"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "spike",
+    "setup": "waterloo_station",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_08.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.958333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 102927,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a soot-darkened Waterloo railway concourse beneath glass roofs. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Waterloo Station, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on every surface in the picture is plain, wordless paint. The gun train enters beneath Waterloo’s glass roof, with huge field guns on carriage trucks, soldiers behind them and steam rising to the girders. The camera is At platform height beside the connecting line, facing east along the rails. At the first frame the gun carriage stands at the connecting line beside the platform barrier; gas pendants hang above the far centre; the cast-iron column fills the left edge; gun wheels occupy the right middle ground; the police barrier stands at the near-right edge. Soldiers in blue coats stand along the platform beside the gun carriage, their rifles slung at their shoulders. The camera tracks sideways past a cast-iron column across the whole shot, with the gun train behind it as wheels roll beneath the roof, from 00:00 to 00:04. At 00:04 steam rises toward the girders, and the movement continues to the last frame of the shot. Beyond the foreground a gathering crowd watching soldiers and guns pass through the station, from 00:00 to 00:07. By 00:07 the camera is tracking through the last frame, with the gun carriage rolls beneath the glass roof while soldiers now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 270.2,
+    "waited_s": 270.8,
+    "rel_path": "episodes/ep14/takes/r2v/T08.mp4"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "transition",
+    "setup": "waterloo_station",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "refs/characters/police/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_09.png"
+    ],
+    "faces": [
+      "narrators_brother",
+      "police"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.375,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 102928,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Police in <Picture 2>: Type: Surrey Constabulary and Metropolitan Police constables, men aged 24 to 45, each at least 5 ft 9 in tall, broad-shouldered and solid through the chest. Weather-reddened English faces, short back-and-sides hair, full drooping moustaches on most. Representative constable: 34 years old, 5 ft 11 in, square jaw, mid-brown hair in a short back-and-sides, heavy drooping mid-brown moustache, grey eyes. Wearing: Metropolitan Police duty dress: black cork custodian helmet with white-metal Brunswick star plate and rose top, dark navy tunic with high collar showing white embroidered division letter and number, blue-and-white striped duty armlet on the left cuff, black belt with snake clasp, silver whistle chain, dark navy trousers, heavy black boots. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a soot-darkened Waterloo railway concourse beneath glass roofs. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Waterloo Station, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) stands near the platform barrier as the police (Weather-reddened English faces) drive the public away from the rails. The camera is At face height beside the barrier, facing the exit. At the first frame the brother stands beside the platform barrier with his hands at his sides; the police occupy the middle ground beside the rails; the exit arches fill the far frame; the gun train occupies the left edge; steam hangs above the rear platform. The camera tracks beside the brother as he walks toward the exit across the whole shot as the police press people back from the barrier at a normal walking pace, from 00:00 to 00:04. At 00:04 George’s shoulders turn toward the street, and the turn continues to the last frame of the shot. Behind them a gathering crowd backing away from the rails, from 00:00 to 00:07. By 00:07 the camera is tracking through the last frame, and the action continues with it, and the brother reaches the exit while the police keep the barrier and the gun train passes behind them.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 290.4,
+    "waited_s": 291.1,
+    "rel_path": "episodes/ep14/takes/r2v/T09.mp4"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "reaction",
+    "setup": "waterloo_bridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_10.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.625,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 102929,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a granite Waterloo Bridge above the brown Thames. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on the brother (grey eyes, Dark brown hair worn fuller on top) stands at the Waterloo parapet with Parliament beyond and brown scum drifting below. The camera is At parapet height on Waterloo Bridge, facing upstream toward Parliament. At the first frame the brother stands at the parapet with one hand on the granite coping; the Clock Tower stands at the far-left edge; Parliament occupies the far horizon; the river fills the lower frame; the paired Doric columns descend at the lower-left edge. Loafers lean along the parapet beside him, and a steamboat funnel trails grey smoke across the water. The camera rises above the parapet across the whole shot, looking down over the river as the brother leans toward the water, from 00:00 to 00:02. At 00:02 brown patches drift across the current, and the movement continues to the last frame of the shot. Behind <Subject 1> a number of loafers watching the water and the drifting patches, from 00:00 to 00:05. <Subject 1>'s mouth is closed from 00:00 to 00:04 while the brother leans toward the water. By 00:05 the camera is rising through the last frame, and the action continues with it, and the brown river patches occupy the lower frame while the brother and Parliament are above them.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 268.2,
+    "waited_s": 268.8,
+    "rel_path": "episodes/ep14/takes/r2v/T10.mp4"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "setup",
+    "setup": "waterloo_bridge",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_11.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l11.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 9.5,
+    "frames": 243,
+    "seconds": 10.12,
+    "steps": 8,
+    "seed": 102930,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this boy alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 10.12-second take of 1 shot in a granite Waterloo Bridge above the brown Thames. [Shot 1] runs from 00:00 to 00:10. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the boy in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the boy and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:10. The shot opens on the newspaper <Subject 1> (Narrow freckled face, Tousled mousy-brown hair) raises a damp pink sheet beside the Wellington Street placard board. The camera is At face height beside the Wellington Street placard board. At the first frame the newspaper boy’s head spans one third of the frame height; the river parapet occupies the near-left edge; the Wellington Street corner and placard board stand at the far-right edge; the newspaper boy faces the street at the lower centre; the Clock Tower is at the distant left; the bridge route occupies the lower frame. The camera pans from the river parapet across the whole shot to the Wellington Street corner as the newspaper <Subject 1> raises the sheet, from 00:00 to 00:02. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] Dreadful catastrophe!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, his fingers lift the placard paper, and the lift continues to the last frame of the shot. Behind <Subject 1> a number of people reading newspapers and looking toward the street, from 00:00 to 00:10. <Subject 1>'s mouth is closed from 00:03 to 00:09 while his fingers lift the placard paper. By 00:10 the camera is panning through the last frame, with the placard board now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 10.12,
+    "render_s": 381.7,
+    "waited_s": 382.3,
+    "rel_path": "episodes/ep14/takes/r2v/T11.mp4"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "spike",
+    "setup": "waterloo_bridge",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_12.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l13.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.291667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 293088,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this boy alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in a granite Waterloo Bridge above the brown Thames. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the boy in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the boy and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on the newspaper <Subject 1> (Narrow freckled face, Tousled mousy-brown hair) raises a damp pink sheet beside the Wellington Street placard board. The camera is At face height beside the Wellington Street placard board. At the first frame the newspaper boy’s head is half the frame's height; the newspaper boy stands beside the placard board with a damp pink sheet at chest height; Wellington Street fills the background; the bridge parapet occupies the far-left edge; the Strand route occupies the right edge. The camera pushes in toward his face until it fills the middle of the picture as the newspaper <Subject 1> shouts, from 00:00 to 00:03. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] Fighting at Weybridge! Full description!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, the damp paper flutters toward the Strand, and the movement continues to the last frame of the shot. Behind <Subject 1> a number of people reading the damp sheets and turning toward the hawker, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:04 to 00:07 while the newspaper <Subject 1> shouts. By 00:08 the camera is pushing in through the last frame, and the action continues with it, and the newspaper <Subject 1> faces the route with the damp sheet raised and the placard board behind him.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "retake_shot: board, faces",
+    "measured_seconds": 8.0,
+    "render_s": 538.3,
+    "waited_s": 539.0,
+    "rel_path": "episodes/ep14/takes/r2v/T12.mp4"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "payoff",
+    "setup": "strand_square",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_13.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.208333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 103033,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in Trafalgar Square and the eastern Strand with Nelson’s Column. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, gas from the left, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on a map shop window fills the Strand view, with Surrey maps fastened to the glass, gaslight and damp pink sheets on the pavement; only that object and what touches it is in frame. The camera is At window height on the Strand, facing the map shop. At the first frame the map shop window occupies the centre; Surrey maps cover the glass; the gas lamp stands at the left edge; damp pink sheets lie on the pavement; the Strand runs toward the far-right edge; the Eleanor Cross occupies the distant edge. The camera keeps a locked-off frame as a draft lifts the maps against the glass, from 00:00 to 00:03. At 00:03 a newspaper sheet skitters along the pavement, and the movement continues to the last frame of the shot. By 00:06 the action of that shot continues through the last frame, and the Surrey maps cover the window while the Strand route and gas lamps extend eastward.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "replan_cell: content",
+    "measured_seconds": 6.58,
+    "render_s": 272.0,
+    "waited_s": 272.6,
+    "rel_path": "episodes/ep14/takes/r2v/T13.mp4"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "payoff",
+    "setup": "strand_square",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_14.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.041667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 102933,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in Trafalgar Square and the eastern Strand with Nelson’s Column. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, gas from the left, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on the brother (grey eyes, Dark brown hair worn fuller on top) walks beside a refugee cart while a hay waggon occupies the Strand behind him at a normal walking pace. The camera is At the Strand kerb, chest height, facing east toward Trafalgar Square. At the first frame the brother stands beside the refugee cart with his paper folded against his jacket; the map shop window occupies the far-right edge; the hay waggon fills the rear centre; Nelson’s Column rises at the far-left edge; the Eleanor Cross occupies the eastern edge. The camera tracks beside the brother as he walks toward Trafalgar Square across the whole shot as the brother turns toward the cart, from 00:00 to 00:04. At 00:04 his hand touches the folded paper against his jacket, and the movement continues to the last frame of the shot. Behind <Subject 1> a man with his wife and two boys in a cart traveling with furniture, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his hand touches the folded paper against his jacket. By 00:08 the camera is tracking through the last frame, and the action continues with it, and the brother faces the refugee cart, the hay waggon and the map-covered shop window.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 303.9,
+    "waited_s": 304.6,
+    "rel_path": "episodes/ep14/takes/r2v/T14.mp4"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "spike",
+    "setup": "strand_square",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_15.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy",
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l17.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.916667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 103035,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this boy alone; each shot keeps the framing its own words describe.\n<Subject 2> is Narrators Brother in <Picture 2>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in Trafalgar Square and the eastern Strand with Nelson’s Column. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the boy in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the boy and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, gas from the left, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on the brother (grey eyes, Dark brown hair worn fuller on top) stands near the Strand placard board as the newspaper <Subject 1> (Narrow freckled face, Tousled mousy-brown hair) raises a wet sheet. The camera is At face height beside the Strand placard board, facing the newspaper boy and George. At the first frame the newspaper boy’s head spans one third of the frame height; the brother’s head spans one fifth of the frame height; the newspaper boy stands beside the placard board with a wet sheet at chest height; the brother stands behind him near the cart; the map shop occupies the far-right edge; Nelson’s Column occupies the distant edge; the cart fills the lower-left edge. The camera pushes in toward the cart across the whole shot to the newspaper <Subject 1> as the newspaper <Subject 1> raises the sheet, from 00:00 to 00:05. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] Fighting at Weybridge! Full description! Repulse of the Martians! London in Danger!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, George turns toward the headline, and the turn continues to the last frame of the shot. By 00:07 the camera is pushing in through the last frame, and the action continues with it, and the newspaper <Subject 1> faces George with the wet sheet raised while the cart and map window are behind them.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "move_type: frozen-whole, held, last-vs-panel",
+    "measured_seconds": 7.29,
+    "render_s": 306.8,
+    "waited_s": 308.0,
+    "rel_path": "episodes/ep14/takes/r2v/T15.mp4"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "runout",
+    "setup": "marylebone_route",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_16.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.125,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 102935,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a broad Marylebone road beside Regent’s Park railings. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Marylebone, 1894, lit windows, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on the brother (grey eyes, Dark brown hair worn fuller on top) walks beside the Marylebone railings beneath gas lamps at a normal walking pace, with a cartload of refugees on the road. The camera is At pavement height on Marylebone Road, moving beside the brother. At the first frame the brother walks beside the park railings with the newspaper against his jacket; the green cabmen’s shelter stands at the near-left edge; terraces occupy the far-right edge; the cart fills the rear roadway; gas lamps line the route; Portland Place opens at the far edge. The camera tracks beside the brother toward the park railings across the whole shot as the brother looks toward the south, from 00:00 to 00:03. At 00:03 refugee cart wheels turn beside the pavement, and the turn continues to the last frame of the shot. Behind <Subject 1> one or two cartloads of refugees and Sunday-night promenaders traveling and watching, from 00:00 to 00:06. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the brother looks toward the south. By 00:06 the camera is tracking through the last frame, and the action continues with it, and as the cart passes beneath the gas lamps, the brother reaches the park railings and turns his head toward the south.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 268.9,
+    "waited_s": 269.5,
+    "rel_path": "episodes/ep14/takes/r2v/T16.mp4"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "reaction",
+    "setup": "marylebone_route",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_17.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.291667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 102936,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a broad Marylebone road beside Regent’s Park railings. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Marylebone, 1894, lit windows, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on the brother (grey eyes, Dark brown hair worn fuller on top) settles beside the park railings beneath gas lamps, with southern flashes beyond the terraces. The camera is At shoulder height on the Marylebone pavement, facing the brother and the southern sky. At the first frame the brother stands beside the railings with one hand gripping the newspaper; gas lamps line the left edge; park trees fill the right edge; terraces stand at the far side; the southern roofline occupies the upper edge; Portland Place opens beyond the far-right terrace. The camera pans from the gas lamps across the whole shot to the southern roofline as the brother turns his head toward the south, from 00:00 to 00:03. At 00:03 distant guns flash above the roofline, and the movement continues to the last frame of the shot. Behind <Subject 1> silent couples and Sunday-night promenaders walking at a normal pace beneath the gas lamps, from 00:00 to 00:06. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the brother turns his head toward the south. By 00:06 the camera is panning through the last frame, and the action continues with it, and the brother faces the southern roofline as the gas lamps glow beside the park.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 271.4,
+    "waited_s": 272.0,
+    "rel_path": "episodes/ep14/takes/r2v/T17.mp4"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "setup",
+    "setup": "attic_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_18.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.208333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 102937,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on every surface in the picture is plain, wordless paint. The brother (grey eyes, Dark brown hair worn fuller on top) sits beside the deal table in the attic, newspaper and examination notes under the paraffin lamp. The camera is Beside the deal table, waist height, facing the brother, bed and dormer window. At the first frame the brother sits at the deal table with the newspaper open before him; the bed fills the near-left edge; the dormer window occupies the far-east edge; the landing door stands at the rear; examination notes rest beside the lamp; the money drawer occupies the lower-right edge. The camera pulls back from the newspaper across the whole shot, widening to show the attic as the brother turns toward the dormer, from 00:00 to 00:03. At 00:03 the paraffin flame leans beside the notes, and the lean continues to the last frame of the shot. Behind <Subject 1> a dozen residents at windows watching the dark street, from 00:00 to 00:06. <Subject 1>'s mouth is closed from 00:00 to 00:05 while the brother turns toward the dormer. By 00:06 the camera is pulling back through the last frame, and the action continues with it, and the bed, table, dormer window and yellow-sprigged ceiling share the attic frame.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 271.0,
+    "waited_s": 271.7,
+    "rel_path": "episodes/ep14/takes/r2v/T18.mp4"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "turn",
+    "setup": "attic_room",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/police/sheet.png",
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_19.png"
+    ],
+    "faces": [
+      "police",
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l21.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 2.75,
+    "frames": 73,
+    "seconds": 3.04,
+    "steps": 8,
+    "seed": 103140,
+    "prompt": "subject_definitions:\n<Subject 1> is Police in <Picture 1>: Type: Surrey Constabulary and Metropolitan Police constables, men aged 24 to 45, each at least 5 ft 9 in tall, broad-shouldered and solid through the chest. Weather-reddened English faces, short back-and-sides hair, full drooping moustaches on most. Representative constable: 34 years old, 5 ft 11 in, square jaw, mid-brown hair in a short back-and-sides, heavy drooping mid-brown moustache, grey eyes. Wearing: Metropolitan Police duty dress: black cork custodian helmet with white-metal Brunswick star plate and rose top, dark navy tunic with high collar showing white embroidered division letter and number, blue-and-white striped duty armlet on the left cuff, black belt with snake clasp, silver whistle chain, dark navy trousers, heavy black boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Narrators Brother in <Picture 2>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on the police (Weather-reddened English faces) hammer the lodging-house door below while the brother (grey eyes, Dark brown hair worn fuller on top) leans from the dormer above. The camera is At face height level with George’s face, facing the dormer and the street door. At the first frame the police head spans one fifth of the frame height; the brother’s head spans one fifth of the frame height; the police stand at the lodging-house door on the lower-left edge with one fist raised; the brother leans from the dormer at the upper-right edge; the landing fills the middle ground; red ceiling reflections occupy the top frame. The camera keeps a locked-off frame as the police hammer the door as George leans from the dormer, from 00:00 to 00:01. <Subject 1> (S1), on screen, type: Surrey Constabulary and Metropolitan Police constables, with a clipped English voice at an even pace, says: <d>[English] They are coming!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:01, as the line ends, George’s hand grips the sill, and the movement continues to the last frame of the shot. Behind them a dozen residents at windows opening doors and watching the constable, from 00:00 to 00:03. By 00:03 the action of that shot continues through the last frame, and the police strike the door beneath the brother’s open dormer and the lit street.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "replan_cell: content",
+    "measured_seconds": 3.04,
+    "render_s": 216.4,
+    "waited_s": 217.1,
+    "rel_path": "episodes/ep14/takes/r2v/T19.mp4"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "spike",
+    "setup": "attic_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_20.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.041667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 103040,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on every edge in the picture is crisp and sharp. The dormer window looks over flashing yellow-lit houses; a closed carriage and two cabs cross the street toward Chalk Farm. The camera is At the dormer window, looking down the street toward the church spire. At the first frame the yellow-lit houses fill the opposite terrace; the closed carriage stands at the far street corner; the cabs line the roadway behind it; the church spire rises at the right edge; the dormer sill occupies the lower edge; the street doors stand open along the opposite pavement. Night-dressed neighbours lean out of the lit windows opposite, and a policeman's lantern swings along the pavement. The camera tracks beside the yellow-lit houses across the whole shot to the closed carriage as the carriage gallops beneath the dormer, from 00:00 to 00:04. At 00:04 cab lamps bob behind it, and the movement continues to the last frame of the shot. Beyond the foreground people at open windows leaning out and watching the vehicles, from 00:00 to 00:08. By 00:08 the camera is tracking through the last frame, and the action continues with it, and the carriage reaches the centre of the street with the cabs following toward the far end.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "retake_why": "move_type: frozen-whole, held, last-vs-panel",
+    "measured_seconds": 8.0,
+    "render_s": 300.1,
+    "waited_s": 300.7,
+    "rel_path": "episodes/ep14/takes/r2v/T20.mp4"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "reaction",
+    "setup": "attic_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_21.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.833333,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 102940,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on the brother (grey eyes, Dark brown hair worn fuller on top) pulls on his Norfolk jacket beside the dormer; the landing door and deal table stand behind him. The camera is Inside the attic beside the bed, face height level with the brother’s face, facing the dormer and landing door. At the first frame the brother stands beside the bed with his jacket across his forearms; the dormer window occupies the right edge; the landing door stands at the rear; the deal table fills the left edge; red ceiling reflection occupies the upper edge; the bed rail runs along the lower-left edge. The camera tracks beside the brother as he walks toward the dormer across the whole shot as the brother lifts the jacket toward his shoulders at a normal walking pace, from 00:00 to 00:04. At 00:04 his hand carries the sleeve toward his shoulders, and the movement continues to the last frame of the shot. Behind <Subject 1> people at open windows dressing and watching the street, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:07 while his hand carries the sleeve toward his shoulders. By 00:08 the camera is tracking through the last frame, with the brother reaches the window now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.7,
+    "render_s": 326.1,
+    "waited_s": 326.7,
+    "rel_path": "episodes/ep14/takes/r2v/T21.mp4"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "spike",
+    "setup": "attic_room",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_22.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l24.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.5,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 102941,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this boy alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the boy in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the boy and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on the newspaper <Subject 1> (Narrow freckled face, Tousled mousy-brown hair) runs beneath the attic window with damp papers; yellow windows and open doors fill the street behind him. The camera is At the lodging-house doorstep, face height, looking along the dawn street and toward the attic. At the first frame the newspaper boy’s head spans one third of the frame height; the newspaper boy runs at the lower-left edge with a bundle of wet papers; yellow windows occupy the opposite terrace; open doors line the far pavement; the pink sky fills the upper edge; the church spire stands at the right; the doorstep occupies the near edge; the water trough stands up the street. The camera pans from the lodging-house doorstep across the whole shot to the newspaper <Subject 1> as the newspaper <Subject 1> lifts a sheet, from 00:00 to 00:04. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] London in danger of suffocation! Defences forced!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, the damp paper flutters above his shoulder, and the movement continues to the last frame of the shot. By 00:05 the camera is panning through the last frame, with the newspaper <Subject 1> reaches the lower centre beneath the pink dawn while carts and people now in frame, and the action continues with it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.16,
+    "render_s": 257.8,
+    "waited_s": 258.4,
+    "rel_path": "episodes/ep14/takes/r2v/T22.mp4"
+  },
+  {
+    "index": 23,
+    "shots": [
+      23
+    ],
+    "section": "answer",
+    "setup": "attic_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_23.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.291667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 102942,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on every surface in the picture is plain, wordless paint. A damp newspaper lies open on the deal table beneath the paraffin lamp, with the Black Smoke headline above examination notes and the money drawer; only that object and what touches it is in frame. The camera is Beside the deal table, waist height, facing the open newspaper. At the first frame the damp newspaper rests open above the deal table; the Black Smoke headline occupies the upper page; the money drawer stands at the lower-left edge; examination notes rest beside the lamp; the newspaper fills half the frame; the lamp stands at the right edge; the brother’s hand enters from the upper edge. The camera tracks laterally past the paraffin lamp across the whole shot, with the newspaper behind it as the brother’s hand lifts the page at the final dispatch, from 00:00 to 00:04. At 00:04 the lamp flame bends beside the drawer, and the movement continues to the last frame of the shot. By 00:08 the camera is tracking through the last frame, and the action continues with it, and the final dispatch occupies the newspaper while the money drawer and examination notes sit beside it.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 295.3,
+    "waited_s": 296.0,
+    "rel_path": "episodes/ep14/takes/r2v/T23.mp4"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "answer",
+    "setup": "attic_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_24.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.041667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 103145,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on the brother (grey eyes, Dark brown hair worn fuller on top) reads the catastrophic dispatch beside the deal table, with the Black Smoke headline above the examination notes. The camera is At the deal table, face height level with the brother’s face, looking level with the brother and the open newspaper. At the first frame the brother’s head spans one third of the frame height; the brother keeps the newspaper above the deal table; the money drawer occupies the lower-left edge; the landing door stands at the rear; the paraffin lamp glows at the right edge; the newspaper occupies the lower edge; examination notes fill the centre-left edge. The camera pushes in toward the open newspaper across the whole shot to George as the brother lowers the page toward the final instruction, from 00:00 to 00:02. At 00:02 his fingers hover above the money drawer, and the movement continues to the last frame of the shot. Behind <Subject 1> people in the street running beneath the attic window, from 00:00 to 00:05. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his fingers hover above the money drawer. By 00:05 the camera is pushing in through the last frame, and the action continues with it, and the brother reads the final dispatch while the money drawer and examination notes sit beside his elbow.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "retake_why": "move_type: frozen-whole, held, last-vs-panel",
+    "measured_seconds": 5.87,
+    "render_s": 261.4,
+    "waited_s": 262.1,
+    "rel_path": "episodes/ep14/takes/r2v/T24.mp4"
+  },
+  {
+    "index": 25,
+    "shots": [
+      25
+    ],
+    "section": "runout",
+    "setup": "attic_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_25.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.041667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 102944,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:05. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on the deal-table drawer stands open with notes and coins inside, beside the paraffin lamp and examination papers; only that object and what touches it is in frame. The camera is Beside the deal table, waist height, facing the drawer and lamp. At the first frame the notes and coins lie inside the open drawer at the lower centre; the deal table fills the foreground; the paraffin lamp occupies the right edge; the bed fills the left edge; examination papers lie across the table’s rear edge; the brother’s hand enters from above. A folded railway timetable lies beside the drawer, and a candle stub stands in a brass holder. The camera pushes toward the open drawer across the whole shot as the brother’s hand gathers the notes, from 00:00 to 00:02. At 00:02 his fingers lift the notes from the drawer, and the lift continues to the last frame of the shot. By 00:05 the camera is pushing through the last frame, and the action continues with it, and the notes rise from the drawer beside the lamp while examination papers are across the table.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 245.1,
+    "waited_s": 245.7,
+    "rel_path": "episodes/ep14/takes/r2v/T25.mp4"
+  },
+  {
+    "index": 26,
+    "shots": [
+      26
+    ],
+    "section": "runout",
+    "setup": "attic_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_26.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.0,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 110864,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:03. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on the brother’s hand gathers notes and coins beside the open deal-table drawer, the paraffin lamp and examination papers; only that object and what touches it is in frame. The camera is At waist height beside the deal table, facing the drawer and lamp. At the first frame the open drawer occupies the lower centre; notes and coins rest inside it; the paraffin lamp stands at the right edge; the bed fills the left edge; examination papers fill the rear table edge; the brother’s hand enters from above. A folded railway timetable lies beside the drawer, and a candle stub stands in a brass holder. The camera keeps a locked-off frame across the whole shot as the brother’s hand lifts the notes and coins, from 00:00 to 00:02. At 00:02 his fingers close around the money, and the movement continues to the last frame of the shot. By 00:03 the action of that shot continues through the last frame, and the brother’s hand carries the notes and coins above the table while the open drawer is below.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 3.75,
+    "render_s": 202.8,
+    "waited_s": 203.4,
+    "rel_path": "episodes/ep14/takes/r2v/T26.mp4"
+  },
+  {
+    "index": 27,
+    "shots": [
+      27
+    ],
+    "section": "runout",
+    "setup": "attic_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/narrators_brother/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_27.png"
+    ],
+    "faces": [
+      "narrators_brother"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.875,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 102946,
+    "prompt": "subject_definitions:\n<Subject 1> is Narrators Brother in <Picture 1>: Long face with a square jaw and a small cleft chin; long straight nose, straight dark brows and grey eyes. Fresh ruddy complexion. Dark brown hair worn fuller on top with a centre parting and a loose forelock. Wearing: Brown herringbone tweed Norfolk jacket with belt and box pleats, matching brown waistcoat, fawn cavalry-twill trousers, white shirt with soft turn-down collar and maroon knitted tie. Brown flat cloth cap. Brown lace-up boots. Folded newspaper and examination notes in the jacket pocket. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on the brother (grey eyes, Dark brown hair worn fuller on top) reaches the open lodging-house doorway with money in his jacket; the dawn street and fleeing people fill the far view. The camera is Behind the brother at shoulder height, aligned from the deal table toward the landing door. At the first frame the brother stands beside the deal table with the notes in his right hand; the open drawer occupies the lower-left edge; the landing door fills the far-right edge; the dormer window glows at the rear; the stairs occupy the lower edge; the cabin trunk stands beside the doorway. The camera tracks behind the brother toward the open doorway across the whole shot as the brother presses the money into his pocket, from 00:00 to 00:04. At 00:04 his hand leaves the doorframe, and the movement continues to the last frame of the shot. Behind <Subject 1> a dozen residents at windows opening doors and watching the street, from 00:00 to 00:07. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his hand leaves the doorframe. By 00:07 the camera is tracking through the last frame, and the action continues with it, and the brother reaches the landing doorway with the money in his jacket and the drawer open behind him.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 302.8,
+    "waited_s": 303.4,
+    "rel_path": "episodes/ep14/takes/r2v/T27.mp4"
+  },
+  {
+    "index": 28,
+    "shots": [
+      28
+    ],
+    "section": "transition",
+    "setup": "attic_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep14/storyboard/h3/shot_28.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.708333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 102947,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on the open lodging-house doorway looks onto the pink dawn street, with yellow windows, open doors and fleeing people beyond the threshold. The camera is At the lodging-house threshold, looking down the dawn street from chest height. At the first frame the open doorway occupies the near edge; the pink dawn street runs toward the distant church spire; yellow windows fill the opposite terrace; open doors line the far pavement; fleeing people fill the lower road; the stone steps fill the lower centre; the water trough stands up the street. Laden carts and cabs crowd the roadway, and a newsboy runs along the pavement waving a pink sheet. The camera cranes up above the doorway across the whole shot, looking down over the street as the brother’s hand leaves the doorframe, from 00:00 to 00:04. At 00:04 the dawn crowd runs toward the river, and the movement continues to the last frame of the shot. Beyond the foreground people in the street running toward the river and carrying newspapers, from 00:00 to 00:07. By 00:07 the camera is craning up through the last frame, and the action continues with it, and the open doorway and fleeing dawn street share the frame as London moves toward safety.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 274.0,
+    "waited_s": 274.7,
+    "rel_path": "episodes/ep14/takes/r2v/T28.mp4"
+  },
+  {
+    "index": 29,
+    "shots": [
+      29
+    ],
+    "section": "button",
+    "setup": "attic_room",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "episodes/ep14/storyboard/h3/shot_29.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l30.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 3.083333,
+    "frames": 90,
+    "seconds": 3.75,
+    "steps": 8,
+    "seed": 110867,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this boy alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 3.75-second take of 1 shot in a small attic room in a Marylebone lodging house. [Shot 1] runs from 00:00 to 00:03. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the boy in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the boy and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, London, 1894, violet lightning from the west, black shadows.\n[Shot 1] From 00:00 to 00:03. The shot opens on the newspaper <Subject 1> (Narrow freckled face, Tousled mousy-brown hair) faces the pink dawn street with a wet paper raised; fleeing people occupy the road behind him. The camera is At a high angle above the lodging-house threshold, looking down the dawn street from above the newspaper boy. At the first frame the newspaper boy’s head spans one third of the frame height; the newspaper boy stands at the centre of the threshold with the wet paper against his chest; yellow windows fill the opposite terrace; the pink sky crowns the upper edge; the street runs toward the distant church spire. The camera tracks sideways to the right across the whole shot, past the lodging-house doorstep, with the newspaper <Subject 1> behind it as the newspaper <Subject 1> raises the wet paper, from 00:00 to 00:02. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] Black Smoke!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, the dawn crowd streams toward the river, and the movement continues to the last frame of the shot. Behind <Subject 1> people in the street running toward the river and carrying newspapers, from 00:00 to 00:03. By 00:03 the camera is tracking through the last frame, and the action continues with it, and the raised paper and the fleeing street share the dawn frame as London moves toward safety.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 3.75,
+    "render_s": 213.4,
+    "waited_s": 214.1,
+    "rel_path": "episodes/ep14/takes/r2v/T29.mp4"
+  }
+]

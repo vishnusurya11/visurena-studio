@@ -1,0 +1,106 @@
+{
+ "sha8": "ae622cb8",
+ "verdict": "flagged",
+ "note": "content at T09: banned from this book: cliff; content at T11: banned from this book: cliff; content at T13: banned from this book: mountain; content at T17: banned from this book: mountain; content at T18: banned from this book: mountain; content at T19: banned from this book: mountain; content at T20: banned from this book: mountain -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4"
+ ],
+ "signed_at": "2026-10-05T06:50:21Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "content",
+   "where": "T09",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_09.png"
+   },
+   "severity": "normal",
+   "note": "banned from this book: cliff"
+  },
+  {
+   "kind": "content",
+   "where": "T11",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_11.png"
+   },
+   "severity": "normal",
+   "note": "banned from this book: cliff"
+  },
+  {
+   "kind": "content",
+   "where": "T13",
+   "evidence": {
+    "hard": true,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "content",
+   "where": "T17",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "content",
+   "where": "T18",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "content",
+   "where": "T19",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  },
+  {
+   "kind": "content",
+   "where": "T20",
+   "evidence": {
+    "hard": true,
+    "repeated": false
+   },
+   "severity": "high",
+   "note": "banned from this book: mountain"
+  }
+ ],
+ "terminal": "still"
+}

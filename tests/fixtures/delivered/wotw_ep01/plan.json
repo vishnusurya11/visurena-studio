@@ -1,0 +1,770 @@
+{
+  "number": 1,
+  "title": "The Eve of the War",
+  "question": "Today, can the narrator see what Mars is sending?",
+  "aspect": "1:1",
+  "where": "Surrey, 1894",
+  "light": "low lantern light, deep black shadow",
+  "look": "Angular stylised 3D animation, brush-stroke texture",
+  "protagonist": "unnamed_first_person_narrator",
+  "answer": "line 15",
+  "beds": [
+    {
+      "from_shot": 0,
+      "tone": "grave"
+    },
+    {
+      "from_shot": 3,
+      "tone": "plain"
+    },
+    {
+      "from_shot": 7,
+      "tone": "uneasy"
+    },
+    {
+      "from_shot": 15,
+      "tone": "plain"
+    },
+    {
+      "from_shot": 19,
+      "tone": "light"
+    }
+  ],
+  "setups": {
+    "space": {
+      "described": "The gulf of space between Mars and the Earth in 1894: the ochre-red planet Mars with a white polar cap and dark blue-green markings, and far across the black a small blue-white Earth; the far sun is the only light and it comes from the right, hard and white, on the planet's limb, and leaves the night side of each planet and the whole of space black",
+      "cast": [],
+      "landmark": "the ochre-red planet Mars",
+      "landmark_at": "start",
+      "landmark_size": "is half the height of the frame",
+      "route": "from the red planet across the black gulf to the small blue Earth",
+      "geometry": "Mars stands at the LEFT third of the frame, half the frame's height, its lit limb on the RIGHT side and its night side black. The small blue Earth hangs at the RIGHT third across the black, the height of a thumbnail. Fine stars fill the TOP and the BOTTOM edges, and the far sun is off the RIGHT edge of the frame, its hard white light raking across both planets.",
+      "crowd": "",
+      "outdoors": true,
+      "props": [],
+      "location": "earth_and_mars"
+    },
+    "knoll": {
+      "described": "The garden knoll at Ottershaw on a warm starlit night in 1894: a small round observatory of white weatherboard on a red-brick plinth under a green copper dome with its slit open, a plank door with iron strap hinges, three brick steps, a gravel path, and below the knoll a red-brick house with lit windows and the scattered lamps of Ottershaw; a brass lantern is the only near light and it comes from low on one side, warm and yellow, on the steps and the gravel, and leaves the dome, the fields and the sky black",
+      "cast": [
+        "ogilvy",
+        "unnamed_first_person_narrator"
+      ],
+      "landmark": "the white observatory door",
+      "landmark_at": "start",
+      "landmark_size": "is half the height of the frame",
+      "route": "from the observatory door down the gravel path toward the lit house",
+      "geometry": "The white observatory wall and its plank door hold the LEFT half of the frame. The brass lantern glows at the BOTTOM LEFT on the brick steps, its yellow pool on the gravel. The green copper dome with its open slit crosses the TOP LEFT corner. The starry sky is black across the TOP edge, the lit red-brick house sits below the knoll at the CENTRE, and the village lamps are small at the RIGHT third.",
+      "crowd": "",
+      "outdoors": true,
+      "props": [],
+      "location": "ottershaw"
+    },
+    "pier": {
+      "described": "Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit, a mahogany clockwork box on the pier, a little deal table with a soda siphon, tumblers and a brass chronometer in its box; a shaded lantern on the floor in the corner is the only light and it comes from low at the right, a small yellow oval on the pine boards, and leaves the dome, the walls and the corners black",
+      "cast": [
+        "unnamed_first_person_narrator",
+        "ogilvy"
+      ],
+      "landmark": "the brass telescope under the slit",
+      "landmark_at": "far_end",
+      "landmark_size": "is half the height of the frame",
+      "route": "from the door across the pine boards to the telescope under the slit",
+      "geometry": "The brass telescope rises from its black pier across the CENTRE of the frame toward the starry slit at the TOP RIGHT, the mahogany clockwork box on the pier at the CENTRE. The lantern's yellow oval lies on the pine boards at the BOTTOM RIGHT. The star atlases on their shelf are dim at the LEFT third, and the curved walls and the black timber dome are black at the LEFT edge and across the TOP.",
+      "crowd": "",
+      "outdoors": false,
+      "props": [],
+      "location": "ottershaw_observatory"
+    },
+    "corner": {
+      "described": "Interior, inside the small round private observatory at Ottershaw at midnight in 1894, the camera within the room with its curved pine walls closed on all sides: a long brass refractor telescope on a black cast-iron pier pointing up through the narrow open slit in the black timber dome, a strip of stars in the slit, a mahogany clockwork box on the pier, a little deal table with a soda siphon, tumblers and a brass chronometer in its box; a shaded lantern on the floor in the corner is the only light and it comes from low at the right, a small yellow oval on the pine boards, and leaves the dome, the walls and the corners black",
+      "cast": [
+        "unnamed_first_person_narrator",
+        "ogilvy"
+      ],
+      "landmark": "the shaded lantern in the corner",
+      "landmark_at": "far_end",
+      "landmark_size": "is the height of a hand",
+      "route": "from the telescope pier across the boards to the lantern and the little table",
+      "geometry": "The brass eyepiece and the black pier hold the LEFT third of the frame. The shaded lantern glows on the boards at the BOTTOM CENTRE beside the little deal table, which carries the soda siphon, two tumblers and the brass chronometer in its open box at the CENTRE. The curved pine wall and the plank door with its iron hinges are black at the RIGHT edge, and the dome is black across the TOP.",
+      "crowd": "",
+      "outdoors": false,
+      "props": [],
+      "location": "ottershaw_observatory"
+    },
+    "study": {
+      "described": "Interior, inside the narrator's upstairs study at Maybury at night in 1894, the camera within the room with walls closed on all sides: a mahogany writing-table with a green leather top and stacked manuscript sheets, a brass inkstand, a green-shaded brass oil lamp, a pair of glazed French windows with a low iron rail and a raised cream blind, oak bookcases and a globe; the green-shaded lamp is the only light and it comes from low at the right onto the table and the pages, and leaves the bookcases, the corners and the night in the windows black",
+      "cast": [
+        "unnamed_first_person_narrator"
+      ],
+      "landmark": "the green-shaded lamp on the writing-table",
+      "landmark_at": "start",
+      "landmark_size": "is a quarter of the height of the frame",
+      "route": "from the writing-table to the open French windows over the valley",
+      "geometry": "The writing-table crosses the BOTTOM half of the frame with the green lamp at the RIGHT third and the stacked manuscript pages at the CENTRE. The French window and its cream curtain stand at the LEFT edge with the night black in the glass and the dark beech tops beyond. The oak bookcases are black across the TOP and the terrestrial globe is dim in the RIGHT corner.",
+      "crowd": "",
+      "outdoors": false,
+      "props": [],
+      "location": "narrators_study"
+    },
+    "porch": {
+      "described": "The front of the narrator's red-brick villa at Maybury on a warm starlit night in 1894: a black four-panel door with a brass knocker under a small tiled porch on two turned posts, a fanlight glowing, a lit bay window at the left, clipped laurels, a gravel path; the lamplit fanlight is the only light and it comes from the door behind the couple, warm and low, onto the red-and-black tiled step and the gravel, and leaves the laurels, the brick and the sky black",
+      "cast": [
+        "unnamed_first_person_narrator",
+        "narrators_wife"
+      ],
+      "landmark": "the lit fanlight over the door",
+      "landmark_at": "far_end",
+      "landmark_size": "is the height of a hand",
+      "route": "from the gravel path to the black front door under the porch",
+      "geometry": "The black front door and its lit fanlight stand at the CENTRE of the upper half of the frame under the small tiled porch on its two turned posts. The lit bay window glows at the LEFT edge behind its lace. The gravel path fills the BOTTOM edge up to the red-and-black tiled step, the clipped laurels are black at the RIGHT, and the starry sky is black above the slate roof across the TOP.",
+      "crowd": "",
+      "outdoors": true,
+      "props": [],
+      "location": "narrators_home"
+    }
+  },
+  "shots": [
+    {
+      "index": 0,
+      "section": "hook",
+      "setup": "space",
+      "size": "wide",
+      "faces": [],
+      "view": "",
+      "path": 0.1,
+      "frame": "Wide of the gulf of space: the ochre-red planet Mars with its white polar cap at the left, lit hard from the right, and far across the black the small blue-white Earth with its drifting cloud.",
+      "motion": "The camera pans right across the whole shot, travelling a hand's breadth; the red planet keeps the left third; the red planet turns a finger's breadth on its axis toward the far sun.",
+      "camera": "far off the plane of the orbits, a 35mm lens. The sun comes from the RIGHT onto the planet's limb and leaves its night side and all of space black",
+      "at_rest": "The red planet Mars fills the LEFT third of the frame, half the frame's height, its lit limb on the RIGHT side and its night side black. The small blue Earth hangs at the RIGHT third, the height of a thumbnail. Fine stars scatter across the TOP and the BOTTOM edges and the rest of space is black.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.8,
+      "coda_s": 0.3,
+      "turn": "",
+      "why": "Opens on the watchers' own view: the world as the Martians see it.",
+      "cuts": []
+    },
+    {
+      "index": 1,
+      "section": "setup",
+      "setup": "space",
+      "size": "wide",
+      "faces": [],
+      "view": "",
+      "path": 0.4,
+      "frame": "Wide of the gulf of space nearer the red planet: the ochre-red planet Mars with its white polar cap filling the left half, lit hard from the right, its dark night side turned toward the small blue-white Earth far across the black at the right.",
+      "motion": "The camera pushes in on the red planet across the whole shot, travelling a hand's breadth; the small blue Earth keeps the right third; the red planet turns a finger's breadth on its axis toward the far sun.",
+      "camera": "far off the plane of the orbits, nearer the red planet, a 35mm lens. The sun comes from the RIGHT onto the planet's limb and leaves its night side and all of space black",
+      "at_rest": "The red planet Mars fills the LEFT half of the frame, two thirds of the frame's height, its lit limb on the RIGHT side and its night side black. The small blue Earth hangs at the RIGHT third, the height of a fingernail. Fine stars scatter across the TOP edge and the rest of space is black.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.5,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "Where the Thing comes from: a made thing, a gun, before anyone on Earth knows it.",
+      "cuts": []
+    },
+    {
+      "index": 2,
+      "section": "setup",
+      "setup": "space",
+      "size": "insert",
+      "faces": [],
+      "view": "",
+      "path": 0.8,
+      "frame": "Insert on the bright curved limb of Mars against black space: a reddish flash at its edge and a thin streamer of green-white flaming gas projecting out into the dark.",
+      "motion": "The camera pushes in on the reddish flash across the whole shot, travelling a finger's breadth; the curved limb keeps the bottom half; the streamer of flaming gas travels out a finger's breadth into the black.",
+      "camera": "in space close over the planet, a 50mm lens. The sun comes from the RIGHT along the limb and leaves the space above it black",
+      "at_rest": "The curved bright limb of Mars crosses the BOTTOM half of the frame from the LEFT edge to the RIGHT edge. The reddish flash sits at the CENTRE of the limb and the green-white streamer rises from it to the TOP third. Space is black across the TOP edge with fine stars.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.5,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The shot itself: what Lavelle of Java saw, before the narrator hears of it.",
+      "cuts": []
+    },
+    {
+      "index": 3,
+      "section": "setup",
+      "setup": "study",
+      "size": "medium_close",
+      "faces": [
+        "unnamed_first_person_narrator"
+      ],
+      "view": "",
+      "path": 0.2,
+      "frame": "Medium close of the Narrator in the grey herringbone tweed suit, the straw boater set on the table, bent over the manuscript at the writing-table under the green-shaded lamp with the steel pen moving across the page, the long oval face lit from the right.",
+      "motion": "The camera pans right across the whole shot, travelling a finger's breadth; the green lamp keeps the right third; he sets the pen down on the page and his head lifts from it with a faint smile.",
+      "camera": "across the writing-table level with his eyes, an arm's length from him, a 50mm lens. The lamp comes from LOW at the RIGHT onto his face and leaves the bookcases behind him black",
+      "at_rest": "The Narrator's head and shoulders fill the CENTRE of the frame from his dark parted hair at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height, lit from the RIGHT. The green lamp glows at the RIGHT third and the bookcases are black at the LEFT edge.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.8,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The lead is one of the complacent men of the first paragraph, and says so.",
+      "cuts": []
+    },
+    {
+      "index": 4,
+      "section": "setup",
+      "setup": "knoll",
+      "size": "medium",
+      "faces": [
+        "unnamed_first_person_narrator"
+      ],
+      "view": "",
+      "path": 0.1,
+      "frame": "Medium of the Narrator in the grey herringbone tweed suit and straw boater climbing the three brick steps of the white observatory at night, turned three-quarters away from the camera toward the plank door, one boot already on the second step and his hand reaching for the door's edge, the brass lantern glowing on the top step.",
+      "motion": "The camera pans right across the whole shot, travelling a forearm; the plank door keeps the centre; the Narrator steps up onto the top step and his hand draws the plank door open.",
+      "camera": "on the gravel path at a standing man's eye, three long strides from him, a 35mm lens. The lantern comes from LOW at the LEFT onto his boots and knees and leaves the dome and the sky black",
+      "at_rest": "The white weatherboard wall of the observatory fills the CENTRE of the frame with the plank door ajar above the brick steps. The Narrator is on the steps at the RIGHT third, turned three-quarters toward the door, his head a quarter of the frame's height. The lantern glows on the top step at the BOTTOM LEFT and the sky is black at the TOP edge.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.8,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "How he came to be there at all: chance, and a friend's excitement.",
+      "cuts": []
+    },
+    {
+      "index": 5,
+      "section": "setup",
+      "setup": "knoll",
+      "size": "medium_close",
+      "faces": [
+        "ogilvy"
+      ],
+      "view": "",
+      "path": 0.3,
+      "frame": "Medium close of Ogilvy in the ochre tweed Inverness cape, black velvet smoking cap and steel spectacles standing at the plank door of the white observatory on the knoll at night, the broad ruddy face and full auburn beard lit from below by the brass lantern on the step, one hand raised toward the dome.",
+      "motion": "The camera pans left across the whole shot, travelling a finger's breadth; the plank door keeps the left edge; his raised hand beckons toward the open door; his head turns back toward the path.",
+      "camera": "on the gravel path at the foot of the steps level with his eyes, two long strides from him, a 50mm lens. The lantern comes from LOW at the LEFT onto his face and leaves the dome and the sky black",
+      "at_rest": "Ogilvy's head and shoulders fill the CENTRE of the frame from the TOP third to the ochre cape at the BOTTOM edge, his head a third of the frame's height, lit from LOW at the LEFT. The white plank door stands at the LEFT edge and the starry sky is black at the TOP RIGHT.",
+      "end": "",
+      "changed": "",
+      "beat_s": 1.0,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The invitation: a man delighted by a puzzle, which is how the danger arrives.",
+      "cuts": []
+    },
+    {
+      "index": 6,
+      "section": "setup",
+      "setup": "pier",
+      "size": "wide",
+      "faces": [],
+      "view": "",
+      "path": 0.2,
+      "frame": "Wide of the dark round observatory at midnight: the long green-and-brass telescope on its black iron stand pointing up through the open slit full of stars, the Narrator in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left bent at the waist with his eye already at its eyepiece, his back half turned to the camera, the lantern's yellow oval on the boards in the right-hand corner.",
+      "motion": "The camera pans right across the whole shot, travelling a hand's breadth; the green-and-brass telescope keeps the centre; the Narrator's hand turns the brass focusing wheel and his shoulders settle lower to the glass.",
+      "camera": "just inside the door at a standing man's eye, four long strides from the pier, a 35mm lens. The lantern comes from LOW at the RIGHT onto the boards and leaves the dome and the walls black",
+      "at_rest": "The green-and-brass telescope rises from its black iron stand across the CENTRE of the frame to the starry slit at the TOP RIGHT. The Narrator is bent to the eyepiece at the LEFT third, his back half to the camera, his head a fifth of the frame's height. The lantern's yellow oval lies at the BOTTOM RIGHT and the dome is black across the TOP.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.8,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The place of the vigil, remembered in its detail: the black, the lantern, the clockwork.",
+      "cuts": []
+    },
+    {
+      "index": 7,
+      "section": "setup",
+      "setup": "space",
+      "size": "insert",
+      "faces": [],
+      "view": "",
+      "path": 0.82,
+      "frame": "Close view of the planet Mars through the great telescope, hanging in the black: the ochre-red globe fills the centre third of the frame, its white polar cap at the top, dark markings across its face, lit hard from the right with its night side fading into the black, a few faint stars around it.",
+      "motion": "The camera pushes in steadily toward the red planet across the whole shot; the red planet turns steadily on its axis, its dark markings sliding from left to right; a thin pale haze shimmers along its lit limb.",
+      "camera": "at the telescope eyepiece, the lens to the glass, a 90mm lens. The planet's light comes from the CENTRE of the blue circle and leaves the surround black",
+      "at_rest": "The circle of deep blue fills the CENTRE of the frame from the TOP third to the BOTTOM third. The small bright planet sits at the CENTRE, the height of a fingernail, with three faint stars at the RIGHT. The surround is black at the LEFT edge, the RIGHT edge and every corner.",
+      "end": "",
+      "changed": "",
+      "beat_s": 1.2,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "What the man sees: a little thing, bright and small, which is the whole irony.",
+      "cuts": []
+    },
+    {
+      "index": 8,
+      "section": "setup",
+      "setup": "corner",
+      "size": "medium_close",
+      "faces": [
+        "unnamed_first_person_narrator"
+      ],
+      "view": "",
+      "path": 0.2,
+      "frame": "Medium close of the Narrator in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left with one eye to the brass eyepiece of the telescope, the long oval face and neat dark moustache lit from below by the lantern, the other eye narrowed.",
+      "motion": "The camera pans right across the whole shot, travelling a finger's breadth; the brass eyepiece keeps the left third; his hand lifts to the focusing wheel; his shoulders lower toward the glass.",
+      "camera": "beside the pier level with his eyes, an arm's length from him, a 50mm lens. The lantern comes from LOW at the RIGHT onto his cheek and leaves the dome behind him black",
+      "at_rest": "The Narrator's head and shoulders fill the CENTRE of the frame from the straw boater at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height. The brass eyepiece comes in from the LEFT edge and the dome is black at the TOP RIGHT.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.5,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The lead's own face before the turn: patient, curious, safe.",
+      "cuts": []
+    },
+    {
+      "index": 9,
+      "section": "setup",
+      "setup": "corner",
+      "size": "insert",
+      "faces": [],
+      "view": "",
+      "path": 0.3,
+      "frame": "Insert on the brass chronometer with its white enamel dial in its open mahogany box on the little deal table, the glass soda siphon behind it, Ogilvy's broad ink-stained hand resting on the open lid, the lantern's low yellow glow from the right across the dial.",
+      "motion": "The camera pans left across the whole shot, travelling a finger's breadth; the mahogany box keeps the frame's centre; Ogilvy's hand lifts the chronometer from the box and tilts its dial to the lantern.",
+      "camera": "low over the table at a seated man's eye, an arm's length from the box, a 90mm lens. The lantern comes from LOW at the RIGHT onto the dial and leaves the curved wall behind black",
+      "at_rest": "The open mahogany box sits at the CENTRE of the frame with the white dial the height of the middle third, its hands near twelve. The glass siphon stands at the LEFT third behind it, Ogilvy's hand rests on the open lid at the TOP RIGHT, the lantern glow lies along the BOTTOM edge and the curved wall is black across the TOP.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.8,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The clock running toward the second shot: the audience knows what midnight brings.",
+      "cuts": []
+    },
+    {
+      "index": 10,
+      "section": "spike",
+      "setup": "space",
+      "size": "insert",
+      "faces": [],
+      "view": "",
+      "path": 0.86,
+      "frame": "Insert through the telescope eyepiece: the circle of deep blue night inside a black surround with the small bright ochre-red planet Mars at its centre, a reddish flash blooming at the planet's right edge and a hair-thin streamer rising from it.",
+      "motion": "The camera pushes in on the planet's edge across the whole shot, travelling a finger's breadth; the circle of blue keeps the frame; the reddish flash swells at the edge and a thin streamer travels out from it.",
+      "camera": "at the telescope eyepiece, the lens to the glass, a 90mm lens. The planet's light comes from the CENTRE of the blue circle and leaves the surround black",
+      "at_rest": "The circle of deep blue fills the CENTRE of the frame from the TOP third to the BOTTOM third. The small planet sits at the CENTRE, the height of a fingernail, the reddish flash at its RIGHT edge. The surround is black at the LEFT edge, the RIGHT edge and every corner.",
+      "end": "",
+      "changed": "",
+      "beat_s": 1.5,
+      "coda_s": 2.5,
+      "turn": "",
+      "why": "The picture speaks: the second shot fired, seen by one man, silent.",
+      "cuts": []
+    },
+    {
+      "index": 11,
+      "section": "turn",
+      "setup": "corner",
+      "size": "medium_close",
+      "faces": [
+        "unnamed_first_person_narrator"
+      ],
+      "view": "",
+      "path": 0.4,
+      "frame": "Medium close of the Narrator in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left lifting his face from the brass eyepiece and turning it toward the dark, the grey eyes wide, the lantern low at the right on his cheek.",
+      "motion": "The camera pans left across the whole shot, travelling a finger's breadth; the brass eyepiece keeps the left edge; his head turns off the eyepiece toward the dark; his hand lifts and points back at the glass.",
+      "camera": "beside the pier level with his eyes, an arm's length from him, a 50mm lens. The lantern comes from LOW at the RIGHT onto his face and leaves the dome behind him black",
+      "at_rest": "The Narrator's head and shoulders fill the CENTRE of the frame from the straw boater at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height, his face turned toward the RIGHT. The brass eyepiece comes in from the LEFT edge and the dome is black behind him.",
+      "end": "",
+      "changed": "",
+      "beat_s": 1.0,
+      "coda_s": 0.0,
+      "turn": "a quiet vigil -> the first sign seen",
+      "why": "The turn is his own act: he sees it and says so. Nobody else on Earth is looking.",
+      "cuts": []
+    },
+    {
+      "index": 12,
+      "section": "reaction",
+      "setup": "corner",
+      "size": "medium",
+      "faces": [
+        "ogilvy"
+      ],
+      "view": "",
+      "path": 0.6,
+      "frame": "Medium of Ogilvy in the ochre tweed Inverness cape, black velvet smoking cap and steel spectacles bent to the brass eyepiece of the green-and-brass telescope beside its black iron stand, one hand on the tube, the lantern on the boards behind him in the corner.",
+      "motion": "The camera pans right across the whole shot, travelling a forearm; the black iron stand keeps the left third; Ogilvy's hand turns the brass wheel on the tube and his shoulders jerk back from the glass.",
+      "camera": "beside the table at a standing man's eye, three long strides from him, a 35mm lens. The lantern comes from LOW at the RIGHT onto his cape and leaves the dome and the walls black",
+      "at_rest": "Ogilvy stands at the CENTRE of the frame from the BOTTOM edge to the TOP third, his head a quarter of the frame's height, bent to the eyepiece. The black iron stand stands at the LEFT third, the lantern glows at the BOTTOM RIGHT and the curved wall is black at the RIGHT edge.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.3,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The expert takes over and is thrilled: the danger handed to a man who will explain it.",
+      "cuts": []
+    },
+    {
+      "index": 13,
+      "section": "friction",
+      "setup": "corner",
+      "size": "medium",
+      "faces": [
+        "unnamed_first_person_narrator"
+      ],
+      "view": "",
+      "path": 0.9,
+      "frame": "Medium of the Narrator in the grey herringbone tweed suit, bare-headed, his dark hair parted on the left leaning over the little deal table in the dark corner, his hand already on the glass soda siphon beside the tumblers and his straw boater lying crown-down and the brass chronometer in its open box, the lantern low on the floor at the right beside the table leg.",
+      "motion": "The camera pans left across the whole shot, travelling a forearm; the little deal table keeps the centre; his hand tilts the siphon over a tumbler and the soda fizzes into it.",
+      "camera": "low beside the table at a seated man's eye, three long strides from him, a 35mm lens. The lantern comes from LOW at the RIGHT onto the table and leaves the curved wall behind black",
+      "at_rest": "The little deal table stands at the CENTRE of the lower half of the frame with the siphon, the tumblers and the chronometer on it. The Narrator leans in from the LEFT third, his head a quarter of the frame's height. The lantern glows at the BOTTOM RIGHT and the curved wall is black across the TOP.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.3,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The lead turns his back on the thing he has just seen: thirst, a smoke. Ordinary life.",
+      "cuts": []
+    },
+    {
+      "index": 14,
+      "section": "friction",
+      "setup": "space",
+      "size": "wide",
+      "faces": [],
+      "view": "",
+      "path": 0.9,
+      "frame": "Wide of the black gulf of space between the ochre-red planet Mars at the left and the small blue Earth at the right, a small glowing grey cylinder crossing the black between them toward the Earth.",
+      "motion": "The camera pans right across the whole shot, travelling a hand's breadth; the small Earth keeps the right third; the glowing grey cylinder travels across the black toward the Earth.",
+      "camera": "far off the plane of the orbits, a 35mm lens. The sun comes from the RIGHT onto both planets and leaves their night sides and all of space black",
+      "at_rest": "The red planet fills the LEFT third of the frame, half the frame's height, lit on its RIGHT side. The small blue Earth hangs at the RIGHT third. A small glowing cylinder crosses the CENTRE between them and the rest of space is black with fine stars at the TOP and BOTTOM edges.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.5,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "What he did not see: the Thing on its way. The audience knows more than he does.",
+      "cuts": []
+    },
+    {
+      "index": 15,
+      "section": "transition",
+      "setup": "knoll",
+      "size": "insert",
+      "faces": [],
+      "view": "",
+      "path": 0.5,
+      "frame": "Insert on the shaded brass lantern on the top brick step of the observatory at night, Ogilvy's broad ink-stained hand turning up its wick, the flame rising behind the glass and the gravel below.",
+      "motion": "The camera tilts down on the lantern across the whole shot, travelling a finger's breadth; the brass lantern keeps the frame's centre; his hand turns the wick up and lifts the lantern by its ring.",
+      "camera": "beside the steps at the height of a crouching man's eye, an arm's length from the lantern, a 90mm lens. The flame comes from the CENTRE onto his fingers and leaves the plank door behind black",
+      "at_rest": "The brass lantern stands at the CENTRE of the frame on the red brick step, the height of the middle third, its flame bright behind the glass. His hand comes in from the LEFT edge, the gravel lies across the BOTTOM edge and the plank door is black across the TOP.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.3,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The vigil ends by his hand: the light they carry down among the sleepers.",
+      "cuts": []
+    },
+    {
+      "index": 16,
+      "section": "answer",
+      "setup": "knoll",
+      "size": "medium_close",
+      "faces": [
+        "ogilvy"
+      ],
+      "view": "",
+      "path": 0.7,
+      "frame": "Medium close of Ogilvy in the ochre tweed Inverness cape, black velvet smoking cap and steel spectacles on the brick steps of the observatory at night with the brass lantern raised in one hand, the broad ruddy face amused and sure, the full auburn beard, the plank door dark behind.",
+      "motion": "The camera pans right across the whole shot, travelling a finger's breadth; the plank door keeps the left edge; his free hand lifts and waves the thought away; the lantern swings a hand's breadth.",
+      "camera": "on the gravel path level with his eyes, two long strides from him, a 50mm lens. The lantern comes from LOW at the RIGHT onto his face and leaves the dome and the sky black",
+      "at_rest": "Ogilvy's head and shoulders fill the CENTRE of the frame from the TOP third to the ochre cape at the BOTTOM edge, his head a third of the frame's height, lit from LOW at the RIGHT. The plank door is dark at the LEFT edge and the starry sky is black across the TOP.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.7,
+      "coda_s": 0.0,
+      "turn": "a sign seen -> explained away",
+      "why": "The world answers the question: no. The man best placed to see it laughs it off.",
+      "cuts": []
+    },
+    {
+      "index": 17,
+      "section": "transition",
+      "setup": "knoll",
+      "size": "wide",
+      "faces": [],
+      "view": "",
+      "path": 0.9,
+      "frame": "Wide from the knoll at night: Ogilvy in the ochre tweed Inverness cape, black velvet smoking cap and steel spectacles and the Narrator in the grey herringbone tweed suit and straw boater walking down the grass beside the white observatory wall, the brass lantern swinging from Ogilvy's hand, the lit house below and the scattered lamps of Ottershaw beyond.",
+      "motion": "The camera pans right across the whole shot, travelling a hand's breadth; the white observatory wall keeps the left edge; the two men walk down the grass at a normal walking pace toward the lit house.",
+      "camera": "at the observatory door on the knoll at a standing man's eye, four long strides from them, a 35mm lens. The lantern comes from LOW in Ogilvy's hand onto the grass and leaves the fields and the sky black",
+      "at_rest": "The white observatory wall holds the LEFT edge of the frame. The two men walk at the CENTRE of the lower half, each the height of a finger, the lantern between them. The lit house sits at the CENTRE of the frame and the village lamps are small across the RIGHT third under a black sky.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.5,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "Down among the sleepers: the village that will be in the path.",
+      "cuts": []
+    },
+    {
+      "index": 18,
+      "section": "transition",
+      "setup": "study",
+      "size": "medium",
+      "faces": [
+        "unnamed_first_person_narrator"
+      ],
+      "view": "",
+      "path": 0.3,
+      "frame": "Medium of the Narrator in the grey herringbone tweed suit and straw boater, the boater set on the table, at the mahogany writing-table under the green-shaded lamp, a steel pen moving across a manuscript page, the French window dark beside him.",
+      "motion": "The camera pans left across the whole shot, travelling a forearm; the green lamp keeps the right third; he writes a line across the page and lifts the pen to the inkwell.",
+      "camera": "at the side of the table at a seated man's eye, three long strides from him, a 35mm lens. The lamp comes from LOW at the RIGHT onto the page and his face and leaves the bookcases black",
+      "at_rest": "The writing-table crosses the BOTTOM half of the frame with the green-shaded lamp at the RIGHT third. The Narrator sits at the CENTRE, his head a quarter of the frame's height, bent to the page. The French window is black at the LEFT edge and the bookcases are black across the TOP.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.3,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "Men going about their petty concerns: the lead among them, busy with moral progress.",
+      "cuts": []
+    },
+    {
+      "index": 19,
+      "section": "runout",
+      "setup": "porch",
+      "size": "medium_close",
+      "faces": [],
+      "view": "",
+      "path": 0.3,
+      "frame": "Medium close of the Narrator in the grey herringbone tweed suit and straw boater and the Wife in the cream high-collared blouse and paisley shawl side by side on the gravel path at night, three-quarter to the camera, her face turned up to him with a smile, her slim hand with its gold band already at the crook of his grey tweed arm.",
+      "motion": "The camera pans right across the whole shot, travelling a finger's breadth; the glowing fanlight keeps the top; her hand slides into the crook of his arm and his arm draws it in; his head turns down to her.",
+      "camera": "on the gravel path level with their eyes, two long strides from them, a 50mm lens. The fanlight comes from BEHIND at the LEFT onto their shoulders and leaves the laurels beyond black",
+      "at_rest": "The Narrator's head and shoulders fill the LEFT half and the Wife's the RIGHT half of the frame, from the TOP third to the BOTTOM edge, their heads a third of the frame's height. The glowing fanlight sits between them at the TOP and the laurels are black at the RIGHT edge.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.5,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The marriage in one gesture: what the war will separate.",
+      "cuts": []
+    },
+    {
+      "index": 20,
+      "section": "runout",
+      "setup": "porch",
+      "size": "medium",
+      "faces": [
+        "unnamed_first_person_narrator",
+        "narrators_wife"
+      ],
+      "view": "",
+      "path": 0.4,
+      "frame": "Medium of the Narrator in the grey herringbone tweed suit and straw boater and the Wife in the cream high-collared blouse, sage-green skirt and paisley shawl walking arm in arm down the gravel path from the black front door, three-quarter to the camera, the fanlight glowing behind them, his free hand already raised toward the stars.",
+      "motion": "The camera pans right across the whole shot, travelling a forearm; the lit fanlight keeps the centre; the Narrator and the Wife walk a short stride down the gravel path; his raised hand points up at the sky and she turns her face up after it.",
+      "camera": "on the gravel path at a standing man's eye, three long strides from them, a 35mm lens. The fanlight comes from BEHIND them onto their shoulders and leaves the laurels and the sky black",
+      "at_rest": "The Narrator walks at the LEFT third and the Wife at the RIGHT third of the frame, each from the BOTTOM edge to the TOP third, heads a quarter of the frame's height. The black door and its glowing fanlight stand at the CENTRE behind them and the laurels are black at both edges.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.5,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "Home, domestic, safe: a husband explaining the sky to his wife.",
+      "cuts": []
+    },
+    {
+      "index": 21,
+      "section": "runout",
+      "setup": "porch",
+      "size": "medium_close",
+      "faces": [
+        "unnamed_first_person_narrator"
+      ],
+      "view": "",
+      "path": 0.6,
+      "frame": "Medium close of the Narrator in the grey herringbone tweed suit and straw boater on the gravel path at night with his face turned up to the stars, the grey eyes on the sky, the lit fanlight of the porch glowing behind his shoulder.",
+      "motion": "The camera pans right across the whole shot, travelling a finger's breadth; the glowing fanlight keeps the left third; his raised hand points up at the red dot overhead; his head turns to her.",
+      "camera": "on the gravel path level with his eyes, two long strides from him, a 50mm lens. The fanlight comes from BEHIND at the LEFT onto his shoulder and leaves the laurels and the sky black",
+      "at_rest": "The Narrator's head and shoulders fill the CENTRE of the frame from the straw boater at the TOP third to the grey tweed at the BOTTOM edge, his head a third of the frame's height, his face turned up. The glowing fanlight sits at the LEFT third and the laurels are black at the RIGHT edge.",
+      "end": "",
+      "changed": "",
+      "beat_s": 1.0,
+      "coda_s": 0.0,
+      "turn": "",
+      "why": "The last calm: the sounds of a sleeping suburb.",
+      "cuts": []
+    },
+    {
+      "index": 22,
+      "section": "button",
+      "setup": "porch",
+      "size": "medium_close",
+      "faces": [
+        "narrators_wife"
+      ],
+      "view": "",
+      "path": 0.8,
+      "frame": "Medium close of the Wife in the cream high-collared blouse, sage-green skirt and paisley shawl on the gravel path at night, her face turned up and toward the right, wide hazel eyes bright, one slim hand with its gold band raised toward the railway beyond the laurels.",
+      "motion": "The camera pans left across the whole shot, travelling a finger's breadth; the glowing fanlight keeps the left third; her raised hand points toward the railway; her face turns to him with a smile.",
+      "camera": "on the gravel path level with her eyes, two long strides from her, a 50mm lens. The fanlight comes from BEHIND at the LEFT onto her hair and cheek and leaves the laurels behind her black",
+      "at_rest": "The Wife's head and shoulders fill the CENTRE of the frame from her chestnut hair at the TOP third to the paisley shawl at the BOTTOM edge, her head a third of the frame's height. The glowing fanlight sits at the LEFT third and the laurels are black at the RIGHT edge.",
+      "end": "",
+      "changed": "",
+      "beat_s": 0.6,
+      "coda_s": 1.5,
+      "turn": "danger in the sky -> safe and tranquil at home",
+      "why": "The world's last word: beauty, safety -- the lights she admires sit on the line the Martians will come down.",
+      "cuts": []
+    }
+  ],
+  "lines": [
+    {
+      "index": 0,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "No one would have believed it, in those last years of the century. Our world was being watched.",
+      "shot": 0
+    },
+    {
+      "index": 1,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "Across the gulf of space, minds vast and cool watched our green Earth with envy.",
+      "shot": 1
+    },
+    {
+      "index": 2,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "Then Lavelle of Java wired news of a huge flame bursting out of Mars.",
+      "shot": 2
+    },
+    {
+      "index": 3,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "Men went about their little affairs. I was busy writing essays on moral progress.",
+      "shot": 3
+    },
+    {
+      "index": 4,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "I might never have heard of it, but for Ogilvy, the astronomer at Ottershaw. He was wild.",
+      "shot": 4
+    },
+    {
+      "index": 5,
+      "kind": "dialogue",
+      "speaker": "ogilvy",
+      "text": "Come and look. It came out of Mars like a shot from a gun.",
+      "shot": 5
+    },
+    {
+      "index": 6,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "I remember that vigil: the black dome, the lantern low, the clockwork ticking.",
+      "shot": 6
+    },
+    {
+      "index": 7,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "Through the glass: deep blue, and in the middle of it the little planet, swimming.",
+      "shot": 7
+    },
+    {
+      "index": 8,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "So small, so bright. Forty million miles of darkness lay between us.",
+      "shot": 8
+    },
+    {
+      "index": 9,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "Ogilvy moved about in the dark behind me, as the chronometer ran toward midnight.",
+      "shot": 9
+    },
+    {
+      "index": 10,
+      "kind": "dialogue",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "Ogilvy! A red flash, just now, at the edge of it!",
+      "shot": 11
+    },
+    {
+      "index": 11,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "He took the eyepiece at once, and cried out at the plume of gas.",
+      "shot": 12
+    },
+    {
+      "index": 12,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "I felt my way to the siphon, green and crimson swimming before my eyes.",
+      "shot": 13
+    },
+    {
+      "index": 13,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "I never dreamed of it. That night a second missile left Mars, flying for us.",
+      "shot": 14
+    },
+    {
+      "index": 14,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "At one o'clock he gave up the watch, and we lit the lantern.",
+      "shot": 15
+    },
+    {
+      "index": 15,
+      "kind": "dialogue",
+      "speaker": "ogilvy",
+      "text": "The chances against anything manlike on Mars are a million to one.",
+      "shot": 16
+    },
+    {
+      "index": 16,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "We walked down to his house. Below us, Ottershaw and Chertsey slept in peace.",
+      "shot": 17
+    },
+    {
+      "index": 17,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "For ten nights the flames came, and the papers joked about volcanoes on Mars.",
+      "shot": 18
+    },
+    {
+      "index": 18,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "One warm night, I took my wife out walking under the stars.",
+      "shot": 19
+    },
+    {
+      "index": 19,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "I showed her the Zodiac, and Mars creeping overhead.",
+      "shot": 20
+    },
+    {
+      "index": 20,
+      "kind": "narration",
+      "speaker": "unnamed_first_person_narrator",
+      "text": "Lights burned in upper windows. Far off, trains rang, soft as music.",
+      "shot": 21
+    },
+    {
+      "index": 21,
+      "kind": "dialogue",
+      "speaker": "narrators_wife",
+      "text": "Look, dear, the signal lights. Red and green and yellow. So bright.",
+      "shot": 22
+    }
+  ]
+}

@@ -1,0 +1,421 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "char-lucy_ferrier_outdoor_d3cfe9b2.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "char-jefferson_hope_outdoor_102857b4.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is Lucy Ferrier in <Picture 1>: A young woman of about twenty, slight and straight-backed with a lithe girlish figure, a fair oval face burnt a little ruddy across the cheekbones by the open air, clear hazel eyes, a straight nose and a wide mouth, and long chestnut hair parted in the centre and worn loose down her back to below the shoulder blades. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is Jefferson Hope in <Picture 2>: A tall, savage-looking young man in his middle twenties, wide in the shoulder and narrow at the waist, a dark fierce face burnt brown by the sun with high cheekbones and deep-set dark eyes, black hair swept back to the collar, and a full black beard cut close along the jaw. <Picture 2> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 3> is the location in <Picture 3>: The road at the city outskirts, packed bank to bank with a great drove of cattle on a warm June morning, 1860: long-horned bullocks shoulder to shoulder from wall to wall, a standing cloud of red dust to the height of a man, adobe walls and a rail corral on either side, hard white sun overhead <Picture 3> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a full shot of the mustang up on its hind legs in the packed drove.\n<Picture 5> is the first frame of [Shot 2], a medium two-shot at the mustang's head.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:04, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 2 shots in <Subject 3>, the road at the city outskirts. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 5> and runs from 00:04 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the man in [Shot 2]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, Warm high-summer palette of gold ripe wheat, red road dust and deep green pine, hard blue shadow under a clear bleached sky; the Utah valley and Salt Lake City, June 1860; American frontier, sunlight and lamplight only., 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 4>: a full shot of the mustang up on its hind legs in the packed drove, Lucy thrown back along its neck with the straw hat swung back on its ribbon, her hair loose, the horns of the bullocks crowded round its forelegs, red dust to her stirrup. The camera is on the road beside the herd at the height of a mounted man's eye, four long strides from the horse. The camera tilts up with the rearing horse across the whole shot, travelling a head's height as the mustang goes up and tosses its head against the bit, from 00:00 to 00:02. At 00:02 Lucy comes forward along its neck and takes a fresh grip on the reins, and the movement continues to the last frame of the shot. Behind him Six wild-looking herdsmen on ponies ride the flanks of the drove at a normal walking pace swinging coiled ropes, and two more sit their horses at the corral rail watching the road., from 00:00 to 00:04. By 00:04, the mustang's head and Lucy's shoulders stand at the top of the frame with the crowded horns carried out below the bottom edge.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to a medium two-shot at the mustang's head, beginning from <Picture 5>: a sinewy brown hand closed on the curb below the horse's jaw, <Subject 2> beside it on the powerful roan in the broad brown sombrero and the fringed buckskin, Lucy above on the mustang with her hair over her face. The camera pushes in on the two of them across the whole shot, travelling two long strides as <Subject 2> draws the mustang's head down and round toward his knee, from 00:04 to 00:07. <Subject 2> (S1), on screen, a tall, with a clipped English voice at an even pace, says: <d>[English] You're not hurt, I hope, miss.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:07, as the line ends, Lucy lifts her face out of her hair and looks down at his hand, and the lift continues to the last frame of the shot. Behind him Six wild-looking herdsmen on ponies ride the flanks of the drove at a normal walking pace swinging coiled ropes, and two more sit their horses at the corral rail watching the road., from 00:04 to 00:08. By 00:08, both riders stand half again as large with the horses' heads filling the bottom of the frame and the herd carried out past both edges.\n\noverall_soundscape: The ambience of the road at the city outskirts runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 192,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ],
+      "ref_images.ref_image_3": [
+        "21",
+        0
+      ],
+      "ref_images.ref_image_4": [
+        "22",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "28",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 90016
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_16",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "plate_the_drove_3dc1c6ba.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q16_0_26e4618d.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_4"
+    }
+  },
+  "22": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q17_0_54258db2.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_5"
+    }
+  },
+  "23": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q16_0_26e4618d.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q16_0_26e4618d.png @ 0"
+    }
+  },
+  "24": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "23",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor image @ 0"
+    }
+  },
+  "25": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q17_0_54258db2.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q17_0_54258db2.png @ 102"
+    }
+  },
+  "26": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "24",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "25",
+        0
+      ],
+      "frame_idx": 102
+    },
+    "_meta": {
+      "title": "anchor image @ 102"
+    }
+  },
+  "27": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "voice_16_d63b8346.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "28": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "26",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "27",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

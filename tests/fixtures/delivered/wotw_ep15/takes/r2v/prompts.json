@@ -1,0 +1,710 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "st_georges_battery",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/artilleryman/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_00.png"
+    ],
+    "faces": [
+      "artilleryman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.666667,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 103919,
+    "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in a pine-wooded Surrey hill at sunset occupies the picture. Violet lightning from the west strikes the pine crest and throws black shadows across rough heather. Field guns stand in a row through the centre and right. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low firelight from ahead, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on the pine battery fills the centre, a field gun stands at the left edge, <Subject 1> (dark brown eyes, dark blue serge frock jacket) occupies the lower centre, and a green smoke column rises to the upper edge. Heather covers the bottom edge; burning pine trunks frame the sides. The camera is The camera stands at shoulder height behind the heather slope. At the first frame the field guns stand across the whole shot, the artilleryman (dark brown eyes, dark blue serge frock jacket) stands at the nearest trail, and green smoke hangs above the crest. Heather fills the BOTTOM edge, pine trunks frame the sides, and the distant hill occupies the upper background. The camera pans from the burning pine trunks across to the field guns across the whole shot as <Subject 1> grips the gun trail, from 00:00 to 00:04. At 00:04 green smoke coils upward above the crest, and the movement continues to the last frame of the shot. Behind <Subject 1> one distant gunner works beside the limber; pine branches stir in the wind, from 00:00 to 00:09. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he grips the gun trail. By 00:09 the camera is panning through the last frame, with the gun line now in frame, and the action continues with it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "st_georges_battery",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/artilleryman/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_01.png"
+    ],
+    "faces": [
+      "artilleryman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 9.333333,
+    "frames": 243,
+    "seconds": 10.12,
+    "steps": 8,
+    "seed": 111839,
+    "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 10.12-second take of 1 shot in a pine-wooded Surrey hill at sunset occupies the picture. Violet lightning from the west strikes the pine crest and throws black shadows across rough heather. Field guns stand in a row through the centre and right. [Shot 1] runs from 00:00 to 00:10. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low firelight from ahead, black shadows.\n[Shot 1] From 00:00 to 00:10. The shot opens on one field gun stands at the lower left edge and <Subject 1> (dark brown eyes, dark blue serge frock jacket) stands between pine trunks at the centre. The road and smoke lie beyond, the smoke reaches the upper edge, the limber occupies the right edge, and sparks cross the upper edge. The camera is The camera stands at waist height beside the earth bank. At the first frame the artilleryman (dark brown eyes, dark blue serge frock jacket) grips the field gun at the lower LEFT edge. A pine trunk fills the near LEFT edge, the road lies beyond the CENTRE, and green smoke hangs above the far crest. A limber occupies the RIGHT background. The camera tracks sideways to the right past a pine trunk, with <Subject 1> behind it across the whole shot as <Subject 1> lifts the gun trail, from 00:00 to 00:05. At 00:05 sparks scatter from the gun mouth, and the movement continues to the last frame of the shot. Behind <Subject 1> one distant gunner loads beside the limber; pine branches shake above the gun line, from 00:00 to 00:10. <Subject 1>'s mouth is closed from 00:00 to 00:07 while he lifts the gun trail. By 00:10 the camera is tracking through the last frame, and the action continues with it, and <Subject 1> leans into the gun, sparks cross the centre, and the pine trunks frame the road.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "friction",
+    "setup": "st_georges_battery",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "refs/characters/artilleryman/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_02.png"
+    ],
+    "faces": [
+      "martians",
+      "artilleryman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.541667,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 119759,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Subject 2> is the artilleryman in <Picture 2>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in a pine-wooded Surrey hill at sunset occupies the picture. Violet lightning from the west strikes the pine crest and throws black shadows across rough heather. Field guns stand in a row through the centre and right. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low firelight from ahead, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on a shell-lit pine slope fills the frame: one fallen Martian (two immense dark eyes, bare oily brown-grey skin) occupies the centre, <Subject 2> stands at the lower right, pine trunks frame both side edges, shell sparks cross the lower edge, and smoke reaches the upper edge. The camera is The camera stands at knee height on the heather slope. At the first frame Shell sparks surround the fallen Martian (two immense dark eyes, bare oily brown-grey skin) across the whole shot at the CENTRE. The artilleryman stands at the lower RIGHT beside the field gun, pine trunks frame the side edges, and smoke rises behind the crest, his head a third of the frame's height. The camera tilts up from shell sparks to <Subject 1> across the whole shot as the Martian's tentacles fold beneath its bulk, from 00:00 to 00:04. At 00:04 pine branches flare with reflected light, and the movement continues to the last frame of the shot. Behind them one distant gunner ducks beside the earth bank; pine needles fall through shell light, from 00:00 to 00:09. <Subject 2>'s mouth is closed from 00:00 to 00:07 while the Martian's tentacles fold beneath its bulk. By 00:09 the camera is tilting up through the last frame, and the action continues with it, and <Subject 1> lies among shell flashes, <Subject 2> crouches by the gun, and burning pine needles fall.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "spike",
+    "setup": "st_georges_battery",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/artilleryman/sheet.png",
+      "refs/characters/martians/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_03.png"
+    ],
+    "faces": [
+      "artilleryman",
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.541667,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 127679,
+    "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian in <Picture 2>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 2> defines this creature alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in a pine-wooded Surrey hill at sunset occupies the picture. Violet lightning from the west strikes the pine crest and throws black shadows across rough heather. Field guns stand in a row through the centre and right. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low firelight from ahead, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on <Subject 1> (dark brown eyes, dark blue serge frock jacket) stands at the centre beside the gun line, a Martian rises at the far centre beyond the pine trunks, and ammunition cases fill the lower edge beneath the red fire glow. Pine trunks frame the left and right edges, and smoke reaches the upper edge. The camera is The camera stands at chest height behind the ammunition waggon. At the first frame the artilleryman (dark brown eyes, dark blue serge frock jacket) crouches beside the field gun at the CENTRE. Ammunition cases lie along the lower edge, the pine trunks frame both sides, and a Martian bulk rises beyond the trees at the far CENTRE. The camera keeps a locked-off frame across the whole shot as <Subject 1> ducks beside the field gun, from 00:00 to 00:04. At 00:04 flame climbs through the pine branches, and the climb continues to the last frame of the shot. Behind them one gunner runs along the earth bank; fire runs through the pine branches, from 00:00 to 00:09. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he ducks beside the field gun. By 00:09 the action of that shot continues through the last frame, and <Subject 1> reaches for the earth bank, ammunition bursts behind him, and fire climbs the trees.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "reaction",
+    "setup": "st_georges_battery",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_04.png"
+    ],
+    "faces": [
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.0,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 135599,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a pine-wooded Surrey hill at sunset occupies the picture. Violet lightning from the west strikes the pine crest and throws black shadows across rough heather. Field guns stand in a row through the centre and right. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low firelight from ahead, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on three Martian machines occupy the hill: one low behind the earth bank at the lower centre and two upright beyond it at the left and right edges, with smoke behind the pine crest at the upper edge. The camera is The camera stands at ground height beside the heather. At the first frame a damaged Martian support lies beneath the low machine at the lower CENTRE. Two Martian machines stand among the pines at the LEFT and RIGHT edges, and smoke drifts above the crest. The earth bank runs across the foreground. The camera pulls back from the damaged support, widening to show the pine crest across the whole shot as one Martian lifts a tentacle, from 00:00 to 00:02. At 00:02 the other machines angle their tubes toward the valley, and the movement continues to the last frame of the shot. Behind <Subject 1> one distant scout watches from the pine edge; smoke streams between the trunks, from 00:00 to 00:05. <Subject 1>'s mouth is closed from 00:00 to 00:03 while one Martian lifts a tentacle. By 00:05 the camera is pulling back through the last frame, and the action continues with it, and three Martian machines occupy the hill, one support rises beneath the damaged bulk, and smoke streams toward the valley.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "setup",
+    "setup": "st_georges_battery",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/artilleryman/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_05.png"
+    ],
+    "faces": [
+      "artilleryman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.583333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 143519,
+    "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.88-second take of 1 shot in a pine-wooded Surrey hill at sunset occupies the picture. Violet lightning from the west strikes the pine crest and throws black shadows across rough heather. Field guns stand in a row through the centre and right. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low firelight from ahead, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on the nearest field gun fills the lower left edge, the artilleryman's hands occupy the lower centre, pine trunks frame the left and right edges, and the earth bank runs along the bottom edge. The gun barrels point toward the smoky crest at the upper edge. The camera is The camera stands at hand height beside the gun trail. At the first frame the nearest field gun stands at the lower left edge, the artilleryman's hands rest on the sight at the lower centre, pine trunks frame both side edges, and smoke hangs above the crest at the upper edge. The camera keeps a locked-off frame across the whole shot as <Subject 1> sets the gun sights, from 00:00 to 00:02. At 00:02 pine branches tremble above the battery, and the movement continues to the last frame of the shot. Behind <Subject 1> one distant gunner watches beside the limber; smoke hangs between the pine trunks, from 00:00 to 00:05. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he sets the gun sights. By 00:05 the action of that shot continues through the last frame, and the gun sights align across the centre, the artilleryman's hands settle on the trail, and pine branches tremble overhead.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "st_georges_battery",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/artilleryman/sheet.png",
+      "refs/characters/martians/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_06.png"
+    ],
+    "faces": [
+      "artilleryman",
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.291667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 151439,
+    "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Martian in <Picture 2>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 2> defines this creature alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a pine-wooded Surrey hill at sunset occupies the picture. Violet lightning from the west strikes the pine crest and throws black shadows across rough heather. Field guns stand in a row through the centre and right. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows it; <Picture 2> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low firelight from ahead, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on <Subject 1> (dark brown eyes, dark blue serge frock jacket) stands at the lower left edge beside the field gun. Shell sparks cross the lower edge, pine trunks frame the left and right edges, the damaged <Subject 2> occupies the far centre beneath the smoky upper edge, and firelight fills the background. The camera is The camera stands at shoulder height behind the earth bank. At the first frame the artilleryman (dark brown eyes, dark blue serge frock jacket) stands at the lower left edge beside the field gun. The damaged Martian across the whole shot occupies the far centre, pine trunks frame both side edges, and shell sparks fill the lower edge. The camera pans from <Subject 1> across to the damaged <Subject 2> across the whole shot as shell sparks cross the gun line, from 00:00 to 00:04. At 00:04 smoke rises beyond the pine trunks, and the movement continues to the last frame of the shot. Behind them one distant gunner loads beside the limber; pine branches shake above the battery, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:07 while shell sparks cross the gun line. By 00:08 the camera is panning through the last frame, and the action continues with it, and the shell-lit <Subject 2> staggers at the far centre, <Subject 1> braces by the gun, and sparks cross the pine slope.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "reaction",
+    "setup": "st_georges_battery",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_07.png"
+    ],
+    "faces": [
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 1.708333,
+    "frames": 56,
+    "seconds": 2.33,
+    "steps": 8,
+    "seed": 159359,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 2.33-second take of 1 shot in a pine-wooded Surrey hill at sunset occupies the picture. Violet lightning from the west strikes the pine crest and throws black shadows across rough heather. Field guns stand in a row through the centre and right. [Shot 1] runs from 00:00 to 00:02. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, low firelight from ahead, black shadows.\n[Shot 1] From 00:00 to 00:02. The shot opens on a close view keeps the damaged <Subject 1> support beneath the hood at the centre, pine needles fill the lower edge, the earth bank crosses the left background, smoke hangs between the trunks, a second machine stands at the far right edge, and the pine canopy reaches the upper edge; only that object and what touches it is in frame. The camera is The camera stands at ground height beside the heather. At the first frame the damaged Martian support lies beneath the hood at the CENTRE of the insert. Pine needles fill the lower edge, the earth bank crosses the LEFT background, smoke hangs between the trunks, and a second machine stands at the far RIGHT edge. The camera tracks sideways to the right past pine needles, with the damaged support behind it across the whole shot as a tentacle works at the support, from 00:00 to 00:01. At 00:01 smoke streams between the pine trunks, and the movement continues to the last frame of the shot. By 00:02 the camera is tracking through the last frame, and the action continues with it, and the support lifts beneath the hood, pine needles shift, and smoke streams across the crest.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "transition",
+    "setup": "halliford_ditch",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/characters/curate/sheet.png",
+      "refs/characters/martians/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_08.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "curate",
+      "martians"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.208333,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 167279,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Bare to the waist: torso, back and shoulders streaked black with smoke and patched with raw pink scalds on the back and forearms. Water-soaked charcoal-grey worsted trousers, braces hanging loose at the hips, stockinged feet in grey wool socks. Bareheaded, face blackened by smoke, hair matted. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Curate in <Picture 2>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Soot-smudged white linen shirt sleeves under a black clerical waistcoat buttoned to a white Anglican dog collar, black wool trousers, black elastic-sided boots. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 3> is the Martian in <Picture 3>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 3> defines this creature alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 4> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a straight country road runs north through Upper Halliford between high hawthorn hedges. Moonlight from the east touches the road and violet lightning from the west throws black shadows into a broad ditch along the right edge. Dewy nettles and brambles fill the ditch. Flat grass meadows stretch beyond the hedge beneath milky mist. The narrator and curate travel along the road. Martian machines rise across the fields. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2>, <Subject 3> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 3> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 3> carry into every shot that shows it; <Picture 3> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 4> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Upper Halliford, 1894, moonlight from the right, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on two black fighting machines cross a milky field mist while <Subject 1> (grey eyes, water-soaked charcoal-grey worsted trousers) and the curate (Rather large pale blue eyes, black clerical waistcoat) approach along the road. The ditch fills the right edge, the road fills the lower left, the machines mark the far horizon, the mist reaches the upper edge, and the moon occupies the top edge. The camera is The camera stands at shoulder height on the road's left verge. At the first frame the narrator (grey eyes, water-soaked charcoal-grey worsted trousers) walks at the left edge of the road, and the curate (Rather large pale blue eyes, black clerical waistcoat) walks near the centre. Two Martian machines rise across the mist at the far right edge. The camera tracks beside the two figures toward the ditch across the whole shot as <Subject 1> raises one arm toward the hedge, from 00:00 to 00:04. At 00:04 two machines cross the mist beyond, and the crossing continues to the last frame of the shot. Behind them one distant battery observer watches beyond the hedge, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he raises one arm toward the hedge. By 00:08 the camera is tracking through the last frame, and the action continues with it, and the two figures reach the ditch, the nearer machine faces Sunbury, and the second machine fades toward Staines.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "halliford_ditch",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/curate/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_09.png"
+    ],
+    "faces": [
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.75,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 175199,
+    "prompt": "subject_definitions:\n<Subject 1> is Curate in <Picture 1>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Soot-smudged white linen shirt sleeves under a black clerical waistcoat buttoned to a white Anglican dog collar, black wool trousers, black elastic-sided boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in a straight country road runs north through Upper Halliford between high hawthorn hedges. Moonlight from the east touches the road and violet lightning from the west throws black shadows into a broad ditch along the right edge. Dewy nettles and brambles fill the ditch. Flat grass meadows stretch beyond the hedge beneath milky mist. The narrator and curate travel along the road. Martian machines rise across the fields. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Upper Halliford, 1894, moonlight from the right, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on the curate's face (Rather large pale blue eyes, black clerical waistcoat) fills the right half of the frame, hawthorn occupies the left edge, mist fills the background, a black machine marks the far centre, the ditch crosses the bottom edge, and the moonlit sky reaches the upper edge. The camera is A low angle from knee height looking up at the curate. At the first frame the curate (Rather large pale blue eyes, black clerical waistcoat) stands beside the hawthorn hedge at the RIGHT edge, his head spanning one quarter of the frame height. The ditch opens behind his shoulder, wet leaves fill the lower edge, and a black machine moves across the mist. The camera cranes up from the ditch edge to the curate across the whole shot as the curate turns toward the ditch, from 00:00 to 00:04. At 00:04 his curls tremble in the damp wind, and the movement continues to the last frame of the shot. Behind <Subject 1> one distant observer watches beyond the hedge; mist slides between the hawthorn branches, from 00:00 to 00:09. <Subject 1>'s mouth is closed from 00:00 to 00:07 while his curls tremble in the damp wind. By 00:09 the camera is craning up through the last frame, and the action continues with it, and the curate leans toward the ditch, the hedge frames his face, and mist passes behind him.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "setup",
+    "setup": "halliford_ditch",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/characters/curate/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_10.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.833333,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 183119,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Bare to the waist: torso, back and shoulders streaked black with smoke and patched with raw pink scalds on the back and forearms. Water-soaked charcoal-grey worsted trousers, braces hanging loose at the hips, stockinged feet in grey wool socks. Bareheaded, face blackened by smoke, hair matted. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Curate in <Picture 2>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Soot-smudged white linen shirt sleeves under a black clerical waistcoat buttoned to a white Anglican dog collar, black wool trousers, black elastic-sided boots. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a straight country road runs north through Upper Halliford between high hawthorn hedges. Moonlight from the east touches the road and violet lightning from the west throws black shadows into a broad ditch along the right edge. Dewy nettles and brambles fill the ditch. Flat grass meadows stretch beyond the hedge beneath milky mist. The narrator and curate travel along the road. Martian machines rise across the fields. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Upper Halliford, 1894, moonlight from the right, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on <Subject 1> (grey eyes, water-soaked charcoal-grey worsted trousers) enters the ditch beside wet nettles and brambles, with the curate at the hedge. The road occupies the left edge, the ditch fills the lower right, mist lies beyond the hedge, the hawthorn crowns the upper edge, and bramble stems cross the bottom edge. The camera is The camera stands at waist height on the road shoulder. At the first frame the narrator (grey eyes, water-soaked charcoal-grey worsted trousers) reaches the ditch edge at the lower CENTRE, his head spanning one fifth of the frame height. The curate stands above the hedge at the upper RIGHT, wet nettles fill the foreground, and the road runs along the LEFT edge. The camera keeps a locked-off frame across the whole shot as <Subject 1> lowers his shoulders into the ditch, from 00:00 to 00:04. At 00:04 bramble leaves shake beside his hands, and the movement continues to the last frame of the shot. Behind them one distant observer watches along the road; wet nettles sway in the ditch, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:06 while he lowers his shoulders into the ditch. By 00:08 the action of that shot continues through the last frame, and <Subject 1> settles among the nettles, the curate bends over the hedge, and bramble stems sway beside them.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "setup",
+    "setup": "halliford_ditch",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_11.png"
+    ],
+    "faces": [
+      "martians",
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.666667,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 191039,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Narrator in <Picture 2>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Bare to the waist: torso, back and shoulders streaked black with smoke and patched with raw pink scalds on the back and forearms. Water-soaked charcoal-grey worsted trousers, braces hanging loose at the hips, stockinged feet in grey wool socks. Bareheaded, face blackened by smoke, hair matted. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in a straight country road runs north through Upper Halliford between high hawthorn hedges. Moonlight from the east touches the road and violet lightning from the west throws black shadows into a broad ditch along the right edge. Dewy nettles and brambles fill the ditch. Flat grass meadows stretch beyond the hedge beneath milky mist. The narrator and curate travel along the road. Martian machines rise across the fields. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Upper Halliford, 1894, moonlight from the right, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on the ditch fills the lower right edge, the hawthorn hedge forms the lower left edge, milky fields fill the centre, two distant black machines mark the far centre and far left beneath the moon at the upper edge, and the road crosses the bottom edge. The camera is The camera stands on the hedge crest at a high angle. At the first frame the road runs beneath the hedge at the lower edge, the ditch keeps the narrator and curate at the lower RIGHT, and two Martian machines face opposite fields at the far CENTRE and far LEFT. Mist covers the middle distance, while the moon occupies the upper edge. The camera rises above the hedge, looking down over the road and fields across the whole shot as the two machines take positions around distant cylinders, from 00:00 to 00:04. At 00:04 mist spreads along the ditches, and the movement continues to the last frame of the shot. Behind <Subject 1> one distant battery observer watches from the far meadow; mist spreads across the flat meadows, from 00:00 to 00:09. <Subject 1>'s mouth is closed from 00:00 to 00:07 while the two machines take positions around distant cylinders. By 00:09 the camera is rising through the last frame, and the action continues with it, and the hedge forms a dark foreground line, machines mark the far meadow, and mist spreads around their cylinders.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "turn",
+    "setup": "halliford_ditch",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "refs/characters/curate/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_12.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator",
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l11.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.5,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 198959,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Bare to the waist: torso, back and shoulders streaked black with smoke and patched with raw pink scalds on the back and forearms. Water-soaked charcoal-grey worsted trousers, braces hanging loose at the hips, stockinged feet in grey wool socks. Bareheaded, face blackened by smoke, hair matted. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Subject 2> is Curate in <Picture 2>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Soot-smudged white linen shirt sleeves under a black clerical waistcoat buttoned to a white Anglican dog collar, black wool trousers, black elastic-sided boots. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in a straight country road runs north through Upper Halliford between high hawthorn hedges. Moonlight from the east touches the road and violet lightning from the west throws black shadows into a broad ditch along the right edge. Dewy nettles and brambles fill the ditch. Flat grass meadows stretch beyond the hedge beneath milky mist. The narrator and curate travel along the road. Martian machines rise across the fields. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Upper Halliford, 1894, moonlight from the right, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on the narrator's shoulder fills the left foreground, the curate's face (Rather large pale blue eyes, black clerical waistcoat) occupies the right centre, the ditch edge crosses the lower frame, the hedge opening toward the dark road fills the background, and the upper hedge crosses the top edge. The camera is A high angle looking down over the narrator's shoulder toward the curate; the camera stands at the ditch edge. At the first frame the narrator's shoulder fills the LEFT foreground, and the narrator (grey eyes, water-soaked charcoal-grey worsted trousers) reaches from that position. The curate's face (Rather large pale blue eyes. The camera tracks beside <Subject 1> for toward the curate across the whole shot as <Subject 1> pulls the curate into the ditch, from 00:00 to 00:06. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] I draw the curate into cover; his fear changes our route from flight to watching.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, the curate folds beside his hand, and the movement continues to the last frame of the shot. Behind them one distant observer watches beyond the hedge; leaves tremble over the ditch, from 00:00 to 00:08. By 00:08 the camera is tracking through the last frame, and the action continues with it, and <Subject 1> grips the curate's sleeve, the curate lowers beside him, and the hedge covers their shoulders.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "friction",
+    "setup": "halliford_ditch",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/curate/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_13.png"
+    ],
+    "faces": [
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l12.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.416667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 206879,
+    "prompt": "subject_definitions:\n<Subject 1> is Curate in <Picture 1>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Soot-smudged white linen shirt sleeves under a black clerical waistcoat buttoned to a white Anglican dog collar, black wool trousers, black elastic-sided boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in a straight country road runs north through Upper Halliford between high hawthorn hedges. Moonlight from the east touches the road and violet lightning from the west throws black shadows into a broad ditch along the right edge. Dewy nettles and brambles fill the ditch. Flat grass meadows stretch beyond the hedge beneath milky mist. The narrator and curate travel along the road. Martian machines rise across the fields. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Upper Halliford, 1894, moonlight from the right, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on the narrator's shoulder fills the left foreground, the curate's face (Rather large pale blue eyes, black clerical waistcoat) occupies the right centre, the ditch edge crosses the lower frame, the hedge opening fills the background, and the road enters at the left edge. The camera is The camera stands at chest height above the ditch, facing the curate from the narrator's left. At the first frame the curate's face across the whole shot occupies the RIGHT CENTRE, his head spanning one quarter of the frame height. The narrator's shoulder occupies the LEFT foreground. The camera pans from the narrator's shoulder across to the curate's face at the right centre across the whole shot as the curate speaks toward the narrator, from 00:00 to 00:03. <Subject 1> (S1), on screen, man of 34, with a clipped English voice at an even pace, says: <d>[English] What has happened?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, mist moves behind his cheek, and the movement continues to the last frame of the shot. Behind <Subject 1> one distant observer watches beyond the hedge; mist moves across the meadow, from 00:00 to 00:07. By 00:07 the camera is panning through the last frame, and the action continues with it, and the curate turns toward the narrator, his hand points over the hedge, and mist moves behind his cheek.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "reaction",
+    "setup": "halliford_ditch",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_14.png"
+    ],
+    "faces": [
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l13.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.666667,
+    "frames": 124,
+    "seconds": 5.17,
+    "steps": 8,
+    "seed": 214799,
+    "prompt": "subject_definitions:\n<Subject 1> is the Narrator in <Picture 1>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Bare to the waist: torso, back and shoulders streaked black with smoke and patched with raw pink scalds on the back and forearms. Water-soaked charcoal-grey worsted trousers, braces hanging loose at the hips, stockinged feet in grey wool socks. Bareheaded, face blackened by smoke, hair matted. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 5.17-second take of 1 shot in a straight country road runs north through Upper Halliford between high hawthorn hedges. Moonlight from the east touches the road and violet lightning from the west throws black shadows into a broad ditch along the right edge. Dewy nettles and brambles fill the ditch. Flat grass meadows stretch beyond the hedge beneath milky mist. The narrator and curate travel along the road. Martian machines rise across the fields. [Shot 1] runs from 00:00 to 00:05. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Upper Halliford, 1894, moonlight from the right, black shadows.\n[Shot 1] From 00:00 to 00:05. The shot opens on the narrator's face (grey eyes, water-soaked charcoal-grey worsted trousers) occupies the centre above the wet hedge, one star shines at the upper edge, mist fills the background, the ditch edge crosses the lower frame, and brambles frame the left and right edges. The camera is A high angle looking down on the narrator; the camera stands at the hedge crest. At the first frame the narrator (grey eyes, water-soaked charcoal-grey worsted trousers) crouches among the brambles at the CENTRE, his head spanning one half of the frame height. The curate's shoulder rests at the RIGHT edge, the hedge crosses the lower frame. The camera tracks laterally to the right past a bramble stem, with <Subject 1> behind it across the whole shot as <Subject 1> answers toward the curate, from 00:00 to 00:02. <Subject 1> (S1), on screen, long oval face, with a clipped English voice at an even pace, says: <d>[English] Heaven knows!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:02, as the line ends, mist drifts across his cheek, and the movement continues to the last frame of the shot. Behind <Subject 1> one distant observer watches beyond the hedge; mist drifts below the branches, from 00:00 to 00:05. By 00:05 the camera is tracking through the last frame, and the action continues with it, and <Subject 1> raises his face, the curate watches him, and mist drifts across his cheek.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "spike",
+    "setup": "halliford_ditch",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/martians/sheet.png",
+      "refs/characters/unnamed_first_person_narrator/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_15.png"
+    ],
+    "faces": [
+      "martians",
+      "unnamed_first_person_narrator"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 9.041667,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 222719,
+    "prompt": "subject_definitions:\n<Subject 1> is the Martian in <Picture 1>: A rounded grey-brown bulk the size of a bear and four feet across, whose whole body is one huge head. Oily grey-brown skin, fungoid, glistening like wet leather and pulsing with laboured breath. Face: two immense dark eyes, below them a fleshy beak and a quivering V-shaped lipless mouth with a pointed upper lip and a wedgelike lower lip; a smooth domed brow. Sixteen slender grey whiplike tentacles as thick as a walking stick, hanging in two drooping bunches of eight on either side of the mouth and taking the bulk's weight on the ground. A tight pale drum-skin ear disc on the back of the bulk. Wearing: Bare oily brown-grey skin glistening like wet leather, saliva dripping from the V-shaped mouth, body heaving and pulsating with laboured breathing, tentacles gripping the rim of the cylinder, streaks of pale sand dust on the underside. <Picture 1> defines this creature alone; each shot keeps the framing its own words describe.\n<Subject 2> is the Narrator in <Picture 2>: Long oval face, high forehead, long straight nose, straight dark brows, grey eyes. Fair English skin lightly tanned on face and hands. Dark brown hair cut short at back and sides, parted on the left and combed smooth. Neat close-trimmed dark brown moustache; shaven cheeks and chin. Wearing: Bare to the waist: torso, back and shoulders streaked black with smoke and patched with raw pink scalds on the back and forearms. Water-soaked charcoal-grey worsted trousers, braces hanging loose at the hips, stockinged feet in grey wool socks. Bareheaded, face blackened by smoke, hair matted. <Picture 2> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 3> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in a straight country road runs north through Upper Halliford between high hawthorn hedges. Moonlight from the east touches the road and violet lightning from the west throws black shadows into a broad ditch along the right edge. Dewy nettles and brambles fill the ditch. Flat grass meadows stretch beyond the hedge beneath milky mist. The narrator and curate travel along the road. Martian machines rise across the fields. [Shot 1] runs from 00:00 to 00:09. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the creature in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows it; <Picture 1> serves as a definition of the creature and each shot keeps the framing its own words describe.\n<Subject 2> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Upper Halliford, 1894, moonlight from the right, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on the hedge crest fills the lower edge, a Martian beside the riverbank stands at the far centre, its raised tube occupies the upper right edge, distant vapour summits fill the background, and the deep blue sky spans the top edge; only that object and what touches it is in frame. The camera is The camera stands at chest height inside the ditch, aimed toward Sunbury. At the first frame the Martian (two immense dark eyes, bare oily brown-grey skin) stands beside the riverbank at the far CENTRE with its tube angled upward at the RIGHT edge. The narrator and curate watch from the hedge at the lower LEFT, white mist covers the fields, and distant hills fill the upper background. The camera pushes in toward <Subject 1> across the whole shot as <Subject 1> raises its tube, from 00:00 to 00:04. At 00:04 the ground quivers beneath the report, and the movement continues to the last frame of the shot. By 00:09 the camera is pushing in through the last frame, and the action continues with it, and <Subject 1> keeps the tube aloft, a projectile crosses the sky, and the hedge shivers.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "payoff",
+    "setup": "street_cobham_spire",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep15/storyboard/h3/shot_16.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.333333,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 230639,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a grey stone church spire rises above Street Cobham. Sunlight from the east catches the weathercock and violet lightning from the west throws black shadows across the parapet. The narrow stone parapet occupies the foreground. Beneath it. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert view of the highest black vapour hill occupies the centre, the white mist sea fills the lower edge, a second summit marks the right edge, the third darkens the left horizon, and one solitary star shines at the upper edge; only that object and what touches it is in frame. The camera is The camera stands on the hedge crest at eye height. At the first frame White mist covers the low fields at the lower edge, the highest black vapour hill across the whole shot rises toward Sunbury at the CENTRE, and a second summit stands across the river at the RIGHT edge. The northern horizon occupies the LEFT background, with one solitary star above the mist. The camera tilts up from the mist to the highest black vapour hill across the whole shot as the vapour broadens over the fields, from 00:00 to 00:04. At 00:04 the dark hills continue widening across the horizon, and the movement continues to the last frame of the shot. By 00:08 the camera is tilting up through the last frame, and the action continues with it, and three black vapour hills broaden across the horizon, the mist sinks beneath them, and the dark vapour continues widening.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "transition",
+    "setup": "street_cobham_spire",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep15/storyboard/h3/shot_17.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.0,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 238559,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a grey stone church spire rises above Street Cobham. Sunlight from the east catches the weathercock and violet lightning from the west throws black shadows across the parapet. The narrow stone parapet occupies the foreground. Beneath it. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a church spire parapet fills the bottom edge and the weathercock marks the upper left. Red roofs and green trees emerge at the centre, heavy black vapour covers the lower valley, distant hills form the upper right band, and blue sky fills the top edge. The camera is The camera stands on the spire parapet at shoulder height. At the first frame the weathercock rises above the stone parapet at the upper left, black vapour covers the village below, and red roofs across the whole shot occupy the centre. Green trees emerge at the right edge. Distant hills line the upper right, the blue sky fills the top edge, and the parapet crosses the bottom edge. The camera pulls back from the weathercock, widening to show the village beneath it across the whole shot as the vapour folds around the roofs, from 00:00 to 00:04. At 00:04 sunlight glints on the stone parapet, and the movement continues to the last frame of the shot. Beyond the foreground one distant roof watcher stands above the vapour; vapour folds around roofs and trees, from 00:00 to 00:08. By 00:08 the camera is pulling back through the last frame, and the action continues with it, and the spire parapet frames the wide valley, roofs rise through the vapour, and distant hills are clear.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "transition",
+    "setup": "street_cobham_spire",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep15/storyboard/h3/shot_18.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.375,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 246479,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a grey stone church spire rises above Street Cobham. Sunlight from the east catches the weathercock and violet lightning from the west throws black shadows across the parapet. The narrow stone parapet occupies the foreground. Beneath it. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, sunlight from the east, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on the weathercock stands at the left edge above the stone parapet, red roofs occupy the centre, green trees rise at the right edge, black vapour covers the lower valley beneath distant hills and blue sky, and the parapet crosses the bottom edge; only that object and what touches it is in frame. The camera is The camera stands at shoulder height beside the weathercock. At the first frame the weathercock stands at the LEFT edge above the stone parapet. The red roofs across the whole shot occupy the CENTRE, green trees rise at the RIGHT edge, and black vapour covers the lower valley. Distant hills form the upper background beneath the blue sky. The camera pans from the weathercock across to the red roofs across the whole shot as vapour folds around the roofs, from 00:00 to 00:04. At 00:04 a distant tree crown lifts above the black expanse, and the lift continues to the last frame of the shot. By 00:08 the camera is panning through the last frame, and the action continues with it, and the parapet crosses the foreground, the roofs puncture the vapour, and tree crowns continue rising above it.\n\noverall_soundscape: Open air under the action; cloth, footsteps and hands at work.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "spike",
+    "setup": "esher_battery",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/artilleryman/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_19.png"
+    ],
+    "faces": [
+      "artilleryman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.916667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 254399,
+    "prompt": "subject_definitions:\n<Subject 1> is the artilleryman in <Picture 1>: Square weather-browned face, heavy black brows, dark brown eyes, broad nose. Thick straight black hair cut short at the sides and falling forward over the brow and eyes. Full black moustache. Broad calloused hands. Wearing: Royal Horse Artillery driver's dark blue serge frock jacket with scarlet stand collar and brass buttons, hanging unbuttoned; dark blue pantaloons with a broad scarlet stripe; black riding boots with steel spurs. Hatless, his thick black hair falling forward over his brow. Uniform and face blackened with ash and soot, back of the jacket scorched brown. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in a grass hill near Esher keeps a British field battery at twilight. A westward fire in the valley throws red light across the hill. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, westward fire, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on the Esher battery fills the frame: <Subject 1> (dark brown eyes, dark blue serge frock jacket) stands at the lower left beside the guns, ammunition fills the lower centre, hospital tents mark the far right, a towering black vapour cone rises behind them, and the smoke reaches the upper edge. The camera is The camera stands at shoulder height behind the field guns. At the first frame the artilleryman watches from the gun line at the lower LEFT. Ammunition cases sit beside him, a black vapour cone advances across the CENTRE, and white hospital tents occupy the far RIGHT. Limbers and horses stand behind the guns. The camera tracks laterally to the right past the earth bank, with the advancing vapour behind it across the whole shot as <Subject 1> turns from the gun line, from 00:00 to 00:04. At 00:04 hospital tent canvas flutters at the far edge, and the movement continues to the last frame of the shot. Behind <Subject 1> two civilian spectators watch beside the hospital tents; vapour rolls over the grass hill, from 00:00 to 00:08. <Subject 1>'s mouth is closed from 00:00 to 00:07 while he turns from the gun line. By 00:08 the camera is tracking through the last frame, and the action continues with it, and the vapour covers the earth bank, <Subject 1> bends beside the gun, and the tents fade behind black folds.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "answer",
+    "setup": "richmond_street",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep15/storyboard/h3/shot_20.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.833333,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 262319,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in a steep Richmond street descends between Georgian brick houses before dawn. Grey dawn from the east touches the upper windows while violet lightning from the west throws black shadows across the paving. Gas lamps line the street. [Shot 1] runs from 00:00 to 00:09. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, upper windows from the east, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on richmond's steep brick street fills the frame, the nearest gas lamp stands at the left edge, black vapour fills the lower roadway, railings line the right edge, upper windows and the grey dawn sky occupy the upper half, and the riverward street reaches the top centre. The camera is The camera stands at first-floor height beside the nearest brick house. At the first frame the nearest gas lamp marks the LEFT foreground, black vapour fills the lower street, and upper windows face the riverward slope. Brick houses frame both side edges, railings line the RIGHT pavement, and the grey dawn sky occupies the upper edge. The camera rises a measured hand's breadth above the nearest gas lamp across the whole shot as vapour pours between the houses, from 00:00 to 00:04. At 00:04 a grey dawn glow grows above the roofs, and the movement continues to the last frame of the shot. Beyond the foreground one distant Londoner climbs the upper pavement at a walking pace; vapour pours downhill between the houses, from 00:00 to 00:09. By 00:09 the camera is rising through the last frame, and the action continues with it, and the gas lamp stands above the vapour, brick houses frame the street, and dawn light opens beyond the roofs.\n\noverall_soundscape: Open air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "button",
+    "setup": "halliford_window",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/curate/sheet.png",
+      "episodes/ep15/storyboard/h3/shot_21.png"
+    ],
+    "faces": [
+      "curate"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l20.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.041667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 270239,
+    "prompt": "subject_definitions:\n<Subject 1> is Curate in <Picture 1>: Man of 34, 5 ft 8 in, narrow-shouldered with a soft slack build. Long pale face of fair weakness with a retreating chin and a small full mouth. Crisp, almost flaxen curls cut short and lying on a low forehead. Rather large pale blue eyes, wide-set and staring. Fair pink-white skin that flushes red at the neck. Wearing: Soot-smudged white linen shirt sleeves under a black clerical waistcoat buttoned to a white Anglican dog collar, black wool trousers, black elastic-sided boots. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in a deserted square brick house stands beside the road at Upper Halliford. Starlight from the east enters through the upper window and falls across the landing. [Shot 1] runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Surrey, 1894, grey daylight through the left window, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on the curate's face (Rather large pale blue eyes, black clerical waistcoat) occupies the centre beside the upper window, black vapour fills the lower view, a red glow lies beyond, the window sash marks the right edge, the dark room frames the left edge, and the ceiling crosses the upper edge. The camera is The camera stands at the upper landing window at a high angle looking down on the curate's face. At the first frame the curate (Rather large pale blue eyes, black clerical waistcoat) stands beside the window sash at the centre. The camera pushes in toward the curate across the whole shot as the curate faces the window and speaks, from 00:00 to 00:04. <Subject 1> (S1), on screen, man of 34, with a clipped English voice at an even pace, says: <d>[English] The guns are silent.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, vapour flows beneath the upper window, and the movement continues to the last frame of the shot. Behind <Subject 1> one distant watcher stands below the house; vapour flows beneath the upper window, from 00:00 to 00:06. By 00:06 the camera is pushing in through the last frame, and the action continues with it, and the curate turns from the window, the vapour covers the valley, and vapour flows beneath the upper window.\n\noverall_soundscape: Indoor air under the action; cloth, footsteps and the people nearby.\n\nnon_diegetic_music: N/A"
+  }
+]

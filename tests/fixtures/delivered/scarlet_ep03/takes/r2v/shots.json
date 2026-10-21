@@ -1,0 +1,1052 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "sitting_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "Q00_0.png",
+      "Q00_1.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q00_0.png",
+        0
+      ],
+      [
+        "Q00_1.png",
+        68
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.458333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 84000,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1> in the basket chair at the fire.\n<Picture 3> is the first frame of [Shot 2], an insert on the blue-grey notepaper lying open on the wicker chair arm.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 2 shots in the hearth end of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 3> and runs from 00:03 to 00:05. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 2>: a close shot of <Subject 1> in the basket chair at the fire, bare-headed, pale, dark hair swept back, the bottle-green velvet lapel and open white collar, his head a quarter of the frame's height, the white marble mantelpiece holding the LEFT edge. The camera is on the red Turkey carpet at the room's centre, level with the seated man's eyes and a long stride from the basket chair. At the first frame Holmes sits well back in the worn leather basket chair at the hearth with both boots on the red Turkey carpet, bare-headed. The camera pushes in a hand's breadth on his face as <Subject 1> turns his head from the fire toward the camera, from 00:00 to 00:02. At 00:02 his thin hand comes up open at his collarbone, and the opening continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his eyebrows lift a little. By 00:03 the camera has finished pushing in a hand's breadth on his face and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:03 to 00:05. At 00:03 the shot cuts to an insert on the blue-grey notepaper lying open on the wicker chair arm, beginning from <Picture 3>: close-written in black ink, the fire's amber light across it; only what <Picture 3> shows is in frame. The camera is on the carpet at the near side of the hearth, at the height of the chair's woven arm and angled down onto it, a forearm's length from the paper. At the first frame The blue-grey notepaper lies open and flat on the woven wicker arm of the basket chair, close-written in black ink from edge to edge, a signature standing alone at its foot, the woven arm running across the frame, the red Turkey carpet lying beyond it, the amber light of the grate crossing the paper from the LEFT, the bare wicker running out either side of the sheet. The camera pushes in a hand's breadth as the near edge of the sheet lifts a finger's width as a thin hand takes it, from 00:03 to 00:05. By 00:05 the camera has finished pushing in a hand's breadth and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the hearth end of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 196.1,
+    "waited_s": 321.8,
+    "rel_path": "episodes/ep03/takes/r2v/T00.mp4"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "sitting_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "Q01_0.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q01_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.166667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 84001,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot on <Subject 1> turned to Watson across the hearth.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 1 shot in the hearth end of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a medium close shot on <Subject 1> turned to Watson across the hearth, his head a quarter of the frame's height in the RIGHT half, the coal fire amber at the LEFT edge and the grey windows small beyond his shoulder, his lips together with the line on them. The camera is on the red Turkey carpet at the room's centre, level with Holmes's eyes and two yards from him, a 85mm lens turned across the hearth. The coal grate lies at the LEFT edge and the two broad windows stand small and grey beyond his shoulder. The camera pushes in a hand's breadth as <Subject 1> lifts one hand and turns its back toward the camera as he speaks the line, from 00:00 to 00:04. At 00:04 his eyes come round to the fire, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:07 while his fingers spread and close again. By 00:08 the camera has finished pushing in a hand's breadth and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the hearth end of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.7,
+    "render_s": 235.4,
+    "waited_s": 236.5,
+    "rel_path": "episodes/ep03/takes/r2v/T01.mp4"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "friction",
+    "setup": "sitting_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "Q02_0.png",
+      "Q02_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q02_0.png",
+        0
+      ],
+      [
+        "Q02_1.png",
+        68
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.708333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 84002,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], an insert square on the blue-grey note open in two bare sunburnt hands.\n<Picture 3> is the first frame of [Shot 2], a close shot of <Subject 1> standing at the hearth with the blue-grey note open in both bare sunburnt hands.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 2 shots in the hearth end of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 3> and runs from 00:03 to 00:06. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 2]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 2>: an insert square on the blue-grey note open in two bare sunburnt hands, the black ink close-written across it from the LEFT edge to the RIGHT edge of frame, a signature standing alone at the foot; only what <Picture 2> shows is in frame. The camera is on the carpet at the hearth, level with the sheet and a forearm's length from it, square on to the paper, a 50mm lens turned on the written page. The firelight comes from the LEFT and the room behind falls away out of focus. At the first frame The blue-grey note is open in two bare sunburnt hands, the thumbs flat on its near face and the fingers behind it. The camera pushes straight in on the written page as the sheet turns a few degrees flat toward the camera as the hands bring it up, from 00:00 to 00:03. By 00:03 the camera has finished pushing straight in on the written page and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:03 to 00:06. At 00:03 the shot cuts to a close shot of <Subject 1> standing at the hearth with the blue-grey note open in both bare sunburnt hands, beginning from <Picture 3>: his head a quarter of the frame's height, the firelight along one cheek. The camera is on the red Turkey carpet at the room's centre, level with Watson's eyes and a long stride from him, a 100mm lens turned on his face. The amber grate throws its light across one cheek from the LEFT. At the first frame Watson stands at the hearth with both boots on the red Turkey carpet, bare-headed, sunburnt, the thin waxed moustache on his lip, the brown tweed overcoat open at the front, the tweed waistcoat beneath it, its gold watch chain across the waistcoat. The camera pushes in a hand's breadth on his face as <Subject 1>'s eyes travel down the sheet to its foot, from 00:03 to 00:06. <Subject 1>'s mouth is closed from 00:03 to 00:04 while his eyes travel down the sheet to its foot. By 00:06 the camera has finished pushing in a hand's breadth on his face and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the hearth end of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 277.9,
+    "waited_s": 281.3,
+    "rel_path": "episodes/ep03/takes/r2v/T02.mp4"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "friction",
+    "setup": "sitting_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "Q03_0.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q03_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.958333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 84003,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot on <Subject 1> risen from the basket chair with his overcoat half onto one shoulder.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in the hearth end of the first-floor sitting-room of 221B Baker Street. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a medium close shot on <Subject 1> risen from the basket chair with his overcoat half onto one shoulder, his head a quarter of the frame's height, the mantelpiece at the LEFT edge and the grey windows behind him, his lips together with the line on them. The camera is on the red Turkey carpet at the room's centre, level with Holmes's shoulder and two yards from him, a 85mm lens turned on him as he rises. The mantelpiece keeps the LEFT edge and the grey windows stand behind him. At the first frame Holmes stands clear of the basket chair with his overcoat half onto one shoulder. The camera pulls back a hand's breadth as <Subject 1> swings the overcoat up onto his far shoulder as he speaks the line, from 00:00 to 00:03. At 00:03 his eyes come round to the door, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his arm goes into the second sleeve. By 00:06 the camera has finished pulling back a hand's breadth and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the hearth end of the first-floor sitting-room of 221B Baker Street runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 257.7,
+    "waited_s": 256.0,
+    "rel_path": "episodes/ep03/takes/r2v/T03.mp4"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "transition",
+    "setup": "cab",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_cab.png",
+      "Q04_0.png",
+      "Q04_1.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q04_0.png",
+        0
+      ],
+      [
+        "Q04_1.png",
+        90
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.083333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 84004,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The inside of a black two-wheeled hansom cab on the Brixton Road, 1881, in a dun-coloured morning fog: two men side by side on one buttoned leather seat under the folding hood, the black folding doors closed across their knees, a brass side-lamp burning at the front corner, and the fog-grey street sliding past beyond the doors. <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium shot inside the hansom from its near side.\n<Picture 3> is the first frame of [Shot 2], an insert on the brass side-lamp burning at the cab's front corner.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 2 shots in <Subject 1>, the inside of a black two-wheeled hansom cab on the Brixton Road. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: a medium shot inside the hansom from its near side: the two men side by side on the buttoned leather seat, Watson in the LEFT half and Holmes in the RIGHT, the folding hood closing the TOP of frame, the closed black doors across their knees and the fog-grey street beyond at the LEFT edge. The camera is on the near side of the hansom looking in across the closed black doors, level with the seated men's chests and an arm's length from their knees, a 35mm lens turned on the pair. The folding hood closes the TOP of frame. The camera pushes in a hand's breadth over the closed doors as the two men sway together a hand's breadth as the cab takes the road, from 00:00 to 00:04. Sherlock Holmes's mouth is closed from 00:00 to 00:04 while he two men sway together a hand's breadth as the cab takes the road. By 00:04 the camera has finished pushing in a hand's breadth over the closed doors and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to an insert on the brass side-lamp burning at the cab's front corner, beginning from <Picture 3>: the fog-grey street sliding past beyond it, beads of wet standing on the black paint; only what <Picture 3> shows is in frame. The camera is outside the cab at the front corner, level with the lamp and a forearm's length from it, a 50mm lens turned on the burning brass. The fog-grey street slides past beyond it. At the first frame The brass side-lamp burns steadily at the cab's front corner, its flame upright behind the glass, the polished brass wet and beaded with standing drops. The black painted bodywork runs away below it, beads of wet standing along the paint. Beyond the lamp the dun-coloured fog lies over the Brixton Road and the wet cobbles carry the smeared amber of other lamps. The camera pushes in a hand's breadth on the lamp as one bead of wet runs a thumb's length down the black paint, from 00:04 to 00:08. By 00:08 the camera has finished pushing in a hand's breadth on the lamp and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the inside of a black two-wheeled hansom cab on the Brixton Road runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 257.0,
+    "waited_s": 256.6,
+    "rel_path": "episodes/ep03/takes/r2v/T04.mp4"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "cab",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_bench.png",
+      "Q05_0.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q05_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l05.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.791667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 84005,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot on <Subject 1> on the seat's far side under the hood.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in the inside of a black two-wheeled hansom cab on the Brixton Road. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a medium close shot on <Subject 1> on the seat's far side under the hood, his head a quarter of the frame's height in the RIGHT half, the fog-grey street beyond the closed doors at the LEFT edge, his lips together with the line on them. The camera is on the seat's near side under the hood, level with Holmes's eyes and an arm's length from him. At the first frame Holmes sits on the seat's far side under the folding hood, bare-headed. The camera pushes in a hand's breadth as <Subject 1> turns his face from the passing street toward Watson as he speaks the line, from 00:00 to 00:05. <Subject 1> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] No data yet. It is a mistake to theorise before you have the evidence.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his eyes go back to the street, and the movement continues to the last frame of the shot. By 00:06 the camera has finished pushing in a hand's breadth and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the inside of a black two-wheeled hansom cab on the Brixton Road runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 175.8,
+    "waited_s": 176.1,
+    "rel_path": "episodes/ep03/takes/r2v/T05.mp4"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "cab",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_bench.png",
+      "Q06_0.png",
+      "Q06_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q06_0.png",
+        0
+      ],
+      [
+        "Q06_1.png",
+        85
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.041667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 84006,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1> on the seat's near side.\n<Picture 3> is the first frame of [Shot 2], an insert past the closed black doors.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 2 shots in the inside of a black two-wheeled hansom cab on the Brixton Road. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: a close shot of <Subject 1> on the seat's near side, bare-headed, sunburnt, thin waxed moustache, his head a quarter of the frame's height, the buttoned leather behind his shoulder and the fog-grey street at the LEFT edge. The camera is on the seat's far side under the hood, level with Watson's eyes and an arm's length from him, a 85mm lens turned on his face. The fog-grey street lies beyond the doors at the LEFT edge. At the first frame Watson sits on the seat's near side, bare-headed, sunburnt, the thin waxed moustache on his lip, the brown tweed overcoat open over the tweed waistcoat and its watch chain. The camera pushes in a hand's breadth on his face as <Subject 1>'s eyes leave Holmes and travel out to the passing street, from 00:00 to 00:04. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his eyes leave Holmes and travel out to the passing street. By 00:04 the camera has finished pushing in a hand's breadth on his face and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to an insert past the closed black doors, beginning from <Picture 3>: the fog-grey Brixton Road sliding by, a lamp post and a shuttered shop front standing out of the dun-coloured fog and going again; only what <Picture 3> shows is in frame. The camera is on the seat looking out past the closed black doors, level with the doors' top rail, a 50mm lens turned on the passing street. The fog stands grey beyond the paintwork. At the first frame The black folding doors are closed across the frame's BOTTOM and the dun-coloured fog lies over the Brixton Road beyond them. A cast-iron lamp post stands out of the fog at the CENTRE with its flame small and amber, a shuttered shop front behind it. The camera keeps on the fog beyond it as the lamp post travels from the CENTRE of frame out past the LEFT edge, from 00:04 to 00:08. By 00:08 the camera has finished keeping on the fog beyond it and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the inside of a black two-wheeled hansom cab on the Brixton Road runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 220.5,
+    "waited_s": 221.4,
+    "rel_path": "episodes/ep03/takes/r2v/T06.mp4"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "transition",
+    "setup": "garden_path",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_garden_path.png",
+      "Q07_0.png",
+      "Q07_1.png",
+      "Q07_0E.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q07_0.png",
+        0
+      ],
+      [
+        "Q07_1.png",
+        94
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.333333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 84411,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The front garden of Number 3 Lauriston Gardens, off the Brixton Road, a foggy March morning: a shabby brick terrace house standing back from the street behind a small garden of sickly plants, three tiers of blank curtainless windows with a yellowed TO LET card in one pane, a narrow path of yellow clay and gravel crossing the garden to the front door, a three-foot brick wall with wooden rails along its top at the street, and a dun-coloured fog lying over the house-tops, seen from the street side: the yellow clay path crossing to the door, the low brick wall and its wooden rails along the near edge, and the sickly plants standing in wet soil either side of the path. <Picture 1> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide from the street side.\n<Picture 3> is the first frame of [Shot 2], an insert on one blank first-floor window of Number 3.\n<Picture 4> is the last frame of [Shot 1], with the action of that shot completed.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 2 shots in <Subject 1>, the front garden of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 4> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: a wide from the street side: the brick front of Number 3 rising across the whole TOP of frame with three tiers of blank curtainless windows, the yellow clay path running up the CENTRE to the front door, the three-foot brick wall and its wooden rails crossing the BOTTOM of frame. The camera is on the street pavement outside the wooden rails, at a standing man's eye height, square on to the house front, a 35mm lens turned up the clay path. The three-foot brick wall and its rails cross the BOTTOM of frame. The camera pushes in a hand's breadth up the path toward the door as the fog drifts a hand's breadth across the house front, from 00:00 to 00:04. Behind him one stalwart police constable in a tall helmet leaning against the brick wall, and five or six loafers in caps craning over the rails behind him, from 00:00 to 00:04.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to an insert on one blank first-floor window of Number 3, beginning from <Picture 3>: a yellowed card standing in the corner of the pane with the two words \"TO LET\" in heavy black block capitals across it, the fog lying grey on the glass; only what <Picture 3> shows is in frame. The camera is on the clay path inside the rails, angled up at the first floor, a 100mm lens turned on the one blank window. The fog lies grey between the lens and the glass. At the first frame One blank curtainless window of the first floor fills the frame, its black-painted sash weathered, its brickwork wet, a yellowed card standing in the corner of the lower pane, the two words \"TO LET\" standing in heavy black wood-type block capitals across its foxed buff face, the glass grey with fog. The camera pushes in a hand's breadth on the words \"TO LET\" as the fog thickens across the pane by a hand's breadth, from 00:04 to 00:08.\n\noverall_soundscape: The ambience of the front garden of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 4,
+    "measured_seconds": 8.0,
+    "render_s": 239.4,
+    "waited_s": 240.3,
+    "rel_path": "episodes/ep03/takes/r2v/T07.mp4"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "friction",
+    "setup": "garden_path",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_bench.png",
+      "plate_garden_path.png",
+      "Q08_0.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q08_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.625,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 84008,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: The front garden of Number 3 Lauriston Gardens, off the Brixton Road, a foggy March morning: a shabby brick terrace house standing back from the street behind a small garden of sickly plants, three tiers of blank curtainless windows with a yellowed TO LET card in one pane, a narrow path of yellow clay and gravel crossing the garden to the front door, a three-foot brick wall with wooden rails along its top at the street, and a dun-coloured fog lying over the house-tops, seen from the street side: the yellow clay path crossing to the door, the low brick wall and its wooden rails along the near edge, and the sickly plants standing in wet soil either side of the path. <Picture 2> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot on <Subject 1> on the pavement outside the rails.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in <Subject 2>, the front garden of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 3>: a medium shot on <Subject 1> on the pavement outside the rails, bare-headed above his overcoat collar, his head a quarter of the frame's height in the RIGHT half, the brick wall and its wooden rails crossing the BOTTOM of frame and the fogged house front rising behind him. The camera is on the pavement outside the wooden rails, level with Holmes's eyes and a long stride from him. The camera pans a hand's breadth along the rails with him as <Subject 1> turns his head down from the house front to the ground at his boots, from 00:00 to 00:04. At 00:04 his chin lowers an inch, and the movement continues to the last frame of the shot. Behind him one stalwart police constable in a tall helmet leaning against the brick wall, and five or six loafers in caps craning over the rails behind him, from 00:00 to 00:07. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his hands go behind his back. By 00:07 the camera has finished panning a hand's breadth along the rails with him and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the front garden of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 190.1,
+    "waited_s": 191.2,
+    "rel_path": "episodes/ep03/takes/r2v/T08.mp4"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "garden_path",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q09_0.png",
+      "Q09_1.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q09_0.png",
+        0
+      ],
+      [
+        "Q09_1.png",
+        73
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.541667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 84009,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert straight down on the yellow clay path.\n<Picture 2> is the first frame of [Shot 2], an insert closer on one square of the wet clay.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in the front garden of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 2> and runs from 00:03 to 00:07. The take carries <Picture 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 2> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 1>: an insert straight down on the yellow clay path: boot prints crossing and overlapping each other in the wet, standing water in the deepest of them, the fringe of wet grass along the LEFT edge of frame; only what <Picture 1> shows is in frame. The camera is above the clay path pointing straight down at the ground, a forearm and a half above the clay, a 50mm lens turned on the trampled surface. Flat fog-grey daylight falls on it from overhead. At the first frame The narrow path of yellow clay and gravel fills the frame from edge to edge, boot prints crossing and overlapping each other across the whole of it, the clay pushed up in ridges between them, standing water lying in the deepest of the prints, the flat grey sky caught in that water. The camera pushes in a hand's breadth on the trampled clay as Water settles in one deep print, from 00:00 to 00:03. By 00:03 the camera has finished pushing in a hand's breadth on the trampled clay and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:03 to 00:07. At 00:03 the shot cuts to an insert closer on one square of the wet clay, beginning from <Picture 2>: a single square-toed boot print standing whole and sharp among the trampled ones, its edges clean where the others are smeared; only what <Picture 2> shows is in frame. The camera is above the clay path pointing straight down, a forearm above the clay, a 100mm lens turned on one square of ground. Flat fog-grey daylight falls on it from overhead. At the first frame One square of the wet yellow clay fills the frame. A single square-toed boot print stands whole and sharp in the middle of it, its edges clean and its nailed sole pattern unbroken, the standing water in it . Trampled and smeared half-prints of other boots lie all round it. The camera pushes straight in on the print as a thin shadow crosses the clean print as a head comes between it and the sky, from 00:03 to 00:07. By 00:07 the camera has finished pushing straight in on the print and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the front garden of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 185.2,
+    "waited_s": 186.0,
+    "rel_path": "episodes/ep03/takes/r2v/T09.mp4"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "friction",
+    "setup": "garden_path",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_bench.png",
+      "Q10_0.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q10_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.0,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 84010,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot on <Subject 1> halted on the clay path.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in the front garden of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a medium close shot on <Subject 1> halted on the clay path, bare-headed, sunburnt, thin waxed moustache, his head a quarter of the frame's height, the fogged house front rising behind him and the front door standing at the TOP of frame. The camera is on the clay path inside the rails, level with Watson's eyes and a long stride from him, a 85mm lens turned on his face. The fogged house front rises behind him and the front door stands at the TOP of frame. The camera pushes in a hand's breadth on his face as <Subject 1>'s head turns from the ground up to the house front, from 00:00 to 00:07. Behind him one stalwart police constable in a tall helmet leaning against the brick wall, and five or six loafers in caps craning over the rails behind him, from 00:00 to 00:07. <Subject 1>'s mouth is closed from 00:00 to 00:06 while his eyes narrow a little. By 00:07 the camera has finished pushing in a hand's breadth on his face and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the front garden of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 179.2,
+    "waited_s": 180.8,
+    "rel_path": "episodes/ep03/takes/r2v/T10.mp4"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "transition",
+    "setup": "hall",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-tobias_gregson_indoor.png",
+      "plate_hall.png",
+      "Q11_0.png",
+      "Q11_1.png",
+      "Q11_1E.png"
+    ],
+    "faces": [
+      "tobias_gregson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q11_0.png",
+        0
+      ],
+      [
+        "Q11_1.png",
+        68
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.75,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 84112,
+    "prompt": "subject_definitions:\n<Subject 1> is Tobias Gregson in <Picture 1>: A man about thirty-five, tall and long-limbed, a pale white face, flaxen hair receding from the temples, clean-shaven, a dark green hunting jacket over a black silk scarf wound at the throat above a white collar. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: The bare front hall of Number 3 Lauriston Gardens, off the Brixton Road, a foggy March morning: a shabby brick terrace house standing back from the street behind a small garden of sickly plants, three tiers of blank curtainless windows with a yellowed TO LET card in one pane, a narrow path of yellow clay and gravel crossing the garden to the front door, a three-foot brick wall with wooden rails along its top at the street, and a dun-coloured fog lying over the house-tops: stripped floorboards, a papered wall with the paper hanging loose in strips, an open front door letting the fog-grey daylight in from the LEFT, and the doorway to the front room standing open at the RIGHT. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot up the bare hall from the open front door.\n<Picture 4> is the first frame of [Shot 2], an insert on the loose wallpaper of the hall wall.\n<Picture 5> is the last frame of [Shot 2], with the action of that shot completed.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 2 shots in <Subject 2>, the bare front hall of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 4> and runs from 00:03 to 00:06. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 3>: a medium shot up the bare hall from the open front door: <Subject 1>, a tall white-faced man in a dark coat standing at the far end with a notebook open in his hand, his back three-quarters to the camera, the stripped floorboards running up the CENTRE and the doorway to the front room open at the TOP RIGHT. The camera is just inside the open front door at a standing man's eye height, square on up the hall, a 35mm lens turned along the stripped boards. The fog-grey daylight comes in past the lens from behind. The camera pushes a hand's breadth up the hall as <Subject 1> turns a quarter toward the open door, from 00:00 to 00:02. At 00:02 his head tips toward the front room, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his notebook comes down to his side.\n[Shot 2] From 00:03 to 00:06. At 00:03 the shot cuts to an insert on the loose wallpaper of the hall wall, beginning from <Picture 4>: a long strip hanging away from the plaster, the fog-grey daylight raking across the torn edge; only what <Picture 4> shows is in frame. The camera is in the hall a foot from the wall, level with the torn edge of the paper, a 50mm lens turned on the plaster. The fog-grey daylight rakes across it from the LEFT. At the first frame A long strip of the hall's wallpaper hangs away from the plaster and falls across the frame, its torn edge curling, its printed face turned half away, the bare plaster behind it grey and blotched with damp, the paper's pattern faint on the wall where it has lifted, the fog-grey daylight from the open door raking across the torn edge from the LEFT. The camera pushes in a hand's breadth as the hanging strip lifts a thumb's width in the draught from the open door, from 00:03 to 00:06.\n\noverall_soundscape: The ambience of the bare front hall of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "measured_seconds": 6.58,
+    "render_s": 198.7,
+    "waited_s": 286.8,
+    "rel_path": "episodes/ep03/takes/r2v/T11.mp4"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "friction",
+    "setup": "hall",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "Q12_0.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q12_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.166667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 84113,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot on <Subject 1> inside the hall with the open front door and its fog-grey daylight at the LEFT edge.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in the bare front hall of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a medium close shot on <Subject 1> inside the hall with the open front door and its fog-grey daylight at the LEFT edge, his head a quarter of the frame's height, the loose-papered wall at the RIGHT, his lips together with the line on them. The camera is in the hall with its back to the front room, level with Holmes's eyes and a long stride from him, a 85mm lens turned on his face. The open front door and its daylight stand at the LEFT edge. At the first frame Holmes stands inside the bare hall on the stripped boards, bare-headed. The camera pushes in a hand's breadth as <Subject 1> raises one hand and points back out through the open door as he speaks the line, from 00:00 to 00:03. At 00:03 his eyes go to the front-room doorway, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his arm comes down across his coat. By 00:06 the camera has finished pushing in a hand's breadth and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the bare front hall of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "measured_seconds": 6.58,
+    "render_s": 158.5,
+    "waited_s": 160.8,
+    "rel_path": "episodes/ep03/takes/r2v/T12.mp4"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "payoff",
+    "setup": "front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_front_room.png",
+      "Q13_0.png",
+      "Q13_1.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q13_0.png",
+        0
+      ],
+      [
+        "Q13_1.png",
+        68
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.291667,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 84013,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: The front room of Number 3 Lauriston Gardens, off the Brixton Road, a foggy March morning: a shabby brick terrace house standing back from the street behind a small garden of sickly plants, three tiers of blank curtainless windows with a yellowed TO LET card in one pane, a narrow path of yellow clay and gravel crossing the garden to the front door, a three-foot brick wall with wooden rails along its top at the street, and a dun-coloured fog lying over the house-tops, bare of furniture: a wide dusty floor of stripped boards, a thick coat of dust on every surface, wallpaper hanging away from the plaster in strips, one tall curtainless window in the FAR wall giving flat fog-grey daylight, a white marble mantelpiece with a stump of red wax candle on it, and a well-dressed man lying on his back in the middle of the floor. <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide of the bare front room from the doorway.\n<Picture 3> is the first frame of [Shot 2], a medium shot across the dusty floorboards.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 2 shots in <Subject 1>, the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 3> and runs from 00:03 to 00:05. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 2>: a wide of the bare front room from the doorway: stripped dusty floorboards running away to the far wall, the tall curtainless window in the CENTRE of that wall giving flat fog-grey light, the white marble mantelpiece at the LEFT edge with a stump of red candle on it, and a well-dressed man lying on his back across the CENTRE of the floor. The camera is in the front-room doorway at a standing man's eye height, square on across the room, a 35mm lens turned on the floor and the far wall. The doorway's edge stands at the RIGHT of frame. At the first frame The bare front room stands empty but for one man. Stripped dusty floorboards run away from the doorway to the far wall. The camera pushes a hand's breadth in through the doorway toward the body as the fog-grey light shifts a little across the boards, from 00:00 to 00:03. By 00:03 the camera has finished pushing a hand's breadth in through the doorway toward the body and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:03 to 00:05. At 00:03 the shot cuts to a medium shot across the dusty floorboards, beginning from <Picture 3>: the dead man's shoulders and head on the boards, his overcoat open, the flat window light lying along the dust beside him. The camera is on the boards a stride from the body, level with the dead man's shoulder and angled a little down, a 50mm lens turned along the floor. The window light comes flat from beyond him. At the first frame The dead man lies on his back on the stripped boards, his shoulders and head across the frame, his overcoat fallen open and his stiff white collar standing at his throat. The flat grey window light lies along the dust beside him and picks out the grain of the boards. His face is turned up and , his hair dark against the pale floor. The camera pushes a hand's breadth in over the floor as Dust turns in the window light above the boards, from 00:03 to 00:05. By 00:05 the camera has finished pushing a hand's breadth in over the floor and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 210.4,
+    "waited_s": 211.0,
+    "rel_path": "episodes/ep03/takes/r2v/T13.mp4"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "friction",
+    "setup": "front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q14_0.png",
+      "Q14_1.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q14_0.png",
+        0
+      ],
+      [
+        "Q14_1.png",
+        81
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.166667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 84216,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], a close shot of the dead man's face turned up from the boards.\n<Picture 2> is the first frame of [Shot 2], an insert on a printed visiting card in a bare hand at the frame's CENTRE.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 2 shots in the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 2> and runs from 00:03 to 00:08. The take carries <Picture 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 2> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 1>: a close shot of the dead man's face turned up from the boards, well fed and clean shaven above a stiff white collar, his head a quarter of the frame's height, the dust of the floor along the BOTTOM edge of frame. The camera is on the boards beside the body, level with the dead man's face and a forearm from it, a 85mm lens turned down on him. The flat window light falls across the face from beyond. At the first frame The dead man's face is turned up from the boards, well fed and clean shaven above the stiff white collar, the mouth a little open, the eyes closed, his head a quarter of the frame's height, his dark hair back against the pale dusty boards, the grey dust of the floor filling the BOTTOM edge of frame. The camera pushes in a hand's breadth on it as the flat window light shifts a little across the face, from 00:00 to 00:03. By 00:03 the camera has finished pushing in a hand's breadth on it and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to an insert on a printed visiting card in a bare hand at the frame's CENTRE, beginning from <Picture 2>: the three lines \"Enoch J. Drebber\", \"Cleveland\" and \"Ohio\" standing in fine black copperplate script across it, the dusty floorboards below out of focus; only what <Picture 2> shows is in frame. The camera is on the boards beside the body, level with the card and a forearm from it, a 50mm lens turned square on the printed face. The dusty boards fall away out of focus below. At the first frame A printed visiting card is up in one bare hand at the CENTRE of frame, the thumb flat on its face and the fingers behind, three lines of fine black copperplate script standing across its face reading \"Enoch J. Drebber\", then \"Cleveland\". The camera pushes straight in on the engraved name \"Enoch J. Drebber\" as the card turns a few degrees flat toward the camera, from 00:03 to 00:08. By 00:08 the camera has finished pushing straight in on the engraved name \"Enoch J. Drebber\" and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "measured_seconds": 8.0,
+    "render_s": 269.4,
+    "waited_s": 266.1,
+    "rel_path": "episodes/ep03/takes/r2v/T14.mp4"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "friction",
+    "setup": "front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q15_0.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q15_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 5.708333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 84015,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on the stripped floorboards beside the body.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:06. The take carries <Picture 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 1>: an insert on the stripped floorboards beside the body: a dark smear of dried blood standing across two boards at the CENTRE of frame, the dust undisturbed either side of it, the dead man's shoulder at the TOP edge; only what <Picture 1> shows is in frame. The camera is on the boards beside the body, a forearm above the floor and angled straight down, a 50mm lens turned on the two boards. The window light creeps along them from beyond. At the first frame A dark smear of dried blood stands across two stripped floorboards at the CENTRE of frame, its edges dried to brown and its body dark where it pooled in the grain. The grey dust of the room lies undisturbed either side of it. The dead man's shoulder and the black of his overcoat stand at the TOP edge of frame. The camera pushes straight in on the dark smear as the window light creeps a finger's width along the boards, from 00:00 to 00:06. By 00:06 the camera has finished pushing straight in on the dark smear and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 188.7,
+    "waited_s": 191.1,
+    "rel_path": "episodes/ep03/takes/r2v/T15.mp4"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "turn",
+    "setup": "front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "plate_front_room.png",
+      "Q16_0.png",
+      "Q16_1.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q16_0.png",
+        0
+      ],
+      [
+        "Q16_1.png",
+        85
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.916667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 84016,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: The front room of Number 3 Lauriston Gardens, off the Brixton Road, a foggy March morning: a shabby brick terrace house standing back from the street behind a small garden of sickly plants, three tiers of blank curtainless windows with a yellowed TO LET card in one pane, a narrow path of yellow clay and gravel crossing the garden to the front door, a three-foot brick wall with wooden rails along its top at the street, and a dun-coloured fog lying over the house-tops, bare of furniture: a wide dusty floor of stripped boards, a thick coat of dust on every surface, wallpaper hanging away from the plaster in strips, one tall curtainless window in the FAR wall giving flat fog-grey daylight, a white marble mantelpiece with a stump of red wax candle on it, and a well-dressed man lying on his back in the middle of the floor. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot on <Subject 1> down on one knee on the dusty boards where Holmes has knelt.\n<Picture 4> is the first frame of [Shot 2], an insert straight down on the dusty boards where <Subject 1> is looking.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 2>, the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 4> and runs from 00:04 to 00:07. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1] and [Shot 2]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 3>: a medium shot on <Subject 1> down on one knee on the dusty boards where Holmes has knelt, bare-headed, sunburnt, his head a quarter of the frame's height in the LEFT half, the tall window flat and grey in the CENTRE of the far wall behind him. The camera is on the boards across the room from Watson, level with his kneeling head and two yards from him, a 50mm lens turned on him and the floor. The tall window stands flat and grey behind him. At the first frame Watson is down on one knee on the dusty boards where Holmes has knelt, bare-headed, sunburnt. The camera pushes a hand's breadth in over the dust as <Subject 1> lowers his head toward the boards, from 00:00 to 00:02. At 00:02 his eyes travel along the floor, and the movement continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his bare hand comes down flat beside the marks. By 00:04 the camera has finished pushing a hand's breadth in over the dust and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:04 to 00:07. At 00:04 the shot cuts to an insert straight down on the dusty boards where <Subject 1> is looking, beginning from <Picture 4>: grey dust, the overlapping half-prints of many boots, and one long scuff running away toward the far wall; only what <Picture 4> shows is in frame. The camera is above the boards where Watson is looking, pointing straight down, a forearm above the floor, a 50mm lens turned on the dust. Flat fog-grey light falls across it from the window. At the first frame The stripped floorboards fill the frame under a grey film of dust. The overlapping half-prints of many boots cross and recross the boards, their edges broken and their patterns trodden out of each other. One long scuff runs away toward the far wall, the dust pushed aside along it down to the bare grain. Every print lies broken across another under the grey film. The camera pushes straight in on the trampled boards as the dust lifts a little where a breath crosses it, from 00:04 to 00:07. By 00:07 the camera has finished pushing straight in on the trampled boards and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 214.3,
+    "waited_s": 213.1,
+    "rel_path": "episodes/ep03/takes/r2v/T16.mp4"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "reaction",
+    "setup": "front_room",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_indoor.png",
+      "Q17_0.png"
+    ],
+    "faces": [
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q17_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.375,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 84017,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a close shot of <Subject 1>'s face low over the boards.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a close shot of <Subject 1>'s face low over the boards, bare-headed, sunburnt, thin waxed moustache, his head a third of the frame's height, the grey dust of the floor filling the BOTTOM of frame beneath him. The camera is on the boards level with Watson's face and a forearm and a half from it, low down at the floor, a 85mm lens turned up at him. The grey dust fills the frame beneath. At the first frame Watson's face is low over the dusty boards, bare-headed, sunburnt, the thin waxed moustache on his lip. The camera pushes in a hand's breadth as <Subject 1>'s eyes come up off the floor toward the camera, from 00:00 to 00:04. At 00:04 his head lifts an inch, and the lift continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:05 while his jaw sets. By 00:07 the camera has finished pushing in a hand's breadth and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 185.8,
+    "waited_s": 186.0,
+    "rel_path": "episodes/ep03/takes/r2v/T17.mp4"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "spike",
+    "setup": "corner_wall",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-g_lestrade_indoor.png",
+      "Q18_0.png"
+    ],
+    "faces": [
+      "g_lestrade"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q18_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l18.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.208333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 84018,
+    "prompt": "subject_definitions:\n<Subject 1> is G Lestrade in <Picture 1>: A man about thirty-five, little and lean, a sallow complexion, a thin rat-like face with dark eyes set close under a low brow, wavy chestnut hair, clean-shaven, a charcoal frock coat over a soft turned-down collar. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot on <Subject 1> in the dark corner.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in the darkest corner of the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:06. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 2>: a medium close shot on <Subject 1> in the dark corner, a small sallow sharp-featured man with dark eyes, bare-headed, his head a quarter of the frame's height, a lit match cupped in his hand at his chest, the peeled yellow plaster behind his shoulder. The camera is in the corner of the front room, level with Lestrade's eyes and a long stride from him, a 85mm lens turned on his face. The only light is the match cupped in his own hand. The camera pushes in a hand's breadth as <Subject 1> lifts the burning match up toward the bare plaster as he speaks the line, from 00:00 to 00:05. <Subject 1> (S1), on screen, a man about thirty-five, with a clipped English voice at an even pace, says: <d>[English] I have made a discovery of the highest importance. Come here. Stand there.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his eyes go to the wall, and the movement continues to the last frame of the shot. By 00:06 the camera has finished pushing in a hand's breadth and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the darkest corner of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 169.5,
+    "waited_s": 170.9,
+    "rel_path": "episodes/ep03/takes/r2v/T18.mp4"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "spike",
+    "setup": "corner_wall",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "Q19_0.png",
+      "Q19_1.png",
+      "Q19_0E.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q19_0.png",
+        0
+      ],
+      [
+        "Q19_1.png",
+        77
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.083333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 84120,
+    "prompt": "subject_definitions:\n<Picture 1> is the first frame of [Shot 1], an insert on the yellow square of bare plaster filling the frame from the LEFT edge to the RIGHT edge.\n<Picture 2> is the first frame of [Shot 2], an insert closer on the last letter E of the word \"RACHE\".\n<Picture 3> is the last frame of [Shot 1], with the action of that shot completed.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 2 shots in the darkest corner of the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 1> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 2> and runs from 00:03 to 00:08. The take carries <Picture 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 2> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 3> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 1>: an insert on the yellow square of bare plaster filling the frame from the LEFT edge to the RIGHT edge, the word \"RACHE\" scrawled across it in blood-red letters, R then A then C then H then E, a smear trailing down from the last stroke, the hanging paper curling away at both edges; only what <Picture 1> shows is in frame. The camera is square on to the corner wall, level with the bared plaster and a long stride from it, a 50mm lens turned on the yellow square. The match light falls across it from the LEFT. At the first frame A square of bare yellow plaster fills the frame from the LEFT edge to the RIGHT edge where the paper has been stripped away. The camera pushes straight in on the word \"RACHE\" as the match light travels a hand's breadth across the plaster, from 00:00 to 00:03.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to an insert closer on the last letter E of the word \"RACHE\", beginning from <Picture 2>: the blood-red stroke thick at its top and thinning down the coarse plaster where it has run; only what <Picture 2> shows is in frame. The camera is square on to the corner wall, a forearm from the plaster, a 100mm lens turned on the last letter. The match light swells across it from the LEFT. At the first frame The letter E fills the frame, the last letter of the word \"RACHE\", standing on the coarse yellow plaster of the stripped wall, its blood-red stroke thick at the top where the finger bore down, the stroke thinning as it runs down, one long drip hanging below it, the drip dry and glossy against the wall, the grain of the plaster standing up through the red. The camera pushes straight in on the running stroke as the match light swells across the letter, from 00:03 to 00:08.\n\noverall_soundscape: The ambience of the darkest corner of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "measured_seconds": 8.0,
+    "render_s": 266.2,
+    "waited_s": 266.8,
+    "rel_path": "episodes/ep03/takes/r2v/T19.mp4"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20
+    ],
+    "section": "reaction",
+    "setup": "corner_wall",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-g_lestrade_indoor.png",
+      "Q20_0.png"
+    ],
+    "faces": [
+      "g_lestrade"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q20_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l20.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.583333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 84121,
+    "prompt": "subject_definitions:\n<Subject 1> is G Lestrade in <Picture 1>: A man about thirty-five, little and lean, a sallow complexion, a thin rat-like face with dark eyes set close under a low brow, wavy chestnut hair, clean-shaven, a charcoal frock coat over a soft turned-down collar. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot on <Subject 1> turned from the wall with the match burning low in his hand.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 1 shot in the darkest corner of the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 2>: a medium close shot on <Subject 1> turned from the wall with the match burning low in his hand, his head a quarter of the frame's height in the LEFT half, the blood-red word \"RACHE\" standing on the plaster behind his shoulder at the RIGHT, his lips together with the line on them. The camera is in the corner of the front room, level with Lestrade's eyes and a long stride from him. The camera pulls back a hand's breadth as <Subject 1> turns his face from the wall to the camera as he speaks the line, from 00:00 to 00:05. <Subject 1> (S1), on screen, a man about thirty-five, with a clipped English voice at an even pace, says: <d>[English] Rachel. He was writing a woman's name, and was disturbed before he finished.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his chin comes up, and the movement continues to the last frame of the shot. By 00:07 the camera has finished pulling back a hand's breadth and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the darkest corner of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "measured_seconds": 7.29,
+    "render_s": 231.7,
+    "waited_s": 236.0,
+    "rel_path": "episodes/ep03/takes/r2v/T20.mp4"
+  },
+  {
+    "index": 21,
+    "shots": [
+      21
+    ],
+    "section": "runout",
+    "setup": "corner_wall",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "plate_corner_wall.png",
+      "Q21_0.png",
+      "Q21_1.png",
+      "Q21_0E.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q21_0.png",
+        0
+      ],
+      [
+        "Q21_1.png",
+        81
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 84223,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is the location in <Picture 2>: The darkest corner of the front room of Number 3 Lauriston Gardens, off the Brixton Road, a foggy March morning: a shabby brick terrace house standing back from the street behind a small garden of sickly plants, three tiers of blank curtainless windows with a yellowed TO LET card in one pane, a narrow path of yellow clay and gravel crossing the garden to the front door, a three-foot brick wall with wooden rails along its top at the street, and a dun-coloured fog lying over the house-tops, where the hanging wallpaper has peeled away to leave a yellow square of coarse bare plaster, the stripped floorboards meeting the skirting below it, and the flat fog-grey daylight from the far window reaching this corner faintly. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot on <Subject 1> down on the dusty boards below the corner.\n<Picture 4> is the first frame of [Shot 2], an insert on the dusty boards at the skirting.\n<Picture 5> is the last frame of [Shot 1], with the action of that shot completed.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 2>, the darkest corner of the front room of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 4> and runs from 00:03 to 00:07. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 5> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 3>: a medium shot on <Subject 1> down on the dusty boards below the corner, bare-headed, the bottle-green velvet showing at his open overcoat, his head a quarter of the frame's height in the CENTRE, the peeled yellow plaster and its blood-red word \"RACHE\" on the wall above him. The camera is on the boards below the corner, level with Holmes's lowered shoulder and two yards from him, a 50mm lens turned on him and the floor. The peeled plaster and its word stand on the wall above. At the first frame Holmes is down on the dusty boards below the corner, bare-headed, the bottle-green velvet showing at his open overcoat. The camera pushes a hand's breadth in over the dust as <Subject 1> lowers himself onto his forearms over the boards, from 00:00 to 00:02. At 00:02 his head turns along the skirting, and the turn continues to the last frame of the shot. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his head turns along the skirting.\n[Shot 2] From 00:03 to 00:07. At 00:03 the shot cuts to an insert on the dusty boards at the skirting, beginning from <Picture 4>: a steel tape measure run out flat along two boards and a large round magnifying glass laid beside it, a thin ink-stained hand at the frame's edge; only what <Picture 4> shows is in frame. The camera is above the boards at the skirting, pointing straight down, a forearm above the floor, a 50mm lens turned on the tape and the glass. The match light falls across them from the LEFT. At the first frame A steel tape measure is run out flat along two stripped boards at the skirting, its figures small and black along the edge, a large round magnifying glass lying beside it, the glass's brass rim bright, its lens clear over the grain, a thin ink-stained hand resting at the frame's edge. The camera pushes straight in on the glass as the tape runs a hand's breadth further along the boards, from 00:03 to 00:07.\n\noverall_soundscape: The ambience of the darkest corner of the front room of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 2,
+    "measured_seconds": 7.29,
+    "render_s": 292.7,
+    "waited_s": 296.4,
+    "rel_path": "episodes/ep03/takes/r2v/T21.mp4"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22,
+      23
+    ],
+    "section": "runout",
+    "setup": "hall",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "char-john_watson_indoor.png",
+      "Q22_0.png",
+      "Q23_0.png"
+    ],
+    "faces": [
+      "sherlock_holmes",
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q22_0.png",
+        0
+      ],
+      [
+        "Q23_0.png",
+        175
+      ]
+    ],
+    "audio": [
+      [
+        "l22.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 11.583334,
+    "frames": 294,
+    "seconds": 12.25,
+    "steps": 8,
+    "seed": 84022,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Subject 2> is John Watson in <Picture 2>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot. <Picture 2> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium close shot on <Subject 1> at the hall's far end with his overcoat buttoned.\n<Picture 4> is the first frame of [Shot 2], a close shot of <Subject 2> in the hall.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 12.25-second take of 2 shots in the bare front hall of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:07; [Shot 2] begins from <Picture 4> and runs from 00:07 to 00:12. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Subject 2> (the man in [Shot 2]): partially_preserved - the face, hair, build and clothes of <Picture 2> carry into every shot that shows him; <Picture 2> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 3>: a medium close shot on <Subject 1> at the hall's far end with his overcoat buttoned, his head a quarter of the frame's height, the open front door and its fog-grey daylight at the LEFT edge and the loose-papered wall at the RIGHT, his lips together with the line on them. The camera is in the hall between the front room and the door, level with Holmes's eyes and a long stride from him. The camera pushes in a hand's breadth as <Subject 1> pulls his overcoat straight at the collar as he speaks the line, from 00:00 to 00:06. <Subject 1> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] Six feet high, in his prime, small feet, square-toed boots, a Trichinopoly cigar.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:06, as the line ends, his eyes go past the camera to the door, and the movement continues to the last frame of the shot. By 00:07 the camera has finished pushing in a hand's breadth and stands at that distance, with the action of that shot completed.\n[Shot 2] From 00:07 to 00:12. At 00:07 the shot cuts to a close shot of <Subject 2> in the hall, beginning from <Picture 4>: bare-headed, sunburnt, thin waxed moustache, his head a third of the frame's height, the loose-papered wall behind his shoulder and the fog-grey daylight from the open door along one cheek. The camera is in the hall at the front-room doorway, level with Watson's eyes and a long stride from him, a 100mm lens turned on his face. The daylight from the open door lies along one cheek from the LEFT. At the first frame Watson stands in the bare hall on the stripped boards, bare-headed, sunburnt, the thin waxed moustache on his lip. The camera pushes in a hand's breadth on his face as <Subject 2>'s eyes travel from the front-room doorway round to the camera, from 00:07 to 00:10. At 00:10 his chin lowers, and the movement continues to the last frame of the shot. <Subject 2>'s mouth is closed from 00:07 to 00:10 while his lips part a little. By 00:12 the camera has finished pushing in a hand's breadth on his face and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the bare front hall of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 12.25,
+    "render_s": 416.4,
+    "waited_s": 420.4,
+    "rel_path": "episodes/ep03/takes/r2v/T22.mp4"
+  },
+  {
+    "index": 24,
+    "shots": [
+      24
+    ],
+    "section": "button",
+    "setup": "hall",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION when the take has a wide cell to place it against + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_indoor.png",
+      "Q24_0.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q24_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l24.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.666667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 84024,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger. <Picture 1> defines this man alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a medium close shot on <Subject 1> turned back in the open front doorway with the fog-grey street behind him.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.00-second take of 1 shot in the bare front hall of Number 3 Lauriston Gardens. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:08. The shot begins from <Picture 2>: a medium close shot on <Subject 1> turned back in the open front doorway with the fog-grey street behind him, bare-headed above his buttoned overcoat collar, his head a quarter of the frame's height in the RIGHT half, the loose-papered hall wall at the LEFT edge, his lips together with the line on them. The camera is in the hall a stride inside the front door, level with Holmes's eyes. The camera pushes in a hand's breadth as <Subject 1> turns his head back over his shoulder toward the hall as he speaks the line, from 00:00 to 00:04. <Subject 1> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] Rache is the German for revenge. Waste no time on Miss Rachel.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, he turns away into the fog, and the turn continues to the last frame of the shot. By 00:08 the camera has finished pushing in a hand's breadth and stands at that distance, with the action of that shot completed.\n\noverall_soundscape: The ambience of the bare front hall of Number 3 Lauriston Gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.0,
+    "render_s": 210.3,
+    "waited_s": 210.9,
+    "rel_path": "episodes/ep03/takes/r2v/T24.mp4"
+  }
+]

@@ -1,0 +1,943 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "criterion",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-stamford.png",
+      "char-john_watson_criterion.png",
+      "plate_criterion.png",
+      "Q00_0.png"
+    ],
+    "faces": [
+      "stamford",
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q00_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l00.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 5.458333,
+    "frames": 141,
+    "seconds": 5.88,
+    "steps": 8,
+    "seed": 82000,
+    "prompt": "subject_definitions:\n<Subject 1> is Stamford in <Picture 1>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 2> is John Watson in <Picture 2>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 3> is the location in <Picture 3>: The Criterion Bar, Piccadilly, 1881, early afternoon: a long mahogany counter with a brass foot-rail under a great gilt-framed mirror, gasoliers burning yellow through tobacco haze, marble pillars, bottles ranked on glass shelves, a tiled floor; drinkers stand two deep at the near end by the doors and thin to an empty stretch of counter at the far end under the mirror; behind the counter hangs the gilt mirror, which gives back the men's backs and the gasoliers; warm gaslight indoors, with the wet grey daylight of the street lying beyond the doors. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium close-up at the crowded near end of the Criterion counter.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 5.88-second take of 1 shot in <Subject 3>, the Criterion Bar. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:06. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:06. The shot begins from <Picture 4>: a medium close-up at the crowded near end of the Criterion counter: <Subject 1>, dark hair, round clean-shaven face, in a black frock coat, his hand just lifted from a tweed shoulder, facing <Subject 2>'s tweed back at the frame edge; drinkers soft behind; yellow gaslight, the gilt mirror behind the counter reflecting their backs; <Subject 1>'s mouth is closed, the line on his lips. The camera holds a static shot as <Subject 1> speaks the line to the man in front of him, from 00:00 to 00:04. <Subject 1> (S1), on screen, a stout young man in his mid-twenties, with a clipped English voice at an even pace, says: <d>[English] Watson? Good Lord, man. What have you done to yourself?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, <Subject 2> turns his whole body round from the counter to face <Subject 1>, his tweed shoulder and profile filling the left of frame. At 00:05 <Subject 1>'s hand rises open to chest height as he speaks and drops back to his side, and the drop continues to the last frame of the shot. Behind them the white-aproned barman with his corkscrew half-turned into a bottle and a waiter halted with his tray level at shoulder height, from 00:00 to 00:06.\n\noverall_soundscape: The ambience of the Criterion Bar runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 5.87,
+    "render_s": 407.1,
+    "rel_path": "episodes/ep01/takes/r2v/T00.mp4"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "criterion",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_criterion.png",
+      "char-stamford.png",
+      "plate_criterion.png",
+      "Q01_0.png",
+      "Q01_1.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q01_0.png",
+        0
+      ],
+      [
+        "Q01_1.png",
+        77
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82001,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: The Criterion Bar, Piccadilly, 1881, early afternoon: a long mahogany counter with a brass foot-rail under a great gilt-framed mirror, gasoliers burning yellow through tobacco haze, marble pillars, bottles ranked on glass shelves, a tiled floor; drinkers stand two deep at the near end by the doors and thin to an empty stretch of counter at the far end under the mirror; behind the counter hangs the gilt mirror, which gives back the men's backs and the gasoliers; warm gaslight indoors, with the wet grey daylight of the street lying beyond the doors. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a close shot of <Subject 1> turned from the counter near its crowded end.\n<Picture 5> is the first frame of [Shot 2], an insert at the brass foot-rail, same place at the counter.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 3>, the Criterion Bar. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: a close shot of <Subject 1> turned from the counter near its crowded end, bareheaded, dark hair swept back, gaunt sunburnt face, thin moustache, mouth closed, the brown bowler in the hand on the right of frame against his chest; <Subject 2>'s black shoulder at the left edge; gaslight, drinkers blurred behind. The camera is one step farther along the counter on the drinkers' side. The camera holds a static shot as <Subject 1> turns the brown bowler a half turn against his chest in his left hand, from 00:00 to 00:02. At 00:02 his head turns from <Subject 2> down to the hat and back up to <Subject 2>, and the turn continues to the last frame of the shot. Behind them one drinker at the brass rail holding a folded newspaper open in both hands and reading it, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he turns the brown bowler a half turn against his chest in his left hand.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to an insert at the brass foot-rail, same place at the counter, beginning from <Picture 5>: <Subject 1>'s bare sunburnt hand on the silver ball knob of his black stick, the frayed tweed cuff above it, a wine glass beside it on the mahogany; the only hand in frame; only what <Picture 5> shows is in frame. The camera is out on the drinkers' side of the counter, set at the height of the hand on the stick's knob and a pace back from the panelled counter front, a close-focus lens square to that front. The camera holds a static shot as the hand leaves the knob, closes round the wine glass and lifts it up out of the top of frame, from 00:03 to 00:06. At 00:06 the silver knob stands alone on the rail and the hand comes back down onto it, and the movement continues to the last frame of the shot.\n\noverall_soundscape: The ambience of the Criterion Bar runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 583.0,
+    "rel_path": "episodes/ep01/takes/r2v/T01.mp4"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "criterion",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_criterion.png",
+      "char-stamford.png",
+      "plate_criterion.png",
+      "Q02_0.png",
+      "Q02_1.png",
+      "Q02_0E.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q02_0.png",
+        0
+      ],
+      [
+        "Q02_1.png",
+        94
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 8.25,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 82002,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: The Criterion Bar, Piccadilly, 1881, early afternoon: a long mahogany counter with a brass foot-rail under a great gilt-framed mirror, gasoliers burning yellow through tobacco haze, marble pillars, bottles ranked on glass shelves, a tiled floor; drinkers stand two deep at the near end by the doors and thin to an empty stretch of counter at the far end under the mirror; behind the counter hangs the gilt mirror, which gives back the men's backs and the gasoliers; warm gaslight indoors, with the wet grey daylight of the street lying beyond the doors. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium two-shot a few steps further along the counter.\n<Picture 5> is the first frame of [Shot 2], a close shot of <Subject 2>.\n<Picture 6> is the last frame of [Shot 1], the same stretch of mahogany in the same yellow gaslight, a moment later: Watson's wine glass is up at his mouth in his bare sunburnt right hand, his chin lifted and his eyes above the rim on Stamford; the black walking stick leans against the panelled counter front with its silver ball knob against the mahogany's edge and its ferrule on the tiled floor; the brown bowler is in his far left hand at his side; Stamford's glass stands back on the counter in a wet ring, lower by an inch, his fingers spread flat on the wood beside it, his head come down and his eyes travelling along Watson's coat to the black stick at the rail; the great gilt-framed mirror on the wall beyond them keeps both men's backs and the gasoliers above them; the barman draws the cork clear of the bottle neck and pours, and the waiter has carried his tray to the right edge of frame.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 2 shots in <Subject 3>, the Criterion Bar. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 5> and runs from 00:04 to 00:09. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 4>: a medium two-shot a few steps limping further along the counter: <Subject 2> at right at a normal walking pace, dark hair, round clean-shaven face, black frock coat, and <Subject 1> at left facing him over two glasses, bareheaded, the bowler in his far hand at his side, the black stick's silver knob under his bare sunburnt hand nearer the camera at the counter's rail, mouths closed; the gilt mirror behind them showing their own backs. The camera holds a static shot as <Subject 2> drinks from the raised glass and sets it down on the counter, from 00:00 to 00:01. At 00:01 <Subject 1> picks up his own glass from the counter and drinks. At 00:03 <Subject 2>'s head turns to look <Subject 1> up and down, from his face to his stick and back, over the whole shot, and the turn continues to the last frame of the shot. Behind them the white-aproned barman tilting a bottle over a fresh glass and a waiter waiting at the counter's end with his tray level, from 00:00 to 00:04. <Subject 1>'s mouth is closed from 00:00 to 00:04 while he picks up his own glass from the counter and drinks.\n[Shot 2] From 00:04 to 00:09. At 00:04 the shot cuts to a close shot of <Subject 2>, beginning from <Picture 5>: same place at the counter, dark hair, round clean-shaven face, his glass standing on the mahogany at the bottom of frame with his hand flat on the wood beside it, an odd measuring look along <Subject 1>'s coat, mouth closed; gaslight on one side of his face, the gilt mirror behind him. The camera is close in at the quieter end of the counter, on the drinkers' side. The camera holds a static shot as <Subject 2> lifts the glass from the counter to his lips and drinks, from 00:04 to 00:06. At 00:06 his head turns away from <Subject 1> toward the doors and back to him, and the turn continues to the last frame of the shot. Behind them one drinker leaning on the brass rail with both elbows under a gasolier burning steady, from 00:04 to 00:09. <Subject 1>'s mouth is closed from 00:04 to 00:06 while his head turns away from <Subject 1> toward the doors.\n\noverall_soundscape: The ambience of the Criterion Bar runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.7,
+    "render_s": 2196.4,
+    "rel_path": "episodes/ep01/takes/r2v/T02.mp4"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "transition",
+    "setup": "cab",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "plate_cab.png",
+      "Q03_0.png",
+      "Q03_1.png",
+      "Q03_0E.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q03_0.png",
+        0
+      ],
+      [
+        "Q03_1.png",
+        90
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.375,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82003,
+    "prompt": "subject_definitions:\n<Subject 1> is the location in <Picture 1>: A black two-wheeled hansom cab, 1881, on wet cobbled London streets under a grey afternoon sky: a bay horse in the shafts, two tall spoked wheels, a folding hood, the cabman on his high seat up behind the hood, a brass side-lamp at each front corner; inside, one buttoned leather seat for two passengers side by side under the low hood, the hood closing behind and above them, the small rain-streaked front glass and the leather apron ahead of them, the horse's back beyond the glass; shopfronts and gas lamps lit early sliding past. <Picture 1> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 2> is the first frame of [Shot 1], a wide exterior, a wet cobbled street just off Piccadilly under a grey afternoon sky.\n<Picture 3> is the first frame of [Shot 2], an insert low beside the moving hansom, in the same street.\n<Picture 4> is the last frame of [Shot 1], the same stretch of street from the same place on the near pavement, the same normal lens square to the far kerb, the same grey afternoon light and the same shopfronts flat along the whole width of frame. The hansom now stands at the RIGHT of frame: the bay horse's head and shoulders have passed out through the RIGHT edge, its hind quarters and the two long shafts fill the right third of frame, the one tall near wheel stands at the right of centre with its spokes drawn into a blur by the turn, the black body and the two hatted passengers behind their closed folding doors ride at the right of centre with the brass side-lamp burning at the body's front corner, and the cabman keeps his high seat at the BACK of the roof with the reins running forward over it. The puddle at the centre of frame is burst into one white sheet of water thrown back toward the LEFT edge, hanging over the cobbles at the height of the wheel hub, and the cobbles the cab has crossed lie wet and open from the LEFT edge to the middle of frame. The iron lamp post on the near kerb, the lit shopfront windows, the far kerb, the gas lamps lit early and the first-floor brick keep their own places and their own sizes. The boy with the broom has stepped back onto the kerb with the broom head lifted off the stones, two of the four pedestrians under umbrellas have turned their heads after the cab, and the second hansom stands at the far kerb where it stood.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 1>, a black two-wheeled hansom cab. [Shot 1] begins from <Picture 2> and runs from 00:00 to 00:04; [Shot 2] begins from <Picture 3> and runs from 00:04 to 00:08. The take carries <Subject 1> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 1> carry into every shot behind the people; <Picture 1> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 2> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 3> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:04. The shot begins from <Picture 2>: a wide exterior, a wet cobbled street just off Piccadilly under a grey afternoon sky: a black two-wheeled hansom entering from the left at a trot, a bay horse in the shafts, the cabman up on his high seat behind the folding hood, the brass side-lamp at the corner, two hatted figures side by side under the hood; shopfronts, gas lamps lit early. The camera holds a static shot as the hansom enters at the left edge of frame and travels the whole width of the street at a trot, the horse advancing along the cobbles and the wheels turning, and leaves at the right edge of frame, from 00:00 to 00:02. At 00:02 its wheels throw water from a puddle as it passes the centre, and the movement continues to the last frame of the shot. Behind him four pedestrians under umbrellas on the far pavement about their own errands, a boy at the crossing with both hands on his broom handle, and a second hansom waiting at the far kerb, from 00:00 to 00:04.\n[Shot 2] From 00:04 to 00:08. At 00:04 the shot cuts to an insert low beside the moving hansom, in the same street, beginning from <Picture 3>: the tall spoked wheel and the brass side-lamp, the horse's hind legs ahead of the wheel, rain-wet cobbles blurring beneath, spray flying; only what <Picture 3> shows is in frame. The camera is down on the wet cobbles at the near kerb, the lens at the height of the near wheel's hub, a forearm's length above the stones. At the first frame The one tall spoked wheel of this near flank fills the LEFT half of frame, its twelve spokes at rest, a chip in its iron tyre standing at the very top of the rim. The camera tracks beside the hansom at the horse's trot for the whole shot as the wheel turns through full revolutions and the cobbles and shopfronts stream past behind it, from 00:04 to 00:06. At 00:06 the hooves strike and spray flies at every stride, and the movement continues to the last frame of the shot.\n\noverall_soundscape: The ambience of a black two-wheeled hansom cab runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 1942.4,
+    "rel_path": "episodes/ep01/takes/r2v/T03.mp4"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "friction",
+    "setup": "cab",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson.png",
+      "char-stamford.png",
+      "plate_cab.png",
+      "Q04_0.png",
+      "Q04_1.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q04_0.png",
+        0
+      ],
+      [
+        "Q04_1.png",
+        77
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.833333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82004,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: A black two-wheeled hansom cab, 1881, on wet cobbled London streets under a grey afternoon sky: a bay horse in the shafts, two tall spoked wheels, a folding hood, the cabman on his high seat up behind the hood, a brass side-lamp at each front corner; inside, one buttoned leather seat for two passengers side by side under the low hood, the hood closing behind and above them, the small rain-streaked front glass and the leather apron ahead of them, the horse's back beyond the glass; shopfronts and gas lamps lit early sliding past. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a close shot inside the hansom under the low hood, midway to the hospital.\n<Picture 5> is the first frame of [Shot 2], an insert inside the hansom, same seat.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 3>, a black two-wheeled hansom cab. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: a close shot inside the hansom under the low hood, midway to the hospital: <Subject 1> in his brown bowler, gaunt sunburnt face, thin moustache, mouth closed, eyes on the small rain-streaked front glass ahead of him with the horse's back beyond it; the hood closing behind and above his head; <Subject 2>'s black shoulder and round clean-shaven face at the right edge, soft; grey light. The camera holds a static shot as the shopfronts and gas lamps slide past the side window behind him for the whole shot, from 00:00 to 00:01. At 00:01 a jolt lifts <Subject 1> off the seat and drops him back. At 00:02 his head turns from the front glass to the side window and back to the glass, and the turn continues to the last frame of the shot. Behind them one man in a dark coat under an umbrella on the pavement past the side glass and a woman with a basket at a doorway, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his head turns from the front glass to the side window.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to an insert inside the hansom, same seat, beginning from <Picture 5>: <Subject 1>'s bare sunburnt hand gripping the silver ball knob of the black stick planted between his knees, the tweed cuff frayed, the cab floor wet; the only hand in frame; only what <Picture 5> shows is in frame. The camera is inside the passenger box, set low over the wet floorboards a forearm's length from Watson's knees and level with his hands, a close-focus lens looking down the length of the black walking stick. The camera holds a static shot as the wet street slides past at the top of frame for the whole shot, from 00:03 to 00:05. At 00:05 a jolt knocks the stick sideways and the hand catches it and plants it upright again. At 00:06 the hand presses the ferrule down onto the wet floor, and the movement continues to the last frame of the shot.\n\noverall_soundscape: The ambience of a black two-wheeled hansom cab runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 2001.1,
+    "rel_path": "episodes/ep01/takes/r2v/T04.mp4"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "cab",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson.png",
+      "char-stamford.png",
+      "plate_cab.png",
+      "Q05_0.png",
+      "Q05_1.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q05_0.png",
+        0
+      ],
+      [
+        "Q05_1.png",
+        77
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.916667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82005,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: A black two-wheeled hansom cab, 1881, on wet cobbled London streets under a grey afternoon sky: a bay horse in the shafts, two tall spoked wheels, a folding hood, the cabman on his high seat up behind the hood, a brass side-lamp at each front corner; inside, one buttoned leather seat for two passengers side by side under the low hood, the hood closing behind and above them, the small rain-streaked front glass and the leather apron ahead of them, the horse's back beyond the glass; shopfronts and gas lamps lit early sliding past. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium close shot from the side inside the hansom, midway to the hospital.\n<Picture 5> is the first frame of [Shot 2], an insert from the passengers' seat inside the hansom, midway to the hospital.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 3>, a black two-wheeled hansom cab. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: a medium close shot from the side inside the hansom, midway to the hospital: <Subject 1> in profile, brown bowler on, face to the side window, mouth closed, the arm nearer the camera stiff against his tweed coat; beyond him at the right edge <Subject 2>'s black shoulder and round clean-shaven face, soft; the hood above and behind them, grey light. The camera holds a static shot as the street and shopfronts stream past the side window behind <Subject 1>'s profile for the whole shot, from 00:00 to 00:01. At 00:01 a jolt throws him toward the camera and his far hand comes up and grips the stick's knob to steady him. At 00:02 the stiff arm nearer the camera hangs at his side throughout, and the movement continues to the last frame of the shot. Behind them one man under an umbrella on the pavement past the lit windows of a chemist's shopfront, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while a jolt throws him toward the camera and his far hand comes up.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to an insert from the passengers' seat inside the hansom, midway to the hospital, beginning from <Picture 5>: the small rain-streaked front glass and the leather apron below it, the bay horse's back and the reins beyond the glass, the wet street and shopfronts sliding toward the camera; the horse and the street fill the frame; only what <Picture 5> shows is in frame. The camera is from the passengers' own place on the seat, set at their eye height midway between the two men and turned forward along the street, a wide lens. The camera holds a static shot as the horse trots ahead and the wet street at a normal trot, shopfronts and gas lamps rush toward the camera and pass out of both edges of frame for the whole shot, from 00:03 to 00:05. At 00:05 rain runs down the glass. At 00:06 the horse's back rises and falls at every stride, and the movement continues to the last frame of the shot.\n\noverall_soundscape: The ambience of a black two-wheeled hansom cab runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 1202.6,
+    "rel_path": "episodes/ep01/takes/r2v/T05.mp4"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "cab",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson.png",
+      "char-stamford.png",
+      "plate_cab.png",
+      "Q06_0.png",
+      "Q06_1.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q06_0.png",
+        0
+      ],
+      [
+        "Q06_1.png",
+        73
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.291667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 82006,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: A black two-wheeled hansom cab, 1881, on wet cobbled London streets under a grey afternoon sky: a bay horse in the shafts, two tall spoked wheels, a folding hood, the cabman on his high seat up behind the hood, a brass side-lamp at each front corner; inside, one buttoned leather seat for two passengers side by side under the low hood, the hood closing behind and above them, the small rain-streaked front glass and the leather apron ahead of them, the horse's back beyond the glass; shopfronts and gas lamps lit early sliding past. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium close shot inside the hansom, nearing the hospital.\n<Picture 5> is the first frame of [Shot 2], a close shot of <Subject 1> in the hansom.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 2 shots in <Subject 3>, a black two-wheeled hansom cab. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: a medium close shot inside the hansom, nearing the hospital: <Subject 2> in strict profile, dark hair, round clean-shaven face, black frock coat, looking out the side past the brass lamp, mouth closed; <Subject 1>'s tweed shoulder and bowler brim nearer the camera; the hood above them, grey light, the street sliding past. The camera is on the seat itself between the two men. The camera holds a static shot as the shopfronts slide past the side window beyond <Subject 2> for the whole shot, from 00:00 to 00:01. At 00:01 he raises his arm and points out past the brass lamp at something in the street, the arm fully extended, and lowers it. At 00:02 his head follows the thing he pointed at back past the lamp, and the movement continues to the last frame of the shot. Behind them three pedestrians under umbrellas along the pavement past the side glass, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he raises his arm.\n[Shot 2] From 00:03 to 00:07. At 00:03 the shot cuts to a close shot of <Subject 1> in the hansom, beginning from <Picture 5>: same seat, brown bowler on, mouth closed, turned to watch <Subject 2>'s averted round face and black shoulder at the right edge of frame, soft; grey light through the small front glass. The camera is inside the passenger box at its front right corner. The camera holds a static shot as the street slides past the front glass behind him for the whole shot, from 00:03 to 00:04. At 00:04 <Subject 1> turns his whole head from <Subject 2> at the right edge round to the front glass. At 00:06 a jolt rocks him sideways against the seat and he rights himself, and the movement continues to the last frame of the shot. Behind them one man in a dark coat on the pavement beyond the iron railings in the side glass, from 00:03 to 00:07. <Subject 1>'s mouth is closed from 00:03 to 00:05 while he turns his whole head from <Subject 2> at the right edge round to the front glass.\n\noverall_soundscape: The ambience of a black two-wheeled hansom cab runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 1108.8,
+    "rel_path": "episodes/ep01/takes/r2v/T06.mp4"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7,
+      8
+    ],
+    "section": "transition",
+    "setup": "gateway",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson.png",
+      "char-stamford.png",
+      "plate_gateway.png",
+      "Q07_0.png",
+      "Q08_0.png",
+      "Q08_1.png",
+      "Q08_0E.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q07_0.png",
+        0
+      ],
+      [
+        "Q08_0.png",
+        51
+      ],
+      [
+        "Q08_1.png",
+        120
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 10.25,
+    "frames": 260,
+    "seconds": 10.83,
+    "steps": 8,
+    "seed": 82007,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: The street front of Saint Bartholomew's Hospital, 1881: a stone gateway arch onto the wet cobbled street, iron gates open, worn stone steps beyond the arch up to a small side-door in soot-dark brick, a pavement with iron railings along the hospital wall running to a corner, gas lamps on iron posts unlit, fog thinning, rain just stopped; the arrival panels stand in the flat grey daylight of that wet early afternoon and the departure panels stand later the same day, with one band of low amber sun along the top course of the wall and the pavement flags in blue shade. <Picture 3> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a wide from across the street.\n<Picture 5> is the first frame of [Shot 2], a full shot from the foot of the worn stone steps just inside the arch, looking up.\n<Picture 6> is the first frame of [Shot 3], a close shot of <Subject 2> at the top of the worn stone steps in the open side-door.\n<Picture 7> is the last frame of [Shot 2], the same flight of steps from the same low place at the foot of it, the same normal lens and the same grey light. Watson stands at the top of the flight with both boots on the threshold sill and the open doorway standing round him, his back to the camera and his face in three-quarter turn toward Stamford, the black walking stick planted on the sill under his bare sunburnt right hand, the brown bowler crown upward at his chest in his bare left hand, his dark hair bare to the grey light. Stamford stands a pace back over the sill inside the dark passage, his black frock coat half taken by that darkness, his round clean-shaven face pale and turned back toward Watson, his flat hand on the inner face of the door, which now stands wide against the passage wall. The five worn steps below the two men lie empty from the bottom step to the top. The folded-back iron gate leaf keeps the left edge of frame with its spear tops level. The shadow of the archway lies across the bottom two steps as it did. The three men in dark coats stand talking at the foot of the wall.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 10.83-second take of 3 shots in <Subject 3>, the street front of Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:02; [Shot 2] begins from <Picture 5> and runs from 00:02 to 00:05; [Shot 3] begins from <Picture 6> and runs from 00:05 to 00:11. The take carries <Subject 1>, <Subject 2> through [Shot 1], [Shot 2] and [Shot 3] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2], [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1], [Shot 2], [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1], [Shot 2] and [Shot 3]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 3] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 7> ([Shot 2] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:02. The shot begins from <Picture 4>: a wide from across the street: the stone gateway arch of Saint Bartholomew's, the SAME black two-wheeled hansom drawn up at the kerb beneath it, the bay horse's head toward the corner, the cabman up behind the hood; <Subject 2> down on the wet cobbles in his black frock coat, turning in under the arch; <Subject 1> in his brown bowler with one boot on the cab step, one hand on the hood's edge, the black stick in his other bare hand reaching for the cobbles; grey light. The camera holds a static shot as the hansom stands at the kerb, from 00:00 to 00:01. At 00:01 <Subject 1> steps down from the cab step onto the cobbles, plants the stick and limps two steps toward the arch on it, while <Subject 2> walks at a normal pace ahead of him in under the arch, and the step continues to the last frame of the shot. Behind them three men in dark coats talking just inside the archway, a porter halted at the railings with both hands on his barrow shafts, and a woman with a basket waiting at the far kerb, from 00:00 to 00:02.\n[Shot 2] From 00:02 to 00:05. At 00:02 the shot cuts to a full shot from the foot of the worn stone steps just inside the arch at a normal walking pace, looking up, beginning from <Picture 5>: <Subject 2> at the top in the open side-door, black frock coat, turned back; <Subject 1> seen from behind at the bottom of the flight, both boots together on the lowest step, his weight on the black stick in the bare sunburnt hand on the right of frame, the brown bowler square on his head, the hand on the left of frame hanging at the skirt of his coat. The camera holds a static shot as <Subject 1> climbs all five steps on his stick, one limping step per second, lifts the bowler off his head as he reaches the top and passes <Subject 2> through the door, from 00:02 to 00:04. At 00:04 <Subject 2> steps back through the door ahead of him, and the step continues to the last frame of the shot. Behind them three men in dark coats talking at the foot of the wall with their backs turned, and a woman with a basket waiting out on the far kerb, from 00:02 to 00:05. <Subject 1>'s mouth is closed from 00:02 to 00:05 while he climbs all five steps on his stick.\n[Shot 3] From 00:05 to 00:11. At 00:05 the shot cuts to a close shot of <Subject 2> at the top of the worn stone steps in the open side-door at a normal walking pace, beginning from <Picture 6>: dark hair, round clean-shaven face, black frock coat, turned back to <Subject 1> below him, mouth closed, an uneasy half smile; soot-dark brick behind. The camera is low on the third step looking up at Stamford in the doorway at the top of the flight. The camera holds a static shot as <Subject 2> turns his head from <Subject 1> below him to the doorway, pushes the door wide open with his flat hand, and steps limping on his stick through it, his shoulder leaving the frame, from 00:05 to 00:08. At 00:08 <Subject 1>'s bare head and tweed shoulder rise into the bottom of frame behind him, and the movement continues to the last frame of the shot. Behind them three men in dark coats standing far below at the foot of the wall, talking with their hats on, from 00:05 to 00:11. <Subject 1>'s mouth is closed from 00:05 to 00:09 while his bare head.\n\noverall_soundscape: The ambience of the street front of Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 10.83,
+    "render_s": 1668.7,
+    "rel_path": "episodes/ep01/takes/r2v/T07.mp4"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "corridor",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_corridor.png",
+      "char-stamford.png",
+      "plate_corridor.png",
+      "Q09_0.png",
+      "Q09_1.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q09_0.png",
+        0
+      ],
+      [
+        "Q09_1.png",
+        77
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.791667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82009,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: A long stone corridor inside Saint Bartholomew's Hospital, 1881: flagstone floor worn hollow, whitewashed walls stained with damp, dun-coloured doors, tall barred windows on one side throwing cold grey daylight in bars across the floor, unlit gas brackets, an open doorway to a dissecting room with a slab under a high window, and at the far end a low arched passage. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium shot from behind at the corridor's near end.\n<Picture 5> is the first frame of [Shot 2], a close shot of <Subject 2> in strict profile walking.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 3>, a long stone corridor inside Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: a medium shot from behind at the corridor's near end: <Subject 2> a pace ahead in the black frock coat, <Subject 1> bareheaded, the brown bowler in the hand on the left of frame, the black stick swinging in the bare hand on the right of frame; bars of window light on the flagstones ahead. The camera tracks behind them at <Subject 2>'s normal walking pace for the whole shot as <Subject 1> limps along on his stick at a normal walking pace while <Subject 2> walks at a normal pace a step ahead of him, from 00:00 to 00:01. At 00:01 both men advance three full strides down the corridor and the bars of window light pass under their boots. At 00:02 <Subject 2>'s head turns back over his shoulder to <Subject 1> and forward again, and the turn continues to the last frame of the shot. Behind them two porters in leather aprons halted at the left-hand wall with a covered wheeled trolley between them, and a nurse in a white cap and long apron at a dun-coloured door beyond them with a folded pile of linen level in both arms, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he limps along on his stick at a normal walking pace.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to a close shot of <Subject 2> in strict profile walking, beginning from <Picture 5>: a quarter of the way down the corridor, dark hair, round clean-shaven face, mouth closed, eyes ahead; whitewashed wall passing behind. The camera is against the window wall on the RIGHT-hand side of the corridor. The camera tracks beside him in profile at his normal walking pace for the whole shot as the whitewashed wall and its damp stains stream past behind him as he walks limping on his stick, from 00:03 to 00:06. At 00:06 he turns his head toward <Subject 1> beside him and faces ahead again, and the turn continues to the last frame of the shot. Behind him one student in a black coat holding an open folio in both hands at the whitewashed wall, and a charwoman kneeling at its foot with a zinc pail beside her, from 00:03 to 00:08. <Subject 2>'s mouth is closed from 00:03 to 00:06 while he turns his head toward <Subject 1> beside him and faces ahead again.\n\noverall_soundscape: The ambience of a long stone corridor inside Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 1205.6,
+    "rel_path": "episodes/ep01/takes/r2v/T09.mp4"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "friction",
+    "setup": "corridor",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_corridor.png",
+      "char-stamford.png",
+      "plate_corridor.png",
+      "Q10_0.png",
+      "Q10_1.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q10_0.png",
+        0
+      ],
+      [
+        "Q10_1.png",
+        77
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.5,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 82010,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: A long stone corridor inside Saint Bartholomew's Hospital, 1881: flagstone floor worn hollow, whitewashed walls stained with damp, dun-coloured doors, tall barred windows on one side throwing cold grey daylight in bars across the floor, unlit gas brackets, an open doorway to a dissecting room with a slab under a high window, and at the far end a low arched passage. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], an insert from the corridor, now abreast of the dissecting-room doorway, seen through it.\n<Picture 5> is the first frame of [Shot 2], a medium close-up of <Subject 1> stopped dead beside the dissecting-room doorway.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 7.29-second take of 2 shots in <Subject 3>, a long stone corridor inside Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:08. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: an insert from the corridor, now abreast of the dissecting-room doorway, seen through it: a plain wooden stick lying on a slab beside a body under a grey sheet, cold light from a high window; only what <Picture 4> shows is in frame. The camera is in the middle of the corridor abreast of the dissecting-room doorway, at walking height, a normal lens, turned square into the opening, so the dark jambs of that doorway stand down BOTH edges of frame. The camera pushes in through the doorway toward the slab for the whole shot as the stick and the sheet grow from a third of the frame to two thirds and the doorframe passes out of both edges of frame, from 00:00 to 00:02. At 00:02 a drip runs off the slab's edge to the floor, and the movement continues to the last frame of the shot.\n[Shot 2] From 00:03 to 00:08. At 00:03 the shot cuts to a medium close-up of <Subject 1> stopped dead beside the dissecting-room doorway, beginning from <Picture 5>: bareheaded, dark hair swept back, thin moustache, the brown bowler in the hand on the right of frame, the black stick's silver knob under the bare sunburnt hand on the left of frame, staring in, mouth closed, his face grey-white to the lips; <Subject 2>'s black shoulder at the edge of frame, nearer the camera, soft. The camera holds a static shot as <Subject 1> takes a full step back from the doorway on his stick, his whole body moving to the right of frame, from 00:03 to 00:06. At 00:06 his head and shoulders turn round to <Subject 2> at the frame edge, and the turn continues to the last frame of the shot. Behind them two students in black coats at a dun-coloured door with one open folio between them, and a charwoman at the whitewashed wall with both hands on her zinc pail, from 00:03 to 00:08. <Subject 1>'s mouth is closed from 00:03 to 00:05 while he takes a full step back from the doorway on his stick.\n\noverall_soundscape: The ambience of a long stone corridor inside Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 7.29,
+    "render_s": 1159.1,
+    "rel_path": "episodes/ep01/takes/r2v/T10.mp4"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "payoff",
+    "setup": "corridor",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_corridor.png",
+      "char-stamford.png",
+      "plate_corridor.png",
+      "Q11_0.png",
+      "Q11_1.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q11_0.png",
+        0
+      ],
+      [
+        "Q11_1.png",
+        68
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 5.666667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 82011,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: A long stone corridor inside Saint Bartholomew's Hospital, 1881: flagstone floor worn hollow, whitewashed walls stained with damp, dun-coloured doors, tall barred windows on one side throwing cold grey daylight in bars across the floor, unlit gas brackets, an open doorway to a dissecting room with a slab under a high window, and at the far end a low arched passage. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a full shot from behind, low on the flagstones at the corridor's far end.\n<Picture 5> is the first frame of [Shot 2], an insert low at the corridor's far end, from behind.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 2 shots in <Subject 3>, a long stone corridor inside Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: a full shot from behind, low on the flagstones at the corridor's far end: <Subject 2> through the low arched passage holding its door open, <Subject 1>'s back nearer the camera, bareheaded, the brown bowler in the hand on the left of frame, the black stick planted under the bare hand on the right of frame, weight on the stick. The camera holds a static shot as <Subject 1> limps along on his stick at a normal walking pace down the corridor toward the passage, two full strides, growing smaller in frame, from 00:00 to 00:02. At 00:02 <Subject 2> stands in the open doorway at the far end with his hand on the door, and the opening continues to the last frame of the shot. Behind them a nurse in a white cap and long apron at a dun-coloured door with a covered tray level in both hands, and a charwoman beyond her with both hands on her pail, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while he limps along on his stick at a normal walking pace down the corridor toward the passage.\n[Shot 2] From 00:03 to 00:07. At 00:03 the shot cuts to an insert low at the corridor's far end, from behind, beginning from <Picture 5>: <Subject 1>'s boot on the worn flagstone with the black stick's ferrule planted beside it, a bar of window light across them; ahead, the threshold of the low arched passage and the door; only what <Picture 5> shows is in frame. The camera is set down on the flagstones at the corridor's far end a half pace behind Watson's boots, a hand's breadth above the stone and level with it, a close-focus lens looking along the floor toward the low arched passage. The camera holds a static shot as the boot lifts, swings forward through a full stride and lands a step nearer the passage, from 00:03 to 00:04. At 00:04 the stick's ferrule lifts and plants beside it. At 00:06 the bar of window light passes over them, and the movement continues to the last frame of the shot.\n\noverall_soundscape: The ambience of a long stone corridor inside Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 1087.3,
+    "rel_path": "episodes/ep01/takes/r2v/T11.mp4"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "transition",
+    "setup": "lab",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_lab.png",
+      "char-sherlock_holmes_lab.png",
+      "char-stamford.png",
+      "plate_lab.png",
+      "Q12_0.png",
+      "Q12_1.png",
+      "Q12_0E.png"
+    ],
+    "faces": [
+      "john_watson",
+      "sherlock_holmes",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q12_0.png",
+        0
+      ],
+      [
+        "Q12_1.png",
+        68
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 7.875,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 82012,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Sherlock Holmes in <Picture 2>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 3> is Stamford in <Picture 3>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 4> is the location in <Picture 4>: The chemical laboratory of Saint Bartholomew's Hospital, 1881, seen from its door: a lofty chamber lined with countless bottles, broad low tables scattered with retorts, test-tubes and little Bunsen lamps with blue flickering flames, a tall arched window centred at the far end and under it Holmes's own working table with a wooden stool, cold daylight mixed with the blue of the flames; the bench setup is this same room seen from its middle toward that window. <Picture 4> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 5> is the first frame of [Shot 1], a wide through the laboratory door.\n<Picture 6> is the first frame of [Shot 2], a medium close-up of <Subject 1> and <Subject 3> just inside the laboratory doorway.\n<Picture 7> is the last frame of [Shot 1], the same view from the same doorway, the same aisle, the same benches and shelves and the same flat grey window light: Holmes has risen off the stool to his full lean height and stands in the aisle in front of his table, his whole body turned round square to the door and the camera, his face lifted and his mouth wide open on a shout, the test-tube thrust straight up at the end of a fully extended arm so that his hand and the tube break into the upper third of the frame beside the tall arched window; the wooden stool lies tipped back on two legs behind his heels, rocking; the two students at the nearer benches have straightened and turned their heads toward him, one with the flask lowered to the bench; the ranked bottles, the blue flames, the long benches and the window keep their own places and their own sizes.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 2 shots in <Subject 4>, the chemical laboratory of Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 5> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 6> and runs from 00:03 to 00:09. The take carries <Subject 1>, <Subject 2>, <Subject 3> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (appears in [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 3>.\n<Subject 4> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 4> carry into every shot behind the people; <Picture 4> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 5> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 7> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 5>: a wide through the laboratory door: long benches crowded with retorts and bottles, blue flames, and at the far end under the tall arched window a tall lean figure in a bottle-green velvet jacket, visibly green, dark wavy hair, bent over a test-tube at his own table, his back to the door. The camera is in the open doorway itself at the near end of the room. The camera holds a static shot as the figure springs up from the stool to his full height with the test-tube thrust up at arm's length toward the window in the first 1 second, the stool tipping and rocking behind him, from 00:00 to 00:02. At 00:02 he turns his whole body round to face the door, and the turn continues to the last frame of the shot. Behind him two students in shirtsleeves at the nearer benches, one writing in a notebook and one holding a flask up to the daylight, from 00:00 to 00:03.\n[Shot 2] From 00:03 to 00:09. At 00:03 the shot cuts to a medium close-up of <Subject 1> and <Subject 3> just inside the laboratory doorway, beginning from <Picture 6>: both turned toward the far end, mouths closed; <Subject 1> bareheaded, dark hair swept back, thin moustache, the brown bowler in the hand on the right of frame; <Subject 3>, dark hair, round clean-shaven face, in the black frock coat. The camera is at the near end of the aisle a half pace inside the door. The camera holds a static shot as <Subject 3> steps forward out of the doorway and passes out of the right edge of frame at a normal walking pace, from 00:03 to 00:06. At 00:06 <Subject 1> turns his head after him, then limps forward on his stick toward the camera, two steps, his face growing larger in frame, and the step continues to the last frame of the shot. Behind them one student in shirtsleeves at a near bench with a pipette over a dish, from 00:03 to 00:09. <Subject 1>'s mouth is closed from 00:03 to 00:06 while he turns his head after him.\n\noverall_soundscape: The ambience of the chemical laboratory of Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 8.7,
+    "render_s": 1339.9,
+    "rel_path": "episodes/ep01/takes/r2v/T12.mp4"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "turn",
+    "setup": "lab",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_lab.png",
+      "char-sherlock_holmes_lab.png",
+      "char-stamford.png",
+      "plate_lab.png",
+      "Q13_0.png",
+      "Q13_1.png"
+    ],
+    "faces": [
+      "john_watson",
+      "sherlock_holmes",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q13_0.png",
+        0
+      ],
+      [
+        "Q13_1.png",
+        68
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 6.083333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 82114,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Sherlock Holmes in <Picture 2>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 3> is Stamford in <Picture 3>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 4> is the location in <Picture 4>: The chemical laboratory of Saint Bartholomew's Hospital, 1881, seen from its door: a lofty chamber lined with countless bottles, broad low tables scattered with retorts, test-tubes and little Bunsen lamps with blue flickering flames, a tall arched window centred at the far end and under it Holmes's own working table with a wooden stool, cold daylight mixed with the blue of the flames; the bench setup is this same room seen from its middle toward that window. <Picture 4> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 5> is the first frame of [Shot 1], a full three-shot mid-laboratory between the benches.\n<Picture 6> is the first frame of [Shot 2], an insert mid-laboratory between the benches.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 2 shots in <Subject 4>, the chemical laboratory of Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 5> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 6> and runs from 00:03 to 00:07. The take carries <Subject 1>, <Subject 2>, <Subject 3> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (appears in [Shot 1], [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 3>.\n<Subject 4> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 4> carry into every shot behind the people; <Picture 4> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 5> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 5>: a full three-shot mid-laboratory between the benches: <Subject 3> in the middle, dark hair, round clean-shaven face, black frock coat, one hand extended palm up toward <Subject 2>; <Subject 1> at left, bareheaded, the brown bowler against his far side, the black stick's silver knob under his bare sunburnt hand nearer the camera; <Subject 2> at right in the bottle-green velvet jacket, visibly green, dark wavy hair, the test-tube raised in the hand nearer the camera, a small plaster on the forefinger of his far hand. The camera holds a static shot as <Subject 3>'s extended hand sweeps across from <Subject 2> to <Subject 1> and drops to his side, from 00:00 to 00:02. At 00:02 <Subject 2> steps limping on his stick forward from the bench toward <Subject 1> at a normal walking pace, one full stride, the test-tube coming down to his chest,, and the step continues to the last frame of the shot. Behind them two students in shirtsleeves working on at the benches beyond, one pouring from a flask and one bent over a rack of tubes, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while his extended hand sweeps across from <Subject 2> to <Subject 1>.\n[Shot 2] From 00:03 to 00:07. At 00:03 the shot cuts to an insert mid-laboratory between the benches, beginning from <Picture 6>: <Subject 3>'s open hand extended palm up between the two men; at left <Subject 1>'s tweed sleeve and the bare sunburnt hand on the silver knob; at right <Subject 2>'s bottle-green velvet sleeve, the small plaster on the forefinger of the hand hooked on the bench edge, the test-tube in his other hand above it; only what <Picture 6> shows is in frame. The camera is in the middle of the aisle at waist height, close in over the near bench edge between the three men, a short macro lens. The camera holds a static shot as the open hand sweeps from <Subject 2> to <Subject 1> and drops out of the bottom of frame, from 00:03 to 00:05. At 00:05 <Subject 2>'s velvet sleeve comes forward and carries the test-tube in his other hand over the empty rack, holding it upright above the wood, and the movement continues to the last frame of the shot.\n\noverall_soundscape: The ambience of the chemical laboratory of Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "tries": 1,
+    "measured_seconds": 6.58,
+    "render_s": 737.5,
+    "waited_s": 738.4,
+    "rel_path": "episodes/ep01/takes/r2v/T13.mp4"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14,
+      15
+    ],
+    "section": "spike",
+    "setup": "lab",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_lab.png",
+      "char-sherlock_holmes_lab.png",
+      "plate_lab.png",
+      "Q14_0.png",
+      "Q14_1.png",
+      "Q15_0.png"
+    ],
+    "faces": [
+      "john_watson",
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q14_0.png",
+        0
+      ],
+      [
+        "Q14_1.png",
+        68
+      ],
+      [
+        "Q15_0.png",
+        145
+      ]
+    ],
+    "audio": [
+      [
+        "l14.wav",
+        6.209
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 10.25,
+    "frames": 260,
+    "seconds": 10.83,
+    "steps": 8,
+    "seed": 82014,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Sherlock Holmes in <Picture 2>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 3> is the location in <Picture 3>: The chemical laboratory of Saint Bartholomew's Hospital, 1881, seen from its door: a lofty chamber lined with countless bottles, broad low tables scattered with retorts, test-tubes and little Bunsen lamps with blue flickering flames, a tall arched window centred at the far end and under it Holmes's own working table with a wooden stool, cold daylight mixed with the blue of the flames; the bench setup is this same room seen from its middle toward that window. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a close shot from <Subject 2>'s eye line.\n<Picture 5> is the first frame of [Shot 2], an insert from <Subject 2>'s eye line, mid-laboratory.\n<Picture 6> is the first frame of [Shot 3], a medium close-up of <Subject 2> mid-laboratory facing <Subject 1>.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:06, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 10.83-second take of 3 shots in <Subject 3>, the chemical laboratory of Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 5> and runs from 00:03 to 00:06; [Shot 3] begins from <Picture 6> and runs from 00:06 to 00:11. The take carries <Subject 1>, <Subject 2> through [Shot 1], [Shot 2] and [Shot 3] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2], [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1], [Shot 2], [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1], [Shot 2] and [Shot 3]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 3] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 4>: a close shot from <Subject 2>'s eye line, mid-laboratory, on <Subject 1>'s coat collar and white cravat with its stud, the edge of the thin moustache at the top of frame, loose tweed hanging on a thinned frame; the hands and the stick are out of frame below. The camera is from where Holmes stands, a pace in front of Watson and a little below his chin, a short telephoto lens. The camera tilts down from the cravat over the loose tweed coat to the bare sunburnt hand on the stick's silver knob at the bottom of frame, the collar leaving the top of frame as the coat swings as <Subject 1> shifts his weight onto the stick, from 00:00 to 00:03. Behind them one student in shirtsleeves at a far bench with his back turned, fallen soft in the blur, from 00:00 to 00:03. <Subject 1>'s mouth is closed from 00:00 to 00:03 while the coat swings as <Subject 1> shifts his weight onto the stick.\n[Shot 2] From 00:03 to 00:06. At 00:03 the shot cuts to an insert from <Subject 2>'s eye line, mid-laboratory, beginning from <Picture 5>: <Subject 1>'s bare sunburnt hand on the silver ball knob of the black stick in the upper sixth of the frame with the frayed tweed cuff above it, the black stick running plumb down the centre of the frame from that knob to the floorboards, his stiff leg beside it with the trouser falling its whole length, and the boot and the stick's ferrule together in the lowest sixth; the hand is the only hand in frame. From the hand to the boot is five times the length of the hand, so the leg reads its full standing height; the boot is as long as the hand and a half; only what <Picture 5> shows is in frame. The camera holds a static shot as <Subject 1> shifts his weight off the stiff leg onto the stick : the stick tilts toward the camera, the hand presses down on the knob and the stiff leg swings a half step forward and plants, from 00:03 to 00:04. At 00:04 the ferrule slides on the boards and lands, and the movement continues to the last frame of the shot.\n[Shot 3] From 00:06 to 00:11. At 00:06 the shot cuts to a medium close-up of <Subject 2> mid-laboratory facing <Subject 1>, beginning from <Picture 6>: bareheaded, dark wavy hair, the bottle-green velvet jacket visibly green over the checked muffler, the test-tube in the hand on the right of frame, the small plaster on the forefinger of the hand on the left of frame at his chest, a thin amused certainty on his face, lips just closed; bottles and a blue flame behind him. The camera holds a static shot as <Subject 2> speaks the line to the man in front of him, from 00:06 to 00:09. <Subject 2> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] How are you? You have been in Afghanistan, I perceive.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:09, as the line ends, as he speaks he lowers the test-tube from his chest to the bench at the bottom of frame and raises the plastered hand to point one finger at <Subject 1>, the arm fully extended by the end of the line, and the lift continues to the last frame of the shot. Behind them one student in shirtsleeves at a bench beyond, his shoulder soft at the edge of frame, from 00:06 to 00:11.\n\noverall_soundscape: The ambience of the chemical laboratory of Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 10.83,
+    "render_s": 1595.6,
+    "rel_path": "episodes/ep01/takes/r2v/T14.mp4"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "reaction",
+    "setup": "lab",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson_lab.png",
+      "char-sherlock_holmes_lab.png",
+      "plate_lab.png",
+      "Q16_0.png"
+    ],
+    "faces": [
+      "john_watson",
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q16_0.png",
+        0
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 5.958333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 82016,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Sherlock Holmes in <Picture 2>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 3> is the location in <Picture 3>: The chemical laboratory of Saint Bartholomew's Hospital, 1881, seen from its door: a lofty chamber lined with countless bottles, broad low tables scattered with retorts, test-tubes and little Bunsen lamps with blue flickering flames, a tall arched window centred at the far end and under it Holmes's own working table with a wooden stool, cold daylight mixed with the blue of the flames; the bench setup is this same room seen from its middle toward that window. <Picture 3> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium close-up of <Subject 1> ALONE filling the frame.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in <Subject 3>, the chemical laboratory of Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 4>: a medium close-up of <Subject 1> ALONE filling the frame, mid-laboratory, turned toward <Subject 2> off frame right, bareheaded, dark hair swept back, thin moustache, the brown bowler in the hand on the right of frame at his chest, the bare sunburnt stick hand out of frame below, mouth closed, eyes wide; glassware and a blue flame soft behind him. The camera holds a static shot as his head turns from <Subject 2> off right down to the bowler in his hand, from 00:00 to 00:02. At 00:02 he lifts the bowler and turns it a full turn in his hand. At 00:05 his head comes up and turns back to <Subject 2> and he takes a half step toward him, and the step continues to the last frame of the shot. Behind them one student in shirtsleeves at a bench along the aisle behind him, a soft shape, from 00:00 to 00:07. <Subject 1>'s mouth is closed from 00:00 to 00:04 while his head turns from <Subject 2> off right down to the bowler in his hand.\n\noverall_soundscape: The ambience of the chemical laboratory of Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 849.7,
+    "rel_path": "episodes/ep01/takes/r2v/T16.mp4"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "runout",
+    "setup": "bench",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_bench.png",
+      "plate_bench.png",
+      "Q17_0.png",
+      "Q17_1.png",
+      "Q17_2.png"
+    ],
+    "faces": [
+      "sherlock_holmes"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q17_0.png",
+        0
+      ],
+      [
+        "Q17_1.png",
+        119
+      ],
+      [
+        "Q17_2.png",
+        213
+      ]
+    ],
+    "audio": "silence",
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 14.666667,
+    "frames": 362,
+    "seconds": 15.08,
+    "steps": 8,
+    "seed": 82017,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 2> is the location in <Picture 2>: Holmes's own working table under the tall arched window of the chemical laboratory, 1881: the SAME room as the lab setup, seen from the middle of the room toward its far window, the reverse angle of the lab, so the far arched window fills the top of frame and the same bottle-lined shelves stand either side, and the frame keeps that one window alone; a broad low bench crowded with retorts and a rack of test-tubes, a litre glass vessel of clear water, a Bunsen lamp's blue flame, white crystals in a dish, an open notebook and pen, two high three-legged stools, acid stains on the wood; cold window light with the blue of the flame. <Picture 2> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 3> is the first frame of [Shot 1], a medium shot from behind <Subject 1>'s bottle-green velvet shoulder at his own table under the tall arched window, the same laboratory seen from its middle.\n<Picture 4> is the first frame of [Shot 2], an extreme close-up at the same place on the bench.\n<Picture 5> is the first frame of [Shot 3], an extreme close-up of the vessel on the bench.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 15.08-second take of 3 shots in <Subject 2>, Holmes's own working table under the tall arched window of the chemical laboratory. [Shot 1] begins from <Picture 3> and runs from 00:00 to 00:05; [Shot 2] begins from <Picture 4> and runs from 00:05 to 00:09; [Shot 3] begins from <Picture 5> and runs from 00:09 to 00:16. The take carries <Subject 1> through [Shot 1], [Shot 2] and [Shot 3] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (the location behind [Shot 1], [Shot 2] and [Shot 3]): partially_preserved - the materials, furniture and light of <Picture 2> carry into every shot behind the people; <Picture 2> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 3> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 4> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 3] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 3>: a medium shot from behind <Subject 1>'s bottle-green velvet shoulder at his own table under the tall arched window, the same laboratory seen from its middle: he is turned to the table, dark wavy hair; a long bodkin raised in the hand on the left of frame; the hand on the right of frame, his right, with the small plaster on its forefinger, over the litre vessel of clear water; the blue flame beside the vessel. The camera holds a static shot as <Subject 1> pricks the fingertip with the bodkin and sets the bodkin down on the bench in the first 2 seconds, from 00:00 to 00:02. At 00:02 he squeezes the finger and lowers the hand to the mouth of the vessel. At 00:03 a drop falls into the water and the hand draws back and reaches for a pipette on the bench, and the reach continues to the last frame of the shot. Behind him one student in shirtsleeves at a far bench under the window, his back turned, writing, from 00:00 to 00:05. <Subject 1>'s mouth is closed from 00:00 to 00:05 while he pricks the fingertip with the bodkin.\n[Shot 2] From 00:05 to 00:09. At 00:05 the shot cuts to an extreme close-up at the same place on the bench, beginning from <Picture 4>: the plastered forefinger above the litre vessel, a single drop of blood hanging from the fingertip, the water below perfectly clear, the blue flame reflected in the glass. The camera is at the mouth of the litre vessel itself, a hand's breadth from the glass and level with its rim, a macro lens. The camera holds a static shot as the drop falls from the fingertip into the water and a red thread sinks through the clear water to the bottom of the vessel, from 00:05 to 00:07. At 00:07 the plastered finger lifts out of the top of frame and a glass pipette comes down into the vessel from above, and the lift continues to the last frame of the shot. Behind him one shirtsleeved shoulder at the far bench, fallen to a soft dark ground beyond the glass, from 00:05 to 00:09.\n[Shot 3] From 00:09 to 00:16. At 00:09 the shot cuts to an extreme close-up of the vessel on the bench, beginning from <Picture 5>: the one thin red thread hanging in nearly clear water, the flame in the glass; the bench and the glass alone in frame, the vessel's rim the only edge above the water. The camera is set down on the bench top a hand's breadth back from the vessel. The camera holds a static shot as the pipette tip releases drops into the water and lifts out of the top of frame, from 00:09 to 00:11. At 00:11 the water darkens from the red thread outward to dull mahogany, a brownish dust settling to the bottom. At 00:14 <Subject 1>'s plastered hand comes in from the right, picks the vessel up and tilts it toward the camera by the cut, and the movement continues to the last frame of the shot. Behind him one student in shirtsleeves at a far bench beyond the glass, his back turned, fallen soft, from 00:09 to 00:16.\n\noverall_soundscape: The ambience of Holmes's own working table under the tall arched window of the chemical laboratory runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 15.08,
+    "render_s": 2034.0,
+    "waited_s": 2037.7,
+    "rel_path": "episodes/ep01/takes/r2v/T17.mp4"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18,
+      19
+    ],
+    "section": "runout",
+    "setup": "bench",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-sherlock_holmes_bench.png",
+      "char-john_watson_bench.png",
+      "char-stamford.png",
+      "plate_bench.png",
+      "Q18_0.png",
+      "Q19_0.png",
+      "Q19_1.png"
+    ],
+    "faces": [
+      "sherlock_holmes",
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q18_0.png",
+        0
+      ],
+      [
+        "Q19_0.png",
+        111
+      ],
+      [
+        "Q19_1.png",
+        187
+      ]
+    ],
+    "audio": [
+      [
+        "l18.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 11.541667,
+    "frames": 294,
+    "seconds": 12.25,
+    "steps": 8,
+    "seed": 82018,
+    "prompt": "subject_definitions:\n<Subject 1> is Sherlock Holmes in <Picture 1>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 2> is John Watson in <Picture 2>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 3> is Stamford in <Picture 3>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 4> is the location in <Picture 4>: Holmes's own working table under the tall arched window of the chemical laboratory, 1881: the SAME room as the lab setup, seen from the middle of the room toward its far window, the reverse angle of the lab, so the far arched window fills the top of frame and the same bottle-lined shelves stand either side, and the frame keeps that one window alone; a broad low bench crowded with retorts and a rack of test-tubes, a litre glass vessel of clear water, a Bunsen lamp's blue flame, white crystals in a dish, an open notebook and pen, two high three-legged stools, acid stains on the wood; cold window light with the blue of the flame. <Picture 4> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 5> is the first frame of [Shot 1], a medium close-up of <Subject 1> at his bench under the tall window.\n<Picture 6> is the first frame of [Shot 2], an insert across the bench, lit by the tall window.\n<Picture 7> is the first frame of [Shot 3], a medium shot from the laboratory door at the near end of the room, facing them.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 12.25-second take of 3 shots in <Subject 4>, Holmes's own working table under the tall arched window of the chemical laboratory. [Shot 1] begins from <Picture 5> and runs from 00:00 to 00:05; [Shot 2] begins from <Picture 6> and runs from 00:05 to 00:08; [Shot 3] begins from <Picture 7> and runs from 00:08 to 00:13. The take carries <Subject 1>, <Subject 2>, <Subject 3> through [Shot 1], [Shot 2] and [Shot 3] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2], [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1], [Shot 2], [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (appears in [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 3>.\n<Subject 4> (the location behind [Shot 1], [Shot 2] and [Shot 3]): partially_preserved - the materials, furniture and light of <Picture 4> carry into every shot behind the people; <Picture 4> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 5> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 7> ([Shot 3] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 5>: a medium close-up of <Subject 1> at his bench under the tall window, facing <Subject 2> across it, bareheaded, dark wavy hair, the bottle-green velvet jacket visibly green, the pen poised over the open notebook in the hand on the left of frame, his right, with the small plaster on its forefinger, brisk good humour, lips just closed; the blue flame beside him. The camera holds a static shot as <Subject 1> speaks the line to the man across the bench, from 00:00 to 00:04. <Subject 1> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] We may consider the thing settled, if the rooms suit you.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, as he speaks he sets the pen down on the notebook, pushes the stool back and stands up to his full height, and extends his plastered right hand across the bench toward the camera by the end of the line, and the push continues to the last frame of the shot. Behind them one student in shirtsleeves at a far bench under the window, his back turned, pouring from a flask, from 00:00 to 00:05.\n[Shot 2] From 00:05 to 00:08. At 00:05 the shot cuts to an insert across the bench, lit by the tall window, beginning from <Picture 6>: two hands clasped at centre; from the bottle-green velvet sleeve on the left of frame <Subject 1>'s hand, the small plaster on its forefinger visible on the outside of the grip; from the tweed sleeve on the right of frame <Subject 2>'s bare sunburnt hand; these two hands alone in frame; only what <Picture 6> shows is in frame. The camera is across the bench at its near edge, set at the height of the two joined hands and a foot from them, a short telephoto lens. At the first frame Two hands are in this frame and they are these two: from the bottle-green velvet cuff at the LEFT edge. The camera holds a static shot as the two clasped hands pump up and down twice, a full hand's height each time,, then let go and draw apart to the two edges of frame, from 00:05 to 00:08.\n[Shot 3] From 00:08 to 00:13. At 00:08 the shot cuts to a medium shot from the laboratory door at the near end of the room, facing them, beginning from <Picture 7>: <Subject 2> and <Subject 3> walking toward the camera away from the bench, <Subject 2> bareheaded, the brown bowler in the hand on the right of frame, the black stick in the bare sunburnt hand on the left of frame, <Subject 3> in the black frock coat; behind them, small, under the tall arched window, <Subject 1> in the bottle-green velvet jacket bent back over his table. The camera tracks back ahead of them at <Subject 3>'s normal walking pace for the whole shot as <Subject 2> limps along on his stick at a normal walking pace while <Subject 3> walks at a normal pace beside him, from 00:08 to 00:10. At 00:10 both advance toward the camera, growing from half the frame height to the full height, the benches passing either side. At 00:11 behind them, small, <Subject 1> bends over his table, and the movement continues to the last frame of the shot. Behind them one student in shirtsleeves at a far bench holding a flask up to the daylight, from 00:08 to 00:13. <Subject 1>'s mouth is closed from 00:08 to 00:10 while he limps along on his stick at a normal walking pace.\n\noverall_soundscape: The ambience of Holmes's own working table under the tall arched window of the chemical laboratory runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 12.25,
+    "render_s": 1186.0,
+    "waited_s": 1181.6,
+    "rel_path": "episodes/ep01/takes/r2v/T18.mp4"
+  },
+  {
+    "index": 20,
+    "shots": [
+      20,
+      21
+    ],
+    "section": "runout",
+    "setup": "gateway",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-john_watson.png",
+      "char-stamford.png",
+      "plate_gateway.png",
+      "Q20_0.png",
+      "Q21_0.png",
+      "Q21_1.png"
+    ],
+    "faces": [
+      "john_watson",
+      "stamford"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q20_0.png",
+        0
+      ],
+      [
+        "Q21_0.png",
+        115
+      ],
+      [
+        "Q21_1.png",
+        188
+      ]
+    ],
+    "audio": [
+      [
+        "l20.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 11.833333,
+    "frames": 294,
+    "seconds": 12.25,
+    "steps": 8,
+    "seed": 82020,
+    "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Stamford in <Picture 2>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 3> is the location in <Picture 3>: The street front of Saint Bartholomew's Hospital, 1881: a stone gateway arch onto the wet cobbled street, iron gates open, worn stone steps beyond the arch up to a small side-door in soot-dark brick, a pavement with iron railings along the hospital wall running to a corner, gas lamps on iron posts unlit, fog thinning, rain just stopped; the arrival panels stand in the flat grey daylight of that wet early afternoon and the departure panels stand later the same day, with one band of low amber sun along the top course of the wall and the pavement flags in blue shade. <Picture 3> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium close-up of <Subject 1> stopped on the wet pavement just outside the gateway arch.\n<Picture 5> is the first frame of [Shot 2], a medium two-shot side on along the railings, halfway to the corner, both walking.\n<Picture 6> is the first frame of [Shot 3], a close shot of <Subject 1> walking along the railings.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 12.25-second take of 3 shots in <Subject 3>, the street front of Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:05; [Shot 2] begins from <Picture 5> and runs from 00:05 to 00:08; [Shot 3] begins from <Picture 6> and runs from 00:08 to 00:13. The take carries <Subject 1>, <Subject 2> through [Shot 1], [Shot 2] and [Shot 3] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2], [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1], [Shot 2], [Shot 3]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1], [Shot 2] and [Shot 3]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 5> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 3] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:05. The shot begins from <Picture 4>: a medium close-up of <Subject 1> stopped on the wet pavement just outside the gateway arch, brown bowler on, dark hair, thin moustache, turned to <Subject 2> off frame, the question on his face, lips just closed; the silver knob of the black stick under his bare sunburnt hand at the bottom of frame; iron railings and the hospital wall behind him. The camera holds a static shot as <Subject 1> speaks the line to the man beside him off frame, from 00:00 to 00:04. <Subject 1> (S1), on screen, a man in his late twenties, with a clipped English voice at an even pace, says: <d>[English] How the deuce did he know I was in Afghanistan?</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, as he speaks he turns his whole upper body round toward <Subject 2>'s side, the bowler brim turning with him, then after the line he raises the stick and points it back at the arch behind his right shoulder, and the lift continues to the last frame of the shot. Behind them a woman with a basket standing at the far kerb with her hands on the handle, and a porter standing beside his barrow set down at the railings, from 00:00 to 00:05.\n[Shot 2] From 00:05 to 00:08. At 00:05 the shot cuts to a medium two-shot side on along the railings, halfway to the corner, both walking, beginning from <Picture 5>: <Subject 2> nearer the camera in strict profile, dark hair, round clean-shaven face, black frock coat, a half smile, mouth closed; <Subject 1> beyond him, brown bowler on, watching his face, the black stick's silver knob swinging in his bare sunburnt hand on the camera side. The camera tracks beside them at <Subject 2>'s normal walking pace for the whole shot as <Subject 1> limps along on his stick at a normal walking pace while <Subject 2> walks at a normal pace beside him, shortening his stride to <Subject 1>'s, from 00:05 to 00:06. At 00:06 the railings and the hospital wall stream past behind them. At 00:07 <Subject 2> shrugs both shoulders high and drops them and turns his head to <Subject 1>, and the turn continues to the last frame of the shot. Behind them a porter halted at the railings behind them with both hands on his barrow shafts, and a woman with a basket waiting at the corner ahead, from 00:05 to 00:08. <Subject 1>'s mouth is closed from 00:05 to 00:08 while he limps along on his stick at a normal walking pace.\n[Shot 3] From 00:08 to 00:13. At 00:08 the shot cuts to a close shot of <Subject 1> walking along the railings at a normal walking pace, beginning from <Picture 6>: brown bowler on, thin moustache, his eyes on <Subject 2> beside him at the frame edge, mouth closed; the hospital wall and railings sliding past behind him. The camera is out on the street side of the railings a few paces ahead of the two men and angled back along the pavement. The camera tracks ahead of him at his limping pace for the whole shot as the railings stream past behind him, from 00:08 to 00:10. At 00:10 <Subject 1>'s head turns from <Subject 2> beside him to the street ahead and back. At 00:11 he stops dead on his stick and <Subject 2>'s black shoulder passes on out of frame ahead of him, and the movement continues to the last frame of the shot. Behind them a porter halted at the railings halfway back with his barrow shafts down on the flags, and two women with baskets talking at the far kerb, from 00:08 to 00:13. <Subject 1>'s mouth is closed from 00:08 to 00:10 while his head turns from <Subject 2> beside him to the street ahead.\n\noverall_soundscape: The ambience of the street front of Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 12.25,
+    "render_s": 1348.8,
+    "waited_s": 1352.6,
+    "rel_path": "episodes/ep01/takes/r2v/T20.mp4"
+  },
+  {
+    "index": 22,
+    "shots": [
+      22
+    ],
+    "section": "button",
+    "setup": "gateway",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video: a cast sheet for every face the take shows + the plate as a DEFINITION + one <Picture N> per pinned cell + the END cells + the take's own storyboard strip as a weak_reference; each cell pinned once at its start frame; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "char-stamford.png",
+      "char-john_watson.png",
+      "plate_gateway.png",
+      "Q22_0.png"
+    ],
+    "faces": [
+      "stamford",
+      "john_watson"
+    ],
+    "ref_image_size": "match",
+    "anchors": [
+      [
+        "Q22_0.png",
+        0
+      ]
+    ],
+    "audio": [
+      [
+        "l22.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 1344,
+    "fps": 24,
+    "placed_seconds": 5.708333,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 82022,
+    "prompt": "subject_definitions:\n<Subject 1> is Stamford in <Picture 1>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 2> is John Watson in <Picture 2>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 3> is the location in <Picture 3>: The street front of Saint Bartholomew's Hospital, 1881: a stone gateway arch onto the wet cobbled street, iron gates open, worn stone steps beyond the arch up to a small side-door in soot-dark brick, a pavement with iron railings along the hospital wall running to a corner, gas lamps on iron posts unlit, fog thinning, rain just stopped; the arrival panels stand in the flat grey daylight of that wet early afternoon and the departure panels stand later the same day, with one band of low amber sun along the top course of the wall and the pavement flags in blue shade. <Picture 3> defines this place alone; each shot keeps the framing of its own first-frame picture.\n<Picture 4> is the first frame of [Shot 1], a medium close-up of <Subject 1> at the corner where a cab stands.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 6.58-second take of 1 shot in <Subject 3>, the street front of Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 4> and runs from 00:00 to 00:07. The take carries <Subject 1>, <Subject 2> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (the location behind [Shot 1]): partially_preserved - the materials, furniture and light of <Picture 3> carry into every shot behind the people; <Picture 3> serves as a definition of the place and each shot keeps the framing of its own first-frame picture.\n<Picture 4> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:07. The shot begins from <Picture 4>: a medium close-up of <Subject 1> at the corner where a cab stands, dark hair, round clean-shaven face, black frock coat, turned back to <Subject 2> one last time, a wry smile, lips just closed, the last word on his lips; the street and the waiting cab soft behind him. The camera holds a static shot as <Subject 1> speaks the line to the man behind him with the wry smile, from 00:00 to 00:03. <Subject 1> (S1), on screen, a stout young man in his mid-twenties, with a clipped English voice at an even pace, says: <d>[English] He'll learn more about you than you about him.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, after the line he turns his head and shoulders away from <Subject 2> toward the waiting cab and raises an arm to hail it, the arm fully up. At 00:05 his face is in frame in profile, and the movement continues to the last frame of the shot. Behind them a crossing-sweeper at rest on his broom at the kerb and a woman with a basket waiting at the far corner, from 00:00 to 00:07.\n\noverall_soundscape: The ambience of the street front of Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+    "measured_seconds": 6.58,
+    "render_s": 394.9,
+    "waited_s": 397.0,
+    "rel_path": "episodes/ep01/takes/r2v/T22.mp4"
+  }
+]

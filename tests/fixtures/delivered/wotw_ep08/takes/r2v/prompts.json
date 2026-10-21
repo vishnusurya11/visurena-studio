@@ -1,0 +1,586 @@
+[
+  {
+    "index": 0,
+    "shots": [
+      0
+    ],
+    "section": "hook",
+    "setup": "street",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_00.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.541667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 89000,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, sash windows, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide down a Surrey village street at night: brick cottages with lit sash windows along the left, a gas lamp burning at the kerb, the lantern of the public house further along, and the pale road running away empty between the hedges. The camera is in the middle of the road at a standing man's eye, a 35mm lens. The gaslight comes from the LEFT. At the first frame the pale road runs from the BOTTOM edge away into the CENTRE. Brick cottages with lit sash windows stand along the LEFT from the BOTTOM LEFT to the CENTRE, a gas lamp at the kerb at the CENTRE LEFT, and the lantern of the public house shows further along at the CENTRE. Black gardens fill the RIGHT third and a black sky fills the TOP third. The shot is inside this place: the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens, a gas street lamp at the kerb, a public house with a lantern over its door partway along, clipped hedges and a pillar box, and the road going away pale between them. The camera rises from the road with small amplitude until the whole row of lit windows and the lantern beyond stand inside the picture, travelling one short stride as a curtain is drawn across one lit window and the light behind it goes on burning, from 00:00 to 00:04. At 00:04 moths go on turning about the gas lamp, and the turn continues to the last frame of the shot. By 00:07 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 1,
+    "shots": [
+      1
+    ],
+    "section": "setup",
+    "setup": "street",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_01.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.0,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 89001,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, sash windows, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on a working man watering a garden at night by lamplight from his own window, in shirtsleeves with his braces down, a tin can in one hand, the rows of his vegetables black and wet in front of him and the lit window warm behind. The camera is at the garden rail level with his chest, four paces from him, a 50mm lens. The window light comes from behind him at the RIGHT. At the first frame the pale road runs from the BOTTOM edge away into the CENTRE. Brick cottages with lit sash windows stand along the LEFT from the BOTTOM LEFT to the CENTRE, a gas lamp at the kerb at the CENTRE LEFT, and the lantern of the public house shows further along at the CENTRE. Black gardens fill the RIGHT third and a black sky fills the TOP third. The shot is inside this place: the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens, a gas street lamp at the kerb, a public house with a lantern over its door partway along, clipped hedges and a pillar box, and the road going away pale between them. The camera tracks sideways to the right along the garden rail, a truck with small amplitude, until the lit window already in the picture is at the centre, travelling one short stride as the water goes on running from the can along the row, from 00:00 to 00:04. At 00:04 he moves the can on to the next row and goes on pouring, and the pour continues to the last frame of the shot. By 00:08 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 2,
+    "shots": [
+      2
+    ],
+    "section": "setup",
+    "setup": "street",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_02.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.125,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89002,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, sash windows, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot on a lit upstairs window at night seen from the road, the sash up a hand's breadth, a woman's shape crossing it with a child against her shoulder, and the warm light spilling out over the sill on to the dark hedge below. The camera is in the road below the window looking up, a 50mm lens, a low angle. The window is the light. At the first frame the lit sash window fills the CENTRE of the frame, a third of the frame's height, warm against dark brick that fills the LEFT edge and the RIGHT edge. The black hedge crosses the BOTTOM third and a black sky fills the TOP third. The shot is inside this place: the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens, a gas street lamp at the kerb, a public house with a lantern over its door partway along, clipped hedges and a pillar box, and the road going away pale between them. The camera tilts up the face of the cottage to the window, travelling a hand's breadth, until the lit sash is in the middle of the picture as the shape crosses the window and comes back, from 00:00 to 00:04. At 00:04 the light on the sill goes on moving as she moves, and the movement continues to the last frame of the shot. By 00:08 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 3,
+    "shots": [
+      3
+    ],
+    "section": "setup",
+    "setup": "street",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_03.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.041667,
+    "frames": 158,
+    "seconds": 6.58,
+    "steps": 8,
+    "seed": 89003,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 6.58-second take of 1 shot in the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens. [Shot 1] runs from 00:00 to 00:06. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, sash windows, black shadows.\n[Shot 1] From 00:00 to 00:06. The shot opens on an insert on the lantern over the door of the public house at night, close: a square iron lantern with smoked glass and a candle burning inside it, the painted board beside it dark, and a warm wash of light going down the bricks below; only that object and what touches it is in frame. The camera is close under the lantern on the pavement, a 50mm lens, a low angle. The lantern is the light. At the first frame the pale road runs from the BOTTOM edge away into the CENTRE. Brick cottages with lit sash windows stand along the LEFT from the BOTTOM LEFT to the CENTRE, a gas lamp at the kerb at the CENTRE LEFT, and the lantern of the public house shows further along at the CENTRE. Black gardens fill the RIGHT third and a black sky fills the TOP third. The shot is inside this place: the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens, a gas street lamp at the kerb, a public house with a lantern over its door partway along, clipped hedges and a pillar box, and the road going away pale between them. The camera pans to the left along the wall until the lantern already in the picture is at the centre, travelling a hand's breadth as the flame inside leans and rights itself as the door below opens, from 00:00 to 00:03. At 00:03 the wash of light on the bricks goes on widening, and the movement continues to the last frame of the shot. By 00:06 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the main street of a Surrey village at night in 1894: a row of brick and stucco cottages with lit sash windows and low front gardens runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 4,
+    "shots": [
+      4
+    ],
+    "section": "setup",
+    "setup": "junction",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_04.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.625,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 89004,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the platform of Woking junction at night in 1894: a long canopied platform under iron columns. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, is gaslight, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a wide along the platform of Woking junction at night: iron columns down both sides with gas lamps hanging between them, passengers waiting with bags along the edge, milk churns and mail sacks stacked by the wall, and a locomotive standing at the far end in its own steam. The camera is on the platform at a standing man's eye, a 35mm lens. The gas lamps come from ABOVE. At the first frame the pale platform runs from the BOTTOM edge away into the CENTRE, iron columns standing along it at the LEFT third and the RIGHT third with gas lamps hanging between them across the TOP third. The locomotive stands at the CENTRE at the far end with white steam about its wheels, the shuttered bookstall at the RIGHT third, and black track beyond the platform edge at the LEFT edge. The shot is inside this place: the platform of Woking junction at night in 1894: a long canopied platform under iron columns, gas lamps hanging in a row down it, a locomotive standing at the far end with steam about its wheels, goods trucks on the siding beyond, a wooden bookstall shuttered for the night, a wheeled porter's barrow standing empty, a cast-iron weighing machine. The camera tracks sideways to the right along the platform, a truck with small amplitude, until the locomotive already in the picture is at the centre, travelling one short stride as steam goes on rolling out along the platform at ankle height, from 00:00 to 00:04. At 00:04 a porter wheels a truck of sacks across in front of the lamps, and the movement continues to the last frame of the shot. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the platform of Woking junction at night in 1894: a long canopied platform under iron columns runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 5,
+    "shots": [
+      5
+    ],
+    "section": "friction",
+    "setup": "junction",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "episodes/ep08/storyboard/h3/shot_05.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l05.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.708333,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 89005,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the platform of Woking junction at night in 1894: a long canopied platform under iron columns. [Shot 1] runs from 00:00 to 00:07. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, is gaslight, black shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium close shot on <Subject 1>, a skinny lad of thirteen with knobbly wrists, a narrow freckled face, a snub nose, big ears and a gap between his front teeth, his tousled mousy-brown hair under a grey flat cloth cap pushed back, in an oversized ginger-orange corduroy jacket with an empty canvas bag folded flat on its strap across his chest working the platform at night with a folded paper up in one hand, his mouth open on a cry, the gas lamps hard on his face and the waiting passengers black behind him. The camera is on the platform level with his face, three paces from him, a 50mm lens. The gas lamps come from ABOVE. At the first frame the boy fills the CENTRE of the frame, the panel cutting him at the middle of the chest. The shot is inside this place: the platform of Woking junction at night in 1894: a long canopied platform under iron columns, gas lamps hanging in a row down it, a locomotive standing at the far end with steam about its wheels, goods trucks on the siding beyond, a wooden bookstall shuttered for the night, a wheeled porter's barrow standing empty, a cast-iron weighing machine. The camera tracks with him along the platform at his own pace, a truck with small amplitude, keeping him in the middle of the picture, travelling a hand's breadth as he lifts the paper higher and calls again, from 00:00 to 00:03. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] Evening paper! Read all about it!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:03, as the line ends, his free hand goes on tugging the empty bag round on its strap, and the movement continues to the last frame of the shot. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the platform of Woking junction at night in 1894: a long canopied platform under iron columns runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 6,
+    "shots": [
+      6
+    ],
+    "section": "friction",
+    "setup": "junction",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_06.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.416667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89006,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the platform of Woking junction at night in 1894: a long canopied platform under iron columns. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, is gaslight, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert on the front page of an evening paper up at night, close: a column of small black type under a plain heading, the sheet creased where a thumb keeps it, and the hard gaslight raking across the paper from above; only that object and what touches it is in frame. The camera is close to the paper on the platform, a 50mm lens. The gas lamps come from ABOVE; the paper reads bright. At the first frame the pale platform runs from the BOTTOM edge away into the CENTRE, iron columns standing along it at the LEFT third and the RIGHT third with gas lamps hanging between them across the TOP third. The locomotive stands at the CENTRE at the far end with white steam about its wheels, the shuttered bookstall at the RIGHT third, and black track beyond the platform edge at the LEFT edge. The shot is inside this place: the platform of Woking junction at night in 1894: a long canopied platform under iron columns, gas lamps hanging in a row down it, a locomotive standing at the far end with steam about its wheels, goods trucks on the siding beyond, a wooden bookstall shuttered for the night, a wheeled porter's barrow standing empty, a cast-iron weighing machine. The camera pushes in on the sheet, a dolly with small amplitude, until the heading fills the middle of the picture, travelling a hand's breadth as the hand holding it lifts the sheet and lets it settle, from 00:00 to 00:04. At 00:04 the light goes on raking across the creases, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the platform of Woking junction at night in 1894: a long canopied platform under iron columns runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 7,
+    "shots": [
+      7
+    ],
+    "section": "friction",
+    "setup": "junction",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_07.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.375,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89007,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the platform of Woking junction at night in 1894: a long canopied platform under iron columns. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, is gaslight, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on a knot of five men under the platform lamps at night, hats on the backs of their heads, two of them talking at once with their hands going, the others listening with their arms folded, and the lit carriage windows of a stopped train behind them. The camera is on the platform level with their faces, four paces from them, a 50mm lens. The gas lamps come from ABOVE. At the first frame the pale platform runs from the BOTTOM edge away into the CENTRE, iron columns standing along it at the LEFT third and the RIGHT third with gas lamps hanging between them across the TOP third. The locomotive stands at the CENTRE at the far end with white steam about its wheels, the shuttered bookstall at the RIGHT third, and black track beyond the platform edge at the LEFT edge. The shot is inside this place: the platform of Woking junction at night in 1894: a long canopied platform under iron columns, gas lamps hanging in a row down it, a locomotive standing at the far end with steam about its wheels, goods trucks on the siding beyond, a wooden bookstall shuttered for the night, a wheeled porter's barrow standing empty, a cast-iron weighing machine. The camera pans to the right across the knot until the furthest man already in the picture is at the centre, travelling a hand's breadth as the two who are talking go on talking over each other, from 00:00 to 00:04. At 00:04 one of the listeners turns away toward the train and keeps turning, and the turn continues to the last frame of the shot. By 00:08 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the platform of Woking junction at night in 1894: a long canopied platform under iron columns runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 8,
+    "shots": [
+      8
+    ],
+    "section": "friction",
+    "setup": "junction",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_shopman/sheet.png",
+      "episodes/ep08/storyboard/h3/shot_08.png"
+    ],
+    "faces": [
+      "unnamed_shopman"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l08.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.625,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89008,
+    "prompt": "subject_definitions:\n<Subject 1> is the shopman in <Picture 1>: Young shop assistant from Woking, 21 years old, 5 ft 7 in, slight and narrow-shouldered with a thin neck. Oval face, pale indoor complexion, weak chin, prominent ears. Dark brown hair cut short with a brushed-up quiff at the front. Brown eyes. Wearing: Brown cloth cap, high white celluloid collar, violet satin tie with a pin, black alpaca shop jacket with black sateen sleeve protectors, black-and-white pinstriped trousers, black boots, all smeared with yellow gravel and sand from the pit. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the platform of Woking junction at night in 1894: a long canopied platform under iron columns. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, is gaslight, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot on the young <Subject 1>, a slight narrow-shouldered man of twenty-one with an oval face, a pale indoor complexion, prominent ears and dark brown hair brushed up in a quiff, clean-shaven, in a brown cloth cap, a high white celluloid collar and a violet satin tie, his white pinstriped trousers smeared with yellow sand from the pit at the platform lamps at night, telling it to somebody just out of frame with his cap pushed back and his hands going, the yellow sand of the pit on his trousers, the hard gaslight full on his face. The camera is on the platform level with his face, two paces from him, a 50mm lens. The gas lamps come from ABOVE. At the first frame the shopman fills the CENTRE of the frame, the panel cutting him at the middle of the chest. The shot is inside this place: the platform of Woking junction at night in 1894: a long canopied platform under iron columns, gas lamps hanging in a row down it, a locomotive standing at the far end with steam about its wheels, goods trucks on the siding beyond, a wooden bookstall shuttered for the night, a wheeled porter's barrow standing empty, a cast-iron weighing machine. The camera pushes in on him a hand's breadth, a dolly with small amplitude, until his face fills the middle of the picture as he says it and his hands go on moving, from 00:00 to 00:05. <Subject 1> (S1), on screen, young shop assistant from Woking, with a clipped English voice at an even pace, says: <d>[English] I saw it myself. The thing has opened and there are men inside it.</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:05, as the line ends, his cap goes further back off his forehead as he talks, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the platform of Woking junction at night in 1894: a long canopied platform under iron columns runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 9,
+    "shots": [
+      9
+    ],
+    "section": "friction",
+    "setup": "junction",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_09.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.041667,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89009,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the platform of Woking junction at night in 1894: a long canopied platform under iron columns. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, is gaslight, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide of the sidings beyond the platform at night: goods trucks being shunted along the rails under the lamps, a shunter walking beside them with a pole, steam standing about the wheels, and the lit platform small behind. The camera is beside the siding low to the rails, a 35mm lens. The lamps come from ABOVE at the RIGHT. At the first frame the pale platform runs from the BOTTOM edge away into the CENTRE, iron columns standing along it at the LEFT third and the RIGHT third with gas lamps hanging between them across the TOP third. The locomotive stands at the CENTRE at the far end with white steam about its wheels, the shuttered bookstall at the RIGHT third, and black track beyond the platform edge at the LEFT edge. The shot is inside this place: the platform of Woking junction at night in 1894: a long canopied platform under iron columns, gas lamps hanging in a row down it, a locomotive standing at the far end with steam about its wheels, goods trucks on the siding beyond, a wooden bookstall shuttered for the night, a wheeled porter's barrow standing empty, a cast-iron weighing machine. The camera rises above the trucks with small amplitude until the whole line of them and the lit platform behind stand inside the picture, travelling one short stride as the trucks go on rolling and clashing along the rail, from 00:00 to 00:04. At 00:04 the shunter walks on beside them with his pole, and the walk continues to the last frame of the shot. By 00:08 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the platform of Woking junction at night in 1894: a long canopied platform under iron columns runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 10,
+    "shots": [
+      10
+    ],
+    "section": "reaction",
+    "setup": "carriage",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_10.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.583333,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 89010,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in the inside of a third-class railway carriage at night in 1894: a compartment with buttoned cloth seats facing each other. [Shot 1] runs from 00:00 to 00:09. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, roof lamp, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on a medium shot across a lighted third-class compartment at night: four passengers on the facing seats, one with a folded paper on his knee, one asleep in the corner, the roof lamp burning above them and the black window running past between. The camera is in the compartment level with their chests, four paces along it, a 35mm lens. The roof lamp comes from ABOVE. At the first frame the buttoned cloth seats fill the LEFT third and the RIGHT third of the frame facing each other, the black window between them at the CENTRE with the luggage rack across the TOP third above it. The roof lamp burns at the TOP CENTRE and its light falls on the seats and the floor in the BOTTOM third. The shot is inside this place: the inside of a third-class railway carriage at night in 1894: a compartment with buttoned cloth seats facing each other, brass rails along the luggage rack above, a framed line map and an advertisement card on the panelling, a leather strap hanging by the door, a folded newspaper on one seat, one oil lamp in the roof. The camera tracks sideways to the left along the compartment, a truck with small amplitude, until the black window already in the picture is at the centre, travelling one short stride as the whole compartment rocks steadily on the rail, from 00:00 to 00:04. At 00:04 the folded paper slides a hand's breadth along the knee and is caught, and the movement continues to the last frame of the shot. By 00:09 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the inside of a third-class railway carriage at night in 1894: a compartment with buttoned cloth seats facing each other runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 11,
+    "shots": [
+      11
+    ],
+    "section": "setup",
+    "setup": "carriage",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_11.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.125,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89011,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the inside of a third-class railway carriage at night in 1894: a compartment with buttoned cloth seats facing each other. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, roof lamp, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot on two passengers leaning to the carriage window at night, an older man with his hand cupped against the glass and a young woman beside him with her forehead near it, both of them looking out into the dark with the roof lamp warm on the sides of their faces. The camera is in the compartment level with their faces, three paces from them, a 50mm lens. The roof lamp comes from ABOVE behind them. At the first frame the two passengers fill the CENTRE of the frame side by side, the panel cutting them at the middle of the chest, each head a third the frame's height at the TOP third. The black window fills the frame behind them and the roof lamp shows at the TOP CENTRE. The shot is inside this place: the inside of a third-class railway carriage at night in 1894: a compartment with buttoned cloth seats facing each other, brass rails along the luggage rack above, a framed line map and an advertisement card on the panelling, a leather strap hanging by the door, a folded newspaper on one seat, one oil lamp in the roof. The camera pushes in on the glass a hand's breadth, a dolly with small amplitude, until both faces and the black window fill the middle of the picture as his cupped hand goes on shading the glass, from 00:00 to 00:04. At 00:04 her breath goes on misting it and clearing, and the movement continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the inside of a third-class railway carriage at night in 1894: a compartment with buttoned cloth seats facing each other runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 12,
+    "shots": [
+      12
+    ],
+    "section": "turn",
+    "setup": "carriage",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_12.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.5,
+    "frames": 226,
+    "seconds": 9.42,
+    "steps": 8,
+    "seed": 89012,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 9.42-second take of 1 shot in the inside of a third-class railway carriage at night in 1894: a compartment with buttoned cloth seats facing each other. [Shot 1] runs from 00:00 to 00:09. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, roof lamp, black shadows.\n[Shot 1] From 00:00 to 00:09. The shot opens on an insert through the carriage window at night: the black country running past, a single flickering spark dancing up from the direction of Horsell, a low red glow beyond it and a thin veil of smoke driving across the stars; only that object and what touches it is in frame. The camera is at the carriage glass looking out, a 50mm lens. The red glow on the horizon is the only light. At the first frame the buttoned cloth seats fill the LEFT third and the RIGHT third of the frame facing each other, the black window between them at the CENTRE with the luggage rack across the TOP third above it. The roof lamp burns at the TOP CENTRE and its light falls on the seats and the floor in the BOTTOM third. The shot is inside this place: the inside of a third-class railway carriage at night in 1894: a compartment with buttoned cloth seats facing each other, brass rails along the luggage rack above, a framed line map and an advertisement card on the panelling, a leather strap hanging by the door, a folded newspaper on one seat, one oil lamp in the roof. The camera pans to the right with the running country until the red glow already in the picture is at the centre, travelling a hand's breadth as the spark goes on dancing up and away, from 00:00 to 00:04. At 00:04 the veil of smoke goes on driving across the stars, and the movement continues to the last frame of the shot. By 00:09 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the inside of a third-class railway carriage at night in 1894: a compartment with buttoned cloth seats facing each other runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 13,
+    "shots": [
+      13
+    ],
+    "section": "setup",
+    "setup": "bridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_13.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.208333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89013,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the Horsell bridge over the canal at night in 1894: a low brick parapet crossing the road. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, that lamp from the near end, shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide of the Horsell bridge at night from the near side: the low brick parapet crossing the frame with a crowd standing all along it, the pale road going over and away toward the open common, a gas lamp burning at the near end, and a red glow standing low in the sky beyond. The camera is on the road at the near end of the bridge, low, a 35mm lens. The gas lamp comes from the LEFT. At the first frame the brick parapet runs across the CENTRE of the frame from the LEFT edge to the RIGHT edge. The pale road crosses it at the CENTRE and runs away to the open common beyond, black canal water shows at the BOTTOM LEFT, a gas lamp burns at the LEFT third, and a low red glow lies along the CENTRE at the horizon under a black sky in the TOP third. The shot is inside this place: the Horsell bridge over the canal at night in 1894: a low brick parapet crossing the road, the pale road going over it toward the open common beyond, black canal water below the near side, a gas lamp at the near end, a white painted handrail along the parapet, a stone milestone at the near corner. The camera rises from the road with small amplitude until the whole parapet and the red glow beyond stand inside the picture, travelling one short stride as two of the crowd leave the parapet and walk back past the camera, from 00:00 to 00:04. At 00:04 three more come up and take their places along it, and the movement continues to the last frame of the shot. By 00:08 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the Horsell bridge over the canal at night in 1894: a low brick parapet crossing the road runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 14,
+    "shots": [
+      14
+    ],
+    "section": "friction",
+    "setup": "bridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_14.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 6.666667,
+    "frames": 175,
+    "seconds": 7.29,
+    "steps": 8,
+    "seed": 89014,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 7.29-second take of 1 shot in the Horsell bridge over the canal at night in 1894: a low brick parapet crossing the road. [Shot 1] runs from 00:00 to 00:07. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, that lamp from the near end, shadows.\n[Shot 1] From 00:00 to 00:07. The shot opens on a medium shot along the parapet at night: six or seven people leaning on the brick side by side, all of them turned the same way toward the common, a man with a child up on the parapet beside him, and the red glow low on the horizon in front of them. The camera is behind the parapet level with their shoulders, three paces from them, a 50mm lens. The red glow comes from the CENTRE beyond. At the first frame the brick parapet runs across the CENTRE of the frame from the LEFT edge to the RIGHT edge. The pale road crosses it at the CENTRE and runs away to the open common beyond, black canal water shows at the BOTTOM LEFT, a gas lamp burns at the LEFT third, and a low red glow lies along the CENTRE at the horizon under a black sky in the TOP third. The shot is inside this place: the Horsell bridge over the canal at night in 1894: a low brick parapet crossing the road, the pale road going over it toward the open common beyond, black canal water below the near side, a gas lamp at the near end, a white painted handrail along the parapet, a stone milestone at the near corner. The camera tracks sideways to the right behind them, a truck with small amplitude, until the man with the child already in the picture is at the centre, travelling one short stride as the child points out toward the glow and keeps pointing, from 00:00 to 00:04. At 00:04 the man shifts his weight on the brick, and the movement continues to the last frame of the shot. By 00:07 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the Horsell bridge over the canal at night in 1894: a low brick parapet crossing the road runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 15,
+    "shots": [
+      15
+    ],
+    "section": "spike",
+    "setup": "bridge",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_15.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.583333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89015,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the Horsell bridge over the canal at night in 1894: a low brick parapet crossing the road. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, that lamp from the near end, shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on an insert on a pale beam sweeping the black common at night, seen low from the bridge: a flat shaft of light like a warship's searchlight lying along the heather, the tops of the furze bright where it crosses them, and the dark closing again behind it; only that object and what touches it is in frame. The camera is low on the bridge looking out over the common, a 35mm lens. The beam is the only light. At the first frame the brick parapet runs across the CENTRE of the frame from the LEFT edge to the RIGHT edge. The pale road crosses it at the CENTRE and runs away to the open common beyond, black canal water shows at the BOTTOM LEFT, a gas lamp burns at the LEFT third, and a low red glow lies along the CENTRE at the horizon under a black sky in the TOP third. The shot is inside this place: the Horsell bridge over the canal at night in 1894: a low brick parapet crossing the road, the pale road going over it toward the open common beyond, black canal water below the near side, a gas lamp at the near end, a white painted handrail along the parapet, a stone milestone at the near corner. The camera tilts up from the heather along the beam, travelling a hand's breadth, until the far end of it is in the middle of the picture as the beam goes on sweeping across the heather from the left, from 00:00 to 00:04. At 00:04 the furze tops brighten in turn as it passes them, and the turn continues to the last frame of the shot. By 00:08 the camera is tilting up through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the Horsell bridge over the canal at night in 1894: a low brick parapet crossing the road runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 16,
+    "shots": [
+      16
+    ],
+    "section": "answer",
+    "setup": "pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_16.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.208333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89016,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the sand-pits on Horsell Common at night in 1894: the raw ring of flung yellow sand round the crater. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, gaslight and black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a wide of the open common at night from out on the heather: the raw ring of flung yellow sand with a low red glow standing out of it, thin smoke lying flat along the ground, dark shapes lying on the open sand, and a flat horizon of low pines behind. The camera is out on the heather a hundred yards from the pit, low, a 35mm lens. The red glow out of the pit is the only light. At the first frame Black heather fills the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The raw ring of flung yellow sand runs across the CENTRE, lit red from within, a tenth of the height of the frame, with thin smoke lying flat along the ground in front of it. Dark shapes lie on the open sand at the CENTRE LEFT and the CENTRE RIGHT. The shot is inside this place: the sand-pits on Horsell Common at night in 1894: the raw ring of flung yellow sand round the crater, a low red glow standing up out of it, knee-deep heather and dark furze black to a flat horizon closed by low pines, thin smoke lying along the ground, and dark shapes lying out on the open sand. The camera tracks sideways to the left across the heather, a truck with small amplitude, until the red ring already in the picture is at the centre, travelling one short stride as the flat smoke goes on drifting across the sand, from 00:00 to 00:04. At 00:04 the glow out of the pit goes on rising and falling, and the movement continues to the last frame of the shot. By 00:08 the camera is tracking through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the sand-pits on Horsell Common at night in 1894: the raw ring of flung yellow sand round the crater runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 17,
+    "shots": [
+      17
+    ],
+    "section": "answer",
+    "setup": "pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_17.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 4.0,
+    "frames": 107,
+    "seconds": 4.46,
+    "steps": 8,
+    "seed": 89017,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 4.46-second take of 1 shot in the sand-pits on Horsell Common at night in 1894: the raw ring of flung yellow sand round the crater. [Shot 1] runs from 00:00 to 00:04. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, gaslight and black shadows.\n[Shot 1] From 00:00 to 00:04. The shot opens on an insert on the charred ground at night, close: heather burnt down to black stalks, the sand under it scorched and fused in patches, a man's boot lying on its side among the stalks, and the low red glow of the pit catching the rim of it; only that object and what touches it is in frame. The camera is on the ground among the burnt stalks, a 50mm lens, a low angle. The red glow comes from the RIGHT. At the first frame Black heather fills the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The raw ring of flung yellow sand runs across the CENTRE, lit red from within, a tenth of the height of the frame, with thin smoke lying flat along the ground in front of it. Dark shapes lie on the open sand at the CENTRE LEFT and the CENTRE RIGHT, and a black sky fills the TOP third. The shot is inside this place: the sand-pits on Horsell Common at night in 1894: the raw ring of flung yellow sand round the crater, a low red glow standing up out of it, knee-deep heather and dark furze black to a flat horizon closed by low pines, thin smoke lying along the ground, and dark shapes lying out on the open sand. The camera pans to the left across the burnt ground until the boot already in the picture is at the centre, travelling a hand's breadth as thin smoke goes on rising from the stalks, from 00:00 to 00:02. At 00:02 a flake of ash lifts off the sand and goes on drifting, and the lift continues to the last frame of the shot. By 00:04 the camera is panning through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the sand-pits on Horsell Common at night in 1894: the raw ring of flung yellow sand round the crater runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 18,
+    "shots": [
+      18
+    ],
+    "section": "answer",
+    "setup": "pit",
+    "lane": "narration",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "episodes/ep08/storyboard/h3/shot_18.png"
+    ],
+    "faces": [],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": "silence",
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 8.166667,
+    "frames": 209,
+    "seconds": 8.71,
+    "steps": 8,
+    "seed": 89018,
+    "prompt": "subject_definitions:\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n<Picture 1> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.71-second take of 1 shot in the sand-pits on Horsell Common at night in 1894: the raw ring of flung yellow sand round the crater. [Shot 1] runs from 00:00 to 00:08. The take carries the place through [Shot 1] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 1> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, gaslight and black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium shot on the lip of the pit at night from out on the sand: the raw edge of flung sand with the red glow standing up behind it, a long shadow moving on the sand beyond the rim, and thin smoke going up straight in the air. The camera is out on the sand thirty paces from the lip, low, a 35mm lens. The red glow comes from beyond the rim at the CENTRE. At the first frame Black heather fills the BOTTOM third of the frame from the LEFT edge to the RIGHT edge. The raw ring of flung yellow sand runs across the CENTRE, lit red from within, a tenth of the height of the frame, with thin smoke lying flat along the ground in front of it. Dark shapes lie on the open sand at the CENTRE LEFT and the CENTRE RIGHT, and a black sky fills the TOP third. The shot is inside this place: the sand-pits on Horsell Common at night in 1894: the raw ring of flung yellow sand round the crater, a low red glow standing up out of it, knee-deep heather and dark furze black to a flat horizon closed by low pines, thin smoke lying along the ground, and dark shapes lying out on the open sand. The camera rises from the sand with small amplitude until the lip of the pit and the glow behind it fill the middle of the picture, travelling one short stride as the shadow beyond the rim goes on moving back and forth, from 00:00 to 00:04. At 00:04 the smoke goes on climbing straight up, and the climb continues to the last frame of the shot. By 00:08 the camera is riseing through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the sand-pits on Horsell Common at night in 1894: the raw ring of flung yellow sand round the crater runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots and the small sounds of hands on wood, glass and iron carry the physical action throughout.\n\nnon_diegetic_music: N/A"
+  },
+  {
+    "index": 19,
+    "shots": [
+      19
+    ],
+    "section": "button",
+    "setup": "junction",
+    "lane": "dialogue",
+    "workflow": "video_minimax_h3_r2v_turbo_ref8 + anchors",
+    "model": "MiniMax-H3 ref2va + Ref2V 8-step LoRA",
+    "mode": "reference-to-video from the references alone (--from-refs): a cast sheet for every face the take shows + the location plate, always; no storyboard cell, nothing pinned; the dialogue wavs at their offsets anchored at frame 0",
+    "refs": [
+      "refs/characters/unnamed_newspaper_boy/sheet.png",
+      "episodes/ep08/storyboard/h3/shot_19.png"
+    ],
+    "faces": [
+      "unnamed_newspaper_boy"
+    ],
+    "ref_image_size": "match",
+    "anchors": [],
+    "audio": [
+      [
+        "l18.wav",
+        0.25
+      ]
+    ],
+    "width": 768,
+    "height": 768,
+    "fps": 24,
+    "placed_seconds": 7.708333,
+    "frames": 192,
+    "seconds": 8.0,
+    "steps": 8,
+    "seed": 89019,
+    "prompt": "subject_definitions:\n<Subject 1> is the newspaper boy in <Picture 1>: Newspaper boy, 13 years old, 4 ft 10 in, skinny with knobbly wrists and knees. Narrow freckled face, snub nose, big ears, a gap between the front teeth. Tousled mousy-brown hair. Quick grey-green eyes. Wearing: Grey flat cloth cap pushed back, oversized ginger-orange corduroy jacket with patched elbows and turned-up sleeves, grey flannel shirt, grey knickerbockers, darned black wool stockings, scuffed hobnailed boots, empty canvas bag flat and folded on its strap across the chest. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track: the one line spoken on camera at 00:00, over silence for the rest of its length.\n<Picture 2> is the storyboard frame drawn for this shot: the place, the people in it and the clothes they wear, at this hour of the day, in the house art style.\n\nsummary:\n[reference generation + audio reuse] One 8.00-second take of 1 shot in the platform of Woking junction at night in 1894: a long canopied platform under iron columns. [Shot 1] runs from 00:00 to 00:08. The take carries <Subject 1> through [Shot 1] in that order. <Audio 1> carries that spoken line and is the complete audio track.\n\nretention_analysis:\n<Subject 1> (the man in [Shot 1]): partially_preserved - the face, hair, build and clothes of <Picture 1> carry into every shot that shows him; <Picture 1> serves as a definition of the man and each shot keeps the framing its own words describe.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n<Picture 2> ([Shot 1] first frame): fully_preserved - subject placement, wardrobe and light.\n\ndetailed_description:\nAngular stylised 3D animation, brush-stroke texture, Horsell, Surrey, 1894, is gaslight, black shadows.\n[Shot 1] From 00:00 to 00:08. The shot opens on a medium close shot on <Subject 1>, a skinny lad of thirteen with knobbly wrists, a narrow freckled face, a snub nose, big ears and a gap between his front teeth, his tousled mousy-brown hair under a grey flat cloth cap pushed back, in an oversized ginger-orange corduroy jacket with an empty canvas bag folded flat on its strap across his chest at the end of the platform at night with the last of his papers under his arm, his head back and his mouth wide on a cry, the gas lamps hard on his face and the shunting trucks black behind him. The camera is on the platform level with his face, two paces from him, a 50mm lens. The gas lamps come from ABOVE. At the first frame the boy fills the CENTRE of the frame, the panel cutting him at the middle of the chest. The shot is inside this place: the platform of Woking junction at night in 1894: a long canopied platform under iron columns, gas lamps hanging in a row down it, a locomotive standing at the far end with steam about its wheels, goods trucks on the siding beyond, a wooden bookstall shuttered for the night, a wheeled porter's barrow standing empty, a cast-iron weighing machine. The camera pushes in on him a hand's breadth, a dolly with small amplitude, until his face fills the middle of the picture as he cries it out and his head is back, from 00:00 to 00:04. <Subject 1> (S1), on screen, newspaper boy, with a clipped English voice at an even pace, says: <d>[English] Men from Mars! Read it here, men from Mars!</d> His mouth shapes every syllable as the line is heard and closes on the last word. At 00:04, as the line ends, the empty bag goes on swinging against his hip, and the swing continues to the last frame of the shot. By 00:08 the camera is pushing in through the last frame, and the action continues with it.\n\noverall_soundscape: The ambience of the platform of Woking junction at night in 1894: a long canopied platform under iron columns runs under the whole take: its own air, the surfaces underfoot and the fabric of the place around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A"
+  }
+]

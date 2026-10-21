@@ -1,0 +1,882 @@
+{
+ "number": 6,
+ "title": "Tobias Gregson Shows What He Can Do",
+ "question": "Today, can a man be certain and wrong in the same room?",
+ "aspect": "1:1",
+ "protagonist": "john_watson",
+ "beds": [
+  {
+   "from_shot": 0,
+   "tone": "plain"
+  },
+  {
+   "from_shot": 4,
+   "tone": "light"
+  },
+  {
+   "from_shot": 10,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 15,
+   "tone": "grave"
+  },
+  {
+   "from_shot": 20,
+   "tone": "uneasy"
+  },
+  {
+   "from_shot": 23,
+   "tone": "thrilling"
+  }
+ ],
+ "setups": {
+  "breakfast_morning": {
+   "described": "The first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. A round breakfast table stands under the two windows with a white cloth, a coffee pot, two cups and a spread of folded newspapers across it, and the white morning light of an April day comes flat through the two sash windows and a small coal fire burns red in the black grate",
+   "cast": [
+    "john_watson",
+    "sherlock_holmes"
+   ],
+   "landmark": "the white marble mantelpiece over the black grate",
+   "landmark_at": "far_end",
+   "landmark_size": "is the height of a hand",
+   "route": "from the round breakfast table under the windows to the hearth rug at the grate",
+   "geometry": "The round table under its white cloth holds the CENTRE of frame at the height of a man's hip with the folded newspapers spread across it, the two broad sash windows stand in the FAR wall across the TOP with white morning light coming through them, the white marble mantelpiece is at the LEFT edge at the height of a standing man's shoulder, and the red Turkey carpet holds the BOTTOM of frame",
+   "outdoors": false,
+   "crowd": ""
+  },
+  "carpet_irregulars": {
+   "described": "The first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. The open panelled door to the landing stands in the RIGHT wall with the carpet worn bare in a track before it, and the white morning light of an April day comes flat through the two sash windows and a small coal fire burns red in the black grate",
+   "cast": [
+    "sherlock_holmes",
+    "wiggins"
+   ],
+   "landmark": "the open panelled door to the landing",
+   "landmark_at": "far_end",
+   "landmark_size": "is half the height of the frame",
+   "route": "from the hearth rug across the red carpet to the open landing door",
+   "geometry": "The open panelled door to the landing stands at the RIGHT edge at the height of a standing man and a half, the six boys hold the CENTRE of frame in a line across the red Turkey carpet at the height of a man's chest, the black iron grate is at the LEFT edge, and the red Turkey carpet holds the BOTTOM of frame",
+   "outdoors": false,
+   "crowd": "six ragged boys between nine and thirteen years old stand shoulder to shoulder in one line, three of them barefoot on the carpet, each with his cap screwed up in both hands"
+  },
+  "window_street": {
+   "described": "The first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. The near sash window stands in the FAR wall with its lower pane raised a hand's breadth over Baker Street, the heavy red curtain drawn back against the jamb, and the white morning light of an April day comes flat through the two sash windows and a small coal fire burns red in the black grate",
+   "cast": [
+    "sherlock_holmes"
+   ],
+   "landmark": "the near sash window over Baker Street",
+   "landmark_at": "far_end",
+   "landmark_size": "is half the height of the frame",
+   "route": "from the hearth rug to the near sash window over Baker Street",
+   "geometry": "The near sash window holds the CENTRE of frame from the TOP edge down to the height of a man's hip with white morning light flooding through it, the heavy red curtain is drawn back against the jamb at the LEFT, the grey fronts of the far side of Baker Street stand beyond the glass at the height of a thumb, and the red Turkey carpet holds the BOTTOM",
+   "outdoors": false,
+   "crowd": ""
+  },
+  "armchair_gregson": {
+   "described": "The first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. The two worn armchairs stand at the hearth on either side of the black grate with a low deal table between them carrying a decanter, a tumbler and a box of cigars, and the white morning light of an April day comes flat through the two sash windows and a small coal fire burns red in the black grate",
+   "cast": [
+    "tobias_gregson",
+    "sherlock_holmes",
+    "john_watson"
+   ],
+   "landmark": "the white marble mantelpiece over the black grate",
+   "landmark_at": "start",
+   "landmark_size": "is the height of a hand",
+   "route": "from the hearth rug at the grate back across the room to the sofa arm",
+   "geometry": "The near armchair holds the RIGHT half of frame with a tall flaxen-haired man seated in it at the height of a seated man, the white marble mantelpiece stands across the TOP LEFT at the height of a standing man's shoulder with the black grate under it, the low deal table with its decanter and tumbler stands at the CENTRE at the height of a seated man's knee, and the red Turkey carpet holds the BOTTOM of frame",
+   "outdoors": false,
+   "crowd": ""
+  },
+  "boarding_parlour": {
+   "described": "The front parlour of Charpentier's Boarding Establishment, Torquay Terrace, Camberwell, 1881: a tall sash window in the FAR wall behind heavy maroon curtains over a strip of front garden, a small black grate under a plain deal mantelpiece in the LEFT wall, the hall door in the RIGHT wall, a brown patterned carpet, dull green wallpaper, a horsehair settee along the near wall, two upright chairs at a round rosewood table under the window, a glass dome of wax fruit on the mantelpiece. Grey afternoon light comes through the tall window and the small grate stands cold and swept",
+   "cast": [
+    "madame_charpentier",
+    "alice_charpentier",
+    "arthur_charpentier"
+   ],
+   "landmark": "the tall sash window behind the maroon curtains",
+   "landmark_at": "far_end",
+   "landmark_size": "is half the height of the frame",
+   "route": "from the hall door across the brown carpet to the round table under the window",
+   "geometry": "The round rosewood table stands at the CENTRE of frame at the height of a woman's hip, the tall sash window stands in the FAR wall across the TOP CENTRE with grey afternoon light coming through it between the maroon curtains, the hall door stands at the RIGHT edge at the height of a standing man and a half, the plain deal mantelpiece is at the LEFT edge, and the brown carpet holds the BOTTOM of frame",
+   "outdoors": false,
+   "crowd": ""
+  },
+  "landing_door": {
+   "described": "The first-floor sitting-room of 221B Baker Street, 1881: two broad sash windows in the FAR wall over Baker Street, a black iron grate under a white marble mantelpiece in the LEFT wall, the panelled door to the landing in the RIGHT wall, a red patterned Turkey carpet, buff striped wallpaper, a horsehair sofa along the near RIGHT wall, two worn armchairs at the hearth, a deal side table carrying a rack of test tubes and a spirit lamp, bookshelves flanking the chimney breast. The panelled door to the landing stands open in the RIGHT wall with the dim stairhead beyond it, the hat stand on the landing showing past the jamb, and the white morning light of an April day comes flat through the two sash windows and a small coal fire burns red in the black grate",
+   "cast": [
+    "g_lestrade",
+    "tobias_gregson"
+   ],
+   "landmark": "the open panelled door to the landing",
+   "landmark_at": "far_end",
+   "landmark_size": "is half the height of the frame",
+   "route": "from the hearth rug across the red carpet to the open landing door",
+   "geometry": "The open panelled door to the landing holds the RIGHT half of frame from the TOP edge down to the carpet with the dim stairhead beyond it, a small wiry man stands in the doorway at the height of a standing man, the white marble mantelpiece is at the LEFT edge, and the red Turkey carpet holds the BOTTOM of frame",
+   "outdoors": false,
+   "crowd": ""
+  }
+ },
+ "shots": [
+  {
+   "section": "hook",
+   "setup": "breakfast_morning",
+   "size": "insert",
+   "faces": [],
+   "path": 0.0,
+   "frame": "Insert straight down on the white breakfast cloth: four folded newspapers spread across it with BRIXTON MYSTERY standing black across the top of the nearest column, a white coffee cup and its saucer at the edge of the cloth.",
+   "motion": "The camera pulls back off the newspapers across the whole shot, travelling a forearm; a bare hand comes into the bottom of frame and draws the nearest paper a thumb's width toward the camera; the fingers spread flat on the column.",
+   "camera": "straight down over the round table, level with a standing man's chin and a forearm above the cloth, a 50mm lens. The white morning light falls from the windows at the TOP",
+   "at_rest": "Four folded newspapers lie spread across a white cloth filling the whole frame, the black word BRIXTON standing at the height of a thumb across the nearest column, a white coffee cup and saucer stand at the RIGHT edge, and a bare hand rests at the BOTTOM edge of frame",
+   "turn": "one death -> a public mystery",
+   "why": "The chapter opens on the press, not on the men: the world has taken the case up and that is the new fact. An insert of the headline says it without a word.",
+   "index": 0,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "setup",
+   "setup": "breakfast_morning",
+   "size": "medium",
+   "faces": [
+    "john_watson",
+    "sherlock_holmes"
+   ],
+   "path": 0.15,
+   "frame": "Medium of the round breakfast table under the two sash windows: Holmes bare-headed in the bottle-green velvet jacket over a white shirt collar in the far chair with a paper open in both hands, Watson bare-headed, his thin waxed moustache dark on his sunburnt face, in the near chair in a grey tweed waistcoat with a paper folded on the cloth before him.",
+   "motion": "The camera pushes in on the two men across the whole shot, travelling two long strides; Holmes lowers his paper to the cloth and his chin comes up; Watson turns his head to him across the table.",
+   "camera": "at the hearth rug, level with a seated man's chest and four long strides from the table, a 35mm lens turned to the windows. The white morning light comes flat through the two sash windows behind them",
+   "at_rest": "A round table under a white cloth stands across the CENTRE of frame at the height of a man's hip, a man in a bottle-green velvet jacket sits in the far chair with an open newspaper held up before him at the height of his chest, a man in a grey tweed waistcoat sits in the near chair three-quarters to the camera, the two sash windows stand across the TOP with white morning light coming through them, and the red Turkey carpet holds the BOTTOM of frame",
+   "turn": "two readers -> one reader amused",
+   "why": "Establishes the room and the pair at their ordinary hour, and shows Holmes entertained by what horrifies the public. That gap is the episode's engine.",
+   "index": 1,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "setup",
+   "setup": "breakfast_morning",
+   "size": "close",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.3,
+   "frame": "Close on Holmes at the breakfast table, bare-headed, clean-shaven, the bottle-green velvet at his shoulder, a small white sticking plaster wound round the middle joint of his right forefinger where it holds the paper's edge, his head filling the upper half of frame.",
+   "motion": "The camera pushes in on his face across the whole shot, travelling a forearm; his chin comes up off the paper; his eyebrows come up together with it.",
+   "camera": "across the round table, level with a seated man's eyes and two long strides from him, an 85mm lens. The white window light falls on the side of his face from the RIGHT",
+   "at_rest": "A clean-shaven man's head fills the upper CENTRE of frame at half the frame height with a bottle-green velvet shoulder under it, the white edge of a newspaper crosses the BOTTOM of frame at the height of a hand with a small white sticking plaster on the forefinger holding it, and the buff striped wallpaper stands behind him",
+   "turn": "private amusement -> spoken prophecy",
+   "index": 2,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "setup",
+   "setup": "breakfast_morning",
+   "size": "medium_close",
+   "faces": [
+    "john_watson"
+   ],
+   "path": 0.4,
+   "frame": "Medium close of Watson in the near chair, bare-headed, the thin waxed moustache dark against his sunburnt face, a grey tweed waistcoat with its watch chain across it, his bare sunburnt hands flat on the folded paper before him.",
+   "motion": "The camera tracks a hand's breadth to the right across the whole shot; his head turns from the paper up to the far chair; his shoulders come round with it.",
+   "camera": "at the near side of the round table, level with a seated man's eyes and two long strides from him, a 50mm lens. The white window light falls across his face from behind",
+   "at_rest": "A man's head and shoulders fill the CENTRE of frame at half the frame height with a thin waxed moustache on his lip, a grey tweed waistcoat and its watch chain below, his bare sunburnt hands flat on a folded newspaper at the BOTTOM of frame, and the white light of the sash windows behind his head",
+   "turn": "agreement -> doubt",
+   "index": 3,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "friction",
+   "setup": "carpet_irregulars",
+   "size": "wide",
+   "faces": [
+    "wiggins"
+   ],
+   "path": 0.1,
+   "frame": "Wide of the sitting-room carpet toward the open landing door: the panelled door standing open on the dim stairhead, the red Turkey carpet running to it, the two armchairs at the hearth in the near LEFT.",
+   "motion": "The camera pans a hand's breadth to the right across the whole shot; the open door swings a thumb's width further on its hinge as a boy's shoulder comes through it; two more boys come up the stair behind him.",
+   "camera": "at the breakfast table, level with a standing man's chest and five long strides from the landing door, a 28mm lens. The white morning light comes from the windows behind the camera",
+   "at_rest": "The open panelled door stands at the RIGHT of frame at the height of a standing man and a half with the dim stairhead beyond it, the red Turkey carpet runs across the BOTTOM two thirds of frame, two worn armchairs stand at the hearth at the LEFT edge, and the white marble mantelpiece is beyond them",
+   "turn": "a quiet room -> an invasion",
+   "index": 4,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "friction",
+   "setup": "carpet_irregulars",
+   "size": "full",
+   "faces": [
+    "wiggins"
+   ],
+   "path": 0.35,
+   "frame": "Full of six ragged street boys standing shoulder to shoulder in one line across the red carpet, caps screwed up in their hands, three of them barefoot, the tallest at the LEFT with a torn brown jacket and a sharp freckled face.",
+   "motion": "The camera pushes in on the line of boys across the whole shot, travelling two long strides; the tallest boy's chin comes up; the boy beside him shifts his weight from one bare foot to the other.",
+   "camera": "at the hearth rug, level with a boy's eyes and three long strides from the line, a 35mm lens. The white morning light comes across them from the windows at the LEFT",
+   "at_rest": "Six boys stand shoulder to shoulder in one line across the CENTRE of frame at two thirds of the frame height, each with a cloth cap screwed up in both hands at the height of his waist, the open panelled door stands behind them at the RIGHT edge, and the red Turkey carpet holds the BOTTOM of frame",
+   "crowd": "six ragged boys between nine and thirteen stand in one line, three of them barefoot on the carpet, each with his cap screwed up in both hands",
+   "turn": "a rabble -> a rank",
+   "index": 5,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "take": 0
+  },
+  {
+   "section": "friction",
+   "setup": "carpet_irregulars",
+   "size": "medium_close",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.55,
+   "frame": "Medium close of Holmes standing on the carpet before the line of boys, bare-headed, clean-shaven, the bottle-green velvet jacket open over his white shirt, his right hand raised at the height of his chest with the small white sticking plaster on the forefinger.",
+   "motion": "The camera pushes in on Holmes across the whole shot, travelling a forearm; his raised hand comes down through the frame to his side; his chin comes up above his collar.",
+   "camera": "behind the line of boys, level with a standing man's eyes and two long strides from him, a 50mm lens. The white morning light falls on his face from the LEFT",
+   "at_rest": "A clean-shaven man's head and chest fill the CENTRE of frame at half the frame height in a bottle-green velvet jacket, his right hand is raised at the height of his own chest with a small white sticking plaster on the forefinger, a boy's cap shows at the BOTTOM edge of frame, and the buff striped wallpaper stands behind him",
+   "turn": "a crowd -> a command",
+   "index": 6,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "friction",
+   "setup": "carpet_irregulars",
+   "size": "insert",
+   "faces": [
+    "wiggins"
+   ],
+   "path": 0.75,
+   "frame": "Insert on a man's open palm at the height of a boy's chest with six shillings lying in it, a small white sticking plaster on the forefinger beside them, a boy's grimy hand coming in at the BOTTOM edge of frame.",
+   "motion": "The camera pushes in on the open palm across the whole shot, travelling a hand's breadth; the boy's fingers close over the nearest shilling and carry it down out of frame; the palm tips a thumb's width after it.",
+   "camera": "beside the two hands, level with a boy's chest and a forearm from the palm, an 85mm lens. The white morning light falls across the palm from the LEFT",
+   "at_rest": "An open palm fills the CENTRE of frame at a third of the frame height with six shillings lying across it and a small white sticking plaster on the forefinger, a boy's grimy fingers stand at the BOTTOM edge of frame at the height of a thumb, and the red Turkey carpet is out of focus beyond",
+   "turn": "an order -> a wage",
+   "index": 7,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "payoff",
+   "setup": "window_street",
+   "size": "medium",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.2,
+   "frame": "Medium of Holmes crossing the red carpet to the near sash window, bare-headed, clean-shaven, the bottle-green velvet jacket open, the heavy red curtain drawn back against the jamb and the white window light standing beyond him.",
+   "motion": "The camera tracks with him a long stride to the left across the whole shot; he walks to the window at a normal walking pace; his hand comes up to the curtain edge.",
+   "camera": "at the hearth rug, level with a standing man's chest and three long strides from the window, a 35mm lens. The white morning light floods from the window at the CENTRE",
+   "at_rest": "A man in a bottle-green velvet jacket stands at the CENTRE of frame at two thirds of the frame height with his back three-quarters to the camera, the near sash window stands beyond him from the TOP edge down to the height of a man's hip with white light flooding through it, the heavy red curtain is drawn back at the LEFT, and the red Turkey carpet holds the BOTTOM",
+   "turn": "idleness -> attention",
+   "index": 8,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "payoff",
+   "setup": "window_street",
+   "size": "close",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.6,
+   "frame": "Close on Holmes at the raised sash, bare-headed, clean-shaven, the white morning light full on his face from the glass, the grey fronts of the far side of Baker Street out of focus beyond the pane.",
+   "motion": "The camera pushes in on his face across the whole shot, travelling a forearm; his head turns a thumb's width to follow something down in the street; his shoulders come round after it.",
+   "camera": "inside the room at the window jamb, level with a standing man's eyes and two long strides from him, an 85mm lens. The white morning light comes full on his face from the glass at the LEFT",
+   "at_rest": "A clean-shaven man's head fills the CENTRE of frame at half the frame height turned three-quarters to the glass, the raised lower pane of the sash window stands at the LEFT edge with white light through it, the grey fronts across Baker Street stand out of focus beyond the glass at the height of a thumb, and the heavy red curtain holds the RIGHT edge",
+   "turn": "waiting -> the news arriving",
+   "index": 9,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "spike",
+   "setup": "armchair_gregson",
+   "size": "full",
+   "faces": [
+    "tobias_gregson"
+   ],
+   "path": 0.05,
+   "frame": "Full of the sitting-room door side: Gregson coming into the room at a normal walking pace, a tall long-limbed man in a dark green hunting jacket over a black silk scarf, his flaxen hair receding from the temples above a pale white face, a low straw boater in his left hand and his right hand already out before him.",
+   "motion": "The camera pulls back from the door across the whole shot, travelling two long strides; Gregson comes forward across the carpet at a normal walking pace; his right hand comes further out toward the camera.",
+   "camera": "at the hearth rug, level with a standing man's chest and four long strides from the landing door, a 35mm lens. The white morning light comes from the windows at the LEFT",
+   "at_rest": "A tall long-limbed man in a dark green hunting jacket stands at the CENTRE of frame at four fifths of the frame height with a straw boater in his left hand at the height of his hip and his right hand out before him at the height of his chest, the open panelled door stands behind him at the RIGHT at the height of a standing man and a half, and the red Turkey carpet holds the BOTTOM of frame",
+   "turn": "an ordinary morning -> a man with news",
+   "index": 10,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "spike",
+   "setup": "armchair_gregson",
+   "size": "medium_close",
+   "faces": [
+    "tobias_gregson"
+   ],
+   "path": 0.2,
+   "frame": "Medium close of Gregson, a tall long-limbed man with flaxen hair receding from the temples and a pale white clean-shaven face, the dark green hunting jacket open over a black silk scarf wound at the throat above a white collar, his chest inflated and both long hands coming together before him.",
+   "motion": "The camera pushes in on Gregson across the whole shot, travelling a forearm; his two hands come together and rub once before his chest; his chin lifts as he speaks.",
+   "camera": "at the hearth rug, level with a standing man's eyes and two long strides from him, a 50mm lens. The white morning light falls across his pale face from the LEFT",
+   "at_rest": "A tall long-limbed man's head and chest fill the CENTRE of frame at half the frame height with flaxen hair receding from the temples, a black silk scarf and a gold watch chain below the open dark green hunting jacket, his two long hands are together before his chest at the height of a hand, and the buff striped wallpaper stands behind him",
+   "turn": "a claim -> a boast",
+   "index": 11,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "spike",
+   "setup": "armchair_gregson",
+   "size": "close",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.35,
+   "frame": "Close on Holmes standing at the mantelpiece, bare-headed, clean-shaven, the bottle-green velvet at his shoulder, the white marble mantelpiece edge crossing behind him, his face carrying one line of anxiety between the brows.",
+   "motion": "The camera pushes in on his face across the whole shot, travelling a forearm; his head turns to the armchair; his shoulders come down a thumb's width.",
+   "camera": "at the near armchair, level with a standing man's eyes and two long strides from him, an 85mm lens. The white morning light falls on his face from the RIGHT",
+   "at_rest": "A clean-shaven man's head fills the CENTRE of frame at half the frame height with a bottle-green velvet shoulder under it, the white marble mantelpiece edge crosses the frame behind him at the height of his own shoulder, and the buff striped wallpaper stands beyond",
+   "turn": "relief -> a held breath",
+   "why": "Holmes is afraid for one second that Gregson is right. It is the only moment in the chapter where his certainty is in question, and it has to be photographed.",
+   "index": 12,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "turn",
+   "setup": "armchair_gregson",
+   "size": "medium_close",
+   "faces": [
+    "tobias_gregson"
+   ],
+   "path": 0.45,
+   "frame": "Medium close of Gregson seated in the near armchair, the dark green hunting jacket thrown open, a lit cigar between two long fingers of his right hand at the height of his chin, a tumbler standing on the low deal table at his elbow.",
+   "motion": "The camera tilts down a hand's breadth across the whole shot; his hand carries the cigar down from his chin to the arm of the chair; his chest comes forward over his knees as he speaks.",
+   "camera": "at the far armchair, level with a seated man's eyes and two long strides from him, a 50mm lens. The white morning light falls across him from the LEFT",
+   "at_rest": "A tall long-limbed man sits in a worn armchair filling the CENTRE of frame at three quarters of the frame height, a lit cigar stands between two fingers of his right hand at the height of his chin, a tumbler stands on the low deal table at the RIGHT edge at the height of his elbow, and the white marble mantelpiece crosses the TOP LEFT",
+   "turn": "a name -> a case",
+   "index": 13,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "reaction",
+   "setup": "armchair_gregson",
+   "size": "insert",
+   "faces": [],
+   "path": 0.5,
+   "frame": "Insert on the low deal table between the armchairs: a cut-glass tumbler of whiskey and water, a box of cigars with its lid back, and a man's long bare hand resting beside them.",
+   "motion": "The camera pushes in on the tumbler across the whole shot, travelling a hand's breadth; the long bare hand closes round the tumbler and carries it up out of the top of frame; the cigar box lid rocks a thumb's width where his cuff catches it.",
+   "camera": "over the low deal table, level with a seated man's knee and a forearm above the table top, an 85mm lens. The white morning light falls across the glass from the LEFT",
+   "at_rest": "A cut-glass tumbler of whiskey and water stands at the CENTRE of frame at a third of the frame height, an open cigar box stands beside it at the LEFT at the height of a hand, a man's long bare hand rests at the RIGHT edge, and the red Turkey carpet is out of focus beyond",
+   "turn": "a guest -> a man made comfortable",
+   "index": 14,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "runout",
+   "setup": "boarding_parlour",
+   "size": "wide",
+   "faces": [
+    "madame_charpentier"
+   ],
+   "path": 0.05,
+   "frame": "Wide of the Camberwell front parlour from the hall door: the round rosewood table under the tall sash window, the maroon curtains half drawn, the horsehair settee along the near wall, the glass dome of wax fruit on the deal mantelpiece, grey afternoon light across the brown carpet.",
+   "motion": "The camera pushes in from the hall door across the whole shot, travelling two long strides; the maroon curtain lifts and falls once at its hem in the draught from the hall; a woman's shoulder comes into the LEFT of frame.",
+   "camera": "in the hall doorway, level with a standing man's chest and five long strides from the round table, a 28mm lens. The grey afternoon light comes through the tall window at the CENTRE",
+   "at_rest": "A round rosewood table stands at the CENTRE of frame at the height of a woman's hip, the tall sash window stands beyond it across the TOP CENTRE with grey afternoon light between half-drawn maroon curtains, a horsehair settee runs along the near RIGHT wall, a glass dome of wax fruit stands on the deal mantelpiece at the LEFT edge at the height of a standing woman's shoulder, and the brown carpet holds the BOTTOM of frame",
+   "turn": "a detective's story -> a house",
+   "index": 15,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "runout",
+   "setup": "boarding_parlour",
+   "size": "medium",
+   "faces": [
+    "madame_charpentier",
+    "alice_charpentier"
+   ],
+   "path": 0.3,
+   "frame": "Medium of two women at the round rosewood table: Madame Charpentier standing in black bombazine with a white lace cap over grey hair, her face very pale, and Alice seated beside her in a dove-grey dress with her dark hair drawn back and her eyes red about the lids.",
+   "motion": "The camera pushes in on the two women across the whole shot, travelling two long strides; the mother's hand comes up to the table edge; the daughter's head turns up to her.",
+   "camera": "at the hall door, level with a seated woman's eyes and four long strides from the table, a 35mm lens. The grey afternoon light comes from the tall window behind them",
+   "at_rest": "An older woman in black bombazine with a white lace cap stands at the LEFT of CENTRE at four fifths of the frame height, a young woman in a dove-grey dress sits at the round table at the RIGHT of CENTRE at half the frame height, the tall sash window stands beyond them across the TOP with grey afternoon light through it, and the brown carpet holds the BOTTOM of frame",
+   "turn": "a closed house -> two frightened women",
+   "index": 16,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "runout",
+   "setup": "boarding_parlour",
+   "size": "close",
+   "faces": [
+    "alice_charpentier"
+   ],
+   "path": 0.5,
+   "frame": "Close on Alice Charpentier at the round table, a young woman with dark hair drawn back from a pale oval face, her eyelids red, a plain white collar at the throat of the dove-grey dress, the maroon curtain out of focus behind her.",
+   "motion": "The camera pushes in on her face across the whole shot, travelling a forearm; her chin comes up from the table; her head turns to the LEFT of frame.",
+   "camera": "across the round rosewood table, level with a seated woman's eyes and two long strides from her, an 85mm lens. The grey afternoon light falls on her face from the RIGHT",
+   "at_rest": "A young woman's head fills the CENTRE of frame at half the frame height with dark hair drawn back and a plain white collar at her throat, the round rosewood table edge crosses the BOTTOM of frame at the height of a hand, and the maroon curtain stands out of focus behind her",
+   "turn": "obedience -> the truth spoken",
+   "index": 17,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "runout",
+   "setup": "boarding_parlour",
+   "size": "medium_close",
+   "faces": [
+    "madame_charpentier"
+   ],
+   "path": 0.7,
+   "frame": "Medium close of Madame Charpentier risen from the upright chair, a woman about fifty in black bombazine buttoned to the throat with a white lace house cap set back on grey hair, her long pale face turned to the hall door and her right hand coming up open before her.",
+   "motion": "The camera pushes in on her across the whole shot, travelling a forearm; her right hand comes up open to the height of her own throat; her head turns further round to the hall door.",
+   "camera": "at the round rosewood table, level with a standing woman's eyes and two long strides from her, a 50mm lens. The grey afternoon light comes from the tall window at the LEFT",
+   "at_rest": "A woman in black bombazine with a white lace house cap fills the CENTRE of frame at three quarters of the frame height with her face turned to the RIGHT, her right hand is up open at the height of her own chest, the upright chair back stands at the BOTTOM LEFT, and the dull green wallpaper is behind her",
+   "turn": "a mother holding her tongue -> a mother crying out",
+   "why": "Her own account is that she screamed and then could not raise her head. The witness does not see what happens; neither should the camera.",
+   "index": 18,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "runout",
+   "setup": "boarding_parlour",
+   "size": "full",
+   "faces": [
+    "arthur_charpentier"
+   ],
+   "path": 0.9,
+   "frame": "Full of the hall doorway of the parlour: Arthur Charpentier standing in it in a dark navy pea coat, a young man with his mother's grey eyes and a short dark beard, a stout oak cudgel held down along his right leg, the dim hall behind him.",
+   "motion": "The camera pushes in on the doorway across the whole shot, travelling two long strides; the young man's shoulders come round square to the room; his right hand carries the oak cudgel up from his leg to the height of his hip.",
+   "camera": "at the round rosewood table, level with a standing man's chest and four long strides from the hall door, a 35mm lens. The grey afternoon light comes from the window behind the camera",
+   "at_rest": "A young man in a dark navy pea coat stands in the hall doorway at the CENTRE of frame at four fifths of the frame height, a stout oak cudgel is held down along his right leg at the height of his knee, the doorway stands round him at the height of a standing man and a half with the dim hall beyond it, and the brown carpet holds the BOTTOM of frame",
+   "turn": "a sister held -> a brother in the door",
+   "index": 19,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "runout",
+   "setup": "armchair_gregson",
+   "size": "close",
+   "faces": [
+    "tobias_gregson"
+   ],
+   "path": 0.6,
+   "frame": "Close on Gregson in the armchair, a pale white clean-shaven face with flaxen hair receding from the temples, the cigar smoke standing in the white light beside his cheek, his eyes bright with his own account.",
+   "motion": "The camera pushes in on his face across the whole shot, travelling a forearm; his head turns square to the camera; his mouth opens on the line.",
+   "camera": "at the far armchair, level with a seated man's eyes and two long strides from him, an 85mm lens. The white morning light falls on his pale face from the LEFT",
+   "at_rest": "A tall long-limbed man's head fills the CENTRE of frame at half the frame height with flaxen hair receding from the temples, a black silk scarf shows at the BOTTOM of frame, cigar smoke stands in the white light beside his cheek at the RIGHT, and the buff striped wallpaper is behind him",
+   "turn": "a story -> a conclusion",
+   "index": 20,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "runout",
+   "setup": "armchair_gregson",
+   "size": "medium",
+   "faces": [
+    "sherlock_holmes",
+    "john_watson"
+   ],
+   "path": 0.75,
+   "frame": "Medium of Holmes and Watson at the hearth: Holmes standing at the mantelpiece in the bottle-green velvet jacket with one elbow on the marble, Watson seated on the sofa arm behind him in the grey tweed waistcoat, the black grate between them.",
+   "motion": "The camera tracks a long stride to the left across the whole shot; Holmes's elbow comes off the marble and his hand goes into his jacket pocket; Watson's head turns from him to the armchair.",
+   "camera": "at the near armchair, level with a standing man's chest and three long strides from the hearth, a 35mm lens. The white morning light comes from the windows at the RIGHT",
+   "at_rest": "A man in a bottle-green velvet jacket stands at the LEFT of CENTRE at four fifths of the frame height with one elbow on the white marble mantelpiece at the height of his own chest, a man in a grey tweed waistcoat sits on the sofa arm at the RIGHT of frame at half the frame height, the black iron grate stands between them at the BOTTOM LEFT, and the red Turkey carpet holds the BOTTOM of frame",
+   "turn": "a listener -> a judge",
+   "index": 21,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "runout",
+   "setup": "armchair_gregson",
+   "size": "medium_close",
+   "faces": [
+    "sherlock_holmes"
+   ],
+   "path": 0.85,
+   "frame": "Medium close of Holmes past the back of the near armchair, bare-headed, clean-shaven, the bottle-green velvet jacket open over his white shirt and his right hand out from the shoulder with the small white sticking plaster on the forefinger, the bookshelves standing behind him, and the flaxen crown of a seated head crossing the near LEFT corner of frame.",
+   "motion": "The camera cranes up a hand's breadth over the chair back across the whole shot; Holmes's open hand comes further out toward the seated man; his shoulders come down toward him.",
+   "camera": "behind the near armchair, level with the top of its back and a long stride behind the seated man's head, a 50mm lens turned up across the room. The white morning light comes from the windows at the RIGHT",
+   "at_rest": "A clean-shaven man in an open bottle-green velvet jacket holds the CENTRE of frame at three quarters of the frame height with his right hand out from the shoulder palm up at the height of his own chest, the bookshelves stand behind him at the RIGHT, the armchair back crosses the BOTTOM of frame, and a seated flaxen crown fills the near LEFT corner at a third of the frame height",
+   "turn": "doubt -> encouragement",
+   "index": 22,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "answer",
+   "setup": "landing_door",
+   "size": "full",
+   "faces": [
+    "g_lestrade"
+   ],
+   "path": 0.2,
+   "frame": "Full of the open landing door: Lestrade standing in it, a little lean man with a sallow thin rat-like face under wavy chestnut hair, his charcoal frock coat disarranged and his collar askew, a black silk top hat turning over in both his hands at the height of his waist.",
+   "motion": "The camera pushes in on the doorway across the whole shot, travelling two long strides; his two hands turn the black silk top hat once round between them; his head comes down to it.",
+   "camera": "at the hearth rug, level with a standing man's chest and four long strides from the landing door, a 35mm lens. The white morning light comes from the windows at the LEFT and the stairhead stands dim beyond him",
+   "at_rest": "A little lean man stands in the open panelled doorway at the CENTRE of frame at four fifths of the frame height with a sallow face under wavy chestnut hair, a black silk top hat is held in both his hands at the height of his own waist, the doorway stands round him at the height of a standing man and a half with the dim stairhead beyond, and the red Turkey carpet holds the BOTTOM of frame",
+   "turn": "triumph in the room -> a man who has lost his",
+   "index": 23,
+   "beat_s": 0.0,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "answer",
+   "setup": "landing_door",
+   "size": "medium_close",
+   "faces": [
+    "tobias_gregson"
+   ],
+   "path": 0.5,
+   "frame": "Medium close of Gregson risen out of the armchair, his pale white face turned to the door, the cigar still between two fingers at the height of his chest, his flaxen hair receding from the temples and his chin up in triumph.",
+   "motion": "The camera tracks a hand's breadth to the right across the whole shot; his chin comes up further; his free hand comes out toward the doorway at the height of his own shoulder.",
+   "camera": "at the hearth rug, level with a standing man's eyes and two long strides from him, a 50mm lens. The white morning light falls across his pale face from the LEFT",
+   "at_rest": "A tall long-limbed man's head and chest fill the LEFT of CENTRE at half the frame height with his chin up and his face turned to the RIGHT, a lit cigar stands between two fingers at the height of his chest, the open panelled door shows at the RIGHT edge, and the buff striped wallpaper is behind him",
+   "turn": "a rival arriving -> a rival to crow over",
+   "index": 24,
+   "beat_s": 1.2,
+   "coda_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  },
+  {
+   "section": "button",
+   "setup": "landing_door",
+   "size": "close",
+   "faces": [
+    "g_lestrade"
+   ],
+   "path": 0.8,
+   "frame": "Close on Lestrade in the doorway, a little lean man with a dark sallow rat-like face and black eyes, his collar askew at his throat, the dim stairhead out of focus behind his head.",
+   "motion": "The camera pushes in on his face across the whole shot, travelling a forearm; his head comes up square to the room; his mouth opens on the line.",
+   "camera": "at the hearth rug, level with a standing man's eyes and two long strides from the doorway, an 85mm lens. The white morning light falls on one side of his face from the LEFT",
+   "at_rest": "A little lean man's head fills the CENTRE of frame at half the frame height with a sallow face under wavy chestnut hair and black eyes, his collar stands askew at his throat at the BOTTOM of frame, the panelled door jamb holds the LEFT edge, and the dim stairhead stands out of focus behind his head",
+   "turn": "a case closed -> a second murder",
+   "why": "The world answers, and it is not the lead who says it. Everything Gregson has spent two minutes building is gone in one sentence he does not get to argue with.",
+   "coda_s": 2.5,
+   "index": 25,
+   "beat_s": 0.0,
+   "cuts": [],
+   "end": "",
+   "changed": "",
+   "crowd": "",
+   "take": 0
+  }
+ ],
+ "lines": [
+  {
+   "index": 0,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "The papers next morning were full of the Brixton Mystery, and every one of them was certain.",
+   "shot": 0
+  },
+  {
+   "index": 1,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Holmes and I read the notices over together at breakfast, and they afforded him considerable amusement.",
+   "shot": 1
+  },
+  {
+   "index": 2,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Whatever happened, he said, Lestrade and Gregson would both be sure to score by it.",
+   "shot": 2
+  },
+  {
+   "index": 3,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "That depends on how it turns out, I said, and he told me it hardly mattered.",
+   "shot": 3
+  },
+  {
+   "index": 4,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Then came a pattering of many feet in the hall, and our landlady's loud disgust with it.",
+   "shot": 4
+  },
+  {
+   "index": 5,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Six of the dirtiest, most ragged street boys I ever clapped eyes on rushed into the room.",
+   "shot": 5
+  },
+  {
+   "index": 6,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "In future, he told them, Wiggins alone should come up, and the others keep to the street.",
+   "shot": 6
+  },
+  {
+   "index": 7,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "He handed each of them a shilling, and they scampered off downstairs like so many rats.",
+   "shot": 7
+  },
+  {
+   "index": 8,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "There is more work in one of those little beggars, he said, than in a dozen police.",
+   "shot": 8
+  },
+  {
+   "index": 9,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Here is Gregson, he said, coming down the road with beatitude on every feature of his face.",
+   "shot": 9
+  },
+  {
+   "index": 10,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "There was a violent peal at the bell, and the fair-haired detective came up three at a time.",
+   "shot": 10
+  },
+  {
+   "index": 11,
+   "kind": "dialogue",
+   "speaker": "tobias_gregson",
+   "text": "Congratulate me! I have made the whole thing as clear as day.",
+   "shot": 11
+  },
+  {
+   "index": 12,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "A shade of anxiety crossed Holmes's expressive face, and I heard him ask for the name.",
+   "shot": 12
+  },
+  {
+   "index": 13,
+   "kind": "dialogue",
+   "speaker": "tobias_gregson",
+   "text": "Arthur Charpentier, sub-lieutenant in Her Majesty's navy, under lock and key.",
+   "shot": 13
+  },
+  {
+   "index": 14,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Holmes gave a sigh of relief, and offered the man a cigar and some whiskey and water.",
+   "shot": 14
+  },
+  {
+   "index": 15,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "He had begun, he told us, with the dead man's hat and the maker's name inside it.",
+   "shot": 15
+  },
+  {
+   "index": 16,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Underwood of Camberwell Road had sent that hat to a boarding house in Torquay Terrace.",
+   "shot": 16
+  },
+  {
+   "index": 17,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "No good comes of falsehood, the daughter said, and owned that they had seen Drebber again.",
+   "shot": 17
+  },
+  {
+   "index": 18,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "He had come back that night the worse for drink, and caught the girl by the wrist.",
+   "shot": 18
+  },
+  {
+   "index": 19,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Her brother came through the door with a stout oak cudgel in his hand.",
+   "shot": 19
+  },
+  {
+   "index": 20,
+   "kind": "dialogue",
+   "speaker": "tobias_gregson",
+   "text": "I flatter myself that I have managed it rather neatly.",
+   "shot": 20
+  },
+  {
+   "index": 21,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "He had arrested the young man with the cudgel still upon him, and thought the case complete.",
+   "shot": 21
+  },
+  {
+   "index": 22,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Well done, said Holmes in an encouraging voice; we shall make something of you yet.",
+   "shot": 22
+  },
+  {
+   "index": 23,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Then Lestrade came up our stairs, and all the jauntiness had gone out of his dress.",
+   "shot": 23
+  },
+  {
+   "index": 24,
+   "kind": "narration",
+   "speaker": "john_watson",
+   "text": "Gregson crowed at him, and asked whether he had managed to find the secretary Stangerson.",
+   "shot": 24
+  },
+  {
+   "index": 25,
+   "kind": "dialogue",
+   "speaker": "g_lestrade",
+   "text": "Joseph Stangerson was murdered at Halliday's Private Hotel about six o'clock this morning.",
+   "shot": 25
+  }
+ ]
+}

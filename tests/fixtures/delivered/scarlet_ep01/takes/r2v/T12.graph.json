@@ -1,0 +1,449 @@
+{
+  "1": {
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
+    }
+  },
+  "2": {
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+    },
+    "class_type": "LoraLoaderModelOnly",
+    "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+    }
+  },
+  "3": {
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+    },
+    "class_type": "PathchSageAttentionKJ",
+    "_meta": {
+      "title": "Patch Sage Attention KJ"
+    }
+  },
+  "5": {
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
+    }
+  },
+  "6": {
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (video)"
+    }
+  },
+  "7": {
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE (audio)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "image": "char-john_watson_lab.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_1 (subject)"
+    }
+  },
+  "19": {
+    "inputs": {
+      "image": "char-sherlock_holmes_lab.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "ref_image_2 (location/style)"
+    }
+  },
+  "8": {
+    "inputs": {
+      "clip": [
+        "5",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is John Watson in <Picture 1>: A man in his late twenties, as thin as a lath, as brown as a nut, dark hair swept back, a thin waxed moustache, a brown bowler hat, a brown tweed overcoat over a tweed waistcoat with a watch chain and a white cravat pinned with a stud, both hands bare to the wrist and sunburnt, the right hand on the silver ball knob of a black walking stick that stands hip high and reaches a little over half his own height, its shaft as thick as one finger and its ferrule on the ground beside his boot.\n<Subject 2> is Sherlock Holmes in <Picture 2>: A man in his late twenties, rather over six feet, excessively lean, a pale complexion the colour of a man who works by lamplight, dark hair swept back from a high forehead, clean-shaven, a bottle-green velvet jacket over a white shirt with the cuffs turned back and the collar open at the throat; a small white sticking plaster wound round the middle joint of his right forefinger.\n<Subject 3> is Stamford in <Picture 3>: A stout young man in his mid-twenties, a round clean-shaven face with a fresh high colour and small bright eyes, dark hair parted at the side and combed flat, a black frock coat over a grey waistcoat and a white shirt with a high starched collar closed by a dark silk cravat.\n<Subject 4> is the location in <Picture 4>: The chemical laboratory of Saint Bartholomew's Hospital, 1881, seen from its door: a lofty chamber lined with countless bottles, broad low tables scattered with retorts, test-tubes and little Bunsen lamps with blue flickering flames, a tall arched window centred at the far end and under it Holmes's own working table with a wooden stool, cold daylight mixed with the blue of the flames; the bench setup is this same room seen from its middle toward that window. <Picture 4> defines this room alone; each shot keeps the framing of its own first-frame picture.\n<Picture 5> is the first frame of [Shot 1], a wide through the laboratory door.\n<Picture 6> is the first frame of [Shot 2], a medium close-up of <Subject 1> and <Subject 3> just inside the laboratory doorway.\n<Picture 7> is the last frame of [Shot 1], the same view from the same doorway, the same aisle, the same benches and shelves and the same flat grey window light: Holmes has risen off the stool to his full lean height and stands in the aisle in front of his table, his whole body turned round square to the door and the camera, his face lifted and his mouth wide open on a shout, the test-tube thrust straight up at the end of a fully extended arm so that his hand and the tube break into the upper third of the frame beside the tall arched window; the wooden stool lies tipped back on two legs behind his heels, rocking; the two students at the nearer benches have straightened and turned their heads toward him, one with the flask lowered to the bench; the ranked bottles, the blue flames, the long benches and the window keep their own places and their own sizes.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + keyframe completion + audio reuse] One 8.71-second take of 2 shots in <Subject 4>, the chemical laboratory of Saint Bartholomew's Hospital. [Shot 1] begins from <Picture 5> and runs from 00:00 to 00:03; [Shot 2] begins from <Picture 6> and runs from 00:03 to 00:09. The take carries <Subject 1>, <Subject 2>, <Subject 3> through [Shot 1] and [Shot 2] in that order. <Audio 1> is the complete audio track.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 1>.\n<Subject 2> (appears in [Shot 1]): fully_preserved - face, hair, build and clothes exactly as in <Picture 2>.\n<Subject 3> (appears in [Shot 2]): fully_preserved - face, hair, build and clothes exactly as in <Picture 3>.\n<Subject 4> (the location behind [Shot 1] and [Shot 2]): partially_preserved - the materials, furniture and light of <Picture 4> carry into every shot behind the people; <Picture 4> serves as a definition of the room and each shot keeps the framing of its own first-frame picture.\n<Picture 5> ([Shot 1] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 6> ([Shot 2] first frame): fully_preserved - viewpoint, subject placement, wardrobe and light.\n<Picture 7> ([Shot 1] last frame): fully_preserved - the same viewpoint with the action completed.\n<Audio 1>: fully_copy - <Audio 1> is reused 1:1 as the take's complete final audio track.\n\ndetailed_description:\nPhotoreal cinematic live-action, 1881 London, 35 mm film grain, natural weight and pace.\n[Shot 1] From 00:00 to 00:03. The shot begins from <Picture 5>: a wide through the laboratory door: long benches crowded with retorts and bottles, blue flames, and at the far end under the tall arched window a tall lean figure in a bottle-green velvet jacket, visibly green, dark wavy hair, bent over a test-tube at his own table, his back to the door. The camera is in the open doorway itself at the near end of the room. The camera holds a static shot as the figure springs up from the stool to his full height with the test-tube thrust up at arm's length toward the window in the first 1 second, the stool tipping and rocking behind him, from 00:00 to 00:02. At 00:02 he turns his whole body round to face the door, and the turn continues to the last frame of the shot. Behind him two students in shirtsleeves at the nearer benches, one writing in a notebook and one holding a flask up to the daylight, from 00:00 to 00:03.\n[Shot 2] From 00:03 to 00:09. At 00:03 the shot cuts to a medium close-up of <Subject 1> and <Subject 3> just inside the laboratory doorway, beginning from <Picture 6>: both turned toward the far end, mouths closed; <Subject 1> bareheaded, dark hair swept back, thin moustache, the brown bowler in the hand on the right of frame; <Subject 3>, dark hair, round clean-shaven face, in the black frock coat. The camera is at the near end of the aisle a half pace inside the door. The camera holds a static shot as <Subject 3> steps forward out of the doorway and passes out of the right edge of frame at a normal walking pace, from 00:03 to 00:06. At 00:06 <Subject 1> turns his head after him, then limps forward on his stick toward the camera, two steps, his face growing larger in frame, and the step continues to the last frame of the shot. Behind them one student in shirtsleeves at a near bench with a pipette over a dish, from 00:03 to 00:09. <Subject 1>'s mouth is closed from 00:03 to 00:06 while he turns his head after him.\n\noverall_soundscape: The ambience of the chemical laboratory of Saint Bartholomew's Hospital runs under the whole take: its own air, the surfaces underfoot and the fabric of the room around it. Cloth, boots, wood and glass carry the physical action, and the movement and low murmur of the people at work nearby carry under it throughout.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 1344,
+      "length": 209,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "18",
+        0
+      ],
+      "ref_images.ref_image_1": [
+        "19",
+        0
+      ],
+      "ref_images.ref_image_2": [
+        "20",
+        0
+      ],
+      "ref_images.ref_image_3": [
+        "21",
+        0
+      ],
+      "ref_images.ref_image_4": [
+        "22",
+        0
+      ],
+      "ref_images.ref_image_5": [
+        "23",
+        0
+      ],
+      "ref_images.ref_image_6": [
+        "24",
+        0
+      ]
+    },
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+    }
+  },
+  "9": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 1.0
+    },
+    "class_type": "BasicScheduler",
+    "_meta": {
+      "title": "BasicScheduler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "model": [
+        "4",
+        0
+      ],
+      "conditioning": [
+        "30",
+        0
+      ]
+    },
+    "class_type": "BasicGuider",
+    "_meta": {
+      "title": "BasicGuider"
+    }
+  },
+  "11": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": {
+      "title": "KSamplerSelect"
+    }
+  },
+  "12": {
+    "inputs": {
+      "noise_seed": 82012
+    },
+    "class_type": "RandomNoise",
+    "_meta": {
+      "title": "RandomNoise"
+    }
+  },
+  "13": {
+    "inputs": {
+      "noise": [
+        "12",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "11",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "8",
+        1
+      ]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": {
+      "title": "SamplerCustomAdvanced"
+    }
+  },
+  "14": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "6",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode (video)"
+    }
+  },
+  "15": {
+    "inputs": {
+      "samples": [
+        "13",
+        0
+      ],
+      "vae": [
+        "7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode (audio)"
+    }
+  },
+  "16": {
+    "inputs": {
+      "images": [
+        "14",
+        0
+      ],
+      "audio": [
+        "15",
+        0
+      ],
+      "fps": 24,
+      "bit_depth": 8
+    },
+    "class_type": "CreateVideo",
+    "_meta": {
+      "title": "Create Video"
+    }
+  },
+  "17": {
+    "inputs": {
+      "video": [
+        "16",
+        0
+      ],
+      "filename_prefix": "ep_take_12",
+      "format": "auto",
+      "codec": "auto"
+    },
+    "class_type": "SaveVideo",
+    "_meta": {
+      "title": "Save Video"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxH3SigmaShift",
+    "inputs": {
+      "model": [
+        "3",
+        0
+      ],
+      "shift_video": 12,
+      "shift_audio": 3.0
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "char-stamford.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_3"
+    }
+  },
+  "21": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "plate_lab.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_4"
+    }
+  },
+  "22": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q12_0.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_5"
+    }
+  },
+  "23": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q12_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_6"
+    }
+  },
+  "24": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q12_0E.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "ref_image_7"
+    }
+  },
+  "25": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q12_0.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q12_0.png @ 0"
+    }
+  },
+  "26": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "8",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "25",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor image @ 0"
+    }
+  },
+  "27": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "Q12_1.png",
+      "upload": "image"
+    },
+    "_meta": {
+      "title": "anchor Q12_1.png @ 68"
+    }
+  },
+  "28": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "26",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "vae": [
+        "6",
+        0
+      ],
+      "image": [
+        "27",
+        0
+      ],
+      "frame_idx": 68
+    },
+    "_meta": {
+      "title": "anchor image @ 68"
+    }
+  },
+  "29": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "silence_12.wav"
+    },
+    "_meta": {
+      "title": "anchored audio"
+    }
+  },
+  "30": {
+    "class_type": "MiniMaxH3AddGuide",
+    "inputs": {
+      "positive": [
+        "28",
+        0
+      ],
+      "latent": [
+        "8",
+        1
+      ],
+      "audio_vae": [
+        "7",
+        0
+      ],
+      "audio": [
+        "29",
+        0
+      ],
+      "frame_idx": 0
+    },
+    "_meta": {
+      "title": "anchor audio @ 0"
+    }
+  }
+}

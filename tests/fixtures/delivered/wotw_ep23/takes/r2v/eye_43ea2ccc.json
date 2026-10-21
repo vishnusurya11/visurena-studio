@@ -1,0 +1,117 @@
+{
+ "sha8": "43ea2ccc",
+ "verdict": "flagged",
+ "note": "content at T08: posture 'lying': the shot asks for low; frozen-whole at T12: 100% static, run 5.62s HARD: the whole frame stands still; cut at T14: 35.6; jump at T14: 0.02 HARD: another picture; leak at T14: 8 frames of plate before the panel; cut-vote at T14: jump+step+scene HARD: an unplanned cut; frozen-whole at T15: 90% static, run 4.21s HARD: the whole frame stands still -> still",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4"
+ ],
+ "signed_at": "2026-10-08T22:41:44Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "content",
+   "where": "T08",
+   "evidence": {
+    "hard": true,
+    "repeated": false,
+    "still": "storyboard/shot_08.png"
+   },
+   "severity": "normal",
+   "note": "posture 'lying': the shot asks for low"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T12",
+   "evidence": {
+    "value": 0.995,
+    "penalty": 59.7,
+    "repeated": true,
+    "still": "storyboard/shot_12.png"
+   },
+   "severity": "normal",
+   "note": "100% static, run 5.62s HARD: the whole frame stands still"
+  },
+  {
+   "kind": "cut",
+   "where": "T14",
+   "evidence": {
+    "value": 35.6,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "35.6"
+  },
+  {
+   "kind": "jump",
+   "where": "T14",
+   "evidence": {
+    "value": 0.024,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "0.02 HARD: another picture"
+  },
+  {
+   "kind": "leak",
+   "where": "T14",
+   "evidence": {
+    "value": 8,
+    "penalty": 40.0,
+    "repeated": true,
+    "frames": 8,
+    "covers": true
+   },
+   "severity": "high",
+   "note": "8 frames of plate before the panel"
+  },
+  {
+   "kind": "cut-vote",
+   "where": "T14",
+   "evidence": {
+    "value": 3,
+    "penalty": 40.0,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "jump+step+scene HARD: an unplanned cut"
+  },
+  {
+   "kind": "frozen-whole",
+   "where": "T15",
+   "evidence": {
+    "value": 0.903,
+    "penalty": 54.2,
+    "repeated": true
+   },
+   "severity": "high",
+   "note": "90% static, run 4.21s HARD: the whole frame stands still"
+  }
+ ],
+ "terminal": "still"
+}
