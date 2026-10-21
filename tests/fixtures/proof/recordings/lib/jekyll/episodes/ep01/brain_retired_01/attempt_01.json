@@ -1,0 +1,23 @@
+{
+ "verdict": "retry",
+ "why": "The active fault is a bare 'RuntimeError: REFUSED: scripts/episode/say_lines.py exit 1' on the record step — no gate reading, no stack detail, and it does not appear anywhere in the learnings history (those rows are all PLAN-gate ladder history from an earlier, already-resolved attempt that terminated keep_best). A single opaque non-zero exit with zero prior occurrences is exactly the case for one retry before spending any diagnosis effort — TTS/model-load hiccups on say_lines.py are the common transient cause here, and retry costs $0. If it fails again with the same signature, that's the trigger to park and capture the real stderr rather than guessing at a cure blind.",
+ "commit": null,
+ "order": null,
+ "finding_row": "| F1 | say_lines.py exit 1 on record (step 04), no stack/gate detail, zero prior occurrences in learnings | $0.00 | retry step 04 once; if it recurs, park and capture full stderr before any code change | unconfirmed — first occurrence, no diagnostic evidence yet |",
+ "proposed_diff": "",
+ "meta": {
+  "session_id": "3ee89520-81ff-4046-ada3-880161f56ae9",
+  "total_cost_usd": 0.20225200000000002,
+  "model_usage": {
+   "claude-haiku-4-5-20251001": {
+    "input_tokens": 3823,
+    "output_tokens": 14
+   },
+   "claude-sonnet-5": {
+    "input_tokens": 82667,
+    "output_tokens": 1873
+   }
+  },
+  "num_turns": 3
+ }
+}

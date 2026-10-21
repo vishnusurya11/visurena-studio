@@ -18,7 +18,8 @@ import pytest
 
 from studio.rehearsal import recordings as rec
 
-FIXTURE = Path(__file__).resolve().parent / "fixtures" / "proof" / "recordings" / "library"
+FIXTURE = Path(__file__).resolve().parent / "fixtures" / "proof" / "recordings" / "lib"
+"""A stand-in library root; named `lib` because .gitignore drops every `library/` folder."""
 REPO = Path(__file__).resolve().parents[1]
 MEDIA = ["takes/r2v/T02.mp4", "takes/r2v/T03.mp4", "takes/r2v/attempts/T02_fail1.mp4",
          "takes/r2v/attempts/T02_fail2.mp4", "takes/r2v/refine/T06_p0.mp4", "takes/r2v/refine/T06_p0_src.mp4",

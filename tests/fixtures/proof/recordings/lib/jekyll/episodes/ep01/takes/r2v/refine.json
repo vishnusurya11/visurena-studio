@@ -1,0 +1,91 @@
+{
+ "T06": {
+  "status": "refined",
+  "take_sha8": "e0f6ac37",
+  "people": [
+   {
+    "who": "richard_enfield",
+    "crop": "refine/T06_p0.mp4",
+    "track": "refine/T06_p0.json",
+    "kept": true,
+    "why": "kept",
+    "measures": {
+     "id_src": 0.6285947213570277,
+     "id_ref": 0.7777617623408636,
+     "seam": 6.14,
+     "flick_src": 10.659,
+     "flick_ref": 10.432,
+     "faces_src": 1,
+     "faces_ref": 1,
+     "change": 8.23,
+     "drift": 19.51,
+     "eye_src": 113.42,
+     "eye_ref": 89.79,
+     "ccip_src": 0.0424,
+     "ccip_ref": 0.0399,
+     "clip_src": 0.8824,
+     "clip_ref": 0.8817,
+     "outside": 0.0,
+     "band_warp": 0.269,
+     "core_flow": 0.721,
+     "turn": 2.58
+    },
+    "frames": 175,
+    "denoise": 0.431,
+    "face_px": 78.1,
+    "min_px": 52.4,
+    "soft": false,
+    "source": "face",
+    "lost": 0,
+    "regated": "2026-10-19T21:40:39"
+   },
+   {
+    "who": "edward_hyde",
+    "crop": "refine/T06_p1.mp4",
+    "track": "refine/T06_p1.json",
+    "kept": true,
+    "why": "kept",
+    "measures": {
+     "id_src": 0.3570712109406789,
+     "id_ref": 0.2886270781358083,
+     "seam": 9.46,
+     "flick_src": 3.289,
+     "flick_ref": 3.195,
+     "faces_src": 0,
+     "faces_ref": 1,
+     "change": 9.85,
+     "drift": 22.98,
+     "eye_src": 0.0,
+     "eye_ref": 0.0,
+     "ccip_src": 0.1526,
+     "ccip_ref": 0.0579,
+     "clip_src": 0.6958,
+     "clip_ref": 0.8406,
+     "outside": 0.0,
+     "band_warp": 0.665,
+     "core_flow": 1.099,
+     "turn": null
+    },
+    "frames": 175,
+    "denoise": 0.55,
+    "face_px": 13.5,
+    "min_px": 10.7,
+    "soft": true,
+    "source": "face",
+    "lost": 3,
+    "regated": "2026-10-19T21:40:43"
+   }
+  ],
+  "decided": "2026-10-19T13:46:00",
+  "gpu_s_priced": 200.5,
+  "seconds": 383.8
+ },
+ "T24": {
+  "status": "no_faces",
+  "take_sha8": "554dc816",
+  "people": [],
+  "decided": "2026-10-18T20:56:40",
+  "gpu_s_priced": 0.0,
+  "seconds": 9.6
+ }
+}
