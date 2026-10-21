@@ -67,3 +67,13 @@ def test_the_shipped_ep01_line_is_a_credit_fault():
     assert metadata.credit_faults("x Chapter  of y")
     assert not metadata.credit_faults(WOTW_PRIOR[0]["description"])
     assert not metadata.credit_faults("\"Story of the Door\", Chapter 1 of Dr Jekyll and Mr Hyde by R, in the public domain.")
+
+
+def test_a_numeral_then_a_comma_or_a_stop_is_a_numbered_chapter():
+    """Scarlet ep01-05 read 'This episode adapts Chapter II, "The Science of Deduction".': a
+    numeral then a comma is a numbered chapter, and G-META refused all five (gate replay 2026-10-21)."""
+    for said in ('This episode adapts Chapter II, "The Science of Deduction".', "Chapter V.", "Chapter 12;",
+                 "Chapter VI of Arthur Conan Doyle's A Study in Scarlet"):
+        assert not metadata.credit_faults(said), said
+    assert metadata.credit_faults("Chapter CLIMAX of Part One")
+    assert metadata.credit_faults("Chapter IVY of Part One")

@@ -285,9 +285,10 @@ def grounding_faults(meta: ShortMetadata, plan: dict, prior_docs: list[dict]) ->
             for word in loose]
 
 
-BROKEN_CREDIT = re.compile(r'""|Chapter (?![IVXLC]+ |\d+ )')
+BROKEN_CREDIT = re.compile(r'""|Chapter (?![IVXLC]+\b|\d+\b)')
 """Empty quotes, or 'Chapter' followed by no numeral: Jekyll ep01's live line read
-'Chapter STORY OF THE DOOR of Part One of ..., "", in the public domain.'"""
+'Chapter STORY OF THE DOOR of Part One of ..., "", in the public domain.'  A numeral ends at a
+word boundary, so 'Chapter II, "<title>"' (five delivered episodes' lines) is a numbered chapter."""
 
 
 def credit_faults(text: str) -> list[str]:
