@@ -209,12 +209,143 @@ def test_a_suites_proof_rows_are_read_and_a_file_without_rows_is_named(tmp_path)
     assert "summary.json" in (tmp_path / "out" / "CONFIDENCE_iter1.md").read_text(encoding="utf-8")
 
 
-def test_the_map_names_the_ids_the_face_suite_emits():
-    qmap = cf.load_questions(cf.QUESTIONS)["questions"]
-    assert all("instrument_gate.face_eye.cel" in qmap[q]["gates"] for q in ("Q1", "Q2", "Q3"))
-    assert all("face_replay.unrecorded_kill" in qmap[q]["gates"] for q in ("Q1", "Q2"))
-    assert "face_replay.outside_invariant" in [c["check"] for c in qmap["Q1"]["checks"]]
-    assert "panel_take_size" in [c["check"] for c in qmap["Q3"]["checks"]]
+class Anything:
+    """A suite summary that answers every key with nothing: the row IDS a suite emits depend on no input."""
+    def __getitem__(self, key):
+        return Anything()
+
+    def __iter__(self):
+        return iter(())
+
+    def __add__(self, other):
+        return 0
+
+    __sub__ = __radd__ = __rsub__ = __add__
+
+    def __int__(self):
+        return 0
+
+    def __bool__(self):
+        return False
+
+    def __eq__(self, other):
+        return False
+
+    __hash__ = object.__hash__
+
+
+def emitted(tmp: Path) -> set[tuple[str, str, str]]:
+    """(question, check, kind) of every row the suites write, from their own row builders on empty inputs."""
+    from scripts.proof import face_replay as fr, rehearse
+    from studio.rehearsal import asserts, time_model as tm
+    rows = fr.proof_rows(Anything(), Anything()) + fr.instrument_report(tmp)["proof_rows"] + fr.panel(tmp)["proof_rows"]
+    rows += [rehearse.summary_row(sc, [], 0) for sc in rehearse.TABLE.values()]
+    rows += [asserts.a_caps(tmp / "book", 1), asserts.a_canned([], []), asserts.s0b_outcome("PARKED", "r", [], "", False)]
+    rows += asserts.s0a_rows(tmp / "book", recorded=tmp / "rec", git=lambda *a, **k: "")
+    rows += tm.result_rows([], [], (0, 0), []) + cf.incident_rows({}, []) + cf.precondition_rows({})
+    return {(r["question"], r["check"], r["kind"]) for r in rows}
+
+
+def test_every_id_the_map_names_is_one_a_suite_emits_under_its_question_and_kind(tmp_path):
+    """A map id no suite writes can never be met: the gate stays shut and the check stays short forever.
+    Checks match (question, check, kind); a gate is read across questions, so its id alone; an id still
+    to come is listed under not_yet_emitted, and a listed id a suite already writes is stale."""
+    qmap = cf.load_questions(cf.QUESTIONS)
+    got, later = emitted(tmp_path), set(qmap.get("not_yet_emitted") or {})
+    ids = {c for _, c, _ in got}
+    for q, spec in qmap["questions"].items():
+        for c in spec.get("checks") or []:
+            assert (q, c["check"], c.get("kind", "quality")) in got or c["check"] in later, (q, c)
+        assert [g for g in spec.get("gates") or [] if g not in ids and g not in later] == [], q
+    assert sorted(later & ids) == []
+
+
+def test_a_gate_row_answers_every_question_that_names_it():
+    """The face instrument's gate row is written once under Q1; Q2 and Q3 name the same gate."""
+    qmap = {"questions": {"Q1": {"title": "a", "gates": ["g"]}, "Q2": {"title": "b", "gates": ["g"],
+                                                                      "checks": [{"check": "c", "min_n": 1}]}}}
+    rows = [row(check="g", q="Q1", kind="mechanism"), row(check="c", q="Q2")]
+    assert cf.evaluate(qmap, rows, shape_ok=True)["Q2"]["status"] == "PROVEN"
+    shut = [row(check="g", q="Q1", kind="mechanism", passed=False), row(check="c", q="Q2")]
+    assert cf.evaluate(qmap, shut, shape_ok=True)["Q2"]["status"] == "REAL-RUN"
+
+
+def test_a_shut_gate_holds_its_question_real_run_and_only_an_ungated_check_can_fail_it():
+    """DESIGN 5.2: Q1 is REAL-RUN until the eye gate passes AND unrecorded <= 50 %, so a check measured on
+    what the recordings do not cover cannot fail it; Q3's R^2 is valid without the eye gate (ungated)."""
+    gated = {"title": "t", "gates": ["g"], "checks": [{"check": "c", "min_n": 1}, {"check": "r", "min_n": 1}]}
+    shut = row(check="g", kind="mechanism", passed=False)
+    got = cf.status(gated, [shut, row(check="c", kind="mechanism", passed=False)], shape_ok=True)
+    assert got["status"] == "REAL-RUN" and "gate not passed: g" in got["why"] and "c" in got["why"]
+    free = gated | {"checks": [{"check": "c", "min_n": 1}, {"check": "r", "min_n": 1, "ungated": True}]}
+    got = cf.status(free, [shut, row(check="r", passed=False)], shape_ok=True)
+    assert got["status"] == "FAILING" and "r" in got["why"]
+    opened = cf.status(gated, [row(check="g", kind="mechanism"), row(check="c", passed=False)], shape_ok=True)
+    assert opened["status"] == "FAILING"
+
+
+def write(folder: Path, name: str, rows, mtime: float, scenario: str | None = None) -> None:
+    import os
+    doc = {"scenario": scenario, "rows": rows} if scenario else rows
+    (folder / name).write_text(json.dumps(doc), encoding="utf-8")
+    os.utime(folder / name, (mtime, mtime))
+
+
+def test_a_newer_refused_time_row_never_hides_the_real_measured_failure(tmp_path):
+    """R15 before supersession: a newer sandbox or recorded-clock row of the same check is REFUSED and
+    supersedes nothing, so the real back-test's failure still fails Q5."""
+    real = [row(check="time_backtest_loo", q="Q5", passed=False, n=4, n_pass=2, clock="measured",
+                evidence=[str(tmp_path / "library" / "ep01" / "timing.jsonl")])]
+    boxed = [row(check="time_backtest_loo", q="Q5", n=4, clock="recorded",
+                 evidence=[str(tmp_path / "visurena_rehearsal" / "r1" / "timing.jsonl")])]
+    write(tmp_path, "time_backtest.json", real, 1_000_000)
+    write(tmp_path, "zz_rehearsal.json", boxed, 2_000_000)
+    qmap, time_qs = cf.load_questions(cf.QUESTIONS), frozenset({"Q5"})
+    got = cf.evaluate(qmap, cf.load_results(tmp_path, time_qs), shape_ok=True)["Q5"]
+    assert got["status"] == "FAILING" and "time_backtest_loo" in got["why"]
+    assert [r["_file"] for r, _ in got["refused"]] == ["zz_rehearsal.json"]
+    assert cf.superseded_names(tmp_path, time_qs) == []
+
+
+def test_a_passing_gap_row_of_a_time_question_needs_a_real_measure_and_never_replaces_a_blocker(tmp_path):
+    """A gap row that PASSES says a step was measured: from a sandbox or a recorded clock it is refused
+    and supersedes nothing; a FAILING gap from anywhere still blocks (a blocker is never hidden)."""
+    spec = {"title": "t", "time": True}
+    boxed = [str(tmp_path / "visurena_rehearsal" / "r1" / "timing.jsonl")]
+    shut = row(check="unmeasured:x", q="Q5", kind="gap", passed=False, evidence=boxed, clock="recorded")
+    assert cf.contribution(shut, spec)[0] == "gap"
+    assert cf.contribution(shut | {"passed": True}, spec)[0] == "refused"
+    write(tmp_path, "time_backtest.json", [shut | {"clock": "measured", "evidence": [str(tmp_path / "t.jsonl")]}], 1e6)
+    write(tmp_path, "zz.json", [shut | {"passed": True, "n_pass": 1}], 2e6)
+    got = cf.evaluate(cf.load_questions(cf.QUESTIONS), cf.load_results(tmp_path, frozenset({"Q5"})), True)["Q5"]
+    assert [r["_file"] for r in got["gaps"] if not r["passed"]] == ["time_backtest.json"]
+    assert got["status"] == "PARTIAL" and "open gap: unmeasured:x" in got["why"]
+    assert [r["_file"] for r, _ in got["refused"]] == ["zz.json"]
+
+
+def test_rows_of_one_check_in_one_file_count_once_and_a_failed_one_is_never_hidden(tmp_path):
+    """5.1 never reruns: a suite that appends a rerun (or one row per point beside its summary) into ONE
+    file counts that check once, at its largest n_distinct; a failed row fails it with no invented k."""
+    write(tmp_path, "F1.json", [row(check="c", n=1), row(check="c", n=1), row(check="c", n=3)], 1e6, "F1")
+    got = cf.load_results(tmp_path)
+    assert [(r["check"], r["n_distinct"]) for r in got] == [("c", 3)]
+    write(tmp_path, "F1.json", [row(check="c", n=3), row(check="c", n=1, passed=False)], 1e6, "F1")
+    once = cf.load_results(tmp_path)
+    assert len(once) == 1 and once[0]["passed"] is False and cf.k_of(once[0]) is None
+    write(tmp_path, "S0b.json", [row(check="S0b", n=1), row(check="S0b", n=2, kind="mechanism")], 1e6, "S0b")
+    assert sorted(r["kind"] for r in cf.load_results(tmp_path) if r["check"] == "S0b") == ["mechanism", "quality"]
+    assert "c (F1.json, 2 rows)" in cf.counted_once_names(tmp_path)
+
+
+def test_one_check_in_two_scenarios_files_is_two_points_never_a_rerun(tmp_path):
+    """Every rehearsal scenario writes A-caps into its own results/<sid>.json: F9's newer pass is a
+    different scenario, so F1's failure still fails Q5."""
+    caps = row(check="A-caps", q="Q5", kind="mechanism", passed=False, n_pass=0, match_classes={})
+    write(tmp_path, "F1.json", [caps], 1e6, "F1")
+    write(tmp_path, "F9.json", [caps | {"passed": True, "n_pass": 1}], 2e6, "F9")
+    got = cf.evaluate(cf.load_questions(cf.QUESTIONS), cf.load_results(tmp_path), shape_ok=True)["Q5"]
+    assert got["status"] == "FAILING" and "A-caps" in got["why"] and got["mechanism"] == (1, 2)
+    assert cf.superseded_names(tmp_path) == []
 
 
 def test_a_failed_row_without_per_point_passes_fails_the_question_but_invents_no_count():

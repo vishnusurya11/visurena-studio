@@ -57,3 +57,13 @@ package spends GPU time or a paid call; the staged real runs SR-0..SR-5 wait for
   4 h shards at the baseline's measured cost, resume on the same sandbox and report untried (never a pass);
   a missing status doc fails A-named; the rehearsal tests skip only on a scheduler refusal or an absent
   input.  No real-book scenario has run: the visurena-autopilot task is still Ready.
+- 2026-10-21 -- P7 second review fixes: questions.yaml names the ids the suites write (`unrecorded_le_half`,
+  `outside_invariant`, `refine_decision_recall` as mechanism) and lists the rest under `not_yet_emitted`
+  (D1, plan_battery_ch2); a test builds the rows from every suite's own builder and fails on any other id.
+  A gate answers every question that names it, and while it is shut only an `ungated` check (Q3's R^2) can
+  fail the question, so Q1 is REAL-RUN as DESIGN 5.2 says.  A refused time row (sandbox or recorded clock,
+  and now a PASSING gap row too) supersedes nothing; rows of one check in one file count once; one check in
+  two scenarios' files is two points, never a rerun.  The back-test leaves an unclocked first-pass refine
+  out of both the measure and the prior, so its Gap counts it once: still FAIL, 2 of 4 (ep01 -0.042,
+  ep24 -0.159, ep25 +0.098, ep26 -0.304); refine share 0.087.  Reports: TIME_BACKTEST_iter4.md and the
+  CONFIDENCE report of that run.

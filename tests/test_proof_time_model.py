@@ -227,6 +227,40 @@ def test_a_refine_row_with_its_gpu_clock_measures_the_first_pass_refine(tmp_path
     assert gaps["first-pass face refine"].measured
 
 
+def test_a_first_pass_refine_without_its_gpu_clock_is_kept_out_of_the_measure(tmp_path):
+    """A first-pass refine row with no GPU clock timed an older refine than face_refine.price prices
+    (ep01's 8-min rows): the measure drops it and the prior prices no refine, so the Gap carries it alone."""
+    book = tmp_path / "g"
+    stamp(book, "face_refine", 0, 480, within="takes")
+    stamp(book, "takes", 0, 900)
+    rows = episode_clock.rows(book, 1)
+    era = tm.era_for(rows)
+    assert not tm.refine_clocked(rows) and tm.refine_clocked(rows + [{**rows[0], "gpu_busy_s": 300.0}])
+    assert tm.measured(rows, era, refine=False)["09"] == pytest.approx(900.0)
+    assert tm.measured(rows, era)["09"] == pytest.approx(1380.0)
+
+
+def test_the_back_test_scores_a_refine_era_episode_without_its_unclocked_refine(tmp_path):
+    from scripts.proof import time_backtest as tb
+    book = tmp_path / "h"
+    stamp(book, "takes", 0, 900)
+    stamp(book, "face_refine", 900, 480)
+    stamp(book, "dossier", 1500, 1)
+    shots = [{"index": 0, "frames": 192, "faces": ["x"]}]
+    rec = {"timing": episode_clock.rows(book, 1), "clock": [], "repair": [], "shots": shots,
+           "placed": {"lines": []}, "plan": {"shots": shots}, "paths": {k: tmp_path / k for k in tb.NAMED}}
+    ep, _ = tb.episode("h", rec)
+    assert ep.refine is False and ep.measured["09"] == pytest.approx(900.0)
+
+
+def test_an_unmeasured_bound_is_counted_once_in_the_share():
+    """The refine is priced either in the p90 (clocked) or as its Gap (not): never both."""
+    refine = tm.Gap("refine", "09", "no clock", measured=False, p90_s=1000.0, source="price")
+    done = tm.Gap("publish", "13", "timed", measured=True, p90_s=600.0, source="cap")
+    assert tm.share_denominator([refine, done], 9000.0) == pytest.approx(10000.0)
+    assert tm.shares([refine, done], 9000.0) == [(refine, pytest.approx(0.1)), (done, 0.0)]
+
+
 def test_a_predicted_step_no_training_episode_measured_is_unmeasured_too():
     eps = [episode("a", 1.0), episode("b", 1.0)]
     eps[0].measured["10"] = eps[1].measured["10"] = 0.0

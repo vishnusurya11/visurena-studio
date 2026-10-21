@@ -1,8 +1,8 @@
 [
  {"check": "instrument_gate.face_eye.cel", "question": "Q1", "passed": false, "n_points": 15, "n_distinct": 15, "n_pass": 4,
-  "evidence": ["review/face_labels_0db3d8d9.json"], "match_classes": [], "instrument": "face_eye", "instrument_state": "failed", "kind": "quality"},
+  "evidence": ["review/face_labels_0db3d8d9.json"], "match_classes": [], "instrument": "face_eye", "instrument_state": "failed", "kind": "mechanism"},
  {"check": "face_first_pass_vs_iter1", "question": "Q1", "passed": true, "n_points": 20, "n_distinct": 20, "n_pass": 20,
   "evidence": ["results/face_rows.json"], "match_classes": ["exact"], "instrument": "face_eye", "instrument_state": "failed", "kind": "quality"},
- {"check": "face_replay.outside_invariant", "question": "Q1", "passed": true, "n_points": 40, "n_distinct": 40, "n_pass": 40,
+ {"check": "outside_invariant", "question": "Q1", "passed": true, "n_points": 40, "n_distinct": 40, "n_pass": 40,
   "evidence": ["results/face_rows.json"], "match_classes": ["exact"], "instrument": "pixel_diff", "instrument_state": "n/a", "kind": "mechanism"}
 ]

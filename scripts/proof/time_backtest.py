@@ -32,6 +32,7 @@ PREREGISTERED = ("jekyll:1", "wotw:24", "wotw:25", "wotw:26")
 OUT = ROOT / "docs" / "audit" / "2026-10-21_ep02_proof"
 SUB09 = {"takes": "render", "take_render": "render", "take_dq": "checks", "take_content": "checks",
          "take_eye": "checks", "strip": "checks", "face_refine": "refine"}
+REFINE_ERA = {e.name: e.refine for e in tm.ERAS}
 NAMED = {"timing": "timing.jsonl", "clock": "clock.jsonl", "repair": "repair.jsonl", "plan": "plan.json",
          "placed": "placed.json", "shots": "takes/r2v/shots.json"}
 
@@ -55,7 +56,8 @@ def episode(name: str, rec: dict) -> tuple[tm.Episode, list[dict]]:
     era = tm.era_for(rows)
     first, apart = tm.first_pass(rows, tm.repair_windows(rec["repair"]))
     end = tm.first_master_end(rows)
-    ep = tm.Episode(name=name, era=era.name, refine=era.refine, measured=tm.measured(first, era),
+    refine = era.refine and tm.refine_clocked(first)
+    ep = tm.Episode(name=name, era=era.name, refine=refine, measured=tm.measured(first, era, refine),
                     inputs=tm.inputs_from(rec["shots"], rec["placed"], rec["plan"]),
                     clock_s=tm.clock_to_first_master(rec["clock"], end), contended=tm.contended(first, era),
                     evidence=tuple(str(rec["paths"][k]) for k in ("timing", "plan", "placed", "shots")),
@@ -140,6 +142,8 @@ def step_lines(results: list[dict], episodes: list[tm.Episode], firsts: list[lis
         out.append(f"| {s} | {mae.get(s, 0.0):.1f} | " + " | ".join(cells) + " |")
     out += ["", "m = measured, p = predicted p50.  Step 09 split per episode:"]
     out += [f"- {e.name}: {split09(f)}; apart (after the first master or in a repair window) {hours(e.apart_s)}"
+            + ("; its refine rows carry no GPU clock, so the measure and the prior both leave the refine out "
+               "(the first-pass refine Gap carries it)" if REFINE_ERA[e.era] and not e.refine else "")
             for e, f in zip(episodes, firsts)]
     return out + [""]
 
@@ -192,7 +196,7 @@ def context(library: Path, specs: list[str], target: str) -> dict:
     every = [r for _, rec in loaded for r in rec["timing"]]
     found = tm.gaps([r for f in firsts for r in f], every, episodes[t].inputs,
                     [e.uncovered_s for e in episodes if e.uncovered_s is not None]) + tm.unseen_steps(episodes)
-    denom = results[t]["p90_s"] + sum(g.p90_s or 0.0 for g in found if not g.measured)
+    denom = tm.share_denominator(found, results[t]["p90_s"])
     return {"episodes": episodes, "firsts": firsts, "fit": fit, "results": results, "target": episodes[t],
             "shared": tm.shares(found, results[t]["p90_s"]), "denom": denom, "sha": head_sha()}
 

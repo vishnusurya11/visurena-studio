@@ -5,7 +5,10 @@
 #            kind of row that satisfies it (quality unless said); a check id is the design's id (S0a, F1,
 #            A-caps, ...) or the suite's row name (face_replay rows, time_backtest_loo, ...)
 #   gates    checks whose row must PASS before the question can leave REAL-RUN (an instrument's calibration,
-#            a recording's coverage); a failing gate row means "not answerable from recordings", never FAILING
+#            a recording's coverage); a failing gate row means "not answerable from recordings", never FAILING.
+#            A gate row answers every question that names it, whichever question the suite wrote it under.
+#            While a gate is shut only a check marked `ungated: true` can fail the question (DESIGN 5.2: Q3's
+#            R^2 is valid without the eye gate); every other failed row prints behind the gate
 #   staged   the staged real runs (staged_runs below) that would answer what recordings cannot
 #   real_run true: no recording can answer it; the status is REAL-RUN whatever the rows say
 #   cap_uncalibrated_shape  true: capped at PARTIAL while the fake ComfyUI's shape is uncalibrated (R12)
@@ -15,13 +18,16 @@
 #            Mechanism and gap rows (A-caps) measure no duration: they still count, and still fail
 #   baseline what prints beside the question as its base rate
 #
-# Check ids as emitted today: A-caps (Q5), A-canned, S0b, A-ledger (Q6) by studio/rehearsal/asserts.py;
-# time_backtest_loo, unmeasured:<step>, base_rate_under_6h (Q5) by scripts/proof/time_backtest.py;
-# incident_coverage and preconditions_ch2 (Q6, mechanism, with their open gaps) by confidence.py's adapters
-# over P2's results/incidents.json and results/preconditions_ch2.json summaries.  The face
-# suite's gate and regression ids as P6 emits them (instrument_gate.face_eye.cel, panel_take_size); its per-face
-# ids are the design's names until P6 writes them (face_replay.unrecorded_kill, the recordings-coverage gate, and
-# face_replay.outside_invariant are P6's); a renamed check is edited HERE, in review.
+# Every id below is one a suite's own row builder writes, under the question and kind named here, or it is
+# listed under not_yet_emitted; tests/test_proof_confidence_report.py builds the rows from the builders
+# (scripts/proof/face_replay.py proof_rows / instrument_report / panel, scripts/proof/rehearse.py
+# summary_row over its TABLE, studio/rehearsal/asserts.py, studio/rehearsal/time_model.py result_rows,
+# confidence.py's adapters over P2's incidents.json and preconditions_ch2.json) and fails on any other id.
+# A renamed check is edited HERE, in the same commit as the suite that renames it.
+
+not_yet_emitted:
+  D1: the refine graph byte compare (DESIGN 4.2, package P6; n from 2 to 5 by SR-3); no suite writes it yet
+  plan_battery_ch2: the plan battery on ch2's step-02 plan (Q8, kind compliance); needs SR-2's recorded writer session
 
 staged_runs:
   SR-0:
@@ -57,22 +63,22 @@ questions:
     title: faces better than ep01's first master
     checks:
       - {check: face_first_pass_vs_iter1, min_n: 30}
-      - {check: refine_decision_recall, min_n: 12}
-      - {check: face_replay.outside_invariant, min_n: 12, kind: mechanism}
-    gates: [instrument_gate.face_eye.cel, face_replay.unrecorded_kill]
+      - {check: refine_decision_recall, min_n: 12, kind: mechanism}
+      - {check: outside_invariant, min_n: 12, kind: mechanism}
+    gates: [instrument_gate.face_eye.cel, unrecorded_le_half]
     staged: [SR-1, SR-0]
   Q2:
     title: as good as iter3, first time
     checks:
       - {check: face_first_pass_vs_iter3, min_n: 30}
       - {check: D1, min_n: 5}
-    gates: [instrument_gate.face_eye.cel, face_replay.unrecorded_kill]
+    gates: [instrument_gate.face_eye.cel, unrecorded_le_half]
     staged: [SR-1, SR-3, SR-0]
   Q3:
     title: mid faces get drawn eyes
     checks:
       - {check: face_mid_tier, min_n: 10}
-      - {check: panel_take_size, min_n: 8}
+      - {check: panel_take_size, min_n: 8, ungated: true}
     gates: [instrument_gate.face_eye.cel]
     staged: [SR-4, SR-0]
   Q4:

@@ -5,7 +5,9 @@ frames and planned faces) prices every step with the studio's own models -- `epi
 and scaled norms, the VL read fit (`library/vlm_calls.jsonl`, seconds = a + b * tokens), the face
 refine's GPU price (`face_refine.price`) -- and corrects each step by the measured/prior ratio of the
 OTHER episodes (leave one out; the band is `eta.band`).  The measure is timing.jsonl step totals of the
-first pass (to the first dossier), contended rows marked, repair windows apart.  A step the current code
+first pass (to the first dossier), contended rows marked, repair windows apart.  The refine is priced and
+measured only where a first-pass refine row carries its GPU clock; otherwise its rows timed an older refine
+than the price, so both sides leave it out and its Gap alone carries it (never twice).  A step the current code
 runs that no record measures is a Gap with its p90 bound; Q5 cannot be PROVEN while any Gap's share of
 the p90 is above 5 hundredths, or unknown.  Inputs are REAL records only: a path under a sandbox is
 refused, because a rehearsal's clock is the fake's recording, never a measure."""
@@ -133,12 +135,21 @@ def first_pass(rows: list[dict], repairs: list[tuple[float, float]]) -> tuple[li
     return keep, apart
 
 
-def measured(rows: list[dict], era: Era) -> dict[str, float]:
-    """Seconds per step: each row's `seconds`, so a netted parent and its nested rows sum to its wall."""
+REFINE_STAGE = "face_refine"
+
+
+def refine_clocked(rows: list[dict]) -> bool:
+    """A refine row carries its GPU clock (907616f): only then does it time the refine face_refine.price prices."""
+    return any(r["stage"] == REFINE_STAGE and r.get("gpu_busy_s") is not None for r in rows)
+
+
+def measured(rows: list[dict], era: Era, refine: bool = True) -> dict[str, float]:
+    """Seconds per step: each row's `seconds`, so a netted parent and its nested rows sum to its wall.  With
+    refine False the refine rows are left out: their refine is unmeasured, and its Gap carries it."""
     out = dict.fromkeys(STEPS, 0.0)
     for r in rows:
         step = step_of(r["stage"], era)
-        if step != MARK:
+        if step != MARK and (refine or r["stage"] != REFINE_STAGE):
             out[step] += float(r.get("seconds") or 0)
     return out
 
@@ -299,7 +310,7 @@ MASTER_EYE_SINCE = "2026-10-21T02:04:50"
 
 
 def _refine_gap(first: list[dict], target: Inputs) -> Gap:
-    seen = any(r["stage"] == "face_refine" and r.get("gpu_busy_s") is not None for r in first)
+    seen = refine_clocked(first)
     priced = sum(face_refine.price(f, n) for f, n in zip(target.faces, target.frames))
     return Gap("first-pass face refine", "09", "no first-pass refine row carries its GPU clock (907616f)",
                seen, priced, "face_refine.price over the target's planned faces")
@@ -344,9 +355,14 @@ def unseen_steps(train: list[Episode]) -> list[Gap]:
             for s in PREDICTED if not any(e.measured.get(s) for e in train)]
 
 
+def share_denominator(found: list[Gap], p90_total: float) -> float:
+    """The predicted p90 plus each unmeasured bound once (an unclocked refine is out of the p90: its Gap only)."""
+    return p90_total + sum(g.p90_s or 0.0 for g in found if not g.measured)
+
+
 def shares(found: list[Gap], p90_total: float) -> list[tuple[Gap, float | None]]:
     """Each Gap's share of the p90: its bound over the predicted p90 plus every unmeasured bound."""
-    denom = p90_total + sum(g.p90_s or 0.0 for g in found if not g.measured)
+    denom = share_denominator(found, p90_total)
     return [(g, None if g.p90_s is None else (0.0 if g.measured else g.p90_s / denom)) for g in found]
 
 

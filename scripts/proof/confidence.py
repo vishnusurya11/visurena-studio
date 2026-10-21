@@ -8,14 +8,21 @@ a new N every run, never an overwrite.  Confidence here is a pass count over n D
 Wilson lower bound, from checks that ran the real pipeline code; never an agent's opinion.  The rules of
 DESIGN 5.1 are enforced here, each with a test:
 - n is `n_distinct` (distinct points or distinct recovery traces), never rows or reruns; a row without it
-  counts nothing; a check two results files hold counts from the newest file only, the older named;
+  counts nothing; rows of one check (and kind) in ONE file count once, at their largest n_distinct and failed
+  if any failed; a check two results files hold counts from the newest file only, the older named, except
+  across rehearsal scenarios (each file names its `scenario`: another scenario is another point, never a
+  rerun) and except a time row R15 refuses, which supersedes nothing;
+- a gate is one instrument's row: it answers every question that names it, whichever question wrote it;
+  while a gate is shut the question is REAL-RUN and only a check the map marks `ungated` can fail it (the
+  rest ran on what the recordings do not cover);
 - a quality or compliance row with any `canned` answer is mechanism;
 - a row measured by an instrument whose gate failed (`instrument_state: failed`) is INSTRUMENT FAILED and
   contributes nothing;
 - a time MEASURE (kind quality or baseline) of a time question (Q5, Q7) counts only with clock `measured` and
   evidence whose every path is absolute and outside any sandbox; any other is REFUSED with its path (R15, fail
-  closed).  A mechanism row (A-caps: did a cap fire) or a gap row measures no duration, so a sandbox under it is
-  no refusal and its failure still fails the question;
+  closed).  A PASSING gap row says a step was measured, so it is held to the same rule.  A mechanism row
+  (A-caps: did a cap fire) or a failing gap row measures no duration, so a sandbox under it is no refusal and
+  its failure still fails the question;
 - a failed row with no per-point pass count is never given an invented k: its points print beside the count
   as failed with unknown passes, and no Wilson bound is printed over the rest;
 - a question flagged `cap_uncalibrated_shape` (Q6) is capped at PARTIAL until the ComfyUI transcript holds a
@@ -73,37 +80,71 @@ def rows_in(data) -> list[dict]:
     return [r for r in data if isinstance(r, dict) and "check" in r]
 
 
+def once(group: list[dict]) -> dict:
+    """Rows of one (question, check, kind) in ONE file counted once: the row with the most distinct points,
+    failed if any of them failed, and then with no pass count (never invented)."""
+    top = max(group, key=lambda r: int(r.get("n_distinct") or -1))
+    said = {**top, "_rows": len(group)}
+    if top.get("passed") and not all(r.get("passed") for r in group):
+        said = {k: v for k, v in said.items() if k != "n_pass"} | {"passed": False}
+    return said
+
+
+def counted_once(rows: list[dict]) -> list[dict]:
+    groups: dict[tuple, list[dict]] = {}
+    for r in rows:
+        groups.setdefault((r.get("question"), r.get("check"), r.get("kind", "quality")), []).append(r)
+    return [once(g) for g in groups.values()]
+
+
 def file_rows(folder: Path) -> list[dict]:
-    """Every row of every results file, each tagged with the file it came from."""
+    """Every row of every results file, each check counted once per file, tagged with its file and the
+    rehearsal scenario the file names (None for any other suite)."""
     rows = []
     for path in sorted(Path(folder).glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
-        rows += [{**r, "_file": path.name} for r in rows_in(data)]
+        run = data.get("scenario") if isinstance(data, dict) else None
+        rows += counted_once([{**r, "_file": path.name, "_run": run} for r in rows_in(data)])
     return rows
 
 
-def superseded(rows: list[dict], folder: Path) -> list[dict]:
-    """The rows of a (question, check) that a NEWER results file also holds: an earlier run, never added
-    (n is distinct points, never reruns).  Newest is by mtime, then by name."""
-    age = {f: ((Path(folder) / f).stat().st_mtime, f) for f in {r["_file"] for r in rows}}
+def counted_once_names(folder: Path) -> list[str]:
+    return sorted(f"{r['check']} ({r['_file']}, {r['_rows']} rows)" for r in file_rows(folder) if r["_rows"] > 1)
+
+
+def time_refused(row: dict, time_qs: frozenset) -> bool:
+    """A time claim of a time question that R15 refuses: it prints REFUSED and supersedes nothing."""
+    return row.get("question") in time_qs and time_claim(row) and bool(time_refusal(row))
+
+
+def superseded(rows: list[dict], folder: Path, time_qs: frozenset = frozenset()) -> list[dict]:
+    """The rows of a (question, check, scenario) that a NEWER results file also holds: an earlier run, never
+    added (n is distinct points, never reruns).  Newest is by mtime, then by name; a refused time row takes no
+    part, so it can hide no real row."""
+    live = [r for r in rows if not time_refused(r, time_qs)]
+    age = {f: ((Path(folder) / f).stat().st_mtime, f) for f in {r["_file"] for r in live}}
+    key = lambda r: (r.get("question"), r.get("check"), r.get("_run"))  # noqa: E731
     newest: dict[tuple, str] = {}
-    for r in rows:
-        key = (r.get("question"), r.get("check"))
-        if key not in newest or age[r["_file"]] > age[newest[key]]:
-            newest[key] = r["_file"]
-    return [r for r in rows if newest[(r.get("question"), r.get("check"))] != r["_file"]]
+    for r in live:
+        if key(r) not in newest or age[r["_file"]] > age[newest[key(r)]]:
+            newest[key(r)] = r["_file"]
+    return [r for r in live if newest[key(r)] != r["_file"]]
 
 
-def superseded_names(folder: Path) -> list[str]:
-    return sorted({f"{r['check']} ({r['_file']})" for r in superseded(file_rows(folder), folder)})
+def superseded_names(folder: Path, time_qs: frozenset = frozenset()) -> list[str]:
+    return sorted({f"{r['check']} ({r['_file']})" for r in superseded(file_rows(folder), folder, time_qs)})
 
 
-def load_results(folder: Path) -> list[dict]:
+def load_results(folder: Path, time_qs: frozenset = frozenset()) -> list[dict]:
     """The rows of the newest run of every check, then the adapted summaries."""
     rows = file_rows(folder)
-    old = {id(r) for r in superseded(rows, folder)}
+    old = {id(r) for r in superseded(rows, folder, time_qs)}
     kept = [r for r in rows if id(r) not in old]
     return kept + adapted(Path(folder), kept)
+
+
+def time_questions(qmap: dict) -> frozenset:
+    return frozenset(q for q, spec in qmap["questions"].items() if spec.get("time"))
 
 
 def rowless_files(folder: Path) -> list[str]:
@@ -226,12 +267,14 @@ def engine_shape_ok(transcript: bool, rows: list[dict]) -> bool:
 
 
 TIME_KINDS = ("quality", "baseline")
-"""The kinds that measure a duration.  A mechanism row counts whether a cap fired and a gap row declares a
-blocker: neither is a clock, and refusing either could only hide a failure or a blocker."""
+"""The kinds that measure a duration.  A mechanism row counts whether a cap fired and a failing gap row
+declares a blocker: neither is a clock, and refusing either could only hide a failure or a blocker.  A
+PASSING gap row claims its step was measured, so it is a time claim too."""
 
 
-def measures_time(row: dict) -> bool:
-    return row.get("kind", "quality") in TIME_KINDS
+def time_claim(row: dict) -> bool:
+    kind = row.get("kind", "quality")
+    return kind in TIME_KINDS or (kind == "gap" and bool(row.get("passed")))
 
 
 def time_refusal(row: dict) -> str:
@@ -253,7 +296,7 @@ def contribution(row: dict, spec: dict) -> tuple[str, str]:
     """(what the row counts as, why): refused, instrument_failed, or its (possibly demoted) kind."""
     if row.get("n_distinct") is None:
         return "refused", f"no n_distinct: n is distinct points, never rows or reruns ({row.get('_file', '?')})"
-    if spec.get("time") and measures_time(row) and (why := time_refusal(row)):
+    if spec.get("time") and time_claim(row) and (why := time_refusal(row)):
         return "refused", why
     if instrument_failed(row):
         return "instrument_failed", f"INSTRUMENT FAILED: {row.get('instrument')}"
@@ -284,6 +327,8 @@ def unknown_points(rows: list[dict]) -> int:
 # ---- the status of a question ----
 
 def gate_misses(spec: dict, rows: list[dict]) -> list[str]:
+    """The gates with no passing, unrefused row; `rows` is EVERY row, since a gate answers each question
+    that names it, whichever question wrote it."""
     return [g for g in spec.get("gates") or [] if not any(
         r["check"] == g and r.get("passed") and contribution(r, spec)[0] != "refused" for r in rows)]
 
@@ -299,10 +344,19 @@ def check_misses(spec: dict, by: dict) -> list[str]:
     return misses
 
 
-def failing(spec: dict, by: dict) -> list[dict]:
+def failing(spec: dict, by: dict, shut: bool = False) -> list[dict]:
+    """The failed counted rows; while a gate is shut only a check the map marks `ungated` can fail the
+    question (the rest ran on what the recordings do not cover: DESIGN 5.2, Q1 REAL-RUN below its gates)."""
     gates = set(spec.get("gates") or [])
+    free = {c["check"] for c in spec.get("checks") or [] if c.get("ungated")}
     return [r for kind in ("quality", "mechanism") for r in by.get(kind, [])
-            if not r["passed"] and r["check"] not in gates]
+            if not r["passed"] and r["check"] not in gates and (not shut or r["check"] in free)]
+
+
+def shut_why(spec: dict, by: dict, shut: list[str]) -> str:
+    held = [r["check"] for r in failing(spec, by) if r not in failing(spec, by, True)]
+    return "gate not passed: " + ", ".join(shut) + (
+        f"; failing behind the shut gate (not answerable from recordings): {', '.join(held)}" if held else "")
 
 
 def short_of_proof(spec: dict, by: dict) -> str:
@@ -316,13 +370,14 @@ def short_of_proof(spec: dict, by: dict) -> str:
     return "; ".join(p for p in parts if p) or ("" if by.get("quality") else "no quality row")
 
 
-def decide(spec: dict, by: dict, rows: list[dict], shape_ok: bool) -> tuple[str, str]:
+def decide(spec: dict, by: dict, every: list[dict], shape_ok: bool) -> tuple[str, str]:
     if spec.get("real_run"):
         return "REAL-RUN", "no recording can answer it"
-    if bad := failing(spec, by):
+    shut = gate_misses(spec, every)
+    if bad := failing(spec, by, bool(shut)):
         return "FAILING", "failing: " + ", ".join(r["check"] for r in bad)
-    if gates := gate_misses(spec, rows):
-        return "REAL-RUN", "gate not passed: " + ", ".join(gates)
+    if shut:
+        return "REAL-RUN", shut_why(spec, by, shut)
     if why := short_of_proof(spec, by):
         return "PARTIAL", why
     if spec.get("cap_uncalibrated_shape") and not shape_ok:
@@ -330,9 +385,10 @@ def decide(spec: dict, by: dict, rows: list[dict], shape_ok: bool) -> tuple[str,
     return "PROVEN", "every check passes at its minimum, calibrated, no canned answer under a quality check"
 
 
-def status(spec: dict, rows: list[dict], shape_ok: bool) -> dict:
+def status(spec: dict, rows: list[dict], shape_ok: bool, every: list[dict] | None = None) -> dict:
+    """The question's status from its own rows; its gates are read over `every` row (default: its own)."""
     by = bucket(spec, rows)
-    state, why = decide(spec, by, rows, shape_ok)
+    state, why = decide(spec, by, rows if every is None else every, shape_ok)
     k, n = tally(by.get("quality", []))
     return {"status": state, "why": why, "k": k, "n": n, "lb": wilson_lb(k, n),
             "unknown": unknown_points(by.get("quality", [])), "refused": by.get("refused", []),
@@ -343,7 +399,7 @@ def status(spec: dict, rows: list[dict], shape_ok: bool) -> dict:
 
 
 def evaluate(qmap: dict, rows: list[dict], shape_ok: bool) -> dict[str, dict]:
-    return {q: status(spec, [r for r in rows if r.get("question") == q], shape_ok)
+    return {q: status(spec, [r for r in rows if r.get("question") == q], shape_ok, rows)
             for q, spec in qmap["questions"].items()}
 
 
@@ -432,6 +488,8 @@ def report(path: Path, qmap: dict, got: dict, ctx: dict) -> str:
              + (f"; no proof rows in {', '.join(ctx['rowless'])}" if ctx.get("rowless") else "") + ").",
              "Superseded by a newer results file (an earlier run, never counted): "
              + (", ".join(ctx["superseded"]) if ctx.get("superseded") else "none") + ".",
+             "Several rows of one check in one file, counted once: "
+             + (", ".join(ctx["once"]) if ctx.get("once") else "none") + ".",
              "Fake ComfyUI shape: " + ("calibrated (a recorded transcript exists)." if ctx["shape_ok"] else
                                        "uncalibrated (no recorded transcript; SR-5): every Q6 row is capped at PARTIAL."),
              "Rules (DESIGN 5.1, in code): n is distinct points; canned makes a row mechanism; a failed instrument "
@@ -465,11 +523,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--transcript", type=Path, default=TRANSCRIPT)
     ap.add_argument("--questions", type=Path, default=QUESTIONS)
     args = ap.parse_args(argv)
-    qmap, rows = load_questions(args.questions), load_results(args.results)
+    qmap = load_questions(args.questions)
+    time_qs = time_questions(qmap)
+    rows = load_results(args.results, time_qs)
     shape_ok = engine_shape_ok(shape_calibrated(args.transcript), rows)
     path = next_path(args.out_dir)
     ctx = {"rows": rows, "results": args.results, "shape_ok": shape_ok, "rowless": rowless_files(args.results),
-           "superseded": superseded_names(args.results)}
+           "superseded": superseded_names(args.results, time_qs), "once": counted_once_names(args.results)}
     write_new(path, report(path, qmap, evaluate(qmap, rows, shape_ok), ctx))
     print(path)
     print(path.read_text(encoding="utf-8"))
