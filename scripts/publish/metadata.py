@@ -92,13 +92,19 @@ def book_said(book) -> dict:
 ORDINALS = ("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten")
 
 
+NUMBERED = re.compile(r"^([IVXLC]+)\. ")
+"""A chapter title that carries its own numeral: 'I. UNDER FOOT.' (WotW).  Jekyll's are
+named only ('STORY OF THE DOOR'), and the old partition read the name as the numeral."""
+
+
 def chapter_marker(book, number: int) -> tuple[str, str, int]:
     """(roman, title, part) of the book's own chapter `number` from book.json:
-    'I. UNDER FOOT.' in part 2 -> ('I', 'Under Foot', 2)."""
+    'I. UNDER FOOT.' in part 2 -> ('I', 'Under Foot', 2); a named chapter has roman ''."""
     chapter = book_said(book)["chapters"][number]
-    roman, _, rest = str(chapter.get("title", "")).partition(". ")
-    title = rest.rstrip(". ").replace("“", "").replace("”", "")
-    return roman.strip(), headline(title), int(chapter.get("part") or 1)
+    said = str(chapter.get("title", ""))
+    numbered = NUMBERED.match(said)
+    title = said[numbered.end() if numbered else 0:].rstrip(". ").replace("“", "").replace("”", "")
+    return (numbered.group(1) if numbered else ""), headline(title), int(chapter.get("part") or 1)
 
 
 SMALL = {"a", "an", "and", "at", "by", "for", "from", "in", "of", "on", "or", "the", "to", "with"}
@@ -127,6 +133,8 @@ def attribution(book, number: int, prior_docs: list[dict]) -> str:
     division, year = house_style(prior_docs)
     said = book_said(book)
     work = said.get("display_title") or said.get("title", "")
+    if not roman:
+        return f'"{title}", Chapter {number} of {work} by {said.get("author", "")}, in the public domain.'
     dated = f" ({year})" if year else ""
     return (f"Chapter {roman} of {division} {ORDINALS[part - 1]} of {said.get('author', '')}'s "
             f"{work}{dated}, \"{title}\", in the public domain.")
@@ -277,6 +285,18 @@ def grounding_faults(meta: ShortMetadata, plan: dict, prior_docs: list[dict]) ->
             for word in loose]
 
 
+BROKEN_CREDIT = re.compile(r'""|Chapter (?![IVXLC]+ |\d+ )')
+"""Empty quotes, or 'Chapter' followed by no numeral: Jekyll ep01's live line read
+'Chapter STORY OF THE DOOR of Part One of ..., "", in the public domain.'"""
+
+
+def credit_faults(text: str) -> list[str]:
+    """G-META: a credit line with empty quotes or a chapter that is not a number."""
+    hit = BROKEN_CREDIT.search(text)
+    return [f"the credit line is broken at {hit.group(0)!r}: a chapter is a numeral and "
+            f"a quoted title is never empty"] if hit else []
+
+
 def claim_faults(meta: ShortMetadata, doc: dict, book) -> list[str]:
     """G-META check 2: the disclosure verbatim, the attribution honest."""
     out = []
@@ -288,7 +308,7 @@ def claim_faults(meta: ShortMetadata, doc: dict, book) -> list[str]:
         out.append(f"attribution_line must name the book: {display_title}")
     if "public domain" not in low:
         out.append("attribution_line must say 'public domain'")
-    return out
+    return out + credit_faults(meta.attribution_line)
 
 
 def wall_faults(doc: dict) -> list[str]:
@@ -381,7 +401,7 @@ def recheck(home, book, number: int) -> list[str]:
         out.append("title is not the series format for this plan")
     if disclosure(book_said(book).get("author", "")) not in str(doc.get("description", "")):
         out.append("description lacks the AI-disclosure block")
-    out += wall_faults(doc)
+    out += credit_faults(str(doc.get("description", ""))) + wall_faults(doc)
     if (doc.get("_for") or {}).get("plan_sha8") != plan_verdict.plan_sha8(Path(home) / "plan.json"):
         out.append("_for.plan_sha8 is stale: the plan moved since this was written")
     return out
