@@ -141,12 +141,14 @@ def test_a_negative_vl_slope_is_refused_and_a_read_is_priced_at_the_median_secon
     assert tm.vl_read_s(fit) == pytest.approx(20.0) and tm.vl_read_s(fit, tokens=1000) == pytest.approx(20.0)
 
 
-def test_the_priors_are_the_studio_models_of_each_step():
+def test_the_priors_are_the_studio_models_of_each_step_with_the_gpu_measured_on_the_real_engine():
+    """Step 09's render and refine are priced by the 2026-10-21 GPU measurements (measured_costs.json:
+    a take 9.86 + 0.489 s per frame warm plus one 45 s cold load; a refined face 11.03 + 0.558 s per frame)."""
     inp = tm.Inputs(shots=3, setups=2, lines=4, frames=(141, 90, 175), faces=(1, 0, 2))
     got = tm.priors(inp, read_s=5.0, refine=True)
-    render = episode_clock.norm_for("takes", frames=[141, 90, 175])
+    render = 45.0 + sum(9.86 + 0.4892 * f for f in (141, 90, 175))
     checks = episode_clock.norm_for("take_dq", count=3) + 3 * 5.0
-    priced = face_refine.price(1, 141) + face_refine.price(2, 175)
+    priced = (11.03 + 0.5583 * 141) + 2 * (11.03 + 0.5583 * 175)
     assert got["09"] == pytest.approx(render + checks + priced)
     assert tm.priors(inp, read_s=5.0, refine=False)["09"] == pytest.approx(render + checks)
     assert got["04"] == episode_clock.norm_for("lines", count=4) and got["08"] == pytest.approx(15.0)
@@ -210,7 +212,8 @@ def test_the_gaps_name_the_declared_unmeasured_steps_on_ep01_shaped_rows(tmp_pat
     inp = tm.Inputs(shots=2, setups=1, lines=3, frames=(192, 90), faces=(1, 0))
     gaps = {g.name: g for g in tm.gaps(first=rows[:1], every=rows, target=inp, uncovered=[700.0])}
     assert not gaps["first-pass face refine"].measured
-    assert gaps["first-pass face refine"].p90_s == pytest.approx(face_refine.price(1, 192))
+    assert gaps["first-pass face refine"].p90_s == pytest.approx((11.03 + 0.5583 * 192 + 8.23) * 1.4216)
+    assert "measured" in gaps["first-pass face refine"].source
     assert gaps["tiny-face 1024 rung"].p90_s == pytest.approx(200.0) and not gaps["tiny-face 1024 rung"].measured
     assert not gaps["master eye (b008100)"].measured and gaps["master eye (b008100)"].p90_s == pytest.approx(900.0)
     assert gaps["GPU whisper worker"].p90_s is None
@@ -351,3 +354,88 @@ def test_the_script_writes_numbered_reports_and_rows_and_refuses_a_sandbox_libra
     assert rows[0]["check"] == "time_backtest_loo" and rows[0]["n_distinct"] == 4
     boxed = tmp_path / "visurena_rehearsal" / "library"
     assert tb.main(["--library", str(boxed), "--out-dir", str(out), "--episodes", "j:1"]) == 2
+
+
+
+# ---- the refit (2026-10-21 GPU costs) and the honest back-test ----
+
+def test_the_measured_costs_are_the_real_engines_and_say_where_they_were_measured():
+    costs = tm.costs()
+    assert "RTX 4090" in costs["measured"] and costs["take_wuli"]["n"] == 4
+    assert tm.take_s(141) == pytest.approx(9.86 + 0.4892 * 141)
+    assert tm.refine_face_s(73) == pytest.approx(11.03 + 0.5583 * 73)
+
+
+def test_the_per_step_error_is_signed_and_counted_within_the_tolerance_per_step():
+    res = [{"episode": "a", "pred": {"02": (600.0, 0.0), "09": (1000.0, 0.0)}, "measured": {"02": 1200.0, "09": 1050.0}},
+           {"episode": "b", "pred": {"02": (600.0, 0.0), "09": (1000.0, 0.0)}, "measured": {"02": 600.0, "09": 0.0}}]
+    got = tm.step_errors(res, steps=("02", "09"))
+    assert got["02"]["errors"] == {"a": pytest.approx(-0.5), "b": pytest.approx(0.0)}
+    assert got["02"]["within"] == 1 and got["02"]["n"] == 2
+    assert got["09"]["errors"]["b"] is None and got["09"]["n"] == 1 and got["09"]["within"] == 1
+
+
+def test_the_ep02_row_is_its_predicted_p90_clock_with_the_uncovered_term_against_six_hours():
+    row = tm.ep02_row(p90_s=5.0 * 3600, uncovered_s=0.5 * 3600, evidence=["D:/lib/ep02/plan.json"])
+    assert row["check"] == "ep02_p90_clock" and row["question"] == "Q5" and row["kind"] == "mechanism"
+    assert row["passed"] is True and row["clock"] == "predicted" and "5.50 h" in row["detail"]
+    assert tm.ep02_row(5.8 * 3600, 0.5 * 3600, [])["passed"] is False
+    assert tm.ep02_row(5.0 * 3600, None, [])["passed"] is False
+
+
+def delivered_library(tmp_path: Path) -> Path:
+    lib = tmp_path / "library"
+    lib.mkdir()
+    (lib / "vlm_calls.jsonl").write_text(json.dumps({"seconds": 5.0, "answer_tokens": 40}) + "\n", encoding="utf-8")
+    start = datetime(2026, 10, 8, 9, 0, 0).timestamp()
+    for n, scale in ((24, 1.0), (25, 1.0), (26, 1.1), (27, 1.2)):
+        write_episode(lib, "w", n, start + (n - 24) * 86400, scale)
+    write_episode(lib, "w", 3, datetime(2026, 9, 20, 9, 0, 0).timestamp(), 1.0)    # before every reviewed era
+    write_episode(lib, "j", 1, datetime(2026, 10, 18, 9, 0, 0).timestamp(), 1.0)
+    (lib / "w" / "episodes" / "ep28").mkdir(parents=True)                          # no records
+    return lib
+
+
+def test_every_delivered_episode_with_full_records_is_scored_and_each_one_left_out_is_named(tmp_path):
+    from scripts.proof import time_backtest as tb
+    lib = delivered_library(tmp_path)
+    specs, excluded = tb.delivered(lib, {"j": "j", "w": "w"})
+    assert specs == ["j:1", "w:24", "w:25", "w:26", "w:27"]
+    assert list(excluded) == ["w:3"] and "no reviewed era map" in excluded["w:3"]
+
+
+def test_the_back_test_row_counts_every_delivered_episode_and_keeps_the_pre_registered_verdict(tmp_path):
+    from scripts.proof import time_backtest as tb
+    lib = delivered_library(tmp_path)
+    out = tmp_path / "proof"
+    argv = ["--library", str(lib), "--out-dir", str(out), "--episodes", "delivered", "--books", "j=j", "w=w",
+            "--preregistered", "j:1", "w:24", "w:25", "w:26"]
+    assert tb.main(argv) == 0
+    rows = json.loads((out / "results" / "time_backtest.json").read_text(encoding="utf-8"))
+    loo = rows[0]
+    assert loo["check"] == "time_backtest_loo" and loo["n_distinct"] == 5
+    assert "pre-registered 4" in loo["detail"]
+    text = (out / "TIME_BACKTEST_iter1.md").read_text(encoding="utf-8")
+    assert "Excluded" in text and "w:3" in text and "Per step: within 0.15" in text
+    assert "VERDICT (pre-registered" in text
+
+
+def test_an_ep02_plan_gives_the_ep02_prediction_row_and_none_without_it(tmp_path):
+    from scripts.proof import time_backtest as tb
+    lib = delivered_library(tmp_path)
+    out = tmp_path / "proof"
+    base = ["--library", str(lib), "--out-dir", str(out), "--episodes", "j:1", "w:24", "w:25", "w:26"]
+    assert tb.main(base) == 0
+    rows = json.loads((out / "results" / "time_backtest.json").read_text(encoding="utf-8"))
+    assert "ep02_p90_clock" not in [r["check"] for r in rows]
+    plan = tmp_path / "ep02"
+    plan.mkdir()
+    for name in ("plan.json", "placed.json"):
+        (plan / name).write_text((lib / "j" / "episodes" / "ep01" / name).read_text(encoding="utf-8"), encoding="utf-8")
+    (plan / "takes" / "r2v").mkdir(parents=True)
+    (plan / "takes" / "r2v" / "shots.json").write_text(
+        (lib / "j" / "episodes" / "ep01" / "takes" / "r2v" / "shots.json").read_text(encoding="utf-8"), encoding="utf-8")
+    assert tb.main(base + ["--target-plan", str(plan)]) == 0
+    rows = json.loads((out / "results" / "time_backtest.json").read_text(encoding="utf-8"))
+    ep02 = next(r for r in rows if r["check"] == "ep02_p90_clock")
+    assert ep02["clock"] == "predicted" and str(plan / "plan.json") in ep02["evidence"]

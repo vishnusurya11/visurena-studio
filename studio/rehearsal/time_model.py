@@ -1,9 +1,10 @@
 """The episode time model and its back-test (2026-10-21_ep02_proof DESIGN 4.7, package P7; skeptic R15, R16).
 
 A predictor from an episode's INPUTS only (the plan's shots and setups, the placed lines, each take's
-frames and planned faces) prices every step with the studio's own models -- `episode_clock`'s take model
-and scaled norms, the VL read fit (`library/vlm_calls.jsonl`, seconds = a + b * tokens), the face
-refine's GPU price (`face_refine.price`) -- and corrects each step by the measured/prior ratio of the
+frames and planned faces) prices every step with the studio's own models -- `episode_clock`'s scaled
+norms, the VL read fit (`library/vlm_calls.jsonl`, seconds = a + b * tokens), and for step 09's render
+and refine the GPU costs measured on the real engine on 2026-10-21 (measured_costs.json beside this
+file: a take, a refined face, a cold load) -- and corrects each step by the measured/prior ratio of the
 OTHER episodes (leave one out; the band is `eta.band`).  The measure is timing.jsonl step totals of the
 first pass (to the first dossier), contended rows marked, repair windows apart.  The refine is priced and
 measured only where a first-pass refine row carries its GPU clock; otherwise its rows timed an older refine
@@ -20,7 +21,7 @@ import statistics
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from studio import episode_clock, eta, face_refine, settings, step_caps
+from studio import episode_clock, eta, settings, step_caps
 from studio.run_budget import OWNER_LIMIT_SECONDS
 
 STEPS = ("02", "03", "04", "07", "08", "09", "10", "11", "13", "small")
@@ -34,6 +35,8 @@ SHARE_LIMIT = 0.05
 PROOF_SANDBOX = settings.REPO / "docs" / "audit" / "2026-10-21_ep02_proof" / "sandbox"
 SANDBOX_DIR = "visurena_rehearsal"
 """`sandbox.default_base()`'s folder name: every built sandbox lives under one."""
+COSTS = Path(__file__).with_name("measured_costs.json")
+"""The GPU costs measured on the real engine (2026-10-21_ep02_proof gpu/COSTS.md, FACE.md), committed."""
 
 
 class SandboxInput(ValueError):
@@ -226,12 +229,36 @@ def vl_read_s(fit: dict, tokens: float | None = None) -> float:
     return fit["a"] + fit["b"] * (fit["tokens"] if tokens is None else tokens)
 
 
+def costs() -> dict:
+    """measured_costs.json: the GPU seconds the real engine took per take, refined face and load."""
+    return json.loads(COSTS.read_text(encoding="utf-8"))
+
+
+def _line(fit: dict, frames: float) -> float:
+    return float(fit["intercept_s"]) + float(fit["s_per_frame"]) * float(frames)
+
+
+def take_s(frames: int) -> float:
+    """One warm H3 take's GPU seconds: the Wuli graph's measured line (the dearer graph, 24 of ep01's 28)."""
+    return _line(costs()["take_wuli"], frames)
+
+
+def refine_face_s(frames: int) -> float:
+    """One refined face's GPU seconds: the measured line (frames set it, face size does not: COSTS.md)."""
+    return _line(costs()["refine_face"], frames)
+
+
+def render_s(frames) -> float:
+    return float(costs()["take_cold_s"]) + sum(take_s(f) for f in frames)
+
+
 def priors(inp: Inputs, read_s: float, refine: bool) -> dict[str, float]:
-    """Each step's prior seconds (a unit of 1 where the step does not scale with an input)."""
+    """Each step's prior seconds (a unit of 1 where the step does not scale with an input); step 09's
+    render and refine at the GPU costs measured on the real engine."""
     takes = len(inp.frames)
-    render = episode_clock.norm_for("takes", frames=list(inp.frames))
+    render = render_s(inp.frames)
     checks = episode_clock.norm_for("take_dq", count=takes) + takes * read_s
-    priced = sum(face_refine.price(f, n) for f, n in zip(inp.faces, inp.frames)) if refine else 0.0
+    priced = sum(n * refine_face_s(f) for n, f in zip(inp.faces, inp.frames)) if refine else 0.0
     return {"02": 1.0, "03": float(max(inp.setups, 1)), "04": episode_clock.norm_for("lines", count=inp.lines),
             "07": float(inp.shots), "08": inp.shots * read_s, "09": render + checks + priced, "10": 1.0,
             "11": episode_clock.norm_for("qc", count=inp.lines) + read_s, "small": 1.0}
@@ -287,6 +314,22 @@ def verdict(results: list[dict], tol: float = TOLERANCE, need: int = NEED) -> di
     return {"passed": len(results) >= HELD_OUT and within >= need, "within": within, "n": len(results)}
 
 
+def step_error(r: dict, step: str) -> float | None:
+    """(predicted p50 - measured) / measured for one held-out step; None where it measured nothing."""
+    got = r["measured"][step]
+    return (r["pred"].get(step, (0.0, 0.0))[0] - got) / got if got else None
+
+
+def step_errors(results: list[dict], steps=PREDICTED, tol: float = TOLERANCE) -> dict[str, dict]:
+    """Per step, each held-out episode's signed error, and on how many of the measured ones it is within tol."""
+    out = {}
+    for s in steps:
+        errs = {r["episode"]: step_error(r, s) for r in results}
+        known = [e for e in errs.values() if e is not None]
+        out[s] = {"errors": errs, "n": len(known), "within": sum(1 for e in known if abs(e) <= tol)}
+    return out
+
+
 def step_mae(results: list[dict], steps=PREDICTED) -> dict[str, float]:
     """Per step, the mean |predicted p50 - measured| over the held-out episodes, in minutes."""
     return {s: statistics.fmean(abs(r["pred"].get(s, (0.0, 0.0))[0] - r["measured"][s]) for r in results) / 60
@@ -309,11 +352,20 @@ MASTER_EYE_SINCE = "2026-10-21T02:04:50"
 """b008100: the master eye's read cache keyed on the take's bytes and frame (its current form)."""
 
 
+def refine_p90_s(target: Inputs) -> float:
+    """The first-pass refine's p90 wall: each planned face at the measured line plus its largest residual,
+    times the wall/GPU ratio the real first pass took (FACE.md: 927 s over 652 s, pipelined)."""
+    c = costs()
+    gpu = sum(n * (refine_face_s(f) + float(c["refine_face"]["max_abs_residual_s"]))
+              for n, f in zip(target.faces, target.frames))
+    return gpu * float(c["refine_wall_per_gpu_s"])
+
+
 def _refine_gap(first: list[dict], target: Inputs) -> Gap:
     seen = refine_clocked(first)
-    priced = sum(face_refine.price(f, n) for f, n in zip(target.faces, target.frames))
     return Gap("first-pass face refine", "09", "no first-pass refine row carries its GPU clock (907616f)",
-               seen, priced, "face_refine.price over the target's planned faces")
+               seen, refine_p90_s(target), "measured on the real engine 2026-10-21 (measured_costs.json: the refine "
+               "line + its largest residual per planned face, x the first pass's wall/GPU ratio)")
 
 
 def _tiny_chain(every: list[dict]) -> float | None:
@@ -395,6 +447,17 @@ def result_rows(results: list[dict], shared: list[tuple[Gap, float | None]], bas
                   int(g.measured), 1, evidence, p90_s=g.p90_s, p90_share=s, source=g.source) for g, s in shared]
     return rows + [_row("base_rate_under_6h", "baseline", base[0] == base[1] and base[1] > 0, base[0], base[1],
                         evidence)]
+
+
+def ep02_row(p90_s: float, uncovered_s: float | None, evidence: list[str]) -> dict:
+    """AUDIT A6: ep02's predicted p90 clock to the first master (the step p90s plus the uncovered-clock bound)
+    against the owner's 6 h.  A PREDICTION (clock `predicted`), so a mechanism row and the map's predictor."""
+    total = None if uncovered_s is None else p90_s + uncovered_s
+    said = ("uncovered-clock bound unknown" if total is None else
+            f"predicted p90 clock {total / 3600:.2f} h = steps {p90_s / 3600:.2f} h + uncovered {uncovered_s / 3600:.2f} h")
+    return {**_row("ep02_p90_clock", "mechanism", total is not None and total < OWNER_LIMIT_SECONDS, 0, 1, evidence),
+            "n_pass": int(total is not None and total < OWNER_LIMIT_SECONDS), "clock": "predicted",
+            "detail": f"{said} against {OWNER_LIMIT_SECONDS / 3600:.0f} h"}
 
 
 def read_jsonl(path: Path) -> list[dict]:

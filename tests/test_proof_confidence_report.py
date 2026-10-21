@@ -243,7 +243,8 @@ def emitted(tmp: Path) -> set[tuple[str, str, str]]:
     rows += [rehearse.summary_row(sc, [], 0) for sc in rehearse.TABLE.values()]
     rows += [asserts.a_caps(tmp / "book", 1), asserts.a_canned([], []), asserts.s0b_outcome("PARKED", "r", [], "", False)]
     rows += asserts.s0a_rows(tmp / "book", recorded=tmp / "rec", git=lambda *a, **k: "")
-    rows += tm.result_rows([], [], (0, 0), []) + cf.incident_rows({}, []) + cf.precondition_rows({})
+    rows += tm.result_rows([], [], (0, 0), []) + [tm.ep02_row(0.0, None, [])] + cf.incident_rows({}, [])
+    rows += cf.precondition_rows({})
     return {(r["question"], r["check"], r["kind"]) for r in rows}
 
 

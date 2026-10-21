@@ -1,7 +1,7 @@
 """Back-test the episode time model on delivered episodes, leave one out (2026-10-21_ep02_proof DESIGN 4.7, P7).
 
-    uv run --no-sync python scripts/proof/time_backtest.py [--episodes jekyll:1 wotw:24 wotw:25 wotw:26]
-        [--target jekyll:1] [--library <real library>] [--out-dir docs/audit/2026-10-21_ep02_proof]
+    uv run --no-sync python scripts/proof/time_backtest.py [--episodes delivered | jekyll:1 wotw:24 ...]
+        [--target jekyll:1] [--target-plan <ep02 home>] [--library <real library>] [--out-dir <proof folder>]
 
 Read-only, CPU, seconds.  It opens NAMED files per episode (timing.jsonl, clock.jsonl, repair.jsonl,
 plan.json, placed.json, takes/r2v/shots.json) and the library's vlm_calls.jsonl, never a walk.  It writes
@@ -10,7 +10,10 @@ plan.json, placed.json, takes/r2v/shots.json) and the library's vlm_calls.jsonl,
 
 The episode set is PRE-REGISTERED before any error was computed (2026-10-21): Jekyll ep01 (the one
 episode of the current era) and WotW ep25 (the clean run the step shares were priced on) with its two
-neighbours ep24 and ep26.  Pass: total |error| <= 0.15 on >= 3 of the 4 held-out episodes."""
+neighbours ep24 and ep26.  Pass: total |error| <= 0.15 on >= 3 of the 4 held-out episodes.  That verdict is
+kept as registered; the counted row is the leave-one-out over EVERY delivered episode with full records
+(`--episodes delivered`, the default), at the same 3-in-4 rate, and each episode left out is named with
+why.  `--target-plan` (SR-2's ch2 plan) adds ep02's predicted p90 clock row (AUDIT A6)."""
 from __future__ import annotations
 
 import argparse
@@ -27,8 +30,12 @@ from studio import episode_capacity, settings  # noqa: E402
 from studio.rehearsal import time_model as tm  # noqa: E402
 
 BOOKS = {"jekyll": "20260827135504_the-strange-case-of-dr-jekyll-and-mr-hyde",
-         "wotw": "20260827135508_the-war-of-the-worlds"}
+         "wotw": "20260827135508_the-war-of-the-worlds", "scarlet": "20260822113400_a-study-in-scarlet"}
 PREREGISTERED = ("jekyll:1", "wotw:24", "wotw:25", "wotw:26")
+DELIVERED = "delivered"
+MAX_EPISODE = 40
+"""epNN probed by name up to here per book, never a walk."""
+REQUIRED = ("timing", "plan", "placed", "shots")
 OUT = ROOT / "docs" / "audit" / "2026-10-21_ep02_proof"
 SUB09 = {"takes": "render", "take_render": "render", "take_dq": "checks", "take_content": "checks",
          "take_eye": "checks", "strip": "checks", "face_refine": "refine"}
@@ -37,9 +44,37 @@ NAMED = {"timing": "timing.jsonl", "clock": "clock.jsonl", "repair": "repair.jso
          "placed": "placed.json", "shots": "takes/r2v/shots.json"}
 
 
-def home_of(library: Path, spec: str) -> tuple[str, Path]:
+def home_of(library: Path, spec: str, books: dict | None = None) -> tuple[str, Path]:
     book, n = spec.split(":")
-    return f"{book}:ep{int(n):02d}", library / BOOKS.get(book, book) / "episodes" / f"ep{int(n):02d}"
+    folder = (books or BOOKS).get(book, book)
+    return f"{book}:ep{int(n):02d}", library / folder / "episodes" / f"ep{int(n):02d}"
+
+
+def unscorable(home: Path) -> str | None:
+    """Why an episode with full records cannot be scored (no reviewed era map, a stage the map lacks, no
+    first master), or None."""
+    try:
+        rows = load(home)["timing"]
+        era = tm.era_for(rows)
+    except (tm.UnmappedStage, OSError, ValueError, KeyError) as why:
+        return str(why).strip("'\"")
+    if missing := tm.unmapped(rows, era):
+        return f"stages not in the reviewed {era.name} map: {', '.join(missing[:6])}"
+    return None if tm.first_master_end(rows) is not None else "no first master (no dossier row)"
+
+
+def delivered(library: Path, books: dict | None = None) -> tuple[list[str], dict[str, str]]:
+    """(every episode with full records the back-test can score, {each one it cannot: why}), by name."""
+    specs, excluded = [], {}
+    for key, folder in (books or BOOKS).items():
+        for n in range(1, MAX_EPISODE + 1):
+            home = Path(library) / folder / "episodes" / f"ep{n:02d}"
+            if not home.is_dir() or not all((home / NAMED[k]).is_file() for k in REQUIRED):
+                continue
+            why = unscorable(home)
+            specs += [] if why else [f"{key}:{n}"]
+            excluded.update({f"{key}:{n}": why} if why else {})
+    return specs, excluded
 
 
 def load(home: Path) -> dict:
@@ -125,10 +160,31 @@ def loo_lines(results: list[dict], episodes: list[tm.Episode]) -> list[str]:
                    f"| {r['error']:+.3f} | {'yes' if abs(r['error']) <= tm.TOLERANCE else 'NO'} "
                    f"| {hours(cap)} ({(cap - r['measured_s']) / r['measured_s']:+.3f}) |")
     under = sum(1 for r in results if r["measured_s"] <= r["p90_s"])
-    out += ["", f"VERDICT (pre-registered): {'PASS' if v['passed'] else 'FAIL'} -- {v['within']} of {v['n']} "
-            f"held-out episodes within 0.15 (needs {tm.NEED} of {tm.HELD_OUT})",
+    out += ["", f"EVERY SCORED EPISODE: {v['within']} of {v['n']} held-out episodes within 0.15 (the counted row; "
+            f"it needs the registered rate, {tm.NEED} in {tm.HELD_OUT})",
             f"Band (information, not the verdict): measured at or under the predicted p90 on {under} of {v['n']}.", ""]
     return out
+
+
+def pre_lines(ctx: dict) -> list[str]:
+    """The pre-registered verdict on its own 4 episodes, and the episodes the default run left out."""
+    pre = ctx.get("pre")
+    out = [f"VERDICT (pre-registered, its 4 episodes only): {'PASS' if pre['passed'] else 'FAIL'} -- {pre['within']} "
+           f"of {pre['n']} within 0.15 (needs {tm.NEED} of {tm.HELD_OUT})", ""] if pre else []
+    excluded = ctx.get("excluded") or {}
+    out += ["Excluded (full records, not scorable): " + "; ".join(f"{k} ({v})" for k, v in excluded.items()), ""] \
+        if excluded else []
+    return out
+
+
+def step_error_lines(results: list[dict]) -> list[str]:
+    got = tm.step_errors(results)
+    out = ["Per step: within 0.15 of its own measure, over the held-out episodes that measured it", "",
+           "| step | within | signed error per episode |", "|---|---|---|"]
+    for s, e in got.items():
+        each = ", ".join(f"{k} {v:+.2f}" for k, v in e["errors"].items() if v is not None)
+        out.append(f"| {s} | {e['within']} of {e['n']} | {each} |")
+    return out + [""]
 
 
 def step_lines(results: list[dict], episodes: list[tm.Episode], firsts: list[list[dict]]) -> list[str]:
@@ -164,11 +220,11 @@ def gap_lines(shared: list[tuple[tm.Gap, float | None]], denom: float) -> list[s
 
 def report(path: Path, ctx: dict) -> str:
     lines = [str(path), "", f"# Time-model back-test ({datetime.now().astimezone():%Y-%m-%d %H:%M %Z}, HEAD {ctx['sha']})",
-             "", f"Episodes (pre-registered): {', '.join(e.name for e in ctx['episodes'])}.  {fit_line(ctx['fit'])}  "
+             "", f"Episodes scored: {', '.join(e.name for e in ctx['episodes'])}.  {fit_line(ctx['fit'])}  "
              f"Gap shares are taken on {ctx['target'].name}'s inputs (ep02's plan does not exist until SR-2).", ""]
     lines += scope_lines(ctx["episodes"], ctx["results"])
-    lines += base_lines(ctx["episodes"]) + loo_lines(ctx["results"], ctx["episodes"])
-    lines += step_lines(ctx["results"], ctx["episodes"], ctx["firsts"])
+    lines += base_lines(ctx["episodes"]) + loo_lines(ctx["results"], ctx["episodes"]) + pre_lines(ctx)
+    lines += step_lines(ctx["results"], ctx["episodes"], ctx["firsts"]) + step_error_lines(ctx["results"])
     lines += gap_lines(ctx["shared"], ctx["denom"]) + [f"Q5 rows: {ctx['rows_path']}", ""]
     return "\n".join(lines)
 
@@ -186,13 +242,13 @@ def write_new(path: Path, text: str) -> None:
         f.write(text)
 
 
-def context(library: Path, specs: list[str], target: str) -> dict:
-    loaded = [(name, load(home)) for name, home in map(lambda s: home_of(library, s), specs)]
+def context(library: Path, specs: list[str], target: str, books: dict | None = None) -> dict:
+    loaded = [(name, load(home)) for name, home in map(lambda s: home_of(library, s, books), specs)]
     built = [episode(name, rec) for name, rec in loaded]
     episodes, firsts = [b[0] for b in built], [b[1] for b in built]
     fit = tm.vl_fit(tm.read_jsonl(library / "vlm_calls.jsonl"))
     results = tm.leave_one_out(episodes, tm.vl_read_s(fit))
-    t = [e.name for e in episodes].index(home_of(library, target)[0]) if target in specs else 0
+    t = [e.name for e in episodes].index(home_of(library, target, books)[0]) if target in specs else 0
     every = [r for _, rec in loaded for r in rec["timing"]]
     found = tm.gaps([r for f in firsts for r in f], every, episodes[t].inputs,
                     [e.uncovered_s for e in episodes if e.uncovered_s is not None]) + tm.unseen_steps(episodes)
@@ -201,29 +257,81 @@ def context(library: Path, specs: list[str], target: str) -> dict:
             "shared": tm.shares(found, results[t]["p90_s"]), "denom": denom, "sha": head_sha()}
 
 
+def pre_registered(ctx: dict, pre: list[str]) -> dict | None:
+    """The registered verdict, re-scored on its own episodes alone when the run scored more than them."""
+    names = [e.name for e in ctx["episodes"]]
+    picked = [names.index(n) for n in pre if n in names]
+    if len(picked) != len(pre):
+        return None
+    if len(picked) == len(names):
+        return tm.verdict(ctx["results"])
+    return tm.verdict(tm.leave_one_out([ctx["episodes"][i] for i in picked], tm.vl_read_s(ctx["fit"])))
+
+
+def loo_row(row: dict, ctx: dict) -> dict:
+    """The counted back-test row: every scored episode at the registered 3-in-4 rate, the registered verdict said."""
+    v, pre = tm.verdict(ctx["results"]), ctx.get("pre")
+    rate = v["n"] >= tm.HELD_OUT and v["within"] * tm.HELD_OUT >= tm.NEED * v["n"]
+    said = (f"pre-registered {pre['n']}: {pre['within']} of {pre['n']} within 0.15 ({'PASS' if pre['passed'] else 'FAIL'})"
+            if pre else "pre-registered episodes not all scored")
+    return {**row, "passed": rate and bool(pre and pre["passed"]),
+            "detail": f"{v['within']} of {v['n']} delivered episodes within 0.15 (needs {tm.NEED} in {tm.HELD_OUT}); {said}"}
+
+
+def target_rows(ctx: dict, plan_home: Path | None) -> list[dict]:
+    """ep02's predicted p90 clock row, from SR-2's plan, when the plan exists (AUDIT A6)."""
+    if plan_home is None:
+        return []
+    p = {k: Path(plan_home) / NAMED[k] for k in ("plan", "placed", "shots")}
+    tm.refuse_sandbox(p.values())
+    js = {k: json.loads(v.read_text(encoding="utf-8")) for k, v in p.items()}
+    inp, read_s = tm.inputs_from(js["shots"], js["placed"], js["plan"]), tm.vl_read_s(ctx["fit"])
+    p90 = sum(v[1] for v in tm.predict(inp, False, tm.fit(ctx["episodes"], read_s), read_s).values())
+    uncovered = [e.uncovered_s for e in ctx["episodes"] if e.uncovered_s is not None]
+    return [tm.ep02_row(p90 + tm.refine_p90_s(inp), max(uncovered) if uncovered else None, [str(v) for v in p.values()])]
+
+
 def write_rows(out: Path, ctx: dict) -> Path:
     """The Q5 rows confidence.py reads (results are inputs to the report, rewritten each run)."""
     rows = tm.result_rows(ctx["results"], ctx["shared"], tm.base_rate(ctx["episodes"]), ctx["episodes"])
+    rows = [loo_row(rows[0], ctx), *rows[1:], *target_rows(ctx, ctx.get("target_plan"))]
     path = out / "results" / "time_backtest.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(rows, indent=1) + "\n", encoding="utf-8", newline="\n")
     return path
 
 
-def main(argv: list[str] | None = None) -> int:
+def parse(argv: list[str] | None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--episodes", nargs="+", default=list(PREREGISTERED))
+    ap.add_argument("--episodes", nargs="+", default=[DELIVERED])
+    ap.add_argument("--preregistered", nargs="+", default=list(PREREGISTERED))
+    ap.add_argument("--books", nargs="+", default=None, help="key=folder pairs (default: the series books)")
     ap.add_argument("--target", default=PREREGISTERED[0])
+    ap.add_argument("--target-plan", type=Path, default=None, help="an ep02 home holding SR-2's plan")
     ap.add_argument("--library", type=Path, default=settings.REAL_LIBRARY)
     ap.add_argument("--out-dir", type=Path, default=OUT)
-    args = ap.parse_args(argv)
+    return ap.parse_args(argv)
+
+
+def run(args: argparse.Namespace) -> dict:
+    """Score the episodes, the registered verdict and the target plan; the rows written."""
+    books = dict(b.split("=", 1) for b in args.books) if args.books else None
+    tm.refuse_sandbox([args.library / "vlm_calls.jsonl"])
+    specs, excluded = delivered(args.library, books) if args.episodes == [DELIVERED] else (args.episodes, {})
+    ctx = context(args.library, specs, args.target, books)
+    ctx.update(excluded=excluded, target_plan=args.target_plan,
+               pre=pre_registered(ctx, [home_of(args.library, s, books)[0] for s in args.preregistered]))
+    ctx["rows_path"] = write_rows(args.out_dir, ctx)
+    return ctx
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse(argv)
     try:
-        tm.refuse_sandbox([args.library / "vlm_calls.jsonl"])
-        ctx = context(args.library, args.episodes, args.target)
+        ctx = run(args)
     except tm.SandboxInput as e:
         print(f"REFUSED: {e}", file=sys.stderr)
         return 2
-    ctx["rows_path"] = write_rows(args.out_dir, ctx)
     path = next_path(args.out_dir, "TIME_BACKTEST")
     write_new(path, report(path, ctx))
     print(path.read_text(encoding="utf-8"))

@@ -1,0 +1,19 @@
+{
+ "measured": "2026-10-21, RTX 4090, ComfyUI 0.41.2, one job at a time on an empty /queue; docs/audit/2026-10-21_ep02_proof/gpu/COSTS.md (measured_costs.json) and FACE.md",
+ "take_wuli": {"intercept_s": 9.86, "s_per_frame": 0.4892, "n": 4, "max_abs_residual_s": 1.12,
+               "graph": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang, 768x768, 3 refs, warm"},
+ "take_spark": {"intercept_s": 14.83, "s_per_frame": 0.4119, "n": 5, "max_abs_residual_s": 2.55,
+                "graph": "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_spark_zechengtang, 768x768, 3 refs, warm"},
+ "take_cold_s": 45.0,
+ "take_cold_basis": "the first H3 job after an engine start (transcript h3_take); 0-5 s after a /free",
+ "refine_face": {"intercept_s": 11.03, "s_per_frame": 0.5583, "n": 6, "max_abs_residual_s": 8.23,
+                 "graph": "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_facecrop_v2v_mickmumpitz, crop to 768x768"},
+ "refine_wall_per_gpu_s": 1.4216,
+ "refine_wall_basis": "FACE.md: the real first pass on ep01 T06 T13 T18 T26 took 927 s of wall from the first selection to the last decision over 652.1 s of GPU in 7 jobs (one run, pipelined, CCIP gating on the CPU)",
+ "grid_1x1_s": 12.73,
+ "grid_2x2_s": 69.71,
+ "qwen_image_load_s": 140.9,
+ "vl_read_s": 9.58,
+ "av3_s_per_frame": 0.0444,
+ "av3_fixed_s": 28.3
+}
