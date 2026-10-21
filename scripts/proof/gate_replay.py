@@ -353,9 +353,10 @@ def run_gate(gate: dict, fixtures: list[tuple[str, Path, int]]) -> dict:
 
 def gate_row(gate: dict, said: dict) -> dict:
     passed = said["n"] > 0 and said["unruled"] == 0 and said["ruled_false"] == 0
-    return ig.proof_row(f"gate_replay.{gate['id']}", gate["question"], passed, said["n"], said["n"],
-                        ["results/gates.json", "scripts/proof/gates_under_test.yaml"], {"recorded": said["n"]},
-                        gate["callable"], "n/a (a gate, not an instrument)", "compliance")
+    row = ig.proof_row(f"gate_replay.{gate['id']}", gate["question"], passed, said["n"], said["n"],
+                       ["results/gates.json", "scripts/proof/gates_under_test.yaml"], {"recorded": said["n"]},
+                       gate["callable"], "n/a (a gate, not an instrument)", "compliance")
+    return {**row, "n_pass": said["n"] - said["unruled"] - said["ruled_false"]}
 
 
 def report(spec: dict, fixtures: list[tuple[str, Path, int]]) -> dict:

@@ -201,6 +201,16 @@ def test_refusals_an_owner_ruling_explains_are_expected_never_false_and_the_row_
     assert gr.gate_row(gate, said)["passed"] and not gr.gate_row(gate, gr.tally(items, confirmed=[]))["passed"]
 
 
+def test_a_failed_gate_row_says_how_many_of_its_units_passed():
+    """The report never invents a pass count (confidence.k_of): a gate row gives its own, every unit
+    but the unruled and the ruled-false refusals, so '41/42' prints instead of 'not reported'."""
+    items = [{"unit": f"u{i}", "verdict": "refused" if i < 2 else "passed"} for i in range(5)]
+    said = gr.tally(items, confirmed=[{"unit": "u0", "source": "owner"}])
+    gate = {"id": "G-X", "question": "Q6", "callable": "m:f"}
+    row = gr.gate_row(gate, said)
+    assert (row["passed"], row["n_pass"], row["n_distinct"]) == (False, 4, 5)
+
+
 def test_the_report_writes_one_design_5_row_per_replayed_gate(tmp_path):
     spec = {"gates": [{"id": "G-META-CREDIT", "callable": "scripts.publish.metadata:credit_faults", "reader": "credit",
                        "since": "2026-10-20", "commit": "967597b", "question": "Q6", "unit": "episode", "confirmed": []},
