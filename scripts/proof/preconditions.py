@@ -32,7 +32,7 @@ def chapter_of(arg: str) -> int:
 def gap_line(g: dict) -> str:
     cost = (f"median {g['cost_s']:.0f} s, p90 {g['cost_p90_s']:.0f} s ({g['cost_basis']})" if g["cost_s"]
             else g["cost_basis"])
-    head = {"park": "PREDICTED PARK", "jit": "JIT REF STEP", "unknown": "UNKNOWN"}[g["outcome"]]
+    head = {"park": "PREDICTED PARK", "jit": "JIT REF STEP", "unknown": "UNKNOWN", "owner": "OWNER"}[g["outcome"]]
     return f"  {head} at step {g['step']}: {g['kind']} {g['what']} | cost {cost}" + (f" | {g['note']}" if g["note"] else "")
 
 

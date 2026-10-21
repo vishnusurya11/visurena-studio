@@ -153,3 +153,12 @@ def test_a_paused_or_ended_series_is_an_owner_precondition_the_audit_lists(book)
                                                    encoding="utf-8")
     assert not [g for g in pre.audit(book, 2)["gaps"] if g["kind"] == "series_state"]
     assert "autopilot/series.json" in pre.audit(book, 2)["sources"]
+
+
+def test_the_script_prints_an_owners_precondition(book, tmp_path, capsys):
+    from scripts.proof import preconditions as script
+    (book / "autopilot").mkdir()
+    (book / "autopilot" / "series.json").write_text(json.dumps({"last": 1, "paused": True}), encoding="utf-8")
+    assert script.main(["ch2", "--book", str(book), "--out", str(tmp_path / "p.json")]) == 0
+    said = capsys.readouterr().out
+    assert "OWNER at step autopilot: series_state autopilot/series.json: paused, last 1" in said
