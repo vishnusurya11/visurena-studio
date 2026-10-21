@@ -1,0 +1,3 @@
+{"id": "smoke", "checkpoint": "after_12", "episode": 2, "expected_ticks": 1,
+ "fault": {"kind": "tear", "record": ".autopilot/heartbeat.json"},
+ "why": "one checkpoint (after_12), one take (T00), one fault (the supervisor's heartbeat torn mid-write): the REAL autopilot tick reads it, rebuilds it and ends HELD_PUBLISH named, with no traceback"}
