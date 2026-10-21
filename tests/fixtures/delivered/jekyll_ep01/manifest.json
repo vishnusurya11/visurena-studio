@@ -1,0 +1,1877 @@
+{
+  "codex_id": "20260827135504",
+  "unit": "ep01",
+  "number": 1,
+  "master": "20260827135504_the-strange-case-of-dr-jekyll-and-mr-hyde/episodes/ep01/cut/master_r2v.mp4",
+  "qc": {
+    "passed": true,
+    "sha8": "0db3d8d9",
+    "seconds": 139.5,
+    "planned_seconds": 134.791667,
+    "lufs": -14.17,
+    "true_peak": -1.57,
+    "longest_gap_s": 5.53,
+    "missing_cuts": [],
+    "takes": {
+      "pass": 27,
+      "of": 28,
+      "fail": [
+        "T01"
+      ],
+      "budget_spent": [],
+      "worst": [
+        "T17",
+        6.8
+      ],
+      "unjudged": []
+    }
+  },
+  "steps": {
+    "01": "skipped",
+    "02": "skipped",
+    "03": "skipped",
+    "04": "skipped",
+    "05": "skipped",
+    "06": "skipped",
+    "07": "skipped",
+    "08": "skipped",
+    "09": "skipped",
+    "10": "skipped",
+    "11": "completed",
+    "12": "started",
+    "13": "escalated"
+  },
+  "timing": {
+    "total_seconds": 26114.9,
+    "runs": 215,
+    "by_stage": {
+      "step_02": 0.0,
+      "plan": 2380.6,
+      "step_03": 0.0,
+      "places": 660.9,
+      "step_04": 0.0,
+      "lines": 1387.4,
+      "speaker_check": 36.4,
+      "step_05": 0.0,
+      "respot": 0.6,
+      "timeline": 0.5,
+      "step_06": 0.0,
+      "prompts": 5.8,
+      "no_last_frame": 0.6,
+      "step_07": 0.0,
+      "grids": 1170.7,
+      "step_08": 0.0,
+      "panels": 72.3,
+      "panel_dq": 24.0,
+      "panel_content": 591.3,
+      "panel_eye": 2751.0,
+      "step_09": 0.0,
+      "take_dq": 6227.1,
+      "takes": -141.4,
+      "face_refine": 1724.2,
+      "take_content": 2868.3,
+      "strip": 40.4,
+      "take_eye": 809.6,
+      "step_10": 0.0,
+      "assemble": 328.5,
+      "upscale": 938.2,
+      "step_11": 0.0,
+      "qc": 1078.1,
+      "master_eye": 2985.2,
+      "dossier": 0.9,
+      "step_12": 0.0,
+      "step_13": 0.0,
+      "grid_lint": 0.9,
+      "cut": 63.3,
+      "bed": 10.6,
+      "sfx": 62.6,
+      "mix": 36.3
+    }
+  },
+  "stage": "episode",
+  "inputs": [
+    {
+      "path": "analysis/characters/carew_housemaid.json",
+      "sha8": "ca0ccf24"
+    },
+    {
+      "path": "analysis/characters/carew_policeman.json",
+      "sha8": "1688cb93"
+    },
+    {
+      "path": "analysis/characters/child_family.json",
+      "sha8": "4747dbdf"
+    },
+    {
+      "path": "analysis/characters/child_of_hyde_incident.json",
+      "sha8": "4342e00a"
+    },
+    {
+      "path": "analysis/characters/edward_hyde.json",
+      "sha8": "6c4ae889"
+    },
+    {
+      "path": "analysis/characters/gabriel_john_utterson.json",
+      "sha8": "a4730ded"
+    },
+    {
+      "path": "analysis/characters/henry_jekyll.json",
+      "sha8": "4419fa96"
+    },
+    {
+      "path": "analysis/characters/hyde_driver.json",
+      "sha8": "7584a1c8"
+    },
+    {
+      "path": "analysis/characters/hyde_hotel_attendants.json",
+      "sha8": "0cb80062"
+    },
+    {
+      "path": "analysis/characters/hyde_hotel_waiter.json",
+      "sha8": "28a98c62"
+    },
+    {
+      "path": "analysis/characters/hyde_housekeeper.json",
+      "sha8": "38c17b04"
+    },
+    {
+      "path": "analysis/characters/hyde_incident_crowd.json",
+      "sha8": "aec5d1ff"
+    },
+    {
+      "path": "analysis/characters/hyde_incident_women.json",
+      "sha8": "f833bbf4"
+    },
+    {
+      "path": "analysis/characters/inspector_newcomen.json",
+      "sha8": "6ac161ca"
+    },
+    {
+      "path": "analysis/characters/jekyll_servants.json",
+      "sha8": "bac85955"
+    },
+    {
+      "path": "analysis/characters/mr_guest.json",
+      "sha8": "f3525d6b"
+    },
+    {
+      "path": "analysis/characters/police.json",
+      "sha8": "190cde35"
+    },
+    {
+      "path": "analysis/characters/poole.json",
+      "sha8": "6553e1d6"
+    },
+    {
+      "path": "analysis/characters/reginald_lanyon.json",
+      "sha8": "a887d217"
+    },
+    {
+      "path": "analysis/characters/richard_enfield.json",
+      "sha8": "62e71035"
+    },
+    {
+      "path": "analysis/characters/sawbones.json",
+      "sha8": "6723a660"
+    },
+    {
+      "path": "analysis/characters/sir_danvers_carew.json",
+      "sha8": "5a04ecee"
+    },
+    {
+      "path": "analysis/locations/black_mail_house_door.json",
+      "sha8": "ed682218"
+    },
+    {
+      "path": "analysis/locations/carew_murder_lane.json",
+      "sha8": "b87d1346"
+    },
+    {
+      "path": "analysis/locations/hyde_soho_rooms.json",
+      "sha8": "86297dee"
+    },
+    {
+      "path": "analysis/locations/jekyll_bedroom.json",
+      "sha8": "6b9f949e"
+    },
+    {
+      "path": "analysis/locations/jekyll_cabinet.json",
+      "sha8": "18ee4968"
+    },
+    {
+      "path": "analysis/locations/jekyll_house.json",
+      "sha8": "0b219357"
+    },
+    {
+      "path": "analysis/locations/jekyll_laboratory.json",
+      "sha8": "29222ba1"
+    },
+    {
+      "path": "analysis/locations/jekyll_laboratory_cabinet_room.json",
+      "sha8": "4ef5242d"
+    },
+    {
+      "path": "analysis/locations/jekyll_mirror.json",
+      "sha8": "fe252175"
+    },
+    {
+      "path": "analysis/locations/lanyon_consulting_room.json",
+      "sha8": "709b2953"
+    },
+    {
+      "path": "analysis/locations/lanyon_dining_room.json",
+      "sha8": "c54813d2"
+    },
+    {
+      "path": "analysis/locations/lanyon_house.json",
+      "sha8": "d2b68852"
+    },
+    {
+      "path": "analysis/locations/lanyon_table.json",
+      "sha8": "457e1633"
+    },
+    {
+      "path": "analysis/locations/london.json",
+      "sha8": "04918427"
+    },
+    {
+      "path": "analysis/locations/london_streets.json",
+      "sha8": "ac751c76"
+    },
+    {
+      "path": "analysis/locations/london_sunday_walks.json",
+      "sha8": "ab9cc8be"
+    },
+    {
+      "path": "analysis/locations/police_station_cell.json",
+      "sha8": "c5c7b0e1"
+    },
+    {
+      "path": "analysis/locations/portland_street_hotel.json",
+      "sha8": "48a9f03f"
+    },
+    {
+      "path": "analysis/locations/regents_park.json",
+      "sha8": "9a559cac"
+    },
+    {
+      "path": "analysis/locations/utterson_house.json",
+      "sha8": "9820caa0"
+    },
+    {
+      "path": "analysis/scenes.json",
+      "sha8": "177d4112"
+    },
+    {
+      "path": "cast/carew_policeman/voice/design.wav",
+      "sha8": "513188a9"
+    },
+    {
+      "path": "cast/child_of_hyde_incident/voice/design.wav",
+      "sha8": "f336d076"
+    },
+    {
+      "path": "cast/edward_hyde/voice/design.wav",
+      "sha8": "ecd7baf7"
+    },
+    {
+      "path": "cast/gabriel_john_utterson/voice/design.wav",
+      "sha8": "40edb818"
+    },
+    {
+      "path": "cast/henry_jekyll/voice/design.wav",
+      "sha8": "111c9276"
+    },
+    {
+      "path": "cast/narrator/voice/design.wav",
+      "sha8": "243cc4e7"
+    },
+    {
+      "path": "cast/poole/voice/design.wav",
+      "sha8": "3018c095"
+    },
+    {
+      "path": "cast/reginald_lanyon/voice/design.wav",
+      "sha8": "8ba1b902"
+    },
+    {
+      "path": "cast/richard_enfield/voice/design.wav",
+      "sha8": "6a816ea4"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l00.wav",
+      "sha8": "2fdf7ed3"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l01.wav",
+      "sha8": "3603ec25"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l02.wav",
+      "sha8": "7a4d2136"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l03.wav",
+      "sha8": "e332fae7"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l04.wav",
+      "sha8": "ce4f22fe"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l05.wav",
+      "sha8": "a3ff5994"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l06.wav",
+      "sha8": "29e84170"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l07.wav",
+      "sha8": "25923f46"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l08.wav",
+      "sha8": "41bcebf1"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l09.wav",
+      "sha8": "3dc8db37"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l10.wav",
+      "sha8": "8fa831f7"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l11.best.wav",
+      "sha8": "8848fe80"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l11.wav",
+      "sha8": "9a94eecd"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l12.wav",
+      "sha8": "0cd7d712"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l13.wav",
+      "sha8": "49061741"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l14.wav",
+      "sha8": "83803bac"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l15.wav",
+      "sha8": "26d54146"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l16.wav",
+      "sha8": "3e1b3780"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l17.wav",
+      "sha8": "7ab66f54"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l18.wav",
+      "sha8": "63b5bb33"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l19.wav",
+      "sha8": "790e5546"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l20.wav",
+      "sha8": "5be6d21a"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/l21.wav",
+      "sha8": "02193ab3"
+    },
+    {
+      "path": "episodes/ep01/audio/lines/lines.json",
+      "sha8": "a587af94"
+    },
+    {
+      "path": "episodes/ep01/cut/master_r2v.mp4",
+      "sha8": "0db3d8d9"
+    },
+    {
+      "path": "episodes/ep01/manifest.json",
+      "sha8": "01307140"
+    },
+    {
+      "path": "episodes/ep01/placed.json",
+      "sha8": "25080945"
+    },
+    {
+      "path": "episodes/ep01/plan.json",
+      "sha8": "35816aed"
+    },
+    {
+      "path": "episodes/ep01/plan.verdict.json",
+      "sha8": "582b1b86"
+    },
+    {
+      "path": "episodes/ep01/qc_r2v.json",
+      "sha8": "8221246c"
+    },
+    {
+      "path": "episodes/ep01/review/eye_0db3d8d9.json",
+      "sha8": "1b2d9f12"
+    },
+    {
+      "path": "episodes/ep01/review/eye_8fb5ba37.json",
+      "sha8": "7e3adc7a"
+    },
+    {
+      "path": "episodes/ep01/review/eye_daebf2d4.json",
+      "sha8": "5d611a60"
+    },
+    {
+      "path": "episodes/ep01/review/eye_db355db6.json",
+      "sha8": "445b3dfe"
+    },
+    {
+      "path": "episodes/ep01/storyboard/eye_01e2d16f.json",
+      "sha8": "f518bab8"
+    },
+    {
+      "path": "episodes/ep01/storyboard/eye_42fa3d59.json",
+      "sha8": "b5a9ce4c"
+    },
+    {
+      "path": "episodes/ep01/storyboard/eye_c8519c8c.json",
+      "sha8": "04754e13"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_door_step_day_1x1_b.png",
+      "sha8": "6d22b7ad"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_door_step_day_1x1_c.png",
+      "sha8": "f0a3cc5e"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_door_step_day_2x2_a.png",
+      "sha8": "114229ad"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_corner_1x1_a.png",
+      "sha8": "33011278"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_corner_1x1_b.png",
+      "sha8": "a877d1a8"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_corner_1x1_c.png",
+      "sha8": "d74a9ecc"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_corner_1x1_s09.png",
+      "sha8": "88a7ec8d"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_door_2x2.png",
+      "sha8": "b98d4237"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1.png",
+      "sha8": "68bd2b20"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1_s02.png",
+      "sha8": "0e83bec9"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1_s03.png",
+      "sha8": "354ffec2"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1_s04.png",
+      "sha8": "dcea347e"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1_s05.png",
+      "sha8": "401ceb07"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1.png",
+      "sha8": "f45d25d0"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s19.png",
+      "sha8": "8b7b3a26"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s20.png",
+      "sha8": "50ba5dc9"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s21.png",
+      "sha8": "5a09cacc"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s22.png",
+      "sha8": "6241644f"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s23.png",
+      "sha8": "8444b8a4"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s24.png",
+      "sha8": "9e1316a5"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s25.png",
+      "sha8": "b18c36fc"
+    },
+    {
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_2_1x1.png",
+      "sha8": "056e3d5d"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_00.png",
+      "sha8": "906730ed"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_01.png",
+      "sha8": "c76d8173"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_02.png",
+      "sha8": "92f4f806"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_03.png",
+      "sha8": "efc0b94b"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_04.png",
+      "sha8": "e4ad2f94"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_05.png",
+      "sha8": "cca2b327"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_06.png",
+      "sha8": "2fe53301"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_07.png",
+      "sha8": "a0fc0de3"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_08.png",
+      "sha8": "15ca1584"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_09.png",
+      "sha8": "442a46aa"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_10.png",
+      "sha8": "4b2ef9e8"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_11.png",
+      "sha8": "6899dc0e"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_12.png",
+      "sha8": "dc61ad23"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_13.png",
+      "sha8": "3b0a56a5"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_14.png",
+      "sha8": "7a10ee49"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_15.png",
+      "sha8": "ca16493f"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_16.png",
+      "sha8": "8c16f704"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_17.png",
+      "sha8": "393f444c"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_18.png",
+      "sha8": "504e2c0e"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_19.png",
+      "sha8": "83617b05"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_20.png",
+      "sha8": "060dabc7"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_21.png",
+      "sha8": "b04f7cbb"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_22.png",
+      "sha8": "f764a25b"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_23.png",
+      "sha8": "608549b4"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_24.png",
+      "sha8": "8ee26588"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_25.png",
+      "sha8": "8af75a2a"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_26.png",
+      "sha8": "208b7b59"
+    },
+    {
+      "path": "episodes/ep01/storyboard/shot_27.png",
+      "sha8": "de18e0c0"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T00.mp4",
+      "sha8": "56da138b"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T01.mp4",
+      "sha8": "f267e3fb"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T02.mp4",
+      "sha8": "cf4a8a9a"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T03.mp4",
+      "sha8": "3e126774"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T04.mp4",
+      "sha8": "fff6d7e0"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T05.mp4",
+      "sha8": "2be68f14"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T06.mp4",
+      "sha8": "e0f6ac37"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T07.mp4",
+      "sha8": "11cb613c"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T08.mp4",
+      "sha8": "7c698c89"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T09.mp4",
+      "sha8": "8123af6c"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T10.mp4",
+      "sha8": "19ffb91a"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T11.mp4",
+      "sha8": "1222acb0"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T12.mp4",
+      "sha8": "5d96ff6e"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T13.mp4",
+      "sha8": "6ba78561"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T14.mp4",
+      "sha8": "3c2a8128"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T15.mp4",
+      "sha8": "c3ad2700"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T16.mp4",
+      "sha8": "afb74e4d"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T17.mp4",
+      "sha8": "90e5ecc7"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T18.mp4",
+      "sha8": "8044d636"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T19.mp4",
+      "sha8": "3cdeae1f"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T20.mp4",
+      "sha8": "3a5bb411"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T21.mp4",
+      "sha8": "e41a9bec"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T22.mp4",
+      "sha8": "4bd4aa42"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T23.mp4",
+      "sha8": "2d71b261"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T24.mp4",
+      "sha8": "554dc816"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T25.mp4",
+      "sha8": "b0057bed"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T26.mp4",
+      "sha8": "98fd34a3"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/T27.mp4",
+      "sha8": "0e567308"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/eye_a720dafd.json",
+      "sha8": "dbd974d1"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/eye_b368ae93.json",
+      "sha8": "15dcf01a"
+    },
+    {
+      "path": "episodes/ep01/takes/r2v/prompts.json",
+      "sha8": "01805ddb"
+    },
+    {
+      "path": "episodes/ep01/timing.jsonl",
+      "sha8": "987fba89"
+    },
+    {
+      "path": "publish/standing.json",
+      "sha8": "a8a5386f"
+    },
+    {
+      "path": "refs/characters/child_of_hyde_incident/sheet.png",
+      "sha8": "cff7f631"
+    },
+    {
+      "path": "refs/characters/edward_hyde/sheet.png",
+      "sha8": "b074b48c"
+    },
+    {
+      "path": "refs/characters/gabriel_john_utterson/sheet.png",
+      "sha8": "eb374bc4"
+    },
+    {
+      "path": "refs/characters/henry_jekyll/sheet.png",
+      "sha8": "5250b7a7"
+    },
+    {
+      "path": "refs/characters/richard_enfield/sheet.png",
+      "sha8": "da32e492"
+    },
+    {
+      "path": "refs/locations/black_mail_house_door/wide_establishing.png",
+      "sha8": "c0184c09"
+    },
+    {
+      "path": "refs/locations/black_mail_house_door/wide_establishing__a_bright_sunday_afternoon_the_door_shut_in_its_r.png",
+      "sha8": "07e3228e"
+    },
+    {
+      "path": "refs/locations/black_mail_house_door/wide_establishing__a_bright_sunday_afternoon_the_shop_shutters_fres.png",
+      "sha8": "b4e12f6e"
+    },
+    {
+      "path": "refs/locations/black_mail_house_door/wide_establishing__four_o_clock_of_a_black_winter_morning_the_kerb_.png",
+      "sha8": "63692277"
+    },
+    {
+      "path": "refs/locations/london_sunday_walks/wide_establishing.png",
+      "sha8": "250e5c0a"
+    },
+    {
+      "path": "refs/locations/london_sunday_walks/wide_establishing__a_bright_sunday_afternoon_the_street_broad_and_n.png",
+      "sha8": "4285a83d"
+    },
+    {
+      "path": "refs/locations/london_sunday_walks/wide_establishing__three_o_clock_of_a_black_winter_morning_every_st.png",
+      "sha8": "ec831bd1"
+    },
+    {
+      "path": "refs/refs.json",
+      "sha8": "a6357363"
+    },
+    {
+      "path": "screenplay/feature/elements.json",
+      "sha8": "1d0e7f27"
+    }
+  ],
+  "outputs": [
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l00.wav",
+      "sha8": "2fdf7ed3"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l01.wav",
+      "sha8": "3603ec25"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l02.wav",
+      "sha8": "7a4d2136"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l03.wav",
+      "sha8": "e332fae7"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l04.wav",
+      "sha8": "ce4f22fe"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l05.wav",
+      "sha8": "a3ff5994"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l06.wav",
+      "sha8": "29e84170"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l07.wav",
+      "sha8": "25923f46"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l08.wav",
+      "sha8": "41bcebf1"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l09.wav",
+      "sha8": "3dc8db37"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l10.wav",
+      "sha8": "8fa831f7"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l11.best.wav",
+      "sha8": "8848fe80"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l11.wav",
+      "sha8": "9a94eecd"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l12.wav",
+      "sha8": "0cd7d712"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l13.wav",
+      "sha8": "49061741"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l14.wav",
+      "sha8": "83803bac"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l15.wav",
+      "sha8": "26d54146"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l16.wav",
+      "sha8": "3e1b3780"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l17.wav",
+      "sha8": "7ab66f54"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l18.wav",
+      "sha8": "63b5bb33"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l19.wav",
+      "sha8": "790e5546"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l20.wav",
+      "sha8": "5be6d21a"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/l21.wav",
+      "sha8": "02193ab3"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/audio/lines/lines.json",
+      "sha8": "a587af94"
+    },
+    {
+      "kind": "edit",
+      "path": "episodes/ep01/cut/master_r2v.mp4",
+      "sha8": "0db3d8d9"
+    },
+    {
+      "kind": "timeline",
+      "path": "episodes/ep01/placed.json",
+      "sha8": "25080945"
+    },
+    {
+      "kind": "plan",
+      "path": "episodes/ep01/plan.json",
+      "sha8": "35816aed"
+    },
+    {
+      "kind": "plan",
+      "path": "episodes/ep01/plan.verdict.json",
+      "sha8": "582b1b86"
+    },
+    {
+      "kind": "qc",
+      "path": "episodes/ep01/qc_r2v.json",
+      "sha8": "8221246c"
+    },
+    {
+      "kind": "qc",
+      "path": "episodes/ep01/review/eye_0db3d8d9.json",
+      "sha8": "1b2d9f12"
+    },
+    {
+      "kind": "qc",
+      "path": "episodes/ep01/review/eye_8fb5ba37.json",
+      "sha8": "7e3adc7a"
+    },
+    {
+      "kind": "qc",
+      "path": "episodes/ep01/review/eye_daebf2d4.json",
+      "sha8": "5d611a60"
+    },
+    {
+      "kind": "qc",
+      "path": "episodes/ep01/review/eye_db355db6.json",
+      "sha8": "445b3dfe"
+    },
+    {
+      "kind": "record",
+      "path": "episodes/ep01/review/speaker_check.json",
+      "sha8": "1bb73c6a"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/anchors/door_step_day.png",
+      "sha8": "de18e0c0"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/anchors/night_corner.png",
+      "sha8": "2fe53301"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/anchors/street_day.png",
+      "sha8": "c76d8173"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/anchors/walk_on_day.png",
+      "sha8": "504e2c0e"
+    },
+    {
+      "kind": "places",
+      "path": "episodes/ep01/storyboard/cells_from_picture.json",
+      "sha8": "299db7d6"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/contact.png",
+      "sha8": "74820c23"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/eye_01e2d16f.json",
+      "sha8": "f518bab8"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/eye_42fa3d59.json",
+      "sha8": "b5a9ce4c"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/eye_c8519c8c.json",
+      "sha8": "04754e13"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_door_step_day_1x1_b.png",
+      "sha8": "6d22b7ad"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_door_step_day_1x1_c.png",
+      "sha8": "f0a3cc5e"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_door_step_day_2x2_a.png",
+      "sha8": "114229ad"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_corner_1x1_a.png",
+      "sha8": "33011278"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_corner_1x1_b.png",
+      "sha8": "a877d1a8"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_corner_1x1_c.png",
+      "sha8": "d74a9ecc"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_corner_1x1_s09.png",
+      "sha8": "88a7ec8d"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_night_door_2x2.png",
+      "sha8": "b98d4237"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1.png",
+      "sha8": "68bd2b20"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1_s02.png",
+      "sha8": "0e83bec9"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1_s03.png",
+      "sha8": "354ffec2"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1_s04.png",
+      "sha8": "dcea347e"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_street_day_1x1_s05.png",
+      "sha8": "401ceb07"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1.png",
+      "sha8": "f45d25d0"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s19.png",
+      "sha8": "8b7b3a26"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s20.png",
+      "sha8": "50ba5dc9"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s21.png",
+      "sha8": "5a09cacc"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s22.png",
+      "sha8": "6241644f"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s23.png",
+      "sha8": "8444b8a4"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s24.png",
+      "sha8": "9e1316a5"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_1x1_s25.png",
+      "sha8": "b18c36fc"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/grids/ep01_grid_walk_on_day_2_1x1.png",
+      "sha8": "056e3d5d"
+    },
+    {
+      "kind": "board",
+      "path": "episodes/ep01/storyboard/layout.json",
+      "sha8": "83699afc"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/panel_content.json",
+      "sha8": "f71081e1"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/panel_dq.json",
+      "sha8": "91ca9d3e"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_00.png",
+      "sha8": "906730ed"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_01.png",
+      "sha8": "c76d8173"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_02.png",
+      "sha8": "92f4f806"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_03.png",
+      "sha8": "efc0b94b"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_04.png",
+      "sha8": "e4ad2f94"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_05.png",
+      "sha8": "cca2b327"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_06.png",
+      "sha8": "2fe53301"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_07.png",
+      "sha8": "a0fc0de3"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_08.png",
+      "sha8": "15ca1584"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_09.png",
+      "sha8": "442a46aa"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_10.png",
+      "sha8": "4b2ef9e8"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_11.png",
+      "sha8": "6899dc0e"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_12.png",
+      "sha8": "dc61ad23"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_13.png",
+      "sha8": "3b0a56a5"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_14.png",
+      "sha8": "7a10ee49"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_15.png",
+      "sha8": "ca16493f"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_16.png",
+      "sha8": "8c16f704"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_17.png",
+      "sha8": "393f444c"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_18.png",
+      "sha8": "504e2c0e"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_19.png",
+      "sha8": "83617b05"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_20.png",
+      "sha8": "060dabc7"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_21.png",
+      "sha8": "b04f7cbb"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_22.png",
+      "sha8": "f764a25b"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_23.png",
+      "sha8": "608549b4"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_24.png",
+      "sha8": "8ee26588"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_25.png",
+      "sha8": "8af75a2a"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_26.png",
+      "sha8": "208b7b59"
+    },
+    {
+      "kind": "panels",
+      "path": "episodes/ep01/storyboard/shot_27.png",
+      "sha8": "de18e0c0"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T00.content.json",
+      "sha8": "e82ce65b"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T00.dq.json",
+      "sha8": "c64b1de0"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T00.mp4",
+      "sha8": "56da138b"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T01.content.json",
+      "sha8": "0ad26cec"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T01.dq.json",
+      "sha8": "84187ab2"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T01.mp4",
+      "sha8": "f267e3fb"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T02.content.json",
+      "sha8": "f2f0591f"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T02.dq.json",
+      "sha8": "0155decc"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T02.mp4",
+      "sha8": "cf4a8a9a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T03.content.json",
+      "sha8": "73b4242b"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T03.dq.json",
+      "sha8": "2fc9b9d8"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T03.mp4",
+      "sha8": "3e126774"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T04.content.json",
+      "sha8": "ca3b5514"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T04.dq.json",
+      "sha8": "f5e5f303"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T04.mp4",
+      "sha8": "fff6d7e0"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T05.content.json",
+      "sha8": "0eac3553"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T05.dq.json",
+      "sha8": "9b069851"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T05.mp4",
+      "sha8": "2be68f14"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T06.content.json",
+      "sha8": "5d17c62a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T06.dq.json",
+      "sha8": "b0917f13"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T06.mp4",
+      "sha8": "e0f6ac37"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T07.content.json",
+      "sha8": "1fc61315"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T07.dq.json",
+      "sha8": "e9110063"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T07.mp4",
+      "sha8": "11cb613c"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T08.content.json",
+      "sha8": "75445931"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T08.dq.json",
+      "sha8": "bf2194b0"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T08.mp4",
+      "sha8": "7c698c89"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T09.content.json",
+      "sha8": "df21ec74"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T09.dq.json",
+      "sha8": "6a77c265"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T09.mp4",
+      "sha8": "8123af6c"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T10.content.json",
+      "sha8": "fafd35ae"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T10.dq.json",
+      "sha8": "1baaad27"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T10.mp4",
+      "sha8": "19ffb91a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T11.content.json",
+      "sha8": "f2e4a8cf"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T11.dq.json",
+      "sha8": "94b5254e"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T11.mp4",
+      "sha8": "1222acb0"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T12.content.json",
+      "sha8": "acbf7b7a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T12.dq.json",
+      "sha8": "7f7fc533"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T12.mp4",
+      "sha8": "5d96ff6e"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T13.content.json",
+      "sha8": "ad4171ec"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T13.dq.json",
+      "sha8": "03d8f20e"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T13.mp4",
+      "sha8": "6ba78561"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T14.content.json",
+      "sha8": "253de8ad"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T14.dq.json",
+      "sha8": "827113db"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T14.mp4",
+      "sha8": "3c2a8128"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T15.content.json",
+      "sha8": "402a79b5"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T15.dq.json",
+      "sha8": "46ca6957"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T15.mp4",
+      "sha8": "c3ad2700"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T16.content.json",
+      "sha8": "0d4f0be9"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T16.dq.json",
+      "sha8": "4f2276e8"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T16.mp4",
+      "sha8": "afb74e4d"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T17.content.json",
+      "sha8": "8c246e4a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T17.dq.json",
+      "sha8": "a32c92cf"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T17.mp4",
+      "sha8": "90e5ecc7"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T18.content.json",
+      "sha8": "b5e2375f"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T18.dq.json",
+      "sha8": "f36454de"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T18.mp4",
+      "sha8": "8044d636"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T19.content.json",
+      "sha8": "86ebb2b2"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T19.dq.json",
+      "sha8": "458761fa"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T19.mp4",
+      "sha8": "3cdeae1f"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T20.content.json",
+      "sha8": "9bb9e086"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T20.dq.json",
+      "sha8": "b1784903"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T20.mp4",
+      "sha8": "3a5bb411"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T21.content.json",
+      "sha8": "d77e180a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T21.dq.json",
+      "sha8": "596d6086"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T21.mp4",
+      "sha8": "e41a9bec"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T22.content.json",
+      "sha8": "8db2f329"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T22.dq.json",
+      "sha8": "5f291e7e"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T22.mp4",
+      "sha8": "4bd4aa42"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T23.content.json",
+      "sha8": "0fd15421"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T23.dq.json",
+      "sha8": "7197c27b"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T23.mp4",
+      "sha8": "2d71b261"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T24.content.json",
+      "sha8": "4bc47bdc"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T24.dq.json",
+      "sha8": "d29cf9cf"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T24.mp4",
+      "sha8": "554dc816"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T25.content.json",
+      "sha8": "b9b6b7be"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T25.dq.json",
+      "sha8": "5913837a"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T25.mp4",
+      "sha8": "b0057bed"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T26.content.json",
+      "sha8": "3caca943"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T26.dq.json",
+      "sha8": "a1b0618f"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T26.mp4",
+      "sha8": "98fd34a3"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T27.content.json",
+      "sha8": "3117ec32"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T27.dq.json",
+      "sha8": "194de575"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/T27.mp4",
+      "sha8": "0e567308"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/eye_a720dafd.json",
+      "sha8": "dbd974d1"
+    },
+    {
+      "kind": "shoot",
+      "path": "episodes/ep01/takes/r2v/eye_b368ae93.json",
+      "sha8": "15dcf01a"
+    },
+    {
+      "kind": "prompts",
+      "path": "episodes/ep01/takes/r2v/prompts.json",
+      "sha8": "01805ddb"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/black_mail_house_door/wide_establishing.png",
+      "sha8": "c0184c09"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/black_mail_house_door/wide_establishing__a_bright_sunday_afternoon_the_door_shut_in_its_r.png",
+      "sha8": "07e3228e"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/black_mail_house_door/wide_establishing__a_bright_sunday_afternoon_the_shop_shutters_fres.png",
+      "sha8": "b4e12f6e"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/black_mail_house_door/wide_establishing__four_o_clock_of_a_black_winter_morning_the_kerb_.png",
+      "sha8": "63692277"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/london_sunday_walks/wide_establishing.png",
+      "sha8": "250e5c0a"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/london_sunday_walks/wide_establishing__a_bright_sunday_afternoon_the_street_broad_and_n.png",
+      "sha8": "4285a83d"
+    },
+    {
+      "kind": "places",
+      "path": "refs/locations/london_sunday_walks/wide_establishing__three_o_clock_of_a_black_winter_morning_every_st.png",
+      "sha8": "ec831bd1"
+    },
+    {
+      "kind": "bind",
+      "path": "refs/refs.json",
+      "sha8": "a6357363"
+    },
+    {
+      "kind": "edit",
+      "path": "title/ep01.mp4",
+      "sha8": "6754dde3"
+    }
+  ],
+  "verdicts": [
+    {
+      "gate": "PLAN",
+      "path": "episodes/ep01/plan.verdict.json",
+      "signed_by": "judge:plan@1",
+      "word": "APPROVE",
+      "terminal": ""
+    },
+    {
+      "gate": "EYE_PANELS",
+      "path": "episodes/ep01/storyboard/eye_01e2d16f.json",
+      "signed_by": "judge:panel_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_PANELS",
+      "path": "episodes/ep01/storyboard/eye_42fa3d59.json",
+      "signed_by": "judge:panel_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_PANELS",
+      "path": "episodes/ep01/storyboard/eye_c8519c8c.json",
+      "signed_by": "judge:panel_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_TAKES",
+      "path": "episodes/ep01/takes/r2v/eye_a720dafd.json",
+      "signed_by": "judge:take_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "EYE_TAKES",
+      "path": "episodes/ep01/takes/r2v/eye_b368ae93.json",
+      "signed_by": "judge:take_eye@1",
+      "word": "flagged",
+      "terminal": "keep_best"
+    },
+    {
+      "gate": "MASTER",
+      "path": "episodes/ep01/review/eye_0db3d8d9.json",
+      "signed_by": "judge:master_eye@1",
+      "word": "",
+      "terminal": "flag"
+    },
+    {
+      "gate": "MASTER",
+      "path": "episodes/ep01/review/eye_8fb5ba37.json",
+      "signed_by": "judge:master_eye@1",
+      "word": "",
+      "terminal": "flag"
+    },
+    {
+      "gate": "MASTER",
+      "path": "episodes/ep01/review/eye_daebf2d4.json",
+      "signed_by": "judge:master_eye@1",
+      "word": "",
+      "terminal": "flag"
+    },
+    {
+      "gate": "MASTER",
+      "path": "episodes/ep01/review/eye_db355db6.json",
+      "signed_by": "judge:master_eye@1",
+      "word": "",
+      "terminal": "flag"
+    }
+  ],
+  "cost": {
+    "wall_seconds": 26114.9,
+    "gpu_seconds": 0.0,
+    "usd": 0.0
+  }
+}

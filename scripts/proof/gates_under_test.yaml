@@ -1,16 +1,18 @@
 # Every gate added since 2026-10-14 (2026-10-21_ep02_proof DESIGN 4.6), replayed by scripts/proof/gate_replay.py
 # over frozen delivered episodes.  Each gate: its dotted callable (module:attribute), the reader in
 # gate_replay.READERS that turns one frozen episode into the callable's inputs, the date and commit it
-# landed, the unit counted, the question its row answers, and `confirmed`: refusals confirmed as TRUE
-# faults, each with its source (listed apart from the false ones; only an owner's ruling confirms one).
-# A gate with no refusal to replay names `why_not_replayed` instead of a reader.  `counts` says what a hit
-# is: a refusal (the default), an advisory flag (log only) or a reworded row (a wording change).
+# landed, the unit counted, the question its row answers, and the owner's rulings on its refusals:
+# `confirmed` (TRUE faults) and `ruled_false` (false refusals), each unit with its source -- only an owner's
+# ruling puts a refusal in either -- and `expected` ({why, source}) when a dated owner ruling already says
+# every other refusal of the gate is the behaviour asked for.  A refusal in none of them is UNRULED, never
+# false.  A gate with no refusal to replay names `why_not_replayed` instead of a reader.  `counts` says what
+# a hit is: a refusal (the default), an advisory flag (log only) or a reworded row (a wording change).
 since: "2026-10-14"
 
 episodes:
   - {slug: wotw, book: "20260827135508", numbers: "1-27"}
   - {slug: scarlet, book: "20260822113400", numbers: "1-14"}
-  - {slug: jekyll, book: "20260827135504", numbers: "1", fixture: ep01}   # the existing fixture, read only
+  - {slug: jekyll, book: "20260827135504", numbers: "1"}   # jekyll_ep01; the older ep01 fixture is the regress baseline's
 
 gates:
   - id: G-STANDING
@@ -22,6 +24,13 @@ gates:
     question: Q6
     reads: the book's publish/standing.json (frozen into <fixture>/_book/)
     confirmed: []
+    expected:
+      why: >-
+        a standing file that names no episodes approves none, so step 13 parks every unlisted episode at
+        G-STANDING: the refusal the rule asks for, on episodes delivered before the list existed
+      source: >-
+        docs/DECISIONS.md 2026-10-20 "the standing publish approval names its episodes", enforcing the owner's
+        2026-10-12 rule "no upload unless asked"
 
   - id: G-META-CREDIT
     callable: scripts.publish.metadata:credit_faults

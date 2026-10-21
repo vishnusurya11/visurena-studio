@@ -1,0 +1,945 @@
+{
+  "T06": {
+    "status": "refined",
+    "take_sha8": "e0f6ac37",
+    "people": [
+      {
+        "who": "richard_enfield",
+        "crop": "refine/T06_p0.mp4",
+        "track": "refine/T06_p0.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.6285947213570277,
+          "id_ref": 0.7777617623408636,
+          "seam": 6.14,
+          "flick_src": 10.659,
+          "flick_ref": 10.432,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 8.23,
+          "drift": 19.51,
+          "eye_src": 113.42,
+          "eye_ref": 89.79,
+          "ccip_src": 0.0424,
+          "ccip_ref": 0.0399,
+          "clip_src": 0.8824,
+          "clip_ref": 0.8817,
+          "outside": 0.0,
+          "band_warp": 0.269,
+          "core_flow": 0.721,
+          "turn": 2.58
+        },
+        "frames": 175,
+        "denoise": 0.431,
+        "face_px": 78.1,
+        "min_px": 52.4,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:40:39"
+      },
+      {
+        "who": "edward_hyde",
+        "crop": "refine/T06_p1.mp4",
+        "track": "refine/T06_p1.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.3570712109406789,
+          "id_ref": 0.2886270781358083,
+          "seam": 9.46,
+          "flick_src": 3.289,
+          "flick_ref": 3.195,
+          "faces_src": 0,
+          "faces_ref": 1,
+          "change": 9.85,
+          "drift": 22.98,
+          "eye_src": 0.0,
+          "eye_ref": 0.0,
+          "ccip_src": 0.1526,
+          "ccip_ref": 0.0579,
+          "clip_src": 0.6958,
+          "clip_ref": 0.8406,
+          "outside": 0.0,
+          "band_warp": 0.665,
+          "core_flow": 1.099,
+          "turn": null
+        },
+        "frames": 175,
+        "denoise": 0.55,
+        "face_px": 13.5,
+        "min_px": 10.7,
+        "soft": true,
+        "source": "face",
+        "lost": 3,
+        "regated": "2026-10-19T21:40:43"
+      }
+    ],
+    "decided": "2026-10-19T13:46:00",
+    "gpu_s_priced": 200.5,
+    "seconds": 383.8
+  },
+  "T08": {
+    "status": "unrefined",
+    "take_sha8": "7c698c89",
+    "people": [
+      {
+        "who": "child_of_hyde_incident",
+        "crop": "refine/T08_p0.mp4",
+        "track": "refine/T08_p0.json",
+        "kept": false,
+        "why": "the redraw turned the face 9.3 deg > 4.0",
+        "measures": {
+          "id_src": 0.22221789012352625,
+          "id_ref": 0.4260084678729375,
+          "seam": 12.44,
+          "flick_src": 17.435,
+          "flick_ref": 17.19,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 17.06,
+          "drift": null,
+          "eye_src": null,
+          "eye_ref": null,
+          "ccip_src": null,
+          "ccip_ref": null,
+          "clip_src": null,
+          "clip_ref": null,
+          "outside": 0.0,
+          "band_warp": 0.653,
+          "core_flow": 2.952,
+          "turn": 9.34
+        },
+        "frames": 124,
+        "regated": "2026-10-19T21:40:47"
+      }
+    ],
+    "decided": "2026-10-18T20:21:23",
+    "gpu_s_priced": 100.3,
+    "seconds": 139.1
+  },
+  "T18": {
+    "status": "refined",
+    "take_sha8": "8044d636",
+    "people": [
+      {
+        "who": "gabriel_john_utterson",
+        "crop": "refine/T18_p0.mp4",
+        "track": "refine/T18_p0.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.36165337714677054,
+          "id_ref": 0.7287696897983551,
+          "seam": 11.74,
+          "flick_src": 23.362,
+          "flick_ref": 23.489,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 14.71,
+          "drift": null,
+          "eye_src": null,
+          "eye_ref": null,
+          "ccip_src": null,
+          "ccip_ref": null,
+          "clip_src": null,
+          "clip_ref": null,
+          "outside": 0.0,
+          "band_warp": 0.61,
+          "core_flow": 3.002,
+          "turn": 2.35
+        },
+        "frames": 124,
+        "regated": "2026-10-19T21:41:15"
+      },
+      {
+        "who": "richard_enfield",
+        "crop": "refine/T18_p1.mp4",
+        "track": "refine/T18_p1.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.28301723053057987,
+          "id_ref": 0.8334318697452545,
+          "seam": 12.94,
+          "flick_src": 20.165,
+          "flick_ref": 19.423,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 15.33,
+          "drift": null,
+          "eye_src": null,
+          "eye_ref": null,
+          "ccip_src": null,
+          "ccip_ref": null,
+          "clip_src": null,
+          "clip_ref": null,
+          "outside": 0.0,
+          "band_warp": 0.63,
+          "core_flow": 2.27,
+          "turn": 2.53
+        },
+        "frames": 124,
+        "regated": "2026-10-19T21:41:19"
+      }
+    ],
+    "decided": "2026-10-18T20:24:01",
+    "gpu_s_priced": 161.6,
+    "seconds": 174.8
+  },
+  "T23": {
+    "status": "refined",
+    "take_sha8": "2d71b261",
+    "people": [
+      {
+        "who": "richard_enfield",
+        "crop": "refine/T23_p0.mp4",
+        "track": "refine/T23_p0.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.8461946348349253,
+          "id_ref": 0.890526294708252,
+          "seam": 9.04,
+          "flick_src": 6.194,
+          "flick_ref": 5.802,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 11.2,
+          "drift": 19.6,
+          "eye_src": 167.61,
+          "eye_ref": 162.03,
+          "ccip_src": 0.0271,
+          "ccip_ref": 0.0219,
+          "clip_src": 0.8567,
+          "clip_ref": 0.8915,
+          "outside": 0.0,
+          "band_warp": 0.441,
+          "core_flow": 0.928,
+          "turn": 2.32
+        },
+        "frames": 141,
+        "denoise": 0.405,
+        "face_px": 111.6,
+        "min_px": 111.2,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:41:26"
+      }
+    ],
+    "decided": "2026-10-19T13:52:55",
+    "gpu_s_priced": 80.8,
+    "seconds": 592.3
+  },
+  "T05": {
+    "status": "refined",
+    "take_sha8": "2be68f14",
+    "people": [
+      {
+        "who": "richard_enfield",
+        "crop": "refine/T05_p0.mp4",
+        "track": "refine/T05_p0.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.6356502423683802,
+          "id_ref": 0.6506168991327286,
+          "seam": 14.33,
+          "flick_src": 15.71,
+          "flick_ref": 15.679,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 15.88,
+          "drift": 22.52,
+          "eye_src": 117.71,
+          "eye_ref": 81.72,
+          "ccip_src": 0.0398,
+          "ccip_ref": 0.0506,
+          "clip_src": 0.8497,
+          "clip_ref": 0.8813,
+          "outside": 0.0,
+          "band_warp": 0.637,
+          "core_flow": 2.952,
+          "turn": 2.65
+        },
+        "frames": 39,
+        "denoise": 0.41,
+        "face_px": 103.8,
+        "min_px": 100.5,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:40:28"
+      }
+    ],
+    "decided": "2026-10-19T13:45:37",
+    "gpu_s_priced": 41.8,
+    "seconds": 390.2
+  },
+  "T13": {
+    "status": "refined",
+    "take_sha8": "6ba78561",
+    "people": [
+      {
+        "who": "richard_enfield",
+        "crop": "refine/T13_p0.mp4",
+        "track": "refine/T13_p0.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.635889545083046,
+          "id_ref": 0.7401905059814453,
+          "seam": 9.05,
+          "flick_src": 5.709,
+          "flick_ref": 5.231,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 11.36,
+          "drift": 20.03,
+          "eye_src": 131.8,
+          "eye_ref": 122.96,
+          "ccip_src": 0.0352,
+          "ccip_ref": 0.0343,
+          "clip_src": 0.8623,
+          "clip_ref": 0.9163,
+          "outside": 0.0,
+          "band_warp": 0.419,
+          "core_flow": 1.57,
+          "turn": 1.95
+        },
+        "frames": 209,
+        "denoise": 0.45,
+        "face_px": 60.4,
+        "min_px": 59.7,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:41:03"
+      }
+    ],
+    "decided": "2026-10-19T13:51:21",
+    "gpu_s_priced": 119.7,
+    "seconds": 398.9
+  },
+  "T21": {
+    "status": "all_readable",
+    "take_sha8": "e41a9bec",
+    "people": [],
+    "decided": "2026-10-19T13:51:33",
+    "gpu_s_priced": 0.0,
+    "seconds": 601.4
+  },
+  "T24": {
+    "status": "no_faces",
+    "take_sha8": "554dc816",
+    "people": [],
+    "decided": "2026-10-18T20:56:40",
+    "gpu_s_priced": 0.0,
+    "seconds": 9.6
+  },
+  "T00": {
+    "status": "all_readable",
+    "take_sha8": "56da138b",
+    "people": [],
+    "decided": "2026-10-19T13:42:17",
+    "gpu_s_priced": 0.0,
+    "seconds": 231.6
+  },
+  "T01": {
+    "status": "unrefined",
+    "take_sha8": "f267e3fb",
+    "people": [
+      {
+        "who": "gabriel_john_utterson",
+        "crop": "refine/T01_p0.mp4",
+        "track": "refine/T01_p0.json",
+        "kept": false,
+        "why": "seam 19.3 > 18.0; band warp 0.94 > 0.9; the redraw turned the face 5.5 deg > 4.0",
+        "measures": {
+          "id_src": 0.10686562024056911,
+          "id_ref": 0.4557021010356645,
+          "seam": 19.26,
+          "flick_src": 29.215,
+          "flick_ref": 29.382,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 20.63,
+          "drift": 22.48,
+          "eye_src": 28.92,
+          "eye_ref": 56.05,
+          "ccip_src": 0.1031,
+          "ccip_ref": 0.0486,
+          "clip_src": 0.8123,
+          "clip_ref": 0.8662,
+          "outside": 0.0,
+          "band_warp": 0.945,
+          "core_flow": 3.565,
+          "turn": 5.55
+        },
+        "frames": 141,
+        "denoise": 0.485,
+        "face_px": 36.7,
+        "min_px": 35.2,
+        "soft": true,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:40:22"
+      },
+      {
+        "who": "richard_enfield",
+        "crop": "refine/T01_p1.mp4",
+        "track": "refine/T01_p1.json",
+        "kept": false,
+        "why": "seam 18.3 > 18.0",
+        "measures": {
+          "id_src": 0.32656947523355484,
+          "id_ref": 0.5883958488702774,
+          "seam": 18.29,
+          "flick_src": 19.882,
+          "flick_ref": 20.138,
+          "faces_src": 2,
+          "faces_ref": 1,
+          "change": 20.43,
+          "drift": 22.43,
+          "eye_src": 44.48,
+          "eye_ref": 27.32,
+          "ccip_src": 0.0923,
+          "ccip_ref": 0.0554,
+          "clip_src": 0.7985,
+          "clip_ref": 0.8434,
+          "outside": 0.0,
+          "band_warp": 0.718,
+          "core_flow": 2.201,
+          "turn": 2.84
+        },
+        "frames": 73,
+        "denoise": 0.49,
+        "face_px": 34.7,
+        "min_px": 32.5,
+        "soft": true,
+        "source": "face",
+        "lost": 1,
+        "regated": "2026-10-19T21:40:25"
+      }
+    ],
+    "decided": "2026-10-19T14:07:26",
+    "gpu_s_priced": 161.6,
+    "seconds": 31.7
+  },
+  "T09": {
+    "status": "unrefined",
+    "take_sha8": "8123af6c",
+    "people": [
+      {
+        "who": "edward_hyde",
+        "crop": "refine/T09_p0.mp4",
+        "track": "refine/T09_p0.json",
+        "kept": false,
+        "why": "the redraw turned the face 8.0 deg > 4.0",
+        "measures": {
+          "id_src": 0.6250870923201243,
+          "id_ref": 0.7117042243480682,
+          "seam": 15.12,
+          "flick_src": 2.372,
+          "flick_ref": 2.045,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 15.08,
+          "drift": 19.55,
+          "eye_src": 31.73,
+          "eye_ref": 0.0,
+          "ccip_src": 0.0634,
+          "ccip_ref": 0.0564,
+          "clip_src": 0.7811,
+          "clip_ref": 0.8012,
+          "outside": 0.0,
+          "band_warp": 0.476,
+          "core_flow": 2.055,
+          "turn": 8.03
+        },
+        "frames": 39,
+        "denoise": 0.403,
+        "face_px": 115.4,
+        "min_px": 112.7,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:40:51"
+      }
+    ],
+    "decided": "2026-10-19T13:46:11",
+    "gpu_s_priced": 110.0,
+    "seconds": 381.0
+  },
+  "T10": {
+    "status": "refined",
+    "take_sha8": "19ffb91a",
+    "people": [
+      {
+        "who": "edward_hyde",
+        "crop": "refine/T10_p0.mp4",
+        "track": "refine/T10_p0.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.7371365229288737,
+          "id_ref": 0.6537240147590637,
+          "seam": 7.3,
+          "flick_src": 4.515,
+          "flick_ref": 3.986,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 8.92,
+          "drift": 18.18,
+          "eye_src": 139.46,
+          "eye_ref": 92.53,
+          "ccip_src": 0.0302,
+          "ccip_ref": 0.0376,
+          "clip_src": 0.8927,
+          "clip_ref": 0.9301,
+          "outside": 0.0,
+          "band_warp": 0.45,
+          "core_flow": 2.764,
+          "turn": 1.17
+        },
+        "frames": 22,
+        "denoise": 0.409,
+        "face_px": 105.7,
+        "min_px": 103.8,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:40:54"
+      },
+      {
+        "who": "richard_enfield",
+        "crop": "refine/T10_p2.mp4",
+        "track": "refine/T10_p2.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.7879032591978709,
+          "id_ref": 0.9004130959510803,
+          "seam": 13.67,
+          "flick_src": 19.28,
+          "flick_ref": 18.218,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 15.26,
+          "drift": 21.53,
+          "eye_src": 144.2,
+          "eye_ref": 93.38,
+          "ccip_src": 0.0174,
+          "ccip_ref": 0.0134,
+          "clip_src": 0.8801,
+          "clip_ref": 0.9103,
+          "outside": 0.0,
+          "band_warp": 0.592,
+          "core_flow": 1.969,
+          "turn": 0.9
+        },
+        "frames": 22,
+        "denoise": 0.42,
+        "face_px": 90.5,
+        "min_px": 89.7,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:40:57"
+      }
+    ],
+    "decided": "2026-10-19T13:47:02",
+    "gpu_s_priced": 161.6,
+    "seconds": 368.9
+  },
+  "T15": {
+    "status": "refined",
+    "take_sha8": "c3ad2700",
+    "people": [
+      {
+        "who": "richard_enfield",
+        "crop": "refine/T15_p0.mp4",
+        "track": "refine/T15_p0.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.7247026264667511,
+          "id_ref": 0.7622142136096954,
+          "seam": 9.38,
+          "flick_src": 6.424,
+          "flick_ref": 6.005,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 11.54,
+          "drift": 19.33,
+          "eye_src": 87.88,
+          "eye_ref": 61.24,
+          "ccip_src": 0.0299,
+          "ccip_ref": 0.0227,
+          "clip_src": 0.8525,
+          "clip_ref": 0.9032,
+          "outside": 0.0,
+          "band_warp": 0.403,
+          "core_flow": 1.193,
+          "turn": 1.34
+        },
+        "frames": 175,
+        "denoise": 0.417,
+        "face_px": 95.0,
+        "min_px": 94.4,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:41:11"
+      }
+    ],
+    "decided": "2026-10-19T13:51:33",
+    "gpu_s_priced": 100.3,
+    "seconds": 629.2
+  },
+  "T19": {
+    "status": "all_readable",
+    "take_sha8": "3cdeae1f",
+    "people": [],
+    "decided": "2026-10-19T13:51:33",
+    "gpu_s_priced": 0.0,
+    "seconds": 617.8
+  },
+  "T26": {
+    "status": "refined",
+    "take_sha8": "98fd34a3",
+    "people": [
+      {
+        "who": "gabriel_john_utterson",
+        "crop": "refine/T26_p0.mp4",
+        "track": "refine/T26_p0.json",
+        "kept": true,
+        "why": "kept",
+        "measures": {
+          "id_src": 0.5837461451689402,
+          "id_ref": 0.7570835451285044,
+          "seam": 8.45,
+          "flick_src": 4.77,
+          "flick_ref": 4.527,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 11.72,
+          "drift": 17.25,
+          "eye_src": 30.57,
+          "eye_ref": 57.24,
+          "ccip_src": 0.0375,
+          "ccip_ref": 0.032,
+          "clip_src": 0.8354,
+          "clip_ref": 0.8915,
+          "outside": 0.0,
+          "band_warp": 0.56,
+          "core_flow": 1.95,
+          "turn": 2.07
+        },
+        "frames": 73,
+        "denoise": 0.44,
+        "face_px": 69.2,
+        "min_px": 68.1,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:41:30"
+      },
+      {
+        "who": "richard_enfield",
+        "crop": "refine/T26_p1.mp4",
+        "track": "refine/T26_p1.json",
+        "kept": false,
+        "why": "the redraw turned the face 5.8 deg > 4.0",
+        "measures": {
+          "id_src": 0.35493651529153186,
+          "id_ref": 0.5314527402321497,
+          "seam": 13.34,
+          "flick_src": 5.886,
+          "flick_ref": 5.38,
+          "faces_src": 1,
+          "faces_ref": 1,
+          "change": 14.51,
+          "drift": 23.42,
+          "eye_src": 73.12,
+          "eye_ref": 45.49,
+          "ccip_src": 0.0915,
+          "ccip_ref": 0.0579,
+          "clip_src": 0.7926,
+          "clip_ref": 0.8335,
+          "outside": 0.0,
+          "band_warp": 0.657,
+          "core_flow": 2.39,
+          "turn": 5.8
+        },
+        "frames": 73,
+        "denoise": 0.442,
+        "face_px": 67.0,
+        "min_px": 61.7,
+        "soft": false,
+        "source": "face",
+        "lost": 0,
+        "regated": "2026-10-19T21:41:33"
+      }
+    ],
+    "decided": "2026-10-19T13:54:37",
+    "gpu_s_priced": 83.6,
+    "seconds": 654.9
+  },
+  "face_list": {
+    "px": 120.0,
+    "listed": [
+      "T01",
+      "T08",
+      "T09",
+      "T26"
+    ],
+    "takes": {
+      "T00": {
+        "smallest_px": null,
+        "pasted": false,
+        "unpasted": [],
+        "status": "all_readable",
+        "by": "refine"
+      },
+      "T01": {
+        "smallest_px": 32.5,
+        "pasted": false,
+        "unpasted": [
+          {
+            "who": "gabriel_john_utterson",
+            "px": 35.2
+          },
+          {
+            "who": "richard_enfield",
+            "px": 32.5
+          }
+        ],
+        "status": "unrefined",
+        "by": "refine",
+        "route": "logged"
+      },
+      "T02": {
+        "smallest_px": 211.2,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T03": {
+        "smallest_px": 121.7,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T04": {
+        "smallest_px": 230.5,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T05": {
+        "smallest_px": 100.5,
+        "pasted": true,
+        "unpasted": [],
+        "status": "refined",
+        "by": "refine"
+      },
+      "T06": {
+        "smallest_px": 10.7,
+        "pasted": true,
+        "unpasted": [],
+        "status": "refined",
+        "by": "refine"
+      },
+      "T07": {
+        "smallest_px": 29.6,
+        "pasted": false,
+        "unpasted": [
+          {
+            "who": null,
+            "px": 49.0
+          },
+          {
+            "who": null,
+            "px": 35.4
+          },
+          {
+            "who": null,
+            "px": 29.6
+          }
+        ],
+        "status": "insert",
+        "by": "warp"
+      },
+      "T08": {
+        "smallest_px": null,
+        "pasted": false,
+        "unpasted": [
+          {
+            "who": "child_of_hyde_incident",
+            "px": null
+          }
+        ],
+        "status": "unrefined",
+        "by": "refine",
+        "route": "logged"
+      },
+      "T09": {
+        "smallest_px": 112.7,
+        "pasted": false,
+        "unpasted": [
+          {
+            "who": "edward_hyde",
+            "px": 112.7
+          }
+        ],
+        "status": "unrefined",
+        "by": "refine",
+        "route": "logged"
+      },
+      "T10": {
+        "smallest_px": 89.7,
+        "pasted": true,
+        "unpasted": [],
+        "status": "refined",
+        "by": "refine"
+      },
+      "T11": {
+        "smallest_px": 219.2,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T12": {
+        "smallest_px": null,
+        "pasted": false,
+        "unpasted": [],
+        "status": "insert",
+        "by": "warp"
+      },
+      "T13": {
+        "smallest_px": 59.7,
+        "pasted": true,
+        "unpasted": [],
+        "status": "refined",
+        "by": "refine"
+      },
+      "T14": {
+        "smallest_px": 158.1,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T15": {
+        "smallest_px": 94.4,
+        "pasted": true,
+        "unpasted": [],
+        "status": "refined",
+        "by": "refine"
+      },
+      "T16": {
+        "smallest_px": 193.2,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T17": {
+        "smallest_px": 67.0,
+        "pasted": false,
+        "unpasted": [
+          {
+            "who": null,
+            "px": 67.0
+          }
+        ],
+        "status": "insert",
+        "by": "warp"
+      },
+      "T18": {
+        "smallest_px": null,
+        "pasted": true,
+        "unpasted": [],
+        "status": "refined",
+        "by": "refine"
+      },
+      "T19": {
+        "smallest_px": null,
+        "pasted": false,
+        "unpasted": [],
+        "status": "all_readable",
+        "by": "refine"
+      },
+      "T20": {
+        "smallest_px": 120.0,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T21": {
+        "smallest_px": null,
+        "pasted": false,
+        "unpasted": [],
+        "status": "all_readable",
+        "by": "refine"
+      },
+      "T22": {
+        "smallest_px": 198.6,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T23": {
+        "smallest_px": 111.2,
+        "pasted": true,
+        "unpasted": [],
+        "status": "refined",
+        "by": "refine"
+      },
+      "T24": {
+        "smallest_px": 145.6,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T25": {
+        "smallest_px": 242.8,
+        "pasted": false,
+        "unpasted": [],
+        "status": "not_selected",
+        "by": "warp"
+      },
+      "T26": {
+        "smallest_px": 61.7,
+        "pasted": true,
+        "unpasted": [
+          {
+            "who": "richard_enfield",
+            "px": 61.7
+          }
+        ],
+        "status": "refined",
+        "by": "refine",
+        "route": "logged"
+      },
+      "T27": {
+        "smallest_px": null,
+        "pasted": false,
+        "unpasted": [],
+        "status": "unplanned",
+        "by": "warp"
+      }
+    },
+    "note": "log only: a listed take is routed to the refine and never fails the master"
+  }
+}

@@ -1,0 +1,112 @@
+{
+ "sha8": "a720dafd",
+ "verdict": "flagged",
+ "note": "gait at T01: shuffle: 4.1 steps/s, 0.035 heights a step over 0.14 heights/s HARD: the feet slide; clones at T08: two faces read as one man (facenet 0.943); clones at T08: two faces read as one man (facenet 0.931); clones at T08: two faces read as one man (facenet 0.893); clones at T08: two faces read as one man (facenet 0.793) -> keep_best",
+ "files": [
+  "T00.mp4",
+  "T01.mp4",
+  "T02.mp4",
+  "T03.mp4",
+  "T04.mp4",
+  "T05.mp4",
+  "T06.mp4",
+  "T07.mp4",
+  "T08.mp4",
+  "T09.mp4",
+  "T10.mp4",
+  "T11.mp4",
+  "T12.mp4",
+  "T13.mp4",
+  "T14.mp4",
+  "T15.mp4",
+  "T16.mp4",
+  "T17.mp4",
+  "T18.mp4",
+  "T19.mp4",
+  "T20.mp4",
+  "T21.mp4",
+  "T22.mp4",
+  "T23.mp4",
+  "T24.mp4",
+  "T25.mp4",
+  "T26.mp4",
+  "T27.mp4"
+ ],
+ "signed_at": "2026-10-21T01:31:08Z",
+ "signed_by": "judge:take_eye@1",
+ "faults": [
+  {
+   "kind": "gait",
+   "where": "T01",
+   "evidence": {
+    "value": 0.035,
+    "penalty": 40.0,
+    "repeated": false,
+    "settled": "keep_best"
+   },
+   "severity": "normal",
+   "note": "shuffle: 4.1 steps/s, 0.035 heights a step over 0.14 heights/s HARD: the feet slide"
+  },
+  {
+   "kind": "clones",
+   "where": "T08",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.943,
+    "by": "facenet",
+    "frame": 0,
+    "t": 0.14583333333333334,
+    "settled": "keep_best"
+   },
+   "severity": "normal",
+   "note": "two faces read as one man (facenet 0.943)"
+  },
+  {
+   "kind": "clones",
+   "where": "T08",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.931,
+    "by": "facenet",
+    "frame": 1,
+    "t": 1.1458333333333333,
+    "settled": "keep_best"
+   },
+   "severity": "normal",
+   "note": "two faces read as one man (facenet 0.931)"
+  },
+  {
+   "kind": "clones",
+   "where": "T08",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.893,
+    "by": "facenet",
+    "frame": 2,
+    "t": 2.1458333333333335,
+    "settled": "keep_best"
+   },
+   "severity": "normal",
+   "note": "two faces read as one man (facenet 0.893)"
+  },
+  {
+   "kind": "clones",
+   "where": "T08",
+   "evidence": {
+    "i": 0,
+    "j": 1,
+    "cosine": 0.793,
+    "by": "facenet",
+    "frame": 4,
+    "t": 4.145833333333334,
+    "settled": "keep_best"
+   },
+   "severity": "normal",
+   "note": "two faces read as one man (facenet 0.793)"
+  }
+ ],
+ "terminal": "keep_best"
+}

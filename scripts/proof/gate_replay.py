@@ -3,19 +3,25 @@
 
     uv run --no-sync python scripts/proof/gate_replay.py freeze <slug> <n>     # one episode, a NEW folder
     uv run --no-sync python scripts/proof/gate_replay.py freeze-all            # each missing one, one at a time
+    uv run --no-sync python scripts/proof/gate_replay.py scrub                 # absolute paths made relative
     uv run --no-sync python scripts/proof/gate_replay.py run [--out=<dir>]     # results/gates.json
 
 A delivered episode is frozen ONCE into tests/fixtures/delivered/<slug>_ep<NN>/ by
 scripts/episode/regress_delivered.freeze (the deciders' records and stat.json: sizes, mtimes, each kept
 take's sha8, never a video), plus the named records the gates read (plan, placed timeline, youtube
-record, cards, refine.json, panel_dq) and the book's publish/standing.json under `_book/`.  A folder that
-exists is never written again; the existing `ep01` fixture (Jekyll) and its actions.baseline.json are
-read only.  The real library is opened for read, by name, one episode at a time (never walked).
+record, cards, refine.json, panel_dq) and the book's publish/standing.json under `_book/`, every absolute
+path in them written relative to its episode (the repo stores no absolute path).  A folder that exists is
+never written again; Jekyll's ep01 is frozen as jekyll_ep01, and the older `ep01` fixture with its
+actions.baseline.json is the regress baseline's, read only.  The real library is opened for read, by name,
+one episode at a time (never walked).
 
 `run` asks each gate of scripts/proof/gates_under_test.yaml -- its REAL callable, through its reader --
 about every unit of every frozen episode: `refused`, `passed` or `unread` (the record it needs is not
-in the fixture).  Per gate: refusals over n readable units, unread units counted apart, refusals the
-spec lists as confirmed true faults apart from the false ones, and one DESIGN 5 row.  $0, no GPU."""
+in the fixture).  Per gate: refusals over n readable units, unread units counted apart, and each refusal
+in one of four places: `confirmed` (an owner ruled it a true fault), `ruled_false` (an owner ruled it
+false), `expected` (an owner ruling the spec cites already explains it) or `unruled` (no ruling yet).
+No refusal is called false without an owner's ruling.  One DESIGN 5 row per gate, passed only with
+none unruled and none ruled false.  $0, no GPU."""
 from __future__ import annotations
 
 import importlib
@@ -39,8 +45,10 @@ BOOK_DIR = "_book"
 EXTRAS = ("plan.json", "placed.json", "youtube.json", "takes/r2v/prompts.json", "takes/r2v/refine.json",
           "storyboard/panel_dq.json")
 BOOK_EXTRAS = ("publish/standing.json",)
-SLUGS = ("wotw", "scarlet")
-"""The books whose episodes this replay freezes (new folders only; Jekyll's ep01 fixture already exists)."""
+SLUGS = ("wotw", "scarlet", "jekyll")
+"""The books whose episodes this replay freezes, each into a new <slug>_epNN folder."""
+ABSOLUTE = re.compile(r"^(?:[A-Za-z]:[\\/]|\\\\)")
+"""A Windows absolute path (drive or UNC): never stored in a fixture."""
 ROOM = "takes/r2v"
 COUNTS = ("refusals", "flags", "rewords")
 """What a gate's `refused` verdict is: a refusal (counted false unless confirmed), an advisory flag (log
@@ -94,14 +102,53 @@ def copy_extras(src: Path, dest: Path, names: tuple[str, ...]) -> list[str]:
     return done
 
 
+def relative_text(text: str) -> str:
+    """An absolute path as the fixture keeps it: relative to its episode, else to its book, else its name."""
+    if not ABSOLUTE.match(text):
+        return text
+    slashed = text.replace("\\", "/")
+    found = re.search(r"/episodes/ep\d+/(.+)$", slashed) or re.search(r"/library/[^/]+/(.+)$", slashed)
+    return found.group(1) if found else slashed.rsplit("/", 1)[-1]
+
+
+def absolute_strings(doc) -> set[str]:
+    """Every absolute path string in a record, at any depth."""
+    if isinstance(doc, dict):
+        return {s for v in doc.values() for s in absolute_strings(v)}
+    if isinstance(doc, list):
+        return {s for v in doc for s in absolute_strings(v)}
+    return {doc} if isinstance(doc, str) and ABSOLUTE.match(doc) else set()
+
+
+def scrubbed_text(text: str) -> str:
+    """A record's text with each absolute path string written relative (relative_text), every other byte
+    as it was (the record's own layout kept)."""
+    for value in sorted(absolute_strings(json.loads(text))):
+        for said in {json.dumps(value), json.dumps(value, ensure_ascii=False)}:
+            text = text.replace(said, json.dumps(relative_text(value), ensure_ascii=False))
+    return text
+
+
+def scrub(folder: Path) -> list[str]:
+    """Rewrite each JSON record of a fixture that holds an absolute path; the records rewritten."""
+    done = []
+    for path in sorted(Path(folder).rglob("*.json")):
+        text = path.read_text(encoding="utf-8")
+        if (clean := scrubbed_text(text)) != text:
+            path.write_text(clean, encoding="utf-8", newline="\n")
+            done.append(path.relative_to(folder).as_posix())
+    return done
+
+
 def freeze(home: Path, book: Path, dest: Path) -> dict:
     """One delivered episode into a NEW fixture folder: regress_delivered.freeze, the gate records, the
-    book's standing file.  A folder that exists is refused (a fixture is frozen once)."""
+    book's standing file, every absolute path made relative.  A folder that exists is refused."""
     if Path(dest).exists():
         raise FileExistsError(f"{dest} exists: a delivered fixture is frozen once, never written again")
     doc = rd.freeze(Path(home), Path(dest))
     extras = copy_extras(home, dest, EXTRAS) + [f"{BOOK_DIR}/{r}" for r in copy_extras(book, Path(dest) / BOOK_DIR, BOOK_EXTRAS)]
-    return {"records": len(doc["files"]), "takes": len(doc["kept"]), "draws": len(doc["draws"]), "extras": extras}
+    return {"records": len(doc["files"]), "takes": len(doc["kept"]), "draws": len(doc["draws"]), "extras": extras,
+            "scrubbed": scrub(dest)}
 
 
 def freeze_named(spec: dict, slug: str, number: int) -> tuple[Path, dict]:
@@ -272,16 +319,20 @@ READERS = {"standing": standing, "credit": credit, "outside": outside, "face_lis
 
 # ---- the tally and the report ------------------------------------------------------------------------
 
-def tally(items: list[dict], confirmed: list[dict], counts: str = "refusals") -> dict:
-    """refusals over n readable units; unread apart; confirmed true faults apart from the false ones.  An
-    advisory gate's `refused` units are FLAGS and a wording change's are REWORDS: neither is a refusal."""
-    sure = {c["unit"] for c in confirmed or []}
+def tally(items: list[dict], confirmed: list[dict], counts: str = "refusals", expected: dict | None = None,
+          ruled_false=()) -> dict:
+    """refusals over n readable units, unread apart, each refusal confirmed, ruled false, expected (by the
+    owner ruling `expected` cites) or unruled.  An advisory gate's `refused` units are FLAGS and a wording
+    change's are REWORDS: neither is a refusal."""
+    sure, wrong = {c["unit"] for c in confirmed or []}, {c["unit"] for c in ruled_false or []}
     hit = [r["unit"] for r in items if r["verdict"] == "refused"]
     refused = hit if counts == "refusals" else []
+    rest = [u for u in refused if u not in sure | wrong]
     readable = [r for r in items if r["verdict"] != "unread"]
     return {"n": len(readable), "refused": len(refused), "flagged": len(hit) if counts == "flags" else 0,
             "reworded": len(hit) if counts == "rewords" else 0, "unread": len(items) - len(readable),
-            "confirmed": [u for u in refused if u in sure], "false_refusals": len([u for u in refused if u not in sure])}
+            "confirmed": [u for u in refused if u in sure], "ruled_false": len([u for u in refused if u in wrong]),
+            "expected": len(rest) if expected else 0, "expected_by": expected, "unruled": 0 if expected else len(rest)}
 
 
 def run_gate(gate: dict, fixtures: list[tuple[str, Path, int]]) -> dict:
@@ -293,12 +344,15 @@ def run_gate(gate: dict, fixtures: list[tuple[str, Path, int]]) -> dict:
             missing.append(name)
             continue
         items += [{**r, "unit": f"{name} {r['unit']}"} for r in reader(Path(path), fn)]
-    return {**tally(items, gate.get("confirmed") or [], gate.get("counts", "refusals")), "missing_fixtures": missing,
+    said = tally(items, gate.get("confirmed") or [], gate.get("counts", "refusals"), gate.get("expected"),
+                 gate.get("ruled_false") or [])
+    return {**said, "missing_fixtures": missing,
             "refusals": [r for r in items if r["verdict"] == "refused"], "unread_units": [r for r in items if r["verdict"] == "unread"]}
 
 
 def gate_row(gate: dict, said: dict) -> dict:
-    return ig.proof_row(f"gate_replay.{gate['id']}", gate["question"], said["n"] > 0 and said["false_refusals"] == 0, said["n"], said["n"],
+    passed = said["n"] > 0 and said["unruled"] == 0 and said["ruled_false"] == 0
+    return ig.proof_row(f"gate_replay.{gate['id']}", gate["question"], passed, said["n"], said["n"],
                         ["results/gates.json", "scripts/proof/gates_under_test.yaml"], {"recorded": said["n"]},
                         gate["callable"], "n/a (a gate, not an instrument)", "compliance")
 
@@ -329,8 +383,8 @@ def said_of(g: dict) -> str:
         return f"{g['flagged']}/{g['n']} flagged (advisory, never a refusal), {g['unread']} unread"
     if g["counts"] == "rewords":
         return f"{g['reworded']}/{g['n']} rows reworded (wording, never a refusal), {g['unread']} unread"
-    return (f"{g['refused']}/{g['n']} refused ({g['false_refusals']} false, {len(g['confirmed'])} confirmed), "
-            f"{g['unread']} unread")
+    return (f"{g['refused']}/{g['n']} refused ({len(g['confirmed'])} confirmed, {g['ruled_false']} ruled false, "
+            f"{g['expected']} expected by ruling, {g['unruled']} unruled), {g['unread']} unread")
 
 
 def freeze_all(spec: dict) -> list[str]:
@@ -353,6 +407,10 @@ def main(argv: list[str]) -> int:
         return 0
     if argv[:1] == ["freeze-all"]:
         freeze_all(spec)
+        return 0
+    if argv[:1] == ["scrub"]:
+        for name, path, _ in episodes(spec):
+            print(f"{name}: {len(scrub(path))} records made relative", flush=True)
         return 0
     out = next((Path(a.split("=", 1)[1]) for a in argv if a.startswith("--out=")), RESULTS)
     doc = report(spec, episodes(spec))

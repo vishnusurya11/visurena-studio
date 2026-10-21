@@ -3,9 +3,10 @@
 scripts/proof/gates_under_test.yaml names each gate with its dotted callable, the reader that turns a
 frozen delivered episode into the callable's inputs, and the date and commit it landed.  The replay
 counts refusals over n readable units per gate, counts unreadable units apart, and lists refusals
-confirmed as true faults apart from the false ones.  Fixtures are frozen with regress_delivered's
-freeze into NEW tests/fixtures/delivered/<book>_<ep>/ folders; the existing ep01 fixture is read, never
-written."""
+confirmed as true faults, refusals an owner ruling already explains, and refusals no one has ruled on,
+apart.  A refusal is false only when an owner ruled it so.  Fixtures are frozen with regress_delivered's
+freeze into NEW tests/fixtures/delivered/<book>_<ep>/ folders (Jekyll's ep01 as jekyll_ep01; the older
+ep01 fixture is the regress baseline's and is read, never written), every absolute path made relative."""
 from __future__ import annotations
 
 import json
@@ -40,16 +41,17 @@ def test_the_spec_names_every_design_4_6_gate_since_2026_10_14_and_each_callable
             assert g["why_not_replayed"]
 
 
-def test_the_spec_names_27_wotw_14_scarlet_and_jekyll_ep01():
+def test_the_spec_names_27_wotw_14_scarlet_and_jekyll_ep01_each_frozen_in_its_own_folder():
     names = [name for name, _, _ in gr.episodes(gr.load_spec())]
     assert sum(n.startswith("wotw_") for n in names) == 27 and sum(n.startswith("scarlet_") for n in names) == 14
-    assert "ep01" in names and len(names) == 42
+    assert "jekyll_ep01" in names and "ep01" not in names and len(names) == 42
+    assert all((rd.FIXTURES / n).is_dir() for n in names)
 
 
 def test_a_new_fixture_name_is_book_and_episode_and_never_an_existing_folder(tmp_path):
-    assert gr.fixture_name("wotw", 5) == "wotw_ep05"
+    assert gr.fixture_name("wotw", 5) == "wotw_ep05" and gr.fixture_name("jekyll", 1) == "jekyll_ep01"
     with pytest.raises(ValueError):
-        gr.fixture_name("jekyll", 1)
+        gr.fixture_name("dracula", 1)
     (tmp_path / "wotw_ep05").mkdir()
     with pytest.raises(FileExistsError):
         gr.freeze(tmp_path / "src_book" / "episodes" / "ep05", tmp_path / "src_book", tmp_path / "wotw_ep05")
@@ -162,12 +164,23 @@ def test_the_launch_dry_check_on_the_frozen_ep01_matches_its_committed_baseline(
     assert sum(r["verdict"] == "refused" for r in said) == sum(not v["held"].startswith("keep") for v in held.values())
 
 
-def test_the_tally_counts_unread_apart_and_confirmed_refusals_apart_from_false_ones():
+def test_the_tally_counts_unread_apart_and_a_refusal_is_false_only_by_an_owner_ruling():
     items = [{"unit": "a", "verdict": "refused"}, {"unit": "b", "verdict": "refused"}, {"unit": "c", "verdict": "passed"},
              {"unit": "d", "verdict": "unread"}]
     said = gr.tally(items, confirmed=[{"unit": "b", "source": "owner 2026-10-20"}])
-    assert (said["n"], said["refused"], said["unread"], said["false_refusals"]) == (3, 2, 1, 1)
-    assert said["confirmed"] == ["b"]
+    assert (said["n"], said["refused"], said["unread"], said["unruled"], said["ruled_false"]) == (3, 2, 1, 1, 0)
+    assert said["confirmed"] == ["b"] and "false_refusals" not in said
+    ruled = gr.tally(items, confirmed=[], ruled_false=[{"unit": "a", "source": "owner 2026-10-22"}])
+    assert (ruled["ruled_false"], ruled["unruled"]) == (1, 1)
+
+
+def test_refusals_an_owner_ruling_explains_are_expected_never_false_and_the_row_needs_none_unruled():
+    items = [{"unit": "wotw_ep01 episode", "verdict": "refused"}, {"unit": "jekyll_ep01 episode", "verdict": "passed"}]
+    rule = {"why": "the file lists no WotW episode", "source": "docs/DECISIONS.md 2026-10-20"}
+    said = gr.tally(items, confirmed=[], expected=rule)
+    assert (said["expected"], said["unruled"], said["ruled_false"]) == (1, 0, 0) and said["expected_by"] == rule
+    gate = {"id": "G-STANDING", "question": "Q6", "callable": "studio.standing_approval:ok"}
+    assert gr.gate_row(gate, said)["passed"] and not gr.gate_row(gate, gr.tally(items, confirmed=[]))["passed"]
 
 
 def test_the_report_writes_one_design_5_row_per_replayed_gate(tmp_path):
@@ -211,7 +224,7 @@ def test_the_face_list_without_the_plan_is_unread(tmp_path):
 def test_an_advisory_gate_counts_flags_never_false_refusals():
     items = [{"unit": "a", "verdict": "refused"}, {"unit": "b", "verdict": "passed"}]
     said = gr.tally(items, confirmed=[], counts="flags")
-    assert (said["n"], said["refused"], said["false_refusals"], said["flagged"]) == (2, 0, 0, 1)
+    assert (said["n"], said["refused"], said["unruled"], said["flagged"]) == (2, 0, 0, 1)
 
 
 def test_every_spec_gate_says_whether_it_refuses_flags_or_rewords():
@@ -232,3 +245,38 @@ def test_a_gate_with_no_readable_unit_never_passes(tmp_path):
     (tmp_path / "wotw_ep05").mkdir()
     (row,) = gr.report(spec, [("wotw_ep05", tmp_path / "wotw_ep05", 5)])["proof_rows"]
     assert row["n_points"] == 0 and not row["passed"]
+
+
+def test_freeze_writes_every_absolute_path_relative_to_its_episode(tmp_path):
+    book = tmp_path / "book"
+    home = book / "episodes" / "ep05"
+    strip = str(home / "takes" / "r2v" / "dq" / "T00_strip.png")
+    put(home, "takes/r2v/shots.json", [])
+    put(home, "takes/r2v/T00.dq.json", {"take_sha8": "x", "strip": strip, "gates": [{"file": "D:/elsewhere/a.png"}]})
+    (home / "takes" / "r2v" / "T00.mp4").write_bytes(b"take")
+    gr.freeze(home, book, tmp_path / "wotw_ep05")
+    doc = json.loads((tmp_path / "wotw_ep05" / "takes/r2v/T00.dq.json").read_text(encoding="utf-8"))
+    assert doc["strip"] == "takes/r2v/dq/T00_strip.png" and doc["gates"][0]["file"] == "a.png"
+
+
+def test_no_frozen_fixture_holds_an_absolute_path():
+    import re
+    found = [p.relative_to(rd.FIXTURES).as_posix() for p in sorted(rd.FIXTURES.rglob("*.json"))
+             if re.search(r'"[A-Za-z]:(\\|/)', p.read_text(encoding="utf-8"))]
+    assert found == []
+
+
+PINNED = {"G-STANDING": (28, 28, 14), "G-META-CREDIT": (42, 6, 0), "G-HOLE-SLACK": (42, 7, 0),
+          "OUTSIDE-UNREAD": (11, 0, 41), "A28-TINY-FACE": (25, 8, 41), "G-CROWD-ORPHAN": (236, 21, 0),
+          "L28-STYLE-LIGHT": (1044, 24, 0), "FACE-LIST": (1041, 4, 0), "ADVISORY-WORDING": (8, 8, 0)}
+"""(n, hits, unread) each cheap gate replays to on the 42 frozen episodes, pinned from results/gates.json of
+2026-10-21; a change to a gate or a fixture that moves one is seen here (the dry check runs in its own test)."""
+
+
+@pytest.mark.parametrize("gate_id", sorted(PINNED))
+def test_the_frozen_fixtures_replay_each_cheap_gate_to_its_pinned_counts(gate_id):
+    spec = gr.load_spec()
+    gate = next(g for g in spec["gates"] if g["id"] == gate_id)
+    said = gr.run_gate(gate, gr.episodes(spec))
+    hits = said["refused"] + said["flagged"] + said["reworded"]
+    assert said["missing_fixtures"] == [] and (said["n"], hits, said["unread"]) == PINNED[gate_id]
