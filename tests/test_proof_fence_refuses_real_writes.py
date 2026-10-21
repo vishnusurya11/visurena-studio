@@ -116,3 +116,53 @@ def test_activate_arms_the_fence_in_a_child_process(tmp_path):
     assert out.returncode != 0 and "RehearsalTripwire" in out.stderr, out.stderr[-2000:]
     assert json.loads(out.stdout.splitlines()[0])["tmp"] == str(box / "tmp")
     assert not planted.exists() and len(trips(box)) == 1
+
+
+def test_an_extended_length_path_into_a_root_trips(armed):
+    lib, _, box = armed
+    target = lib / JEKYLL / "y.txt"
+    for prefix in ("\\\\?\\", "\\\\.\\"):     # \\?\ and \\.\ open the same file as its plain path
+        with pytest.raises(fence.RehearsalTripwire):
+            open(prefix + str(target), "w")
+    assert not target.exists() and len(trips(box)) == 2
+
+
+def test_a_junction_from_the_sandbox_into_a_root_trips(armed):
+    _winapi = pytest.importorskip("_winapi")
+    lib, _, box = armed
+    fence.disarm()
+    _winapi.CreateJunction(str(lib / JEKYLL), str(box / "door"))
+    fence.install(fence.Fence.of(roots=(lib, armed[1]), sandbox=box, repo=REPO))
+    with pytest.raises(fence.RehearsalTripwire):
+        (box / "door" / "through.txt").write_text("x", encoding="utf-8")
+    assert not (lib / JEKYLL / "through.txt").exists()
+    fence.disarm()                      # removing the junction itself also resolves into the root
+    os.rmdir(box / "door")
+
+
+GRANDCHILD = r'''
+import os, sys, json, subprocess
+sys.path.insert(0, sys.argv[1])
+import studio                                  # the variable is not set yet: a no-op
+os.environ["VISURENA_LIBRARY"] = sys.argv[2]
+from studio.rehearsal import activate
+off = '"TaskName","Next Run Time","Status"\n"\\visurena-autopilot","N/A","Disabled"\n'
+activate.install(env=os.environ, schtasks=lambda: off, series=lambda: [])
+code = f"open({sys.argv[3]!r}, 'w').write('x')"
+out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, cwd=sys.argv[4], timeout=120)
+print(json.dumps({"rc": out.returncode, "err": out.stderr[-1500:]}), flush=True)
+'''
+
+
+def test_a_python_child_that_never_imports_studio_is_still_fenced(tmp_path):
+    """The rehearsal boot path rides PYTHONPATH: a bare `python -c` child arms before its code."""
+    box = tiny_sandbox(tmp_path)
+    planted = stand_in_roots(tmp_path)[0] / "grandchild.txt"
+    clean = {k: v for k, v in os.environ.items() if k not in ("VISURENA_LIBRARY", "PYTHONPATH")}
+    out = subprocess.run([sys.executable, "-c", GRANDCHILD, str(REPO), env_for(box)["VISURENA_LIBRARY"],
+                          str(planted), str(tmp_path)], capture_output=True, text=True, cwd=REPO, env=clean,
+                         timeout=240)
+    assert out.returncode == 0, out.stderr[-2000:]
+    child = json.loads(out.stdout.splitlines()[-1])
+    assert child["rc"] != 0 and "RehearsalTripwire" in child["err"], child
+    assert not planted.exists() and trips(box)[-1]["event"] == "open"

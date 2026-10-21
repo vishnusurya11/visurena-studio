@@ -85,3 +85,56 @@ def test_disarmed_the_clients_build_as_before(tmp_path):
     from claude_agent_sdk import ClaudeSDKClient
     fence.disarm()
     assert openai.OpenAI(api_key="sk-x") is not None and ClaudeSDKClient() is not None
+
+
+# ---- asyncio: the Windows proactor connects in C (_overlapped.ConnectEx), no audit event ----
+
+def test_an_asyncio_connect_off_the_fake_ports_trips(armed):
+    import asyncio
+    box, _ = armed
+
+    async def go():
+        await asyncio.open_connection("127.0.0.1", 9)
+    with pytest.raises(fence.RehearsalTripwire, match="127.0.0.1:9"):
+        asyncio.run(go())
+    assert trips(box)[-1]["event"] == "asyncio.connect"
+
+
+def test_an_asyncio_connect_to_a_fake_port_passes(armed):
+    import asyncio
+    box, port = armed
+
+    async def go():
+        _, writer = await asyncio.open_connection("127.0.0.1", port)
+        writer.close()
+        await writer.wait_closed()
+    asyncio.run(go())
+    assert trips(box) == []
+
+
+def test_an_asyncio_datagram_to_a_remote_host_trips(armed):
+    import asyncio
+
+    async def go():
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.setblocking(False)
+        try:
+            await asyncio.get_running_loop().sock_sendto(sock, b"x", ("203.0.113.7", 53))
+        finally:
+            sock.close()
+    with pytest.raises(fence.RehearsalTripwire, match="203.0.113.7"):
+        asyncio.run(go())
+
+
+def test_an_async_http_client_cannot_reach_a_real_port(armed):
+    import asyncio
+    import httpx
+    box, _ = armed
+
+    async def go():
+        async with httpx.AsyncClient() as client:
+            await client.get("http://127.0.0.1:9/", timeout=3)
+    with pytest.raises(BaseException) as caught:
+        asyncio.run(go())
+    assert "RehearsalTripwire" in repr(caught.value) or isinstance(caught.value, fence.RehearsalTripwire)
+    assert trips(box)[-1]["event"] == "asyncio.connect"

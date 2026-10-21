@@ -10,6 +10,14 @@ at <sandbox>/git, `uv run --no-sync python` from the repo, sys.executable); a so
 anywhere but loopback on a manifest fake port or this process's own listener; building an
 openai client; and building a ClaudeSDKClient without the rehearsal transport.
 
+What raises no audit event is wrapped instead, at its import: soundfile.SoundFile and
+cv2.imwrite (they open their path in C) and the Windows proactor's connect/sendto (ConnectEx,
+WSASendTo).  A path is compared without its \\\\?\\ prefix and through realpath (junctions).
+A Python child may start only if it will arm itself: no -I/-E/-S, and an env that keeps
+VISURENA_LIBRARY and studio/rehearsal/boot on PYTHONPATH.  A trip raised inside an asyncio
+callback (not a coroutine) is still refused and logged, but asyncio's exception handler
+swallows it: a rehearsal's verdict reads tripwire.jsonl, never only the exit code.
+
 RehearsalTripwire is a BaseException so the `except Exception` / `except OSError` a step uses
 to survive a flaky log write cannot swallow a trip.  An audit hook cannot be removed:
 `disarm()` leaves it inert (one attribute read per event), which only tests call."""
@@ -43,6 +51,8 @@ WATCHED = frozenset({"open", "sqlite3.connect", "subprocess.Popen", "socket.bind
                      *LAUNCH_EVENTS, *SOCKET_EVENTS})
 NAMED_TRIPS = ("gpu_ledger.py", "notify_bench.py")
 LOOPBACK = ("127.0.0.1", "::1")
+BOOT = Path(__file__).resolve().parent / "boot"
+"""The folder a rehearsal puts first on PYTHONPATH: its sitecustomize arms every Python child."""
 
 _ARMED: "Fence | None" = None
 _HOOKED = False
@@ -55,14 +65,34 @@ class RehearsalTripwire(BaseException):
     """A rehearsal reached outside its sandbox; the reach was refused before it happened."""
 
 
+EXTENDED = ("\\\\?\\unc\\", "\\\\?\\", "\\\\.\\")
+"""normcase'd Windows extended-length and device prefixes: `\\\\?\\D:\\x` opens D:\\x itself."""
+
+
+def plain(text: str) -> str:
+    """A normcase'd path without its extended-length or device prefix (UNC kept as \\\\host)."""
+    for prefix in EXTENDED:
+        if text.startswith(prefix):
+            return ("\\\\" if prefix.endswith("unc\\") else "") + text[len(prefix):]
+    return text
+
+
 def norm(path) -> str | None:
-    """normcase(abspath) of a path-like; None for a file descriptor or nothing."""
+    """normcase(abspath) of a path-like, its \\\\?\\ prefix dropped; None for a descriptor or nothing."""
     if path is None or isinstance(path, int):
         return None
     try:
-        return os.path.normcase(os.path.abspath(os.fsdecode(os.fspath(path))))
+        return os.path.normcase(os.path.abspath(plain(os.path.normcase(os.fsdecode(os.fspath(path))))))
     except (TypeError, ValueError):
         return None
+
+
+def resolved(text: str) -> str:
+    """The path with its symlinks and junctions followed (realpath, never strict); itself on error."""
+    try:
+        return os.path.normcase(os.path.realpath(text))
+    except (OSError, ValueError):
+        return text
 
 
 @dataclass(frozen=True)
@@ -89,11 +119,12 @@ def armed() -> Fence | None:
 
 
 def under(fence: Fence, path) -> str | None:
-    """The real root `path` lies in, or None."""
+    """The real root `path` lies in, as spelled or through a symlink/junction, or None."""
     p = norm(path)
     if p is None:
         return None
-    return next((r for r in fence.roots if p == r or p.startswith(r + os.sep)), None)
+    forms = dict.fromkeys((p, resolved(p)))
+    return next((r for f in forms for r in fence.roots if f == r or f.startswith(r + os.sep)), None)
 
 
 def write_refusal(fence: Fence, path, what: str) -> str | None:
@@ -126,7 +157,7 @@ def event_refusal(fence: Fence, event: str, args: tuple) -> str | None:
         path = sqlite_path(args[0])
         return write_refusal(fence, path, "sqlite3.connect") if path else None
     if event == "subprocess.Popen":
-        return launch_refusal(fence, args[0], args[1], args[2])
+        return launch_refusal(fence, args[0], args[1], args[2], args[3] if len(args) > 3 else None)
     return other_refusal(fence, event, args)
 
 
@@ -193,7 +224,46 @@ RULES: dict[str, Callable] = {"ffmpeg": ffmpeg_refusal, "ffprobe": ffprobe_refus
                               "uv": uv_refusal}
 
 
-def launch_refusal(fence: Fence, executable, args, cwd) -> str | None:
+def isolating_flag(options: list[str]) -> str | None:
+    """The first -I/-E/-S flag (alone or combined) before the script, -c or -m: each makes the
+    child skip PYTHONPATH or site, so the rehearsal boot would never run in it."""
+    skip = False
+    for word in options:
+        if skip or word.startswith("--"):
+            skip = False
+            continue
+        if not word.startswith("-") or word == "-":
+            return None
+        skip = word in ("-X", "-W")
+        for letter in word[1:]:
+            if letter in "IES":
+                return word
+            if letter in "cm":
+                return None
+            if letter in "XW":
+                break
+    return None
+
+
+def drops_rehearsal(env) -> bool:
+    """A child env (None: this process's, inherited) without this rehearsal's VISURENA_LIBRARY
+    or the boot path on PYTHONPATH: the child would not arm, so it may not start."""
+    upper = {os.fsdecode(k).upper(): os.fsdecode(v) for k, v in (os.environ if env is None else env).items()}
+    library = upper.get(settings.ENV.upper())
+    paths = [os.path.normcase(p) for p in upper.get("PYTHONPATH", "").split(os.pathsep)]
+    return not library or library != os.environ.get(settings.ENV) or os.path.normcase(str(BOOT)) not in paths
+
+
+def python_refusal(words: list[str], env) -> str | None:
+    """A Python child must arm its own fence at start (studio/rehearsal/boot via PYTHONPATH)."""
+    if flag := isolating_flag(words[1:]):
+        return f"an isolated python child ({flag}) would skip the rehearsal boot and run unfenced"
+    if drops_rehearsal(env):
+        return "a python child whose env lacks VISURENA_LIBRARY or the rehearsal boot path would run unfenced"
+    return None
+
+
+def launch_refusal(fence: Fence, executable, args, cwd, env=None) -> str | None:
     """Why this launch is refused in a rehearsal, or None (the allowlist of 2.6)."""
     words = argv_words(args)
     named = next((n for n in NAMED_TRIPS if any(n in w for w in words)), None)
@@ -201,9 +271,11 @@ def launch_refusal(fence: Fence, executable, args, cwd) -> str | None:
         return f"launch naming {named}: {' '.join(words)[:300]}"
     path, name = program(executable, words)
     if path and path == fence.executable:
-        return None
+        return python_refusal(words, env)
     rule = RULES.get(name)
-    return rule(fence, words, cwd) if rule else f"launch of {name} is not on the allowlist: {path}"
+    if rule is None:
+        return f"launch of {name} is not on the allowlist: {path}"
+    return rule(fence, words, cwd) or (python_refusal(words[3:], env) if name == "uv" else None)
 
 
 # ---- sockets -----------------------------------------------------------------
@@ -253,15 +325,20 @@ def hook(event: str, args: tuple) -> None:
         trip(fence, event, reason)
 
 
-def guarded(original: Callable, event: str, refuses: Callable[..., str | None]) -> Callable:
+def fenced(original: Callable, event: str, refuses: Callable[..., str | None]) -> Callable:
     """`original` that trips first while armed and `refuses(*args, **kwargs)` gives a reason."""
     @functools.wraps(original)
-    def call(self, *args, **kwargs):
+    def call(*args, **kwargs):
         fence = _ARMED
         if fence is not None and (reason := refuses(*args, **kwargs)):
             trip(fence, event, reason)
-        return original(self, *args, **kwargs)
+        return original(*args, **kwargs)
     return call
+
+
+def guarded(original: Callable, event: str, refuses: Callable[..., str | None]) -> Callable:
+    """A method's `fenced`: `refuses` sees the arguments after self."""
+    return fenced(original, event, lambda _self, *args, **kwargs: refuses(*args, **kwargs))
 
 
 def _without_transport(*args, **kwargs) -> str | None:
@@ -277,22 +354,110 @@ def _openai_refused(name: str) -> Callable[..., str]:
     return lambda *a, **k: f"openai.{name} built in a rehearsal"
 
 
+def _guard_openai(openai) -> None:
+    for cls in (openai.OpenAI, openai.AsyncOpenAI):
+        cls.__init__ = guarded(cls.__init__, "openai", _openai_refused(cls.__name__))
+
+
+def _guard_sdk(_sdk) -> None:
+    from claude_agent_sdk import ClaudeSDKClient
+    from claude_agent_sdk._internal.client import InternalClient
+    ClaudeSDKClient.__init__ = guarded(ClaudeSDKClient.__init__, "ClaudeSDKClient", _without_transport)
+    InternalClient.process_query = guarded(InternalClient.process_query, "claude_agent_sdk.query",
+                                           _query_without_transport)
+
+
+# ---- writes made in C: libsndfile and OpenCV open their own path, no `open` audit event ----
+
+def _soundfile_refusal(file=None, mode="r", *_, **kwargs) -> str | None:
+    mode = kwargs.get("mode", mode)
+    return write_refusal(_ARMED, file, f"soundfile mode {mode}") if writes(mode, None) else None
+
+
+def _imwrite_refusal(filename=None, *_, **__) -> str | None:
+    return write_refusal(_ARMED, filename, "cv2.imwrite")
+
+
+def _guard_soundfile(soundfile) -> None:
+    """SoundFile.__init__ is the one door: soundfile.write opens through it."""
+    soundfile.SoundFile.__init__ = guarded(soundfile.SoundFile.__init__, "soundfile", _soundfile_refusal)
+
+
+def _guard_cv2(cv2) -> None:
+    cv2.imwrite = fenced(cv2.imwrite, "cv2.imwrite", _imwrite_refusal)
+
+
+NATIVE_GUARDS: dict[str, tuple[str, Callable]] = {"soundfile.SoundFile": ("soundfile", _guard_soundfile),
+                                                  "cv2.imwrite": ("cv2", _guard_cv2)}
+"""Native writer call -> (module, its patch).  tests/test_proof_fence_native_writes.py fails when
+studio/ or scripts/ call a native writer missing here (torch.save, cv2.VideoWriter, ...)."""
+
+
+# ---- asyncio on Windows: the proactor connects through _overlapped.ConnectEx, no audit event ----
+
+def _proactor_connect_refusal(_conn=None, address=None, *_, **__) -> str | None:
+    return connect_refusal(_ARMED, address)
+
+
+def _proactor_sendto_refusal(_conn=None, _buf=None, _flags=0, addr=None) -> str | None:
+    return connect_refusal(_ARMED, addr) if addr is not None else None
+
+
+def _guard_proactor(windows_events) -> None:
+    proactor = windows_events.IocpProactor
+    proactor.connect = guarded(proactor.connect, "asyncio.connect", _proactor_connect_refusal)
+    proactor.sendto = guarded(proactor.sendto, "asyncio.sendto", _proactor_sendto_refusal)
+
+
+GUARDS: tuple[tuple[str, Callable], ...] = (("openai", _guard_openai), ("claude_agent_sdk", _guard_sdk),
+                                            ("asyncio.windows_events", _guard_proactor),
+                                            *NATIVE_GUARDS.values())
+
+
+# ---- patch a module when it is imported, never import it to patch it ----------
+
+_PENDING: dict[str, list[Callable]] = {}
+
+
+class PatchOnImport:
+    """A meta-path finder: a pending module gets its patches right after its own code runs."""
+
+    @classmethod
+    def find_spec(cls, name, path=None, target=None):
+        if name not in _PENDING:
+            return None
+        spec = next((s for f in sys.meta_path if f is not cls and hasattr(f, "find_spec")
+                     and (s := f.find_spec(name, path, target)) is not None), None)
+        loader = getattr(spec, "loader", None)
+        if loader is not None and not isinstance(loader, type) and hasattr(loader, "exec_module"):
+            loader.exec_module = _then_patch(loader.exec_module, name)
+        return spec
+
+
+def _then_patch(run: Callable, name: str) -> Callable:
+    def exec_module(module) -> None:
+        run(module)
+        for patch in _PENDING.pop(name, []):
+            patch(module)
+    return exec_module
+
+
+def patch_on_import(name: str, patch: Callable) -> None:
+    """patch(module) now if `name` is imported, else the moment it is (no import cost here)."""
+    module = sys.modules.get(name)
+    if module is not None:
+        patch(module)
+        return
+    _PENDING.setdefault(name, []).append(patch)
+    if PatchOnImport not in sys.meta_path:
+        sys.meta_path.insert(0, PatchOnImport)
+
+
 def guard_clients() -> None:
-    """openai's clients refuse; the SDK client and query() need the rehearsal transport."""
-    try:
-        import openai
-        for cls in (openai.OpenAI, openai.AsyncOpenAI):
-            cls.__init__ = guarded(cls.__init__, "openai", _openai_refused(cls.__name__))
-    except ImportError:
-        pass
-    try:
-        from claude_agent_sdk import ClaudeSDKClient
-        from claude_agent_sdk._internal.client import InternalClient
-        ClaudeSDKClient.__init__ = guarded(ClaudeSDKClient.__init__, "ClaudeSDKClient", _without_transport)
-        InternalClient.process_query = guarded(InternalClient.process_query, "claude_agent_sdk.query",
-                                               _query_without_transport)
-    except ImportError:
-        pass
+    """openai's clients refuse; the SDK client and query() need the rehearsal transport; native
+    writers and the Windows proactor's connect are fenced.  Each patch lands at its import."""
+    for name, patch in GUARDS:
+        patch_on_import(name, patch)
 
 
 def install(fence: Fence) -> None:

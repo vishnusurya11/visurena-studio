@@ -8,6 +8,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -87,6 +88,8 @@ def armed_calls(monkeypatch) -> list:
     calls: list = []
     monkeypatch.setattr(fence, "install", lambda *a, **k: calls.append("fence"))
     monkeypatch.setattr(activate, "_INSTALLED", False)
+    monkeypatch.setattr(activate, "arm_children", lambda: None)
+    monkeypatch.setattr(activate, "mark_cleared", lambda box: None)
     return calls
 
 
@@ -130,17 +133,66 @@ def test_studio_init_carries_the_one_install_line():
         "from studio.rehearsal import activate as _activate; _activate.install()  # no-op without a manifest"]
 
 
-def test_the_scheduler_query_is_read_only_and_says_nothing_when_it_cannot(monkeypatch):
-    seen = []
+def fake_run(monkeypatch, returncode: int, stdout: str = "", stderr: str = "") -> list:
+    seen: list = []
 
     def run(argv, **kw):
         seen.append(argv)
-        return subprocess.CompletedProcess(argv, 0 if len(seen) == 1 else 1, SCHTASKS_READY, "")
+        return subprocess.CompletedProcess(argv, returncode, stdout, stderr)
     monkeypatch.setattr(activate.subprocess, "run", run)
-    assert activate.schtasks_query() == SCHTASKS_READY and activate.schtasks_query() == ""
-    assert seen[0] == ["schtasks", "/query", "/tn", "visurena-autopilot", "/fo", "csv"]
-    monkeypatch.setattr(activate.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(OSError("no schtasks")))
+    return seen
+
+
+def test_the_scheduler_query_is_read_only(monkeypatch):
+    seen = fake_run(monkeypatch, 0, SCHTASKS_READY)
+    assert activate.schtasks_query() == SCHTASKS_READY
+    assert seen == [["schtasks", "/query", "/tn", "visurena-autopilot", "/fo", "csv"]]
+
+
+def test_a_missing_task_is_a_definite_no(monkeypatch):
+    fake_run(monkeypatch, 1, stderr="ERROR: The system cannot find the file specified.\n")
     assert activate.schtasks_query() == ""
+
+
+@pytest.mark.parametrize("failure", ["exit", "oserror", "timeout"])
+def test_a_scheduler_that_cannot_say_is_none(monkeypatch, failure):
+    if failure == "exit":
+        fake_run(monkeypatch, 1, stderr="ERROR: Access is denied.\n")
+    else:
+        err = OSError("no schtasks") if failure == "oserror" else subprocess.TimeoutExpired("schtasks", 30)
+        monkeypatch.setattr(activate.subprocess, "run", lambda *a, **k: (_ for _ in ()).throw(err))
+    assert activate.schtasks_query() is None
+
+
+def test_cannot_say_refuses_the_rehearsal(tmp_path, monkeypatch):
+    box, calls = tiny_sandbox(tmp_path), armed_calls(monkeypatch)
+    manifest = settings.rehearsal(env=env_for(box))
+    with pytest.raises(activate.RehearsalRefused, match="cannot read"):
+        activate.install(manifest, env=env_for(box), schtasks=lambda: None, series=lambda: [])
+    assert calls == []
+
+
+def test_a_child_inherits_its_parents_clearance_and_skips_the_query(tmp_path, monkeypatch):
+    box = tiny_sandbox(tmp_path)
+    monkeypatch.setenv(activate.CLEARED, "")
+    activate.mark_cleared(box)
+    env = {**env_for(box), activate.CLEARED: os.environ[activate.CLEARED]}
+    assert activate.cleared(env, box) and not activate.cleared(env, tmp_path / "other")
+    stale = {**env, activate.CLEARED: f"{time.time() - activate.CLEARANCE_S - 5:.0f}|{box}"}
+    assert not activate.cleared(stale, box) and not activate.cleared({**env, activate.CLEARED: "junk"}, box)
+    calls = armed_calls(monkeypatch)
+    monkeypatch.setattr(activate, "point_tempdir", lambda box: None)
+    activate.install(settings.rehearsal(env=env), env=env, schtasks=lambda: SCHTASKS_READY, series=lambda: [])
+    assert calls == ["fence"]
+
+
+def test_arm_children_puts_the_boot_path_first(tmp_path, monkeypatch):
+    monkeypatch.setenv("PYTHONPATH", "C:/elsewhere")
+    activate.arm_children()
+    assert os.environ["PYTHONPATH"].split(os.pathsep) == [str(fence.BOOT), "C:/elsewhere"]
+    activate.arm_children()
+    assert os.environ["PYTHONPATH"].split(os.pathsep).count(str(fence.BOOT)) == 1
+    assert (fence.BOOT / "sitecustomize.py").is_file()
 
 
 def test_point_tempdir_sends_temp_files_into_the_sandbox(tmp_path, monkeypatch):

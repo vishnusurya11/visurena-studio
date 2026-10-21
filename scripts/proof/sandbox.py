@@ -19,17 +19,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from studio import settings  # noqa: E402
 from studio.rehearsal import guard, sandbox  # noqa: E402
 
-REAL_BOOK = ROOT / "library" / f"{sandbox.REAL_CODEX}_{sandbox.SLUG}"
-REAL_DB = ROOT / "db" / "visurena_studio.db"
+REAL_BOOK = settings.REAL_LIBRARY / f"{sandbox.REAL_CODEX}_{sandbox.SLUG}"
+REAL_DB = settings.REPO / settings.db_path(env={})
 
 
 def build(args: argparse.Namespace) -> int:
     box = sandbox.build(args.run_id, source_book=REAL_BOOK, real_db=REAL_DB, episode=args.episode,
                         manifest={"fakes": not args.no_fakes})
     print(box)
-    print(f"rehearse with: VISURENA_LIBRARY={box / 'library'}")
+    print(f"rehearse with: {settings.ENV}={box / settings.LIBRARY_DIR}")
     return 0
 
 

@@ -77,3 +77,18 @@ def test_the_message_names_each_touched_path(repo):
     (repo / "library" / "vlm_calls.jsonl").write_text("xy", encoding="utf-8")
     assert guard.touched(before, guard.snapshot(paths(repo))) == [
         f"REAL LIBRARY TOUCHED: {repo / 'library' / 'vlm_calls.jsonl'}"]
+
+
+@pytest.mark.parametrize("plant", ["deep_line", "other_book_episode", "other_book_top"])
+def test_a_native_write_two_levels_down_or_in_another_book_is_seen(repo, plant):
+    """The backstop for writes the fence cannot see (a C library opening its own path)."""
+    lines = repo / "library" / JEKYLL / "episodes" / "ep01" / "audio" / "lines"
+    other = repo / "library" / "20260827135508_the-war-of-the-worlds"
+    for d in (lines, other / "episodes" / "ep01"):
+        d.mkdir(parents=True)
+    before = guard.snapshot(paths(repo))
+    target = {"deep_line": lines / "x.wav", "other_book_episode": other / "episodes" / "ep09",
+              "other_book_top": other / "plan.json"}[plant]
+    target.write_text("x", encoding="utf-8") if target.suffix else target.mkdir()
+    with pytest.raises(guard.RealLibraryTouched, match="REAL LIBRARY TOUCHED: "):
+        guard.check(before, paths(repo))

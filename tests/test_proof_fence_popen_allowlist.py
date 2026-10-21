@@ -10,6 +10,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -30,11 +31,27 @@ def guard(tmp_path):
     fence.disarm()
 
 
+@pytest.fixture
+def child_env(monkeypatch):
+    """This process's env as a rehearsal leaves it: the variable set, the boot first on PYTHONPATH."""
+    monkeypatch.setenv("VISURENA_LIBRARY", "C:/sb/library")
+    monkeypatch.setenv("PYTHONPATH", str(fence.BOOT))
+
+
 def refusal(armed, argv, cwd=None, executable=None):
     return fence.launch_refusal(armed, executable, argv, cwd)
 
 
-def test_the_allowlist_passes_its_four_shapes(guard):
+def test_a_python_child_inheriting_an_env_that_cannot_arm_it_trips(guard, monkeypatch):
+    monkeypatch.delenv("VISURENA_LIBRARY", raising=False)
+    monkeypatch.setenv("PYTHONPATH", str(fence.BOOT))
+    assert "unfenced" in refusal(guard[0], [sys.executable, "-c", "pass"])
+    monkeypatch.setenv("VISURENA_LIBRARY", "C:/sb/library")
+    monkeypatch.setenv("PYTHONPATH", "C:/elsewhere")
+    assert "unfenced" in refusal(guard[0], ["uv", "run", "--no-sync", "python", "w.py"], cwd=REPO)
+
+
+def test_the_allowlist_passes_its_four_shapes(guard, child_env):
     armed, lib, box = guard
     assert refusal(armed, ["ffmpeg", "-y", "-i", str(lib / "in.mp4"), str(box / "out.mp4")]) is None
     assert refusal(armed, ["ffprobe", "-v", "error", str(lib / "in.mp4")]) is None
@@ -96,11 +113,42 @@ def test_the_autopilot_gpu_ledger_launch_trips(guard, monkeypatch):
     assert "gpu_ledger.py" in trips(box)[-1]["reason"]
 
 
-def test_an_allowed_launch_runs_and_os_system_trips(guard):
+def test_an_allowed_python_child_arms_itself_and_os_system_trips(guard, tmp_path, monkeypatch):
+    from studio.rehearsal import activate
+    from tests.proof_sandbox_fixture import tiny_sandbox
     armed, _, box = guard
+    sb = tiny_sandbox(tmp_path / "sb")
+    monkeypatch.setenv("VISURENA_LIBRARY", str(sb / "library"))
+    monkeypatch.setenv("PYTHONPATH", str(fence.BOOT))
+    monkeypatch.setenv(activate.CLEARED, f"{int(time.time())}|{sb}")     # the parent's verdict
     fence.install(armed)
-    out = subprocess.run([sys.executable, "-c", "print('ok')"], capture_output=True, text=True, timeout=60)
-    assert out.stdout.strip() == "ok"
+    probe = "from studio.rehearsal import fence; print(fence.armed() is not None)"
+    out = subprocess.run([sys.executable, "-c", probe], capture_output=True, text=True, timeout=120, cwd=tmp_path)
+    assert out.stdout.strip() == "True", out.stderr[-1500:]
     with pytest.raises(fence.RehearsalTripwire):
         os.system("echo hi")
     assert [t["event"] for t in trips(box)] == ["os.system"]
+
+
+@pytest.mark.parametrize("flags", [["-I"], ["-E"], ["-S"], ["-X", "utf8", "-I"], ["-sE"]])
+def test_an_isolated_python_child_would_skip_the_boot_and_trips(guard, flags):
+    armed = guard[0]
+    assert "isolated" in refusal(armed, [sys.executable, *flags, "-c", "pass"])
+    assert "isolated" in refusal(armed, ["uv", "run", "--no-sync", "python", *flags, "w.py"], cwd=REPO)
+
+
+def test_python_flags_that_keep_the_boot_pass(guard, child_env):
+    armed = guard[0]
+    assert refusal(armed, [sys.executable, "-u", "-X", "utf8", "-c", "pass"]) is None
+    assert refusal(armed, [sys.executable, "-m", "pytest", "-I"]) is None     # -I after -m is pytest's
+
+
+def test_a_python_child_given_an_env_without_the_rehearsal_trips(guard, monkeypatch):
+    armed = guard[0]
+    boot = str(fence.BOOT)
+    monkeypatch.setenv("VISURENA_LIBRARY", "C:/sb/library")
+    keeps = {"VISURENA_LIBRARY": "C:/sb/library", "PYTHONPATH": boot}
+    assert fence.launch_refusal(armed, None, [sys.executable, "-c", "pass"], None, keeps) is None
+    for env in ({"PYTHONPATH": boot}, {"VISURENA_LIBRARY": "C:/sb/library"}, {}):
+        assert "env" in fence.launch_refusal(armed, None, [sys.executable, "-c", "pass"], None, env)
+    assert fence.launch_refusal(armed, None, ["ffmpeg", "-version"], None, {}) is None

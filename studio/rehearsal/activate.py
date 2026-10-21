@@ -1,9 +1,12 @@
 """Arm a rehearsal process (2026-10-21_ep02_proof 1.1, 2.6): refuse while the real autopilot
-could run, point temp files into the sandbox, install the fence, then the fakes and trace.
+could run, point temp files into the sandbox, arm every Python child, install the fence, then
+the fakes and trace.
 
-`install()` is called by studio/__init__.py in EVERY Python process; without a manifest it
-returns False at once.  The scheduler query is the one read-only `schtasks` call a rehearsal
-makes, and it is made BEFORE the fence's hook exists (the fence refuses schtasks after)."""
+`install()` is called by studio/__init__.py in EVERY Python process (and by the rehearsal boot's
+sitecustomize in every Python child); without a manifest it returns False at once.  The
+scheduler query is the one read-only `schtasks` call per rehearsal: the first process makes it
+BEFORE its fence exists (the fence refuses schtasks after), and its children inherit the
+verdict through VISURENA_REHEARSAL_CLEARED for CLEARANCE_S.  A query that cannot say refuses."""
 from __future__ import annotations
 
 import csv
@@ -13,7 +16,9 @@ import io
 import json
 import os
 import subprocess
+import sys
 import tempfile
+import time
 from pathlib import Path
 from typing import Callable, Mapping
 
@@ -21,6 +26,11 @@ from studio import settings
 from studio.rehearsal import fence
 
 TASK = "visurena-autopilot"
+NOT_FOUND = "cannot find the file specified"
+"""schtasks' English stderr for a task that does not exist (any other answer cannot say)."""
+CLEARED = "VISURENA_REHEARSAL_CLEARED"
+CLEARANCE_S = 1800
+"""How long a parent's scheduler verdict stands for its children: `<epoch>|<sandbox>`."""
 _INSTALLED = False
 
 
@@ -28,14 +38,20 @@ class RehearsalRefused(RuntimeError):
     """A rehearsal may not start: the real autopilot could run, or the fakes are missing."""
 
 
-def schtasks_query() -> str:
-    """The scheduler's CSV for the real task; '' when it cannot say (no task, not Windows)."""
+def schtasks_query() -> str | None:
+    """The scheduler's CSV for the real task; '' when there surely is none (schtasks says the task
+    does not exist, or there is no Task Scheduler: not Windows); None when it cannot say (a failed,
+    timed-out or other-language answer), which refuses the rehearsal: fail closed."""
+    if sys.platform != "win32":
+        return ""
     try:
         out = subprocess.run(["schtasks", "/query", "/tn", TASK, "/fo", "csv"],
                              capture_output=True, text=True, timeout=30, check=False)
     except (OSError, subprocess.SubprocessError):
-        return ""
-    return out.stdout if out.returncode == 0 else ""
+        return None
+    if out.returncode == 0:
+        return out.stdout
+    return "" if NOT_FOUND in (out.stderr or "").lower() else None
 
 
 def task_enabled(text: str) -> bool:
@@ -58,12 +74,49 @@ def _paused(path: Path) -> bool:
         return False
 
 
-def refuse_live_autopilot(schtasks: Callable[[], str], series: Callable[[], list]) -> None:
-    if task_enabled(schtasks()):
+def refuse_live_autopilot(schtasks: Callable[[], str | None], series: Callable[[], list]) -> None:
+    answer = schtasks()
+    if answer is None:
+        raise RehearsalRefused(f"cannot read the Task Scheduler entry {TASK} (the query failed or timed out); "
+                               f"a rehearsal starts only when the scheduler says it is disabled or absent")
+    if task_enabled(answer):
         raise RehearsalRefused(f"the real Task Scheduler entry {TASK} is enabled; disable it before a rehearsal "
                                f"(schtasks /change /tn {TASK} /disable)")
     if held := series():
         raise RehearsalRefused(f"a real series is unpaused: {', '.join(map(str, held))}")
+
+
+def cleared(env: Mapping[str, str], box: Path) -> bool:
+    """A parent rehearsal process checked the scheduler and the series for THIS sandbox under
+    CLEARANCE_S ago: its children inherit the verdict instead of each querying schtasks again."""
+    stamp, _, where = (env.get(CLEARED) or "").partition("|")
+    try:
+        age = time.time() - int(stamp)
+    except ValueError:
+        return False
+    same = bool(where) and os.path.normcase(os.path.abspath(where)) == os.path.normcase(os.path.abspath(box))
+    return same and 0 <= age < CLEARANCE_S
+
+
+def mark_cleared(box: Path) -> None:
+    os.environ[CLEARED] = f"{int(time.time())}|{box}"
+
+
+def clear_or_refuse(env: Mapping[str, str], box: Path, schtasks: Callable, series: Callable) -> None:
+    """The one read-only scheduler query per rehearsal (children inherit it), or a refusal."""
+    if cleared(env, box):
+        return
+    refuse_live_autopilot(schtasks, series)
+    mark_cleared(box)
+
+
+def arm_children() -> None:
+    """Put the rehearsal boot first on PYTHONPATH: every Python child this process launches arms
+    its own fence at start, even one that never imports studio (a bare `python -c`)."""
+    boot = str(fence.BOOT)
+    rest = [p for p in os.environ.get("PYTHONPATH", "").split(os.pathsep)
+            if p and os.path.normcase(p) != os.path.normcase(boot)]
+    os.environ["PYTHONPATH"] = os.pathsep.join([boot, *rest])
 
 
 def point_tempdir(box: Path) -> None:
@@ -100,9 +153,10 @@ def install(manifest: Mapping | None = None, *, env: Mapping[str, str] = os.envi
     manifest = settings.rehearsal(env) if manifest is None else manifest
     if manifest is None or _INSTALLED:
         return False
-    libraries = settings.real_libraries(env)
-    refuse_live_autopilot(schtasks, series or (lambda: [p for lib in libraries for p in unpaused_series(lib)]))
-    point_tempdir(settings.sandbox(env))
+    libraries, box = settings.real_libraries(env), settings.sandbox(env)
+    clear_or_refuse(env, box, schtasks, series or (lambda: [p for lib in libraries for p in unpaused_series(lib)]))
+    point_tempdir(box)
+    arm_children()
     fence.install(fence.Fence.from_settings(env))
     load_fakes(manifest)
     load_trace(manifest)

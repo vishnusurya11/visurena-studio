@@ -10,7 +10,7 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 LITERAL = re.compile(r"""/\s*["']library["']|Path\(\s*["']library["']\s*\)""")
-SCANNED = ("studio", "scripts/episode", "scripts/publish")
+SCANNED = ("studio", "scripts/episode", "scripts/publish", "scripts/proof")
 ALLOWED = {
     "studio/settings.py": "the one place a library root is chosen",
     "studio/brain.py": "_under_library DENIES a brain tool write under the repo's real library; it never "
