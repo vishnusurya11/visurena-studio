@@ -81,13 +81,37 @@ def test_a_changed_reader_or_prompt_reads_everything_again(tmp_path):
         assert c.reads == 10
 
 
-def test_a_changed_plan_row_reads_that_shot_again(tmp_path):
+def test_a_changed_plan_row_reads_nothing_again_the_verdict_is_recomputed(tmp_path):
+    """A31 (face debate 2026-10-21, LEDGER_round4 check 4): the cache holds `said` and `faces`; the
+    verdict is recomputed from the reads and the CURRENT plan on every run, and the prompt is a module
+    constant hashed into prompt_sha.  So a plan-row edit (iter2: one take changed, 17 min re-read)
+    cannot stale a read, and the key no longer carries the row."""
     placed, plan = home_with_two_takes(tmp_path)
     measure(tmp_path, placed, plan, Counter(), make_cache(tmp_path))
     plan["shots"][0]["frame"] = "a new framing"
     c = Counter()
     measure(tmp_path, placed, plan, c, make_cache(tmp_path))
-    assert c.reads == 5
+    assert c.reads == 0
+
+
+def test_the_key_is_the_takes_bytes_and_its_frame_not_the_plan_row(tmp_path):
+    placed, plan = home_with_two_takes(tmp_path)
+    key = make_cache(tmp_path).key(placed, plan, 7.5)
+    edited = {"shots": [plan["shots"][0], dict(plan["shots"][1], frame="new words", at_rest="moved")]}   # shot 2 holds 7.5 s
+    assert make_cache(tmp_path).key(placed, edited, 7.5) == key, "a plan-row edit never changes the key"
+    (tmp_path / "takes" / "r2v" / "T02.mp4").write_bytes(b"take 2, pasted")
+    assert make_cache(tmp_path).key(placed, plan, 7.5) != key, "a paste (new take bytes) changes it"
+
+
+def test_a_take_that_starts_later_in_a_longer_master_keeps_its_keys(tmp_path):
+    """The frame is counted from the take's own start: the same take frame a second later in the
+    master (shot 1 grew) is the same read."""
+    placed, plan = home_with_two_takes(tmp_path)
+    key = make_cache(tmp_path).key(placed, plan, 7.5)
+    shifted = {"duration_s": 11.0, "shots": [
+        {"index": 1, "t_start": 0.0, "t_end": 6.0, "seconds": 6.0},
+        {"index": 2, "t_start": 6.0, "t_end": 11.0, "seconds": 5.0}]}
+    assert make_cache(tmp_path).key(shifted, plan, 8.5) == key
 
 
 def test_the_eye_resumes_after_an_engine_crash(tmp_path):

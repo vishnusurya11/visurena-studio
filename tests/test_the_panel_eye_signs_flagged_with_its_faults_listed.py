@@ -84,3 +84,14 @@ def test_the_judge_names_itself_and_counts_its_reads(tmp_path):
     verdict = panel_eye.judge(board.parent, plan, **tools())
     assert verdict.judge == "panel_eye" and verdict.version == "1"
     assert verdict.signer == "judge:panel_eye@1" and verdict.reads == 1 and verdict.confidence == 1.0
+
+
+def test_the_signed_verdict_keeps_the_eyes_books(tmp_path):
+    """A27 (face debate 2026-10-21): 45.9 min of panel eye over 4 ep01 runs with no record of how many
+    reads were cache hits; the books (reads, cache_hits, seconds per reader, unread) ride into the
+    signed eye_<sha8>.json beside the faults."""
+    board, plan = board_of(tmp_path, [])
+    clear(Ctx(tmp_path), board, plan)
+    doc = json.loads(next(board.glob("eye_*.json")).read_text(encoding="utf-8"))
+    assert doc["books"]["reads"] == 1 and doc["books"]["cache_hits"] == 0
+    assert set(doc["books"]["seconds"]) >= {"size", "faces"}

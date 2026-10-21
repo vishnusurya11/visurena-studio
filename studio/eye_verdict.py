@@ -67,10 +67,12 @@ def require(folder: Path, paths: list[Path], gate: str, ask: str, home: Path | N
 
 
 def sign(folder: Path, paths: list[Path], verdict: str, note: str, *,
-         signed_by: str = jv.OWNER, faults: list[dict] | None = None, terminal: str = "") -> Path:
+         signed_by: str = jv.OWNER, faults: list[dict] | None = None, terminal: str = "",
+         books: dict | None = None) -> Path:
     """Write the verdict for these pictures.  A verdict is pass, flagged or
     fault, and it carries a note: a signature with nothing said is the
-    six-frame glance.  A judge's hand adds who signed, the faults, the rung."""
+    six-frame glance.  A judge's hand adds who signed, the faults, the rung, and
+    its books (reads, cache hits, seconds per reader: A27, face debate 2026-10-21)."""
     if verdict not in VERDICTS:
         raise SystemExit(f"a verdict is one of {VERDICTS}, not {verdict!r}")
     if not note.strip():
@@ -79,7 +81,7 @@ def sign(folder: Path, paths: list[Path], verdict: str, note: str, *,
     doc = {"sha8": sha8, "verdict": verdict, "note": note.strip(),
            "files": [Path(p).name for p in sorted(Path(p) for p in paths)],
            "signed_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-           **jv.signature(signed_by, faults, terminal=terminal)}
+           **jv.signature(signed_by, faults, terminal=terminal, **({"books": books} if books else {}))}
     target = path(folder, sha8)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
@@ -89,4 +91,5 @@ def sign(folder: Path, paths: list[Path], verdict: str, note: str, *,
 def sign_verdict(folder: Path, paths: list[Path], v: jv.Verdict) -> Path:
     """The judge's entry: a pass, or a flag at a terminal rung; never a fault."""
     return sign(folder, paths, jv.word(v), v.summary(), signed_by=v.signer,
-                faults=[f.model_dump() for f in v.faults], terminal=v.terminal)
+                faults=[f.model_dump() for f in v.faults], terminal=v.terminal,
+                books=getattr(v, "evidence", None) or None)

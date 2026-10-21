@@ -438,8 +438,11 @@ def last_vs_panel(home: Path, reads: dict[int, list[Read]], sigs: dict[float, np
 
 
 EYE_READS = Path("review") / "work" / "eye_reads.json"
-"""One entry per (take sha8, local frame, slow, plan row, reader model, prompt): the reader's
-answer and the faces found, so a recut that changed one take re-reads only that take."""
+"""One entry per (take sha8, local frame, slow, reader model, prompt): the reader's answer and the
+faces found, so a recut that changed one take re-reads only that take.  The plan row is NOT in the
+key (face debate 2026-10-21, A31): the entry holds `said` and `faces` only and `verdict_of` recomputes
+every field from the reads and the CURRENT plan, so a row edit cannot stale a read; keyed on it,
+ep01 iter2 re-read 17 min of unchanged takes."""
 TAKE_FPS = 24
 
 
@@ -492,17 +495,18 @@ class EyeCache:
         return cut, kept, dead or {}
 
     def key(self, placed: dict, plan: dict, at: float) -> str | None:
-        """The cache key of the frame at `at`, or None in the tail / outside any take."""
+        """The cache key of the frame at `at`, or None in the tail / outside any take: the take's
+        bytes, the frame counted from the take's own start, its dead-cut seconds, the reader and the
+        prompt.  `plan` is accepted for the callers' sake and read for nothing (A31)."""
         cut, records, dead = self.load_cut(placed)
         shot = next((s for s in cut["shots"] if s["t_start"] <= at < s["t_start"] + s["seconds"]), None)
         rec = next((r for r in records if shot and shot["index"] in (r.get("shots") or [r["index"]])), None)
         if rec is None:
             return None
         first = next(s for s in cut["shots"] if s["index"] == (rec.get("shots") or [rec["index"]])[0])
-        row = next((r for r in plan.get("shots", []) if int(r.get("index", -1)) == shot["index"]), {})
         slow = (dead.get("seconds") or {}).get(str(rec["index"]), (dead.get("seconds") or {}).get(rec["index"], ""))
         return sha8_text(self.take_sha8(rec["index"]), round((at - first["t_start"]) * TAKE_FPS), slow,
-                         json.dumps(row, sort_keys=True), self.reader_id, self.prompt_sha)
+                         self.reader_id, self.prompt_sha)
 
     def get(self, key: str | None) -> dict | None:
         return self.rows.get(key) if key else None
