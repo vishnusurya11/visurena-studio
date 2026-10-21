@@ -1,0 +1,10 @@
+WARN 20260827135504 episode/ep01: the desk says escalated on refs/04; running on the owner's word -- the disk is the truth of a step
+=== EPISODE start | 20260827135504 episode/ep01 | run 20260827135504__episode__20261021003947 ===
+--- step 11 (qc) | 20260827135504 episode/ep01 ---
+[... lines omitted in the fixture ...]
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\studio\comfy.py", line 531, in run_text
+    record = wait_record(submit(keep_loaded(prompt) if KEEP_LOADED else prompt),
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\KingdomOfViSuReNa\alpha\visurena_studio\studio\comfy.py", line 400, in wait_record
+    raise StillRunning(prompt_id, timeout)
+studio.comfy.StillRunning: a2d9e4b0-2973-4e97-8964-dacabb717a4b still running after 600.0s

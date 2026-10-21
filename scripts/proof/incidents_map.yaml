@@ -1,0 +1,139 @@
+# Every recorded incident class -> the rehearsal scenario that reproduces it (DESIGN 2026-10-21_ep02_proof 4.5).
+#
+# Read by studio/rehearsal/incidents.py.  Ordered: the FIRST rule whose `match` (a Python regex,
+# searched in the incident's text) hits names the class.  A text no rule matches becomes a class
+# named from its own words and is UNCOVERED.  `scenario` is a DESIGN 3.2 id or UNCOVERED; a rule
+# says UNCOVERED when the class is known but no scenario injects it, and NOT_A_FAULT for a stop
+# that is no fault (the owner's own order): counted apart, outside recorded / mapped / uncovered.  A mapped class counts as
+# covered-and-handled only once its scenario PASSES (P5); this file only says who reproduces it.
+#
+# An incident's text: a drive log's  "<autopilot.classify reason>\n<last line>",
+# an event's "<event> <reason|error|verdict|why>", a parked row's "parked <reason>",
+# the drive ledger's "drive_died ..." / "drive_silent ...", and "torn_record <file>".
+rules:
+  - id: owner_order
+    match: '^parked owner: '
+    scenario: NOT_A_FAULT
+    why: the owner's own order parked the episode; counted apart, never a class to reproduce
+  - id: code_moved_hold
+    match: 'commit_hold|code moved mid-episode'
+    scenario: F7
+    why: a commit landed mid-run; F7 / F7b
+  - id: drive_died
+    match: '^drive_died'
+    scenario: F2
+    why: a start with no end before the next start; the drive tree died mid-run (F2 kills it, F4 with the supervisor)
+  - id: log_cut_off
+    match: '^log_cut_off'
+    scenario: F2
+    why: a drive log that ends mid-run with no EPISODE terminal and no traceback; the tree was killed
+  - id: drive_silent
+    match: '^drive_silent'
+    scenario: F9
+    why: the drive log went quiet past drive.SILENCE_S; F9 hangs the engine at a take submit
+  - id: supervisor_died
+    match: 'supervisor_died_at'
+    scenario: F4
+    why: the supervisor's heartbeat stopped; F4 kills the tree AND the supervisor
+  - id: torn_record
+    match: '^torn_record|JSONDecodeError'
+    scenario: F18
+    why: a JSON/JSONL record that does not parse; F18 truncates each record the resume reads
+  - id: ffmpeg_bad_take
+    match: 'CalledProcessError.*ffmpeg'
+    scenario: F13
+    why: ep01 drive_run02.log, ffmpeg died reading takes/r2v/T00.mp4; F13 serves a corrupt take
+  - id: book_json_precondition
+    match: 'source/book\.json does not say'
+    scenario: F14
+    why: ep01 drive_run08.log, step 13 died on a book.json without series/display_title/episodes
+  - id: cast_unbound
+    match: 'cast_unbound|CAST BOUND|not bound|no sheet for'
+    scenario: F14
+    why: a cast member with no base sheet; F14 plants the ch2 sheet gaps
+  - id: no_cast_voice
+    match: 'has no cast voice|NotCast|has no voice cast'
+    scenario: F14
+    why: a speaker with no cast voice; F14 plants the ch2 voice gaps
+  - id: engine_hung
+    match: 'StillRunning|engine_hung|queue_busy|queue stayed busy'
+    scenario: F9
+    why: a job the engine never finished; F9 hangs a submit
+  - id: engine_transient
+    match: 'engine_transient|EngineLost|ConnectionError|RemoteDisconnected|vanished: the engine'
+    scenario: F1
+    why: the engine went away and came back; F1 crashes it at a take submit
+  - id: engine_down
+    match: '^engine_down|^engine_restart|^engine_recycled'
+    scenario: F1b
+    why: the supervisor saw the engine down and restarted it; F1b never brings it back
+  - id: oauth_expired
+    match: 'youtube_token_expired|RefreshError|invalid_grant'
+    scenario: F6
+    why: the YouTube refresh token died (weekly in Testing); F6 raises the recorded invalid_grant
+  - id: plan_deferred
+    match: 'plan_deferred|DEFERRED PLAN'
+    scenario: F5
+    why: the plan gate refused and the plan was deferred; F5 feeds a refusing plan
+  - id: held_publish
+    match: 'escalated: G-STANDING|held_publish|OWNER G-STANDING'
+    scenario: S0a
+    why: no standing publish approval; S0a must end HELD_PUBLISH with G-STANDING as step 13's last learning
+  - id: brain_failed
+    match: '^brain brain: error|^brain_rejected|brain_exhausted|BrainFailed'
+    scenario: F15
+    why: the brain session failed or ran out of sessions; F15 serves an error result
+  - id: rate_limited
+    match: 'RateLimited|rate.limit'
+    scenario: F15
+    why: F15 serves a RateLimitEvent
+  - id: bare_step_refusal
+    match: 'REFUSED: scripts/\S+ exit \d+'
+    scenario: UNCOVERED
+    why: a step script refused with only its exit code; no scenario injects a step-script refusal
+  - id: brain_clamped
+    match: 'brain: clamped'
+    scenario: UNCOVERED
+    why: the brain named no valid order and was clamped; the scripted brain streams never emit a bad order
+  - id: brain_park_judgement
+    match: '^parked brain: '
+    scenario: UNCOVERED
+    why: the brain parked on its own reading of a tail; no scenario scripts a judgement park
+  - id: qc_fail
+    match: 'qc_fail|qc FAIL|qc\.py left no report'
+    scenario: UNCOVERED
+    why: step 11 refused the master; no scenario injects a QC refusal (S0b may meet one, it does not inject it)
+  - id: over_budget
+    match: 'over_budget|OverBudget'
+    scenario: UNCOVERED
+    why: the LLM spend ceiling stopped the run; no scenario spends
+  - id: db_locked
+    match: 'database is locked'
+    scenario: UNCOVERED
+    why: another process held the studio DB; no scenario holds the sandbox DB
+  - id: provider_400
+    match: 'BadRequestError|compiled grammar'
+    scenario: UNCOVERED
+    why: an OpenRouter 400 on a strict schema; every live tier is claude-sdk now, no scenario serves it
+  - id: provider_no_content
+    match: 'ProviderNoContent'
+    scenario: UNCOVERED
+    why: a reply cut off at its token budget; no scenario serves a truncated reply
+  - id: timeline_packs
+    match: 'measured timeline still packs'
+    scenario: UNCOVERED
+    why: step 05's hold cure left packed lines; no scenario plants a packing plan
+  - id: speech_hole
+    match: 'hole in speech|speech_gap'
+    scenario: UNCOVERED
+    why: the timeline left a hole in the speech past the wall; no scenario plants a gapped plan
+  - id: dirty_tree
+    match: 'tree_dirty|working tree is dirty'
+    scenario: UNCOVERED
+    why: the drive refused to start on uncommitted files (WAIT_TREE); no scenario dirties the sandbox tree
+  - id: tick_error
+    match: '^tick_error'
+    scenario: UNCOVERED
+    why: the supervisor's tick raised (WotW, int('compilation')); fixed in autopilot.episode_rows, no scenario
+# Any other traceback falls through to a class named from its own words (UNCOVERED), so two
+# different exceptions are never folded into one class.
