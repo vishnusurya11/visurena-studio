@@ -1,0 +1,18 @@
+{
+ "id": "fx_caption",
+ "description": "fake-ComfyUI test fixture (2026-10-21_ep02_proof P3)",
+ "inject": {
+  "prompt": {
+   "node": "2",
+   "field": "text"
+  },
+  "image_1": {
+   "node": "1",
+   "field": "image"
+  },
+  "seed": {
+   "node": "2",
+   "field": "seed"
+  }
+ }
+}

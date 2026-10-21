@@ -1,0 +1,32 @@
+{
+ "1": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "frame.png"
+  }
+ },
+ "2": {
+  "class_type": "Qwen3_VQA",
+  "inputs": {
+   "text": "",
+   "model": "Qwen3-VL-8B-Instruct",
+   "temperature": 0.2,
+   "max_new_tokens": 512,
+   "seed": 0,
+   "keep_model_loaded": false,
+   "source_path": [
+    "1",
+    0
+   ]
+  }
+ },
+ "3": {
+  "class_type": "PreviewAny",
+  "inputs": {
+   "source": [
+    "2",
+    0
+   ]
+  }
+ }
+}

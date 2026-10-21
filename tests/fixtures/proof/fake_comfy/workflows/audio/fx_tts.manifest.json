@@ -1,0 +1,26 @@
+{
+ "id": "fx_tts",
+ "description": "fake-ComfyUI test fixture (2026-10-21_ep02_proof P3)",
+ "inject": {
+  "ref_audio": {
+   "node": "2",
+   "field": "audio"
+  },
+  "ref_text": {
+   "node": "3",
+   "field": "reference_text"
+  },
+  "target_text": {
+   "node": "4",
+   "field": "text"
+  },
+  "seed": {
+   "node": "4",
+   "field": "seed"
+  },
+  "filename_prefix": {
+   "node": "5",
+   "field": "filename_prefix"
+  }
+ }
+}

@@ -1,0 +1,34 @@
+{
+ "id": "fx_take",
+ "description": "fake-ComfyUI test fixture (2026-10-21_ep02_proof P3)",
+ "inject": {
+  "prompt": {
+   "node": "8",
+   "field": "prompt"
+  },
+  "width": {
+   "node": "8",
+   "field": "width"
+  },
+  "height": {
+   "node": "8",
+   "field": "height"
+  },
+  "frames": {
+   "node": "8",
+   "field": "length"
+  },
+  "seed": {
+   "node": "12",
+   "field": "noise_seed"
+  },
+  "ref_image_1": {
+   "node": "2",
+   "field": "image"
+  },
+  "filename_prefix": {
+   "node": "17",
+   "field": "filename_prefix"
+  }
+ }
+}

@@ -1,0 +1,29 @@
+{
+ "5": {
+  "class_type": "TextEncodeQwenImage21",
+  "inputs": {
+   "prompt": ""
+  }
+ },
+ "7": {
+  "class_type": "KSampler",
+  "inputs": {
+   "seed": 0,
+   "steps": 8,
+   "positive": [
+    "5",
+    0
+   ]
+  }
+ },
+ "9": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "filename_prefix": "grid",
+   "images": [
+    "7",
+    0
+   ]
+  }
+ }
+}

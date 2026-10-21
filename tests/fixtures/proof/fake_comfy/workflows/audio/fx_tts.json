@@ -1,0 +1,50 @@
+{
+ "1": {
+  "class_type": "Qwen3TTSEngineNode",
+  "inputs": {
+   "max_new_tokens": 2048,
+   "language": "English"
+  }
+ },
+ "2": {
+  "class_type": "LoadAudio",
+  "inputs": {
+   "audio": "ref.wav"
+  }
+ },
+ "3": {
+  "class_type": "CharacterVoicesNode",
+  "inputs": {
+   "reference_text": "",
+   "audio": [
+    "2",
+    0
+   ]
+  }
+ },
+ "4": {
+  "class_type": "UnifiedTTSTextNode",
+  "inputs": {
+   "text": "",
+   "seed": 0,
+   "engine": [
+    "1",
+    0
+   ],
+   "voice": [
+    "3",
+    0
+   ]
+  }
+ },
+ "5": {
+  "class_type": "SaveAudio",
+  "inputs": {
+   "filename_prefix": "line",
+   "audio": [
+    "4",
+    0
+   ]
+  }
+ }
+}
