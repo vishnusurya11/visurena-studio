@@ -48,3 +48,12 @@ package spends GPU time or a paid call; the staged real runs SR-0..SR-5 wait for
   slope (-0.502) is refused for the median read; the back-test states it scores timing rows, not the 6 h clock
   (still FAIL, 2 of 4). Report: CONFIDENCE_iter5.md. Correction: c229514's message says the doc tests passed
   61; that run passed 49.
+- 2026-10-21 -- P5 review fixes (one round): a fault row lands at the key ITS fake reads (P3 `faults`, its
+  seven kinds only; P4 `sdk_faults`, `worker_die_at`, `youtube: invalid_grant`; `brain_stream`; the harness's
+  own `harness_faults`), so F2/F3/F6/F7/F7b/F15/F17 no longer die at supervisor start (the old shape was
+  reproduced: `unknown fault kind 'rate_limit'`); every point gets A-served (a planted fault its fake never
+  served fails the point); the brain's scripted stream answers the real brain.turn (brain_script.py);
+  pre-registered checks for F1, F1b, F3, F6, F7, F7b, F8, F9, F13, F15, F17; F8 joins the table; sweeps run in
+  4 h shards at the baseline's measured cost, resume on the same sandbox and report untried (never a pass);
+  a missing status doc fails A-named; the rehearsal tests skip only on a scheduler refusal or an absent
+  input.  No real-book scenario has run: the visurena-autopilot task is still Ready.

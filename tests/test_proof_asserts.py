@@ -215,3 +215,146 @@ def test_the_specific_checks_are_keyed_by_scenario(tmp_path):
     write_rows(book / "autopilot" / "events.jsonl", [{"event": "stale_lock"}, {"event": "supervisor_died_at"}])
     assert asserts.specific("F4", tmp_path, book, {})[0]["passed"] is True
     assert asserts.specific("smoke", tmp_path, book, {}) == []
+
+
+# ---- a status doc that never came, and a fault that never fired -------------------------------
+
+def test_a_run_that_ends_with_no_status_doc_fails_named(tmp_path):
+    book, _ = book_at(tmp_path)
+    r = asserts.a_named(book, 2, ["ep02 PARKED (engine)"])
+    assert r["passed"] is False and "no status" in r["detail"]
+
+
+@pytest.mark.parametrize("planted, files, served", [
+    ({"kind": "exec_error"}, {"engine_log.jsonl": [{"call": "prompt", "fault": "exec_error"}]}, True),
+    ({"kind": "exec_error"}, {"engine_log.jsonl": [{"call": "prompt", "fault": None}]}, False),
+    ({"kind": "rate_limit"}, {"sdk_log.jsonl": [{"n": 1, "label": "fault", "row": "rate_limit"}]}, True),
+    ({"kind": "rate_limit"}, {"sdk_log.jsonl": [{"n": 1, "label": "canned"}]}, False),
+    ({"kind": "worker_death"}, {"workers.jsonl": [{"worker": "whisper", "event": "died", "line": 2}]}, True),
+    ({"kind": "worker_death"}, {}, False),
+    ({"kind": "oauth"}, {"youtube.jsonl": [{"event": "invalid_grant", "call": "send"}]}, True),
+    ({"kind": "oauth"}, {"youtube.jsonl": [{"event": "refused", "call": "send"}]}, False),
+    ({"kind": "kill"}, {"kill.done": None}, True),
+    ({"kind": "kill"}, {}, False),
+])
+def test_a_planted_fault_that_never_fired_fails_the_point(tmp_path, planted, files, served):
+    for name, rows in files.items():
+        (tmp_path / name).write_text("" if rows is None else "".join(json.dumps(r) + "\n" for r in rows))
+    r = asserts.a_served(planted, tmp_path, {})
+    assert r["check"] == "A-served" and r["passed"] is served, r["detail"]
+
+
+def test_a_fault_with_nothing_to_serve_is_no_row():
+    assert asserts.a_served({"kind": "none"}, Path("."), {}) is None
+
+
+def test_a_commit_and_a_tear_are_served_by_what_was_planted(tmp_path):
+    assert asserts.a_served({"kind": "commit"}, tmp_path, {"commits": ["abc"]})["passed"] is True
+    assert asserts.a_served({"kind": "commit"}, tmp_path, {"commits": []})["passed"] is False
+    assert asserts.a_served({"kind": "tear"}, tmp_path, {}, planted={"torn": "x", "kept": 3})["passed"] is True
+    assert asserts.a_served({"kind": "tear"}, tmp_path, {}, planted={"torn": None})["passed"] is False
+
+
+# ---- the pre-registered specific checks of 3.2 ------------------------------------------------
+
+def status(book: Path, state: str, reason: str = "x") -> None:
+    (book / "autopilot").mkdir(parents=True, exist_ok=True)
+    (book / "autopilot" / "status.json").write_text(json.dumps({"episode": {"n": 1, "state": state, "reason": reason}}))
+
+
+def take_rows(*faults_) -> list[dict]:
+    return [{"call": "prompt", "workflow": "ref2v_take", "index": i, "fault": f} for i, f in faults_]
+
+
+def test_f1_renders_the_take_in_flight_again_exactly_once(tmp_path):
+    book, _ = book_at(tmp_path)
+    write_rows(tmp_path / "engine_log.jsonl", take_rows((3, "crash"), (3, None), (4, None)))
+    assert asserts.specific("F1", tmp_path, book, {})[0]["passed"] is True
+    write_rows(tmp_path / "engine_log.jsonl", take_rows((3, "crash"), (4, None)))
+    assert asserts.specific("F1", tmp_path, book, {})[0]["passed"] is False
+
+
+def test_f1b_and_f9_park_on_the_engine_and_rerender_the_hung_take_at_most_once(tmp_path):
+    book, _ = book_at(tmp_path)
+    write_rows(tmp_path / "engine_log.jsonl", take_rows((3, "lost"), (3, None)))
+    status(book, "PARKED", "engine: no answer after 2 restarts")
+    assert asserts.specific("F1b", tmp_path, book, {})[0]["passed"] is True
+    assert asserts.specific("F9", tmp_path, book, {})[0]["passed"] is True
+    status(book, "HELD_PUBLISH")
+    assert asserts.specific("F1b", tmp_path, book, {})[0]["passed"] is False
+    write_rows(tmp_path / "engine_log.jsonl", take_rows((3, "hang"), (3, None), (3, None)))
+    assert asserts.specific("F9", tmp_path, book, {})[0]["passed"] is False
+
+
+def test_f13_retakes_the_corrupt_take_or_parks_named(tmp_path):
+    book, _ = book_at(tmp_path)
+    write_rows(tmp_path / "engine_log.jsonl", take_rows((2, "corrupt"), (2, None)))
+    assert asserts.specific("F13", tmp_path, book, {})[0]["passed"] is True
+    write_rows(tmp_path / "engine_log.jsonl", take_rows((2, "corrupt")))
+    status(book, "HELD_PUBLISH")
+    assert asserts.specific("F13", tmp_path, book, {})[0]["passed"] is False
+    status(book, "PARKED", "take: refused")
+    assert asserts.specific("F13", tmp_path, book, {})[0]["passed"] is True
+
+
+def test_f3_submits_no_take(tmp_path):
+    book, _ = book_at(tmp_path)
+    write_rows(tmp_path / "engine_log.jsonl", [{"call": "prompt", "workflow": "tts", "fault": None}])
+    assert asserts.specific("F3", tmp_path, book, {})[0]["passed"] is True
+    write_rows(tmp_path / "engine_log.jsonl", take_rows((1, None)))
+    assert asserts.specific("F3", tmp_path, book, {})[0]["passed"] is False
+
+
+def test_f6_parks_on_the_token_without_an_upload_and_says_the_consent(tmp_path):
+    book, _ = book_at(tmp_path)
+    (tmp_path / "library").mkdir(exist_ok=True)
+    (tmp_path / "library" / ".youtube_consent.json").write_text("{}")
+    write_rows(tmp_path / "youtube.jsonl", [{"event": "invalid_grant", "call": "send"}])
+    write_rows(tmp_path / "notify.jsonl", [{"text": "ep01: YouTube token refresh fails: open https://x , approve"}])
+    status(book, "PARKED", "youtube_token_expired: run youtube_auth.py")
+    assert asserts.specific("F6", tmp_path, book, {})[0]["passed"] is True
+    write_rows(tmp_path / "youtube.jsonl", [{"event": "would_upload", "call": "send"}])
+    assert asserts.specific("F6", tmp_path, book, {})[0]["passed"] is False
+
+
+def test_f7_hands_over_and_the_resume_names_the_moved_code(tmp_path):
+    book, home = book_at(tmp_path)
+    (home.parent / "ep01").mkdir()
+    (home.parent / "ep01" / "drive_run02.log").write_text("WARNING code moved mid-episode: started on a")
+    assert asserts.specific("F7", tmp_path, book, {"handovers": ["def"]})[0]["passed"] is True
+    assert asserts.specific("F7", tmp_path, book, {"handovers": []})[0]["passed"] is False
+    write_rows(book / "autopilot" / "events.jsonl", [{"event": "code_moved_during_run", "episode": 1}] * 2)
+    assert asserts.specific("F7b", tmp_path, book, {"handovers": ["def"]})[0]["passed"] is False
+
+
+def test_f8_closes_the_window_and_submits_no_take(tmp_path):
+    book, _ = book_at(tmp_path)
+    home = book / "episodes" / "ep01"
+    home.mkdir()
+    from studio import repair_clock
+    write_rows(home / "repair.jsonl", [{"opened_at": 1.0, "closed_by": repair_clock.UNBACKED}])
+    write_rows(home / "drive.jsonl", [{"event": "end", "code": 2, "refused": "dry_check"}])
+    status(book, "PARKED", "drive_refused")
+    assert asserts.specific("F8", tmp_path, book, {})[0]["passed"] is True
+    (home / "repair.json").write_text("{}")
+    assert asserts.specific("F8", tmp_path, book, {})[0]["passed"] is False
+
+
+def test_f15_serves_its_fault_and_never_retries_the_ask_past_its_cap(tmp_path):
+    book, _ = book_at(tmp_path)
+    write_rows(tmp_path / "sdk_log.jsonl", [{"n": 1, "label": "fault", "row": "rate_limit", "prompt_sha": "a"},
+                                            {"n": 2, "label": "canned", "prompt_sha": "a"}])
+    status(book, "PARKED", "brain: rate limited until 12:00")
+    assert asserts.specific("F15", tmp_path, book, {})[0]["passed"] is True
+    write_rows(tmp_path / "sdk_log.jsonl", [{"n": i, "label": "fault" if i == 1 else "canned", "prompt_sha": "a"}
+                                            for i in range(1, 13)])
+    assert asserts.specific("F15", tmp_path, book, {})[0]["passed"] is False
+
+
+def test_f17_restarts_the_worker_within_its_spawns(tmp_path):
+    book, _ = book_at(tmp_path)
+    write_rows(tmp_path / "workers.jsonl", [{"worker": "whisper", "pid": 1, "event": "died", "line": 2},
+                                            {"worker": "whisper", "pid": 2, "event": "answer", "line": 1}])
+    assert asserts.specific("F17", tmp_path, book, {})[0]["passed"] is True
+    write_rows(tmp_path / "workers.jsonl", [{"worker": "whisper", "pid": p, "event": "died", "line": 2} for p in (1, 2, 3)])
+    assert asserts.specific("F17", tmp_path, book, {})[0]["passed"] is False

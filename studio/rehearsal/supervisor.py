@@ -7,8 +7,9 @@ first.  Deps, per DESIGN 3: `popen` launches the REAL drive.py with the sandbox 
 `--rehearsal=<run_id>` argv tail; `procs` is only this supervisor's process tree (pid ancestry,
 remembering every pid it ever held so an orphan of a killed drive stays visible); `git` the
 sandbox repo (autopilot.git already answers from settings.git_root()); `brain` the real brain
-code (P4's ReplayTransport answers it); `notify` a capture to <sandbox>/notify.jsonl; `root`
-<sandbox>/library/.autopilot; `ledger` None; `token_note` the fake; `chapters` the rehearsed unit.
+code over P4's ReplayTransport, with the manifest's `brain_stream` scripted in front of it
+(brain_script.py); `notify` a capture to <sandbox>/notify.jsonl; `root` <sandbox>/library/.autopilot;
+`ledger` None; `token_note` the fake (the manifest's `youtube`); `chapters` the rehearsed unit.
 The loop stops at a terminal of the unit (HELD_PUBLISH, PARKED, COMPLETE), or FAILS at twice the
 expected ACTING ticks (a wait while the drive runs is not an act) or at the wall.  A moved HEAD
 is handed over in process: the supervisor is its own successor, it never spawns one."""
@@ -260,7 +261,7 @@ def bounded_tick(home: Path, alive: bool, bound: str) -> str | None:
 def commit_tick(box: Path, manifest: Mapping, tick: int) -> list[str]:
     """F7/F7b: a planted `commit` row lands in <sandbox>/git at its tick."""
     from studio.rehearsal import faults
-    rows = [r for r in manifest.get("faults") or () if r.get("kind") == "commit" and int(r.get("tick", 0)) == tick]
+    rows = [r for r in manifest.get("harness_faults") or () if r.get("kind") == "commit" and int(r.get("tick", 0)) == tick]
     return [faults.sandbox_commit(box, r.get("path")) for r in rows]
 
 
@@ -312,6 +313,8 @@ def main(argv: list[str]) -> int:
     box, manifest = Path(args.box), settings.rehearsal()
     if manifest is None or Path(settings.sandbox()).resolve() != box.resolve():
         raise SystemExit(f"refused: {box} is not this process's rehearsal sandbox")
+    from studio.rehearsal import brain_script
+    brain_script.install(manifest, box)                        # the brain runs in THIS process
     engine, deps = start_engine(box, manifest), make_deps(box, manifest, args.episode)
     book = book_dir(box, manifest)
     hook = before_tick(box, book, args.episode, deps, manifest, {"made": []})

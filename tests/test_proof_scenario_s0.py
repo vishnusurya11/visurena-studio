@@ -19,12 +19,10 @@ pytestmark = pytest.mark.rehearsal
 
 
 def run(sid: str, tmp_path) -> tuple[dict, dict]:
-    missing = rehearse.missing_packages(sid)
-    if missing:
-        pytest.skip(f"{sid} stands on {', '.join(missing)}, not on disk yet")
     out = rehearse.run_scenario(sid, results=tmp_path / "results", wall=4 * 3600.0)
-    if out.get("blocked"):
+    if rehearse.skippable(out):
         pytest.skip(f"{sid} did not run: {out['blocked']}")
+    assert not out.get("blocked"), out                    # any other block is a FAILURE, never a skip
     doc = json.loads((tmp_path / "results" / f"{sid}.json").read_text(encoding="utf-8"))
     return out, {r["check"]: r for r in doc["rows"]}
 

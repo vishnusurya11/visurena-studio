@@ -33,7 +33,7 @@ def test_one_checkpoint_one_take_one_fault_ends_named_under_a_minute(tmp_path):
     assert out["supervisor"]["tick_errors"] == 0
     failed = {k: r["detail"] for k, r in rows.items() if not r["passed"]}
     assert not failed, failed
-    assert {"A-caps", "A-noupload", "A-named", "A-real", "A-torn", "A-ledger", "smoke"} <= set(rows)
+    assert {"A-caps", "A-noupload", "A-named", "A-real", "A-torn", "A-ledger", "A-served", "smoke"} <= set(rows)
     assert all(set(asserts.ROW_KEYS) <= set(r) for r in doc["rows"])
     assert rows["smoke"]["n_points"] == 1 and rows["smoke"]["n_distinct"] == 1
     assert out["trace"] and any(f == "scripts/episode/autopilot.py" for f, _ in out["trace_lines"])
@@ -222,7 +222,7 @@ def test_a_bounded_run_asks_for_the_boundary_past_its_step_and_ends_there(tmp_pa
 
 def test_a_planted_commit_lands_in_the_sandbox_repo_at_its_tick(tmp_path):
     box = tiny_sandbox(tmp_path, run_id="commit")
-    manifest = {"faults": [{"kind": "commit", "tick": 2, "path": None}]}
+    manifest = {"harness_faults": [{"kind": "commit", "tick": 2, "path": None}]}
     assert supervisor.commit_tick(box, manifest, 1) == []
     assert len(supervisor.commit_tick(box, manifest, 2)) == 1
 

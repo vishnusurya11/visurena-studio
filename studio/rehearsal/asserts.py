@@ -192,7 +192,10 @@ def a_named(book: Path, n: int, notify: Iterable[str]) -> dict:
     """The terminal state is in the enum with a reason; each park reason is in the vocabulary;
     a notify line names the episode's terminal."""
     from studio.autopilot import State
-    status = json.loads((Path(book) / "autopilot" / "status.json").read_text(encoding="utf-8"))
+    path = Path(book) / "autopilot" / "status.json"
+    if not path.is_file():
+        return row("A-named", False, ["autopilot/status.json"], detail="no status doc: the run ended without autopilot/status.json")
+    status = json.loads(path.read_text(encoding="utf-8"))
     ep = status.get("episode") or {}
     reasons = [r.get("reason", "") for r in jsonl(Path(book) / "autopilot" / "parked.jsonl") if r.get("episode") == n]
     words, said = vocabulary(), [line for line in notify if f"ep{n:02d}" in line]
@@ -360,21 +363,179 @@ def resubmits(engine_rows: list[Mapping]) -> int:
                and r.get("index") == idx)
 
 
+# ---- A-served: the planted fault reached its fake ------------------------------------------
+
+from studio.rehearsal.faults import ENGINE as ENGINE_KINDS  # noqa: E402 -- the one list of engine kinds
+
+SERVED_IN = {**{k: ("engine_log.jsonl", lambda r: bool(r.get("fault"))) for k in ENGINE_KINDS},
+             "rate_limit": ("sdk_log.jsonl", lambda r: r.get("label") == "fault"),
+             "brain_failed": ("sdk_log.jsonl", lambda r: r.get("label") == "fault"),
+             "worker_death": ("workers.jsonl", lambda r: r.get("event") == "died"),
+             "oauth": ("youtube.jsonl", lambda r: r.get("event") == "invalid_grant")}
+"""Where each planted fault shows that its fake SERVED it: the fake's own log row."""
+
+
+def served(kind: str, box: Path, sup: Mapping, planted: Mapping | None) -> tuple[bool, list[str]] | None:
+    """(the fault fired, its evidence); None for a fault with no channel (a planted file, none)."""
+    if kind in SERVED_IN:
+        name, hit = SERVED_IN[kind]
+        return any(hit(r) for r in jsonl(Path(box) / name)), [name]
+    if kind == "kill":
+        return any((Path(box) / f).exists() for f in ("kill.done", "kill.request")), ["kill.done"]
+    if kind == "commit":
+        return bool(sup.get("commits")), ["supervisor.json"]
+    if kind == "tear":
+        return bool((planted or {}).get("torn")), ["planted"]
+    return None
+
+
+def a_served(fault: Mapping, box: Path, sup: Mapping, planted: Mapping | None = None) -> dict | None:
+    """A planted fault its fake never served leaves an UNFAULTED run: that point fails, named."""
+    got = served(str(fault.get("kind")), box, sup, planted)
+    if got is None:
+        return None
+    ok, evidence = got
+    return row("A-served", ok, evidence, detail=f"{fault.get('kind')} " + ("served" if ok else
+               "planted but never served: the point ran unfaulted"))
+
+
+# ---- the specific checks, one per scenario --------------------------------------------------
+
+def state_of(book: Path) -> tuple[str, str]:
+    """(state, reason) of the unit in status.json; ("", "") when there is none."""
+    path = Path(book) / "autopilot" / "status.json"
+    ep = (json.loads(path.read_text(encoding="utf-8")).get("episode") or {}) if path.is_file() else {}
+    return str(ep.get("state") or ""), str(ep.get("reason") or "")
+
+
+def take_submits(engine_rows: list[Mapping]) -> list[Mapping]:
+    from studio.rehearsal import sweep
+    return [r for r in engine_rows if sweep.is_take_submit(r)]
+
+
+def resubmitted(ok, said: str):
+    """A check on how often the faulted take was submitted again."""
+    def check(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+        got = resubmits(engine)
+        return row(sid, bool(ok(got)), ["engine_log.jsonl"], detail=f"the faulted take resubmitted {got}; pre-registered {said}")
+    return check
+
+
+def f_drives(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F2: at most one drive alive at every tick."""
+    most = max(sup.get("drives_alive") or [0])
+    return row(sid, most <= 1, ["supervisor.json"], detail=f"at most {most} drive(s) alive at any tick")
+
+
+def f_reboot(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F4: adopt() and clear_stale_lock act."""
+    events = [r.get("event") for r in jsonl(Path(book) / "autopilot" / "events.jsonl")]
+    ok = "stale_lock" in events and "supervisor_died_at" in events
+    return row(sid, ok, ["autopilot/events.jsonl"], detail=f"stale_lock + supervisor_died_at: {ok}")
+
+
+def f_engine_park(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F1b: restarts <= 2 (A-caps), then PARK(engine) named."""
+    state, reason = state_of(book)
+    ok = state == "PARKED" and "engine" in reason.lower()
+    return row(sid, ok, ["autopilot/status.json"], detail=f"{state or 'no state'}: {reason}; pre-registered PARK(engine)")
+
+
+def f_corrupt(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F13: the corrupt take is retaken (within caps: A-caps), or the episode parks named."""
+    state, reason = state_of(book)
+    got = resubmits(engine)
+    ok = got >= 1 or (state == "PARKED" and bool(reason.strip()))
+    return row(sid, ok, ["engine_log.jsonl", "autopilot/status.json"], detail=f"retaken {got}; {state}: {reason}")
+
+
+def f_no_take(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F3: the resume of step 10 submits no take."""
+    takes = take_submits(engine)
+    return row(sid, not takes, ["engine_log.jsonl"], detail=f"{len(takes)} take submit(s); pre-registered 0")
+
+
+def f_oauth(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F6: no upload; the consent pending in the SANDBOX library; a park named for the token; the
+    notify line carries the consent text."""
+    from studio import settings
+    state, reason = state_of(book)
+    said = [str(r.get("text", "")) for r in jsonl(Path(box) / "notify.jsonl")]
+    faults = [f"uploaded {n}" for n in [sum(r.get("event") == "would_upload" for r in jsonl(Path(box) / "youtube.jsonl"))] if n]
+    faults += [] if (Path(box) / settings.LIBRARY_DIR / ".youtube_consent.json").is_file() else ["no sandbox consent file"]
+    faults += [] if state == "PARKED" and re.search(r"youtube|oauth", reason, re.I) else [f"{state}: {reason}"]
+    faults += [] if any(re.search(r"youtube_auth|approve|consent", t, re.I) for t in said) else ["no consent line"]
+    return row(sid, not faults, ["youtube.jsonl", "notify.jsonl"], detail="; ".join(faults) or "parked on the token")
+
+
+def drive_logs(book: Path) -> str:
+    return "\n".join(p.read_text(encoding="utf-8", errors="replace")
+                     for p in sorted(Path(book).glob("episodes/ep*/drive_run*.log")))
+
+
+def f_commit(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F7: code_moved hands over and the resume names the moved code; F7b: said at most once."""
+    moved = [r for r in jsonl(Path(book) / "autopilot" / "events.jsonl") if r.get("event") == "code_moved_during_run"]
+    named = "code moved mid-episode" in drive_logs(book) or bool(moved)
+    ok = bool(sup.get("handovers")) and (named if sid == "F7" else len(moved) <= 1)
+    return row(sid, ok, ["supervisor.json", "autopilot/events.jsonl"],
+               detail=f"handovers {len(sup.get('handovers') or [])}; resume named it {named}; said {len(moved)}")
+
+
+def f_repair(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F8: leftover_window closes the window; the dry check refuses (exit 2); zero take submits; named."""
+    from studio import repair_clock
+    homes = [p for p in Path(book).glob("episodes/ep*") if p.is_dir()]
+    faults = [f"{h.name}: window still open" for h in homes if (h / repair_clock.WINDOW).is_file()]
+    closed = [r for h in homes for r in jsonl(h / repair_clock.LOG) if r.get("closed_by") == repair_clock.UNBACKED]
+    refused = [r for h in homes for r in jsonl(h / "drive.jsonl") if r.get("event") == "end" and r.get("code") == 2]
+    faults += [] if closed else ["no window closed as unbacked"]
+    faults += [] if refused else ["no drive end refused with exit 2"]
+    faults += [f"{n} take submit(s)" for n in [len(take_submits(engine))] if n]
+    faults += [] if state_of(book)[0] in ("PARKED", "HELD_PUBLISH") else [f"state {state_of(book)[0] or 'none'}"]
+    return row(sid, not faults, ["repair.jsonl", "drive.jsonl", "engine_log.jsonl"], detail="; ".join(faults) or "closed and refused")
+
+
+def ask_cap() -> int:
+    """The most asks llm.structured makes of one prompt: its own defaults (re-asks x transient tries)."""
+    from studio import llm
+    params = inspect.signature(llm.structured).parameters
+    return int(params["retries"].default) * (int(params["transient_retries"].default) + 1)
+
+
+def f_brain(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F15: the faulted ask is never asked again past llm's cap, and the run ends named."""
+    rows = jsonl(Path(box) / "sdk_log.jsonl")
+    hit = next((i for i, r in enumerate(rows) if r.get("label") == "fault"), None)
+    again = 0 if hit is None else sum(r.get("prompt_sha") == rows[hit].get("prompt_sha") for r in rows[hit + 1:])
+    state, reason = state_of(book)
+    ok = hit is not None and again <= ask_cap() and bool(state)
+    return row(sid, ok, ["sdk_log.jsonl", "autopilot/status.json"],
+               detail=f"asked again {again} (cap {ask_cap()}); {state or 'no state'}: {reason}")
+
+
+def f_worker(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F17: the dead worker is started again within the real SPAWNS; never a third start."""
+    from studio import routed_whisper
+    rows = jsonl(Path(box) / "workers.jsonl")
+    died = {r.get("worker") for r in rows if r.get("event") == "died"}
+    starts = {w: len({r.get("pid") for r in rows if r.get("worker") == w}) for w in died}
+    over = [f"{w} started {n} > {routed_whisper.SPAWNS}" for w, n in starts.items() if n > routed_whisper.SPAWNS]
+    return row(sid, bool(died) and not over, ["workers.jsonl"], detail="; ".join(over) or f"starts {starts}")
+
+
+CHECKS = {"F1": resubmitted(lambda n: n == 1, "1"), "F1b": f_engine_park, "F2": f_drives, "F3": f_no_take,
+          "F4": f_reboot, "F6": f_oauth, "F7": f_commit, "F7b": f_commit, "F8": f_repair,
+          "F9": resubmitted(lambda n: n <= 1, "<= 1"), "F10": resubmitted(lambda n: n == 1, "1"), "F13": f_corrupt,
+          "F15": f_brain, "F16": resubmitted(lambda n: n == 0, "0"), "F17": f_worker}
+"""Each scenario's pre-registered specific check (3.2).  F1: the take in flight rendered again exactly
+once; F9: the hung take at most once; F10: one resubmission; F16: none."""
+
+
 def specific(sid: str, box: Path, book: Path, sup: Mapping) -> list[dict]:
-    """The pre-registered specific asserts of 3.2 that one file answers; [] for the others."""
-    engine = jsonl(Path(box) / "engine_log.jsonl")
-    if sid == "S0a":
-        return s0a_rows(book)
-    if sid == "S0b":
-        return s0b_rows(book, box)
-    if sid in ("F10", "F16"):
-        want, got = (1 if sid == "F10" else 0), resubmits(engine)
-        return [row(sid, got == want, ["engine_log.jsonl"], detail=f"resubmitted {got}, pre-registered {want}")]
-    if sid == "F2":
-        most = max(sup.get("drives_alive") or [0])
-        return [row(sid, most <= 1, ["supervisor.json"], detail=f"at most {most} drive(s) alive at any tick")]
-    if sid == "F4":
-        events = [r.get("event") for r in jsonl(Path(book) / "autopilot" / "events.jsonl")]
-        ok = "stale_lock" in events and "supervisor_died_at" in events
-        return [row(sid, ok, ["autopilot/events.jsonl"], detail=f"stale_lock + supervisor_died_at: {ok}")]
-    return []
+    """The pre-registered specific asserts of 3.2 that the files answer; [] for the others."""
+    if sid in ("S0a", "S0b"):
+        return s0a_rows(book) if sid == "S0a" else s0b_rows(book, box)
+    if sid not in CHECKS:
+        return []
+    return [CHECKS[sid](sid, box, book, jsonl(Path(box) / "engine_log.jsonl"), sup)]

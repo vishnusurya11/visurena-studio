@@ -1,9 +1,10 @@
 """The fault injectors F1-F18 (2026-10-21_ep02_proof DESIGN 3.2): each plants ONE fault at ONE point.
 
 Three kinds of injector:
-- a manifest row the fakes read: engine faults for the fake ComfyUI (P3: `{kind, on: submit#k,
-  workflow, detail}`), and worker deaths, rate limits, brain failures, the OAuth expiry and the
-  brain's scripted stream for P4's fakes;
+- a manifest row at the key its fake reads (`route`): engine faults for the fake ComfyUI (P3's
+  `faults`: `{kind, on: submit#k, workflow, detail}`, its seven kinds only), and for P4's fakes
+  `sdk_faults` (rate limit, brain failure), `worker_die_at`, `youtube: invalid_grant`, plus the
+  brain's scripted stream (`brain_stream`, brain_script.py);
 - a hook in a child: `kill_at_write` stops the process BEFORE its k-th write at a named site
   (file kind x code location, trace.py's names), writes `<sandbox>/kill.request`, and exits
   KILLED; the supervisor then kills the rest of the drive tree;
@@ -39,10 +40,45 @@ def read_manifest(box: Path) -> dict:
     return json.loads((Path(box) / "rehearsal.json").read_text(encoding="utf-8"))
 
 
+HARNESS = ("kill_at_write", "commit")
+"""Faults the harness plants itself (a child's kill hook, a supervisor's commit): `harness_faults`."""
+CLEAN = {"faults": [], "harness_faults": [], "sdk_faults": [], "worker_die_at": {}, "youtube": "refuse",
+         "brain_stream": []}
+"""A point's manifest before its ONE fault: no fault at any key a fake reads."""
+
+
+def call_k(row: Mapping) -> int:
+    return int(str(row["on"]).rpartition("#")[2])
+
+
+def _append(doc: Mapping, key: str, item: Mapping) -> dict:
+    return {key: [*(doc.get(key) or []), dict(item)]}
+
+
+ROUTES: dict[str, Callable[[Mapping, Mapping], dict]] = {
+    **{k: (lambda d, r: _append(d, "faults", r)) for k in ENGINE},
+    "rate_limit": lambda d, r: _append(d, "sdk_faults", {"on": call_k(r), "kind": "rate_limit"}),
+    "brain_failed": lambda d, r: _append(d, "sdk_faults", {"on": call_k(r), "kind": "error"}),
+    "worker_death": lambda d, r: {"worker_die_at": {**(d.get("worker_die_at") or {}), r["worker"]: int(r["line"])}},
+    "oauth": lambda d, r: {"youtube": "invalid_grant"},
+    "brain_stream": lambda d, r: {"brain_stream": list(r["stream"])},
+    **{k: (lambda d, r: _append(d, "harness_faults", r)) for k in HARNESS}}
+"""Each fault kind -> the manifest keys ITS fake reads: P3's engine `faults` (its seven kinds only);
+P4's `sdk_faults` [{on: k, kind: rate_limit|error}], `worker_die_at` {worker: line} and
+`youtube: invalid_grant`; brain_script's `brain_stream`; the harness's own `harness_faults`."""
+
+
+def route(doc: Mapping, row: Mapping) -> dict:
+    """The manifest with `row` at the key its fake reads; a kind no fake reads raises."""
+    kind = row.get("kind")
+    if kind not in ROUTES:
+        raise ValueError(f"no fake reads a fault of kind {kind!r}; known: {', '.join(ROUTES)}")
+    return {**doc, **ROUTES[kind](doc, row)}
+
+
 def add(box: Path, row: Mapping) -> dict:
-    """Append one fault row to the sandbox manifest; the manifest as written."""
-    doc = read_manifest(box)
-    doc["faults"] = [*(doc.get("faults") or []), dict(row)]
+    """Plant one fault row in the sandbox manifest, at the key its fake reads; the manifest as written."""
+    doc = route(read_manifest(box), row)
     (Path(box) / "rehearsal.json").write_text(json.dumps(doc, indent=1), encoding="utf-8")
     return doc
 
@@ -82,8 +118,9 @@ def brain_stream(verdicts: list[str]) -> dict:
 
 
 def token_note(manifest: Mapping) -> Callable[[], str | None]:
-    """The fake for Deps.token_note: the expired token's message when F6 is planted, else None."""
-    said = next((r.get("error") for r in manifest.get("faults") or () if r.get("kind") == "oauth"), None)
+    """The fake for Deps.token_note: the expired token's message when F6 set `youtube: invalid_grant`
+    (the drive's step-13 send then raises P4's recorded RefreshError), else None."""
+    said = INVALID_GRANT if manifest.get("youtube") == "invalid_grant" else None
     return lambda: said
 
 
@@ -94,7 +131,7 @@ def kill_at_write(kind: str, site: str, occurrence: int, step: str | None) -> di
 
 
 def kill_rows(manifest: Mapping, step: str) -> list[dict]:
-    rows = [r for r in manifest.get("faults") or () if r.get("kind") == "kill_at_write"]
+    rows = [r for r in manifest.get("harness_faults") or () if r.get("kind") == "kill_at_write"]
     return [r for r in rows if r.get("step") in (None, step)]
 
 

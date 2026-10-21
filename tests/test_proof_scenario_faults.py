@@ -39,12 +39,36 @@ def test_an_engine_fault_is_a_manifest_row_the_fake_engine_reads(box):
         faults.engine("corrupt", 1, detail="sideways")
 
 
-def test_the_fakes_faults_are_rows_too(box):
+def test_each_fakes_fault_lands_at_the_key_its_fake_reads(box):
     for row in (faults.worker_death("whisper", 4), faults.rate_limit(2), faults.brain_failed(1),
                 faults.oauth_expired(), faults.brain_stream(["relaunch", "park"])):
         faults.add(box, row)
-    kinds = [r["kind"] for r in manifest(box)["faults"]]
-    assert kinds == ["worker_death", "rate_limit", "brain_failed", "oauth", "brain_stream"]
+    doc = manifest(box)
+    assert doc["faults"] == []                                   # P3's parser sees only its own kinds
+    assert doc["worker_die_at"] == {"whisper": 4}                # P4 fake_workers
+    assert doc["sdk_faults"] == [{"on": 2, "kind": "rate_limit"}, {"on": 1, "kind": "error"}]   # P4 fake_sdk
+    assert doc["youtube"] == "invalid_grant"                     # P4 fake_publish
+    assert doc["brain_stream"] == ["relaunch", "park"]           # brain_script
+
+
+def test_the_harness_own_faults_never_reach_the_fake_engine(box):
+    faults.add(box, faults.kill_at_write("k", "s", 1, "09"))
+    faults.add(box, {"kind": "commit", "tick": 2, "path": None})
+    doc = manifest(box)
+    assert doc["faults"] == [] and [r["kind"] for r in doc["harness_faults"]] == ["kill_at_write", "commit"]
+    assert faults.kill_rows(doc, step="09")[0]["site"] == "s"
+
+
+def test_a_row_no_fake_reads_is_refused_not_dropped(box):
+    with pytest.raises(ValueError, match="no fake reads"):
+        faults.add(box, {"kind": "meteor"})
+
+
+def test_a_point_starts_from_a_manifest_with_no_fault_of_any_kind(box):
+    for row in (faults.worker_death("whisper", 4), faults.oauth_expired(), faults.engine("crash", 1)):
+        faults.add(box, row)
+    doc = {**manifest(box), **faults.CLEAN}
+    assert not doc["faults"] and not doc["sdk_faults"] and not doc["worker_die_at"] and doc["youtube"] == "refuse"
 
 
 def test_a_kill_at_write_k_stops_the_child_before_its_kth_write_and_asks_for_the_tree(tmp_path):
@@ -53,7 +77,7 @@ def test_a_kill_at_write_k_stops_the_child_before_its_kth_write_and_asks_for_the
     book.mkdir(parents=True)
     row = faults.kill_at_write("episodes/ep##/x##.txt", "<string>:1", 2, None)
     code = ("import sys; sys.path.insert(0, {repo!r}); from studio.rehearsal import faults; "
-            "faults.arm({{'faults': [{row!r}]}}, {box!r}); "
+            "faults.arm({{'harness_faults': [{row!r}]}}, {box!r}); "
             "[open({d!r} + '/x%02d.txt' % i, 'w').write('x') for i in range(5)]")
     done = subprocess.run([sys.executable, "-c", code.format(repo=str(settings.REPO), row=row, box=str(box), d=str(book))],
                           capture_output=True, text=True, timeout=60)
@@ -64,7 +88,7 @@ def test_a_kill_at_write_k_stops_the_child_before_its_kth_write_and_asks_for_the
 
 
 def test_a_kill_row_for_another_step_arms_nothing():
-    assert faults.kill_rows({"faults": [faults.kill_at_write("k", "s", 1, "10")]}, step="09") == []
+    assert faults.kill_rows({"harness_faults": [faults.kill_at_write("k", "s", 1, "10")]}, step="09") == []
 
 
 def test_a_dropped_supervisor_leaves_a_stale_lock_and_an_old_heartbeat(box):
@@ -133,22 +157,30 @@ def test_a_record_kind_resolves_under_the_episode_or_the_book(tmp_path):
 
 def test_the_token_note_fake_answers_from_the_manifest():
     assert faults.token_note({})() is None
-    assert "invalid_grant" in faults.token_note({"faults": [faults.oauth_expired()]})()
+    assert faults.token_note({"youtube": "refuse"})() is None
+    assert "invalid_grant" in faults.token_note({"youtube": "invalid_grant"})()
 
 
 # ---- the scenarios (the real pipeline; excluded by default) ----------------------------------
 
+def fault_ids() -> list[str]:
+    """Every fault scenario of the harness table: the list cannot drift from what rehearse.py runs."""
+    from scripts.proof import rehearse
+    return [k for k in rehearse.TABLE if k.startswith("F")]
+
+
+def test_the_rehearsal_list_is_the_harness_table():
+    assert {"F1", "F8", "F15", "F17"} <= set(fault_ids())
+
+
 @pytest.mark.rehearsal
-@pytest.mark.parametrize("scenario", ["F1", "F1b", "F2", "F3", "F4", "F5", "F7", "F7b", "F8", "F9", "F10", "F11",
-                                      "F13", "F14", "F15", "F16", "F17", "F18"])
+@pytest.mark.parametrize("scenario", fault_ids())
 def test_a_fault_scenario_writes_its_counted_rows(scenario, tmp_path):
     from scripts.proof import rehearse
-    missing = rehearse.missing_packages(scenario)
-    if missing:
-        pytest.skip(f"{scenario} stands on {', '.join(missing)}, not on disk yet")
     out = rehearse.run_scenario(scenario, results=tmp_path / "results", wall=4 * 3600.0)
-    if out.get("blocked"):
+    if rehearse.skippable(out):
         pytest.skip(f"{scenario} did not run: {out['blocked']}")
+    assert not out.get("blocked"), out                    # a checkpoint or prepare() failure is a FAILURE
     rows = json.loads((tmp_path / "results" / f"{scenario}.json").read_text())["rows"]
     assert rows and all(set(rehearse.ROW_KEYS) <= set(r) for r in rows)
     assert out["scenario"] == scenario
