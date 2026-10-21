@@ -1,0 +1,7 @@
+{
+ "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "minimax_h3.safetensors", "weight_dtype": "default"}},
+ "18": {"class_type": "LoadImage", "inputs": {"image": "sheet.png"}},
+ "30": {"class_type": "LoadVideo", "inputs": {"file": "crop_src.mp4"}},
+ "40": {"class_type": "H3InjectVideoLatent", "inputs": {"denoise": 0.45, "video": ["30", 0], "model": ["1", 0], "ref_image": ["18", 0]}},
+ "17": {"class_type": "SaveVideo", "inputs": {"filename_prefix": "face_refine", "format": "mp4", "codec": "h264", "video": ["40", 0]}}
+}

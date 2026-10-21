@@ -15,6 +15,14 @@ fingerprint (workflow_fingerprint), then answered by the first of:
   canned       nothing matched: a grey picture, a grey video, a silent wav, or CANNED_TEXT,
                which every studio reader's readable() refuses (2.4: canned answers REFUSE)
 
+A job's KIND comes from the workflow it was filled from, never from a recording that happens to
+join it: a recording that names that workflow says it; a face-refine workflow (studio/face_refine.
+WORKFLOW, or a new technique named after it) is a refine_crop with no take index; any other video
+output is a take; anything else takes the first joined recording's kind or its output's.  Only
+recordings of that kind may answer.  A take recording joins by its bare class multiset, or by the
+template it was identified as (its recorded graph, else P2's section-0 class set), so a take graph
+that grew nodes still meets its recording.
+
 A take's try count is how many DISTINCT graphs of that index this engine was asked before (an
 identical resubmission is the same try).  Recorded outputs are opened for READ and copied into
 <sandbox>/comfy/output/<prefix>_<00001>_.<ext>.  /history spaces execution_start and
@@ -128,7 +136,28 @@ def load_recordings(path: Path, root: Path | None = None) -> list[dict]:
         doc = json.load(fh)
     rows = (doc.get("entries") or doc.get("recordings") or []) if isinstance(doc, dict) else doc
     base = Path(root) if root else path.parent
-    return [{**r, "path": resolve(base, r.get("path")), "graph": resolve(base, r.get("graph"))} for r in rows]
+    return [{**r, "path": resolve(base, r.get("path")), "graph": resolve(base, r.get("graph")),
+             "source_graph": resolve(base, source_graph(r))} for r in rows]
+
+
+def source_graph(rec: dict) -> str | None:
+    """The recorded graph file P2's take entry names as its `source` (`.../T05.graph.json`)."""
+    source = rec.get("source")
+    return source if isinstance(source, str) and source.endswith(".graph.json") else None
+
+
+def refine_workflows() -> tuple[str, ...]:
+    """The face-refine workflow the studio submits (studio/face_refine.WORKFLOW)."""
+    try:
+        from studio import face_refine
+    except ImportError:
+        return ()
+    return (face_refine.WORKFLOW,)
+
+
+def is_refine(name: str | None, refine: tuple[str, ...]) -> bool:
+    """A refine workflow, or a new technique named after one (`<base>_<source>`)."""
+    return bool(name) and any(name == w or name.startswith(w + "_") for w in refine)
 
 
 def prompt_graph(body: bytes) -> dict:
@@ -181,7 +210,8 @@ def output_node(graph: dict) -> tuple[str | None, str | None, str | None]:
 # ---- media: read the recording, write the sandbox ----------------------------------------
 
 def ffmpeg() -> str:
-    return shutil.which("ffmpeg") or "ffmpeg"
+    """The pinned imageio-ffmpeg binary (comfy_faults.ffmpeg), never whatever PATH holds."""
+    return comfy_faults.ffmpeg()
 
 
 def run_ffmpeg(args: list[str]) -> None:
@@ -241,9 +271,9 @@ def grey_png(path: Path, size: int = 64) -> None:
     Path(path).write_bytes(b"\x89PNG\r\n\x1a\n" + body)
 
 
-def grey_video(path: Path, frames: int, fps: int = 24) -> None:
-    """A flat grey clip of `frames` frames with a silent audio stream (a take always has one)."""
-    run_ffmpeg(["-f", "lavfi", "-i", f"color=c=gray:size=64x64:rate={fps}", "-f", "lavfi", "-i",
+def grey_video(path: Path, frames: int, fps: int = 24, size: tuple = (64, 64)) -> None:
+    """A flat grey clip of `frames` frames at `size` (w, h) with a silent audio stream (a take always has one)."""
+    run_ffmpeg(["-f", "lavfi", "-i", f"color=c=gray:size={size[0]}x{size[1]}:rate={fps}", "-f", "lavfi", "-i",
                 "anullsrc=r=16000:cl=mono", "-frames:v", str(frames), "-t", f"{frames / fps:.4f}",
                 "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", str(path)])
 
@@ -254,9 +284,16 @@ def silent_wav(path: Path, seconds: float = 1.0, rate: int = 16000) -> None:
         out.writeframes(b"\x00\x00" * int(seconds * rate))
 
 
-def canned_media(path: Path, ext: str, frames: int | None) -> None:
+def asked_size(values: dict) -> tuple[int, int] | None:
+    """The (width, height) a graph asks for at its inject points, or None when it names neither."""
+    w, h = values.get("width"), values.get("height")
+    return (int(w), int(h)) if isinstance(w, int) and isinstance(h, int) and w > 0 and h > 0 else None
+
+
+def canned_media(path: Path, ext: str, frames: int | None, size: tuple | None = None) -> None:
+    """Grey media the readers refuse; a video at the graph's asked (width, height), as the engine renders."""
     if ext in VIDEO:
-        grey_video(path, int(frames or 24))
+        grey_video(path, int(frames or 24), size=size or (64, 64))
     elif ext in AUDIO:
         silent_wav(path)
     else:
@@ -344,15 +381,18 @@ def subsets(names: list[str]):
 class Matcher:
     """Which recording answers a job, and how: exact, substituted or canned (module docstring)."""
 
-    def __init__(self, idx: dict, inputs: Path, voices: dict | None = None):
+    def __init__(self, idx: dict, inputs: Path, voices: dict | None = None, refine: tuple | None = None):
         self.idx, self.inputs, self.voices = idx, Path(inputs), dict(voices or {})
+        self.refine = tuple(refine) if refine is not None else refine_workflows()
         self.recordings: list[dict] = []
         self.seen: dict[tuple, list[str]] = {}
         self._fields: dict[int, dict] = {}
+        self._templates: dict[int, str | None] = {}
 
     def match(self, job: Job) -> Match:
-        recs = self.candidates(job)
-        kind = recs[0]["kind"] if recs else KIND_OF_OUTPUT.get(output_node(job.graph)[2] or "text")
+        joined = self.candidates(job)
+        kind = self.kind_of(job, joined)
+        recs = [r for r in joined if r.get("kind") == kind]
         index = take_index(job.values) if kind == "take" else None
         tries = self.try_of(job, index) if kind == "take" else None
         exact = next((r for r in recs if self.exact(r, job)), None)
@@ -361,7 +401,21 @@ class Matcher:
         return Match(cls, kind, rec, tries, index, self.diff(kind, rec, recs, job, index),
                      self.speaker(job) if kind == "tts_line" else None)
 
-    # ---- which recordings may answer this job --------------------------------------------
+    # ---- what the job is, and which recordings may answer it -----------------------------
+
+    def kind_of(self, job: Job, recs: list[dict]) -> str | None:
+        """The job's kind from the workflow it was filled from (module docstring), never from
+        whichever recording joined first."""
+        named = next((r.get("kind") for r in recs if job.name and (r.get("fields") or {}).get("workflow") == job.name),
+                     None)
+        ext = output_node(job.graph)[2] or "text"
+        if named:
+            return named
+        if is_refine(job.name, self.refine):
+            return "refine_crop"
+        if ext in VIDEO:
+            return "take"
+        return recs[0]["kind"] if recs else KIND_OF_OUTPUT.get(ext)
 
     def candidates(self, job: Job) -> list[dict]:
         entry = self.idx.get(job.name) if job.name else None
@@ -369,13 +423,35 @@ class Matcher:
         kinds = JOINS.get(output_node(job.graph)[2] or "text", ())
         return [r for r in self.recordings if self.joins(r, job, fps, kinds)]
 
-    @staticmethod
-    def joins(rec: dict, job: Job, fps: set, kinds: tuple) -> bool:
-        """By fingerprint (template or bare multiset), else by the workflow it names, else by kind."""
+    def joins(self, rec: dict, job: Job, fps: set, kinds: tuple) -> bool:
+        """By fingerprint (template or bare multiset) or the template the recording was identified
+        as, else by the workflow it names, else by kind."""
         if rec.get("workflow_fp"):
-            return rec["workflow_fp"] in fps
+            return rec["workflow_fp"] in fps or (job.name is not None and self.rec_template(rec) == job.name)
         named = (rec.get("fields") or {}).get("workflow")
         return named == job.name if named else rec.get("kind") in kinds
+
+    def rec_template(self, rec: dict) -> str | None:
+        """The template a recording was filled from: its recorded graph identified, else the
+        template whose class set P2's section-0 `node_classes` covers best."""
+        key = id(rec)
+        if key not in self._templates:
+            graph = self.rec_graph(rec)
+            self._templates[key] = (wf.identify(graph, self.idx) if graph else
+                                    wf.identify_classes((rec.get("fields") or {}).get("node_classes"), self.idx))
+        return self._templates[key]
+
+    @staticmethod
+    def rec_graph(rec: dict) -> dict | None:
+        """The recording's graph file opened for read (`graph`, or P2's `source_graph`); None if absent."""
+        for path in (rec.get("graph"), rec.get("source_graph")):
+            try:
+                if path and Path(path).is_file():
+                    with open(path, "r", encoding="utf-8") as fh:
+                        return json.load(fh)
+            except (OSError, ValueError):
+                continue
+        return None
 
     def try_of(self, job: Job, index: int | None) -> int:
         """How many distinct graphs of this take were asked before this one."""
@@ -831,7 +907,7 @@ class FakeComfy:
         """Write one output: canned, a take fitted to its frames, a stretched line, or the copy."""
         asked = job.values.get("frames")
         if match.cls == "canned" or src is None:
-            canned_media(dest, dest.suffix.lstrip("."), asked)
+            canned_media(dest, dest.suffix.lstrip("."), asked, asked_size(job.values))
         elif match.cls == "substituted" and match.kind == "take" and asked:
             fit_frames(Path(src), dest, int(asked))
         elif match.cls == "substituted" and match.kind == "tts_line":

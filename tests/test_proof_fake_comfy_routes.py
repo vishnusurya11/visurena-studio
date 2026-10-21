@@ -24,8 +24,9 @@ from studio.rehearsal import workflow_fingerprint as wf
 
 FIX = Path(__file__).resolve().parent / "fixtures" / "proof" / "fake_comfy"
 WORKFLOWS = FIX / "workflows"
-FFMPEG = shutil.which("ffmpeg")
-needs_ffmpeg = pytest.mark.skipif(FFMPEG is None, reason="ffmpeg is not on PATH")
+FFMPEG = fake_comfy.ffmpeg()
+"""The pinned imageio-ffmpeg binary the fake itself runs (studio/take_zoom.ffmpeg_exe), not PATH's."""
+needs_ffmpeg = pytest.mark.skipif(shutil.which(FFMPEG) is None, reason="no ffmpeg binary")
 TAKE = {"prompt": "Utterson walks the lane at night", "width": 512, "height": 512, "frames": 24,
         "seed": 1005, "ref_image_1": "utterson_ab12cd34.png", "filename_prefix": "ep_take_05"}
 
@@ -172,7 +173,7 @@ def test_graph_fields_are_every_literal_input_and_the_class_set(monkeypatch):
 def test_the_index_reads_templates_and_never_changes_them():
     before = {p: (p.stat().st_mtime_ns, sha(p)) for p in WORKFLOWS.rglob("*.json")}
     idx = wf.index(WORKFLOWS)
-    assert set(idx) == {"fx_take", "fx_caption", "fx_caption_alt", "fx_tts", "fx_grid"}
+    assert set(idx) == {"fx_take", "fx_refine", "fx_caption", "fx_caption_alt", "fx_tts", "fx_grid"}
     assert {p: (p.stat().st_mtime_ns, sha(p)) for p in WORKFLOWS.rglob("*.json")} == before
 
 
@@ -446,6 +447,7 @@ def test_a_p2_grid_entry_is_exact_on_seed_and_prompt_sha_and_substitutes_on_cell
     assert [row["class"] for row in r.answers()] == ["exact", "substituted"]
 
 
+@needs_ffmpeg
 def test_a_p2_tts_entry_needs_the_voice_map_to_be_exact(rig):
     r = rig(voices={"jekyll_0a1b2c.wav": "jekyll"})
     wav = make_wav(r.media / "l1.wav", 1.0)
@@ -470,3 +472,124 @@ def test_a_p2_refine_crop_is_exact_on_the_staged_source_bytes(rig):
                                          str(out), 40.0, "refine.json")])
     comfy.run("fx_grid", {"prompt": staged.name, "seed": 1, "filename_prefix": "crop"})
     assert r.answers()[-1]["class"] == "exact"
+
+
+# ---- a job's kind comes from the workflow it was filled from, never from a recording ----
+
+def a_job(name: str, graph: dict) -> fake_comfy.Job:
+    entry = wf.index(WORKFLOWS)[name]
+    return fake_comfy.Job("p", 1, graph, wf.identify(graph, wf.index(WORKFLOWS)),
+                          wf.inject_values(graph, entry["inject"]), 0, 0.0)
+
+
+def p2_take(graph: dict) -> dict:
+    rec_mod = p2()
+    return rec_mod.entry("take", [5, 0], rec_mod.graph_fields(graph), "T05.mp4", 300.0,
+                         "ep01/takes/r2v/T05.graph.json", tries=0, workflow_fp=rec_mod.classes_fp(graph))
+
+
+def p2_crop() -> dict:
+    """P2's refine crop as it writes one: no workflow_fp, no workflow named, keyed by the src sha."""
+    return p2().entry("refine_crop", "ab" * 32, {"take": "T05", "who": "utterson"}, "T05_p1.mp4", 40.0,
+                      "ep01/takes/r2v/refine.json")
+
+
+def grown(graph: dict) -> dict:
+    """A take graph that gained an anchor node: its bare class multiset no longer equals the recording's."""
+    out = json.loads(json.dumps(graph))
+    out["30"] = {"class_type": "LoadImage", "inputs": {"image": "anchor_1.png"}}
+    return out
+
+
+def matcher(recordings, refine=("fx_refine",)) -> fake_comfy.Matcher:
+    m = fake_comfy.Matcher(wf.index(WORKFLOWS), Path("."), refine=refine)
+    m.recordings.extend(recordings)
+    return m
+
+
+def test_a_reseeded_take_is_a_substituted_take_even_when_a_refine_crop_joins_first(monkeypatch):
+    monkeypatch.setattr(comfy, "WORKFLOWS", WORKFLOWS)
+    m = matcher([p2_crop(), p2_take(filled("fx_take", TAKE))])
+    got = m.match(a_job("fx_take", filled("fx_take", {**TAKE, "seed": 9})))
+    assert (got.cls, got.kind, got.index, got.tries) == ("substituted", "take", 5, 0)
+    assert got.rec["kind"] == "take"
+
+
+def test_a_take_whose_graph_grew_joins_its_recording_by_the_identified_template(monkeypatch):
+    monkeypatch.setattr(comfy, "WORKFLOWS", WORKFLOWS)
+    asked = grown(filled("fx_take", {**TAKE, "seed": 9}))
+    assert wf.multiset_fp(asked) != p2().classes_fp(filled("fx_take", TAKE))
+    for recs in ([p2_take(filled("fx_take", TAKE))], [p2_crop(), p2_take(filled("fx_take", TAKE))]):
+        got = matcher(recs).match(a_job("fx_take", asked))
+        assert (got.cls, got.kind, got.index, got.tries) == ("substituted", "take", 5, 0)
+
+
+def test_a_take_recording_of_another_workflow_never_answers_a_take(monkeypatch):
+    monkeypatch.setattr(comfy, "WORKFLOWS", WORKFLOWS)
+    alien = {**p2_take(filled("fx_take", TAKE)), "workflow_fp": "f" * 16,
+             "fields": {**p2_take(filled("fx_take", TAKE))["fields"], "node_classes": ["Nothing", "SaveVideo"]}}
+    got = matcher([alien]).match(a_job("fx_take", grown(filled("fx_take", TAKE))))
+    assert (got.cls, got.kind, got.index) == ("canned", "take", 5)
+
+
+def test_a_refine_job_is_a_refine_crop_with_no_index_even_with_no_refine_recording(monkeypatch):
+    monkeypatch.setattr(comfy, "WORKFLOWS", WORKFLOWS)
+    graph = filled("fx_refine", {"sheet": "utterson.png", "crop_video": "T05_p1_src.mp4",
+                                 "filename_prefix": "ep_take_05"})
+    for recs in ([], [p2_take(filled("fx_take", TAKE))], [p2_take(filled("fx_take", TAKE)), p2_crop()]):
+        got = matcher(recs).match(a_job("fx_refine", graph))
+        assert (got.kind, got.index, got.tries) == ("refine_crop", None, None)
+        assert got.rec is None or got.rec["kind"] == "refine_crop"
+
+
+def test_the_refine_workflows_are_face_refines_own_and_every_variant_named_after_it():
+    from studio import face_refine
+    found = fake_comfy.refine_workflows()
+    assert face_refine.WORKFLOW in found
+    assert fake_comfy.is_refine(face_refine.WORKFLOW + "_lms_alissonerdx", found)
+    assert not fake_comfy.is_refine("video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg", found)
+    assert not fake_comfy.is_refine(None, found)
+
+
+@needs_ffmpeg
+def test_a_grown_take_submitted_through_the_client_logs_as_a_take_with_its_index(rig):
+    r = rig()
+    video = make_video(r.media / "T05.mp4")
+    r.fake.add_recordings([p2_crop(), {**p2_take(filled("fx_take", TAKE)), "path": str(video)}])
+    r.fake.matcher.refine = ("fx_refine",)
+    comfy.wait_record(comfy.submit(grown(filled("fx_take", {**TAKE, "seed": 9}))), timeout=30, poll=0.05)
+    row = r.answers()[-1]
+    assert (row["class"], row["kind"], row["index"], row["tries"]) == ("substituted", "take", 5, 0)
+
+
+def test_the_fake_and_its_faults_run_the_pinned_ffmpeg_not_paths(monkeypatch):
+    from studio import take_zoom
+    from studio.rehearsal import comfy_faults
+    monkeypatch.setenv("PATH", "")
+    assert fake_comfy.ffmpeg() == comfy_faults.ffmpeg() == take_zoom.ffmpeg_exe()
+    assert Path(fake_comfy.ffmpeg()).is_file()
+
+
+def test_the_fence_lets_the_pinned_ffmpeg_write_the_sandbox_and_nothing_else_by_that_name(tmp_path):
+    from studio.rehearsal import fence
+    real = tmp_path / "real_library"
+    real.mkdir()
+    armed = fence.Fence.of(roots=(real,), sandbox=tmp_path / "box", repo=settings.REPO)
+    pinned = fake_comfy.ffmpeg()
+    assert fence.launch_refusal(armed, pinned, [pinned, "-i", "a.mp4", str(tmp_path / "box" / "b.mp4")], None) is None
+    assert fence.launch_refusal(armed, pinned, [pinned, "-i", "a.mp4", str(real / "b.mp4")], None)
+    other = str(tmp_path / "ffmpeg-win-x86_64-v7.1.exe")
+    assert fence.launch_refusal(armed, other, [other, "-i", "a.mp4", "b.mp4"], None)
+
+
+def test_a_p2_take_names_its_recorded_graph_and_is_identified_from_it(tmp_path, monkeypatch):
+    monkeypatch.setattr(comfy, "WORKFLOWS", WORKFLOWS)
+    lib = tmp_path / "lib"
+    (lib / "b").mkdir(parents=True)
+    (lib / "b" / "T05.graph.json").write_text(json.dumps(filled("fx_take", TAKE)), encoding="utf-8")
+    (tmp_path / "idx.json").write_text(json.dumps({"entries": [
+        {"kind": "take", "workflow_fp": "x", "key": [5, 0], "fields": {}, "source": "b/T05.graph.json"},
+        {"kind": "refine_crop", "key": "ab", "fields": {}, "source": "b/refine.json"}]}), encoding="utf-8")
+    take, crop = fake_comfy.load_recordings(tmp_path / "idx.json", root=lib)
+    assert take["source_graph"] == str(lib / "b" / "T05.graph.json") and crop["source_graph"] is None
+    assert matcher([take]).rec_template(take) == "fx_take"

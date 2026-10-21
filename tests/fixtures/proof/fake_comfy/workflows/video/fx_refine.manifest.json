@@ -1,0 +1,10 @@
+{
+ "id": "fx_refine",
+ "description": "fake-ComfyUI test fixture (2026-10-21_ep02_proof P3): a face-refine shape, a staged crop video re-rendered",
+ "inject": {
+  "sheet": {"node": "18", "field": "image"},
+  "crop_video": {"node": "30", "field": "file"},
+  "denoise": {"node": "40", "field": "denoise"},
+  "filename_prefix": {"node": "17", "field": "filename_prefix"}
+ }
+}

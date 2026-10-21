@@ -20,7 +20,6 @@ out-of-memory wording.  NO studio log in the repo holds a recorded OOM, so FATAL
 from __future__ import annotations
 
 import re
-import shutil
 import subprocess
 from collections import Counter
 from dataclasses import dataclass
@@ -124,7 +123,10 @@ def error_message(fault: Fault, prompt_id: str, node_id: str, now_ms: int) -> li
 
 
 def ffmpeg() -> str:
-    return shutil.which("ffmpeg") or "ffmpeg"
+    """The pinned imageio-ffmpeg binary studio/take_zoom.ffmpeg_exe runs, never whatever PATH holds:
+    a rehearsal with no ffmpeg on PATH must not answer HTTP 500, a fault the real engine never gives."""
+    from studio.take_zoom import ffmpeg_exe
+    return ffmpeg_exe()
 
 
 def reencode(path: Path, args: list[str]) -> None:

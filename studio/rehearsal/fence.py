@@ -186,7 +186,25 @@ def program(executable, words: list[str]) -> tuple[str, str]:
     """(normalized path, bare lower-case name without .exe) of what is launched."""
     exe = os.fsdecode(os.fspath(executable)) if executable else (words[0] if words else "")
     name = os.path.basename(exe).lower()
-    return norm(exe) or "", name[:-4] if name.endswith(".exe") else name
+    path = norm(exe) or ""
+    if path and path == pinned_ffmpeg():
+        return path, "ffmpeg"
+    return path, name[:-4] if name.endswith(".exe") else name
+
+
+@functools.lru_cache(maxsize=1)
+def pinned_ffmpeg() -> str | None:
+    """The imageio-ffmpeg binary the studio pins (studio/take_zoom.ffmpeg_exe): an ffmpeg by its
+    exact path, so `ffmpeg-win-x86_64-v7.1.exe` passes the ffmpeg rule and no look-alike does.
+    Located as imageio-ffmpeg 0.6.0 locates it, WITHOUT its `-version` probe: this runs inside the
+    audit hook, and a launch made here would re-enter it."""
+    try:
+        from imageio_ffmpeg import _definitions, _utils
+        exe = os.getenv("IMAGEIO_FFMPEG_EXE") or os.path.join(
+            _utils._get_bin_dir(), _definitions.FNAME_PER_PLATFORM.get(_definitions.get_platform(), ""))
+        return norm(exe)
+    except Exception:  # the lock pins imageio-ffmpeg; without it there is no pinned binary to allow
+        return None
 
 
 def _at(cwd, word: str) -> str:

@@ -108,6 +108,21 @@ def identify(graph: dict, idx: dict[str, dict]) -> str | None:
     return max(scored)[3] if scored else None
 
 
+def class_cover(names: set, template: dict) -> float:
+    """The share of the template's distinct classes found in `names`."""
+    wanted = {n.get("class_type") for n in template.values() if isinstance(n, dict)}
+    return len(wanted & names) / len(wanted) if wanted else 0.0
+
+
+def identify_classes(names, idx: dict[str, dict]) -> str | None:
+    """The template a recorded class SET (P2's section-0 `node_classes`, no node ids) was filled
+    from: the best covered, ties to the larger template; None below MIN_COVER."""
+    names = set(names or ())
+    scored = [(class_cover(names, e["template"]), len(e["template"]), name) for name, e in idx.items()]
+    scored = [s for s in scored if s[0] >= MIN_COVER]
+    return max(scored)[2] if scored else None
+
+
 def graph_fields(graph: dict) -> dict[str, Any]:
     """Every literal input as `<node>.<input>`, plus the class multiset under `classes`."""
     fields: dict[str, Any] = {"classes": classes(graph)}
