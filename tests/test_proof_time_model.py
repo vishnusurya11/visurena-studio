@@ -130,7 +130,15 @@ def test_the_vl_fit_is_least_squares_on_the_reply_tokens():
     fit = tm.vl_fit(calls)
     assert fit["a"] == pytest.approx(2.0) and fit["b"] == pytest.approx(0.5) and fit["n"] == 4
     assert tm.vl_read_s(fit) == pytest.approx(2.0 + 0.5 * 25)
-    assert tm.vl_fit([])["n"] == 0
+    assert tm.vl_fit([])["n"] == 0 and "refused_b" not in fit
+
+
+def test_a_negative_vl_slope_is_refused_and_a_read_is_priced_at_the_median_seconds():
+    """A read cannot get cheaper with more reply tokens: b < 0 is no model, so a read costs the median."""
+    calls = [{"seconds": s, "answer_tokens": t} for t, s in ((10, 30.0), (20, 20.0), (30, 4.0))]
+    fit = tm.vl_fit(calls)
+    assert fit["refused_b"] == pytest.approx(-1.3) and fit["b"] == 0.0
+    assert tm.vl_read_s(fit) == pytest.approx(20.0) and tm.vl_read_s(fit, tokens=1000) == pytest.approx(20.0)
 
 
 def test_the_priors_are_the_studio_models_of_each_step():
@@ -248,6 +256,32 @@ def test_the_result_rows_carry_the_row_schema_with_a_measured_clock():
 
 
 # ---- the script, on a tiny library in tmp_path ----
+
+def test_overlapped_lanes_print_only_the_step_09_total_never_a_netted_sub_step():
+    from scripts.proof import time_backtest as tb
+    lanes = [{"stage": "takes", "seconds": -324.0}, {"stage": "take_dq", "seconds": 600.0, "within": "takes"}]
+    text = tb.split09(lanes)
+    assert "-5.4" not in text and "render" not in text and "09 total 4.6 min" in text and "not a measure" in text
+    plain = tb.split09([{"stage": "takes", "seconds": 600.0}, {"stage": "take_dq", "seconds": 120.0}])
+    assert plain == "render 10.0 / checks 2.0 / refine 0.0 min"
+
+
+def test_the_report_says_the_back_test_scores_timing_rows_not_the_six_hour_clock():
+    from scripts.proof import time_backtest as tb
+    eps = [episode("j", 1.0, clock=6.02 * 3600), episode("w", 1.0)]
+    res = [{"measured_s": 4.83 * 3600}, {"measured_s": 2.0 * 3600}]
+    text = "\n".join(tb.scope_lines(eps, res))
+    assert "does not predict" in text and "6 h" in text
+    assert "j: timing rows 4.83 h, clock 6.02 h" in text and "w:" not in text
+
+
+def test_the_report_flags_a_refused_vl_slope():
+    from scripts.proof import time_backtest as tb
+    fit = tm.vl_fit([{"seconds": s, "answer_tokens": t} for t, s in ((10, 30.0), (20, 20.0), (30, 4.0))])
+    text = tb.fit_line(fit)
+    assert "-1.300" in text and "REFUSED" in text and "median 20.0 s" in text
+    good = tb.fit_line(tm.vl_fit([{"seconds": 2.0 + t, "answer_tokens": t} for t in (10, 20)]))
+    assert "REFUSED" not in good and "seconds = 2.00 + 1.000 x tokens" in good
 
 def write_episode(library: Path, book: str, n: int, start: float, scale: float) -> None:
     home = library / book / "episodes" / f"ep{n:02d}"

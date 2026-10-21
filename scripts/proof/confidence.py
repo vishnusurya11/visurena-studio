@@ -8,13 +8,20 @@ a new N every run, never an overwrite.  Confidence here is a pass count over n D
 Wilson lower bound, from checks that ran the real pipeline code; never an agent's opinion.  The rules of
 DESIGN 5.1 are enforced here, each with a test:
 - n is `n_distinct` (distinct points or distinct recovery traces), never rows or reruns; a row without it
-  counts nothing;
+  counts nothing; a check two results files hold counts from the newest file only, the older named;
 - a quality or compliance row with any `canned` answer is mechanism;
 - a row measured by an instrument whose gate failed (`instrument_state: failed`) is INSTRUMENT FAILED and
   contributes nothing;
-- a row of a time question (Q5, Q7) whose evidence lies under a sandbox, or whose clock is `recorded`, is
-  REFUSED with its path (R15);
-- a question flagged `cap_uncalibrated_shape` (Q6) is capped at PARTIAL until the ComfyUI transcript exists;
+- a time MEASURE (kind quality or baseline) of a time question (Q5, Q7) counts only with clock `measured` and
+  evidence whose every path is absolute and outside any sandbox; any other is REFUSED with its path (R15, fail
+  closed).  A mechanism row (A-caps: did a cap fire) or a gap row measures no duration, so a sandbox under it is
+  no refusal and its failure still fails the question;
+- a failed row with no per-point pass count is never given an invented k: its points print beside the count
+  as failed with unknown passes, and no Wilson bound is printed over the rest;
+- a question flagged `cap_uncalibrated_shape` (Q6) is capped at PARTIAL until the ComfyUI transcript holds a
+  pair for every contract route (`fake_comfy.shape_state`);
+- a suite summary with no rows is adapted into rows by a named adapter (incidents.json: classes handled by a
+  PASSING scenario, the rest open gaps; preconditions_ch2.json: gaps with a named outcome, the rest open gaps);
 - `compliance` rows print apart (Q8-compliance) and never upgrade a REAL-RUN question;
 - a percentage is never printed: every rate is a count over n."""
 from __future__ import annotations
@@ -22,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import subprocess
 import sys
 from datetime import datetime
@@ -32,6 +40,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from studio.rehearsal.fake_comfy import shape_state  # noqa: E402
 from studio.rehearsal.time_model import under_sandbox  # noqa: E402
 
 OUT = ROOT / "docs" / "audit" / "2026-10-21_ep02_proof"
@@ -52,17 +61,19 @@ def wilson_lb(k: int, n: int, z: float = Z) -> float:
     return (centre - spread) / (1 + z * z / n)
 
 
-ROW_LISTS = ("rows", "proof_rows")
-"""Where a results file keeps its rows: a bare list, or one of these keys beside the suite's own summary."""
+ROW_LISTS = ("proof_rows", "rows")
+"""Where a results file keeps its rows: a bare list, or the first of these keys it holds, beside the suite's
+own summary (face_replay keeps per-face data under `rows` beside its `proof_rows`)."""
 
 
 def rows_in(data) -> list[dict]:
-    if isinstance(data, list):
-        return data
-    return [r for key in ROW_LISTS for r in data.get(key) or []]
+    """The proof rows: dicts that name a check; a suite's own data under a row key is never a row."""
+    if isinstance(data, dict):
+        data = next((data[k] for k in ROW_LISTS if k in data), None) or []
+    return [r for r in data if isinstance(r, dict) and "check" in r]
 
 
-def load_results(folder: Path) -> list[dict]:
+def file_rows(folder: Path) -> list[dict]:
     """Every row of every results file, each tagged with the file it came from."""
     rows = []
     for path in sorted(Path(folder).glob("*.json")):
@@ -71,10 +82,104 @@ def load_results(folder: Path) -> list[dict]:
     return rows
 
 
+def superseded(rows: list[dict], folder: Path) -> list[dict]:
+    """The rows of a (question, check) that a NEWER results file also holds: an earlier run, never added
+    (n is distinct points, never reruns).  Newest is by mtime, then by name."""
+    age = {f: ((Path(folder) / f).stat().st_mtime, f) for f in {r["_file"] for r in rows}}
+    newest: dict[tuple, str] = {}
+    for r in rows:
+        key = (r.get("question"), r.get("check"))
+        if key not in newest or age[r["_file"]] > age[newest[key]]:
+            newest[key] = r["_file"]
+    return [r for r in rows if newest[(r.get("question"), r.get("check"))] != r["_file"]]
+
+
+def superseded_names(folder: Path) -> list[str]:
+    return sorted({f"{r['check']} ({r['_file']})" for r in superseded(file_rows(folder), folder)})
+
+
+def load_results(folder: Path) -> list[dict]:
+    """The rows of the newest run of every check, then the adapted summaries."""
+    rows = file_rows(folder)
+    old = {id(r) for r in superseded(rows, folder)}
+    kept = [r for r in rows if id(r) not in old]
+    return kept + adapted(Path(folder), kept)
+
+
 def rowless_files(folder: Path) -> list[str]:
-    """The results files that hold no proof rows (a suite's summary): read, named, never counted."""
+    """The results files that hold no proof rows and no adapter (a suite's summary): named, never counted."""
     return [p.name for p in sorted(Path(folder).glob("*.json"))
-            if not rows_in(json.loads(p.read_text(encoding="utf-8")))]
+            if p.name not in ADAPTERS and not rows_in(json.loads(p.read_text(encoding="utf-8")))]
+
+
+# ---- the summaries P2 writes, adapted into rows ----
+
+NO_SCENARIO = ("UNCOVERED", "NOT_A_FAULT")
+NAMED_OUTCOMES = ("jit", "park")
+
+
+def summary_row(check: str, kind: str, passed: bool, k: int, n: int, tried: int, evidence: str, detail: str) -> dict:
+    return {"check": check, "question": "Q6", "passed": passed, "n_points": tried, "n_distinct": n, "n_pass": k,
+            "evidence": [evidence], "match_classes": {}, "instrument": "files", "instrument_state": "n/a",
+            "kind": kind, "detail": detail}
+
+
+def open_gap(name: str, items: list[str], evidence: str) -> list[dict]:
+    """One open gap row naming every item, or none when nothing is open."""
+    return [summary_row(f"unmeasured:{name}", "gap", False, 0, 1, 1, evidence, ", ".join(items))] if items else []
+
+
+def scenario_ran(classes: dict, rows: list[dict]) -> tuple[dict, dict]:
+    """(class -> scenario for every mapped class, scenario -> its rows in the results)."""
+    mapped = {c: v.get("scenario") for c, v in classes.items() if v.get("scenario") not in NO_SCENARIO}
+    by = {s: [r for r in rows if r.get("check") == s] for s in set(mapped.values())}
+    return mapped, by
+
+
+def incident_rows(summary: dict, rows: list[dict]) -> list[dict]:
+    """DESIGN 4.5: a recorded class is handled only when its scenario ran and every row of it PASSED (a
+    mechanism row: the scenarios run on fake engines); unreproduced and unrun classes are open gaps."""
+    classes, src = summary.get("classes") or {}, "results/incidents.json"
+    mapped, by = scenario_ran(classes, rows)
+    ran = {c: s for c, s in mapped.items() if by[s]}
+    failed = [c for c, s in ran.items() if not all(r.get("passed") for r in by[s])]
+    recorded, handled = int(summary.get("recorded", len(classes))), len(ran) - len(failed)
+    detail = f"handled {handled} of {recorded} recorded classes" + (
+        f"; scenario failed: {', '.join(failed)}" if failed else "")
+    cov = summary_row("incident_coverage", "mechanism", not failed, handled, len(ran), recorded, src, detail)
+    unreproduced = [c for c, v in classes.items() if v.get("scenario") == "UNCOVERED"]
+    unrun = [f"{c} ({s})" for c, s in mapped.items() if c not in ran]
+    return ([cov] + open_gap("incident classes no scenario reproduces", unreproduced, src)
+            + open_gap("incident classes whose scenario has not run", unrun, src))
+
+
+def precondition_rows(audit: dict) -> list[dict]:
+    """DESIGN 4.3: the ch2 gaps with a rule-named outcome (a just-in-time ref step or a named park) are a
+    mechanism row (F14 tests the handling); a gap with no named outcome, and props not yet listed, are open."""
+    gaps, src = audit.get("gaps") or [], "results/preconditions_ch2.json"
+    named = [g for g in gaps if g.get("outcome") in NAMED_OUTCOMES]
+    unknown = [str(g.get("what")) for g in gaps if g.get("outcome") not in NAMED_OUTCOMES]
+    props = audit.get("props") or {}
+    unknown += [f"props ({props.get('why')})"] if props.get("status") == "REAL-RUN" else []
+    parks = sum(g["outcome"] == "park" for g in named)
+    detail = (f"{len(named)} of {len(gaps)} ch2 gaps have a named outcome ({parks} parks, {len(named) - parks} "
+              "just-in-time ref steps); F14 tests the handling")
+    row = summary_row("preconditions_ch2", "mechanism", True, len(named), len(named), len(gaps), src, detail)
+    return [row] + open_gap("ch2 preconditions with no named outcome", unknown, src)
+
+
+ADAPTERS = {"incidents.json": incident_rows, "preconditions_ch2.json": lambda data, rows: precondition_rows(data)}
+"""A summary file a suite writes with no rows, and the function that turns it into rows: (data, rows) -> rows."""
+
+
+def adapted(folder: Path, rows: list[dict]) -> list[dict]:
+    out = []
+    for name, adapt in ADAPTERS.items():
+        path = folder / name
+        data = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
+        if isinstance(data, dict) and not rows_in(data):
+            out += [{**r, "_file": name} for r in adapt(data, rows)]
+    return out
 
 
 def load_questions(path: Path) -> dict:
@@ -82,8 +187,8 @@ def load_questions(path: Path) -> dict:
 
 
 def shape_calibrated(folder: Path) -> bool:
-    """The fake ComfyUI's shape is calibrated once SR-5 has recorded a transcript there."""
-    return Path(folder).is_dir() and any(Path(folder).iterdir())
+    """Calibrated once SR-5 has recorded a pair for EVERY contract route there, never on a partial capture."""
+    return shape_state(Path(folder)) == "calibrated"
 
 
 # ---- the counting rules ----
@@ -120,11 +225,26 @@ def engine_shape_ok(transcript: bool, rows: list[dict]) -> bool:
     return transcript and not any(uncalibrated(r) and "shape" in str(r.get("instrument_state")) for r in rows)
 
 
+TIME_KINDS = ("quality", "baseline")
+"""The kinds that measure a duration.  A mechanism row counts whether a cap fired and a gap row declares a
+blocker: neither is a clock, and refusing either could only hide a failure or a blocker."""
+
+
+def measures_time(row: dict) -> bool:
+    return row.get("kind", "quality") in TIME_KINDS
+
+
 def time_refusal(row: dict) -> str:
-    """Why a time row is no evidence: a clock the fake recorded, or evidence under a sandbox."""
+    """Why a time measure is no evidence (R15, fail closed): '' only for clock `measured` with evidence whose
+    every path is absolute and outside any sandbox."""
     paths = [str(p) for p in row.get("evidence") or []]
-    if row.get("clock") == "recorded":
-        return f"clock recorded by the fake engine, never a measure ({', '.join(paths)})"
+    if row.get("clock") != "measured":
+        return f"clock {row.get('clock', 'not stated')!r}, never a measure ({', '.join(paths) or 'no evidence'})"
+    if not paths:
+        return "no evidence path: a time measure names the real record it read"
+    loose = [p for p in paths if not os.path.isabs(p)]
+    if loose:
+        return f"relative evidence, which any sandbox could hold: {', '.join(loose)}"
     boxed = [p for p in paths if under_sandbox(p)]
     return f"evidence under a sandbox: {', '.join(boxed)}" if boxed else ""
 
@@ -133,7 +253,7 @@ def contribution(row: dict, spec: dict) -> tuple[str, str]:
     """(what the row counts as, why): refused, instrument_failed, or its (possibly demoted) kind."""
     if row.get("n_distinct") is None:
         return "refused", f"no n_distinct: n is distinct points, never rows or reruns ({row.get('_file', '?')})"
-    if spec.get("time") and (why := time_refusal(row)):
+    if spec.get("time") and measures_time(row) and (why := time_refusal(row)):
         return "refused", why
     if instrument_failed(row):
         return "instrument_failed", f"INSTRUMENT FAILED: {row.get('instrument')}"
@@ -154,6 +274,11 @@ def bucket(spec: dict, rows: list[dict]) -> dict[str, list]:
 def tally(rows: list[dict]) -> tuple[int, int]:
     known = [r for r in rows if k_of(r) is not None]
     return sum(k_of(r) for r in known), sum(n_of(r) for r in known)
+
+
+def unknown_points(rows: list[dict]) -> int:
+    """The distinct points of failed rows that never said how many passed: printed beside the count."""
+    return sum(n_of(r) for r in rows if k_of(r) is None)
 
 
 # ---- the status of a question ----
@@ -209,10 +334,12 @@ def status(spec: dict, rows: list[dict], shape_ok: bool) -> dict:
     by = bucket(spec, rows)
     state, why = decide(spec, by, rows, shape_ok)
     k, n = tally(by.get("quality", []))
-    return {"status": state, "why": why, "k": k, "n": n, "lb": wilson_lb(k, n), "refused": by.get("refused", []),
+    return {"status": state, "why": why, "k": k, "n": n, "lb": wilson_lb(k, n),
+            "unknown": unknown_points(by.get("quality", [])), "refused": by.get("refused", []),
             "instrument_failed": by.get("instrument_failed", []), "mechanism": tally(by.get("mechanism", [])),
             "compliance": tally(by.get("compliance", [])), "quality": by.get("quality", []),
-            "gaps": by.get("gap", []), "baselines": by.get("baseline", [])}
+            "gaps": by.get("gap", []), "baselines": by.get("baseline", []),
+            "mechanism_rows": by.get("mechanism", []), "compliance_rows": by.get("compliance", [])}
 
 
 def evaluate(qmap: dict, rows: list[dict], shape_ok: bool) -> dict[str, dict]:
@@ -222,17 +349,19 @@ def evaluate(qmap: dict, rows: list[dict], shape_ok: bool) -> dict[str, dict]:
 
 # ---- the report ----
 
-def count(k: int, n: int) -> str:
-    if n <= 0:
-        return "no counted points"
-    return f"{k}/{n} distinct points (Wilson lower bound {wilson_lb(k, n):.3f})"
+def count(k: int, n: int, unknown: int = 0) -> str:
+    """k/n with its Wilson bound; failed points with unknown passes print beside it, and then no bound."""
+    said = "no counted points" if n <= 0 else f"{k}/{n} distinct points"
+    if unknown:
+        return said + f" + {unknown} failed points with unknown passes (no bound over a part of the points)"
+    return said if n <= 0 else said + f" (Wilson lower bound {wilson_lb(k, n):.3f})"
 
 
 def summary(qmap: dict, got: dict) -> list[str]:
     out = ["| Q | question | status | quality passes | why |", "|---|---|---|---|---|"]
     for q, spec in qmap["questions"].items():
         g = got[q]
-        out.append(f"| {q} | {spec['title']} | **{g['status']}** | {count(g['k'], g['n'])} | {g['why']} |")
+        out.append(f"| {q} | {spec['title']} | **{g['status']}** | {count(g['k'], g['n'], g['unknown'])} | {g['why']} |")
     return out + [""]
 
 
@@ -254,20 +383,28 @@ def staged(spec: dict, runs: dict) -> list[str]:
     return out
 
 
+def gap_line(r: dict) -> str:
+    """A time gap prints its share of the p90; any other gap prints what it names."""
+    if "p90_share" in r:
+        said = " (p90 share UNKNOWN)" if r["p90_share"] is None else f" (p90 share {r['p90_share']:.3f})"
+    else:
+        said = f": {r['detail']}" if r.get("detail") else ""
+    return f"- open gap: {r['check']}{said}"
+
+
 def evidence_lines(g: dict) -> list[str]:
-    out = [row_line(r) for r in g["quality"]]
+    out = [row_line(r) for k in ("quality", "mechanism_rows", "compliance_rows") for r in g.get(k, [])]
     out += [f"- INSTRUMENT FAILED: {r['check']} ({r.get('instrument')}): contributes nothing"
             for r in g["instrument_failed"]]
     out += [f"- REFUSED: {r.get('check', '?')}: {why}" for r, why in g["refused"]]
-    out += [f"- open gap: {r['check']}" + (f" (p90 share {r['p90_share']:.3f})" if r.get("p90_share") is not None
-                                           else " (p90 share UNKNOWN)") for r in g["gaps"] if not r["passed"]]
+    out += [gap_line(r) for r in g["gaps"] if not r["passed"]]
     out += [f"- baseline: {r['check']} {k_of(r) or 0} of {n_of(r)}" for r in g["baselines"]]
     return out
 
 
 def section(q: str, spec: dict, g: dict, runs: dict) -> list[str]:
     out = [f"## {q} {spec['title']}: {g['status']}", "", f"Why: {g['why']}.", "",
-           f"Quality: {count(g['k'], g['n'])}.  Mechanism exercised: {g['mechanism'][0]}/{g['mechanism'][1]} "
+           f"Quality: {count(g['k'], g['n'], g['unknown'])}.  Mechanism exercised: {g['mechanism'][0]}/{g['mechanism'][1]} "
            "distinct points (never counted toward the question).", ""]
     if spec.get("compliance_apart"):
         out += [f"{q}-compliance (kind compliance, printed apart, never upgrades {q}): "
@@ -293,10 +430,13 @@ def report(path: Path, qmap: dict, got: dict, ctx: dict) -> str:
              f"HEAD {head_sha()})", "",
              f"Results read: {ctx['results']} ({len(ctx['rows'])} rows from {', '.join(files) or 'no files'}"
              + (f"; no proof rows in {', '.join(ctx['rowless'])}" if ctx.get("rowless") else "") + ").",
+             "Superseded by a newer results file (an earlier run, never counted): "
+             + (", ".join(ctx["superseded"]) if ctx.get("superseded") else "none") + ".",
              "Fake ComfyUI shape: " + ("calibrated (a recorded transcript exists)." if ctx["shape_ok"] else
                                        "uncalibrated (no recorded transcript; SR-5): every Q6 row is capped at PARTIAL."),
              "Rules (DESIGN 5.1, in code): n is distinct points; canned makes a row mechanism; a failed instrument "
-             "counts nothing; a sandbox or recorded clock is refused for Q5 and Q7; no rate without its count.", ""]
+             "counts nothing; a Q5/Q7 time measure counts only with a measured clock and absolute evidence outside "
+             "any sandbox; mechanism rows still count and can fail; no rate without its count.", ""]
     lines += summary(qmap, got)
     for q, spec in qmap["questions"].items():
         lines += section(q, spec, got[q], qmap["staged_runs"])
@@ -328,7 +468,8 @@ def main(argv: list[str] | None = None) -> int:
     qmap, rows = load_questions(args.questions), load_results(args.results)
     shape_ok = engine_shape_ok(shape_calibrated(args.transcript), rows)
     path = next_path(args.out_dir)
-    ctx = {"rows": rows, "results": args.results, "shape_ok": shape_ok, "rowless": rowless_files(args.results)}
+    ctx = {"rows": rows, "results": args.results, "shape_ok": shape_ok, "rowless": rowless_files(args.results),
+           "superseded": superseded_names(args.results)}
     write_new(path, report(path, qmap, evaluate(qmap, rows, shape_ok), ctx))
     print(path)
     print(path.read_text(encoding="utf-8"))

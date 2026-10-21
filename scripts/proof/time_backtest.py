@@ -65,14 +65,36 @@ def episode(name: str, rec: dict) -> tuple[tm.Episode, list[dict]]:
 
 
 def split09(first: list[dict]) -> str:
-    """Step 09's measured render / checks / refine, or why the split is not a measure."""
+    """Step 09's measured render / checks / refine; with overlapped lanes only the 09 total, since netting a
+    lane out of its parent can leave a sub-step negative, and a negative minute is no measure."""
     got = {"render": 0.0, "checks": 0.0, "refine": 0.0}
     for r in first:
         if r["stage"] in SUB09:
             got[SUB09[r["stage"]]] += float(r.get("seconds") or 0)
-    lanes = any(r.get("within") == "takes" for r in first)
-    text = " / ".join(f"{k} {v / 60:.1f}" for k, v in got.items())
-    return text + (" min (OVERLAPPED lanes: the split is netting, only the 09 total is a measure)" if lanes else " min")
+    if any(r.get("within") == "takes" for r in first):
+        return (f"09 total {sum(got.values()) / 60:.1f} min (OVERLAPPED lanes: a sub-step split is netting, "
+                "not a measure, so none is printed)")
+    return " / ".join(f"{k} {v / 60:.1f}" for k, v in got.items()) + " min"
+
+
+def fit_line(fit: dict) -> str:
+    """The VL read fit as the predictor uses it; a refused negative slope is said, with the median it uses."""
+    if "refused_b" in fit:
+        return (f"VL fit over {fit['n']} logged reads: slope {fit['refused_b']:.3f} s per token REFUSED (b < 0 is "
+                f"no model: it prices a long read at or below zero); a read is priced at the median "
+                f"{fit['median_s']:.1f} s.")
+    return (f"VL fit over {fit['n']} logged reads: seconds = {fit['a']:.2f} + {fit['b']:.3f} x tokens "
+            f"({tm.vl_read_s(fit):.1f} s at the median {fit['tokens']:.0f} tokens).")
+
+
+def scope_lines(episodes: list[tm.Episode], results: list[dict]) -> list[str]:
+    """What the back-test scores against what Q5 asks: timing-row seconds, not the clock to the first master."""
+    each = [f"{e.name}: timing rows {hours(r['measured_s'])}, clock {hours(e.clock_s)}"
+            for e, r in zip(episodes, results) if e.clock_s is not None]
+    return ["SCOPE: this back-test scores the first pass's timing-row seconds.  Q5 asks about the machine clock "
+            "to the first master (clock.jsonl) against 6 h; the difference is drive overhead and killed runs "
+            "(the uncovered-clock gap below).  So this back-test does not predict the 6 h quantity"
+            + (f" ({'; '.join(each)})." if each else "."), ""]
 
 
 def hours(s: float | None) -> str:
@@ -138,10 +160,9 @@ def gap_lines(shared: list[tuple[tm.Gap, float | None]], denom: float) -> list[s
 
 def report(path: Path, ctx: dict) -> str:
     lines = [str(path), "", f"# Time-model back-test ({datetime.now().astimezone():%Y-%m-%d %H:%M %Z}, HEAD {ctx['sha']})",
-             "", f"Episodes (pre-registered): {', '.join(e.name for e in ctx['episodes'])}.  VL fit over "
-             f"{ctx['fit']['n']} logged reads: seconds = {ctx['fit']['a']:.2f} + {ctx['fit']['b']:.3f} x tokens "
-             f"({tm.vl_read_s(ctx['fit']):.1f} s at the median {ctx['fit']['tokens']:.0f} tokens).  "
+             "", f"Episodes (pre-registered): {', '.join(e.name for e in ctx['episodes'])}.  {fit_line(ctx['fit'])}  "
              f"Gap shares are taken on {ctx['target'].name}'s inputs (ep02's plan does not exist until SR-2).", ""]
+    lines += scope_lines(ctx["episodes"], ctx["results"])
     lines += base_lines(ctx["episodes"]) + loo_lines(ctx["results"], ctx["episodes"])
     lines += step_lines(ctx["results"], ctx["episodes"], ctx["firsts"])
     lines += gap_lines(ctx["shared"], ctx["denom"]) + [f"Q5 rows: {ctx['rows_path']}", ""]

@@ -10,13 +10,18 @@
 #   real_run true: no recording can answer it; the status is REAL-RUN whatever the rows say
 #   cap_uncalibrated_shape  true: capped at PARTIAL while the fake ComfyUI's shape is uncalibrated (R12)
 #   compliance_apart        true: kind=compliance rows print apart and never upgrade the question (R17)
-#   time     true: a row whose evidence lies under a sandbox, or whose clock is `recorded`, is refused (R15)
+#   time     true: a time MEASURE (kind quality or baseline) counts only with clock `measured` and evidence
+#            whose every path is absolute and outside any sandbox; any other is refused (R15, fail closed).
+#            Mechanism and gap rows (A-caps) measure no duration: they still count, and still fail
 #   baseline what prints beside the question as its base rate
 #
 # Check ids as emitted today: A-caps (Q5), A-canned, S0b, A-ledger (Q6) by studio/rehearsal/asserts.py;
-# time_backtest_loo, unmeasured:<step>, base_rate_under_6h (Q5) by scripts/proof/time_backtest.py.  The face
+# time_backtest_loo, unmeasured:<step>, base_rate_under_6h (Q5) by scripts/proof/time_backtest.py;
+# incident_coverage and preconditions_ch2 (Q6, mechanism, with their open gaps) by confidence.py's adapters
+# over P2's results/incidents.json and results/preconditions_ch2.json summaries.  The face
 # suite's gate and regression ids as P6 emits them (instrument_gate.face_eye.cel, panel_take_size); its per-face
-# ids are the design's names until P6 writes them; a renamed check is edited HERE, in review.
+# ids are the design's names until P6 writes them (face_replay.unrecorded_kill, the recordings-coverage gate, and
+# face_replay.outside_invariant are P6's); a renamed check is edited HERE, in review.
 
 staged_runs:
   SR-0:
@@ -53,15 +58,15 @@ questions:
     checks:
       - {check: face_first_pass_vs_iter1, min_n: 30}
       - {check: refine_decision_recall, min_n: 12}
-      - {check: outside_invariant, min_n: 12, kind: mechanism}
-    gates: [instrument_gate.face_eye.cel, unrecorded_le_half]
+      - {check: face_replay.outside_invariant, min_n: 12, kind: mechanism}
+    gates: [instrument_gate.face_eye.cel, face_replay.unrecorded_kill]
     staged: [SR-1, SR-0]
   Q2:
     title: as good as iter3, first time
     checks:
       - {check: face_first_pass_vs_iter3, min_n: 30}
       - {check: D1, min_n: 5}
-    gates: [instrument_gate.face_eye.cel, unrecorded_le_half]
+    gates: [instrument_gate.face_eye.cel, face_replay.unrecorded_kill]
     staged: [SR-1, SR-3, SR-0]
   Q3:
     title: mid faces get drawn eyes
@@ -88,8 +93,8 @@ questions:
     title: start to upload-ready, unattended
     cap_uncalibrated_shape: true
     checks:
-      - {check: incident_coverage, min_n: 1}
-      - {check: preconditions_ch2, min_n: 1}
+      - {check: incident_coverage, min_n: 1, kind: mechanism}
+      - {check: preconditions_ch2, min_n: 1, kind: mechanism}
       - {check: S0a, min_n: 1}
       - {check: S0b, min_n: 1}
       - {check: A-canned, min_n: 1, kind: mechanism}

@@ -189,16 +189,26 @@ def inputs_from(shots_rows: list[dict], placed: dict, plan: dict) -> Inputs:
                   faces=tuple(len(r.get("faces") or []) for r in shots_rows))
 
 
+def least_squares(xy: list[tuple[float, float]]) -> tuple[float, float]:
+    """(a, b) of y = a + b * x."""
+    mx, my = (statistics.fmean(v) for v in zip(*xy))
+    var = sum((x - mx) ** 2 for x, _ in xy)
+    b = sum((x - mx) * (y - my) for x, y in xy) / var if var else 0.0
+    return my - b * mx, b
+
+
 def vl_fit(calls: list[dict]) -> dict:
-    """seconds = a + b * answer_tokens, least squares over the logged reads; `tokens` is their median."""
+    """seconds = a + b * answer_tokens, least squares over the logged reads; `tokens` is their median.  A
+    negative b is no model (a read never gets cheaper with a longer reply, and it prices a read at or below
+    zero): it is kept as `refused_b` and a read is priced at the median read seconds whatever its tokens."""
     xy = [(float(c["answer_tokens"]), float(c["seconds"])) for c in calls
           if c.get("seconds") is not None and c.get("answer_tokens") is not None]
     if not xy:
         return {"a": 0.0, "b": 0.0, "n": 0, "tokens": 0.0}
-    mx, my = (statistics.fmean(v) for v in zip(*xy))
-    var = sum((x - mx) ** 2 for x, _ in xy)
-    b = sum((x - mx) * (y - my) for x, y in xy) / var if var else 0.0
-    return {"a": my - b * mx, "b": b, "n": len(xy), "tokens": statistics.median(x for x, _ in xy)}
+    a, b = least_squares(xy)
+    got = {"a": a, "b": b, "n": len(xy), "tokens": statistics.median(x for x, _ in xy),
+           "median_s": statistics.median(y for _, y in xy)}
+    return got | {"a": got["median_s"], "b": 0.0, "refused_b": b} if b < 0 else got
 
 
 def vl_read_s(fit: dict, tokens: float | None = None) -> float:

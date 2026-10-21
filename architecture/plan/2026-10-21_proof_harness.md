@@ -40,3 +40,11 @@ package spends GPU time or a paid call; the staged real runs SR-0..SR-5 wait for
   OPERATOR 13,386 -> 13,206 B, the history moved to LESSONS_ARCHIVE).  The first report over the real
   results folder (CONFIDENCE_iter2.md): Q1/Q2 REAL-RUN (the face_eye gate failed), Q3 FAILING (the panel->take
   regression failed its kill), Q5 FAILING (the back-test), Q6 PARTIAL (no scenario rows yet), Q4/Q7/Q8 REAL-RUN.
+- 2026-10-21 -- P7 review fixes: R15 fails closed (a time measure counts only with clock `measured` and absolute
+  evidence outside any sandbox) and refuses only time measures, so a failing sandbox A-caps row turns Q5
+  FAILING; the Q6 cap lifts only on a transcript for every contract route; failed points with unknown passes
+  print beside the count with no bound; P2's incidents and ch2 summaries are adapted into Q6 rows and open
+  gaps; reruns and a suite's per-face `rows` are no longer counted (102 rows read as 30); the VL fit's negative
+  slope (-0.502) is refused for the median read; the back-test states it scores timing rows, not the 6 h clock
+  (still FAIL, 2 of 4). Report: CONFIDENCE_iter5.md. Correction: c229514's message says the doc tests passed
+  61; that run passed 49.
