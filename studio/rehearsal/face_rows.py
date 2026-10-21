@@ -193,7 +193,9 @@ def sr1_estimate(entries: dict, takes: list[str]) -> dict:
 
 
 def noise_band(first: list[float], again: list[float], plus: list[float], minus: list[float]) -> dict:
-    """The eye measure's noise: its largest change read twice on the same crops, and one frame either way."""
-    repeat = max((abs(a - b) for a, b in zip(first, again)), default=0.0)
-    shift = max((abs(a - b) for side in (plus, minus) for a, b in zip(first, side)), default=0.0)
-    return {"repeat": round(float(repeat), 3), "shift": round(float(shift), 3)}
+    """The eye measure's noise: its largest change read twice on the same crops, and one frame either way;
+    None where nothing was read (a band over no reading is unmeasured, never 0)."""
+    repeat = [abs(a - b) for a, b in zip(first, again)]
+    shift = [abs(a - b) for side in (plus, minus) for a, b in zip(first, side)]
+    return {"repeat": round(float(max(repeat)), 3) if repeat else None,
+            "shift": round(float(max(shift)), 3) if shift else None, "reads": len(first)}

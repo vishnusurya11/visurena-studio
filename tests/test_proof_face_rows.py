@@ -115,7 +115,7 @@ def test_the_sr1_estimate_sums_measured_gpu_and_says_when_only_a_price_exists():
 
 
 def test_the_noise_band_is_the_largest_change_of_a_repeat_or_a_one_frame_shift():
-    assert rows.noise_band([10.0, 12.0], [10.0, 12.0], [11.0, 15.0], [9.0, 12.5]) == {"repeat": 0.0, "shift": 3.0}
+    assert rows.noise_band([10.0, 12.0], [10.0, 12.0], [11.0, 15.0], [9.0, 12.5]) == {"repeat": 0.0, "shift": 3.0, "reads": 2}
 
 
 def test_a_record_is_read_by_name_and_a_missing_one_is_its_default(tmp_path):
@@ -149,3 +149,8 @@ def test_the_sr1_inputs_price_the_replays_crops_and_measure_only_the_real_record
     real = {"T05": {"take_sha8": "aa", "gpu_busy_s": 77.0}, "T06": {"take_sha8": "bb", "gpu_busy_s": 9.0}}
     assert rows.sr1_inputs(replay, real) == {"T05": {"gpu_s_priced": 41.8, "gpu_busy_s": 77.0}}
     assert rows.sr1_inputs(replay, {"T05": {"take_sha8": "zz", "gpu_busy_s": 77.0}}) == {"T05": {"gpu_s_priced": 41.8}}
+
+
+def test_a_noise_band_over_no_reading_is_unmeasured_never_zero():
+    assert rows.noise_band([], [], [], []) == {"repeat": None, "shift": None, "reads": 0}
+    assert rows.noise_band([10.0], [10.0], [], [])["shift"] is None

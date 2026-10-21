@@ -182,3 +182,11 @@ def test_the_step_10_paste_moves_nothing_outside_the_face_core_and_the_measure_s
     paster = fp.Paster(lambda f: f, [fp.Span(0, 0, FRAMES, 0, 1.0, None, (track,))], 256, 256, 1)
     pasted = [paster(f) for f in frames]
     assert face_rows.outside_moved(frames[8], pasted[8], np.zeros((256, 256), bool)) > 0   # the paste is seen
+
+
+def test_a_track_recorded_before_its_faces_is_read_where_the_windows_put_the_face():
+    """ep01's track files hold no per-frame `faces`: the eye is read at face_track.windows' centre."""
+    rng = np.random.default_rng(3)
+    frames = [rng.integers(0, 255, (768, 768, 3), dtype=np.uint8) for _ in range(12)]
+    doc = {"start": 0, "life": [0, 11], "windows": [[0, 0, 300]] * 12, "face_px": 120.0, "side": 300}
+    assert len(fx.crop_eyes(frames, doc, [2, 5, 8])) == 3

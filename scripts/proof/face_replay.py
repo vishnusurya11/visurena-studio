@@ -336,15 +336,29 @@ def pastes(room: Path, doc: dict) -> dict[tuple, float]:
 
 # ---- the eye measure's own noise ---------------------------------------------------------------------
 
+def face_box(doc: dict, t: int, side: int) -> tuple | None:
+    """The face box on crop frame t (crop pixels): the run's recorded face, else where face_track.windows
+    puts it (centre, FACE_Y down) at the track's face share; None when neither is known."""
+    from studio import face_paste as fp
+    faces = doc.get("faces") or []
+    share = fp.face_share(doc)
+    if t < len(faces) and faces[t]:
+        cx, cy, fh = (float(v) for v in faces[t])
+    elif share is not None:
+        cx, cy, fh = 0.5, fp.FACE_Y, share
+    else:
+        return None
+    return ((cx - fh / 2) * side, (cy - fh / 2) * side, (cx + fh / 2) * side, (cy + fh / 2) * side)
+
+
 def crop_eyes(frames: list, doc: dict, ks: list[int]) -> list[float]:
-    """The drawn-eye score at crop frames `ks`, each read at the run's recorded face box."""
+    """The drawn-eye score at crop frames `ks`, each read at the face box (face_box)."""
     from studio import face_eye
-    faces, side, out = doc.get("faces") or [], frames[0].shape[0], []
+    out = []
     for k in ks:
-        t = int(doc["start"]) + k
-        if 0 <= k < len(frames) and t < len(faces) and faces[t]:
-            cx, cy, fh = (float(v) * side for v in faces[t])
-            out.append(face_eye.eye_score(face_eye.face_gray(frames[k], (cx - fh / 2, cy - fh / 2, cx + fh / 2, cy + fh / 2))))
+        box = face_box(doc, int(doc["start"]) + k, frames[0].shape[0]) if 0 <= k < len(frames) else None
+        if box is not None:
+            out.append(face_eye.eye_score(face_eye.face_gray(frames[k], box)))
     return out
 
 
@@ -425,8 +439,10 @@ def outside_summary(pasted: dict) -> dict:
 
 
 def noise_summary(noise: dict) -> dict:
-    return {"crops": len(noise), "repeat_max": max((b["repeat"] for b in noise.values()), default=None),
-            "shift_max": max((b["shift"] for b in noise.values()), default=None),
+    """The band over every crop that was READ (a crop with no reading is counted apart, never as 0)."""
+    read = [b for b in noise.values() if b["repeat"] is not None]
+    return {"crops": len(noise), "read": len(read), "repeat_max": max((b["repeat"] for b in read), default=None),
+            "shift_max": max((b["shift"] for b in read if b["shift"] is not None), default=None),
             "by_crop": {f"{t} {w}": b for (t, w), b in noise.items()}}
 
 
