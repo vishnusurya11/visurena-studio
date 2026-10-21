@@ -192,12 +192,21 @@ def measure(video, seconds: float | None = None, start: float = 0.0, exempt: boo
                 "advisory": is_advisory(m, placed, exempt)}
 
 
+HARD_WORDS = " HARD: the whole frame stands still"
+"""The note's wall clause; a row demoted to an advisory drops it (five-iterations B4.3)."""
+
+
 def note(m: dict) -> str:
     """The row's note: the static share, its longest run, and why it fails."""
     text = f"{int(round(m['static_share'] * 100))}% static, run {m['longest_static_run_s']}s"
     if m.get("exempt"):
         return text + " (planned still)"
-    return text + (" HARD: the whole frame stands still" if m.get("still") else "")
+    return text + (HARD_WORDS if m.get("still") else "")
+
+
+def advisory_note(text: str) -> str:
+    """The note of a frozen-whole row the grammar exemption demoted: its numbers, never 'HARD'."""
+    return text.replace(HARD_WORDS, "") + " ADVISORY (locked on the grammar)"
 
 
 def gate_args(m: dict) -> dict:

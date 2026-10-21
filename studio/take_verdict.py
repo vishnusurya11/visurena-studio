@@ -674,7 +674,7 @@ def grammar_still(rows: list[Gate], record: dict) -> list[Gate]:
         return rows
     for g in rows:
         if g.name == stillness.KIND and g.hard and not g.ok:
-            g.hard, g.note = False, f"{g.note} (locked on the grammar, advisory)"
+            g.hard, g.note = False, stillness.advisory_note(g.note)
     return rows
 
 

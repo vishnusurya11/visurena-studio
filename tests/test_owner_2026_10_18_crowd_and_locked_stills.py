@@ -52,7 +52,7 @@ def test_a_locked_speaking_grammar_shot_is_advisory():
     rec = {"grammar": True, "lane": "dialogue", "motions": [LOCKED_TALK]}
     rows = grammar_still([frozen_row(), Gate("lip-sync", 0.0, True, True)], rec)
     row = next(g for g in rows if g.name == "frozen-whole")
-    assert row.hard is False and "advisory" in row.note
+    assert row.hard is False and "ADVISORY" in row.note
 
 
 def test_a_speaking_shot_with_no_lip_sync_read_stays_hard():
