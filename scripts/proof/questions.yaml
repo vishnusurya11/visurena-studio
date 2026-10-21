@@ -1,0 +1,113 @@
+# The proof report's question map (2026-10-21_ep02_proof DESIGN 5.2), read by scripts/proof/confidence.py.
+#
+# Reviewable data, not code.  Each question names:
+#   checks   the checks PROVEN needs, each with the distinct-point minimum it must reach (min_n) and the
+#            kind of row that satisfies it (quality unless said); a check id is the design's id (S0a, F1,
+#            A-caps, ...) or the suite's row name (face_replay rows, time_backtest_loo, ...)
+#   gates    checks whose row must PASS before the question can leave REAL-RUN (an instrument's calibration,
+#            a recording's coverage); a failing gate row means "not answerable from recordings", never FAILING
+#   staged   the staged real runs (staged_runs below) that would answer what recordings cannot
+#   real_run true: no recording can answer it; the status is REAL-RUN whatever the rows say
+#   cap_uncalibrated_shape  true: capped at PARTIAL while the fake ComfyUI's shape is uncalibrated (R12)
+#   compliance_apart        true: kind=compliance rows print apart and never upgrade the question (R17)
+#   time     true: a row whose evidence lies under a sandbox, or whose clock is `recorded`, is refused (R15)
+#   baseline what prints beside the question as its base rate
+#
+# Check ids as emitted today: A-caps (Q5), A-canned, S0b, A-ledger (Q6) by studio/rehearsal/asserts.py;
+# time_backtest_loo, unmeasured:<step>, base_rate_under_6h (Q5) by scripts/proof/time_backtest.py.  The face
+# suite's ids (Q1-Q3) are the design's names until P6 emits rows; a renamed check is edited HERE, in review.
+
+staged_runs:
+  SR-0:
+    what: owner labels on the ep01 face strip (and recorded crops from other delivered episodes to reach n >= 30)
+    machine_min: 0
+    owner_min: 2-5
+    owner_go: true
+  SR-1:
+    what: the first-pass refine RENDERED on ep01's iter1 takes, on the GPU, ComfyUI idle
+    machine_min: 20
+    machine_note: priced at face_refine.REFINE_TAKE_S (81 s) x ep01's 15 refined takes; P6 prints the gpu_busy_s sum
+    owner_go: true
+  SR-2:
+    what: record_writer.py, one real step-02 session for ch2 in a sandbox (subscription)
+    machine_min: 40
+    owner_go: true
+  SR-3:
+    what: re-render 3 more recorded refine graphs and compare bytes (D1 n from 2 to 5)
+    machine_min: 6
+    owner_go: true
+  SR-4:
+    what: ep02 steps 01-08 in a sandbox under the real engine (never the real library), no takes
+    machine_min: 120
+    owner_go: true
+  SR-5:
+    what: record_comfy_transcript.py proxy during the next real job (calibrates the fake ComfyUI's shape)
+    machine_min: 0
+    machine_note: rides a real job; no extra machine time
+    owner_go: true
+
+questions:
+  Q1:
+    title: faces better than ep01's first master
+    checks:
+      - {check: face_first_pass_vs_iter1, min_n: 30}
+      - {check: refine_decision_recall, min_n: 12}
+      - {check: outside_invariant, min_n: 12, kind: mechanism}
+    gates: [instrument_gate_face_eye, unrecorded_le_half]
+    staged: [SR-1, SR-0]
+  Q2:
+    title: as good as iter3, first time
+    checks:
+      - {check: face_first_pass_vs_iter3, min_n: 30}
+      - {check: D1, min_n: 5}
+    gates: [instrument_gate_face_eye, unrecorded_le_half]
+    staged: [SR-1, SR-3, SR-0]
+  Q3:
+    title: mid faces get drawn eyes
+    checks:
+      - {check: face_mid_tier, min_n: 10}
+      - {check: panel_take_r2, min_n: 8}
+    gates: [instrument_gate_face_eye]
+    staged: [SR-4, SR-0]
+  Q4:
+    title: tiny faces look good
+    real_run: true
+    checks:
+      - {check: tiny_face_path, min_n: 1, kind: mechanism}
+    staged: [SR-0]
+  Q5:
+    title: ep02 machine time under 6 h
+    time: true
+    checks:
+      - {check: time_backtest_loo, min_n: 4}
+      - {check: A-caps, min_n: 1, kind: mechanism}
+    staged: [SR-2, SR-4]
+    baseline: "ep01: 0 of 1 episodes under 6 h (first master 6.02 h, clock.jsonl)"
+  Q6:
+    title: start to upload-ready, unattended
+    cap_uncalibrated_shape: true
+    checks:
+      - {check: incident_coverage, min_n: 1}
+      - {check: preconditions_ch2, min_n: 1}
+      - {check: S0a, min_n: 1}
+      - {check: S0b, min_n: 1}
+      - {check: A-canned, min_n: 1, kind: mechanism}
+      - {check: F1, min_n: 1, kind: mechanism}
+      - {check: F2, min_n: 1, kind: mechanism}
+      - {check: F9, min_n: 1, kind: mechanism}
+      - {check: F13, min_n: 1, kind: mechanism}
+      - {check: F18, min_n: 1, kind: mechanism}
+    staged: [SR-5, SR-4]
+  Q7:
+    title: finished the same day, with an operator
+    real_run: true
+    time: true
+    staged: []
+    baseline: "ep01: 30.85 h wall, 4.7 h unlogged waiting; no rehearsal clock answers this (R15)"
+  Q8:
+    title: story and staging better
+    real_run: true
+    compliance_apart: true
+    checks:
+      - {check: plan_battery_ch2, min_n: 1, kind: compliance}
+    staged: [SR-4, SR-2]

@@ -1,0 +1,12 @@
+[
+ {"check": "time_backtest_loo", "question": "Q5", "passed": true, "n_points": 4, "n_distinct": 4, "n_pass": 3,
+  "evidence": ["library/wotw/episodes/ep25/timing.jsonl"], "match_classes": [], "instrument": "timing.jsonl", "instrument_state": "n/a", "kind": "quality", "clock": "measured"},
+ {"check": "unmeasured:GPU whisper worker", "question": "Q5", "passed": false, "n_points": 1, "n_distinct": 1, "n_pass": 0,
+  "evidence": ["library/jekyll/episodes/ep01/timing.jsonl"], "match_classes": [], "instrument": "timing.jsonl", "instrument_state": "n/a", "kind": "gap", "clock": "measured", "p90_s": null, "p90_share": null},
+ {"check": "base_rate_under_6h", "question": "Q5", "passed": false, "n_points": 1, "n_distinct": 1, "n_pass": 0,
+  "evidence": ["library/jekyll/episodes/ep01/clock.jsonl"], "match_classes": [], "instrument": "timing.jsonl", "instrument_state": "n/a", "kind": "baseline", "clock": "measured"},
+ {"check": "F12", "question": "Q5", "passed": true, "n_points": 1, "n_distinct": 1, "n_pass": 1,
+  "evidence": ["sandbox_runs/f12/clock.jsonl"], "match_classes": ["substituted"], "instrument": "none", "instrument_state": "n/a", "kind": "quality", "clock": "recorded"},
+ {"check": "same_day", "question": "Q7", "passed": true, "n_points": 1, "n_distinct": 1, "n_pass": 1,
+  "evidence": ["C:/Users/x/AppData/Local/Temp/visurena_rehearsal/r1/library/b/episodes/ep02/clock.jsonl"], "match_classes": ["exact"], "instrument": "none", "instrument_state": "n/a", "kind": "quality", "clock": "measured"}
+]
