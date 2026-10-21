@@ -70,8 +70,10 @@ def ask_pictures(folder: Path) -> list[Path]:
 
 
 def fill_kind(memo: Path, items: Iterable, key_of: Callable, read: Callable) -> dict:
-    """Read every item whose key the memo lacks; the counts and the seconds it took."""
+    """Read every item whose key the memo lacks; the counts and the seconds it took.  The memo is
+    written after each reading, so a worker that dies mid-fill loses only the item it died on."""
     have, began, filled, kept = read_memo(memo), time.monotonic(), 0, 0
+    memo.parent.mkdir(parents=True, exist_ok=True)
     for item in items:
         key = key_of(item)
         if key is None or key in have:
@@ -79,7 +81,7 @@ def fill_kind(memo: Path, items: Iterable, key_of: Callable, read: Callable) -> 
             continue
         have[key] = read(item)
         filled += 1
-    memo.parent.mkdir(parents=True, exist_ok=True)
+        memo.write_text(json.dumps(have, indent=1), encoding="utf-8")
     memo.write_text(json.dumps(have, indent=1), encoding="utf-8")
     return {"filled": filled, "kept": kept, "seconds": round(time.monotonic() - began, 2)}
 
