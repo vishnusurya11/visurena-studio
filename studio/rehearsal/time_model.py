@@ -1,0 +1,377 @@
+"""The episode time model and its back-test (2026-10-21_ep02_proof DESIGN 4.7, package P7; skeptic R15, R16).
+
+A predictor from an episode's INPUTS only (the plan's shots and setups, the placed lines, each take's
+frames and planned faces) prices every step with the studio's own models -- `episode_clock`'s take model
+and scaled norms, the VL read fit (`library/vlm_calls.jsonl`, seconds = a + b * tokens), the face
+refine's GPU price (`face_refine.price`) -- and corrects each step by the measured/prior ratio of the
+OTHER episodes (leave one out; the band is `eta.band`).  The measure is timing.jsonl step totals of the
+first pass (to the first dossier), contended rows marked, repair windows apart.  A step the current code
+runs that no record measures is a Gap with its p90 bound; Q5 cannot be PROVEN while any Gap's share of
+the p90 is above 5 hundredths, or unknown.  Inputs are REAL records only: a path under a sandbox is
+refused, because a rehearsal's clock is the fake's recording, never a measure."""
+from __future__ import annotations
+
+import json
+import math
+import os
+import statistics
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from studio import episode_clock, eta, face_refine, settings, step_caps
+from studio.run_budget import OWNER_LIMIT_SECONDS
+
+STEPS = ("02", "03", "04", "07", "08", "09", "10", "11", "13", "small")
+"""The steps the back-test scores; `small` holds 01, 05, 06 and 12 (seconds each, never minutes)."""
+PREDICTED = tuple(s for s in STEPS if s != "13")
+"""Step 13 (publish) has no timed row in any era: it is a Gap bounded by its wall, never predicted."""
+MARK = "mark"
+TOLERANCE, NEED, HELD_OUT = 0.15, 3, 4
+"""Pre-registered (DESIGN 4.7): total |error| <= 0.15 on >= 3 of 4 held-out episodes."""
+SHARE_LIMIT = 0.05
+PROOF_SANDBOX = settings.REPO / "docs" / "audit" / "2026-10-21_ep02_proof" / "sandbox"
+SANDBOX_DIR = "visurena_rehearsal"
+"""`sandbox.default_base()`'s folder name: every built sandbox lives under one."""
+
+
+class SandboxInput(ValueError):
+    """A time input under a rehearsal sandbox: its clock is a recording, never a measure (R15)."""
+
+
+class UnmappedStage(KeyError):
+    """A timing stage (or an era) the reviewed per-era map does not name."""
+
+
+# ---- the sandbox refusal ----
+
+def _within(path: Path, root: Path) -> bool:
+    p, r = (Path(os.path.normcase(os.path.abspath(x))) for x in (path, root))
+    return p == r or r in p.parents
+
+
+def under_sandbox(path) -> bool:
+    """True under a built sandbox, the proof folder's sandbox, or any folder a manifest sits in."""
+    p = Path(os.path.abspath(path))
+    if any(part.lower() == SANDBOX_DIR for part in p.parts) or _within(p, PROOF_SANDBOX):
+        return True
+    return any((d / settings.MANIFEST).is_file() for d in p.parents)
+
+
+def refuse_sandbox(paths) -> None:
+    bad = [str(p) for p in paths if under_sandbox(p)]
+    if bad:
+        raise SandboxInput("time inputs must be real records; refused under a sandbox: " + ", ".join(bad))
+
+
+# ---- the reviewed per-era step map ----
+
+@dataclass(frozen=True)
+class Era:
+    name: str
+    since: str
+    stages: dict
+    refine: bool
+
+
+WOTW_STAGES = {
+    "bind": "small", "plan": "02", "places": "03", "sheets": "03", "cast": "03", "lines": "04",
+    "speaker_check": "04", "respot": "small", "timeline": "small", "prompts": "small", "no_last_frame": "small",
+    "frames": "07", "grids": "07", "panels": "08", "panel_dq": "08", "panel_content": "08", "panel_eye": "08",
+    "takes": "09", "take_dq": "09", "take_content": "09", "take_eye": "09", "strip": "09", "assemble": "10",
+    "title": "10", "qc": "11", "master_eye": "11", "eye_review": "11", "dossier": "small", "publish": "13"}
+"""Reviewed 2026-10-21 on WotW ep21-27's timing.jsonl: every stage they hold, under the step that runs it
+(eta.SUB_STEP's map, plus the legacy `frames`, `title`, `eye_review` and `publish` norms)."""
+GRAMMAR_STAGES = {**WOTW_STAGES, "face_refine": "09", "take_render": "09", "upscale": "10", "cut": "10",
+                  "bed": "10", "sfx": "10", "mix": "10", "grid_lint": "small"}
+"""Reviewed 2026-10-21 on Jekyll ep01's timing.jsonl: the face refine and the render span inside 09, the
+master upscale and the sound layer inside assemble, the grid lint in 06; `step_NN` rows are marks."""
+ERAS = (Era("wotw-self-curing", "2026-10-06", WOTW_STAGES, refine=False),
+        Era("grammar-face-refine", "2026-10-17", GRAMMAR_STAGES, refine=True))
+
+
+def era_for(rows: list[dict]) -> Era:
+    """The era of the episode's first row; a date before every reviewed era refuses."""
+    first = min(str(r["started"]) for r in rows)[:10]
+    named = [e for e in ERAS if e.since <= first]
+    if not named:
+        raise UnmappedStage(f"no reviewed era map for an episode started {first}")
+    return named[-1]
+
+
+def step_of(stage: str, era: Era) -> str:
+    if stage.startswith("step_"):
+        return MARK
+    if stage not in era.stages:
+        raise UnmappedStage(f"stage {stage!r} is not in the reviewed {era.name} map")
+    return era.stages[stage]
+
+
+def unmapped(rows: list[dict], era: Era) -> list[str]:
+    return sorted({r["stage"] for r in rows if not r["stage"].startswith("step_") and r["stage"] not in era.stages})
+
+
+# ---- the measure ----
+
+def first_master_end(rows: list[dict]) -> float | None:
+    """The end of the first dossier row: the first master is delivered."""
+    ends = [span[1] for r in rows if r["stage"] == "dossier" and (span := episode_clock.epochs(r))]
+    return min(ends) if ends else None
+
+
+def repair_windows(rows: list[dict]) -> list[tuple[float, float]]:
+    return [(float(r["opened_at"]), float(r.get("closed_at") or math.inf)) for r in rows]
+
+
+def first_pass(rows: list[dict], repairs: list[tuple[float, float]]) -> tuple[list[dict], list[dict]]:
+    """(the first pass, the rest): a row after the first master, or inside a repair window, is apart."""
+    end = first_master_end(rows) or math.inf
+    keep, apart = [], []
+    for r in rows:
+        start = (episode_clock.epochs(r) or (math.inf, math.inf))[0]
+        late = start > end or any(lo <= start < hi for lo, hi in repairs)
+        (apart if late else keep).append(r)
+    return keep, apart
+
+
+def measured(rows: list[dict], era: Era) -> dict[str, float]:
+    """Seconds per step: each row's `seconds`, so a netted parent and its nested rows sum to its wall."""
+    out = dict.fromkeys(STEPS, 0.0)
+    for r in rows:
+        step = step_of(r["stage"], era)
+        if step != MARK:
+            out[step] += float(r.get("seconds") or 0)
+    return out
+
+
+def contended(rows: list[dict], era: Era) -> dict[str, list[float]]:
+    """The seconds of every row another run overlapped (`episode_clock.contended`), by step."""
+    out: dict[str, list[float]] = {}
+    for r in rows:
+        step = step_of(r["stage"], era)
+        if step != MARK and episode_clock.contended(r, rows):
+            out.setdefault(step, []).append(float(r["seconds"]))
+    return out
+
+
+def _clocked(runs: list[dict], end: float | None) -> list[dict]:
+    return [r for r in runs if end is not None and not r.get("repair") and float(r["started"]) <= end]
+
+
+def clock_to_first_master(runs: list[dict], end: float | None) -> float | None:
+    """The machine time to the first master: clock.jsonl's non-repair runs that began before it."""
+    got = _clocked(runs, end)
+    return sum(float(r["seconds"]) for r in got) if got else None
+
+
+def uncovered_s(runs: list[dict], rows: list[dict], end: float | None) -> float:
+    """Seconds of those runs no timing row covers: drive overhead, waits, a killed run's lost rest."""
+    return sum((float(r["ended"]) - float(r["started"]))
+               - episode_clock.covered(float(r["started"]), float(r["ended"]), rows) for r in _clocked(runs, end))
+
+
+# ---- the inputs and the priors ----
+
+@dataclass(frozen=True)
+class Inputs:
+    shots: int
+    setups: int
+    lines: int
+    frames: tuple[int, ...]
+    faces: tuple[int, ...]
+
+
+def inputs_from(shots_rows: list[dict], placed: dict, plan: dict) -> Inputs:
+    """What the plan, the placed lines and the take list say before anything renders."""
+    omit = set(plan.get("omit") or [])
+    return Inputs(shots=sum(1 for s in plan["shots"] if s.get("index") not in omit),
+                  setups=len(plan.get("setups") or {}), lines=len(placed.get("lines") or []),
+                  frames=tuple(int(r["frames"]) for r in shots_rows),
+                  faces=tuple(len(r.get("faces") or []) for r in shots_rows))
+
+
+def vl_fit(calls: list[dict]) -> dict:
+    """seconds = a + b * answer_tokens, least squares over the logged reads; `tokens` is their median."""
+    xy = [(float(c["answer_tokens"]), float(c["seconds"])) for c in calls
+          if c.get("seconds") is not None and c.get("answer_tokens") is not None]
+    if not xy:
+        return {"a": 0.0, "b": 0.0, "n": 0, "tokens": 0.0}
+    mx, my = (statistics.fmean(v) for v in zip(*xy))
+    var = sum((x - mx) ** 2 for x, _ in xy)
+    b = sum((x - mx) * (y - my) for x, y in xy) / var if var else 0.0
+    return {"a": my - b * mx, "b": b, "n": len(xy), "tokens": statistics.median(x for x, _ in xy)}
+
+
+def vl_read_s(fit: dict, tokens: float | None = None) -> float:
+    return fit["a"] + fit["b"] * (fit["tokens"] if tokens is None else tokens)
+
+
+def priors(inp: Inputs, read_s: float, refine: bool) -> dict[str, float]:
+    """Each step's prior seconds (a unit of 1 where the step does not scale with an input)."""
+    takes = len(inp.frames)
+    render = episode_clock.norm_for("takes", frames=list(inp.frames))
+    checks = episode_clock.norm_for("take_dq", count=takes) + takes * read_s
+    priced = sum(face_refine.price(f, n) for f, n in zip(inp.faces, inp.frames)) if refine else 0.0
+    return {"02": 1.0, "03": float(max(inp.setups, 1)), "04": episode_clock.norm_for("lines", count=inp.lines),
+            "07": float(inp.shots), "08": inp.shots * read_s, "09": render + checks + priced, "10": 1.0,
+            "11": episode_clock.norm_for("qc", count=inp.lines) + read_s, "small": 1.0}
+
+
+# ---- leave one out ----
+
+@dataclass
+class Episode:
+    name: str
+    era: str
+    refine: bool
+    inputs: Inputs
+    measured: dict
+    clock_s: float | None = None
+    evidence: tuple = ()
+    contended: dict = field(default_factory=dict)
+    apart_s: float = 0.0
+    uncovered_s: float | None = None
+
+
+def fit(train: list[Episode], read_s: float) -> dict[str, tuple[float, float, float, int]]:
+    """Per step, the (p10, p50, p90) of measured/prior over the training episodes, and their count."""
+    out = {}
+    for step in PREDICTED:
+        xs = [e.measured[step] / p for e in train if (p := priors(e.inputs, read_s, e.refine)[step]) > 0]
+        if xs:
+            out[step] = (*eta.band(xs), len(xs))
+    return out
+
+
+def predict(inp: Inputs, refine: bool, rates: dict, read_s: float) -> dict[str, tuple[float, float]]:
+    """(p50, p90) seconds per step: the prior times the training ratio."""
+    pri = priors(inp, read_s, refine)
+    return {s: (rates[s][1] * pri[s], max(rates[s][1], rates[s][2]) * pri[s]) for s in PREDICTED if s in rates}
+
+
+def held_out(episodes: list[Episode], i: int, read_s: float) -> dict:
+    target, train = episodes[i], episodes[:i] + episodes[i + 1:]
+    pred = predict(target.inputs, target.refine, fit(train, read_s), read_s)
+    got = sum(target.measured[s] for s in STEPS)
+    p50 = sum(v[0] for v in pred.values())
+    return {"episode": target.name, "pred": pred, "measured": target.measured, "pred_s": p50,
+            "p90_s": sum(v[1] for v in pred.values()), "measured_s": got, "error": (p50 - got) / got if got else math.inf}
+
+
+def leave_one_out(episodes: list[Episode], read_s: float) -> list[dict]:
+    return [held_out(episodes, i, read_s) for i in range(len(episodes))]
+
+
+def verdict(results: list[dict], tol: float = TOLERANCE, need: int = NEED) -> dict:
+    within = sum(1 for r in results if abs(r["error"]) <= tol)
+    return {"passed": len(results) >= HELD_OUT and within >= need, "within": within, "n": len(results)}
+
+
+def step_mae(results: list[dict], steps=PREDICTED) -> dict[str, float]:
+    """Per step, the mean |predicted p50 - measured| over the held-out episodes, in minutes."""
+    return {s: statistics.fmean(abs(r["pred"].get(s, (0.0, 0.0))[0] - r["measured"][s]) for r in results) / 60
+            for s in steps}
+
+
+# ---- the unmeasured steps (R16) ----
+
+@dataclass(frozen=True)
+class Gap:
+    name: str
+    step: str
+    why: str
+    measured: bool
+    p90_s: float | None
+    source: str
+
+
+MASTER_EYE_SINCE = "2026-10-21T02:04:50"
+"""b008100: the master eye's read cache keyed on the take's bytes and frame (its current form)."""
+
+
+def _refine_gap(first: list[dict], target: Inputs) -> Gap:
+    seen = any(r["stage"] == "face_refine" and r.get("gpu_busy_s") is not None for r in first)
+    priced = sum(face_refine.price(f, n) for f, n in zip(target.faces, target.frames))
+    return Gap("first-pass face refine", "09", "no first-pass refine row carries its GPU clock (907616f)",
+               seen, priced, "face_refine.price over the target's planned faces")
+
+
+def _tiny_chain(every: list[dict]) -> float | None:
+    """The tiny-face rung's seconds wherever it ran: its takes row and the rows after it to the next mark."""
+    for i, r in enumerate(every):
+        if r["stage"] == "takes" and "--tiny-face" in (r.get("note") or ""):
+            rest = next((j for j in range(i + 1, len(every)) if every[j]["stage"].startswith("step_")), len(every))
+            return sum(float(x.get("seconds") or 0) for x in every[i:rest])
+    return None
+
+
+def _tiny_gap(first: list[dict], every: list[dict]) -> Gap:
+    seen = any(r["stage"] == "takes" and "--tiny-face" in (r.get("note") or "") for r in first)
+    return Gap("tiny-face 1024 rung", "09", "the rung ran only inside a repair window", seen, _tiny_chain(every),
+               "the one recorded rung chain (any window)")
+
+
+def _eye_gap(first: list[dict], every: list[dict]) -> Gap:
+    seen = any(r["stage"] == "master_eye" and str(r["started"]) >= MASTER_EYE_SINCE for r in first)
+    xs = [float(r.get("seconds") or 0) for r in every if r["stage"] == "master_eye"]
+    return Gap("master eye (b008100)", "11", "no master_eye row since its cache moved to the take's bytes", seen,
+               eta.band(xs)[2] if xs else None, "p90 of every recorded master_eye row (any window)")
+
+
+def gaps(first: list[dict], every: list[dict], target: Inputs, uncovered: list[float]) -> list[Gap]:
+    """The declared steps the current code runs that the training rows may not measure."""
+    publish = any(r["stage"] == "publish" and float(r.get("seconds") or 0) > 0 for r in first)
+    return [_refine_gap(first, target), _tiny_gap(first, every), _eye_gap(first, every),
+            Gap("GPU whisper worker", "11", "no row times the worker (b8c6ba1)", False, None, "none: unbounded"),
+            Gap("publish (step 13)", "13", "step 13 stamps a mark, never a timed row", publish,
+                step_caps.step_wall_s("13"), "step 13's wall cap (stages.yaml)"),
+            Gap("uncovered clock (drive overhead + killed runs)", "all", "the predictor has no term for it", False,
+                max(uncovered) if uncovered else None, "clock.jsonl less every timing row (clocked episodes)")]
+
+
+def unseen_steps(train: list[Episode]) -> list[Gap]:
+    """A predicted step no training episode measured a second of: found by the map, not declared."""
+    return [Gap(f"step {s} (no training row)", s, "no training episode measured it", False, None, "none")
+            for s in PREDICTED if not any(e.measured.get(s) for e in train)]
+
+
+def shares(found: list[Gap], p90_total: float) -> list[tuple[Gap, float | None]]:
+    """Each Gap's share of the p90: its bound over the predicted p90 plus every unmeasured bound."""
+    denom = p90_total + sum(g.p90_s or 0.0 for g in found if not g.measured)
+    return [(g, None if g.p90_s is None else (0.0 if g.measured else g.p90_s / denom)) for g in found]
+
+
+def provable(shared: list[tuple[Gap, float | None]]) -> bool:
+    return all(g.measured or (s is not None and s <= SHARE_LIMIT) for g, s in shared)
+
+
+# ---- the base rate and the result rows ----
+
+def base_rate(episodes: list[Episode]) -> tuple[int, int]:
+    """(clocked episodes whose first master came under the owner's 6 h, clocked episodes)."""
+    clocked = [e for e in episodes if e.clock_s is not None]
+    return sum(1 for e in clocked if e.clock_s < OWNER_LIMIT_SECONDS), len(clocked)
+
+
+def _row(check: str, kind: str, passed: bool, k: int, n: int, evidence: list[str], **extra) -> dict:
+    return {"check": check, "question": "Q5", "passed": passed, "n_points": n, "n_distinct": n, "n_pass": k,
+            "evidence": evidence, "match_classes": [], "instrument": "timing.jsonl", "instrument_state": "n/a",
+            "kind": kind, "clock": "measured", **extra}
+
+
+def result_rows(results: list[dict], shared: list[tuple[Gap, float | None]], base: tuple[int, int],
+                episodes: list[Episode]) -> list[dict]:
+    """The rows confidence.py reads: the back-test, one per Gap, and the base rate."""
+    evidence = [p for e in episodes for p in e.evidence]
+    v = verdict(results)
+    rows = [_row("time_backtest_loo", "quality", v["passed"], v["within"], v["n"], evidence,
+                 errors={r["episode"]: round(r["error"], 4) for r in results})]
+    rows += [_row(f"unmeasured:{g.name}", "gap", g.measured or (s is not None and s <= SHARE_LIMIT),
+                  int(g.measured), 1, evidence, p90_s=g.p90_s, p90_share=s, source=g.source) for g, s in shared]
+    return rows + [_row("base_rate_under_6h", "baseline", base[0] == base[1] and base[1] > 0, base[0], base[1],
+                        evidence)]
+
+
+def read_jsonl(path: Path) -> list[dict]:
+    if not path.is_file():
+        return []
+    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
