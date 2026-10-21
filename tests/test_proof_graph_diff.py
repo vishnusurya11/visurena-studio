@@ -8,6 +8,8 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
+
 from studio.rehearsal import graph_diff as gd
 
 
@@ -69,10 +71,19 @@ def test_a_prompt_phrase_a_commit_introduced_is_explained_by_that_commit():
     assert all(a[0] == "log" and "--" in a and "scripts/episode/takes_r2v.py" in a for a in seen)   # read-only, take code
 
 
-def test_a_short_number_is_searched_as_a_whole_word_never_a_bare_digit():
-    terms = gd.terms(8, 6)
+def test_a_number_or_a_boolean_is_searched_only_on_a_line_that_names_its_field():
+    terms = gd.terms("9.KSampler.steps", 8, 6)
     assert all(flag == "-G" for flag, _ in terms)
-    assert terms[0][1] == "(^|[^0-9A-Za-z_.])6([^0-9A-Za-z_.]|$)"
+    assert "[sS][tT][eE][pP][sS]" in terms[0][1] and "[kK][sS][aA]" in terms[0][1]
+    assert not any(flag == "-S" for flag, _ in gd.terms("40.LoadImage.upload", True, False))
+    assert gd.terms("12.RandomNoise.noise_seed", 82102, None)[0][0] == "-G"
+    assert gd.terms("[0]", 7, 8) == []                     # a field with no name: nothing can explain it
+
+
+def test_a_short_string_is_bound_to_its_field_and_a_long_phrase_is_searched_alone():
+    assert gd.terms("3.CLIPTextEncode.mode", "fast", "slow")[0][0] == "-G"
+    flag, text = gd.terms("8.X.prompt", "stands at the LEFT third", "stands at the RIGHT third")[0]
+    assert flag == "-S" and "RIGHT" in text
 
 
 def test_the_take_report_lists_each_unexplained_field_and_the_summary_counts_over_n():
@@ -119,3 +130,41 @@ def test_a_recorded_take_room_reports_every_built_take(tmp_path):
     assert reports[0]["unexplained"] == ["lora_second.LoraLoaderModelOnly.strength_model"]
     missing = gd.room_report(room, {7: (graph(), 0)}, "2026-10-13", no_git)
     assert missing[0]["unexplained"] == ["<no recorded graph>"]
+
+
+def commit_in(repo: Path, rel: str, text: str, message: str) -> None:
+    ident = ["-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false"]
+    path = repo / rel
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text)
+    subprocess.run(["git", "-C", str(repo), "add", rel], check=True)
+    subprocess.run(["git", "-C", str(repo), *ident, "commit", "-qm", message], check=True)
+
+
+@pytest.fixture
+def take_repo(tmp_path):
+    repo = tmp_path / "repo"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    commit_in(repo, "studio/take_ladder.py", lines("RETRIES = 1", "FLAG = False", "SIZE = 8", "PAD = 768"), "first")
+    commit_in(repo, "studio/take_ladder.py", lines("RETRIES = 2", "FLAG = True", "SIZE = 6", "PAD = 1024"),
+              "unrelated literals")
+    return repo
+
+
+def lines(*rows: str) -> str:
+    return "".join(f"{r}\n" for r in rows)
+
+
+@pytest.mark.parametrize("field,old,new", [("12.KSampler.cfg", 1, 2), ("40.LoadImage.upload", True, False),
+                                           ("7.EmptyLatent.width", 768, 1024), ("9.Foo.steps", 8, 6)])
+def test_a_commit_that_moved_the_literal_but_never_names_the_field_explains_nothing(take_repo, field, old, new):
+    row = gd.attribute({"field": field, "old": old, "new": new}, "2000-01-01", (0, 0), gd.repo_git(take_repo))
+    assert row["by"] is None, row
+
+
+def test_a_commit_whose_line_names_the_field_with_the_literal_explains_it(take_repo):
+    commit_in(take_repo, "scripts/episode/takes_r2v.py", lines("graph['12']['inputs']['cfg'] = 2", "upload=False"), "cfg 2")
+    git = gd.repo_git(take_repo)
+    assert gd.attribute({"field": "12.KSampler.cfg", "old": 1, "new": 2}, "2000-01-01", (0, 0), git)["by"] == "commit"
+    assert gd.attribute({"field": "40.LoadImage.upload", "old": True, "new": False}, "2000-01-01", (0, 0), git)["by"] == "commit"
+    assert gd.attribute({"field": "7.EmptyLatent.width", "old": 768, "new": 1024}, "2000-01-01", (0, 0), git)["by"] is None

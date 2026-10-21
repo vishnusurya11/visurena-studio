@@ -6,8 +6,9 @@ Three kinds of injector:
   `sdk_faults` (rate limit, brain failure), `worker_die_at`, `youtube: invalid_grant`, plus the
   brain's scripted stream (`brain_stream`, brain_script.py);
 - a hook in a child: `kill_at_write` stops the process BEFORE its k-th write at a named site
-  (file kind x code location, trace.py's names), writes `<sandbox>/kill.request`, and exits
-  KILLED; the supervisor then kills the rest of the drive tree;
+  (file kind x code location, trace.py's names) while the runner is in the row's step; it kills
+  its whole drive tree at once, the drive first (so drive.py never handles a child's exit), writes
+  `<sandbox>/kill.request` and exits KILLED; the supervisor then sweeps any orphan left;
 - a file planted in the sandbox before the run: a dropped supervisor with a stale gpu.lock, a
   commit in <sandbox>/git, a precondition gap (preconditions_ch2.json rows), a torn record.
 Nothing here touches anything outside the sandbox it is given."""
@@ -16,9 +17,11 @@ from __future__ import annotations
 import json
 import os
 import re
+import signal
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 from typing import Callable, Mapping
 
@@ -130,39 +133,97 @@ def kill_at_write(kind: str, site: str, occurrence: int, step: str | None) -> di
     return {"kind": "kill_at_write", "file_kind": kind, "site": site, "occurrence": int(occurrence), "step": step}
 
 
-def kill_rows(manifest: Mapping, step: str) -> list[dict]:
+def kill_rows(manifest: Mapping, step: str | None = None) -> list[dict]:
+    """The kill-at-write rows; with `step`, only those for that step (or for any step)."""
     rows = [r for r in manifest.get("harness_faults") or () if r.get("kind") == "kill_at_write"]
-    return [r for r in rows if r.get("step") in (None, step)]
+    return [r for r in rows if step is None or r.get("step") in (None, step)]
 
 
-def request_kill(box: Path, row: Mapping) -> None:
-    """Tell the supervisor which fault fired, from which pid, before this process dies."""
-    body = {"fault": dict(row), "pid": os.getpid(), "argv": sys.argv[:4]}
+def request_kill(box: Path, row: Mapping, step: str, killed: list[int]) -> None:
+    """Tell the supervisor which fault fired, from which pid and step, when, and which pids of the
+    drive tree went with it, before this process dies."""
+    body = {"fault": dict(row), "pid": os.getpid(), "step": step, "ts": time.time(), "killed": killed,
+            "argv": sys.argv[:4]}
     (Path(box) / KILL_REQUEST).write_text(json.dumps(body), encoding="utf-8")
 
 
+SUPERVISOR_ENV = "VISURENA_REHEARSAL_SUPERVISOR"
+"""The rehearsal supervisor's pid, put in its env so every drive tree it launches knows where it ends."""
+
+
+def supervisor_pid() -> int | None:
+    try:
+        return int(os.environ[SUPERVISOR_ENV])
+    except (KeyError, ValueError):
+        return None
+
+
+def drive_root(parents: Mapping[int, int], me: int, supervisor: int | None) -> int:
+    """The drive the autopilot launched: `me`'s topmost ancestor below the supervisor; `me` itself
+    when the supervisor is unknown or not among its ancestors."""
+    chain, pid = [me], me
+    while (parent := parents.get(pid)) is not None and parent not in chain:
+        if parent == supervisor:
+            return pid
+        chain.append(parent)
+        pid = parent
+    return me
+
+
+def terminate(pid: int) -> None:
+    os.kill(pid, signal.SIGTERM)                       # TerminateProcess on Windows: no handler runs
+
+
+def kill_tree(me: int, supervisor: int | None, parents: Callable[[], Mapping[int, int]] | None = None,
+              kill: Callable[[int], None] = terminate) -> list[int]:
+    """DESIGN 3.2's tree kill, from inside the dying process: the drive first, so it never sees a
+    child's exit and handles it, then every other process under it; never `me` (it exits after)."""
+    from studio.rehearsal import supervisor as sup
+    table = (parents or sup.parent_map)()
+    root = drive_root(table, me, supervisor)
+    pids = [p for p in [root, *sorted(sup.descendants(table, {root}) - {root})] if p != me]
+    for pid in pids:
+        try:
+            kill(pid)
+        except OSError:                                # already gone: what a kill wants
+            pass
+    return pids
+
+
 def kill_hook(row: Mapping, box: Path, exit: Callable[[int], None] = os._exit):
-    """An audit hook counting writes at the row's site; at the k-th it dies before the write."""
-    from studio.rehearsal import fence, trace
+    """An audit hook counting the row's step's writes at the row's site; at the k-th it dies
+    before the write.  The step is the runner's at that write (trace.current_step), so a step
+    imported into episode.py is killed in episode.py."""
+    from studio.rehearsal import fence
     seen = {"n": 0}
 
     def hook(event: str, args: tuple) -> None:
         if event != "open" or getattr(_BUSY, "on", False) or not fence.writes(args[1], args[2]):
             return
-        if trace.kind_of(args[0], box) != row["file_kind"] or trace.site_of(sys._getframe(1)) != row["site"]:
+        step = at_site(row, box, args[0], sys._getframe(1))
+        if step is None:
             return
         seen["n"] += 1
         if seen["n"] == row["occurrence"]:
             _BUSY.on = True
-            request_kill(box, row)
+            request_kill(box, row, step, kill_tree(os.getpid(), supervisor_pid()))
             exit(KILLED)
     return hook
 
 
-def arm(manifest: Mapping, box: Path) -> int:
-    """Install this process's kill hooks (its step's rows); how many were armed."""
+def at_site(row: Mapping, box: Path, path, frame) -> str | None:
+    """The runner's step when this write is the row's (its file kind, code site and step); else None."""
     from studio.rehearsal import trace
-    rows = kill_rows(manifest, trace.step_of(sys.argv))
+    if trace.kind_of(path, box) != row["file_kind"] or trace.site_of(frame) != row["site"]:
+        return None
+    step = trace.current_step(frame)
+    return step if row.get("step") in (None, step) else None
+
+
+def arm(manifest: Mapping, box: Path) -> int:
+    """Install this process's kill hooks, one per row (each filters on the runner's step at the
+    write); how many were armed."""
+    rows = kill_rows(manifest)
     for row in rows:
         sys.addaudithook(kill_hook(row, Path(box)))
     return len(rows)

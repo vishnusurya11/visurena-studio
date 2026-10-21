@@ -111,6 +111,43 @@ def test_a_write_is_named_by_its_file_kind_and_the_code_line_that_made_it(tmp_pa
     assert trace.step_of(["scripts/episode/drive.py"]) == "drive"
 
 
+def test_the_step_is_the_one_the_real_runner_is_in_never_the_process_name():
+    from tests.proof_runner_fixture import run_real_steps, step
+    seen: list = []
+    run_real_steps([step("08", done=True), step("09", lambda ctx: seen.append(trace.current_step()))])
+    assert seen == ["09"]
+    assert trace.current_step() == trace.step_of(sys.argv)          # outside any runner: the script's own name
+
+
+def test_a_write_from_a_worker_thread_is_named_by_the_step_the_main_thread_runs():
+    import threading
+    from tests.proof_runner_fixture import run_real_steps, step
+    seen: list = []
+
+    def run(ctx):
+        worker = threading.Thread(target=lambda: seen.append(trace.current_step()))
+        worker.start()
+        worker.join()
+    run_real_steps([step("10", run)])
+    assert seen == ["10"]
+
+
+def test_a_step_imported_into_the_episode_process_names_its_writes_by_its_step(tmp_path):
+    box = tmp_path / "box"
+    (box / "library" / "b" / "episodes").mkdir(parents=True)
+    out = str(box / "library" / "b" / "episodes" / "ep02.txt")
+    code = ("import sys; sys.path.insert(0, {repo!r}); from studio.rehearsal import trace; "
+            "trace.install({{'trace': False, 'record_writes': True}}, box={box!r}); "
+            "from tests.proof_runner_fixture import run_real_steps, step; "
+            "run_real_steps([step('09', lambda ctx: open({out!r}, 'w').write('x'))])")
+    done = subprocess.run([sys.executable, "-c", code.format(repo=str(settings.REPO), box=str(box), out=out)],
+                          capture_output=True, text=True, timeout=60, cwd=settings.REPO)
+    assert done.returncode == 0, done.stderr
+    rows = [json.loads(line) for p in (box / "writes").glob("*.jsonl") for line in p.read_text().splitlines()]
+    assert [r["step"] for r in rows if r["kind"] == "episodes/ep##.txt"] == ["09"]
+    assert sweep.write_points("F2", rows, step="09")
+
+
 def test_a_child_process_writes_its_trace_and_its_write_sites(tmp_path):
     box = tmp_path / "box"
     (box / "library" / "b" / "episodes").mkdir(parents=True)

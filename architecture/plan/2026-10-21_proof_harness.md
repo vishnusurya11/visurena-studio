@@ -57,6 +57,17 @@ package spends GPU time or a paid call; the staged real runs SR-0..SR-5 wait for
   4 h shards at the baseline's measured cost, resume on the same sandbox and report untried (never a pass);
   a missing status doc fails A-named; the rehearsal tests skip only on a scheduler refusal or an absent
   input.  No real-book scenario has run: the visurena-autopilot task is still Ready.
+- 2026-10-21 -- P5 second review fixes: the graph diff explains a field only by a commit whose line SETS
+  that field to that literal (the review's four fabricated diffs, cfg 1->2, upload True->False, width
+  768->1024, Foo.steps 8->6, now come back unexplained on the real repo; seam_max 10->18 still names
+  8f7cbc5); a write and a kill are named by the step the REAL runner is in (episode.py imports every step),
+  and a kill takes its whole drive tree at once, the drive first; an unjoined canned reply is INSTRUMENT
+  FAILED, never a failed point; S0a/S0b carry their run's match classes (canned -> mechanism); every sweep
+  shard replays one point and an unstable trace fails the trace instrument (n counts nothing); A-norerender
+  lets a take a cut lost render once more and fails a take saved twice; the stat guard excuses a path only
+  when its own record names the live writer's pid; S0a's checkpoints stop the real runner only at its
+  between-steps check (checkpoint_stop.py, no flag file); every rehearsal, a fixture one too, asks the
+  scheduler first.  Still no real-book scenario: the task is Ready, so the smoke and seam children skip.
 - 2026-10-21 -- P7 second review fixes: questions.yaml names the ids the suites write (`unrecorded_le_half`,
   `outside_invariant`, `refine_decision_recall` as mechanism) and lists the rest under `not_yet_emitted`
   (D1, plan_battery_ch2); a test builds the rows from every suite's own builder and fails on any other id.

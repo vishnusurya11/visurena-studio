@@ -20,7 +20,6 @@ import argparse
 import importlib.util
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -35,7 +34,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from studio import settings  # noqa: E402
-from studio.rehearsal import activate, asserts, faults, guard, sandbox, sweep, trace  # noqa: E402
+from studio.rehearsal import activate, asserts, checkpoint_stop, faults, guard, sandbox, sweep, trace  # noqa: E402
 
 SCENARIOS = ROOT / "tests" / "fixtures" / "proof" / "scenarios"
 PROOF = ROOT / "docs" / "audit" / "2026-10-21_ep02_proof"
@@ -92,7 +91,7 @@ TABLE: dict[str, Scenario] = {s.id: s for s in (
              why="the whisper worker dies"),
     Scenario("F18", 1, "after_08", 12, sweep="record", fault={"kind": "tear"}, bound="09", why="torn records"),
 )}
-CHECKPOINTS = ("after_02", "after_05", "after_07", "after_08", "after_09", "after_12")
+CHECKPOINTS = checkpoint_stop.WANTED
 
 
 # ---- what a scenario stands on -------------------------------------------------------------
@@ -221,12 +220,18 @@ def plant_other(box: Path, book: Path, sc: Scenario) -> dict:
         return faults.add(box, faults.oauth_expired())
     if kind == "repair_window":
         return {"window": stale_window(asserts.home_of(book, sc.episode))}
+    return plant_row(box, book, sc)
+
+
+def plant_row(box: Path, book: Path, sc: Scenario) -> dict:
+    """The faults that are one manifest row a fake reads, or the precondition gaps planted in the book."""
+    kind, f = sc.fault.get("kind"), sc.fault
     if kind == "unreadable":
-        return [faults.add(box, faults.engine("unreadable", k)) for k in range(1, sc.fault["first"] + 1)][-1]
+        return [faults.add(box, faults.engine("unreadable", k)) for k in range(1, f["first"] + 1)][-1]
     if kind == "rate_limit":
-        return faults.add(box, faults.rate_limit(sc.fault["call"]))
+        return faults.add(box, faults.rate_limit(f["call"]))
     if kind == "worker_death":
-        return faults.add(box, faults.worker_death(sc.fault["worker"], sc.fault["line"]))
+        return faults.add(box, faults.worker_death(f["worker"], f["line"]))
     if kind == "gaps":
         return {"gaps": faults.plant_all(book, json.loads(FILES["preconditions"].read_text(encoding="utf-8")))}
     return {"none": True}
@@ -252,9 +257,10 @@ def standing(book: Path, n: int) -> Path:
     return path
 
 
-def assert_point(box: Path, book: Path, sc: Scenario, sup: Mapping, before: list[dict], expect_trip: bool) -> list[dict]:
+def assert_point(box: Path, book: Path, sc: Scenario, sup: Mapping, before: list[dict], expect_trip: bool,
+                 saved_before: int = 0) -> list[dict]:
     """The common asserts of 3.1 for one point."""
-    home, engine = asserts.home_of(book, sc.episode), asserts.jsonl(Path(box) / "engine_log.jsonl")
+    home = asserts.home_of(book, sc.episode)
     notify = [r.get("text") or r.get("message") or json.dumps(r) for r in asserts.jsonl(Path(box) / "notify.jsonl")]
     trips = asserts.jsonl(Path(box) / "tripwire.jsonl")
     resume = "\n".join(p.read_text(encoding="utf-8", errors="replace") for p in sorted(home.glob("drive_run*.log")))
@@ -263,14 +269,41 @@ def assert_point(box: Path, book: Path, sc: Scenario, sup: Mapping, before: list
             asserts.a_real(trips, [], expect_trip=expect_trip),
             asserts.a_torn(records, resume + json.dumps(asserts.jsonl(book / "autopilot" / "events.jsonl"))),
             asserts.a_ledger(home, steps_since(home, sup.get("started", 0.0)), list(sup.get("spent") or []))]
-    rows += [asserts.a_named(book, sc.episode, notify)]                 # a missing status doc FAILS it
-    if engine:
-        consumers, ladder = asserts.jsonl(Path(box) / "vl_consumers.jsonl"), home / "takes" / "r2v" / "ladder.json"
-        at, flight = fault_moment(engine)
-        rows += [asserts.a_honest(engine, consumers, shape_of(engine)), asserts.a_canned(engine, consumers),
-                 asserts.a_norerender(engine, json.loads(ladder.read_text(encoding="utf-8")) if ladder.is_file() else {},
-                                      at, flight)]
-    return rows
+    return rows + [asserts.a_named(book, sc.episode, notify)] + engine_asserts(box, home, sup, saved_before)
+
+
+PHASES = "takes/r2v/phases.jsonl"
+"""One row per take the client SAVED (studio/take_phases.record): what A-norerender counts as saved."""
+
+
+def engine_asserts(box: Path, home: Path, sup: Mapping, saved_before: int) -> list[dict]:
+    """A-honest, A-canned and A-norerender, when the run asked the engine anything."""
+    engine = asserts.jsonl(Path(box) / "engine_log.jsonl")
+    if not engine:
+        return []
+    consumers, ladder = asserts.jsonl(Path(box) / "vl_consumers.jsonl"), home / "takes" / "r2v" / "ladder.json"
+    at, flight = fault_moment(engine)
+    cuts, saved = deaths(box, home, float(sup.get("started") or 0.0)), asserts.jsonl(home / PHASES)[saved_before:]
+    return [asserts.a_honest(engine, consumers, shape_of(engine)), asserts.a_canned(engine, consumers),
+            asserts.a_norerender(engine, json.loads(ladder.read_text(encoding="utf-8")) if ladder.is_file() else {},
+                                 at, flight, cuts, saved)]
+
+
+def deaths(box: Path, home: Path, since: float) -> list[float]:
+    """The run's cuts: a kill-at-write's moment, and every drive end row after `since` (a failed
+    drive lost its queue; a boundary stop took the queued takes off it).  What a cut lost may be
+    submitted once more; what was saved before it may not (A-norerender)."""
+    kills = [faults.kill_requested(box)] + [read_json(Path(box) / "kill.done")]
+    moments = [float(k["ts"]) for k in kills if k and k.get("ts") is not None]
+    ends = [asserts.when(r) for r in asserts.jsonl(Path(home) / "drive.jsonl") if r.get("event") == "end"]
+    return sorted(t for t in moments + ends if t >= since)
+
+
+def read_json(path: Path) -> dict | None:
+    try:
+        return json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
 
 
 def anchored(rows: list[dict], box: Path, book: Path) -> list[dict]:
@@ -313,17 +346,26 @@ def run_point(box: Path, book: Path, sc: Scenario, point: sweep.Point, cleared: 
     clear_run(box)
     set_manifest(box, {**faults.CLEAN, "bound": sc.bound, "checkpoints": bool(sc.fault.get("checkpoints"))})
     planted, before, began = plant(box, book, sc, point), asserts.jsonl(book / "uploads.jsonl"), time.monotonic()
+    saved = len(asserts.jsonl(asserts.home_of(book, sc.episode) / PHASES))
     sup = launch_supervisor(box, sc, cleared, every, wall)
     served = asserts.a_served({**sc.fault, "kind": "kill" if sc.sweep == "write" else sc.fault.get("kind")}, box, sup,
                               planted if isinstance(planted, dict) else None)
-    rows = anchored(assert_point(box, book, sc, sup, before, expect_trip=False) + asserts.specific(sc.id, box, book, sup)
+    rows = anchored(assert_point(box, book, sc, sup, before, False, saved) + asserts.specific(sc.id, box, book, sup)
                     + ([served] if served else []), box, book)
     lines = trace.read_all(Path(box) / trace.TRACES)
-    passed = bool(sup.get("terminal")) and not sup.get("tick_errors") and all(r["passed"] for r in rows)
-    return {"id": point.id, "passed": passed, "trace": trace.signature(lines) if lines else None, "rows": rows,
-            "match_classes": point_classes(rows),
-            "supervisor": sup, "planted": planted, "seconds": round(time.monotonic() - began, 1),
-            "trace_lines": sorted(lines)}
+    passed, holes = point_passed(sup, rows)
+    return {"id": point.id, "passed": passed, "instrument_failed": holes, "trace": trace.signature(lines) if lines else None,
+            "rows": rows, "match_classes": point_classes(rows), "supervisor": sup, "planted": planted,
+            "seconds": round(time.monotonic() - began, 1), "trace_lines": sorted(lines)}
+
+
+def point_passed(sup: Mapping, rows: list[dict]) -> tuple[bool, list[str]]:
+    """(the point passed, the checks whose instrument failed): a row its instrument could not
+    measure counts neither way, so a hole in the tool never reads as a pipeline failure."""
+    holes = [r["check"] for r in rows if asserts.instrument_failed(r)]
+    counted = [r for r in rows if not asserts.instrument_failed(r)]
+    ok = bool(sup.get("terminal")) and not sup.get("tick_errors") and all(r["passed"] for r in counted)
+    return ok, holes
 
 
 def baseline(box: Path, book: Path, sc: Scenario, cleared: bool, every: float, wall: float) -> Path:
@@ -335,7 +377,12 @@ def baseline(box: Path, book: Path, sc: Scenario, cleared: bool, every: float, w
     set_manifest(box, {**faults.CLEAN, "bound": sc.bound, "record_writes": True, "checkpoints": False})
     began = time.monotonic()
     launch_supervisor(box, sc, cleared, every, wall)
-    seconds = round(time.monotonic() - began, 1)
+    set_manifest(box, {"record_writes": False})
+    return keep_baseline(box, round(time.monotonic() - began, 1))
+
+
+def keep_baseline(box: Path, seconds: float) -> Path:
+    """The unfaulted run's engine log, write rows and supervisor result, and its measured cost."""
     dest = Path(box) / "baseline"
     shutil.rmtree(dest, ignore_errors=True)
     dest.mkdir()
@@ -345,7 +392,6 @@ def baseline(box: Path, book: Path, sc: Scenario, cleared: bool, every: float, w
             shutil.copytree(src, dest / name)
         elif src.is_file():
             shutil.copy2(src, dest / name)
-    set_manifest(box, {"record_writes": False})
     (dest / "seconds.json").write_text(json.dumps({"seconds": seconds}), encoding="utf-8")
     return dest
 
@@ -364,10 +410,10 @@ def points_of(box: Path, sc: Scenario) -> list[sweep.Point]:
     return [sweep.Point(sc.id, {"checkpoint": sc.checkpoint})]
 
 
-LIVE_WRITERS = {"gpu_ledger.py": (r"library[\\/]\.device[\\/]gpu_util\.jsonl$",),
-                "autopilot.py": (r"library[\\/]\.autopilot([\\/][^\\/]+)?$", r"library[\\/][^\\/]+[\\/]autopilot([\\/][^\\/]+)?$")}
-"""A real process this machine runs outside any rehearsal (the GPU ledger, the scheduled autopilot
-loop, which ticks even while every series is paused or complete) and the real paths it rewrites."""
+LIVE_WRITERS = ("gpu_ledger.py", "autopilot.py")
+"""Real processes this machine runs outside any rehearsal: the GPU ledger, and the scheduled autopilot
+loop, which ticks even while every series is paused or complete.  Being alive excuses nothing: a
+moved path is excused only when its own content says that writer wrote it (`signed_by`, `ledger_wrote`)."""
 
 
 def live_writers(table: Callable | None = None) -> dict[str, int]:
@@ -379,18 +425,59 @@ def live_writers(table: Callable | None = None) -> dict[str, int]:
     return {mark: p.pid for mark in LIVE_WRITERS for p in rows if mark in p.cmdline and p.pid not in mine}
 
 
-def excused_by(line: str, live: Mapping[str, int]) -> str | None:
-    """The live writer whose own paths a touched line names, or None."""
-    path = line.split(": ", 1)[-1]
-    return next((m for m in live if any(re.search(rx, path) for rx in LIVE_WRITERS.get(m, ()))), None)
+def signer(path: Path) -> tuple[Path, str] | None:
+    """The record whose pid field says who wrote one of the autopilot loop's own paths: the library's
+    .autopilot folder, its heartbeat and its lock by supervisor.lock's `pid`; a book's autopilot/
+    folder, its status.json and its events.jsonl by that status.json's `supervisor_pid`.  None for
+    every other path (gpu.lock, parked.jsonl, series.json, an episode): nothing signs those."""
+    p = Path(path)
+    if p.name == ".autopilot" or (p.parent.name == ".autopilot" and p.name in ("heartbeat.json", "supervisor.lock")):
+        return (p if p.name == ".autopilot" else p.parent) / "supervisor.lock", "pid"
+    if p.name == "autopilot" or (p.parent.name == "autopilot" and p.name in ("status.json", "events.jsonl")):
+        return (p if p.name == "autopilot" else p.parent) / "status.json", "supervisor_pid"
+    return None
 
 
-def guard_row(snap: Mapping, writers: Callable[[], dict] = live_writers) -> dict:
-    """A-real's stat guard over the scenario.  A path a live writer OUTSIDE the rehearsal rewrites is
-    excused BY NAME with its pid (the fence's empty tripwire, not this guard, proves no rehearsal
-    process wrote it); every other moved path fails the row."""
+def signed_by(path: Path, pid: int) -> bool:
+    """`path` is one the live autopilot loop wrote: its signing record names that loop's pid."""
+    who = signer(path)
+    doc = read_json(who[0]) if who else None
+    return isinstance(doc, dict) and doc.get(who[1]) == pid
+
+
+def last_row(path: Path) -> dict | None:
+    """A JSONL file's last row, read from its last 4 KB (the real ledger is long; D: is a spinning disk)."""
+    try:
+        with open(path, "rb") as fh:
+            fh.seek(0, os.SEEK_END)
+            fh.seek(max(fh.tell() - 4096, 0))
+            lines = fh.read().decode("utf-8", "replace").splitlines()
+        return json.loads(lines[-1]) if lines else None
+    except (OSError, ValueError):
+        return None
+
+
+def ledger_wrote(path: Path, since: float) -> bool:
+    """library/.device/gpu_util.jsonl whose newest row is stamped after the snapshot (its rows carry no pid)."""
+    p = Path(path)
+    row = last_row(p) if (p.name, p.parent.name) == ("gpu_util.jsonl", ".device") else None
+    return isinstance(row, dict) and float(row.get("ts") or 0.0) >= since
+
+
+def excused_by(line: str, live: Mapping[str, int], since: float = 0.0) -> str | None:
+    """The live writer the touched path's own content names, or None."""
+    path = Path(line.split(": ", 1)[-1])
+    if "gpu_ledger.py" in live and ledger_wrote(path, since):
+        return "gpu_ledger.py"
+    return "autopilot.py" if "autopilot.py" in live and signed_by(path, live["autopilot.py"]) else None
+
+
+def guard_row(snap: Mapping, writers: Callable[[], dict] = live_writers, since: float = 0.0) -> dict:
+    """A-real's stat guard over the scenario.  A path is excused only when its own content names a
+    live writer OUTSIDE the rehearsal (the fence's empty tripwire, not this guard, proves no
+    rehearsal process wrote it); every other moved path fails the row."""
     lines, live = guard.touched(dict(snap), guard.snapshot(guard.named_paths())), writers()
-    by = {ln: excused_by(ln, live) for ln in lines}
+    by = {ln: excused_by(ln, live, since) for ln in lines}
     r = asserts.a_real([], [ln for ln, who in by.items() if who is None], instrument="guard")
     note = "; ".join(f"excused {ln.split(': ', 1)[-1]}: {who} pid {live[who]} outside the rehearsal"
                      for ln, who in by.items() if who)
@@ -406,8 +493,10 @@ def point_classes(rows) -> dict:
     return out
 
 
-def summary_row(sc: Scenario, results: list[dict], planned: int) -> dict:
-    """Passes over DISTINCT recovery traces (3.3): the scenario's own counted row."""
+def summary_row(sc: Scenario, results: list[dict], planned: int, stability: list[dict] | None = None) -> dict:
+    """Passes over DISTINCT recovery traces (3.3): the scenario's own counted row.  A sweep's n is
+    only as good as its trace is stable: with no replay, or a replay that traced differently, the
+    trace instrument FAILED and the row counts nothing (R14: noise is never n)."""
     t = sweep.tally(results, planned)
     classes: dict = {}
     for r in results:
@@ -415,9 +504,24 @@ def summary_row(sc: Scenario, results: list[dict], planned: int) -> dict:
             classes[k] = classes.get(k, 0) + v
     ok = t["n_distinct"] > 0 and t["passed_distinct"] == t["n_distinct"] and not t["failing"] and not t["untried"]
     rest = f"; {t['untried']} untried: run again to continue the sweep" if t["untried"] else ""
-    return asserts.row(sc.id, ok, [f"results/{sc.id}.json"], n_points=t["tried"], n_distinct=t["n_distinct"],
-                       match_classes=classes, instrument="trace", instrument_state=f"untried {t['untried']}",
-                       detail=f"{t['passed_distinct']}/{t['n_distinct']} distinct traces passed; failing {t['failing'][:5]}{rest}")
+    state, why = trace_state(stability, t["untried"])
+    holes = sorted({h for r in results for h in r.get("instrument_failed") or ()})
+    return asserts.row(sc.id, ok and state != asserts.FAILED, [f"results/{sc.id}.json"], n_points=t["tried"],
+                       n_distinct=t["n_distinct"], match_classes=classes, instrument="trace", instrument_state=state,
+                       detail=f"{t['passed_distinct']}/{t['n_distinct']} distinct traces passed; failing {t['failing'][:5]}"
+                              f"{rest}{why}" + (f"; instrument failed in points: {holes}" if holes else ""))
+
+
+def trace_state(stability: list[dict] | None, untried: int) -> tuple[str, str]:
+    """(instrument_state, what the detail adds) of the trace instrument: a sweep's replays decide it."""
+    if stability is None:
+        return f"untried {untried}", ""
+    moved = [s for s in stability if not s.get("same")]
+    if not stability or moved:
+        why = (f"; trace unstable: {moved[0]['point']} traced differently on replay, lines {moved[0].get('only', [])[:4]}"
+               if moved else "; no replay: the trace's stability is unmeasured")
+        return asserts.FAILED, why
+    return f"stable {len(stability)}/{len(stability)}; untried {untried}", ""
 
 
 def write_results(results: Path, sid: str, rows: list[dict], extra: Mapping) -> Path:
@@ -448,7 +552,6 @@ def prepare(sid: str, sc: Scenario, box: Path | None, run_id: str | None) -> tup
         set_manifest(box, {"comfy_host": f"http://127.0.0.1:{free_port()}"})
         sandbox.checkpoint(box, sc.checkpoint)
         return box, book, None
-    refuse_if_live()
     if sc.checkpoint == "fresh":
         name = CHECKPOINT_RUN.format(n=sc.episode) if sid == "S0a" else sid
         box = real_box(run_id or f"{name}_{uuid.uuid4().hex[:8]}", sc)
@@ -503,39 +606,64 @@ def baseline_cost(box: Path) -> float | None:
         return None
 
 
-def run_points(box: Path, book: Path, sc: Scenario, cleared: bool, every: float, wall: float,
-               done: set[str], budget_s: float) -> tuple[list[dict], int]:
-    """A sweep's baseline first (it measures a point's cost), then the next shard: (results, planned)."""
+def run_points(box: Path, book: Path, sc: Scenario, every: float, wall: float,
+               done: set[str], budget_s: float) -> tuple[list[dict], int, list[dict] | None]:
+    """A sweep's baseline first (it measures a point's cost), then the next shard, then one of its
+    points replayed (the trace's stability): (results, planned, stability; None for one point)."""
     if sc.sweep in ("take", "write"):
-        baseline(box, book, sc, cleared, every, wall)
+        baseline(box, book, sc, True, every, wall)
     points = points_of(box, sc)
     todo = shard_of(points, done, baseline_cost(box), budget_s)
-    run = lambda p: run_point(box, book, sc, p, cleared, every, wall)  # noqa: E731
-    return run_budgeted(todo, run, budget_s), len(points)
+    run = lambda p: run_point(box, book, sc, p, True, every, wall)  # noqa: E731
+    out = run_budgeted(todo, run, budget_s)
+    return out, len(points), (replayed(todo, out, run) if sc.sweep else None)
 
 
-def run_scenario(sid: str, results: Path = RESULTS, box: Path | None = None, cleared: bool = False,
-                 run_id: str | None = None, every: float = 0.5, wall: float = 45.0,
-                 budget_s: float = sweep.BUDGET_S) -> dict:
-    """Every point of the scenario, its rows, and its summary row, written to results/<sid>.json."""
-    sc = TABLE[sid]
+def replayed(todo: list[sweep.Point], out: list[dict], run: Callable) -> list[dict]:
+    """The shard's first point run once more, its trace compared (R14): one extra point per shard."""
+    return [sweep.stability(out[0], run(todo[0]))] if out else []
+
+
+def prior_stability(results: Path, sid: str, box: Path) -> list[dict]:
+    """The replays an earlier shard of this scenario left for THIS sandbox."""
+    doc = read_json(Path(results) / f"{sid}.json") or {}
+    return list(doc.get("stability") or []) if doc.get("box") == str(box) else []
+
+
+def cleared_to_run(results: Path, sid: str, sc: Scenario, box: Path | None, run_id: str | None):
+    """(sandbox, book, None) or (None, None, the blocked result): packages, then the real
+    scheduler (asked HERE, for every scenario, a fixture one too: DESIGN's hard rule), then the box."""
     if missing := missing_packages(sid):
-        return blocked(results, sid, "absent: " + ", ".join(missing), {"absent": missing})
-    snap = guard.snapshot(guard.named_paths())
+        return None, None, blocked(results, sid, "absent: " + ", ".join(missing), {"absent": missing})
     try:
+        refuse_if_live()
         box, book, why = prepare(sid, sc, box, run_id)
     except activate.RehearsalRefused as refused:          # the real autopilot could run: never a crash
-        return blocked(results, sid, f"refused: {refused}")
-    if why:
-        return blocked(results, sid, why)
+        return None, None, blocked(results, sid, f"refused: {refused}")
+    return (box, book, None) if not why else (None, None, blocked(results, sid, why))
+
+
+def run_scenario(sid: str, results: Path = RESULTS, box: Path | None = None, run_id: str | None = None,
+                 every: float = 0.5, wall: float = 45.0, budget_s: float = sweep.BUDGET_S) -> dict:
+    """Every point of the scenario, its rows, and its summary row, written to results/<sid>.json.
+    The harness asked the scheduler itself, so its children inherit that verdict (child_env)."""
+    sc, began, snap = TABLE[sid], time.time(), guard.snapshot(guard.named_paths())
+    box, book, refused = cleared_to_run(Path(results), sid, sc, box, run_id)
+    if refused:
+        return refused
     before, carried = prior_shard(Path(results), sid, box)
-    done, planned = run_points(box, book, sc, cleared, every, wall, {p["id"] for p in before}, budget_s)
+    done, planned, stable = run_points(box, book, sc, every, wall, {p["id"] for p in before}, budget_s)
     kept = before + [{k: v for k, v in d.items() if k != "rows"} for d in done]
-    rows = carried + [r for d in done for r in d["rows"]] + [guard_row(snap), summary_row(sc, kept, planned)]
-    path = write_results(Path(results), sid, rows, {"box": str(box), "points": kept, "planned": planned})
+    stable = None if stable is None else prior_stability(Path(results), sid, box) + stable
+    rows = carried + [r for d in done for r in d["rows"]] + [guard_row(snap, since=began), summary_row(sc, kept, planned, stable)]
+    path = write_results(Path(results), sid, rows, {"box": str(box), "points": kept, "planned": planned, "stability": stable})
+    return scenario_out(sid, path, done, planned - len(kept), stable)
+
+
+def scenario_out(sid: str, path: Path, done: list[dict], untried: int, stable: list[dict] | None) -> dict:
     last = done[-1] if done else {}
     return {"scenario": sid, "path": str(path), "supervisor": last.get("supervisor"), "trace": last.get("trace"),
-            "trace_lines": last.get("trace_lines", []), "points": len(done), "untried": planned - len(kept)}
+            "trace_lines": last.get("trace_lines", []), "points": len(done), "untried": untried, "stability": stable}
 
 
 def main(argv: list[str]) -> int:
@@ -551,7 +679,7 @@ def main(argv: list[str]) -> int:
     for one in ids:
         out = run_scenario(one, Path(args.results), run_id=args.run_id, every=5.0, wall=args.wall,
                            budget_s=args.budget_hours * 3600.0)
-        print(json.dumps({k: out.get(k) for k in ("scenario", "path", "blocked", "points", "untried")}))
+        print(json.dumps({k: out.get(k) for k in ("scenario", "path", "blocked", "points", "untried", "stability")}))
     return 0
 
 

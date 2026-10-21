@@ -7,9 +7,11 @@ DISABLEd, so a traced process pays one callback per distinct line.  Each process
 `<sandbox>/traces/<pid>.json` at exit; a point's trace is the union of its run's files.
 
 `record_writes` (an unfaulted run only) adds an audit hook that names every write under the
-sandbox library by its FILE KIND (book-relative, digits as #) and its code SITE (the first frame
-outside the rehearsal package), to `<sandbox>/writes/<pid>.jsonl`: the F2/F3 kill points.
-A child's fault hook (faults.arm, a kill at write k) is armed from here too, one entry point."""
+sandbox library by its FILE KIND (book-relative, digits as #), its code SITE (the first frame
+outside the rehearsal package) and the STEP the runner is in at that write (`current_step`: the
+runner's own frame, since episode.py imports every step), to `<sandbox>/writes/<pid>.jsonl`: the
+F2/F3 kill points.  A child's fault hook (faults.arm, a kill at write k) and S0a's between-steps
+checkpoint stop (checkpoint_stop) are armed from here too, one entry point."""
 from __future__ import annotations
 
 import atexit
@@ -149,10 +151,36 @@ def step_of(argv: list[str]) -> str:
     return hit.group(1) if hit else (Path(script).stem or "?")
 
 
+RUNNER = "studio/step_runner.py"
+"""Where the episode runner's loop lives: episode.py IMPORTS every step (step_runner.import_step),
+so the process is always episode.py and only the runner's frame knows which step is running."""
+
+
+def runner_step(frame) -> str | None:
+    """STEP_ID of the step the runner's `run_steps` frame holds, walking out from `frame`."""
+    while frame is not None:
+        code = frame.f_code
+        if code.co_name == "run_steps" and Path(code.co_filename).as_posix().endswith(RUNNER):
+            step = frame.f_locals.get("step")
+            return str(step.STEP_ID) if hasattr(step, "STEP_ID") else None
+        frame = frame.f_back
+    return None
+
+
+def current_step(frame=None) -> str:
+    """The step the runner is in: this thread's run_steps frame, else the main thread's (a take
+    worker), else the script's own name (a step run as its own process, or no runner at all)."""
+    found = runner_step(frame or sys._getframe(1))
+    if found is None and threading.current_thread() is not threading.main_thread():
+        found = runner_step(sys._current_frames().get(threading.main_thread().ident))
+    return found or step_of(sys.argv)
+
+
 def writes_hook(box: Path):
-    """An audit hook appending {kind, site, step} for every write-capable open in the sandbox library."""
+    """An audit hook appending {kind, site, step} for every write-capable open in the sandbox library;
+    the step is read at each write from the runner, never once from argv."""
     from studio.rehearsal import fence
-    step, busy = step_of(sys.argv), _STATE["busy"]
+    busy = _STATE["busy"]
 
     def hook(event: str, args: tuple) -> None:
         if event != "open" or getattr(busy, "on", False) or not fence.writes(args[1], args[2]):
@@ -160,7 +188,8 @@ def writes_hook(box: Path):
         busy.on = True
         try:
             if (kind := kind_of(args[0], box)) is not None:
-                _STATE["writes"].append({"kind": kind, "site": site_of(sys._getframe(1)), "step": step})
+                frame = sys._getframe(1)
+                _STATE["writes"].append({"kind": kind, "site": site_of(frame), "step": current_step(frame)})
         finally:
             busy.on = False
     return hook
@@ -188,6 +217,7 @@ def install(manifest: Mapping, box: Path | None = None) -> None:
         _STATE["tool"] = start(_STATE["hits"])
     if manifest.get("record_writes"):
         sys.addaudithook(writes_hook(box))
-    from studio.rehearsal import faults
+    from studio.rehearsal import checkpoint_stop, faults
     faults.arm(manifest, box)
+    checkpoint_stop.install(manifest, box)              # S0a: the runner stops in front of a due checkpoint
     atexit.register(flush, box)

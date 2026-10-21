@@ -110,19 +110,45 @@ def ordered_retakes(ladder: Mapping, after: float) -> set[int]:
     return {int(i) for r in ladder.get("rounds") or () if float(r.get("at") or 0) >= after for i in (r.get("faults") or {})}
 
 
-def a_norerender(engine_rows: Iterable[Mapping], ladder: Mapping, fault_at: float, in_flight: int | None) -> dict:
-    """No take submitted twice unless a gate's retake named it after the fault (the take in flight
-    at the fault may render once more)."""
+def when(r: Mapping) -> float:
+    """A row's epoch: a number as is, an ISO stamp parsed, 0 when it has none."""
+    ts = r.get("ts")
+    if isinstance(ts, (int, float)):
+        return float(ts)
+    try:
+        return epoch(str(ts))
+    except ValueError:
+        return 0.0
+
+
+def resubmitted_unordered(engine_rows: Iterable[Mapping], cuts: list[float], named: set, in_flight: int | None) -> list[str]:
+    """Takes submitted twice between two cuts (a drive's end or death), unless named or in flight."""
     from studio.rehearsal import sweep
     seen: Counter = Counter()
     for r in engine_rows:
         if sweep.is_take_submit(r) and (i := take_index(r)) is not None:
-            seen[i] += 1
-    named = ordered_retakes(ladder, fault_at)
-    extra = [f"T{i:02d} x{c}" for i, c in sorted(seen.items())
-             if c > 1 and i not in named and not (i == in_flight and c == 2)]
-    return row("A-norerender", not extra, ["engine_log.jsonl", "takes/r2v/ladder.json"],
-               detail="; ".join(extra) or f"{len(seen)} takes, none re-rendered unordered")
+            seen[(i, sum(1 for d in cuts if d < when(r)))] += 1
+    return [f"T{i:02d} x{c}" for (i, _), c in sorted(seen.items())
+            if c > 1 and i not in named and not (i == in_flight and c == 2)]
+
+
+def resaved(collected: Iterable[Mapping], named: set) -> list[str]:
+    """Takes SAVED twice in the run (phases.jsonl rows: one per take the client collected): finished
+    work rendered again, which no cut excuses, unless a gate's retake named it."""
+    saved = Counter(int(r["take"]) for r in collected if r.get("take") is not None)
+    return [f"T{i:02d} saved x{c}" for i, c in sorted(saved.items()) if c > 1 and i not in named]
+
+
+def a_norerender(engine_rows: Iterable[Mapping], ladder: Mapping, fault_at: float, in_flight: int | None,
+                 deaths: Iterable[float] = (), collected: Iterable[Mapping] = ()) -> dict:
+    """No take rendered again unordered.  The take in flight at an engine fault, and a take a cut
+    lost (submitted before a drive ended or was killed, never saved), may be submitted once more
+    after it; a take saved before the cut and saved again after is a re-render (`collected`: the
+    run's new phases.jsonl rows)."""
+    cuts, named = sorted(deaths), ordered_retakes(ladder, fault_at)
+    extra = resubmitted_unordered(engine_rows, cuts, named, in_flight) + resaved(collected, named)
+    return row("A-norerender", not extra, ["engine_log.jsonl", "takes/r2v/ladder.json", "takes/r2v/phases.jsonl"],
+               detail="; ".join(extra) or f"{len(cuts)} cut(s), no take re-rendered unordered")
 
 
 # ---- A-noupload ---------------------------------------------------------------------------
@@ -232,17 +258,30 @@ def a_honest(engine_rows: list[Mapping], consumers: list[Mapping], shape: str) -
                detail=f"canned consumed by: {', '.join(who) or 'none'}")
 
 
+FAILED = "failed"
+"""instrument_state of a row whose instrument could not measure: the report counts it INSTRUMENT
+FAILED (scripts/proof/confidence.instrument_failed), never as a pass or a pipeline failure."""
+UNJOINED = ("INSTRUMENT FAILED: no gate outcome joins canned {ids}: vl_consumers rows carry no `passed`, "
+            "and a canned take or picture a non-VL gate read has no consumer row at all")
+
+
+def instrument_failed(r: Mapping) -> bool:
+    return str(r.get("instrument_state", "")).strip().lower() in (FAILED, "instrument failed")
+
+
 def a_canned(engine_rows: list[Mapping], consumers: list[Mapping]) -> dict:
-    """No gate PASSED on a canned reply (R3): such a pass is a FAILING Q6 row, named; a canned
-    reply no consumer row judged cannot be proven clean, so it fails as `unjoined`."""
+    """No gate PASSED on a canned reply (R3): such a pass is a FAILING Q6 row, named.  A canned
+    reply no gate outcome joins is a hole in the measuring tool, so the row is INSTRUMENT FAILED
+    (it counts nothing either way), never a failed pipeline row."""
     canned = canned_ids(engine_rows)
     used = [c for c in consumers if str(c.get("prompt_id")) in canned]
     passed = [f"{c.get('ask')} ({c.get('caller')}) passed on canned {c.get('prompt_id')}" for c in used if c.get("passed") is True]
     unjoined = sorted(canned - {str(c.get("prompt_id")) for c in used if "passed" in c})
-    state = "unjoined" if unjoined and not passed else "joined"
-    detail = "; ".join(passed + [f"canned {p} has no judged consumer" for p in unjoined]) or "no gate passed on a canned reply"
+    hole = UNJOINED.format(ids=", ".join(unjoined)) if unjoined else ""
+    state = FAILED if unjoined and not passed else "joined"
+    detail = "; ".join(passed + [hole] * bool(hole)) or "no gate passed on a canned reply"
     return row("A-canned", not passed and not unjoined, ["engine_log.jsonl", "vl_consumers.jsonl"],
-               match_classes=classes_of(engine_rows), instrument_state=state, detail=detail)
+               match_classes=classes_of(engine_rows), instrument="vl_consumers", instrument_state=state, detail=detail)
 
 
 # ---- A-torn ---------------------------------------------------------------------------------
@@ -279,7 +318,8 @@ def publish_refusals(home: Path) -> tuple[list[str], bool]:
     return refusals, not held
 
 
-def s0b_outcome(state: str, reason: str, refusals: list[str], card: str, auto_clearable: bool) -> dict:
+def s0b_outcome(state: str, reason: str, refusals: list[str], card: str, auto_clearable: bool,
+                classes: Mapping | None = None) -> dict:
     """The one pre-registered correct outcome (R2), judged before the run."""
     gates = [r.split(" ", 1)[0] for r in refusals]
     if state == "PARKED":
@@ -294,7 +334,8 @@ def s0b_outcome(state: str, reason: str, refusals: list[str], card: str, auto_cl
         ok, said = False, f"refusal not carried onto the publish card: {', '.join(missing)}"
     else:
         ok, said = True, f"held, {len(refusals)} refusals carried, lock held"
-    return row("S0b", ok, ["autopilot/status.json", "learnings.jsonl"], question="Q6", kind="quality", detail=said)
+    return row("S0b", ok, ["autopilot/status.json", "learnings.jsonl"], question="Q6", kind="quality", detail=said,
+               match_classes=classes)
 
 
 # ---- the scenarios' own pre-registered checks (3.2) ---------------------------------------
@@ -323,34 +364,41 @@ def recorded_since(home: Path) -> str:
     return min(stamps)[:10] if stamps else "2026-10-13"
 
 
-def s0a_rows(book: Path, recorded: Path | None = None, git=None) -> list[dict]:
+def s0a_rows(book: Path, recorded: Path | None = None, git=None, classes: Mapping | None = None) -> list[dict]:
     """Section 0's brick test: the unexplained differences over n takes, each listed; then each
-    deterministic step output against the recording's."""
+    deterministic step output against the recording's.  `classes` (the run's engine answers by
+    match class) rides on every row, so a graph built on a canned answer is mechanism (5.1)."""
     from studio.rehearsal import graph_diff as gd
     rec, git = Path(recorded or ep01_home()), git or gd.repo_git()
     since, mine = recorded_since(rec), home_of(book, 1)
     total = gd.summary(gd.room_report(rec / "takes" / "r2v", built_takes(mine / "takes" / "r2v"), since, git))
     rows = [row("S0a", total["n"] > 0 and total["unexplained"] == 0, [rec / "takes" / "r2v"], kind="quality",
-                n_points=total["n"], instrument="graph_diff",
+                n_points=total["n"], instrument="graph_diff", match_classes=classes,
                 detail=f"{total['unexplained']} unexplained over n={total['n']}: {total['listed'][:8]}")]
-    for rel in DETERMINISTIC:
-        if (mine / rel).is_file() and (rec / rel).is_file():
-            rep = gd.doc_report(rel, json.loads((rec / rel).read_text(encoding="utf-8")),
-                                json.loads((mine / rel).read_text(encoding="utf-8")), since, git)
-            rows.append(row("S0a", not rep["unexplained"], [rec / rel], kind="quality", instrument="graph_diff",
-                            detail=f"{rel}: {len(rep['unexplained'])} unexplained {rep['unexplained'][:6]}"))
-    return rows
+    return rows + [doc_row(rel, rec, mine, since, git, classes) for rel in DETERMINISTIC
+                   if (mine / rel).is_file() and (rec / rel).is_file()]
+
+
+def doc_row(rel: str, rec: Path, mine: Path, since: str, git, classes: Mapping | None) -> dict:
+    """One deterministic step output against the recording's, diffed the way the take graphs are."""
+    from studio.rehearsal import graph_diff as gd
+    rep = gd.doc_report(rel, json.loads((rec / rel).read_text(encoding="utf-8")),
+                        json.loads((mine / rel).read_text(encoding="utf-8")), since, git)
+    return row("S0a", not rep["unexplained"], [rec / rel], kind="quality", instrument="graph_diff", match_classes=classes,
+               detail=f"{rel}: {len(rep['unexplained'])} unexplained {rep['unexplained'][:6]}")
 
 
 def s0b_rows(book: Path, box: Path) -> list[dict]:
     """S0b's one pre-registered outcome, the refusals and the lock read by the real publish lock;
-    the publish card is the status reason, the held_publish events and the notify lines."""
+    the publish card is the status reason, the held_publish events and the notify lines.  The
+    run's engine answers by class ride on the row: gates judged on canned replies are mechanism."""
     ep = json.loads((Path(book) / "autopilot" / "status.json").read_text(encoding="utf-8")).get("episode") or {}
     refusals, clearable = publish_refusals(home_of(book, 2))
     held = [str(r.get("reason", "")) for r in jsonl(Path(book) / "autopilot" / "events.jsonl") if r.get("event") == "held_publish"]
     said = [str(r.get("text", "")) for r in jsonl(Path(box) / "notify.jsonl")]
     card = " ".join([str(ep.get("reason") or ""), *held, *said])
-    return [s0b_outcome(str(ep.get("state")), str(ep.get("reason") or ""), refusals, card, clearable)]
+    return [s0b_outcome(str(ep.get("state")), str(ep.get("reason") or ""), refusals, card, clearable,
+                        classes_of(jsonl(Path(box) / "engine_log.jsonl")))]
 
 
 def resubmits(engine_rows: list[Mapping]) -> int:
@@ -535,7 +583,8 @@ once; F9: the hung take at most once; F10: one resubmission; F16: none."""
 def specific(sid: str, box: Path, book: Path, sup: Mapping) -> list[dict]:
     """The pre-registered specific asserts of 3.2 that the files answer; [] for the others."""
     if sid in ("S0a", "S0b"):
-        return s0a_rows(book) if sid == "S0a" else s0b_rows(book, box)
+        classes = classes_of(jsonl(Path(box) / "engine_log.jsonl"))
+        return s0a_rows(book, classes=classes) if sid == "S0a" else s0b_rows(book, box)
     if sid not in CHECKS:
         return []
     return [CHECKS[sid](sid, box, book, jsonl(Path(box) / "engine_log.jsonl"), sup)]

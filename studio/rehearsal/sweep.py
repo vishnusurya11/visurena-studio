@@ -4,7 +4,9 @@ The point list: F1, F9, F10, F13, F16 sweep k over EVERY take submit of the chec
 an unfaulted run's engine_log.jsonl); F2 and F3 kill at every distinct write SITE (file kind x
 code location, from trace's write rows) at its first and one mid occurrence; F18 tears every
 record kind x checkpoint.  Distinctness: a point counts toward n only when its recovery trace
-is distinct, and a trace class passes only when every point in it passed.  Cost: a sweep past
+is distinct, and a trace class passes only when every point in it passed.  The count is only as
+good as the trace is stable, so every shard replays one point and compares (`stability`): a
+replay that traces differently fails the instrument, and the sweep's n counts nothing.  Cost: a sweep past
 its budget (4 h) is cut into shards run on later nights; the untried count is reported, never
 extrapolated."""
 from __future__ import annotations
@@ -82,6 +84,17 @@ def tally(results: Iterable[Mapping], planned: int) -> dict:
             "untried": max(planned - len(results), 0),
             "failing": [r["id"] for r in results if r.get("passed") is not True],
             "untraced": [r["id"] for r in results if not r.get("trace")]}
+
+
+def stability(first: Mapping, again: Mapping) -> dict:
+    """R14's own check on the instrument: the SAME point replayed must trace the same lines, or the
+    distinct-trace count is counting timing noise.  `only`: the lines one run executed and the
+    other did not, so a moving branch is named."""
+    a = {tuple(x) for x in first.get("trace_lines") or ()}
+    b = {tuple(x) for x in again.get("trace_lines") or ()}
+    same = bool(first.get("trace")) and first.get("trace") == again.get("trace")
+    return {"point": first.get("id"), "same": same, "signatures": [first.get("trace"), again.get("trace")],
+            "only": [list(x) for x in sorted(a ^ b)][:20]}
 
 
 def shards(points: list[Point], seconds_per_point: float, budget_s: float = BUDGET_S) -> list[list[Point]]:

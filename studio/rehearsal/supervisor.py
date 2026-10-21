@@ -95,10 +95,18 @@ def tree_procs(root: int, known: set, table: Callable | None = None, parents: Ca
 
 # ---- Deps -------------------------------------------------------------------------------
 
-def drive_argv_for(run_id: str) -> Callable[[str, int], list[str]]:
-    """The autopilot's own drive argv plus `--rehearsal=<run_id>` (drive.py reads argv[1:3] only)."""
+def drive_argv_for(run_id: str, box: Path | None = None) -> Callable[[str, int], list[str]]:
+    """The autopilot's own drive argv plus `--rehearsal=<run_id>` (drive.py reads argv[1:3] only).
+    The autopilot asks for it only to launch, while no drive runs: a checkpoint still pending is
+    copied first, so no relaunch ever runs past an uncopied one."""
     from scripts.episode import autopilot
-    return lambda codex, n: [*autopilot.drive_argv(codex, n), f"--rehearsal={run_id}"]
+    from studio.rehearsal import checkpoint_stop
+
+    def argv(codex: str, n: int) -> list[str]:
+        if box is not None:
+            checkpoint_stop.take(box, launching=True)
+        return [*autopilot.drive_argv(codex, n), f"--rehearsal={run_id}"]
+    return argv
 
 
 def notify_to(box: Path) -> Callable[[str], None]:
@@ -116,7 +124,7 @@ def make_deps(box: Path, manifest: Mapping, n: int):
     from studio import engine_ops
     from studio.rehearsal import faults
     known: set = set()
-    return autopilot.Deps(drive_argv=drive_argv_for(str(manifest["run_id"])),
+    return autopilot.Deps(drive_argv=drive_argv_for(str(manifest["run_id"]), box),
                           procs=lambda: tree_procs(os.getpid(), known), notify=notify_to(box),
                           chapters=lambda book: [n], root=Path(box) / settings.LIBRARY_DIR / ".autopilot",
                           cpu_s=engine_ops.tree_cpu_s, outputs_at=autopilot.newest_output, ledger=None,
@@ -188,26 +196,33 @@ def loop(ap, book: Path, codex: str, n: int, deps, expected: int, every: float, 
     if not ap.claim_supervisor(deps):
         return {**fresh(deps), "capped": "supervisor lock held"}
     ap.adopt(book, deps)
-    out, t0 = fresh(deps), time.monotonic()
+    out, deadline = fresh(deps), time.monotonic() + wall_s
     while out["terminal"] is None and out["capped"] is None:
-        out["ticks"] += 1
-        if before is not None and (word := before(out)):
-            out["terminal"] = word
-            break
-        hand_over(ap, book, codex, deps, out)
-        doc = one_tick(ap, book, codex, deps, out["ticks"], out)
-        out["terminal"] = terminal_of(doc, n)
-        out["acting"] += bool(doc) and (doc.get("episode") or {}).get("action") != WAIT
-        out["capped"] = "ticks" if out["acting"] > 2 * expected else ("wall" if time.monotonic() - t0 > wall_s else None)
+        go_round(ap, book, codex, n, deps, out, before)
+        if out["terminal"] is None:
+            out["capped"] = "ticks" if out["acting"] > 2 * expected else ("wall" if time.monotonic() > deadline else None)
         if out["terminal"] is None and out["capped"] is None:
             deps.sleep(every)
     return {**out, "ended": time.time()}
+
+
+def go_round(ap, book: Path, codex: str, n: int, deps, out: dict, before: Callable[[dict], str | None] | None) -> None:
+    """One round: the pre-tick hook (its word ends the run), a moved HEAD handed over, one real tick."""
+    out["ticks"] += 1
+    if before is not None and (word := before(out)):
+        out["terminal"] = word
+        return
+    hand_over(ap, book, codex, deps, out)
+    doc = one_tick(ap, book, codex, deps, out["ticks"], out)
+    out["terminal"] = terminal_of(doc, n)
+    out["acting"] += bool(doc) and (doc.get("episode") or {}).get("action") != WAIT
 
 
 # ---- boundaries: checkpoints, bounded runs, a commit mid-run ----------------------------------
 
 STEP_LINE = re.compile(r"^--- step (\d{2}) ", re.MULTILINE)
 BEFORE_STEP = re.compile(r"PAUSED AT BOUNDARY \| .* \| before step (\d{2})")
+"""The real runner's line for a unit stopped in front of a step (step_runner._paused)."""
 
 
 def last_log(home: Path) -> str:
@@ -215,37 +230,17 @@ def last_log(home: Path) -> str:
     return logs[-1].read_text(encoding="utf-8", errors="replace") if logs else ""
 
 
-def stopped_before(home: Path) -> str | None:
-    """The step a drive's last run stopped in front of, at a between-steps boundary."""
-    hits = BEFORE_STEP.findall(last_log(home))
-    return hits[-1] if hits else None
-
-
 def latest_step(home: Path) -> int:
     """The highest step the last run started (0 before any)."""
     return max((int(s) for s in STEP_LINE.findall(last_log(home))), default=0)
 
 
-def progressed(home: Path, since: float) -> bool:
-    """Work landed since `since`: an artifact, or a timing row (a rung or a step finished)."""
-    from scripts.episode import autopilot
-    timing = Path(home) / "timing.jsonl"
-    return autopilot.newest_output(home) > since or (timing.is_file() and timing.stat().st_mtime > since)
-
-
-def checkpoint_tick(box: Path, home: Path, alive: bool, state: dict) -> None:
-    """S0a's checkpoint maker, by the REAL boundary flag: ask every running drive to stop at its next
-    boundary once it has made progress; a drive stopped `before step NN` is copied as after_<NN-1>."""
-    from studio import boundary
-    from studio.rehearsal import sandbox
-    if not alive:
-        nn = stopped_before(home)
-        if nn and state.get("last") != nn and int(nn) > 1:
-            state["made"].append(sandbox.checkpoint(box, f"after_{int(nn) - 1:02d}").name)
-            state.update(last=nn, stopped_at=time.time())
-        return
-    if not boundary.requested(home) and progressed(home, state.get("stopped_at", 0.0)):
-        boundary.request(home, "rehearsal checkpoint")
+def checkpoint_tick(box: Path, alive: bool, state: dict) -> None:
+    """S0a's checkpoint maker: the runner stopped a drive in front of a due checkpoint
+    (checkpoint_stop, between steps only); once that drive is down it is copied, once."""
+    from studio.rehearsal import checkpoint_stop
+    if not alive and (name := checkpoint_stop.take(box)):
+        state["made"].append(name)
 
 
 def bounded_tick(home: Path, alive: bool, bound: str) -> str | None:
@@ -274,7 +269,7 @@ def before_tick(box: Path, book: Path, n: int, deps, manifest: Mapping, state: d
         out.setdefault("commits", []).extend(commit_tick(box, manifest, out["ticks"]))
         alive = bool(out["drives_alive"][-1])
         if manifest.get("checkpoints"):
-            checkpoint_tick(box, home, alive, state)
+            checkpoint_tick(box, alive, state)
             out["checkpoints"] = state["made"]
         return bounded_tick(home, alive, str(manifest["bound"])) if manifest.get("bound") else None
     return hook
@@ -313,7 +308,8 @@ def main(argv: list[str]) -> int:
     box, manifest = Path(args.box), settings.rehearsal()
     if manifest is None or Path(settings.sandbox()).resolve() != box.resolve():
         raise SystemExit(f"refused: {box} is not this process's rehearsal sandbox")
-    from studio.rehearsal import brain_script
+    from studio.rehearsal import brain_script, faults
+    os.environ[faults.SUPERVISOR_ENV] = str(os.getpid())       # a drive tree's kill stops below this process
     brain_script.install(manifest, box)                        # the brain runs in THIS process
     engine, deps = start_engine(box, manifest), make_deps(box, manifest, args.episode)
     book = book_dir(box, manifest)

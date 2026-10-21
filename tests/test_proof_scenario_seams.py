@@ -29,6 +29,17 @@ def manifest(box: Path) -> dict:
     return json.loads((box / "rehearsal.json").read_text(encoding="utf-8"))
 
 
+@pytest.fixture
+def scheduler_clear():
+    """A test that launches a rehearsal child asks the real scheduler first, as the harness does
+    (DESIGN's hard rule: a rehearsal refuses while visurena-autopilot is enabled), and skips if refused."""
+    from studio.rehearsal import activate
+    try:
+        rehearse.refuse_if_live()
+    except activate.RehearsalRefused as refused:
+        pytest.skip(f"refused, as DESIGN's hard rule says: {refused}")
+
+
 def point_of(sc: rehearse.Scenario) -> sweep.Point:
     """A synthetic point of the scenario's sweep (the real list needs a baseline run)."""
     if sc.sweep == "take":
@@ -74,7 +85,7 @@ def test_every_scenario_in_the_table_plants_a_manifest_every_fake_accepts(tmp_pa
         what_reads(manifest(box), box)                        # raises on a row any fake refuses
 
 
-def test_the_supervisor_child_boots_its_engine_with_a_fault_of_every_kind_planted(tmp_path):
+def test_the_supervisor_child_boots_its_engine_with_a_fault_of_every_kind_planted(tmp_path, scheduler_clear):
     box = tiny_sandbox(tmp_path, run_id="seams")
     book = rehearse.stage(box, rehearse.SCENARIOS / "smoke")
     rehearse.set_manifest(box, {**faults.CLEAN, "comfy_host": f"http://127.0.0.1:{rehearse.free_port()}"})
@@ -103,7 +114,7 @@ engine.stop()
 """
 
 
-def test_a_graph_through_the_real_client_in_a_fenced_child_runs_every_engine_assert(tmp_path):
+def test_a_graph_through_the_real_client_in_a_fenced_child_runs_every_engine_assert(tmp_path, scheduler_clear):
     box = tiny_sandbox(tmp_path, run_id="engine")
     rehearse.set_manifest(box, {**faults.CLEAN, "comfy_host": f"http://127.0.0.1:{rehearse.free_port()}"})
     faults.add(box, faults.engine("exec_error", 1))      # every workflow: the fixture graph is not in the real index

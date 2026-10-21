@@ -1,10 +1,13 @@
-"""The default suite's one rehearsal (2026-10-21_ep02_proof DESIGN 3): one checkpoint, one take, one
-fault, under 60 s, through the REAL autopilot tick in a fenced child process.
+"""The default suite's one rehearsal (2026-10-21_ep02_proof DESIGN 3): one checkpoint and one fault,
+under 60 s, through the REAL autopilot tick in a fenced child process.
 
 The sandbox is built from tests/fixtures only (no HDD read): a one-take ep02 at `after_12` whose
 last drive stopped at G-STANDING, and the supervisor's heartbeat torn mid-write (F18 on the
-supervisor's own record).  The real tick must read the torn record, rebuild it and end HELD_PUBLISH
-named, with no traceback, nothing reaching outside the sandbox, and a recovery trace on disk.
+supervisor's own record).  At this checkpoint the tick launches NO drive and submits NO take: what
+it pins is the real tick reading the torn record, rebuilding it and ending HELD_PUBLISH named, with
+no traceback, nothing reaching outside the sandbox, and a recovery trace on disk.  Like every
+rehearsal it is REFUSED while the real Task Scheduler entry is enabled (DESIGN's hard rule, asked by
+the harness itself), and then it skips with that reason.
 The supervisor's own helpers (pid ancestry, the terminal and tick-cap rules, the in-process
 hand-over) are pinned here too, on fakes."""
 from __future__ import annotations
@@ -23,10 +26,12 @@ from studio.rehearsal import asserts, supervisor
 from tests.proof_sandbox_fixture import tiny_sandbox
 
 
-def test_one_checkpoint_one_take_one_fault_ends_named_under_a_minute(tmp_path):
+def test_one_checkpoint_one_fault_through_the_real_tick_ends_named_under_a_minute(tmp_path):
     began = time.monotonic()
     box = tiny_sandbox(tmp_path, run_id="smoke")
-    out = rehearse.run_scenario("smoke", results=tmp_path / "results", box=box, cleared=True)
+    out = rehearse.run_scenario("smoke", results=tmp_path / "results", box=box)
+    if rehearse.skippable(out):
+        pytest.skip(f"refused, as DESIGN's hard rule says, even on a fixture sandbox: {out['blocked']}")
     doc = json.loads((tmp_path / "results" / "smoke.json").read_text(encoding="utf-8"))
     rows = {r["check"]: r for r in doc["rows"]}
     assert out["supervisor"]["terminal"] == "HELD_PUBLISH", out
@@ -151,19 +156,50 @@ def test_the_stage_copies_the_fixture_into_the_sandbox_book(tmp_path):
     assert book.parent == box / "library"
 
 
-def test_the_guard_excuses_only_a_named_live_writer_outside_the_rehearsal(monkeypatch):
-    lib = rehearse.settings.REPO / "library"
-    moved = [f"REAL LIBRARY TOUCHED: {lib / '.device' / 'gpu_util.jsonl'}", f"REAL LIBRARY TOUCHED: {lib / '.autopilot'}",
-             f"REAL LIBRARY TOUCHED: {lib / '.autopilot' / 'heartbeat.json'}",
-             f"REAL LIBRARY TOUCHED: {lib / '2026_book' / 'autopilot'}"]
-    monkeypatch.setattr(rehearse.guard, "snapshot", lambda paths: {})
+def live_library(tmp_path: Path, autopilot_pid: int) -> Path:
+    """A stand-in library whose records name the live autopilot loop the way the real one writes them."""
+    lib = tmp_path / "library"
+    (lib / ".autopilot").mkdir(parents=True)
+    (lib / ".device").mkdir()
+    (lib / "2026_book" / "autopilot").mkdir(parents=True)
+    (lib / ".autopilot" / "supervisor.lock").write_text(json.dumps({"pid": autopilot_pid}))
+    (lib / ".autopilot" / "heartbeat.json").write_text(json.dumps({"ts": 1.0, "tick": 3}))
+    (lib / ".autopilot" / "gpu.lock").write_text(json.dumps({"drive_pid": autopilot_pid}))
+    (lib / "2026_book" / "autopilot" / "status.json").write_text(json.dumps({"supervisor_pid": autopilot_pid}))
+    (lib / "2026_book" / "autopilot" / "events.jsonl").write_text("{}\n")
+    (lib / ".device" / "gpu_util.jsonl").write_text(json.dumps({"ts": time.time()}) + "\n")
+    return lib
+
+
+def guard_moved(monkeypatch, paths: list[Path]) -> None:
+    monkeypatch.setattr(rehearse.guard, "snapshot", lambda p: {})
     monkeypatch.setattr(rehearse.guard, "named_paths", lambda: [])
-    monkeypatch.setattr(rehearse.guard, "touched", lambda a, b: moved)
-    r = rehearse.guard_row({}, writers=lambda: {"gpu_ledger.py": 4242, "autopilot.py": 56132})
-    assert r["passed"] is True and "gpu_ledger.py pid 4242" in r["detail"] and "autopilot.py pid 56132" in r["detail"]
-    assert rehearse.guard_row({}, writers=lambda: {"gpu_ledger.py": 4242})["passed"] is False
-    monkeypatch.setattr(rehearse.guard, "touched", lambda a, b: [f"REAL LIBRARY TOUCHED: {lib / '2026_book' / 'episodes' / 'ep02'}"])
+    monkeypatch.setattr(rehearse.guard, "touched", lambda a, b: [f"REAL LIBRARY TOUCHED: {p}" for p in paths])
+
+
+def test_the_guard_excuses_a_path_only_when_its_content_names_the_live_writer(tmp_path, monkeypatch):
+    lib = live_library(tmp_path, autopilot_pid=56132)
+    book = lib / "2026_book" / "autopilot"
+    mine = [lib / ".device" / "gpu_util.jsonl", lib / ".autopilot", lib / ".autopilot" / "heartbeat.json",
+            lib / ".autopilot" / "supervisor.lock", book, book / "status.json", book / "events.jsonl"]
+    guard_moved(monkeypatch, mine)
+    r = rehearse.guard_row({}, writers=lambda: {"gpu_ledger.py": 4242, "autopilot.py": 56132}, since=time.time() - 60)
+    assert r["passed"] is True, r["detail"]
+    assert "gpu_ledger.py pid 4242" in r["detail"] and "autopilot.py pid 56132" in r["detail"]
+    assert rehearse.guard_row({}, writers=lambda: {"gpu_ledger.py": 4242, "autopilot.py": 777})["passed"] is False
+
+
+@pytest.mark.parametrize("rel", [".autopilot/gpu.lock", "2026_book/autopilot/parked.jsonl", "2026_book/episodes/ep02"])
+def test_the_guard_never_excuses_a_path_the_live_writer_does_not_sign(tmp_path, monkeypatch, rel):
+    lib = live_library(tmp_path, autopilot_pid=56132)
+    guard_moved(monkeypatch, [lib / rel])
     assert rehearse.guard_row({}, writers=lambda: {"gpu_ledger.py": 4242, "autopilot.py": 56132})["passed"] is False
+
+
+def test_the_gpu_ledger_is_excused_only_for_rows_it_wrote_since_the_snapshot(tmp_path, monkeypatch):
+    lib = live_library(tmp_path, autopilot_pid=1)
+    guard_moved(monkeypatch, [lib / ".device" / "gpu_util.jsonl"])
+    assert rehearse.guard_row({}, writers=lambda: {"gpu_ledger.py": 4242}, since=time.time() + 60)["passed"] is False
 
 
 def test_a_live_writer_inside_the_rehearsal_tree_is_never_excused():
@@ -180,34 +216,88 @@ def home_with_log(tmp_path: Path, text: str) -> Path:
     return home
 
 
-def test_a_stop_in_front_of_a_step_names_that_step_and_a_rung_stop_names_none(tmp_path):
+def test_the_last_run_names_the_highest_step_it_started(tmp_path):
     home = home_with_log(tmp_path, "--- step 08 (panels) | x ---\nPAUSED AT BOUNDARY | ep01 | before step 09\n")
-    assert supervisor.stopped_before(home) == "09" and supervisor.latest_step(home) == 8
+    assert supervisor.latest_step(home) == 8
     (home / "drive_run02.log").write_text("--- step 09 (shoot) | x ---\nPAUSED AT BOUNDARY | ep01 | G-TAKE before rung r2 #2\n")
-    assert supervisor.stopped_before(home) is None and supervisor.latest_step(home) == 9
+    assert supervisor.latest_step(home) == 9 and not supervisor.BEFORE_STEP.search(supervisor.last_log(home))
 
 
-def test_the_checkpoint_maker_copies_a_drive_stopped_before_a_step_once(tmp_path):
+@pytest.fixture
+def shimmed(tmp_path):
+    """studio.step_runner with S0a's between-steps stop installed for after_08, undone after."""
+    from studio import step_runner
+    from studio.rehearsal import checkpoint_stop
+    box = tmp_path / "box"
+    (box / "checkpoints").mkdir(parents=True)
+    undo = checkpoint_stop.shim(step_runner, box, ("after_08",))
+    yield box
+    undo()
+
+
+def test_the_real_runner_stops_in_front_of_a_due_checkpoint_and_only_between_steps(tmp_path, shimmed, capsys):
+    from studio import boundary, step_runner
+    from studio.rehearsal import checkpoint_stop
+    from tests.proof_runner_fixture import run_real_steps, step
+    home, ran = tmp_path / "home", []
+    home.mkdir()
+
+    def mid_step(ctx):                                  # a take's or a rung's own check never sees the stop
+        ran.append(("08", step_runner.boundary.requested(home), boundary.requested(home)))
+    out = run_real_steps([step("07", done=True), step("08", mid_step), step("09", lambda ctx: ran.append("09"))], home)
+    assert out == boundary.OUTCOME and out.step == "09" and ran == [("08", False, False)]
+    assert supervisor.BEFORE_STEP.search(capsys.readouterr().out).group(1) == "09"
+    assert checkpoint_stop.pending(shimmed) == "after_08" and not (home / boundary.FLAG).exists()
+
+
+def test_a_rehearsal_child_asking_for_checkpoints_gets_the_stop_when_the_runner_loads(tmp_path):
+    import subprocess
+    import sys
+    box = tmp_path / "box"
+    (box / "checkpoints").mkdir(parents=True)
+    code = ("import sys; sys.path.insert(0, {repo!r}); from studio.rehearsal import trace; "
+            "trace.install({{'trace': False, 'checkpoints': ['after_08']}}, box={box!r}); "
+            "from tests.proof_runner_fixture import run_real_steps, step; "
+            "print('OUTCOME', run_real_steps([step('08', done=True), step('09')], {home!r}))")
+    done = subprocess.run([sys.executable, "-c", code.format(repo=str(rehearse.settings.REPO), box=str(box), home=str(tmp_path))],
+                          capture_output=True, text=True, timeout=60, cwd=rehearse.settings.REPO)
+    assert "OUTCOME paused_at_boundary" in done.stdout, done.stdout + done.stderr
+    assert "before step 09" in done.stdout and (box / "checkpoint.pending").is_file()
+
+
+def test_a_relaunch_past_a_made_checkpoint_runs_on(tmp_path, shimmed):
+    from tests.proof_runner_fixture import run_real_steps, step
+    (shimmed / "checkpoints" / "after_08").mkdir()
+    ran: list = []
+    assert run_real_steps([step("08", done=True), step("09", lambda ctx: ran.append("09"))], tmp_path) == "completed"
+    assert ran == ["09"]
+
+
+def test_the_checkpoint_maker_copies_a_pending_checkpoint_once_the_drive_is_down(tmp_path):
+    from studio.rehearsal import checkpoint_stop
     box = tiny_sandbox(tmp_path, run_id="cp")
-    home = box / "library" / "x" / "episodes" / "ep01"
-    home.mkdir(parents=True)
-    (home / "drive_run01.log").write_text("PAUSED AT BOUNDARY | ep01 | before step 09\n")
+    checkpoint_stop.mark(box, "after_08")
     state = {"made": []}
-    supervisor.checkpoint_tick(box, home, alive=False, state=state)
-    supervisor.checkpoint_tick(box, home, alive=False, state=state)
+    supervisor.checkpoint_tick(box, alive=True, state=state)
+    assert state["made"] == []                             # never while the drive still runs
+    supervisor.checkpoint_tick(box, alive=False, state=state)
+    supervisor.checkpoint_tick(box, alive=False, state=state)
     assert state["made"] == ["after_08"] and (box / "checkpoints" / "after_08" / "library").is_dir()
+    assert checkpoint_stop.pending(box) is None
 
 
-def test_the_checkpoint_maker_asks_a_running_drive_to_stop_only_after_it_made_progress(tmp_path):
-    from studio import boundary
-    home = home_with_log(tmp_path, "--- step 09 (shoot) | x ---\n")
-    state = {"made": [], "stopped_at": time.time() + 3600}
-    supervisor.checkpoint_tick(tmp_path, home, alive=True, state=state)
-    assert not boundary.requested(home)                     # nothing landed since the last stop
-    state["stopped_at"] = time.time() - 60
-    (home / "T00.graph.json").write_text("{}")              # an artifact landed after the stop
-    supervisor.checkpoint_tick(tmp_path, home, alive=True, state=state)
-    assert boundary.requested(home)
+def test_a_relaunch_copies_a_pending_checkpoint_first_without_its_own_open_launch_log(tmp_path):
+    from studio.rehearsal import checkpoint_stop
+    box = tiny_sandbox(tmp_path, run_id="relaunch")
+    home = box / "library" / "b" / "episodes" / "ep01"
+    home.mkdir(parents=True)
+    (home / "drive_launch01.log").write_text("ran\n")
+    (home / "drive_launch02.log").write_text("")           # the autopilot opened it just before drive_argv
+    checkpoint_stop.mark(box, "after_08")
+    argv = supervisor.drive_argv_for("r1", box)("9999", 1)
+    copied = box / "checkpoints" / "after_08" / "library" / "b" / "episodes" / "ep01"
+    assert argv[-1] == "--rehearsal=r1" and checkpoint_stop.pending(box) is None
+    assert (copied / "drive_launch01.log").is_file() and not (copied / "drive_launch02.log").exists()
 
 
 def test_a_bounded_run_asks_for_the_boundary_past_its_step_and_ends_there(tmp_path):
@@ -254,6 +344,61 @@ def test_a_fault_scenario_restores_from_the_newest_s0a_sandbox_holding_its_check
     assert rehearse.checkpoint_box(1, "after_08", base=tmp_path) == old
     assert rehearse.checkpoint_box(1, "after_05", base=tmp_path) == new
     assert rehearse.checkpoint_box(1, "after_12", base=tmp_path) is None
+
+
+def test_a_fixture_scenario_is_refused_too_while_the_real_scheduler_entry_is_enabled(tmp_path, monkeypatch):
+    def refuse():
+        from studio.rehearsal import activate
+        raise activate.RehearsalRefused("the real Task Scheduler entry visurena-autopilot is enabled")
+    monkeypatch.setattr(rehearse, "refuse_if_live", refuse)
+    box = tiny_sandbox(tmp_path, run_id="refused")
+    out = rehearse.run_scenario("smoke", results=tmp_path / "results", box=box)
+    assert out["blocked"] and rehearse.skippable(out) and not (box / "supervisor.json").exists()
+
+
+def test_a_row_whose_instrument_failed_never_fails_the_point_and_is_listed():
+    good, hole = asserts.row("A-real", True, []), asserts.a_canned([{"class": "canned", "prompt_id": "c"}], [])
+    sup = {"terminal": "HELD_PUBLISH", "tick_errors": 0}
+    assert rehearse.point_passed(sup, [good, hole]) == (True, ["A-canned"])
+    assert rehearse.point_passed(sup, [asserts.row("A-real", False, []), hole]) == (False, ["A-canned"])
+    assert rehearse.point_passed({"terminal": None}, [good]) == (False, [])
+
+
+def test_a_cut_is_the_kill_moment_or_any_drive_end_of_this_run(tmp_path):
+    home = tmp_path / "library" / "b" / "episodes" / "ep01"
+    home.mkdir(parents=True)
+    (tmp_path / "kill.done").write_text(json.dumps({"ts": 1792600000.0, "pid": 7}))
+    rows = [{"event": "start", "ts": "2026-10-21T10:00:00+00:00"}, {"event": "end", "ts": "2026-10-21T10:05:00+00:00", "code": 0},
+            {"event": "end", "ts": "2026-10-21T10:09:00+00:00", "code": 137}]
+    (home / "drive.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows))
+    ends = [asserts.epoch("2026-10-21T10:05:00+00:00"), asserts.epoch("2026-10-21T10:09:00+00:00")]
+    assert rehearse.deaths(tmp_path, home, since=0.0) == sorted([1792600000.0, *ends])
+    assert rehearse.deaths(tmp_path, home, since=ends[0] + 1) == sorted([1792600000.0, ends[1]])
+
+
+def test_a_sweep_whose_replayed_point_traces_differently_is_an_instrument_failure():
+    sc = rehearse.TABLE["F10"]
+    results = [{"id": "F10:k=1", "passed": True, "trace": "aaa"}, {"id": "F10:k=2", "passed": True, "trace": "bbb"}]
+    same = rehearse.summary_row(sc, results, 2, stability=[{"point": "F10:k=1", "same": True}])
+    assert same["passed"] is True and "stable 1/1" in same["instrument_state"]
+    moved = rehearse.summary_row(sc, results, 2, stability=[{"point": "F10:k=1", "same": False}])
+    assert asserts.instrument_failed(moved) and "unstable" in moved["detail"]
+    never = rehearse.summary_row(sc, results, 2, stability=[])
+    assert never["passed"] is False and "no replay" in never["detail"]
+
+
+def test_the_stability_check_replays_one_point_and_compares_its_signature():
+    first = {"id": "F10:k=1", "trace": "aaa", "trace_lines": [["studio/comfy.py", 3]]}
+    again = {"id": "F10:k=1", "trace": "aaa", "trace_lines": [["studio/comfy.py", 3]]}
+    assert sweep_stability(first, again) == {"point": "F10:k=1", "same": True, "signatures": ["aaa", "aaa"], "only": []}
+    again = {"id": "F10:k=1", "trace": "ccc", "trace_lines": [["studio/comfy.py", 3], ["scripts/episode/drive.py", 40]]}
+    got = sweep_stability(first, again)
+    assert got["same"] is False and got["only"] == [["scripts/episode/drive.py", 40]]
+
+
+def sweep_stability(first, again):
+    from studio.rehearsal import sweep
+    return sweep.stability(first, again)
 
 
 def test_every_evidence_path_is_made_absolute_under_the_sandbox(tmp_path):

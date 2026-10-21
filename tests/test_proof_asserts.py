@@ -125,10 +125,19 @@ def test_a_gate_that_passed_on_a_canned_reply_is_a_failing_q6_row():
     assert asserts.a_canned(log, consumers)["passed"] is True
 
 
-def test_a_canned_reply_no_consumer_judged_cannot_be_proven_clean():
-    log = [{"call": "prompt", "class": "canned", "prompt_id": "b"}]
-    r = asserts.a_canned(log, [{"prompt_id": "b", "ask": "x", "caller": "y"}])
-    assert r["passed"] is False and r["instrument_state"] == "unjoined"
+def test_a_canned_reply_no_consumer_judged_is_an_instrument_failure_never_a_failed_pipeline_row():
+    from scripts.proof import confidence
+    log = [{"call": "prompt", "class": "canned", "prompt_id": "b"}, {"call": "prompt", "class": "canned", "prompt_id": "m"}]
+    r = asserts.a_canned(log, [{"prompt_id": "b", "ask": "x", "caller": "y"}])     # m: a canned take no VL read
+    assert r["instrument_state"] == "failed" and confidence.instrument_failed(r)
+    assert "INSTRUMENT FAILED" in r["detail"] and "b" in r["detail"] and "m" in r["detail"]
+    assert asserts.instrument_failed(r) and not asserts.instrument_failed(asserts.row("A-real", False, []))
+
+
+def test_a_gate_that_passed_on_a_canned_reply_still_fails_when_another_is_unjoined():
+    log = [{"call": "prompt", "class": "canned", "prompt_id": "b"}, {"call": "prompt", "class": "canned", "prompt_id": "m"}]
+    r = asserts.a_canned(log, [{"prompt_id": "b", "ask": "panel_content", "caller": "y", "passed": True}])
+    assert r["passed"] is False and not asserts.instrument_failed(r) and "panel_content" in r["detail"]
 
 
 def test_torn_passes_when_every_record_parses_or_the_resume_named_it(tmp_path):
@@ -180,6 +189,44 @@ def test_s0a_diffs_every_built_take_against_the_recorded_room_and_lists_the_unex
     rows = asserts.s0a_rows(book, recorded=rec, git=lambda *a: "")
     assert rows[0]["check"] == "S0a" and rows[0]["n_points"] == 2 and rows[0]["passed"] is False
     assert "1 unexplained over n=2" in rows[0]["detail"] and "noise_seed" in rows[0]["detail"]
+
+
+def test_the_headline_rows_standing_on_a_canned_answer_are_mechanism(tmp_path):
+    rec, book = tmp_path / "ep01", tmp_path / "library" / "b"
+    for folder in (rec / "takes" / "r2v", book / "episodes" / "ep01" / "takes" / "r2v"):
+        folder.mkdir(parents=True)
+        (folder / "T00.graph.json").write_text(json.dumps(graph(1)))
+    rows = asserts.s0a_rows(book, recorded=rec, git=lambda *a: "", classes={"exact": 4, "canned": 1})
+    assert rows[0]["kind"] == "mechanism" and rows[0]["match_classes"] == {"exact": 4, "canned": 1}
+    assert asserts.s0a_rows(book, recorded=rec, git=lambda *a: "", classes={"exact": 4})[0]["kind"] == "quality"
+    _, home = book_at(tmp_path / "s0b")
+    book2 = home.parent.parent
+    (book2 / "autopilot").mkdir()
+    (book2 / "autopilot" / "status.json").write_text(json.dumps({"episode": {"n": 2, "state": "PARKED", "reason": "x"}}))
+    write_rows(tmp_path / "engine_log.jsonl", [{"call": "prompt", "class": "canned", "prompt_id": "c"}])
+    assert asserts.s0b_rows(book2, tmp_path)[0]["kind"] == "mechanism"
+
+
+def test_a_take_in_flight_when_its_drive_died_may_render_once_more_after_the_death():
+    rows = [{"call": "prompt", "kind": "take", "index": 1, "ts": "2026-10-21T10:00:01+00:00"},
+            {"call": "prompt", "kind": "take", "index": 2, "ts": "2026-10-21T10:00:02+00:00"},
+            {"call": "prompt", "kind": "take", "index": 2, "ts": "2026-10-21T10:00:09+00:00"}]
+    death = asserts.epoch("2026-10-21T10:00:05+00:00")
+    assert asserts.a_norerender(rows, {}, fault_at=0.0, in_flight=None)["passed"] is False
+    assert asserts.a_norerender(rows, {}, fault_at=0.0, in_flight=None, deaths=[death])["passed"] is True
+    twice = rows + [{"call": "prompt", "kind": "take", "index": 2, "ts": "2026-10-21T10:00:12+00:00"}]
+    assert asserts.a_norerender(twice, {}, fault_at=0.0, in_flight=None, deaths=[death])["passed"] is False
+
+
+def test_a_take_collected_before_the_death_and_rendered_again_after_it_is_a_rerender():
+    rows = [{"call": "prompt", "kind": "take", "index": 2, "ts": 2.0}, {"call": "prompt", "kind": "take", "index": 2, "ts": 9.0}]
+    lost = [{"take": 2, "video": "T02.mp4"}]                                    # in flight: saved once, after the resume
+    kept = [{"take": 2, "video": "T02.mp4"}, {"take": 2, "video": "T02.mp4"}]   # finished, then rendered again
+    assert asserts.a_norerender(rows, {}, 0.0, None, deaths=[5.0], collected=lost)["passed"] is True
+    r = asserts.a_norerender(rows, {}, 0.0, None, deaths=[5.0], collected=kept)
+    assert r["passed"] is False and "T02 saved x2" in r["detail"]
+    named = {"rounds": [{"at": 1.0, "faults": {"2": ["warp"]}}]}
+    assert asserts.a_norerender(rows, named, 0.0, None, deaths=[5.0], collected=kept)["passed"] is True
 
 
 def test_s0a_with_no_built_take_is_never_a_pass(tmp_path):

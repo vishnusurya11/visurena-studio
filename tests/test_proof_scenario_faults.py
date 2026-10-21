@@ -7,6 +7,7 @@ themselves run the real pipeline and are marked `rehearsal` (excluded by default
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -89,6 +90,56 @@ def test_a_kill_at_write_k_stops_the_child_before_its_kth_write_and_asks_for_the
 
 def test_a_kill_row_for_another_step_arms_nothing():
     assert faults.kill_rows({"harness_faults": [faults.kill_at_write("k", "s", 1, "10")]}, step="09") == []
+
+
+def test_a_kill_for_step_09_fires_inside_the_episode_process_only_while_the_runner_is_in_09(tmp_path):
+    box = tmp_path / "box"
+    home = box / "library" / "b" / "episodes" / "ep02"
+    home.mkdir(parents=True)
+    row = faults.kill_at_write("episodes/ep##/x##.txt", "<string>:1", 1, "09")
+    code = ("import sys; sys.path.insert(0, {repo!r}); from studio.rehearsal import faults; "
+            "from tests.proof_runner_fixture import run_real_steps, step; "
+            "w = lambda name: (lambda ctx: open({d!r} + '/' + name, 'w').write('x')); "
+            "faults.arm({{'harness_faults': [{row!r}]}}, {box!r}); "
+            "run_real_steps([step('08', w('x08.txt')), step('09', w('x09.txt')), step('10', w('x10.txt'))])")
+    done = subprocess.run([sys.executable, "-c", code.format(repo=str(settings.REPO), row=row, box=str(box), d=str(home))],
+                          capture_output=True, text=True, timeout=60, cwd=settings.REPO)
+    assert done.returncode == faults.KILLED, done.stdout + done.stderr
+    assert sorted(p.name for p in home.iterdir()) == ["x08.txt"]          # 08 wrote; 09 died before its write
+    assert faults.kill_requested(box)["step"] == "09"
+
+
+def test_the_drive_is_the_topmost_ancestor_below_the_supervisor():
+    parents = {30: 20, 20: 10, 10: 1}                         # episode 30 <- drive 20 <- supervisor 10
+    assert faults.drive_root(parents, 30, supervisor=10) == 20
+    assert faults.drive_root(parents, 30, supervisor=None) == 30           # no supervisor named: only itself
+    assert faults.drive_root({30: 30}, 30, supervisor=10) == 30            # a loop in the map ends the walk
+
+
+def test_the_tree_kill_takes_the_drive_first_and_every_other_process_of_it_never_the_killer():
+    killed: list = []
+    parents = {30: 20, 31: 20, 32: 31, 20: 10, 40: 10}
+    got = faults.kill_tree(30, 10, parents=lambda: parents, kill=killed.append)
+    assert got == killed == [20, 31, 32]                                   # 40 is another child of the supervisor
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="the parent map is Toolhelp32's")
+def test_a_kill_at_write_kills_the_whole_drive_at_once_so_the_drive_never_handles_the_exit(tmp_path):
+    box = tmp_path / "box"
+    home = box / "library" / "b" / "episodes" / "ep02"
+    home.mkdir(parents=True)
+    mark = tmp_path / "drive_handled_the_exit.txt"
+    row = faults.kill_at_write("episodes/ep##/x##.txt", "<string>:1", 1, None)
+    child = ("import sys; sys.path.insert(0, {repo!r}); from studio.rehearsal import faults; "
+             "faults.arm({{'harness_faults': [{row!r}]}}, {box!r}); open({d!r} + '/x01.txt', 'w').write('x')"
+             ).format(repo=str(settings.REPO), row=row, box=str(box), d=str(home))
+    drive = (f"import subprocess, sys, time; p = subprocess.Popen([sys.executable, '-c', {child!r}]); p.wait(); "
+             f"time.sleep(3); open({str(mark)!r}, 'w').write(str(p.returncode))")
+    env = {**os.environ, faults.SUPERVISOR_ENV: str(os.getpid())}
+    done = subprocess.run([sys.executable, "-c", drive], capture_output=True, text=True, timeout=60, env=env)
+    asked = faults.kill_requested(box)
+    assert done.returncode != 0 and not mark.exists(), done.stdout + done.stderr
+    assert asked["killed"] and asked["killed"][0] != asked["pid"]
 
 
 def test_a_dropped_supervisor_leaves_a_stale_lock_and_an_old_heartbeat(box):
