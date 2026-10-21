@@ -88,3 +88,21 @@ def test_the_verdict_says_its_pairing_and_fits_the_single_face_pairs_apart():
     said = pts.verdict(single + crowd)
     assert "tallest" in said["pairing"] and said["single_face"]["n"] == 3 and said["single_face"]["r2"] == 1.0
     assert said["r2"] < 0.8 and not said["passed"]                       # the pre-registered verdict is unchanged
+
+
+def test_the_verdict_says_on_how_many_pairs_the_panel_tier_is_the_take_tier():
+    """AUDIT A6: the number a failed line hides; ep01 had the same tier on 19 of 21 pairs (T09 127 -> 83 px
+    moved down a tier, T19 71 -> 120.3 px moved up, 0.3 px past the 120 px edge).  Tiers: tiny under
+    tiny_face.TINY_PX (40), mid under face_refine.SMALL_FACE_PX (120), large from there."""
+    pairs = [{"take": 9, "panel_px": 127.0, "take_px": 83.0, "static": False, "single": True},
+             {"take": 19, "panel_px": 71.0, "take_px": 120.3, "static": False, "single": True},
+             {"take": 2, "panel_px": 30.0, "take_px": 35.0, "static": False, "single": True}]
+    got = pts.tier_agreement(pairs)
+    assert got == {"same": 1, "n": 3, "moved": ["T09 large->mid", "T19 mid->large"], "edges_px": [40.0, 120.0]}
+    assert pts.verdict(pairs)["tiers"] == got
+
+
+def test_the_panel_row_says_the_tier_agreement_in_its_detail(tmp_path):
+    from scripts.proof import face_replay as fr
+    detail = fr.panel(tmp_path)["proof_rows"][0]["detail"]
+    assert detail.startswith("panel tier = take tier on 0/0 pairs")

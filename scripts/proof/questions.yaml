@@ -3,7 +3,10 @@
 # Reviewable data, not code.  Each question names:
 #   checks   the checks PROVEN needs, each with the distinct-point minimum it must reach (min_n) and the
 #            kind of row that satisfies it (quality unless said); a check id is the design's id (S0a, F1,
-#            A-caps, ...) or the suite's row name (face_replay rows, time_backtest_loo, ...)
+#            A-caps, ...) or the suite's row name (face_replay rows, time_backtest_loo, ...).
+#            `min_n: planned` (a sweep): every point its baseline planned was tried (AUDIT A7).
+#            `predictor: true`: the check predicts the answer before the real run; its failure makes the
+#            question REAL-RUN (answerable only by the run), never FAILING (AUDIT A6)
 #   gates    checks whose row must PASS before the question can leave REAL-RUN (an instrument's calibration,
 #            a recording's coverage); a failing gate row means "not answerable from recordings", never FAILING.
 #            A gate row answers every question that names it, whichever question the suite wrote it under.
@@ -28,6 +31,7 @@
 not_yet_emitted:
   D1: the refine graph byte compare (DESIGN 4.2, package P6; n from 2 to 5 by SR-3); no suite writes it yet
   plan_battery_ch2: the plan battery on ch2's step-02 plan (Q8, kind compliance); needs SR-2's recorded writer session
+  ep02_p90_clock: ep02's predicted p90 clock to the first master, the uncovered-clock term included, under 6 h (Q5, AUDIT A6); needs SR-2's ch2 plan
 
 staged_runs:
   SR-0:
@@ -78,7 +82,7 @@ questions:
     title: mid faces get drawn eyes
     checks:
       - {check: face_mid_tier, min_n: 10}
-      - {check: panel_take_size, min_n: 8, ungated: true}
+      - {check: panel_take_size, min_n: 8, ungated: true, predictor: true}
     gates: [instrument_gate.face_eye.cel]
     staged: [SR-4, SR-0]
   Q4:
@@ -91,7 +95,8 @@ questions:
     title: ep02 machine time under 6 h
     time: true
     checks:
-      - {check: time_backtest_loo, min_n: 4}
+      - {check: time_backtest_loo, min_n: 4, predictor: true}
+      - {check: ep02_p90_clock, min_n: 1, kind: mechanism, predictor: true}
       - {check: A-caps, min_n: 1, kind: mechanism}
     staged: [SR-2, SR-4]
     baseline: "ep01: 0 of 1 episodes under 6 h (first master 6.02 h, clock.jsonl)"
@@ -104,11 +109,11 @@ questions:
       - {check: S0a, min_n: 1}
       - {check: S0b, min_n: 1}
       - {check: A-canned, min_n: 1, kind: mechanism}
-      - {check: F1, min_n: 1, kind: mechanism}
-      - {check: F2, min_n: 1, kind: mechanism}
-      - {check: F9, min_n: 1, kind: mechanism}
-      - {check: F13, min_n: 1, kind: mechanism}
-      - {check: F18, min_n: 1, kind: mechanism}
+      - {check: F1, min_n: planned, kind: mechanism}
+      - {check: F2, min_n: planned, kind: mechanism}
+      - {check: F9, min_n: planned, kind: mechanism}
+      - {check: F13, min_n: planned, kind: mechanism}
+      - {check: F18, min_n: planned, kind: mechanism}
     staged: [SR-5, SR-4]
   Q7:
     title: finished the same day, with an operator

@@ -551,10 +551,11 @@ def summary_row(sc: Scenario, results: list[dict], planned: int, stability: list
     rest = f"; {t['untried']} untried: run again to continue the sweep" if t["untried"] else ""
     state, why = trace_state(stability, t["untried"])
     holes = sorted({h for r in results for h in r.get("instrument_failed") or ()})
-    return asserts.row(sc.id, ok and state != asserts.FAILED, [f"results/{sc.id}.json"], n_points=t["tried"],
+    said = asserts.row(sc.id, ok and state != asserts.FAILED, [f"results/{sc.id}.json"], n_points=t["tried"],
                        n_distinct=t["n_distinct"], match_classes=classes, instrument="trace", instrument_state=state,
                        detail=f"{t['passed_distinct']}/{t['n_distinct']} distinct traces passed; failing {t['failing'][:5]}"
                               f"{rest}{why}" + (f"; instrument failed in points: {holes}" if holes else ""))
+    return {**said, "planned": planned}
 
 
 def trace_state(stability: list[dict] | None, untried: int) -> tuple[str, str]:

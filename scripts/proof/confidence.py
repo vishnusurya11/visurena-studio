@@ -335,24 +335,49 @@ def gate_misses(spec: dict, rows: list[dict]) -> list[str]:
         r["check"] == g and r.get("passed") and contribution(r, spec)[0] != "refused" for r in rows)]
 
 
+PLANNED = "planned"
+"""`min_n: planned`: a sweep's minimum is every point its baseline planned (AUDIT A7), not one trace."""
+
+
+def need_of(c: dict, got: list[dict]) -> tuple[int, int, str]:
+    """(what the rows have, what the check needs, the unit): distinct points, or a sweep's points tried
+    over its planned points."""
+    if c["min_n"] == PLANNED:
+        return (sum(int(r.get("n_points") or 0) for r in got), sum(int(r.get("planned") or 0) for r in got),
+                " planned points tried")
+    return sum(n_of(r) for r in got), int(c["min_n"]), ""
+
+
 def check_misses(spec: dict, by: dict) -> list[str]:
-    """The required checks with no passing row of their kind at their distinct-point minimum."""
+    """The required checks with no passing row of their kind at their minimum (a sweep: all planned points)."""
     misses = []
     for c in spec.get("checks") or []:
         got = [r for r in by.get(c.get("kind", "quality"), []) if r["check"] == c["check"]]
-        n = sum(n_of(r) for r in got)
-        if not got or not all(r["passed"] for r in got) or n < c["min_n"]:
-            misses.append(f"{c['check']} {n} of {c['min_n']}")
+        have, need, unit = need_of(c, got)
+        short = have < need or (c["min_n"] == PLANNED and need <= 0)
+        if not got or not all(r["passed"] for r in got) or short:
+            misses.append(f"{c['check']} {have} of {need}{unit}")
     return misses
+
+
+def predictors(spec: dict) -> set[str]:
+    """Checks the map marks `predictor`: they predict the answer before the real run (AUDIT A6)."""
+    return {c["check"] for c in spec.get("checks") or [] if c.get("predictor")}
 
 
 def failing(spec: dict, by: dict, shut: bool = False) -> list[dict]:
     """The failed counted rows; while a gate is shut only a check the map marks `ungated` can fail the
-    question (the rest ran on what the recordings do not cover: DESIGN 5.2, Q1 REAL-RUN below its gates)."""
-    gates = set(spec.get("gates") or [])
+    question (the rest ran on what the recordings do not cover: DESIGN 5.2, Q1 REAL-RUN below its gates).
+    A failed predictor never fails it: the question is then answerable only by the real run (A6)."""
+    gates, preds = set(spec.get("gates") or []), predictors(spec)
     free = {c["check"] for c in spec.get("checks") or [] if c.get("ungated")}
     return [r for kind in ("quality", "mechanism") for r in by.get(kind, [])
-            if not r["passed"] and r["check"] not in gates and (not shut or r["check"] in free)]
+            if not r["passed"] and r["check"] not in gates | preds and (not shut or r["check"] in free)]
+
+
+def failed_predictors(spec: dict, by: dict) -> list[str]:
+    preds = predictors(spec)
+    return sorted({r["check"] for k in ("quality", "mechanism") for r in by.get(k, []) if not r["passed"] and r["check"] in preds})
 
 
 def shut_why(spec: dict, by: dict, shut: list[str]) -> str:
@@ -378,8 +403,11 @@ def decide(spec: dict, by: dict, every: list[dict], shape_ok: bool) -> tuple[str
     shut = gate_misses(spec, every)
     if bad := failing(spec, by, bool(shut)):
         return "FAILING", "failing: " + ", ".join(r["check"] for r in bad)
-    if shut:
-        return "REAL-RUN", shut_why(spec, by, shut)
+    held = failed_predictors(spec, by)
+    if shut or held:
+        parts = ([shut_why(spec, by, shut)] if shut else []) + (
+            [f"predictor failed: {', '.join(held)} (answerable only by the real run)"] if held else [])
+        return "REAL-RUN", "; ".join(parts)
     if why := short_of_proof(spec, by):
         return "PARTIAL", why
     if spec.get("cap_uncalibrated_shape") and not shape_ok:

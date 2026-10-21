@@ -294,7 +294,7 @@ def write(folder: Path, name: str, rows, mtime: float, scenario: str | None = No
 
 def test_a_newer_refused_time_row_never_hides_the_real_measured_failure(tmp_path):
     """R15 before supersession: a newer sandbox or recorded-clock row of the same check is REFUSED and
-    supersedes nothing, so the real back-test's failure still fails Q5."""
+    supersedes nothing, so the real back-test's failure still holds Q5 (REAL-RUN: a failed predictor, A6)."""
     real = [row(check="time_backtest_loo", q="Q5", passed=False, n=4, n_pass=2, clock="measured",
                 evidence=[str(tmp_path / "library" / "ep01" / "timing.jsonl")])]
     boxed = [row(check="time_backtest_loo", q="Q5", n=4, clock="recorded",
@@ -303,7 +303,7 @@ def test_a_newer_refused_time_row_never_hides_the_real_measured_failure(tmp_path
     write(tmp_path, "zz_rehearsal.json", boxed, 2_000_000)
     qmap, time_qs = cf.load_questions(cf.QUESTIONS), frozenset({"Q5"})
     got = cf.evaluate(qmap, cf.load_results(tmp_path, time_qs), shape_ok=True)["Q5"]
-    assert got["status"] == "FAILING" and "time_backtest_loo" in got["why"]
+    assert got["status"] == "REAL-RUN" and "predictor failed: time_backtest_loo" in got["why"]
     assert [r["_file"] for r, _ in got["refused"]] == ["zz_rehearsal.json"]
     assert cf.superseded_names(tmp_path, time_qs) == []
 
@@ -445,3 +445,42 @@ def test_the_precondition_row_counts_every_gap_and_lists_the_unknown_and_the_own
     head = rows[0]
     assert (head["n_pass"], head["n_distinct"], head["n_points"]) == (8, 10, 10)
     assert "an elderly servant" in rows[1]["detail"] and "series paused" in rows[1]["detail"]
+
+
+def test_a_failed_predictor_makes_its_question_real_run_never_failing():
+    """AUDIT A6: Q3's panel->take size and Q5's back-test predict the answer; a failed predictor makes the
+    question unanswerable before the real run, it does not make the answer fail."""
+    spec = {"title": "t", "checks": [{"check": "p", "min_n": 1, "predictor": True}, {"check": "c", "min_n": 1}]}
+    got = cf.status(spec, [row(check="p", passed=False), row(check="c")], shape_ok=True)
+    assert got["status"] == "REAL-RUN" and "predictor failed: p" in got["why"]
+    still = cf.status(spec, [row(check="p", passed=False), row(check="c", passed=False)], shape_ok=True)
+    assert still["status"] == "FAILING" and "c" in still["why"] and "p" not in still["why"].split("failing: ")[1]
+
+
+def test_a_sweeps_minimum_is_its_planned_point_count():
+    """AUDIT A7: a sweep over every take submit could reach PROVEN on one point; `min_n: planned` asks that
+    every planned point was tried, and the report says the share."""
+    spec = {"title": "t", "checks": [{"check": "F1", "min_n": "planned", "kind": "mechanism"}]}
+    part = row(check="F1", kind="mechanism", n_points=3, n_distinct=1, planned=12)
+    got = cf.status(spec, [part], shape_ok=True)
+    assert got["status"] == "PARTIAL" and "F1 3 of 12 planned points tried" in got["why"]
+    whole = row(check="F1", kind="mechanism", n_points=12, n_distinct=2, planned=12)
+    assert "F1" not in cf.check_misses(spec, cf.bucket(spec, [whole]))
+    assert cf.check_misses(spec, cf.bucket(spec, [row(check="F1", kind="mechanism", n_points=1)])) == [
+        "F1 1 of 0 planned points tried"]
+
+
+def test_the_map_asks_every_sweep_for_its_planned_points_and_names_its_predictors():
+    qmap = cf.load_questions(cf.QUESTIONS)
+    q6 = {c["check"]: c for c in qmap["questions"]["Q6"]["checks"]}
+    from scripts.proof import rehearse
+    sweeps = {sid for sid, sc in rehearse.TABLE.items() if sc.sweep}
+    assert all(c["min_n"] == "planned" for sid, c in q6.items() if sid in sweeps) and {"F1", "F2", "F18"} <= set(q6)
+    preds = {(q, c["check"]) for q, s in qmap["questions"].items() for c in s.get("checks") or [] if c.get("predictor")}
+    assert {("Q3", "panel_take_size"), ("Q5", "time_backtest_loo"), ("Q5", "ep02_p90_clock")} <= preds
+
+
+def test_a_sweep_summary_row_says_how_many_points_were_planned():
+    from scripts.proof import rehearse
+    r = rehearse.summary_row(rehearse.TABLE["F1"], [], 12)
+    assert r["planned"] == 12 and r["n_points"] == 0

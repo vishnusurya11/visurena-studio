@@ -784,6 +784,9 @@ def panel(home: Path) -> dict:
     said = pts.verdict(pairs)
     row = ig.proof_row("panel_take_size", "Q3", said["passed"], said["n"], said["n"], ["results/panel_take_size.json"],
                        [], "panel_dq.face_h x 768 vs take_dq warp min_px", "n/a (not an eye measure)", "quality")
+    t = said["tiers"]
+    row["detail"] = (f"panel tier = take tier on {t['same']}/{t['n']} pairs (edges {t['edges_px']} px)"
+                     + (f"; moved: {', '.join(t['moved'])}" if t["moved"] else ""))
     return {"episode": Path(home).as_posix(), "pairs": pairs, "verdict": said, "proof_rows": [row]}
 
 

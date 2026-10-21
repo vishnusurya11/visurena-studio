@@ -75,10 +75,29 @@ def single_fit(pairs: list[dict]) -> dict:
     return {"n": len(single), "slope": round(slope, 4), "intercept": round(intercept, 2), "r2": round(r2, 4)}
 
 
+def tier_edges() -> list[float]:
+    """The face tiers' edges: tiny under tiny_face.TINY_PX, mid under face_refine.SMALL_FACE_PX."""
+    from scripts.episode.tiny_face import TINY_PX
+    from studio.face_refine import SMALL_FACE_PX
+    return [float(TINY_PX), float(SMALL_FACE_PX)]
+
+
+def tier(px: float, edges: list[float]) -> str:
+    return "tiny" if px < edges[0] else "mid" if px < edges[1] else "large"
+
+
+def tier_agreement(pairs: list[dict]) -> dict:
+    """On how many pairs the panel's face tier is the take's (AUDIT A6: the number a failed line hides)."""
+    edges = tier_edges()
+    moved = [f"T{p['take']:02d} {tier(p['panel_px'], edges)}->{tier(p['take_px'], edges)}" for p in pairs
+             if tier(p["panel_px"], edges) != tier(p["take_px"], edges)]
+    return {"same": len(pairs) - len(moved), "n": len(pairs), "moved": moved, "edges_px": edges}
+
+
 def verdict(pairs: list[dict]) -> dict:
     """The pre-registered verdict (the line, its R^2, every static single-face miss, the kill lines), with
-    its pairing said and the single-face pairs fitted apart."""
-    return {**pre_registered(pairs), "pairing": PAIRING, "single_face": single_fit(pairs)}
+    its pairing said, the single-face pairs fitted apart and the tier agreement."""
+    return {**pre_registered(pairs), "pairing": PAIRING, "single_face": single_fit(pairs), "tiers": tier_agreement(pairs)}
 
 
 def pre_registered(pairs: list[dict]) -> dict:
