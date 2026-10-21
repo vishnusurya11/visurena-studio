@@ -346,3 +346,59 @@ take_content and the take eye pass it; then it is refined again. Replayed on the
 The 20 px floor: A3c drew T06's 10-11 px Hyde with no face either way (eye 0 -> 0). The 40 px line is the soft
 paste's own (`face_paste.SOFT_PX`). Uncalibrated: a 1024 draw has been judged by no gate yet. The first rung rows
 (the eye verdict, take_dq's warp and flicker rows, the refine of the new bytes) are its calibration set.
+
+## The face debate bench (2026-10-21; `docs/audit/2026-10-21_face_debate/`, FINAL.md and `bench/`)
+
+Five debate rounds (8 proposers x 3 refuters) left 20 OPEN items; the ones benchable in <= 15 GPU min each ran
+on 2026-10-21 in the paused window (~44 GPU min: VL reads 3, Spark A/B 2 + 8, C9 8, C4 14, C2 5, plus CPU). The
+library was only read; every write is under the debate folder. Judged by the production gate (`fs.gate_job`:
+turn, seam, flicker, CCIP, clip), the cel eye score on the same track boxes, and the strips by eye.
+
+**C9, a 1024x1024 draw of the same seed (A3c's one change), 5 takes / 9 faces** (`bench/metrics_h3.json`, strips
+`bench/strips/c9_T*_strip.png`). Eye cel A0 -> 1024, own tracks: T01 Utterson 44 -> 56, Enfield 57 -> 80; T06
+Enfield 113 -> 127, Hyde (10 px) 0 -> 0; T13 Enfield 132 -> 133; T18 Utterson 77 -> 98, Enfield 71 -> 86; T26
+Utterson 31 -> 122, Enfield 73 -> 68. Face-window flicker inside the production wall (1.10x + 0.5) on 8 of 9 (T06
+Hyde 4.29 > 4.12); CCIP to the sheet DOWN (better) on 8 of 9, clip up on 7 of 9. By eye T13/T18/T26 hold the 768
+draw's blocking frame for frame (same seed); T01 re-stages its extras (the couple becomes two women; the person
+boxes still match the PANEL at IoU 0.98, as the 768 draw does). Cost 103-251 s a take (1.6-2.0x). The
+pre-registered rule (gain >= +5 on every face, flicker inside the wall on every face) fails on T13 (+1.7), T26
+Enfield (-5) and the 10 px Hyde, so the 1024 first draw is NOT adopted as a route; it is the strongest lead for
+faces under ~70 px, where it gained +12 to +91 on 6 of 6, with identity up. The production path to it stays the
+09_08 tiny-face rung (refused 20-40 px faces); widening that rung to 70 px is an owner decision (FINAL.md).
+
+**C4, margin 2.4 -> 1.6 (MIN_SIDE 56), 7 faces: REFUTED.** Gate: 4 of 7 refused on turn (4.1-6.8 deg; T01
+Enfield also seam 25.5), 3 kept; the gate's eye score fell on 5 of 7 (T18 Utterson 77 -> 67, T08 child 48 -> 43,
+T01 Enfield 55 -> 45, T26 Enfield 73 -> 59, T06 Enfield 113 -> 90) and rose only on refused rows (T13 132 -> 150,
+T18 Enfield 71 -> 75). By eye the tighter window re-poses the head more (less context for the guide) and draws no
+crisper eye than margin 2.4; T01 Enfield's 1.6 crop drew a readable face but repainted the window (seam 25.5).
+The margin stays 2.4.
+
+**C2, the person's expression clause in the crop prompt, 5 renders: REFUTED as a cure.** T08 child (the card's own
+"writhes and screams, mouth wide open"): the redraw parts the lips (the VL reads the mouth open) but turns the
+head 8.3 / 7.1 deg and warps the band (0.96) or doubles a face; T09 Hyde ("cold, closed-mouth stare"): still
+grins, turn 13.8 / 9.9, eye 32 -> 0, a second face. A positive verb is obeyed in part; an absence clause is not
+(H3 obeys direction, not amount); neither passes the gate. T13 control kept (eye 132 -> 121). The crop prompt
+stays as it is; T08-type expression drift has no prompt cure on this evidence.
+
+**P1 / A37, the VL "same expression?" read on the 14 stored pairs (2 seeds each, agreeing pairs only): 7 of 12
+labelled reads agree with the LOOK labels.** It tells the T08 and T09 smiles from their sources (4 of 4) but flips
+on the controls (T13 late, T15 late "smile" vs "neutral", T26 mid) and misses T18 p1's mood. Not a classifier
+(the pre-registered 7/7 fails); the `expr` column is not built. Wall/engine per read 1.14 warm (4.4-6.8 s engine,
++0.6 s wall; the first read 51 s cold): setup is not the VL's problem (A16).
+
+**A36 blocking: a new draw at a new canvas is a new draw.** 768 take vs 1024 draw person-box IoU: T01 0.0-0.88
+(extras re-staged), T06 0.66-0.84; the VL reads both "different" (T06: "moved slightly forward, cane lower").
+Against the PANEL both canvases match at IoU 0.90-0.99 on every person. The layout objection to C9 is the seed
+lottery every retake already runs, judged by take_content and the take eye; it is not the canvas.
+
+**A40 (C5 pre-test): closed.** Fine texture av3 adds above the 768 base, face window / rest of frame on the iter3
+master: T13 7.8, T18 1.05, T26 2.2, T10 2.7 (predicted 0.8-1.2; the ink lines confound it, as refuter 3 said).
+Nothing under 0.6, so C5 (paste after av3) closes by its pre-registered rule; arm B was not rendered.
+
+**A41 (eye-band luminance flicker column): DEAD.** On the stored A4 clips SeedVR2 reads 0.98-1.02x the 768
+control (av3 0.94-1.04x) where the production face-region flicker had separated it 19-30 %. The column is not
+built; `face_paste.region_flicker` stays the ruler. Measures live under `bench/eye_probe.py`, not in `studio/`.
+
+**Spark-H3 A/B (new_models-6), identical seeds.** T26 (73 f, ~11k tokens, under Spark's 12,288 `min_tokens`):
+Spark on 72 s and byte-identical to the delivered take (deterministic), off 54.5 s: Spark COSTS 32 % on a short
+take and the dense draw is another seed (Utterson eye 31 -> 61, Enfield 73 -> 0). T13 (209 f): see FINAL.md.

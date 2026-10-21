@@ -42,12 +42,15 @@ def test_no_record_for_a_back_view_an_uncast_panel_or_a_wide():
     assert panel_dq.frame_record([face(0.1)], 1, "medium_close", "Medium close from behind the narrator") == {}
     assert panel_dq.frame_record([face(0.1)], 0, "medium_close", "") == {}
     assert panel_dq.frame_record([face(0.05)], 1, "medium", "") == {"face_h": 0.05, "planned_size": "medium",
-                                                                      "frame_advisory": False}
+                                                                      "frame_advisory": False, "face_px_768": 38,
+                                                                      "tiny_face_advisory": True,     # A28: 38 px, log only
+                                                                      "tiny_face_note": panel_dq.TINY_FACE_NOTE}
 
 
 def test_a_faced_panel_with_no_face_found_records_none_and_flags_nothing():
     assert panel_dq.frame_record([], 1, "close", "") == {"face_h": None, "planned_size": "close",
-                                                         "frame_advisory": False}
+                                                         "frame_advisory": False, "face_px_768": None,
+                                                         "tiny_face_advisory": False}
 
 
 def test_an_advisory_cannot_fail_a_panel_or_climb_its_ladder(monkeypatch):

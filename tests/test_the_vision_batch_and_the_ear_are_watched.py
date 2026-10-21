@@ -93,4 +93,6 @@ def test_a_cpu_ear_has_nothing_to_drop(capsys):
 
 
 def test_qc_hears_through_the_watchdog():
-    assert "watched(voice_qc.any_transcriber())" in inspect.getsource(qc.main)
+    """The ear is the routed one (its stderr to the episode's qc_whisper.err, A32) and it is heard through the watchdog."""
+    src = inspect.getsource(qc.main)
+    assert "voice_qc.any_transcriber(err_path=routed_whisper.err_log(" in src and "watched(ear)" in src
