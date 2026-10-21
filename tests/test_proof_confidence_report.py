@@ -156,3 +156,31 @@ def test_the_sibling_suites_row_forms_are_read_as_written():
     assert cf.engine_shape_ok(True, [row(instrument_state="shape: uncalibrated")]) is False
     assert cf.engine_shape_ok(True, [row()]) is True and cf.engine_shape_ok(False, [row()]) is False
     assert "a named park" in cf.row_line(row(detail="a named park"))
+
+
+def test_a_suites_proof_rows_are_read_and_a_file_without_rows_is_named(tmp_path):
+    (tmp_path / "gate.json").write_text(json.dumps({"label_files": [], "proof_rows": [row(check="g", q="Q1")]}),
+                                        encoding="utf-8")
+    (tmp_path / "summary.json").write_text(json.dumps({"classes": {}}), encoding="utf-8")
+    assert [r["check"] for r in cf.load_results(tmp_path)] == ["g"]
+    assert cf.rowless_files(tmp_path) == ["summary.json"]
+    argv = ["--results", str(tmp_path), "--out-dir", str(tmp_path / "out"), "--transcript", str(tmp_path / "none")]
+    assert cf.main(argv) == 0
+    assert "summary.json" in (tmp_path / "out" / "CONFIDENCE_iter1.md").read_text(encoding="utf-8")
+
+
+def test_the_map_names_the_ids_the_face_suite_emits():
+    qmap = cf.load_questions(cf.QUESTIONS)["questions"]
+    assert all("instrument_gate.face_eye.cel" in qmap[q]["gates"] for q in ("Q1", "Q2", "Q3"))
+    assert "panel_take_size" in [c["check"] for c in qmap["Q3"]["checks"]]
+
+
+def test_a_failed_row_without_per_point_passes_fails_the_question_but_invents_no_count():
+    agg = row(n=21, passed=False)
+    del agg["n_pass"]
+    got = cf.status(SPEC, [agg, row(n=3)], shape_ok=True)
+    assert got["status"] == "FAILING" and (got["k"], got["n"]) == (3, 3)
+    assert "passes per point not reported" in cf.row_line(agg)
+    whole = row(n=4)
+    del whole["n_pass"]
+    assert cf.tally([whole]) == (4, 4)

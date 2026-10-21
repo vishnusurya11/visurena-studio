@@ -15,7 +15,8 @@
 #
 # Check ids as emitted today: A-caps (Q5), A-canned, S0b, A-ledger (Q6) by studio/rehearsal/asserts.py;
 # time_backtest_loo, unmeasured:<step>, base_rate_under_6h (Q5) by scripts/proof/time_backtest.py.  The face
-# suite's ids (Q1-Q3) are the design's names until P6 emits rows; a renamed check is edited HERE, in review.
+# suite's gate and regression ids as P6 emits them (instrument_gate.face_eye.cel, panel_take_size); its per-face
+# ids are the design's names until P6 writes them; a renamed check is edited HERE, in review.
 
 staged_runs:
   SR-0:
@@ -53,21 +54,21 @@ questions:
       - {check: face_first_pass_vs_iter1, min_n: 30}
       - {check: refine_decision_recall, min_n: 12}
       - {check: outside_invariant, min_n: 12, kind: mechanism}
-    gates: [instrument_gate_face_eye, unrecorded_le_half]
+    gates: [instrument_gate.face_eye.cel, unrecorded_le_half]
     staged: [SR-1, SR-0]
   Q2:
     title: as good as iter3, first time
     checks:
       - {check: face_first_pass_vs_iter3, min_n: 30}
       - {check: D1, min_n: 5}
-    gates: [instrument_gate_face_eye, unrecorded_le_half]
+    gates: [instrument_gate.face_eye.cel, unrecorded_le_half]
     staged: [SR-1, SR-3, SR-0]
   Q3:
     title: mid faces get drawn eyes
     checks:
       - {check: face_mid_tier, min_n: 10}
-      - {check: panel_take_r2, min_n: 8}
-    gates: [instrument_gate_face_eye]
+      - {check: panel_take_size, min_n: 8}
+    gates: [instrument_gate.face_eye.cel]
     staged: [SR-4, SR-0]
   Q4:
     title: tiny faces look good

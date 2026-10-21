@@ -52,13 +52,29 @@ def wilson_lb(k: int, n: int, z: float = Z) -> float:
     return (centre - spread) / (1 + z * z / n)
 
 
+ROW_LISTS = ("rows", "proof_rows")
+"""Where a results file keeps its rows: a bare list, or one of these keys beside the suite's own summary."""
+
+
+def rows_in(data) -> list[dict]:
+    if isinstance(data, list):
+        return data
+    return [r for key in ROW_LISTS for r in data.get(key) or []]
+
+
 def load_results(folder: Path) -> list[dict]:
     """Every row of every results file, each tagged with the file it came from."""
     rows = []
     for path in sorted(Path(folder).glob("*.json")):
         data = json.loads(path.read_text(encoding="utf-8"))
-        rows += [{**r, "_file": path.name} for r in (data.get("rows", []) if isinstance(data, dict) else data)]
+        rows += [{**r, "_file": path.name} for r in rows_in(data)]
     return rows
+
+
+def rowless_files(folder: Path) -> list[str]:
+    """The results files that hold no proof rows (a suite's summary): read, named, never counted."""
+    return [p.name for p in sorted(Path(folder).glob("*.json"))
+            if not rows_in(json.loads(p.read_text(encoding="utf-8")))]
 
 
 def load_questions(path: Path) -> dict:
@@ -76,8 +92,12 @@ def n_of(row: dict) -> int:
     return int(row["n_distinct"])
 
 
-def k_of(row: dict) -> int:
-    return int(row.get("n_pass", n_of(row) if row.get("passed") else 0))
+def k_of(row: dict) -> int | None:
+    """Passes over the row's distinct points: `n_pass`; all of them for a passed row that gives none; None
+    (unknown, never invented) for a failed row that does not say how many of its points passed."""
+    if "n_pass" in row:
+        return int(row["n_pass"])
+    return n_of(row) if row.get("passed") else None
 
 
 def has_canned(classes) -> bool:
@@ -132,7 +152,8 @@ def bucket(spec: dict, rows: list[dict]) -> dict[str, list]:
 
 
 def tally(rows: list[dict]) -> tuple[int, int]:
-    return sum(k_of(r) for r in rows), sum(n_of(r) for r in rows)
+    known = [r for r in rows if k_of(r) is not None]
+    return sum(k_of(r) for r in known), sum(n_of(r) for r in known)
 
 
 # ---- the status of a question ----
@@ -216,8 +237,10 @@ def summary(qmap: dict, got: dict) -> list[str]:
 
 
 def row_line(r: dict) -> str:
+    k = k_of(r)
+    said = f"{k}/{n_of(r)} distinct" if k is not None else f"over {n_of(r)} distinct (passes per point not reported)"
     return (f"- {r['check']} ({r.get('kind', 'quality')}): {'pass' if r.get('passed') else 'FAIL'} "
-            f"{k_of(r)}/{n_of(r)} distinct of {r.get('n_points', '?')} tried; {r.get('_file', '?')}"
+            f"{said} of {r.get('n_points', '?')} tried; {r.get('_file', '?')}"
             + "".join(f"; {r[k]}" for k in ("note", "detail") if r.get(k)))
 
 
@@ -238,7 +261,7 @@ def evidence_lines(g: dict) -> list[str]:
     out += [f"- REFUSED: {r.get('check', '?')}: {why}" for r, why in g["refused"]]
     out += [f"- open gap: {r['check']}" + (f" (p90 share {r['p90_share']:.3f})" if r.get("p90_share") is not None
                                            else " (p90 share UNKNOWN)") for r in g["gaps"] if not r["passed"]]
-    out += [f"- baseline: {r['check']} {k_of(r)} of {n_of(r)}" for r in g["baselines"]]
+    out += [f"- baseline: {r['check']} {k_of(r) or 0} of {n_of(r)}" for r in g["baselines"]]
     return out
 
 
@@ -268,7 +291,8 @@ def report(path: Path, qmap: dict, got: dict, ctx: dict) -> str:
     loose = [r for r in ctx["rows"] if r.get("question") not in known]
     lines = [str(path), "", f"# Proof-backed confidence ({datetime.now().astimezone():%Y-%m-%d %H:%M %Z}, "
              f"HEAD {head_sha()})", "",
-             f"Results read: {ctx['results']} ({len(ctx['rows'])} rows from {', '.join(files) or 'no files'}).",
+             f"Results read: {ctx['results']} ({len(ctx['rows'])} rows from {', '.join(files) or 'no files'}"
+             + (f"; no proof rows in {', '.join(ctx['rowless'])}" if ctx.get("rowless") else "") + ").",
              "Fake ComfyUI shape: " + ("calibrated (a recorded transcript exists)." if ctx["shape_ok"] else
                                        "uncalibrated (no recorded transcript; SR-5): every Q6 row is capped at PARTIAL."),
              "Rules (DESIGN 5.1, in code): n is distinct points; canned makes a row mechanism; a failed instrument "
@@ -304,7 +328,7 @@ def main(argv: list[str] | None = None) -> int:
     qmap, rows = load_questions(args.questions), load_results(args.results)
     shape_ok = engine_shape_ok(shape_calibrated(args.transcript), rows)
     path = next_path(args.out_dir)
-    ctx = {"rows": rows, "results": args.results, "shape_ok": shape_ok}
+    ctx = {"rows": rows, "results": args.results, "shape_ok": shape_ok, "rowless": rowless_files(args.results)}
     write_new(path, report(path, qmap, evaluate(qmap, rows, shape_ok), ctx))
     print(path)
     print(path.read_text(encoding="utf-8"))
