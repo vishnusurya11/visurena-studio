@@ -522,9 +522,11 @@ def report(path: Path, qmap: dict, got: dict, ctx: dict) -> str:
              + (", ".join(ctx["once"]) if ctx.get("once") else "none") + ".",
              "Fake ComfyUI shape: " + ("calibrated (a recorded transcript exists)." if ctx["shape_ok"] else
                                        "uncalibrated (no recorded transcript; SR-5): every Q6 row is capped at PARTIAL."),
-             "Rules (DESIGN 5.1, in code): n is distinct points; canned makes a row mechanism; a failed instrument "
-             "counts nothing; a Q5/Q7 time measure counts only with a measured clock and absolute evidence outside "
-             "any sandbox; mechanism rows still count and can fail; no rate without its count.", ""]
+             "Rules (DESIGN 5.1, in code): n is distinct points; a stand-in answer (canned, substituted, a canned "
+             "worker or Claude answer, a scripted verdict) makes a row mechanism; a failed instrument counts nothing; "
+             "a failed predictor makes its question REAL-RUN; a sweep needs every planned point; a Q5/Q7 time measure "
+             "counts only with a measured clock and absolute evidence outside any sandbox; mechanism rows still count "
+             "and can fail; no rate without its count.", ""]
     lines += summary(qmap, got)
     for q, spec in qmap["questions"].items():
         lines += section(q, spec, got[q], qmap["staged_runs"])
