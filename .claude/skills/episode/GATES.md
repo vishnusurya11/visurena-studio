@@ -215,7 +215,7 @@ staged the wrong person that way (ep05 T19, ep06 T08, ep07 T09/T19/T24/T26).
 | G-LINEAGE (2026-10-11, C2_verdict #9) | refs 02 sheets (`step_02_sheets.lineage`, `studio/lineage.py`) | a new character sheet version against every earlier staged version of the same row: head crop (top 35 %), MTCNN p > 0.95, VGGFace2 cosine | ADVISORY: a pair < 0.60 outside an age-up (a declared `age_up`, or a `_young`/`_child` row that is not simply the name) writes `audit/lineage.jsonl` and a WARNING; never a refusal. 0.60 is calibrated on Scarlet's photoreal sheets (flags exactly Hope 8826eb07 and Brigham c9192677); WotW narrator looks vs base: n 14, min 0.70, median 0.81. Hard only after a cast-wide WotW distribution (H8) |
 | head unauthored (2026-10-11, C1_verdict #9) | refs 01_03 `looks_table.build`, `look_timeline.head_refusal` | a NEW table's character none of whose looks names hair, face or headwear | HARD refusal before the write (blank markers make LOOK-STATE pass anything); existing looks.json never re-judged; WotW replay 0/47 |
 | G-LOOK-WORDS (beard, 2026-10-11, C1_verdict #6) | plan battery (`plan_check` continuity), `continuity_place.look_word_faults` | a head tag (a parenthetical naming face/eyes/hair) of a one-face shot whose staged look's marker is `beard` that says no beard | HARD, but CURED IN CODE FIRST (`cure_beard_tags`, plan_repair `continuity_beards`): the look's own beard phrase is appended to the tag, so the writer never loops; ep25 replay: exactly the 4 bare tags cured, 8 untouched |
-| SHEET-ROW (2026-10-15, Jekyll ep01 v2 girl; `studio/judges/sheet_row.py`, a row of LOOK at refs/04) | every base `sheet.png` of an entity on refs/looks.json | the VLM LISTS headwear kind, colour and material, the garments' colour (whole sheet) and the eyes (whole sheet + head crop); code compares the base look's layers: headwear colour; a DISTINCT material (knitted/lace/felt/straw/silk/fur/leather/metal; silk = felt) other than the row's; a garment colour the row gives no garment (boots and hats left out); eyes `hollow` on BOTH reads where the row asks none | HARD (the sheet ladder climbs) on colour, material, garment colour, eyes; ADVISORY on the hat's kind (LOOK-STATE owns it). Replay: the lace girl 3/3 refused, the redrawn girl passes, 7 other Jekyll sheets: Lanyon refused (true), the constable refused (eyes; his helmet row vs cap sheet flagged) |
+| SHEET-ROW (2026-10-15; `studio/judges/sheet_row.py`) | every base `sheet.png` of an entity on refs/looks.json | the VLM LISTS headwear kind, colour and material, the garments' colour (whole sheet) and the eyes (whole sheet + head crop); code compares the base look's layers: headwear colour; a DISTINCT material (knitted/lace/felt/straw/silk/fur/leather/metal; silk = felt) other than the row's; a garment colour the row gives no garment (boots and hats left out); eyes `hollow` on BOTH reads where the row asks none | HARD (the sheet ladder climbs) on colour, material, garment colour, eyes; ADVISORY on the hat's kind (LOOK-STATE owns it). Replay: the lace girl 3/3 refused, the redrawn girl passes, 7 other Jekyll sheets: Lanyon refused (true), the constable refused (eyes; his helmet row vs cap sheet flagged) |
 | grandfathering (2026-10-15) | refs/04 first verdict | only sheets older than the newest shipped master read light; a sheet drawn after it is read in full (`fresh_paths`); a drawn look is never asked the house sheet-form nouns (`look.asked_words`) | rule |
 | same-place band | 03_05, every derived state | DINOv3 cosine of the variant to its source, `places.SAME_PLACE_BAND` 0.80 | FLAG, uncalibrated |
 
@@ -269,9 +269,9 @@ version); an Unreadable or TimeoutError is never cached. Its `panel_eye` row in 
 notes `reads=N cache_hits=M unread=K`: a 2-panel rewind reads 2. **orphan_limb / body** rows are
 ADVISORY (calibrated False) until the E1 eval reaches recall >= 0.6 and precision >= 0.8; their
 sources are DWPose (`measure/keypoints.orphan_limbs`, `extra_limbs`) and the content keys `body` /
-`limb_attached` (K9). They are not in REDRAW_CANNOT_CURE: once calibrated they climb seed, then
-reprose, then a flagged terminal with a CAP line. A redraw round that changed no panel byte is
-refunded (`panel_ladder.refund_round`).
+`limb_attached` (K9). A redraw round that changed no panel byte is refunded (`panel_ladder.refund_round`).
+Books ride in the signed `eye_<sha8>.json` (`books`, A27); panel_dq rows add `face_px_768` +
+`tiny_face_advisory` (<100 px, log only, A28).
 
 **K9 shape keys (2026-10-19, P06; the one content ask, ASK v2).** `body`, `limb_attached`,
 `fog_cover` take ok / fading / floating / cannot_tell (a foreign value is cannot_tell); a single
@@ -364,9 +364,11 @@ frames) is under 120 px is refined. A take whose every planned face the warp gat
 readable (`fr.soft_faces`). Denoise `fr.denoise_for`: 0.45 at 60 px, +0.05 per halving, 0.40-0.55. `none_found` /
 `all_readable` / `no_cast` spend no round. A warp, gait,
 pulse, frozen-whole, lip-sync or lag hard fail may follow the refine (a warp FAIL after its one seed retake);
-identity, clones, content, lettering, look and leak still bar it. History: LESSONS_ARCHIVE.md.
+identity, clones, content, lettering, look and leak still bar it. Rows carry a measured clock (A25): `span_s`, `queued_at`,
+`started_at`, `gpu_wait_s`, `gpu_busy_s` from the engine (`gpu_s_priced`: a price) and `readable_clause`,
+`warp_min_px`, `yolo_min_px` (A26).
 **FACE LIST** (09 last, log only, V3): refine.json `face_list`, per take its smallest tracked face and whether a paste
-was kept; under 120 px with none is listed and routed to the refine, never a wall (ep01 iter3: T01 T08 T09 T26).
+was kept; under 120 px with none is listed and routed to the refine, never a wall.
 
 **TINY-FACE RUNG (09_08, 2026-10-19, `scripts/episode/tiny_face.py`).** A take whose refine refused (seam or drift,
 current bytes) a planned face (shot face or speaker) of 20-40 px at its smallest (`min_px`), on the Spark graph
@@ -460,10 +462,9 @@ The human sign-off is waived by the owner's standing instruction; these are
 not. Dry-run on 2026-09-23: ep09 passes; ep05-ep08, public before the
 content gate existed, would be refused for unjudged or lettered takes.
 
-## Moved out of this file (2026-10-19, D17)
+## Moved out (D17)
 
-Board states, known gaps and the speed-arm bench rules now live in `LESSONS_ARCHIVE.md`,
-"Gate notes moved out of GATES.md". They are history or bench rules; no step runs them.
+Board states, gaps, bench rules: `LESSONS_ARCHIVE.md`, "Gate notes moved out of GATES.md".
 
 ## Judges — the taste gates are signed by code, never by a person (2026-09-24)
 
@@ -481,7 +482,7 @@ test refuses a commit that loses a catch. `fitted_on` is carried on every measur
 | LAYOUT (episode/07) | `grid_layout@1` | a rule: grids ≤ 9, cols × rows = shots, a face alone in a 1x1 when a setup mixes sizes | — | — | deterministic |
 | EYE panels (episode/08) | `judge:panel_eye@1` | stored dq + content rows; hats worn and held; a reference handed back; posture; framing; clones; lettering; invented landmark; repeats; one short size read | redraw grid seed → reprose the frame (timing untouched); cap 2 grids; framing/posture take no rung (no rung ever moved one on ep13: cure them in the prompt) | best panel kept flagged | refuse on calibrated rows; flag on thin rows |
 | EYE takes (episode/09) | `judge:take_eye@1` | dq rows incl. pass-through, rotation, leak, cut vote, lag; content; identity vs sheet; clones | seed → move type → shorter → head cut → re-plan the cell (priced); the router reads `take_ladder.CURE_RATES` (dated): a cure under 20 % over 4+ tries is dropped for its class; gait → `gait_verb`; an S warp → `warp_gate.cure`, an Se-only warp → none; early clones (clone rows carry `t`, the sample's second; all t <= 0.3 s) → head cut, else one seed on a clean panel | a still from the panel on a narration shot (≤2, never adjacent), else the best recorded draw (fewest hard rows, then lowest Se, read from `T<nn>.dq.json` attempts; the last draw is archived) kept and flagged, high on dialogue/turn/button; every kept fault stamped `evidence.settled` = still / keep_best / high (K5); dropped cure classes land as one `watch` audit row; a signed eye whose fingerprint names the current takes is kept on step 09 re-entry (no re-judge) | refuse where calibrated; "cannot tell" on wides |
-| MASTER (episode/11) | `judge:master_eye@1` | qc hard rows; shadow, faces, board, repeats, story from measures; a 30-frame read; cross-take identity; the face strip (`studio/face_strip`, 4 crops a tier, `FACE_ASK`) LOG ONLY (V3), never a fault, its `review/face_labels_<sha8>.json` the label source for any face metric | one retake through the take ladder, then its recut (no free recut: step 11's master is already current); a rung that changed no take sha8 (nor shots.json sha8) takes no recut and no second eye, books no round, prints `CAP master: retake of Txx changed no take, no recut`; a retake is priced from measured retake seconds, floor 9 min; `review/work/eye_reads.json` keys each frame read (take sha8, frame, slow, plan row, reader, prompt sha) so only misses are read; a flagged take (K7) gets 3 extra frames and a `parts` ask, a vanishing limb is a low advisory `body` fault naming the shot (D8) | the rubric flagged with evidence; never waived by a judge | refuse → retake on measured fields; flag on story |
+| MASTER (episode/11) | `judge:master_eye@1` | qc hard rows; shadow, faces, board, repeats, story from measures; a 30-frame read; cross-take identity; the face strip (`studio/face_strip`, 4 crops a tier, `FACE_ASK`) LOG ONLY (V3), never a fault, its `review/face_labels_<sha8>.json` the label source for any face metric | one retake through the take ladder, then its recut (no free recut: step 11's master is already current); a rung that changed no take sha8 (nor shots.json sha8) takes no recut and no second eye, books no round, prints `CAP master: retake of Txx changed no take, no recut`; a retake is priced from measured retake seconds, floor 9 min; `review/work/eye_reads.json` keys each frame read (take sha8, frame, slow, reader, prompt sha; never the plan row, A31) so only misses are read; a flagged take (K7) gets 3 extra frames and a `parts` ask, a vanishing limb is a low advisory `body` fault naming the shot (D8) | the rubric flagged with evidence; never waived by a judge | refuse → retake on measured fields; flag on story |
 
 The owner's eye: `library/<book>/audit/<unit>.html` (`scripts/audit/sheet.py`), every
 flag with its numbers beside the wall and a seeded sample of passes per gate; a finding
@@ -515,7 +516,8 @@ OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
   whisper worker) and `need_gb` is free on nvidia-smi after a POST /free sent only on an empty
   queue; else "cpu", today's path byte for byte. Any probe failure is "cpu". Every decision is
   a `DEVICE <job> -> <device>: <reason>` line and a row of `library/.device/decisions.jsonl`.
-  `VISURENA_DEVICE=cpu` is the kill switch. Wired: whisper (`voice_qc.any_transcriber` ->
+  `VISURENA_DEVICE=cpu` is the kill switch. The whisper worker starts at the first clip, respawned once,
+  stderr in `review/work/qc_whisper.err` (A32). Wired: whisper (`voice_qc.any_transcriber` ->
   `studio/routed_whisper`: a worker under ComfyUI's embedded python, a render arriving mid-batch
   closes it and the rest goes to the CPU) and the master encode (`studio/video_encoder`: NVENC
   p7 cq = crf + 5 on cuda, x264 on cpu). The VL reads already run on ComfyUI (GPU); facenet and

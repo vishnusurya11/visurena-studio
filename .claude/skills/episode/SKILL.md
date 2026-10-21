@@ -139,8 +139,6 @@ hold (2026-09-23), and each cost ep09 renders before it existed:**
   passed by every gate).
 
 `plan_check` exits 1 whenever it refuses anything. **An exit of 1 is a stop.**
-It used to fail every WotW plan for another book's reasons, and people read
-past it; that is fixed, so a refusal now means something.
 
 ---
 

@@ -15,8 +15,10 @@ face's size (studio/face_refine.WORKFLOW, denoise_for).  Each refined crop is ga
 identity against the sheet (facenet, and CCIP + clip_vision_h in a worker,
 studio/anime_id.py), seam, flicker, drift, face count; drawn eyes logged -- and the decision per take lands in
 takes/r2v/refine.json (`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`,
-`cut`); a refused crop falls back to the unrefined take.  Assemble pastes the kept crops
-at cut scale, then the one upscale (studio/face_paste.py).  Step 09 ends by writing the face
+`cut`); a refused crop falls back to the unrefined take.  Each row carries its measured clock
+(`span_s`, `queued_at`, `started_at`, `gpu_wait_s`, `gpu_busy_s` from the engine's record; A25) and
+why the tracker ran (`readable_clause`, `warp_min_px`, `yolo_min_px`; A26), never a price as a clock.
+Assemble pastes the kept crops at cut scale, then the one upscale (studio/face_paste.py).  Step 09 ends by writing the face
 list under refine.json's `face_list` key (face_list: every take's smallest tracked face and
 whether a paste was accepted, the ones under 120 px with none listed; log only, retro 2026-10-20).
 
@@ -351,7 +353,9 @@ def soft_tracks(work, tracks: list[list], sources: list[str] | None = None) -> t
     """The tracks the refine works on (smallest face under SMALL_FACE_PX) and their sources; when
     there are none the take's status says why: no face found, or every face already reads."""
     sources = sources or ["face"] * len(tracks)
-    keep = [k for k, tr in enumerate(tracks) if face_track.track_px(tr) < fr.SMALL_FACE_PX]
+    sizes = [face_track.track_px(tr) for tr in tracks]
+    work.yolo_min_px = round(min(sizes), 1) if sizes else None
+    keep = [k for k, px in enumerate(sizes) if px < fr.SMALL_FACE_PX]
     if not keep:
         work.status = "all_readable" if tracks else "none_found"
     return [tracks[k] for k in keep], [sources[k] for k in keep]
@@ -498,6 +502,8 @@ class Job:
     soft: bool = False
     source: str = "face"
     lost: int = 0
+    span: tuple | None = None
+    """(execution start, end) epoch seconds from the engine's own record, read at collect (A25)."""
 
 
 @dataclass
@@ -508,6 +514,11 @@ class TakeWork:
     jobs: list = field(default_factory=list)
     status: str = "refined"
     cuts: list = field(default_factory=list)
+    clause: str = ""
+    """Why the warp gate's record sent the take to the tracker (studio/face_refine.readable_clause; A26)."""
+    warp_min_px: float | None = None
+    yolo_min_px: float | None = None
+    """The smallest face the warp gate logged, and the smallest the tracker found (A26)."""
 
 
 @dataclass(frozen=True)
@@ -543,9 +554,12 @@ def run_of(track: list, frames: int, width: int, height_: int, cuts: list[int]) 
 
 def queue_take(book: Path, number: int, index: int, card: dict, engine, loose, detect, embed, find) -> TakeWork:
     """Track, match, write each soft face's crop, and queue its render (no waiting)."""
+    from studio import warp_gate
     room = room_of(book, number)
     take = room / f"T{index:02d}.mp4"
     work = TakeWork(index, sha8(take), read_frames(take))
+    dq = read(room / f"T{index:02d}.dq.json", None)
+    work.clause, work.warp_min_px = fr.readable_clause(card, dq), warp_gate.smallest_face(fr.warp_measure(dq))
     work.cuts = cut_frames(work.frames)
     tracks, sources = soft_tracks(work, *take_tracks(work.frames, find(take, work.frames), work.cuts, Same(work.frames)))
     if not tracks:
@@ -595,6 +609,28 @@ def collect(room: Path, work: TakeWork, job: Job, engine) -> None:
     if not saved:
         raise RuntimeError(f"T{work.index:02d} p{job.k}: no output from save node {job.save!r}")
     job.out = Path(shutil.copy(saved[0], room / OUT / f"T{work.index:02d}_p{job.k}.mp4"))
+    job.span = engine.span(job.prompt_id) if hasattr(engine, "span") else None
+
+
+def gpu_s(job: Job) -> float | None:
+    """The seconds the engine executed the job, from its own record; None unread."""
+    if not job.span or job.span[0] is None or job.span[1] is None:
+        return None
+    return round(job.span[1] - job.span[0], 1)
+
+
+def clock_columns(work: TakeWork, queued_at: float, now: float) -> dict:
+    """A25: the take's clock as measured, never priced.  `span_s` is the take's wall from its queueing
+    (ep01 logged it as `seconds`: 32-655 s under overlapped lanes, 5.4x the stage); `started_at` the
+    engine's first execution start; `gpu_wait_s` the queue wait; `gpu_busy_s` the sum of its jobs'
+    execution spans."""
+    starts = [j.span[0] for j in work.jobs if j.span and j.span[0] is not None]
+    busy = [gpu_s(j) for j in work.jobs if gpu_s(j) is not None]
+    started = min(starts) if starts else None
+    return {"span_s": round(now - queued_at, 1), "queued_at": round(queued_at, 3),
+            "started_at": None if started is None else round(started, 3),
+            "gpu_wait_s": None if started is None else round(max(0.0, started - queued_at), 1),
+            "gpu_busy_s": round(sum(busy), 1)}
 
 
 def sampled(seq: list, n: int = GATE_SAMPLES) -> list:
@@ -650,15 +686,19 @@ def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None, an
             "min_px": round(face_track.track_px(job.track), 1), "soft": job.soft, "source": job.source, "lost": job.lost}
 
 
-def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, seconds: float, loose=None,
+def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, queued_at: float, loose=None,
                 anime=None) -> dict:
+    """Collect and gate every job of the take; the row refine.json keeps, with its measured clock (A25)
+    and why the tracker ran (A26)."""
     people = []
     for job in work.jobs:
         collect(room, work, job, engine)
-        people.append(gate_job(book, work, job, detect, embed, loose, anime))
+        people.append(gate_job(book, work, job, detect, embed, loose, anime) | {"gpu_s": gpu_s(job)})
     status = work.status if not people else ("refined" if any(p["kept"] for p in people) else "unrefined")
     entry = {"status": status, "take_sha8": work.sha, "people": people, "decided": stamp(),
-             "gpu_s_priced": round(fr.price(len(work.jobs), len(work.frames)), 1), "seconds": round(seconds, 1)}
+             "gpu_s_priced": round(fr.price(len(work.jobs), len(work.frames)), 1),
+             **clock_columns(work, queued_at, time.time()),
+             "readable_clause": work.clause, "warp_min_px": work.warp_min_px, "yolo_min_px": work.yolo_min_px}
     write_entry(room, work.index, entry)
     print(f"T{work.index:02d} {status}: " + ("; ".join(f"{p['who']} {'KEPT' if p['kept'] else 'fell back'} ({p['why']})"
                                                     for p in people) or "nothing to refine"), flush=True)
@@ -761,6 +801,11 @@ class Comfy:
         from studio import comfy
         return comfy.outputs_by_node(comfy.wait_record(prompt_id, poll=5.0))
 
+    def span(self, prompt_id: str) -> tuple[float | None, float | None]:
+        """(execution start, end) of a finished job from the engine's history (studio/take_phases.window)."""
+        from studio import comfy, take_phases
+        return take_phases.window(comfy.history(prompt_id))
+
 
 def detectors():
     """(MTCNN loose detector, facenet detect, facenet embed, the YOLO finder with MTCNN behind it)."""
@@ -785,11 +830,13 @@ def refine(book: Path, number: int, indices: list[int] | None, *, engine=None, d
     find, engine, room = find or frame_finder(loose), engine or Comfy(), room_of(book, number)
     cards = {int(c["index"]): c for c in read(room / "prompts.json", [])}
     out = {}
-    with episode_clock.timed(book, number, "face_refine", note=" ".join(map(str, indices or [])), within=within):
+    with episode_clock.timed(book, number, "face_refine", note=" ".join(map(str, indices or [])), within=within) as extra:
         queued = queue_within_wall(book, number, pending(book, number, indices), cards, engine,
                                    (loose, detect, embed, find))
+        extra["gpu_busy_s"] = 0.0
         for began, work in queued:
-            out[work.index] = decide_take(room, book, work, detect, embed, engine, time.time() - began, loose, anime)
+            out[work.index] = decide_take(room, book, work, detect, embed, engine, began, loose, anime)
+            extra["gpu_busy_s"] = round(extra["gpu_busy_s"] + out[work.index]["gpu_busy_s"], 1)
             count_if_worked(episode_home.home(book, number), work)
     getattr(anime, "close", lambda: None)()
     return out

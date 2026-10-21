@@ -66,7 +66,7 @@ class Engine:
     the crop, a boiling one, or (echo) the input itself."""
 
     def __init__(self, tmp_path: Path, boil=False, echo=False):
-        self.dir, self.boil, self.echo, self.graphs, self.staged = tmp_path / "out", boil, echo, [], {}
+        self.dir, self.boil, self.echo, self.graphs, self.staged, self.queued = tmp_path / "out", boil, echo, [], {}, {}
         self.dir.mkdir()
 
     def stage(self, path: Path) -> str:
@@ -74,8 +74,15 @@ class Engine:
         return path.name
 
     def submit(self, graph: dict) -> str:
+        import time
         self.graphs.append(graph)
+        self.queued[f"job{len(self.graphs)}"] = time.time()
         return f"job{len(self.graphs)}"
+
+    def span(self, job: str) -> tuple[float, float]:
+        """The engine's execution_start / execution_success stamps for the job: 0.1 s of GPU, soon after its queueing."""
+        at = self.queued[job]
+        return at + 0.02, at + 0.12
 
     def wait(self, job: str) -> dict[str, list[Path]]:
         graph = self.graphs[int(job[3:]) - 1]
@@ -223,3 +230,35 @@ def test_the_refine_is_stamped_on_the_episode_clock(tmp_path):
                within="takes")
     rows = [json.loads(l) for l in (w.home / "timing.jsonl").read_text().splitlines()]
     assert [(r["stage"], r.get("within")) for r in rows] == [("face_refine", "takes")]
+
+
+# ---- A25 (face debate 2026-10-21): the row's clock columns are measured, never a price --------------
+
+def test_every_take_row_carries_its_queue_wait_and_gpu_busy_seconds(tmp_path):
+    """ep01's `seconds` was a per-take wall under overlapped lanes (5.4x the stage); `gpu_s_priced`
+    repeated to the 0.1 s on different takes.  The row now says when the take was queued, when the
+    engine started it, how long it waited and how long the GPU was busy for it, from the engine's record."""
+    w, engine = Room(tmp_path), Engine(tmp_path)
+    run(w, engine)
+    entry = json.loads((w.room / "refine.json").read_text())["T00"]
+    assert "seconds" not in entry
+    assert entry["span_s"] >= 0 and entry["queued_at"] <= entry["started_at"]
+    assert entry["gpu_wait_s"] == pytest.approx(entry["started_at"] - entry["queued_at"], abs=0.06)   # the column is 0.1 s
+    assert entry["gpu_busy_s"] > 0 and entry["gpu_busy_s"] == pytest.approx(sum(p["gpu_s"] for p in entry["people"]), abs=0.01)
+
+
+def test_the_stage_row_carries_the_gpu_busy_seconds_of_its_takes(tmp_path):
+    w = Room(tmp_path)
+    cli.refine(w.book, 1, None, engine=Engine(tmp_path), detect=detect_one, loose=detect_one, embed=embed, within="takes")
+    row = [json.loads(l) for l in (w.home / "timing.jsonl").read_text().splitlines()][0]
+    assert row["gpu_busy_s"] > 0 and row["gpu_busy_s"] <= row["wall_s"] + 0.01
+
+
+# ---- A26: why the tracker ran, and the two smallest faces the record holds ---------------------------
+
+def test_every_take_row_names_the_readable_clause_that_sent_it_to_the_tracker(tmp_path):
+    w = Room(tmp_path)
+    run(w, Engine(tmp_path))
+    entry = json.loads((w.room / "refine.json").read_text())["T00"]
+    assert entry["readable_clause"] == "no_tracks" and entry["warp_min_px"] is None
+    assert entry["yolo_min_px"] == pytest.approx(30.7, abs=0.5)

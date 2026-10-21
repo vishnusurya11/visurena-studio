@@ -53,7 +53,9 @@ the series paused). The owner's optional acts are `pause`, `resume`, `retry N` a
 - After a prompt-builder change, before any re-render: a no-write take-build replay (rebuild the dry
   prompts, diff against `takes/r2v/shots.json`, list the changed takes).
 - On a plan park, read `plan.cures.jsonl` and the learnings `draft` row first. After a panel rewind,
-  read the `panel_eye` row in timing.jsonl (`reads=N cache_hits=M unread=K`).
+  read the `panel_eye` row in timing.jsonl (`reads=N cache_hits=M unread=K`) or `books` in the signed eye file.
+- A slow face refine: read refine.json's `gpu_wait_s` / `gpu_busy_s` per take (a `span_s` is overlapped wall,
+  not a cost) and `readable_clause`; a slow QC ear: `review/work/qc_whisper.err` and the `poll() =` line.
 - After each run, read `library/.device/gpu_util.jsonl` (`gpu_ledger.minutes_per_step`: busy /
   claimed / idle) and `scripts/audit/doc_sync.py` (fix commits with no doc line).
 - A spent clock ships the episode flagged (C3_verdict #5). Read the audit sheet, and never `retry` to

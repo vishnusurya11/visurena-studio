@@ -65,20 +65,22 @@ def path(book: Path, number: int) -> Path:
 
 def stamp(book: Path, number: int, stage: str, started: float, ended: float,
           ok: bool = True, note: str = "", within: str = "", net_of: float = 0.0,
-          device: str = "", detail: bool = False) -> dict:
+          device: str = "", detail: bool = False, extra: dict | None = None) -> dict:
     """Record one stage run. Append-only; a retry is another row.
 
     `within` names the stage this run happened INSIDE (the master's upscale runs
     inside assemble, 2026-10-14); the outer row is then stamped `net_of` it, so
     every reader that sums `seconds` counts that time once.  A row never goes negative
     (ep01 held -421.1 s): `seconds` is max(0, gross - nested), the rest is `overlap_s`.
-    `t0`/`t1` are the epoch ends; `device` says where it ran (cpu / gpu), blank when unknown.
-    A `detail` row (`DETAIL`) has `seconds` 0 and its span in `span_s`."""
+    `t0`/`t1` are the epoch ends; `wall_s` the gross span; `device` says where it ran (cpu / gpu),
+    blank when unknown.  A `detail` row (`DETAIL`) has `seconds` 0 and its span in `span_s`.
+    `extra` is what the run measured about itself (A25: `gpu_busy_s` from the engine's own record)."""
     gross = ended - started
     row = {"stage": stage, "started": datetime.fromtimestamp(started).isoformat(timespec="seconds"),
            "ended": datetime.fromtimestamp(ended).isoformat(timespec="seconds"),
            "seconds": 0.0 if detail else round(max(0.0, gross - net_of), 1), "ok": ok, "note": note,
-           "t0": started, "t1": ended}
+           "t0": started, "t1": ended, "wall_s": round(gross, 1)}
+    row.update({k: v for k, v in (extra or {}).items() if k not in row})
     if detail:
         row.update(detail=True, span_s=round(gross, 1))
     if device:
@@ -106,17 +108,28 @@ def judged(row: dict) -> float:
 
 @contextmanager
 def timed(book: Path, number: int, stage: str, note: str = "", within: str = ""):
-    """`with timed(book, n, "takes"): ...` -- stamps on exit, failure included,
-    net of the rows stamped `within` this stage while it ran."""
-    started, ok = time.time(), True
+    """`with timed(book, n, "takes") as extra: ...` -- stamps on exit, failure included,
+    net of the rows stamped `within` this stage while it ran; whatever the run put in
+    `extra` (A25: `gpu_busy_s`) rides on the row."""
+    started, ok, extra = time.time(), True, {}
     try:
-        yield
+        yield extra
     except BaseException:
         ok = False
         raise
     finally:
         stamp(book, number, stage, started, time.time(), ok, note, within,
-              net_of=nested_seconds(book, number, stage, started))
+              net_of=nested_seconds(book, number, stage, started), extra=extra)
+
+
+def cpu_s(row: dict) -> float | None:
+    """The seconds of a row the GPU was NOT busy for: wall less `gpu_busy_s`, never under 0; None
+    when the run did not measure its GPU.  A per-take span under overlapped lanes is not a cost
+    (face debate 2026-10-21, A25: ep01's refine spans summed to 5.4x their 972 s stage; its CPU
+    exposure was 972 - 898 = 74 s)."""
+    if row.get("gpu_busy_s") is None:
+        return None
+    return round(max(0.0, float(row.get("wall_s", row.get("seconds") or 0)) - float(row["gpu_busy_s"])), 1)
 
 
 def nested_seconds(book: Path, number: int, stage: str, since: float) -> float:

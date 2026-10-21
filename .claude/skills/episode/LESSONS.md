@@ -7,6 +7,8 @@ brick or a new instance of one, a line here.
 
 ## The bricks
 
+**The face debate** (2026-10-21): the 32 px H3 token is the eye's floor; measure, not price -> The face debate.
+
 1. **A gate that measured nothing has passed nothing.** Empty sets, missing inputs and unread
    pictures refuse (2026-09-22 audit). -> Process; DQ.
 2. **A round, climb or cap is spent only when it changed bytes** (B1): never for a call, a

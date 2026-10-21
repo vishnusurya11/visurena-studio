@@ -2316,3 +2316,42 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   ep02 is the rehearsal that turns RETRO.md's `[est]` into numbers (3.9-5.4 h projected).
 - Tests: `tests/test_the_episode_skill_reads_in_budget.py`, `tests/test_the_skill_names_the_operator_verbs.py`,
   `tests/test_the_operator_page_has_symptoms_guards_and_an_agent_budget.py`, and each package's own above.
+
+## The face debate (2026-10-21: five rounds, 8 proposers x 3 refuters, a 45-min GPU bench)
+
+Owner order: improve faces, remove blur, raise quality, cut time, every step, research online, five rounds, be
+convinced, then change. Ledgers: `docs/audit/2026-10-21_face_debate/LEDGER_round1-5.md`; bench and FINAL under
+the same folder. What the debate settled, and what the bench then measured:
+
+- **The eye's floor is the model's token.** H3 draws in 32 x 32 px tokens; a 15-99 px face has a 4-10 px eye and
+  no upscaler, LoRA, sampler or step count puts an iris there (BENCH_R2: 15 steps no gain, res_2m worse, LMS small
+  and 2.1x GPU, SeedVR2 flickery and hours). Five rounds found no 2026 model with a 4090 / anime number that beats
+  it (FlashVSR refused unbenched). The honest ceiling for ep02 is F2 as shipped (face-only paste, warp 0.00), the
+  writer's withhold-face rule under 15 px (6c0123c), and a 1024 draw only where its route is measured.
+- **A span is not a cost (A25).** ep01's refine rows logged `seconds` of 32-655 s per take under up to 9 lanes:
+  5.4x their 972 s stage; `gpu_s_priced` repeated to the 0.1 s on different takes. The "24 min of tracking" of
+  round 3 was a unit error; CPU exposure was 972 - 898 = 74 s. Rows now carry `span_s`, `queued_at`, `started_at`,
+  `gpu_wait_s`, `gpu_busy_s` from the engine's record; the stage row carries `gpu_busy_s`; `episode_clock.cpu_s`
+  is wall minus GPU, never a sum of spans.
+- **Name the clause, not the symptom (A26).** `readable()` is five clauses; T19 read 120.3 px and was tracked
+  anyway and nothing said why. Every row names `readable_clause` with `warp_min_px` and `yolo_min_px`; the 120 px
+  wall did not move (T09 at 112.7 refused anyway; T05 100.5 and T10 89.7 kept).
+- **A cache key holds what the verdict reads (A31).** The master eye's key carried the plan row though the cache
+  holds only `said` and `faces` and the verdict is recomputed; iter2 re-read 17 min of unchanged takes. The row is
+  out of the key; a paste (take sha8), a frame, a dead-cut second, the reader and the prompt stay in.
+- **A worker started before its work dies idle (A32).** ep01 run01 spawned the GPU whisper before any clip was
+  cut; IDLE_S 30 s passed, the first write read `[Errno 22]`, one line took 527 s on the CPU. Lazy spawn, one
+  respawn, stderr kept, exit code printed. The 300 s keep-alive was refused (holds 4 GB through the VL read).
+- **A number is not an expression (face_refine-3 falsified).** MTCNN's five landmarks give a mouth-corner width /
+  inter-ocular ratio: T09 Hyde 1.31 (smile, caught), T08 child 1.03 (smile, missed, inside the 0.94-1.05 control
+  band), T10 p0 1.22 (kept, not a smile). No landmark number separates a smile from a faithful profile; the
+  column is logged, never a gate.
+- **The white eye under a brim is the sheet's look.** Hyde (T07, T08) and T18 Utterson draw a white glare with
+  a pinpoint pupil in take AND redraw, and `edward_hyde/sheet_front.png` draws exactly that; any eye measure
+  must score it CLEAN or it grades the book's style as blur (C1 waits on the anime-eye ONNX, DOWNLOADS_NEEDED.md).
+- **Moved here from SKILL.md / GATES.md (read budget):** `plan_check` once failed every WotW plan for another
+  book's reasons and people read past it; fixed 2026-09, a refusal means something. The panel eye's advisory
+  `orphan_limb` / `body` rows are not in REDRAW_CANNOT_CURE: once calibrated they climb seed, then reprose, then
+  a flagged terminal with a CAP line.
+- Bench of 2026-10-21 (the numbers): see FINAL.md in the debate folder and `docs/calibration/face_refine.md`
+  (section "The face debate bench").

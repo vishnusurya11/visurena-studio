@@ -137,17 +137,33 @@ def passed_but_warp(dq: dict) -> bool:
 TRACKED_HIGH = 0.8
 
 
+def readable_clause(card: dict, dq: dict | None) -> str:
+    """Why the warp gate's record does NOT already read every planned face at SMALL_FACE_PX, as the
+    first failing clause of `readable` ('' when it does): `no_tracks`, `fewer_tracks_than_faces`,
+    `share<0.8`, `no_min_px` (a record of medians alone, before 2026-10-19) or `min_px<120`.
+    Logged on every refine row (face debate 2026-10-21, A26): ep01 T19 read 120.3 px and was tracked
+    anyway, and nothing said which clause sent it."""
+    from studio import warp_gate
+    m = warp_measure(dq)
+    tracks = m.get("tracks") or []
+    if not tracks:
+        return "no_tracks"
+    if len(tracks) < len(card.get("faces") or [None]):
+        return "fewer_tracks_than_faces"
+    if m.get("share", 0) < TRACKED_HIGH:
+        return f"share<{TRACKED_HIGH}"
+    height = warp_gate.smallest_face(m)
+    if height is None:
+        return "no_min_px"
+    return "" if height >= SMALL_FACE_PX else f"min_px<{SMALL_FACE_PX:.0f}"
+
+
 def readable(card: dict, dq: dict | None) -> bool:
     """Every planned face is tracked by the warp gate, for most of the take, at SMALL_FACE_PX
     or more AT ITS SMALLEST: the tracker need not run.  Never the track's median (a push-in from
     80 to 300 px reads 190 there); a record holding medians alone is left to the tracker.
     MTCNN misses small faces, so fewer tracks than faces proves nothing."""
-    from studio import warp_gate
-    m = warp_measure(dq)
-    tracks = m.get("tracks") or []
-    height = warp_gate.smallest_face(m)
-    return (bool(tracks) and len(tracks) >= len(card.get("faces") or [None]) and m.get("share", 0) >= TRACKED_HIGH
-            and height is not None and height >= SMALL_FACE_PX)
+    return readable_clause(card, dq) == ""
 
 
 def soft_faces(card: dict, dq: dict | None) -> int:
