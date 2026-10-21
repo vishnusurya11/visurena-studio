@@ -4,7 +4,13 @@ x: the panel's tallest present face at the 768 render, read through panel_dq.tin
 A28 column, the real code), from storyboard/panel_dq.json.  y: the take's smallest tracked size of
 its tallest face (the warp gate's track with the largest median, its `min_px`), from
 takes/r2v/T<nn>.dq.json.  A pair needs a panel face that is a cast face and a tracked take face.
-Every pair of the episode is used, not only the refined rows.
+Every pair of the episode is used, not only the refined rows.  A take is paired with the panel of its
+first shot.
+
+The pairing is tallest-to-tallest, never per matched cast face: panel_dq keeps one face height per
+panel (its tallest) and the warp tracks carry no identity, so no record says which take face is which
+panel face.  On a single-face pair (one panel face, one take track) the two ARE the same person; those
+pairs are fitted apart (`single_face`) so a line that holds only because of the pairing shows.
 
 Pre-registered kill: R^2 < 0.8 of the least-squares line, or any STATIC (the dq's camera
 `still_ok`) SINGLE-face (one panel face, one take track) take whose size the line misses by more
@@ -19,6 +25,8 @@ from pathlib import Path
 R2_MIN = 0.8
 STATIC_ERROR_MAX = 0.20
 MIN_PAIRS = 3
+PAIRING = ("tallest panel face (panel_dq face_h) to tallest take track (warp median); no per-face identity is "
+           "recorded on either side, so only a single-face pair is a matched cast face; a take reads its first shot's panel")
 
 
 def tallest_track(dq: dict | None) -> dict | None:
@@ -58,8 +66,23 @@ def error(pair: dict, slope: float, intercept: float) -> float:
     return abs(slope * float(pair["panel_px"]) + intercept - float(pair["take_px"])) / float(pair["take_px"])
 
 
+def single_fit(pairs: list[dict]) -> dict:
+    """The line over the single-face pairs alone (where tallest-to-tallest is the matched face)."""
+    single = [p for p in pairs if p["single"]]
+    if len(single) < MIN_PAIRS:
+        return {"n": len(single), "r2": None}
+    slope, intercept, r2 = fit(single)
+    return {"n": len(single), "slope": round(slope, 4), "intercept": round(intercept, 2), "r2": round(r2, 4)}
+
+
 def verdict(pairs: list[dict]) -> dict:
-    """The pre-registered verdict: the line, its R^2, every static single-face miss, the kill lines."""
+    """The pre-registered verdict (the line, its R^2, every static single-face miss, the kill lines), with
+    its pairing said and the single-face pairs fitted apart."""
+    return {**pre_registered(pairs), "pairing": PAIRING, "single_face": single_fit(pairs)}
+
+
+def pre_registered(pairs: list[dict]) -> dict:
+    """DESIGN 4.4's kill over every pair: R^2 under R2_MIN, or a static single-face miss over 20 %."""
     if len(pairs) < MIN_PAIRS:
         return {"n": len(pairs), "passed": False, "kill": [f"{len(pairs)} pairs: fewer than {MIN_PAIRS}"]}
     slope, intercept, r2 = fit(pairs)

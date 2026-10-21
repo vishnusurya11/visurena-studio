@@ -6,33 +6,49 @@
     uv run --no-sync python scripts/proof/face_replay.py instrument [--book=<codex>] [--episode=1]
 
 `replay` copies the episode's records into a sandbox on C: with every take AS IT WAS AT THE FIRST
-MASTER (cut/master_iter1.mp4's own time; a take a later repair displaced is restored from
-takes/r2v/attempts/), the first-pass attempts and ladder (no refine or tiny-face round), and NO
-refine.json and NO repair window.  It then arms the write fence over the real roots and runs, in
-process, the REAL step-09 face path -- face_refine.refine, step 09's face_list_note, tiny_face.rung,
-the refine again on a kept draw, the face list again -- and the step-10 paste (face_paste.Paster with
-an identity upscaler).  The engine answers a crop whose `_src` bytes match a recorded one with the
-recorded render (`exact`); any other crop is `unrecorded`, served a canned grey render the gate
-refuses, and counted, never guessed.  The tiny-face draw is the episode's own recorded draw when one
-exists for that take, else the render "dies" (unrecorded).
+MASTER, the first-pass attempts and ladder (no refine or tiny-face round), and NO refine.json and NO
+repair window.  Which file a take held then is read from the files' own times against
+cut/master_iter1.mp4's (a take a later repair displaced is restored from takes/r2v/attempts/): the
+first master's eye rubric holds no per-take sha8 and manifest.json is the FINAL master's, so no sha8
+of the first master exists to restore by; the report compares the restore with the final manifest.
 
-Readers: facenet and the loose MTCNN on the CPU, the MTCNN finder, no CCIP reader.  That is the
-production FALLBACK (face_detect.Finder and anime_id.Reader fall back to it when their worker fails):
-both workers run on the portable python, which the rehearsal fence refuses (DESIGN 2.6); the real
-workers' answers enter only through package P4's memos.  Every row says which readers ran.
+The engine is package P3's fake ComfyUI (studio/rehearsal/fake_comfy), a real HTTP server on a free
+loopback port inside the sandbox, serving the episode's recorded crops as P2's recordings index writes
+them (recordings.refine_entries: keyed by the sha256 of the staged `_src` bytes).  Nothing in the
+pipeline's call graph is replaced: face_refine.Comfy -> studio.comfy (stage_image, submit,
+wait_record, history) is the real client, its host and root bound to the fake as a rehearsal process
+binds them.  Each answer is labelled in P3's classes, exact / substituted / canned, in
+<sandbox>/engine_log.jsonl; only an exact answer is evidence.  Then, with the write fence armed over
+the real roots, the REAL step-09 face path runs in process -- face_refine.refine, step 09's
+face_list_note, tiny_face.rung (served the episode's own recorded draw, else it dies), the refine of a
+kept draw, the face list again.
 
-Writes docs/audit/2026-10-21_ep02_proof/results/face_rows.json (`faces`: one row per (take, person);
-the kill, agreement with the repair, the outside invariant, the SR-1 estimate, the noise band, proof rows).  `panel` writes
-results/panel_take_size.json (DESIGN 4.4), `instrument` results/instrument_gate.json (4.2).  The real
-library is only ever read; no GPU, no ComfyUI, no network."""
+Step 10's paste is judged the way step 10 builds it: face_paste.spans_from over the cut's own
+takes/work/layout.json, gutter.json and segments (the sandbox's pasted segments cut by
+assemble.segment from the sandbox takes), the Paster at cut scale with an identity upscaler.  What
+may move is the face rectangle the TRACK RECORD gives (its per-frame faces, else face_track.windows'
+centre at the track's face share), mapped to cut pixels here, never by the Paster's placement.
+
+Readers: facenet and the loose MTCNN on the CPU, the MTCNN finder, no CCIP reader -- the production
+FALLBACK: the YOLO and CCIP workers run on the portable python, which the fence refuses (DESIGN 2.6).
+
+Writes docs/audit/2026-10-21_ep02_proof/results/face_rows.json (`faces`: one row per (take, person),
+plus the kill, agreement, the outside invariant, SR-1, the noise band and the proof rows).  `panel`
+writes results/panel_take_size.json (4.4); `instrument` stages the recorded crops for the owner's
+labels under docs/audit/2026-10-21_ep02_proof/review/ and writes results/instrument_gate.json (4.2).
+The real library is only ever read; no GPU, no real ComfyUI, no network."""
 from __future__ import annotations
 
+import hashlib
+import io
 import json
 import os
+import re
 import shutil
-import subprocess
 import sys
 import time
+from contextlib import contextmanager
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -47,12 +63,25 @@ from studio.rehearsal import face_rows as fr_rows, instrument_gate as ig, panel_
 BOOK = "20260827135504"
 PROOF = ROOT / "docs" / "audit" / "2026-10-21_ep02_proof"
 RESULTS = PROOF / "results"
+REVIEW = PROOF / "review"
 ROOM = Path("takes") / "r2v"
+WORK = Path("takes") / "work"
 HOME_RECORDS = ("plan.json",)
 ROOM_RECORDS = ("prompts.json", "shots.json")
 READERS = "facenet cpu + loose MTCNN cpu + MTCNN finder (production fallback); CCIP/clip_h unread"
 ITER1, ITER3 = "master_iter1.mp4", "master_iter3.mp4"
 REPAIR_STEP = "09"
+ITER1_BASIS = ("file mtime <= cut/master_iter1.mp4's: its eye rubric (review/eye_<sha8>.json) holds no per-take "
+               "sha8 and manifest.json is the final master's, so no first-master sha8 exists to restore by")
+AIMED = ("HOST", "COMFY_ROOT")
+"""The real client's module constants a rehearsal process binds to its engine (studio/comfy)."""
+STEM = re.compile(r"(T\d\d_p\d+)_[0-9a-f]{8}_\d{5}_\.\w+$")
+"""A refine render's output name: face_refine/<stem>_<take sha8>_<n:05>_.mp4 (scripts/episode/face_refine)."""
+
+
+def takes_of(doc: dict) -> list[tuple[str, dict]]:
+    """A refine.json's take entries, in order."""
+    return sorted((k, v) for k, v in doc.items() if k[:1] == "T" and k[1:].isdigit())
 
 
 # ---- the sandbox: the episode at its first master (built before the fence, real files only read) -----
@@ -115,7 +144,7 @@ def sheets_of(cards: list[dict]) -> list[str]:
 
 def build(book: Path, number: int, box: Path) -> tuple[Path, list[dict]]:
     """The sandbox book (its one episode at the first master) and what each take was restored from."""
-    home, box_book = episode_home.home(book, number), Path(box) / "library" / Path(book).name
+    home, box_book = episode_home.home(book, number), Path(box) / settings.LIBRARY_DIR / Path(book).name
     box_home = episode_home.home(box_book, number)
     (box_home / ROOM / "attempts").mkdir(parents=True, exist_ok=True)
     copy_named(home, box_home, [*HOME_RECORDS, *[(ROOM / n).as_posix() for n in ROOM_RECORDS],
@@ -127,54 +156,77 @@ def build(book: Path, number: int, box: Path) -> tuple[Path, list[dict]]:
     return box_book, restored
 
 
-# ---- the engine: recorded crops answer, anything else is unrecorded -----------------------------------
-
-class RecordedEngine:
-    """face_refine's engine seam (stage / submit / wait / span) answered from the episode's recorded
-    crops by the sha256 of the staged `_src` bytes; every answer logged with its match class."""
-
-    def __init__(self, out: Path, recorded: dict[str, Path]):
-        self.out, self.recorded, self.staged, self.graphs, self.log = Path(out), recorded, {}, {}, []
-        self.out.mkdir(parents=True, exist_ok=True)
-
-    def stage(self, path: Path) -> str:
-        self.staged[Path(path).name] = Path(path)
-        return Path(path).name
-
-    def submit(self, graph: dict) -> str:
-        job = f"job{len(self.graphs) + 1}"
-        src = next(self.staged[v] for v in staged_values(graph) if v in self.staged and v.endswith("_src.mp4"))
-        hit = self.recorded.get(fr_rows.sha256_of(src))
-        self.graphs[job] = (graph, src, hit)
-        self.log.append({"job": job, "stem": src.name[:-len("_src.mp4")], "src_sha8": sha8(src),
-                         "match": "exact" if hit else "unrecorded", "recorded": hit.name if hit else None})
-        return job
-
-    def wait(self, job: str) -> dict[str, list[Path]]:
-        from studio import face_refine as fr
-        graph, src, hit = self.graphs[job]
-        out = self.out / f"{job}.mp4"
-        shutil.copyfile(hit, out) if hit else canned(src, out)
-        return {fr.saved_node(graph): [out]}
-
-    def span(self, _job: str) -> tuple[None, None]:
-        """No engine clock: a replayed answer has no GPU second of its own."""
-        return None, None
+def manifest_check(home: Path, restored: list[dict]) -> dict:
+    """The restore against the FINAL master's manifest.json: a take that differs is one a repair redrew
+    after the first master (expected), never proof of a wrong restore."""
+    rows = fr_rows.read_json(Path(home) / "manifest.json", {}).get("inputs") or []
+    final = {Path(r["path"]).stem: r.get("sha8") for r in rows if re.search(r"takes/r2v/T\d\d\.mp4$", str(r.get("path")))}
+    mine = {r["take"]: r.get("sha8") for r in restored if r.get("sha8")}
+    both = sorted(set(final) & set(mine))
+    return {"basis": ITER1_BASIS, "n": len(both), "same": sum(final[t] == mine[t] for t in both),
+            "differ": [t for t in both if final[t] != mine[t]]}
 
 
-def staged_values(graph: dict) -> list[str]:
-    return [v for node in graph.values() for v in (node.get("inputs") or {}).values() if isinstance(v, str)]
+# ---- the engine: P3's fake ComfyUI, the real client aimed at it --------------------------------------
+
+def refine_recordings(home: Path, root: Path) -> list[dict]:
+    """The episode's recorded crops as P2's recordings index writes them, their renders made absolute
+    for the fake to read; a crop whose render was never kept is no recording."""
+    from studio.rehearsal import recordings
+    return [{**e, "path": str(Path(root) / e["path"])} for e in recordings.refine_entries(Path(home), Path(root))
+            if e.get("path")]
 
 
-def canned(src: Path, out: Path) -> Path:
-    """A grey render of the source's frames (DESIGN 2.4: a canned picture is grey, so the gate refuses it)."""
-    import cv2
-    cap = cv2.VideoCapture(str(src))
-    n, side = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)), int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)) or 768
-    cap.release()
-    subprocess.run(["ffmpeg", "-y", "-v", "error", "-f", "lavfi", "-i", f"color=c=gray:s={side}x{side}:r=24",
-                    "-frames:v", str(max(n, 1)), "-c:v", "libx264", "-pix_fmt", "yuv420p", str(out)], check=True)
-    return out
+def refine_workflows(box: Path) -> Path:
+    """The face-refine workflow and every technique named after it, copied into the sandbox for the fake's
+    index (one narrow read of the workflow folder, never an index of every workflow)."""
+    from studio import comfy, face_refine as fr
+    folder = Path(box) / "workflows" / "video"
+    folder.mkdir(parents=True, exist_ok=True)
+    for path in Path(comfy.WORKFLOWS).glob(f"*/{fr.WORKFLOW}*.json"):
+        shutil.copy2(path, folder / path.name)
+    return folder.parent
+
+
+def start_engine(box: Path, recorded: list[dict]):
+    """P3's fake ComfyUI on a free loopback port, its root and engine_log.jsonl in the sandbox."""
+    from studio.rehearsal import fake_comfy
+    return fake_comfy.FakeComfy(Path(box), recordings=recorded, workflows=refine_workflows(box)).start()
+
+
+@contextmanager
+def aimed(fake):
+    """The real client (studio.comfy) bound to the fake for the block, as a rehearsal process binds it."""
+    from studio import comfy
+    saved = {k: getattr(comfy, k) for k in AIMED}
+    comfy.HOST, comfy.COMFY_ROOT = fake.url, fake.root
+    try:
+        yield fake
+    finally:
+        for k, v in saved.items():
+            setattr(comfy, k, v)
+
+
+def answer(row: dict) -> dict:
+    """One answer of the fake: the crop stem its output names, P3's match class, its clock."""
+    stem = next((m.group(1) for o in row.get("outputs") or [] if (m := STEM.search(str(o)))), None)
+    return {"stem": stem, "match": row["class"], "clock": row.get("clock"), "seconds": row.get("seconds"),
+            "recording": row.get("recording"), "workflow": row.get("workflow"), "kind": row.get("kind")}
+
+
+def answers(box: Path) -> list[dict]:
+    """Every crop request the fake answered, in order (its engine_log.jsonl `prompt` rows)."""
+    path = Path(box) / "engine_log.jsonl"
+    rows = [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines()] if path.is_file() else []
+    return [answer(r) for r in rows if r.get("call") == "prompt" and r.get("class")]
+
+
+def engine_clock(doc: dict, log: list[dict]) -> dict:
+    """The sandbox refine's gpu_busy_s (take_phases.window over the fake's /history): a RECORDED clock,
+    spaced by the recordings' seconds, never time evidence (R15)."""
+    busy = [e["gpu_busy_s"] for _, e in takes_of(doc) if e.get("gpu_busy_s") is not None]
+    return {"gpu_busy_s": round(sum(busy), 1), "clock": "recorded" if any(a["clock"] == "recorded" for a in log) else None,
+            "time_evidence": False}
 
 
 # ---- the step context: a log, the learnings, the recorded tiny-face draw ------------------------------
@@ -182,7 +234,7 @@ def canned(src: Path, out: Path) -> Path:
 class Ctx:
     """What the real step-09 functions are handed: the sandbox episode, a log, its learnings file, and
     `run_script` answering the tiny-face rung from the episode's own recorded draw and verdicts.  A draw
-    the episode never made "dies" (SystemExit) before anything moves: unrecorded, never guessed."""
+    the episode never made "dies" (SystemExit) before anything moves: never guessed."""
 
     def __init__(self, book: Path, number: int, draws: dict[int, dict]):
         self.book_dir, self.number, self.draws = Path(book), number, draws
@@ -207,7 +259,7 @@ class Ctx:
 
     def render(self, indices: list[int]) -> None:
         if missing := [i for i in indices if i not in self.draws]:
-            raise SystemExit("unrecorded tiny-face draw: " + ", ".join(f"T{i:02d}" for i in missing))
+            raise SystemExit("no recorded tiny-face draw: " + ", ".join(f"T{i:02d}" for i in missing))
         room = self.home / ROOM
         for i in indices:
             episode_home.displace(room / f"T{i:02d}.mp4", i)
@@ -266,13 +318,14 @@ def cpu_readers():
     return loose, detect, embed, cli.frame_finder(loose)
 
 
-def step09(book: Path, number: int, engine, readers, ctx: Ctx) -> dict:
-    """The refine, the face list, the tiny-face rung, the refine of a kept draw, the face list again."""
+def step09(book: Path, number: int, readers, ctx: Ctx, asked) -> dict:
+    """The refine (the real engine client), the face list, the tiny-face rung, the refine of a kept draw,
+    the face list again; `asked()` counts the crop requests the engine has answered."""
     from scripts.episode import face_refine as cli, step_09_shoot as s09, tiny_face
     loose, detect, embed, find = readers
-    kw = dict(engine=engine, detect=detect, loose=loose, embed=embed, find=find, anime=None)
+    kw = dict(engine=cli.Comfy(), detect=detect, loose=loose, embed=embed, find=find, anime=None)
     first = cli.refine(book, number, None, **kw)
-    asked = len(engine.log)
+    first_requests = asked()
     s09.face_list_note(ctx)
     try:
         kept, rung = tiny_face.rung(ctx, "", recorded_judge, ()), "ran"
@@ -280,58 +333,131 @@ def step09(book: Path, number: int, engine, readers, ctx: Ctx) -> dict:
         kept, rung = [], f"died: {died}"
     second = cli.refine(book, number, kept, **kw) if kept else {}
     s09.face_list_note(ctx)
-    return {"first": sorted(first), "first_requests": asked, "rung": rung, "kept_draws": kept, "second": sorted(second)}
+    return {"first": sorted(first), "first_requests": first_requests, "rung": rung, "kept_draws": kept,
+            "second": sorted(second)}
 
 
-def arm(box: Path, roots=None) -> None:
-    """The write fence over the real roots (DESIGN 2.6), armed in this process before any step runs."""
+def arm(box: Path, roots=None, ports=()) -> None:
+    """The write fence over the real roots (DESIGN 2.6), armed in this process before any step runs;
+    the fake's port is the one loopback port it may connect to."""
     from studio.rehearsal import fence
-    fence.install(fence.Fence.of(roots if roots is not None else settings.todays_real_roots(), box, settings.REPO))
+    fence.install(fence.Fence.of(roots if roots is not None else settings.todays_real_roots(), box, settings.REPO,
+                                 ports))
 
 
-# ---- the step-10 paste: nothing outside the face core may move ----------------------------------------
+# ---- the step-10 paste: nothing outside the track's face may move ------------------------------------
 
-def allowed_core(shape: tuple, track, t: int):
-    """Where the paste may change take frame t: inside the face core's outline, as the Paster places it."""
+def to_cut(px: float, py: float, guard, width: int, height: int) -> tuple[float, float]:
+    """A take pixel in the cut: through the gutter guard's crop (w, h, left, top), then scaled up to cover
+    the canvas and centre-cropped, as assemble's segment filter does (worked here, not by the Paster)."""
+    cw, ch, left, top = guard or (width, height, 0, 0)
+    s = max(width / cw, height / ch)
+    return (px - left) * s - (cw * s - width) / 2, (py - top) * s - (ch * s - height) / 2
+
+
+def recorded_face(track, t: int) -> tuple[float, float, float]:
+    """The face on take frame t as shares of its window, from the TRACK RECORD: the run's own per-frame
+    face, else face_track.windows' centre (half across, 0.5 + 0.05 down) at the track's face share."""
+    from studio.face_track import MARGIN
+    if track.faces and t < len(track.faces) and track.faces[t]:
+        return tuple(float(v) for v in track.faces[t])
+    return 0.5, 0.55, track.face or 1 / MARGIN
+
+
+def face_rect(shape: tuple, track, t: int, guard):
+    """Where step 10 may change cut frame t for this track: the face's square from the track record, in
+    cut pixels (a frame past the track's windows may change nowhere)."""
+    import math
     import numpy as np
-    from studio import face_paste as fp
     h, w = shape[:2]
-    box = fp.box_at(track.windows[t], None, w, h, 1)
-    x, y, s = placed = fp.to_master(track.windows[t], None, w, h, 1)
-    cx, cy, face = fp.face_in_patch(fp.face_at(track, t), box, placed)
-    core, out = fp.core_radius(s, face, (cx, cy)) < 1.0, np.zeros((h, w), bool)
-    x0, y0, x1, y1 = max(x, 0), max(y, 0), min(x + s, w), min(y + s, h)
-    if x0 < x1 and y0 < y1:
-        out[y0:y1, x0:x1] = core[y0 - y:y1 - y, x0 - x:x1 - x]
+    out = np.zeros((h, w), bool)
+    if not 0 <= t < len(track.windows):
+        return out
+    (x, y, side), (fx, fy, fh) = track.windows[t], recorded_face(track, t)
+    x0, y0 = to_cut(x + (fx - fh / 2) * side, y + (fy - fh / 2) * side, guard, w, h)
+    x1, y1 = to_cut(x + (fx + fh / 2) * side, y + (fy + fh / 2) * side, guard, w, h)
+    out[max(0, math.floor(y0)):max(0, math.ceil(y1)), max(0, math.floor(x0)):max(0, math.ceil(x1))] = True
     return out
 
 
-def paste_outside(frames: list, track) -> float:
-    """The largest share of pixels outside the core one track's paste moved on any frame (the step-10
-    Paster, identity upscaler, factor 1, the take's own frames)."""
+def track_outside(frames: list, span, track, width: int, height: int) -> float:
+    """The largest share of pixels outside the track's face that its paste moved on any frame of its
+    segment: step 10's own span (re-based to the segment's first frame) through the Paster, alone."""
     from studio import face_paste as fp
-    h, w = frames[0].shape[:2]
-    paster = fp.Paster(lambda f: f, [fp.Span(0, 0, len(frames), 0, 1.0, None, (track,))], w, h, 1)
+    paster = fp.Paster(lambda f: f, [replace(span, start=0, tracks=(track,))], width, height, 1)
     worst = 0.0
-    for t, frame in enumerate(frames):
-        after = paster(frame)
-        if fp.fade(t, track.life) > 0 and t < len(track.windows):
-            worst = max(worst, fr_rows.outside_moved(frame, after, allowed_core(frame.shape, track, t)))
+    for j, frame in enumerate(frames[:span.frames]):
+        allowed = face_rect(frame.shape, track, fp.take_frame(j, span.head, span.slow), span.guard)
+        worst = max(worst, fr_rows.outside_moved(frame, paster(frame), allowed))
     return worst
 
 
-def pastes(room: Path, doc: dict) -> dict[tuple, float]:
-    """(take, who) -> outside share, for every accepted crop of the replay."""
-    from scripts.episode import face_refine as cli
+def kept_names(room: Path, index: int) -> list[str]:
+    """Who each kept track of a take is, in kept_tracks' order."""
+    entry = fr_rows.read_json(Path(room) / "refine.json", {}).get(f"T{index:02d}") or {}
+    return [str(p.get("who")) for p in entry.get("people") or [] if p.get("kept")]
+
+
+def cut_spans(work: Path, room: Path) -> list:
+    """Step 10's spans: face_paste.spans_from over the cut's layout.json, its segments' measured frames
+    and gutter.json, each take's bytes on disk (assemble.face_paste_wrap less its regate, which writes)."""
+    from scripts.episode import assemble
     from studio import face_paste as fp
+    rows = fr_rows.read_json(Path(work) / "layout.json", [])
+    frames = {int(r["index"]): assemble.video_frames(Path(work) / f"seg{int(r['index']):02d}.mp4") for r in rows}
+    return fp.spans_from(rows, frames, fr_rows.read_json(Path(work) / "gutter.json", {}), Path(room),
+                         sha_of=lambda i: fp.sha8(Path(room) / f"T{i:02d}.mp4"), fps=assemble.FPS)
+
+
+def step10_outside(work: Path, room: Path, aspect: str) -> dict[tuple, float]:
+    """(take, who) -> the outside share of every paste step 10 would make on this cut (0 is the invariant)."""
+    from scripts.episode import face_refine as cli
+    from studio import canvas
+    width, height = canvas.size(aspect)
     out = {}
-    for take, entry in sorted((k, v) for k, v in doc.items() if k[:1] == "T" and k[1:].isdigit()):
-        kept = [p for p in entry.get("people") or [] if p.get("kept")]
-        frames = cli.read_frames(Path(room) / f"{take}.mp4") if kept else []
-        for p in kept:
-            (track,) = fp.kept_tracks({"people": [p]}, room)
-            out[(take, p["who"])] = round(paste_outside(frames, track), 6)
+    for span in cut_spans(work, room):
+        frames = cli.read_frames(Path(work) / f"seg{span.index:02d}.mp4")
+        for who, track in zip(kept_names(room, span.index), span.tracks):
+            out[(f"T{span.index:02d}", who)] = round(track_outside(frames, span, track, width, height), 6)
     return out
+
+
+@contextmanager
+def canvas_of(module, aspect: str):
+    """assemble's W, H bound to the plan's canvas for the block, as its `main` binds them."""
+    from studio import canvas
+    saved = module.W, module.H
+    module.W, module.H = canvas.size(aspect)
+    try:
+        yield
+    finally:
+        module.W, module.H = saved
+
+
+def sandbox_cut(real_home: Path, box_home: Path, pasted: set[int], aspect: str) -> Path:
+    """The sandbox's cut records: the real cut's layout.json, each pasted take's segment cut by step 10's
+    own assemble.segment from the SANDBOX take (its guard recomputed), every other segment the real one."""
+    from scripts.episode import assemble
+    real, work, guarded = Path(real_home) / WORK, Path(box_home) / WORK, {}
+    work.mkdir(parents=True, exist_ok=True)
+    rows = fr_rows.read_json(real / "layout.json", [])
+    gutter = {str(k): v for k, v in fr_rows.read_json(real / "gutter.json", {}).items() if int(k) not in pasted}
+    with canvas_of(assemble, aspect):
+        for r in rows:
+            i = int(r["index"])
+            if i not in pasted:
+                copy_if(real / f"seg{i:02d}.mp4", work / f"seg{i:02d}.mp4")
+                continue
+            assemble.segment(i, float(r["seconds"]), {i: Path(box_home) / ROOM / f"T{i:02d}.mp4"}, {},
+                             {i: float(r.get("head") or 0.0)}, work, guarded, slow=float(r.get("slow") or 1.0))
+    episode_home.write_json(work / "layout.json", rows)
+    episode_home.write_json(work / "gutter.json", {**gutter, **{str(k): v for k, v in guarded.items()}})
+    return work
+
+
+def aspect_of(home: Path) -> str:
+    """The canvas the plan declares (assemble's default when it names none)."""
+    return fr_rows.read_json(Path(home) / "plan.json", {}).get("aspect") or "9:16"
 
 
 # ---- the eye measure's own noise ---------------------------------------------------------------------
@@ -351,14 +477,15 @@ def face_box(doc: dict, t: int, side: int) -> tuple | None:
     return ((cx - fh / 2) * side, (cy - fh / 2) * side, (cx + fh / 2) * side, (cy + fh / 2) * side)
 
 
-def crop_eyes(frames: list, doc: dict, ks: list[int]) -> list[float]:
-    """The drawn-eye score at crop frames `ks`, each read at the face box (face_box)."""
+def crop_eyes(frames: list, doc: dict, ks: list[int]) -> dict[int, float]:
+    """crop frame -> the drawn-eye score there, read at the face box (face_box); a frame with no box is
+    left out, never read as another frame."""
     from studio import face_eye
-    out = []
+    out = {}
     for k in ks:
         box = face_box(doc, int(doc["start"]) + k, frames[0].shape[0]) if 0 <= k < len(frames) else None
         if box is not None:
-            out.append(face_eye.eye_score(face_eye.face_gray(frames[k], box)))
+            out[k] = face_eye.eye_score(face_eye.face_gray(frames[k], box))
     return out
 
 
@@ -367,15 +494,13 @@ def eye_noise(room: Path, doc: dict) -> dict[tuple, dict]:
     import numpy as np
     from scripts.episode import face_refine as cli
     out = {}
-    for take, entry in sorted((k, v) for k, v in doc.items() if k[:1] == "T" and k[1:].isdigit()):
+    for take, entry in takes_of(doc):
         for p in (p for p in entry.get("people") or [] if p.get("kept")):
             track, frames = fr_rows.read_json(Path(room) / p["track"], {}), cli.read_frames(Path(room) / p["crop"])
             life, start = track["life"], int(track["start"])
             ks = sorted({int(v) for v in np.linspace(max(1, life[0] - start), max(1, min(life[1] - start, len(frames) - 2)), 6)})
-            base = crop_eyes(frames, track, ks)
-            out[(take, p["who"])] = fr_rows.noise_band(base, crop_eyes(frames, track, ks),
-                                                       crop_eyes(frames, track, [k + 1 for k in ks]),
-                                                       crop_eyes(frames, track, [k - 1 for k in ks]))
+            near = crop_eyes(frames, track, sorted({k + d for k in ks for d in (1, -1)}))
+            out[(take, p["who"])] = fr_rows.noise_band(crop_eyes(frames, track, ks), crop_eyes(frames, track, ks), near)
     return out
 
 
@@ -384,10 +509,9 @@ def eye_noise(room: Path, doc: dict) -> dict[tuple, dict]:
 def decided_in(doc: dict, start: float, stop: float) -> dict:
     """The take entries of a refine.json whose `decided` stamp (local time) falls in [start, stop]."""
     out = {}
-    for key, entry in doc.items():
-        if key[:1] == "T" and key[1:].isdigit() and entry.get("decided"):
-            if start <= datetime.fromisoformat(entry["decided"]).timestamp() <= stop:
-                out[key] = entry
+    for key, entry in takes_of(doc):
+        if entry.get("decided") and start <= datetime.fromisoformat(entry["decided"]).timestamp() <= stop:
+            out[key] = entry
     return out
 
 
@@ -410,15 +534,14 @@ def iter1_decided(doc: dict, cutoff: float, restored: list[dict]) -> dict:
 # ---- the rows and the report -------------------------------------------------------------------------
 
 def person_matches(log: list[dict], doc: dict) -> dict[tuple, str]:
-    """(take, who) -> the match class of the LAST crop asked for that person (a kept draw is asked again)."""
-    by_crop = {p.get("crop"): (take, p.get("who")) for take, e in doc.items() if take[:1] == "T"
-               for p in e.get("people") or []}
+    """(take, who) -> P3's class for the LAST crop asked for that person (a kept draw is asked again)."""
+    by_crop = {p.get("crop"): (take, p.get("who")) for take, e in takes_of(doc) for p in e.get("people") or []}
     return {by_crop[f"refine/{e['stem']}.mp4"]: e["match"] for e in log if f"refine/{e['stem']}.mp4" in by_crop}
 
 
 def face_table(cards: list[dict], doc: dict, iter1: dict, iter3: dict, log: list[dict], pasted: dict) -> list[dict]:
     """Every take's rows (face_rows.take_rows), the readers named on each."""
-    selected = {int(k[1:]) for k in doc if k[:1] == "T" and k[1:].isdigit()}
+    selected = {int(k[1:]) for k, _ in takes_of(doc)}
     matches = person_matches(log, doc)
     rows = [r for c in cards for r in fr_rows.take_rows(int(c["index"]), doc, iter1, iter3, selected, matches, pasted)]
     return [{**r, "readers": READERS} for r in rows]
@@ -433,9 +556,15 @@ def agreement_with_repair(doc: dict, repair: dict, restored: list[dict]) -> dict
     return said
 
 
+OUTSIDE_HOW = ("step 10's spans (face_paste.spans_from over takes/work/layout.json) through the Paster; allowed: the "
+               "face square from the track record (per-frame faces, else face_track.windows' centre -- there the "
+               "rectangle shares the Paster's own centring assumption)")
+
+
 def outside_summary(pasted: dict) -> dict:
     moved = {f"{t} {w}": v for (t, w), v in pasted.items() if v > 0}
-    return {"pastes": len(pasted), "moved": len(moved), "worst": max(pasted.values(), default=0.0), "which": moved}
+    return {"pastes": len(pasted), "moved": len(moved), "worst": max(pasted.values(), default=0.0), "which": moved,
+            "how": OUTSIDE_HOW}
 
 
 def noise_summary(noise: dict) -> dict:
@@ -446,38 +575,20 @@ def noise_summary(noise: dict) -> dict:
             "by_crop": {f"{t} {w}": b for (t, w), b in noise.items()}}
 
 
-def cel_score(path: Path) -> float | None:
-    """face_eye's cel score of one strip crop, the whole crop read as the face box."""
-    import numpy as np
-    from PIL import Image
-    from studio import face_eye
-    if not Path(path).is_file():
-        return None
-    rgb = np.asarray(Image.open(path).convert("RGB"))
-    return face_eye.eye_score(face_eye.face_gray(rgb, (0, 0, rgb.shape[1], rgb.shape[0])))
-
-
-def instrument(home: Path) -> dict:
-    """The gate on both candidates over the episode's owner label files (review/face_labels_<sha8>.json)."""
-    labels = sorted((Path(home) / "review").glob("face_labels_*.json"))
-    cel = lambda doc, folder: ig.cel_reads(doc, folder, cel_score)  # noqa: E731
-    return {"label_files": [p.name for p in labels], "candidates": ig.calibrate(labels, {"face_eye.cel": cel,
-                                                                                         "eye_judge": ig.eye_judge_reads})}
-
-
 def proof_rows(s: dict, gate: dict) -> list[dict]:
     """The DESIGN 5 rows of the face replay, under the check ids scripts/proof/questions.yaml names."""
     k, a, o, ev = s["kill"], s["agreement"], s["outside"], ["results/face_rows.json"]
-    classes = {"exact": k["requests"] - k["unrecorded"], "unrecorded": k["unrecorded"]}
+    classes = {c: k[c] for c in fr_rows.CLASSES}
     sel, rec, both = s["selection"], s["recorded_outside"], o["pastes"] + s["recorded_outside"]["pastes"]
     return [ig.proof_row("unrecorded_le_half", "Q1", not k["real_run"], k["requests"], k["requests"], ev, classes,
-                         "", "n/a", "mechanism"),
+                         "fake_comfy (P3)", "n/a", "mechanism"),
             ig.proof_row("face_replay.selection_agreement", "Q1", sel["agree"] == sel["n"], sel["n"], sel["n"], ev, {},
                          READERS, "n/a", "mechanism"),
             ig.proof_row("refine_decision_recall", "Q1", a["agree"] == a["n"], a["n"], a["n"], ev, classes,
-                         "", "n/a (a decision on an unrecorded crop rests on a canned render)", "mechanism"),
+                         "", "n/a (a decision on a canned or substituted render is no evidence)", "mechanism"),
             ig.proof_row("outside_invariant", "Q1", o["moved"] + rec["moved"] == 0, both, both, ev,
-                         {"replay": o["pastes"], "recorded": rec["pastes"]}, "face_paste.Paster", "n/a", "mechanism"),
+                         {"replay": o["pastes"], "recorded": rec["pastes"]}, "face_paste.spans_from + Paster", "n/a",
+                         "mechanism"),
             ig.proof_row("tiny_face_path", "Q4", s["step09"]["rung"] == "ran", 1, 1, ev, s["rung_served"],
                          "tiny_face.rung", "n/a", "mechanism"), *eye_rows(s["faces"], gate)]
 
@@ -508,6 +619,84 @@ def write_result(name: str, doc: dict, folder: Path = RESULTS) -> Path:
     return path
 
 
+# ---- the owner's labels (SR-0) and the instrument gate -----------------------------------------------
+
+def cel_score(path: Path) -> float | None:
+    """face_eye's cel score of one staged face picture, the whole picture read as the face box."""
+    import numpy as np
+    from PIL import Image
+    from studio import face_eye
+    if not Path(path).is_file():
+        return None
+    rgb = np.asarray(Image.open(path).convert("RGB"))
+    return face_eye.eye_score(face_eye.face_gray(rgb, (0, 0, rgb.shape[1], rgb.shape[0])))
+
+
+def face_picture(video: Path, track: dict) -> bytes:
+    """The face at the crop's middle frame as PNG bytes: the face box when the track gives one, else the frame."""
+    import numpy as np
+    from PIL import Image
+    from scripts.episode import face_refine as cli
+    frames = cli.read_frames(video)
+    k = len(frames) // 2
+    box = face_box(track, int(track.get("start") or 0) + k, frames[k].shape[0]) if track else None
+    rgb = frames[k] if box is None else frames[k][max(0, int(box[1])):int(box[3]), max(0, int(box[0])):int(box[2])]
+    buf = io.BytesIO()
+    Image.fromarray(np.ascontiguousarray(rgb)).save(buf, "PNG")
+    return buf.getvalue()
+
+
+def staged_picture(review: Path, name: str, body: bytes) -> str:
+    """One picture under review/crops/, named by its bytes and written once; its review-relative path."""
+    rel = f"crops/{name}_{hashlib.sha256(body).hexdigest()[:8]}.png"
+    if not (Path(review) / rel).is_file():
+        (Path(review) / rel).parent.mkdir(parents=True, exist_ok=True)
+        (Path(review) / rel).write_bytes(body)
+    return rel
+
+
+def label_rows(room: Path, take: str, p: dict, review: Path) -> list[dict]:
+    """A recorded crop's two label rows (its source and its render), each with a blank owner word."""
+    render = Path(room) / p["crop"]
+    src, track = render.with_name(f"{render.stem}_src.mp4"), fr_rows.read_json(Path(room) / str(p.get("track")), {})
+    if not (render.is_file() and src.is_file()):
+        return []
+    return [{"take": take, "who": p.get("who"), "kind": kind, "owner": "",
+             "crop": staged_picture(review, f"{take}_{p.get('who')}_{kind}", face_picture(video, track))}
+            for kind, video in (("refine_src", src), ("refine_render", render))]
+
+
+def stage_labels(room: Path, review: Path) -> Path:
+    """The episode's recorded refine crops staged for the owner's labels (SR-0) as
+    review/face_labels_<sha8>.json, every `owner` blank.  The sha8 names the staged pictures, so a set
+    already staged is returned untouched: the owner's words in it are never rewritten."""
+    doc = fr_rows.read_json(Path(room) / "refine.json", {})
+    crops = [r for take, e in takes_of(doc) for p in e.get("people") or [] if p.get("crop")
+             for r in label_rows(room, take, p, review)]
+    path = Path(review) / f"face_labels_{hashlib.sha256(json.dumps([c['crop'] for c in crops]).encode()).hexdigest()[:8]}.json"
+    if not path.is_file():
+        episode_home.write_json(path, {"labels": list(ig.LABELS), "how": "owner: good = a drawn eye, bad = none",
+                                       "crops": crops})
+    return path
+
+
+def label_paths(home: Path, review: Path | None) -> list[tuple[str, Path]]:
+    """(where, file) of every owner label file: the episode's review/, then the staged ones."""
+    found = [("episode", p) for p in sorted((Path(home) / "review").glob("face_labels_*.json"))]
+    return found + ([("proof", p) for p in sorted(Path(review).glob("face_labels_*.json"))] if review else [])
+
+
+def instrument(home: Path, review: Path | None = None) -> dict:
+    """The gate on both candidates over every owner label file, and whether the listed crops could ever
+    reach its n (ig.MIN_N) once the owner has labelled them."""
+    labels = label_paths(home, review)
+    listed = {w: sum(len(fr_rows.read_json(p, {}).get("crops") or []) for x, p in labels if x == w) for w in ("episode", "proof")}
+    cel = lambda doc, folder: ig.cel_reads(doc, folder, cel_score)  # noqa: E731
+    return {"label_files": [f"{w}:review/{p.name}" for w, p in labels], "crops_staged": listed["proof"],
+            "gate_reachable": sum(listed.values()) >= ig.MIN_N,
+            "candidates": ig.calibrate([p for _, p in labels], {"face_eye.cel": cel, "eye_judge": ig.eye_judge_reads})}
+
+
 # ---- the run -----------------------------------------------------------------------------------------
 
 def default_box() -> Path:
@@ -524,48 +713,67 @@ def prepare(book: Path, number: int, box: Path) -> SimpleNamespace:
     cutoff = master_time(home, ITER1)
     return SimpleNamespace(home=home, box=Path(box), book=box_book, number=number, restored=restored, cutoff=cutoff,
                            iter3=master_time(home, ITER3), real=fr_rows.read_json(home / ROOM / "refine.json", {}),
-                           recorded=fr_rows.recorded_crops(home / ROOM / "refine"), draws=recorded_draws(home, cutoff))
-
-
-def summarize(w: SimpleNamespace, ran: dict, engine: RecordedEngine, ctx: Ctx) -> dict:
-    """The replay's evidence: rows, the kill, agreement, the outside invariant, noise, SR-1, the log."""
-    room = episode_home.home(w.book, w.number) / ROOM
-    doc, cards = fr_rows.read_json(room / "refine.json", {}), fr_rows.read_json(room / "prompts.json", [])
-    pasted, first, repair = pastes(room, doc), engine.log[:ran["first_requests"]], repair_decided(w.home, w.real)
-    iter1, iter3 = iter1_decided(w.real, w.cutoff, w.restored), decided_in(w.real, 0.0, w.iter3)
-    return {"episode": episode_home.home(Path(w.home).parents[1].name, w.number).as_posix(), "sandbox": str(w.box),
-            "readers": READERS, "restored": w.restored, "step09": ran, "rung_served": ctx.served,
-            "faces": face_table(cards, doc, iter1, iter3, engine.log, pasted), "engine_log": engine.log,
-            "kill": fr_rows.kill([e["match"] for e in first]),
-            "agreement": agreement_with_repair(doc, repair, w.restored),
-            "selection": fr_rows.selection_agreement(doc, repair, sorted(repair)),
-            "outside": outside_summary(pasted), "noise": noise_summary(eye_noise(room, doc)), **on_record(w),
-            "sr1": fr_rows.sr1_estimate(fr_rows.sr1_inputs(doc, w.real), sorted({e["stem"][:3] for e in first})),
-            "log": ctx.lines}
+                           recorded=refine_recordings(home, Path(book).parent), draws=recorded_draws(home, cutoff))
 
 
 def standing_doc(room: Path, doc: dict) -> dict:
     """The refine entries that decided the CURRENT take bytes (face_refine.standing): what step 10 pastes."""
     from studio import face_refine as fr
-    return {k: e for k, e in doc.items() if k[:1] == "T" and k[1:].isdigit() and fr.standing(e, sha8(Path(room) / f"{k}.mp4"))}
+    return {k: e for k, e in takes_of(doc) if fr.standing(e, sha8(Path(room) / f"{k}.mp4"))}
+
+
+def replay_outside(w: SimpleNamespace, doc: dict) -> dict:
+    """Step 10's paste of the replay's own accepted crops, on the sandbox's cut."""
+    box_home = episode_home.home(w.book, w.number)
+    pasted = {int(k[1:]) for k, e in standing_doc(box_home / ROOM, doc).items() if any(p.get("kept") for p in e.get("people") or [])}
+    if not pasted:
+        return {}
+    work = sandbox_cut(w.home, box_home, pasted, aspect_of(w.home))
+    return step10_outside(work, box_home / ROOM, aspect_of(w.home))
 
 
 def on_record(w: SimpleNamespace) -> dict:
-    """The same paste and eye measures on the episode's OWN recorded pastes (read only): the invariant
-    over real crops even when the replay accepted none."""
+    """The same paste and eye measures on the episode's OWN recorded cut (read only): the invariant over
+    real crops even when the replay accepted none."""
     room = Path(w.home) / ROOM
-    doc = standing_doc(room, w.real)
-    return {"recorded_outside": outside_summary(pastes(room, doc)), "recorded_noise": noise_summary(eye_noise(room, doc))}
+    return {"recorded_outside": outside_summary(step10_outside(Path(w.home) / WORK, room, aspect_of(w.home))),
+            "recorded_noise": noise_summary(eye_noise(room, standing_doc(room, w.real)))}
 
 
-def replay(book: Path, number: int, box: Path, readers=None, roots=None) -> dict:
-    """DESIGN 4.1 end to end: the sandbox, the fence, the real face path, the rows, the instrument's state."""
+def decisions(w: SimpleNamespace, doc: dict) -> dict:
+    """The replay's decisions against the repair's (status and selection)."""
+    repair = repair_decided(w.home, w.real)
+    return {"agreement": agreement_with_repair(doc, repair, w.restored),
+            "selection": fr_rows.selection_agreement(doc, repair, sorted(repair))}
+
+
+def summarize(w: SimpleNamespace, ran: dict, ctx: Ctx) -> dict:
+    """The replay's evidence: rows, the kill, agreement, the outside invariant, noise, SR-1, the engine log."""
+    room = episode_home.home(w.book, w.number) / ROOM
+    doc, cards, log = fr_rows.read_json(room / "refine.json", {}), fr_rows.read_json(room / "prompts.json", []), answers(w.box)
+    pasted, first = replay_outside(w, doc), log[:ran["first_requests"]]
+    iter1, iter3 = iter1_decided(w.real, w.cutoff, w.restored), decided_in(w.real, 0.0, w.iter3)
+    return {"episode": episode_home.home(Path(w.home).parents[1].name, w.number).as_posix(), "sandbox": str(w.box),
+            "readers": READERS, "restored": w.restored, "iter1_restore": manifest_check(w.home, w.restored),
+            "step09": ran, "rung_served": ctx.served, "faces": face_table(cards, doc, iter1, iter3, log, pasted),
+            "engine_log": log, "engine_clock": engine_clock(doc, log), "kill": fr_rows.kill([e["match"] for e in first]),
+            **decisions(w, doc), "outside": outside_summary(pasted), "noise": noise_summary(eye_noise(room, doc)),
+            **on_record(w), "log": ctx.lines,
+            "sr1": fr_rows.sr1_estimate(fr_rows.sr1_inputs(doc, w.real), sorted({e["stem"][:3] for e in first if e["stem"]}))}
+
+
+def replay(book: Path, number: int, box: Path, readers=None, roots=None, review: Path | None = None) -> dict:
+    """DESIGN 4.1 end to end: the sandbox, the fake engine, the fence, the real face path, the rows."""
     w = prepare(book, number, box)
-    arm(w.box, roots)
-    engine, ctx = RecordedEngine(w.box / "comfy" / "output", w.recorded), Ctx(w.book, number, w.draws)
-    ran = step09(w.book, number, engine, readers or cpu_readers(), ctx)
-    said = summarize(w, ran, engine, ctx)
-    gate = instrument(w.home)["candidates"]["face_eye.cel"]
+    ctx = Ctx(w.book, number, w.draws)
+    with aimed(start_engine(w.box, w.recorded)) as fake:
+        arm(w.box, roots, ports=(fake.port,))
+        try:
+            ran = step09(w.book, number, readers or cpu_readers(), ctx, lambda: len(answers(w.box)))
+            said = summarize(w, ran, ctx)
+        finally:
+            fake.stop()
+    gate = instrument(w.home, review)["candidates"]["face_eye.cel"]
     said = {**said, "faces": ig.stamp(said["faces"], gate), "instrument": gate}
     return {**said, "proof_rows": proof_rows(said, gate)}
 
@@ -579,8 +787,8 @@ def panel(home: Path) -> dict:
     return {"episode": Path(home).as_posix(), "pairs": pairs, "verdict": said, "proof_rows": [row]}
 
 
-def instrument_report(home: Path) -> dict:
-    said = instrument(home)
+def instrument_report(home: Path, review: Path | None = None) -> dict:
+    said = instrument(home, review)
     rows = [ig.proof_row(f"instrument_gate.{name}", "Q1", g["passed"], g["n"], g["n"], said["label_files"], [], name,
                          g["state"], "mechanism") for name, g in said["candidates"].items()]
     return {**said, "proof_rows": rows}
@@ -592,6 +800,13 @@ def options(argv: list[str]) -> dict:
     return said
 
 
+def sr1_line(s: dict) -> str:
+    """SR-1's estimate said with its standing: what was measured, and what is only a price."""
+    unknown = ", ".join(s["unknown_takes"]) or "none"
+    return (f"SR-1: {s['measured_s']} GPU s measured on {s['measured_takes']} takes, {s['priced_s']} s PRICED on "
+            f"{s['priced_takes']} takes (face_refine.price, not a measurement); unknown: {unknown}")
+
+
 def headline(cmd: str, doc: dict) -> str:
     if cmd == "panel":
         v = doc["verdict"]
@@ -599,10 +814,10 @@ def headline(cmd: str, doc: dict) -> str:
     if cmd == "instrument":
         return "; ".join(f"{n}: {g['agree']}/{g['n']} LB {g['lower']} {g['state']}" for n, g in doc["candidates"].items())
     k, a, o, sel, rec = doc["kill"], doc["agreement"], doc["outside"], doc["selection"], doc["recorded_outside"]
-    return (f"crops asked {k['requests']}, unrecorded {k['unrecorded']} ({k['share']:.0%}) -> "
-            f"{'Q1/Q2 REAL-RUN (kill)' if k['real_run'] else 'kill not fired'}; selection {sel['agree']}/{sel['n']}, "
-            f"status {a['agree']}/{a['n']} vs the repair; outside moved {o['moved']}/{o['pastes']} replay, "
-            f"{rec['moved']}/{rec['pastes']} recorded; SR-1 ~{doc['sr1']['estimate_s']} GPU s priced; "
+    return (f"crops asked {k['requests']}: exact {k['exact']}, substituted {k['substituted']}, canned {k['canned']} "
+            f"({k['share']:.0%} not exact) -> {'Q1/Q2 REAL-RUN (kill)' if k['real_run'] else 'kill not fired'}; "
+            f"selection {sel['agree']}/{sel['n']}, status {a['agree']}/{a['n']} vs the repair; outside moved "
+            f"{o['moved']}/{o['pastes']} replay, {rec['moved']}/{rec['pastes']} recorded; {sr1_line(doc['sr1'])}; "
             f"eye {doc['instrument']['state']}")
 
 
@@ -610,12 +825,14 @@ def main(argv: list[str]) -> int:
     cmd = argv[0] if argv and not argv[0].startswith("--") else "replay"
     o = options(argv)
     book, number = episode_home.book_dir(o["book"]), int(o["episode"])
+    home = episode_home.home(book, number)
     if cmd == "panel":
-        name, doc = "panel_take_size.json", panel(episode_home.home(book, number))
+        name, doc = "panel_take_size.json", panel(home)
     elif cmd == "instrument":
-        name, doc = "instrument_gate.json", instrument_report(episode_home.home(book, number))
+        print(stage_labels(home / ROOM, REVIEW))
+        name, doc = "instrument_gate.json", instrument_report(home, REVIEW)
     else:
-        name, doc = "face_rows.json", replay(book, number, Path(o.get("box") or default_box()))
+        name, doc = "face_rows.json", replay(book, number, Path(o.get("box") or default_box()), review=REVIEW)
     print(write_result(name, doc, Path(o.get("out") or RESULTS)))
     print(headline(cmd, doc))
     return 0

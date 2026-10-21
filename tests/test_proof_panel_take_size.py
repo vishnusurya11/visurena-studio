@@ -78,3 +78,13 @@ def test_an_episode_is_read_from_its_named_records(tmp_path):
     (home / "takes" / "r2v" / "T00.dq.json").write_text(json.dumps(dq([(80.0, 77.0)])))
     pairs = pts.episode_pairs(home)
     assert [p["take"] for p in pairs] == [0] and pairs[0]["panel_px"] == 77
+
+
+def test_the_verdict_says_its_pairing_and_fits_the_single_face_pairs_apart():
+    """The records keep one face per panel (face_h, its tallest) and no identity per take track, so a pair is
+    tallest-to-tallest; on a single-face pair that IS the matched cast face, so those are fitted apart."""
+    single = [{"take": i, "panel_px": x, "take_px": 2 * x, "static": False, "single": True} for i, x in enumerate((10, 20, 40))]
+    crowd = [{"take": 9, "panel_px": 30, "take_px": 5, "static": False, "single": False}]
+    said = pts.verdict(single + crowd)
+    assert "tallest" in said["pairing"] and said["single_face"]["n"] == 3 and said["single_face"]["r2"] == 1.0
+    assert said["r2"] < 0.8 and not said["passed"]                       # the pre-registered verdict is unchanged

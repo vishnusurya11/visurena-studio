@@ -9,15 +9,15 @@ MASTER, with no repair window.  This module is its pure half:
   it displaced kept its render time when it was moved), and the older files its attempts;
 - the first-pass attempts.json and ladder.json: every `face_refine.*` and `tiny_face.*` round and
   every ladder round after the master taken out, so the real counters read as they did;
-- the recorded crops, keyed by the sha256 of their `_src` bytes: a crop the first pass asks for
-  whose bytes match is `exact`; any other is `unrecorded`, counted, never guessed;
-- one row per (take, person) with the DESIGN 4.1 columns, the pre-registered kill (unrecorded over
-  50 % of the first-pass crop requests: Q1/Q2 are REAL-RUN), decision agreement with the repair,
+- the engine is package P3's fake ComfyUI answering the REAL studio client from the episode's
+  recorded crops, keyed by the sha256 of their staged `_src` bytes; it labels each answer in its own
+  classes -- `exact` (the same bytes were recorded), `substituted`, `canned` (a grey render the
+  gate refuses) -- and only an exact answer is evidence;
+- one row per (take, person) with the DESIGN 4.1 columns, the pre-registered kill (answers not exact
+  over 50 % of the first-pass crop requests: Q1/Q2 are REAL-RUN), decision agreement with the repair,
   the outside-the-face invariant, the SR-1 GPU estimate and the eye noise band."""
 from __future__ import annotations
 
-import hashlib
-import re
 from pathlib import Path
 
 import numpy as np
@@ -26,7 +26,8 @@ TINY_PX, BIG_PX = 40.0, 120.0
 KILL_SHARE = 0.5
 REFINE_KEYS = ("face_refine.", "tiny_face.")
 RETAKES = "retakes"
-SRC = re.compile(r"^(T\d\d_p\d+)_src\.mp4$")
+CLASSES = ("exact", "substituted", "canned")
+"""The fake ComfyUI's match classes (studio/rehearsal/fake_comfy, P3): the one vocabulary counted here."""
 
 
 def read_json(path: Path, default):
@@ -68,25 +69,15 @@ def first_pass_attempts(doc: dict, ladder: dict, cutoff: float) -> dict:
     return out
 
 
-def sha256_of(path: Path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
-def recorded_crops(refine_dir: Path) -> dict[str, Path]:
-    """sha256 of each recorded `_src` crop -> the render the engine returned for it (both on disk)."""
-    out = {}
-    for src in sorted(Path(refine_dir).glob("T[0-9][0-9]_p*_src.mp4")):
-        render = src.with_name(f"{SRC.match(src.name).group(1)}.mp4")
-        if render.is_file():
-            out[sha256_of(src)] = render
-    return out
-
-
 def kill(classes: list[str]) -> dict:
-    """The pre-registered kill: unrecorded over half the first-pass crop requests (or none asked)."""
-    n, miss = len(classes), sum(c == "unrecorded" for c in classes)
+    """The pre-registered kill: answers not `exact` over half the first-pass crop requests (or none
+    asked).  A class outside the fake's vocabulary is refused, never counted."""
+    if strange := sorted(set(classes) - set(CLASSES)):
+        raise ValueError(f"{strange}: not a fake ComfyUI match class {CLASSES}")
+    n, counts = len(classes), {c: classes.count(c) for c in CLASSES}
+    miss = n - counts["exact"]
     share = round(miss / n, 3) if n else 1.0
-    return {"requests": n, "unrecorded": miss, "share": share, "real_run": n == 0 or share > KILL_SHARE}
+    return {"requests": n, **counts, "not_exact": miss, "share": share, "real_run": n == 0 or share > KILL_SHARE}
 
 
 def eye_of(p: dict | None) -> float | None:
@@ -112,15 +103,16 @@ def row(take: str, p: dict | None, status: str, flags: dict, eyes: tuple) -> dic
 
 
 CANNED_COLUMNS = ("accepted", "eye_cel_replay", "flicker", "id_ref")
-"""What a gate decided on a canned render: never evidence (DESIGN 2.4), so blank on an unrecorded row."""
+"""What a gate decided on a render that is not this crop's: never evidence (DESIGN 2.4), so blank."""
 
 
 def uncanned(r: dict) -> dict:
-    """An unrecorded row keeps what the first pass ASKED (take, person, size) and drops what the gate
-    decided on the canned grey render it was served."""
-    if r["match"] != "unrecorded":
+    """A canned or substituted row keeps what the first pass ASKED (take, person, size) and drops what
+    the gate decided on the render it was served (a grey picture, or another crop's)."""
+    if r["match"] not in ("canned", "substituted"):
         return r
-    return {**r, **dict.fromkeys(CANNED_COLUMNS), "why": f"unrecorded: the gate read a canned render ({r['why']})"}
+    said = f"{r['match']}: the gate read a render that is not this crop's ({r['why']})"
+    return {**r, **dict.fromkeys(CANNED_COLUMNS), "why": said}
 
 
 def take_rows(index: int, replay: dict, iter1: dict, iter3: dict, selected: set[int], matches: dict,
@@ -192,10 +184,11 @@ def sr1_estimate(entries: dict, takes: list[str]) -> dict:
             "estimate_s": round(sum(measured.values()) + sum(priced.values()), 1)}
 
 
-def noise_band(first: list[float], again: list[float], plus: list[float], minus: list[float]) -> dict:
-    """The eye measure's noise: its largest change read twice on the same crops, and one frame either way;
-    None where nothing was read (a band over no reading is unmeasured, never 0)."""
-    repeat = [abs(a - b) for a, b in zip(first, again)]
-    shift = [abs(a - b) for side in (plus, minus) for a, b in zip(first, side)]
+def noise_band(first: dict[int, float], again: dict[int, float], near: dict[int, float]) -> dict:
+    """The eye measure's noise: its largest change read twice on the same crop frames, and one frame
+    either way.  Every reading is keyed by its crop frame, so a frame with no reading drops its own
+    pair and never shifts the others; None where nothing was read (unmeasured, never 0)."""
+    repeat = [abs(first[k] - again[k]) for k in first if k in again]
+    shift = [abs(first[k] - near[k + d]) for k in first for d in (1, -1) if k + d in near]
     return {"repeat": round(float(max(repeat)), 3) if repeat else None,
             "shift": round(float(max(shift)), 3) if shift else None, "reads": len(first)}

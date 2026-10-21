@@ -2,10 +2,10 @@
 
 Pure helpers over named records: the take each index held at the first master (by the files'
 own times, restored from attempts/ where a later repair displaced it), the first-pass attempts
-record with every repair-era refine and tiny-face round taken out, the recorded crops keyed by
-their `_src` bytes, one row per (take, person), the pre-registered kill on unrecorded crop
-requests, decision agreement with the repair, the outside-the-face invariant and the SR-1
-estimate."""
+record with every repair-era refine and tiny-face round taken out, one row per (take, person),
+the pre-registered kill on crop requests the fake ComfyUI did not answer `exact` (P3's classes:
+exact, substituted, canned), decision agreement with the repair, the outside-the-face invariant
+and the SR-1 estimate."""
 from __future__ import annotations
 
 import os
@@ -48,20 +48,14 @@ def test_the_first_pass_attempts_drop_every_refine_and_tiny_face_round():
     assert rows.first_pass_ladder(ladder, cutoff=200.0) == {"rounds": [{"at": 100.0}]}
 
 
-def test_recorded_crops_are_keyed_by_their_src_bytes(tmp_path):
-    refine = tmp_path / "refine"
-    touch(refine / "T05_p0_src.mp4", b"crop five", 1.0)
-    touch(refine / "T05_p0.mp4", b"render five", 1.0)
-    touch(refine / "T06_p1_src.mp4", b"crop six", 1.0)          # its render was never kept
-    said = rows.recorded_crops(refine)
-    assert said == {rows.sha256_of(refine / "T05_p0_src.mp4"): refine / "T05_p0.mp4"}
-
-
-def test_the_kill_fires_over_half_unrecorded():
-    assert rows.kill(["exact", "unrecorded", "unrecorded"])["real_run"]
-    said = rows.kill(["exact", "exact", "unrecorded", "unrecorded"])
-    assert not said["real_run"] and said == {"requests": 4, "unrecorded": 2, "share": 0.5, "real_run": False}
+def test_the_kill_fires_when_over_half_the_answers_are_not_exact_in_p3s_classes():
+    assert rows.kill(["exact", "canned", "substituted"])["real_run"]
+    said = rows.kill(["exact", "exact", "canned", "substituted"])
+    assert not said["real_run"] and said == {"requests": 4, "exact": 2, "substituted": 1, "canned": 1,
+                                             "not_exact": 2, "share": 0.5, "real_run": False}
     assert rows.kill([])["real_run"]                # no request is no evidence
+    with pytest.raises(ValueError):
+        rows.kill(["unrecorded"])                   # only the fake's own vocabulary is counted
 
 
 def person(who, kept, eye_src=40.0, eye_ref=90.0, min_px=50.0, why="kept"):
@@ -115,7 +109,16 @@ def test_the_sr1_estimate_sums_measured_gpu_and_says_when_only_a_price_exists():
 
 
 def test_the_noise_band_is_the_largest_change_of_a_repeat_or_a_one_frame_shift():
-    assert rows.noise_band([10.0, 12.0], [10.0, 12.0], [11.0, 15.0], [9.0, 12.5]) == {"repeat": 0.0, "shift": 3.0, "reads": 2}
+    first, again = {4: 10.0, 8: 12.0}, {4: 10.0, 8: 12.0}
+    near = {3: 9.0, 5: 11.0, 7: 12.5, 9: 15.0}
+    assert rows.noise_band(first, again, near) == {"repeat": 0.0, "shift": 3.0, "reads": 2}
+
+
+def test_the_noise_band_pairs_readings_by_frame_never_by_position():
+    """crop_eyes skips a frame with no face box: frame 5 unread must not pair frame 8 with frame 3."""
+    first, again = {4: 10.0, 8: 50.0}, {4: 10.0, 8: 50.0}
+    near = {3: 10.5, 9: 51.0}                       # 5 and 7 had no face box
+    assert rows.noise_band(first, again, near) == {"repeat": 0.0, "shift": 1.0, "reads": 2}
 
 
 def test_a_record_is_read_by_name_and_a_missing_one_is_its_default(tmp_path):
@@ -124,13 +127,14 @@ def test_a_record_is_read_by_name_and_a_missing_one_is_its_default(tmp_path):
     assert rows.read_json(tmp_path / "missing.json", []) == []
 
 
-def test_an_unrecorded_row_carries_no_decision_the_canned_render_made():
+@pytest.mark.parametrize("cls", ["canned", "substituted"])
+def test_a_row_the_fake_did_not_answer_exact_carries_no_decision_its_render_made(cls):
     replay = {"T06": {"status": "unrefined", "people": [person("hyde", False, eye_src=20.4, why="faces 0 != 1")]}}
-    (row,) = rows.take_rows(6, replay, iter1={}, iter3={}, selected={6}, matches={("T06", "hyde"): "unrecorded"},
+    (row,) = rows.take_rows(6, replay, iter1={}, iter3={}, selected={6}, matches={("T06", "hyde"): cls},
                             outside={})
-    assert row["refined"] and row["match"] == "unrecorded" and row["px"] == 50.0 and row["tier"] == "mid"
+    assert row["refined"] and row["match"] == cls and row["px"] == 50.0 and row["tier"] == "mid"
     assert (row["accepted"], row["eye_cel_replay"], row["flicker"], row["id_ref"]) == (None, None, None, None)
-    assert row["why"].startswith("unrecorded: the gate read a canned render")
+    assert row["why"].startswith(f"{cls}: the gate read a render that is not this crop's")
 
 
 def test_selection_agreement_compares_the_people_each_take_was_tracked_for():
@@ -152,5 +156,5 @@ def test_the_sr1_inputs_price_the_replays_crops_and_measure_only_the_real_record
 
 
 def test_a_noise_band_over_no_reading_is_unmeasured_never_zero():
-    assert rows.noise_band([], [], [], []) == {"repeat": None, "shift": None, "reads": 0}
-    assert rows.noise_band([10.0], [10.0], [], [])["shift"] is None
+    assert rows.noise_band({}, {}, {}) == {"repeat": None, "shift": None, "reads": 0}
+    assert rows.noise_band({4: 10.0}, {4: 10.0}, {})["shift"] is None
