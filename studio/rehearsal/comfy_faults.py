@@ -13,6 +13,10 @@ every submit.  The kinds:
   exec_fatal   an execution_error with NON-transient text (out of memory): never retried (F16)
   unreadable   a text job answers a reply every reader's readable() refuses (F11)
   corrupt      the output is broken: zero_byte, truncated, no_audio or wrong_frames (F13)
+  rejected     every output fails validation: HTTP 400 prompt_outputs_failed_validation, nothing
+               queued; `detail` names the broken input as <node>.<input> (GPU transcript, case B)
+  partial_accept  one output still validates: HTTP 200 WITH node_errors, the valid outputs run and
+               the job ends `success` with no picture (GPU transcript, case A)
 
 The error texts are the client's own retry class (`comfy.TRANSIENT`) and ComfyUI's
 out-of-memory wording.  NO studio log in the repo holds a recorded OOM, so FATAL_ERROR's
@@ -26,7 +30,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-KINDS = ("crash", "lost", "hang", "exec_error", "exec_fatal", "unreadable", "corrupt")
+KINDS = ("crash", "lost", "hang", "exec_error", "exec_fatal", "unreadable", "corrupt", "rejected", "partial_accept")
 CORRUPTIONS = ("zero_byte", "truncated", "no_audio", "wrong_frames")
 VIDEO_ONLY = ("no_audio", "wrong_frames")
 SENTENCE = re.compile(r"^\s*(\w+)\s+(?:on|at)\s+submit#(\d+)(?:\s+of\s+workflow\s+(\S+))?\s*$")
@@ -112,14 +116,39 @@ def message_text(error: dict) -> str:
     return f"{error.get('node_type')}: {error.get('exception_message')}"
 
 
-def error_message(fault: Fault, prompt_id: str, node_id: str, now_ms: int) -> list:
-    """The ["execution_error", {...}] status message, in the engine's field set."""
+def error_message(fault: Fault, prompt_id: str, node_id: str, now_ms: int, inputs: dict | None = None) -> list:
+    """The ["execution_error", {...}] status message, in the engine's field set and forms: each of the
+    failing node's inputs as a list of its repr, and the node ids with outputs as a list (SR-5)."""
     error = error_of(fault)
     return ["execution_error", {"prompt_id": prompt_id, "node_id": str(node_id), "node_type": error["node_type"],
                                 "executed": [], "exception_message": error["exception_message"],
                                 "exception_type": error["exception_type"],
                                 "traceback": [f"rehearsal fake: {error['exception_type']} (no recorded traceback)\n"],
-                                "current_inputs": {}, "current_outputs": {}, "timestamp": now_ms}]
+                                "current_inputs": {k: [str(v)] for k, v in (inputs or {}).items()},
+                                "current_outputs": [str(node_id)], "timestamp": now_ms}]
+
+
+REJECTED = {"type": "prompt_outputs_failed_validation", "message": "Prompt outputs failed validation",
+            "details": "", "extra_info": {}}
+"""The 400's `error` when no output of the graph validates (GPU transcript, error_invalid_graph case B)."""
+
+
+def broken_input(fault: Fault, graph: dict) -> tuple[str, str]:
+    """(node id, input name) a validation fault names as <node>.<input>; else the first node's first input."""
+    if fault.detail and "." in fault.detail:
+        node, name = fault.detail.rsplit(".", 1)
+        return node, name
+    node = next((n for n, spec in graph.items() if (spec or {}).get("inputs")), next(iter(graph)))
+    return str(node), next(iter((graph[node] or {}).get("inputs") or {"input": None}))
+
+
+def node_errors(fault: Fault, graph: dict, dependents: list[str]) -> dict:
+    """The engine's `node_errors` for one missing required input and the outputs it starves."""
+    node, name = broken_input(fault, graph)
+    error = {"type": "required_input_missing", "message": "Required input is missing", "details": name,
+             "extra_info": {"input_name": name}}
+    return {node: {"errors": [error], "dependent_outputs": list(dependents),
+                   "class_type": (graph.get(node) or {}).get("class_type")}}
 
 
 def ffmpeg() -> str:

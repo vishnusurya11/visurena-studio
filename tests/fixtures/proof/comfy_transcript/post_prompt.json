@@ -1,0 +1,36 @@
+{
+ "route": "post_prompt",
+ "method": "POST",
+ "path": "/prompt",
+ "request": {
+  "prompt": {
+   "1": {
+    "class_type": "EmptyImage",
+    "inputs": {
+     "width": 64,
+     "height": 64,
+     "batch_size": 1,
+     "color": 8421504
+    }
+   },
+   "2": {
+    "class_type": "SaveImage",
+    "inputs": {
+     "images": [
+      "1",
+      0
+     ],
+     "filename_prefix": "proof_gpu/sr5_contract_ok"
+    }
+   }
+  }
+ },
+ "status": 200,
+ "reply": {
+  "prompt_id": "fee40598-fd2d-42e2-a9f5-5637f3cb14c4",
+  "number": 9,
+  "node_errors": {}
+ },
+ "recorded": "2026-10-21T14:45:17-0700",
+ "source": "SR-5 on the real engine 2026-10-21 14:45 PDT (ComfyUI 0.41.2, RTX 4090) through scripts/proof/record_comfy_transcript.Proxy; CPU-only graphs, 0.7 s of engine time"
+}

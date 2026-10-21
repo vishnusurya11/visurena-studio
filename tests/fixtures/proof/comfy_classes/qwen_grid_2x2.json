@@ -1,0 +1,366 @@
+{
+ "class": "qwen_grid_2x2",
+ "workflow": "image_qwen_image_2_1_edit_multi",
+ "source": "GPU transcript 2026-10-21 (ComfyUI 0.41.2, RTX 4090), docs/audit/2026-10-21_ep02_proof/gpu/transcript/qwen_grid_2x2.json; texts cut to 120 chars, nothing else changed",
+ "prompt_http_status": 200,
+ "prompt_response": {
+  "prompt_id": "7f7896f4-cacb-40a9-8f73-c2dd59794476",
+  "number": 122,
+  "node_errors": {}
+ },
+ "result": "success",
+ "studio_client_error": null,
+ "execution_s": 70.49,
+ "submitted_graph": {
+  "1": {
+   "class_type": "UNETLoader",
+   "inputs": {
+    "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+    "weight_dtype": "default"
+   }
+  },
+  "2": {
+   "class_type": "QwenImage21Cache",
+   "inputs": {
+    "model": [
+     "1",
+     0
+    ],
+    "device": "auto",
+    "dtype": "default"
+   }
+  },
+  "3": {
+   "class_type": "CLIPLoader",
+   "inputs": {
+    "clip_name": "qwen3vl_8b_fp8_scaled.safetensors",
+    "type": "qwen_image",
+    "device": "default"
+   }
+  },
+  "4": {
+   "class_type": "VAELoader",
+   "inputs": {
+    "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+   }
+  },
+  "101": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "sheet_front_97205759.png",
+    "upload": "image"
+   }
+  },
+  "102": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "sheet_front_c367d8b2.png",
+    "upload": "image"
+   }
+  },
+  "103": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "door_step_day_91996144.png",
+    "upload": "image"
+   }
+  },
+  "5": {
+   "class_type": "TextEncodeQwenImage21",
+   "inputs": {
+    "clip": [
+     "3",
+     0
+    ],
+    "prompt": "A storyboard of 4 panels in 2 columns and 2 rows, all the same size, thin white gutters between them, no lettering anywhere.\n\n<image3> is this exact room, already drawn: every panel is set in it, with the same walls, furniture, windows and light.\n\nPANEL 1 (top-left), MEDIUM CLOSE: Medium close over the near shoulder and back of the head of the man in <image2> toward the man in <image1> speaking on the pavement before the blistered door. THE FOCUS OF THE PICTURE IS the man in <image1>'s lined face at the CENTRE, his head a third of the frame's height. The man in <image2>'s black shoulder and the back of his bowler fill the RIGHT third in the foreground. The blistered door in its shadowed recess stands at the LEFT third behind the man in <image1>, the blind plaster wall at the TOP edge. Framing: the panel cuts the figure at the middle of the chest; head and shoulders fill the centre and the background is far behind. In it: the man in <image1>; the man in <image2>.\n\nPANEL 2 (top-right), BIG CLOSE-UP: Close on the man in <image2> weighing his question before the door. THE FOCUS OF THE PICTURE IS the man in <image2>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height. The stained door panels stand behind him at the LEFT third in shadow; a sunlit strip of shop fronts stands at the RIGHT edge; the blind plaster wall fills the TOP edge. Framing: the panel cuts at the shoulders; the face fills the panel. In it: the man in <image2>.\n\nPANEL 3 (bottom-left), MEDIUM CLOSE: Medium close on the man in <image1> answering, the court entry behind him. THE FOCUS OF THE PICTURE IS the man in <image1>'s lined face at the RIGHT third, his head a third of the frame's height. The black slot of the court entry stands at the LEFT edge; the blistered door frame fills the LEFT third; sunlit flagstones stretch across the BOTTOM quarter under his black walking cane. Framing: the panel cuts the figure at the middle of the chest; head and shoulders fill the centre and the background is far behind. In it: the man in <image1>.\n\nPANEL 4 (bottom-right), BIG CLOSE-UP: Close on the man in <image2> looking up at the blind wall above the door. THE FOCUS OF THE PICTURE IS the man in <image2>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height, lifted toward the TOP edge. The discoloured plaster of the blind wall fills the LEFT third behind him; a bar of sunlight crosses the RIGHT edge on the white buttons of his overcoat. Framing: the panel cuts at the shoulders; the face fills the panel. In it: the man in <image2>.\n\nThe man in <image1> wears: dove-grey top hat with a wide brown hatband; mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <image1> is a reference sheet of one man seen from several angles; that one man appears exactly once in each picture.\n\nThe man in <image2> wears: black bowler hat with a pale grey band; long black double-breasted overcoat with six white buttons, white shirt, black tie. <image2> is a reference sheet of one man seen from several angles; that one man appears exactly once in each picture.\n\nThe people in <image1> and <image2> are never dressed alike.\n\nNo name, word or label is written anywhere in the picture. Every plate, sign and paper in the picture is plain and blank, unlettered.\n\nEvery panel is set at <image3>, at the same hour: The pavement directly before the sinister door on the by-street. The location is identical in every panel and never changes -- the same ground, the same horizon, the same weather and the same hour of light in all of them. The wide stands on the pavement east of the door at head height, looking back west along the frontage. The door and its recess fill the LEFT third, the door two thirds of the frame's height. The blind plaster wall fills the TOP third above it. The pavement runs from the BOTTOM edge toward the CENTRE, where sunlit shop fronts recede toward the corner. The court entry is a black slot at the LEFT edge beyond the door. the brass keyhole plate on the door stands at the start of the route in every panel, at most close.\n\nDRAWN IN EXACTLY THE LOOK OF <image3>, copied from it and not invented: The image is a hand-painted 1990s cel animation frame in the Madhouse manner, with crisp, sharp black lines and angular anatomy with long tapered limbs, flat, unmodulated colour fills and hard-edged shadow shapes with large solid black masses, hard rim light on edges, airbrushed misty backgrounds and 35mm film grain, depicting a scene from a Gothic Victorian novel in a palette of dark indigo, teal and charcoal night, with ochre and amber lamplight and blood-red and sickly green accents. Match the palette, the line work and the light of <image3> exactly. The air is thick with thin fog, haze in every frame, softening the far distance.",
+    "negative_prompt": "text, caption, subtitles, watermark, signature, out of focus subject, motion smear, modern clothing, two men dressed alike, two men in the same hat, duplicated people, extra limbs, deformed hands, mountains, cliffs, lettering, letters, words, panel labels, numbers, photographic",
+    "resolution": 1024,
+    "vae": [
+     "4",
+     0
+    ],
+    "images.image_1": [
+     "101",
+     0
+    ],
+    "images.image_2": [
+     "102",
+     0
+    ],
+    "images.image_3": [
+     "103",
+     0
+    ]
+   }
+  },
+  "6": {
+   "class_type": "EmptySD3LatentImage",
+   "inputs": {
+    "width": 2048,
+    "height": 2048,
+    "batch_size": 1
+   }
+  },
+  "7": {
+   "class_type": "KSampler",
+   "inputs": {
+    "model": [
+     "2",
+     0
+    ],
+    "positive": [
+     "5",
+     0
+    ],
+    "negative": [
+     "5",
+     1
+    ],
+    "latent_image": [
+     "6",
+     0
+    ],
+    "seed": 40558,
+    "steps": 25,
+    "cfg": 1.0,
+    "sampler_name": "euler",
+    "scheduler": "simple",
+    "denoise": 1.0
+   }
+  },
+  "8": {
+   "class_type": "VAEDecode",
+   "inputs": {
+    "samples": [
+     "7",
+     0
+    ],
+    "vae": [
+     "4",
+     0
+    ]
+   }
+  },
+  "9": {
+   "class_type": "SaveImage",
+   "inputs": {
+    "images": [
+     "8",
+     0
+    ],
+    "filename_prefix": "proof_gpu/ep01_grid_door_step_day_2x2_a"
+   }
+  }
+ },
+ "history_entry": {
+  "prompt": [
+   122,
+   "7f7896f4-cacb-40a9-8f73-c2dd59794476",
+   {
+    "1": {
+     "class_type": "UNETLoader",
+     "inputs": {
+      "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+      "weight_dtype": "default"
+     }
+    },
+    "2": {
+     "class_type": "QwenImage21Cache",
+     "inputs": {
+      "model": [
+       "1",
+       0
+      ],
+      "device": "auto",
+      "dtype": "default"
+     }
+    },
+    "3": {
+     "class_type": "CLIPLoader",
+     "inputs": {
+      "clip_name": "qwen3vl_8b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+     }
+    },
+    "4": {
+     "class_type": "VAELoader",
+     "inputs": {
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+     }
+    },
+    "101": {
+     "class_type": "LoadImage",
+     "inputs": {
+      "image": "sheet_front_97205759.png",
+      "upload": "image"
+     }
+    },
+    "102": {
+     "class_type": "LoadImage",
+     "inputs": {
+      "image": "sheet_front_c367d8b2.png",
+      "upload": "image"
+     }
+    },
+    "103": {
+     "class_type": "LoadImage",
+     "inputs": {
+      "image": "door_step_day_91996144.png",
+      "upload": "image"
+     }
+    },
+    "5": {
+     "class_type": "TextEncodeQwenImage21",
+     "inputs": {
+      "clip": [
+       "3",
+       0
+      ],
+      "prompt": "A storyboard of 4 panels in 2 columns and 2 rows, all the same size, thin white gutters between them, no lettering anywhere.\n\n<image3> is this exact room, already drawn: every panel is set in it, with the same walls, furniture, windows and light.\n\nPANEL 1 (top-left), MEDIUM CLOSE: Medium close over the near shoulder and back of the head of the man in <image2> toward the man in <image1> speaking on the pavement before the blistered door. THE FOCUS OF THE PICTURE IS the man in <image1>'s lined face at the CENTRE, his head a third of the frame's height. The man in <image2>'s black shoulder and the back of his bowler fill the RIGHT third in the foreground. The blistered door in its shadowed recess stands at the LEFT third behind the man in <image1>, the blind plaster wall at the TOP edge. Framing: the panel cuts the figure at the middle of the chest; head and shoulders fill the centre and the background is far behind. In it: the man in <image1>; the man in <image2>.\n\nPANEL 2 (top-right), BIG CLOSE-UP: Close on the man in <image2> weighing his question before the door. THE FOCUS OF THE PICTURE IS the man in <image2>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height. The stained door panels stand behind him at the LEFT third in shadow; a sunlit strip of shop fronts stands at the RIGHT edge; the blind plaster wall fills the TOP edge. Framing: the panel cuts at the shoulders; the face fills the panel. In it: the man in <image2>.\n\nPANEL 3 (bottom-left), MEDIUM CLOSE: Medium close on the man in <image1> answering, the court entry behind him. THE FOCUS OF THE PICTURE IS the man in <image1>'s lined face at the RIGHT third, his head a third of the frame's height. The black slot of the court entry stands at the LEFT edge; the blistered door frame fills the LEFT third; sunlit flagstones stretch across the BOTTOM quarter under his black walking cane. Framing: the panel cuts the figure at the middle of the chest; head and shoulders fill the centre and the background is far behind. In it: the man in <image1>.\n\nPANEL 4 (bottom-right), BIG CLOSE-UP: Close on the man in <image2> looking up at the blind wall above the door. THE FOCUS OF THE PICTURE IS the man in <image2>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height, lifted toward the TOP edge. The discoloured plaster of the blind wall fills the LEFT third behind him; a bar of sunlight crosses the RIGHT edge on the white buttons of his overcoat. Framing: the panel cuts at the shoulders; the face fills the panel. In it: the man in <image2>.\n\nThe man in <image1> wears: dove-grey top hat with a wide brown hatband; mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane. <image1> is a reference sheet of one man seen from several angles; that one man appears exactly once in each picture.\n\nThe man in <image2> wears: black bowler hat with a pale grey band; long black double-breasted overcoat with six white buttons, white shirt, black tie. <image2> is a reference sheet of one man seen from several angles; that one man appears exactly once in each picture.\n\nThe people in <image1> and <image2> are never dressed alike.\n\nNo name, word or label is written anywhere in the picture. Every plate, sign and paper in the picture is plain and blank, unlettered.\n\nEvery panel is set at <image3>, at the same hour: The pavement directly before the sinister door on the by-street. The location is identical in every panel and never changes -- the same ground, the same horizon, the same weather and the same hour of light in all of them. The wide stands on the pavement east of the door at head height, looking back west along the frontage. The door and its recess fill the LEFT third, the door two thirds of the frame's height. The blind plaster wall fills the TOP third above it. The pavement runs from the BOTTOM edge toward the CENTRE, where sunlit shop fronts recede toward the corner. The court entry is a black slot at the LEFT edge beyond the door. the brass keyhole plate on the door stands at the start of the route in every panel, at most close.\n\nDRAWN IN EXACTLY THE LOOK OF <image3>, copied from it and not invented: The image is a hand-painted 1990s cel animation frame in the Madhouse manner, with crisp, sharp black lines and angular anatomy with long tapered limbs, flat, unmodulated colour fills and hard-edged shadow shapes with large solid black masses, hard rim light on edges, airbrushed misty backgrounds and 35mm film grain, depicting a scene from a Gothic Victorian novel in a palette of dark indigo, teal and charcoal night, with ochre and amber lamplight and blood-red and sickly green accents. Match the palette, the line work and the light of <image3> exactly. The air is thick with thin fog, haze in every frame, softening the far distance.",
+      "negative_prompt": "text, caption, subtitles, watermark, signature, out of focus subject, motion smear, modern clothing, two men dressed alike, two men in the same hat, duplicated people, extra limbs, deformed hands, mountains, cliffs, lettering, letters, words, panel labels, numbers, photographic",
+      "resolution": 1024,
+      "vae": [
+       "4",
+       0
+      ],
+      "images.image_1": [
+       "101",
+       0
+      ],
+      "images.image_2": [
+       "102",
+       0
+      ],
+      "images.image_3": [
+       "103",
+       0
+      ]
+     }
+    },
+    "6": {
+     "class_type": "EmptySD3LatentImage",
+     "inputs": {
+      "width": 2048,
+      "height": 2048,
+      "batch_size": 1
+     }
+    },
+    "7": {
+     "class_type": "KSampler",
+     "inputs": {
+      "model": [
+       "2",
+       0
+      ],
+      "positive": [
+       "5",
+       0
+      ],
+      "negative": [
+       "5",
+       1
+      ],
+      "latent_image": [
+       "6",
+       0
+      ],
+      "seed": 40558,
+      "steps": 25,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0
+     }
+    },
+    "8": {
+     "class_type": "VAEDecode",
+     "inputs": {
+      "samples": [
+       "7",
+       0
+      ],
+      "vae": [
+       "4",
+       0
+      ]
+     }
+    },
+    "9": {
+     "class_type": "SaveImage",
+     "inputs": {
+      "images": [
+       "8",
+       0
+      ],
+      "filename_prefix": "proof_gpu/ep01_grid_door_step_day_2x2_a"
+     }
+    }
+   },
+   {
+    "create_time": 1792605086484
+   },
+   [
+    "9"
+   ]
+  ],
+  "outputs": {
+   "9": {
+    "images": [
+     {
+      "filename": "ep01_grid_door_step_day_2x2_a_00001_.png",
+      "subfolder": "proof_gpu",
+      "type": "output",
+      "metadata": {
+       "kind": "image",
+       "width": 2048,
+       "height": 2048
+      }
+     }
+    ]
+   }
+  },
+  "status": {
+   "status_str": "success",
+   "completed": true,
+   "messages": [
+    [
+     "execution_start",
+     {
+      "prompt_id": "7f7896f4-cacb-40a9-8f73-c2dd59794476",
+      "timestamp": 1792605086488
+     }
+    ],
+    [
+     "execution_cached",
+     {
+      "nodes": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "102"
+      ],
+      "prompt_id": "7f7896f4-cacb-40a9-8f73-c2dd59794476",
+      "timestamp": 1792605087262
+     }
+    ],
+    [
+     "execution_success",
+     {
+      "prompt_id": "7f7896f4-cacb-40a9-8f73-c2dd59794476",
+      "timestamp": 1792605156982
+     }
+    ]
+   ]
+  },
+  "meta": {
+   "9": {
+    "node_id": "9",
+    "display_node": "9",
+    "parent_node": null,
+    "real_node_id": "9"
+   }
+  }
+ }
+}

@@ -1,0 +1,338 @@
+{
+ "class": "qwen_grid_1x1",
+ "workflow": "image_qwen_image_2_1_edit_multi",
+ "source": "GPU transcript 2026-10-21 (ComfyUI 0.41.2, RTX 4090), docs/audit/2026-10-21_ep02_proof/gpu/transcript/qwen_grid_1x1.json; texts cut to 120 chars, nothing else changed",
+ "prompt_http_status": 200,
+ "prompt_response": {
+  "prompt_id": "cbad6764-a2b3-4deb-9a96-8828d89d4f67",
+  "number": 121,
+  "node_errors": {}
+ },
+ "result": "success",
+ "studio_client_error": null,
+ "execution_s": 168.16,
+ "submitted_graph": {
+  "1": {
+   "class_type": "UNETLoader",
+   "inputs": {
+    "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+    "weight_dtype": "default"
+   }
+  },
+  "2": {
+   "class_type": "QwenImage21Cache",
+   "inputs": {
+    "model": [
+     "1",
+     0
+    ],
+    "device": "auto",
+    "dtype": "default"
+   }
+  },
+  "3": {
+   "class_type": "CLIPLoader",
+   "inputs": {
+    "clip_name": "qwen3vl_8b_fp8_scaled.safetensors",
+    "type": "qwen_image",
+    "device": "default"
+   }
+  },
+  "4": {
+   "class_type": "VAELoader",
+   "inputs": {
+    "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+   }
+  },
+  "101": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "sheet_front_c367d8b2.png",
+    "upload": "image"
+   }
+  },
+  "102": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "street_day_c5632748.png",
+    "upload": "image"
+   }
+  },
+  "5": {
+   "class_type": "TextEncodeQwenImage21",
+   "inputs": {
+    "clip": [
+     "3",
+     0
+    ],
+    "prompt": "One full-frame illustration, edge to edge, with no lettering anywhere.\n\n<image2> is this exact room, already drawn: every picture is set in it, with the same walls, furniture, windows and light.\n\nBIG CLOSE-UP: Close on the man in <image1> turning to answer, the sunlit by-street behind him. THE FOCUS OF THE PICTURE IS the man in <image1>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height, the black bowler hat with a pale grey band at the TOP edge. A row of cream shutters stands behind him at the LEFT third; black shadow from a doorway fills the RIGHT edge. Framing: the picture cuts at the shoulders; the face fills the picture. In it: the man in <image1>.\n\nThe man in <image1> wears: black bowler hat with a pale grey band; long black double-breasted overcoat with six white buttons, white shirt, black tie. <image1> is a reference sheet of one man seen from several angles; that one man appears exactly once in each picture.\n\nNo name, word or label is written anywhere in the picture.\n\nThe picture is set at <image2>: A small London by-street on a Sunday afternoon. The wide looks diagonally across the by-street from the far pavement at head height, facing east. The blistered door and its gable stand at the RIGHT third, the gable reaching the TOP edge, the door a third of the frame's height. Bright shop fronts run along the LEFT half toward the corner. The far pavement crosses the BOTTOM quarter in the foreground. The street recedes to the CENTRE, where the corner turns away in sunlight. the blistered door under its blind gable stands at the far end of the route in every picture, at most medium.\n\nDRAWN IN EXACTLY THE LOOK OF <image2>, copied from it and not invented: The image is a hand-painted 1990s cel animation frame in the Madhouse manner, with crisp, sharp black lines and angular anatomy with long tapered limbs, flat, unmodulated colour fills and hard-edged shadow shapes with large solid black masses, hard rim light on edges, airbrushed misty backgrounds and 35mm film grain, depicting a scene from a Gothic Victorian novel in a palette of dark indigo, teal and charcoal night, with ochre and amber lamplight and blood-red and sickly green accents. Match the palette, the line work and the light of <image2> exactly. The air is thick with thin fog, haze in every frame, softening the far distance.",
+    "negative_prompt": "text, caption, subtitles, watermark, signature, out of focus subject, motion smear, modern clothing, two men dressed alike, two men in the same hat, duplicated people, extra limbs, deformed hands, mountains, cliffs, lettering, letters, words, panel labels, numbers, photographic",
+    "resolution": 1024,
+    "vae": [
+     "4",
+     0
+    ],
+    "images.image_1": [
+     "101",
+     0
+    ],
+    "images.image_2": [
+     "102",
+     0
+    ]
+   }
+  },
+  "6": {
+   "class_type": "EmptySD3LatentImage",
+   "inputs": {
+    "width": 1024,
+    "height": 1024,
+    "batch_size": 1
+   }
+  },
+  "7": {
+   "class_type": "KSampler",
+   "inputs": {
+    "model": [
+     "2",
+     0
+    ],
+    "positive": [
+     "5",
+     0
+    ],
+    "negative": [
+     "5",
+     1
+    ],
+    "latent_image": [
+     "6",
+     0
+    ],
+    "seed": 40504,
+    "steps": 25,
+    "cfg": 1.0,
+    "sampler_name": "euler",
+    "scheduler": "simple",
+    "denoise": 1.0
+   }
+  },
+  "8": {
+   "class_type": "VAEDecode",
+   "inputs": {
+    "samples": [
+     "7",
+     0
+    ],
+    "vae": [
+     "4",
+     0
+    ]
+   }
+  },
+  "9": {
+   "class_type": "SaveImage",
+   "inputs": {
+    "images": [
+     "8",
+     0
+    ],
+    "filename_prefix": "proof_gpu/ep01_grid_street_day_1x1_s04"
+   }
+  }
+ },
+ "history_entry": {
+  "prompt": [
+   121,
+   "cbad6764-a2b3-4deb-9a96-8828d89d4f67",
+   {
+    "1": {
+     "class_type": "UNETLoader",
+     "inputs": {
+      "unet_name": "qwen_image_2.1_int8_convrot.safetensors",
+      "weight_dtype": "default"
+     }
+    },
+    "2": {
+     "class_type": "QwenImage21Cache",
+     "inputs": {
+      "model": [
+       "1",
+       0
+      ],
+      "device": "auto",
+      "dtype": "default"
+     }
+    },
+    "3": {
+     "class_type": "CLIPLoader",
+     "inputs": {
+      "clip_name": "qwen3vl_8b_fp8_scaled.safetensors",
+      "type": "qwen_image",
+      "device": "default"
+     }
+    },
+    "4": {
+     "class_type": "VAELoader",
+     "inputs": {
+      "vae_name": "qwen_image_2.1_vae_bf16.safetensors"
+     }
+    },
+    "101": {
+     "class_type": "LoadImage",
+     "inputs": {
+      "image": "sheet_front_c367d8b2.png",
+      "upload": "image"
+     }
+    },
+    "102": {
+     "class_type": "LoadImage",
+     "inputs": {
+      "image": "street_day_c5632748.png",
+      "upload": "image"
+     }
+    },
+    "5": {
+     "class_type": "TextEncodeQwenImage21",
+     "inputs": {
+      "clip": [
+       "3",
+       0
+      ],
+      "prompt": "One full-frame illustration, edge to edge, with no lettering anywhere.\n\n<image2> is this exact room, already drawn: every picture is set in it, with the same walls, furniture, windows and light.\n\nBIG CLOSE-UP: Close on the man in <image1> turning to answer, the sunlit by-street behind him. THE FOCUS OF THE PICTURE IS the man in <image1>'s gaunt, rugged, unsmiling face at the CENTRE, his head half the frame's height, the black bowler hat with a pale grey band at the TOP edge. A row of cream shutters stands behind him at the LEFT third; black shadow from a doorway fills the RIGHT edge. Framing: the picture cuts at the shoulders; the face fills the picture. In it: the man in <image1>.\n\nThe man in <image1> wears: black bowler hat with a pale grey band; long black double-breasted overcoat with six white buttons, white shirt, black tie. <image1> is a reference sheet of one man seen from several angles; that one man appears exactly once in each picture.\n\nNo name, word or label is written anywhere in the picture.\n\nThe picture is set at <image2>: A small London by-street on a Sunday afternoon. The wide looks diagonally across the by-street from the far pavement at head height, facing east. The blistered door and its gable stand at the RIGHT third, the gable reaching the TOP edge, the door a third of the frame's height. Bright shop fronts run along the LEFT half toward the corner. The far pavement crosses the BOTTOM quarter in the foreground. The street recedes to the CENTRE, where the corner turns away in sunlight. the blistered door under its blind gable stands at the far end of the route in every picture, at most medium.\n\nDRAWN IN EXACTLY THE LOOK OF <image2>, copied from it and not invented: The image is a hand-painted 1990s cel animation frame in the Madhouse manner, with crisp, sharp black lines and angular anatomy with long tapered limbs, flat, unmodulated colour fills and hard-edged shadow shapes with large solid black masses, hard rim light on edges, airbrushed misty backgrounds and 35mm film grain, depicting a scene from a Gothic Victorian novel in a palette of dark indigo, teal and charcoal night, with ochre and amber lamplight and blood-red and sickly green accents. Match the palette, the line work and the light of <image2> exactly. The air is thick with thin fog, haze in every frame, softening the far distance.",
+      "negative_prompt": "text, caption, subtitles, watermark, signature, out of focus subject, motion smear, modern clothing, two men dressed alike, two men in the same hat, duplicated people, extra limbs, deformed hands, mountains, cliffs, lettering, letters, words, panel labels, numbers, photographic",
+      "resolution": 1024,
+      "vae": [
+       "4",
+       0
+      ],
+      "images.image_1": [
+       "101",
+       0
+      ],
+      "images.image_2": [
+       "102",
+       0
+      ]
+     }
+    },
+    "6": {
+     "class_type": "EmptySD3LatentImage",
+     "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+     }
+    },
+    "7": {
+     "class_type": "KSampler",
+     "inputs": {
+      "model": [
+       "2",
+       0
+      ],
+      "positive": [
+       "5",
+       0
+      ],
+      "negative": [
+       "5",
+       1
+      ],
+      "latent_image": [
+       "6",
+       0
+      ],
+      "seed": 40504,
+      "steps": 25,
+      "cfg": 1.0,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0
+     }
+    },
+    "8": {
+     "class_type": "VAEDecode",
+     "inputs": {
+      "samples": [
+       "7",
+       0
+      ],
+      "vae": [
+       "4",
+       0
+      ]
+     }
+    },
+    "9": {
+     "class_type": "SaveImage",
+     "inputs": {
+      "images": [
+       "8",
+       0
+      ],
+      "filename_prefix": "proof_gpu/ep01_grid_street_day_1x1_s04"
+     }
+    }
+   },
+   {
+    "create_time": 1792604906770
+   },
+   [
+    "9"
+   ]
+  ],
+  "outputs": {
+   "9": {
+    "images": [
+     {
+      "filename": "ep01_grid_street_day_1x1_s04_00001_.png",
+      "subfolder": "proof_gpu",
+      "type": "output",
+      "metadata": {
+       "kind": "image",
+       "width": 1024,
+       "height": 1024
+      }
+     }
+    ]
+   }
+  },
+  "status": {
+   "status_str": "success",
+   "completed": true,
+   "messages": [
+    [
+     "execution_start",
+     {
+      "prompt_id": "cbad6764-a2b3-4deb-9a96-8828d89d4f67",
+      "timestamp": 1792604907471
+     }
+    ],
+    [
+     "execution_cached",
+     {
+      "nodes": [],
+      "prompt_id": "cbad6764-a2b3-4deb-9a96-8828d89d4f67",
+      "timestamp": 1792604907912
+     }
+    ],
+    [
+     "execution_success",
+     {
+      "prompt_id": "cbad6764-a2b3-4deb-9a96-8828d89d4f67",
+      "timestamp": 1792605075635
+     }
+    ]
+   ]
+  },
+  "meta": {
+   "9": {
+    "node_id": "9",
+    "display_node": "9",
+    "parent_node": null,
+    "real_node_id": "9"
+   }
+  }
+ }
+}

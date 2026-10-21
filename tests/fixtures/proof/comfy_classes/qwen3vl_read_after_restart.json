@@ -1,0 +1,159 @@
+{
+ "class": "qwen3vl_read_after_restart",
+ "workflow": "image_qwen3vl_caption",
+ "source": "GPU transcript 2026-10-21 (ComfyUI 0.41.2, RTX 4090), docs/audit/2026-10-21_ep02_proof/gpu/transcript/qwen3vl_read_after_restart.json; texts cut to 120 chars, nothing else changed",
+ "prompt_http_status": 200,
+ "prompt_response": {
+  "prompt_id": "7b4ef8a2-3bfc-48d7-94f7-15bed9c405ae",
+  "number": 0,
+  "node_errors": {}
+ },
+ "result": "success",
+ "studio_client_error": null,
+ "execution_s": 26.51,
+ "submitted_graph": {
+  "1": {
+   "inputs": {
+    "image": "shot_04_9a1a39a5.png"
+   },
+   "class_type": "LoadImage",
+   "_meta": {
+    "title": "Load Image (to caption)"
+   }
+  },
+  "2": {
+   "inputs": {
+    "text": "Describe this picture by ANSWERING EACH QUESTION with one of the allowed answers and nothing else. Output strict JSON with these keys.\n\"landform\": the shape of the ground, one of flat, gentle rise, hills, mountains, cliffs, indoors.\n\"people\": how many human figures you can see, as a number.\n\"lookalikes\": how many of those figures look like copies of another one (same face, same build, same clothes), as a number.\n\"text\": true if any letters, words, numbers or captions appear anywhere, else false.\n\"hour\": the time of day the LIGHT says, one of day, dusk, night.\n\"posture\": what the MAIN person in the picture is doing with his body, one of standing, walking, running, sitting, crouching, kneeling, lying, none.\n\"body\": is the MAIN person drawn whole, or does the body fade away or dissolve into fog or darkness before the frame edge, one of ok, fading, floating, cannot_tell.\n\"limb_attached\": is every visible hand or arm joined to a body in the picture, or does one float or end in a hard cut with no body, one of ok, fading, floating, cannot_tell.\n\"fog_cover\": does fog or haze hide part of a figure, one of ok, fading, floating, cannot_tell.\n\"subjects\": a list of the things in the picture, each a short plain noun phrase, everything you can name, including anything unexpected.\n(ask v2)",
+    "model": "Qwen3-VL-8B-Instruct",
+    "quantization": "none",
+    "keep_model_loaded": true,
+    "temperature": 0.1,
+    "max_new_tokens": 1024,
+    "min_pixels": 200704,
+    "max_pixels": 1003520,
+    "seed": 11,
+    "attention": "sdpa",
+    "image": [
+     "1",
+     0
+    ]
+   },
+   "class_type": "Qwen3_VQA",
+   "_meta": {
+    "title": "Qwen3-VL VQA"
+   }
+  },
+  "3": {
+   "inputs": {
+    "source": [
+     "2",
+     0
+    ]
+   },
+   "class_type": "PreviewAny",
+   "_meta": {
+    "title": "Caption (collected as text output)"
+   }
+  }
+ },
+ "history_entry": {
+  "prompt": [
+   0,
+   "7b4ef8a2-3bfc-48d7-94f7-15bed9c405ae",
+   {
+    "1": {
+     "inputs": {
+      "image": "shot_04_9a1a39a5.png"
+     },
+     "class_type": "LoadImage",
+     "_meta": {
+      "title": "Load Image (to caption)"
+     }
+    },
+    "2": {
+     "inputs": {
+      "text": "Describe this picture by ANSWERING EACH QUESTION with one of the allowed answers and nothing else. Output strict JSON with these keys.\n\"landform\": the shape of the ground, one of flat, gentle rise, hills, mountains, cliffs, indoors.\n\"people\": how many human figures you can see, as a number.\n\"lookalikes\": how many of those figures look like copies of another one (same face, same build, same clothes), as a number.\n\"text\": true if any letters, words, numbers or captions appear anywhere, else false.\n\"hour\": the time of day the LIGHT says, one of day, dusk, night.\n\"posture\": what the MAIN person in the picture is doing with his body, one of standing, walking, running, sitting, crouching, kneeling, lying, none.\n\"body\": is the MAIN person drawn whole, or does the body fade away or dissolve into fog or darkness before the frame edge, one of ok, fading, floating, cannot_tell.\n\"limb_attached\": is every visible hand or arm joined to a body in the picture, or does one float or end in a hard cut with no body, one of ok, fading, floating, cannot_tell.\n\"fog_cover\": does fog or haze hide part of a figure, one of ok, fading, floating, cannot_tell.\n\"subjects\": a list of the things in the picture, each a short plain noun phrase, everything you can name, including anything unexpected.\n(ask v2)",
+      "model": "Qwen3-VL-8B-Instruct",
+      "quantization": "none",
+      "keep_model_loaded": true,
+      "temperature": 0.1,
+      "max_new_tokens": 1024,
+      "min_pixels": 200704,
+      "max_pixels": 1003520,
+      "seed": 11,
+      "attention": "sdpa",
+      "image": [
+       "1",
+       0
+      ]
+     },
+     "class_type": "Qwen3_VQA",
+     "_meta": {
+      "title": "Qwen3-VL VQA"
+     }
+    },
+    "3": {
+     "inputs": {
+      "source": [
+       "2",
+       0
+      ]
+     },
+     "class_type": "PreviewAny",
+     "_meta": {
+      "title": "Caption (collected as text output)"
+     }
+    }
+   },
+   {
+    "create_time": 1792605958380
+   },
+   [
+    "3"
+   ]
+  ],
+  "outputs": {
+   "3": {
+    "text": [
+     "[\n    \"{\\n  \\\"landform\\\": \\\"flat\\\",\\n  \\\"people\\\": 1,\\n  \\\"lookalikes\\\": 0,\\n  \\\"text\\\": false,\\n  \\\"hour\\\": \\\"night\\\",\\"
+    ]
+   }
+  },
+  "status": {
+   "status_str": "success",
+   "completed": true,
+   "messages": [
+    [
+     "execution_start",
+     {
+      "prompt_id": "7b4ef8a2-3bfc-48d7-94f7-15bed9c405ae",
+      "timestamp": 1792605958381
+     }
+    ],
+    [
+     "execution_cached",
+     {
+      "nodes": [],
+      "prompt_id": "7b4ef8a2-3bfc-48d7-94f7-15bed9c405ae",
+      "timestamp": 1792605958623
+     }
+    ],
+    [
+     "execution_success",
+     {
+      "prompt_id": "7b4ef8a2-3bfc-48d7-94f7-15bed9c405ae",
+      "timestamp": 1792605984889
+     }
+    ]
+   ]
+  },
+  "meta": {
+   "3": {
+    "node_id": "3",
+    "display_node": "3",
+    "parent_node": null,
+    "real_node_id": "3"
+   }
+  }
+ }
+}

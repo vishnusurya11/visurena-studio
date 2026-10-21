@@ -83,10 +83,12 @@ ADMIN_RESTART = "/rehearsal/restart"
 harness's fake here, and it answers even while the engine is down or lost."""
 _LIVE: dict[int, "FakeComfy"] = {}
 """port -> the fake this process serves (a drive child holds none and goes over HTTP)."""
-SYSTEM_STATS = {"system": {"os": "nt", "ram_total": 68719476736, "ram_free": 34359738368,
+SYSTEM_STATS = {"system": {"os": "win32", "ram_total": 68719476736, "ram_free": 34359738368,
                            "comfyui_version": "rehearsal-fake", "required_frontend_version": "",
+                           "installed_templates_version": "", "required_templates_version": "",
+                           "comfy_package_versions": [{"name": "rehearsal-fake", "installed": "", "required": ""}],
                            "python_version": "3.12.9", "pytorch_version": "none", "embedded_python": False,
-                           "argv": ["main.py", "--rehearsal-fake"]},
+                           "deploy_environment": "rehearsal-fake", "argv": ["main.py", "--rehearsal-fake"]},
                 "devices": [{"name": "rehearsal fake (no GPU)", "type": "cpu", "index": 0,
                              "vram_total": 0, "vram_free": 0, "torch_vram_total": 0, "torch_vram_free": 0}]}
 
@@ -198,13 +200,42 @@ def fields_hash(fields: dict) -> str:
     return hashlib.sha256(json.dumps(fields, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
+def output_nodes(graph: dict) -> list[tuple[str, str, str | None]]:
+    """(node id, history slot, extension) of EVERY node the engine reports outputs for: on v0.41.2
+    a Krea2 sheet reports its SaveImage and its PreviewAny (GPU transcript, krea2_sheet)."""
+    return [(str(n), *OUTPUTS[cls]) for n in sorted(graph, key=str)
+            if (cls := (graph[n] or {}).get("class_type", "")) in OUTPUTS]
+
+
 def output_node(graph: dict) -> tuple[str | None, str | None, str | None]:
-    """(node id, history slot, extension) of the node the engine would report outputs for."""
-    for node_id in sorted(graph, key=str):
-        cls = (graph[node_id] or {}).get("class_type", "")
-        if cls in OUTPUTS:
-            return str(node_id), *OUTPUTS[cls]
-    return None, None, None
+    """The node whose answer the job is: the first media output, else the first text one."""
+    nodes = output_nodes(graph)
+    return next((n for n in nodes if n[2]), nodes[0] if nodes else (None, None, None))
+
+
+def video_metadata(path: Path) -> dict:
+    import cv2
+    cap = cv2.VideoCapture(str(path))
+    w, h = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    cap.release()
+    fps, frames = video_info(path)
+    return {"kind": "video", "width": w, "height": h, "duration": frames / fps if fps else 0.0, "fps": fps,
+            "frame_count": frames}
+
+
+def image_metadata(path: Path) -> dict | None:
+    import cv2
+    frame = cv2.imread(str(path))
+    return None if frame is None else {"kind": "image", "width": int(frame.shape[1]), "height": int(frame.shape[0])}
+
+
+def media_metadata(path: Path) -> dict | None:
+    """The `metadata` v0.41.2 puts on an output item: size for a picture, size, fps, frames and
+    duration for a video (GPU transcript); None for audio, whose real form is unrecorded."""
+    ext = Path(path).suffix.lower().lstrip(".")
+    if ext in VIDEO:
+        return video_metadata(path)
+    return image_metadata(path) if ext in ("png", "jpg", "jpeg", "webp") else None
 
 
 # ---- media: read the recording, write the sandbox ----------------------------------------
@@ -341,6 +372,7 @@ class Job:
     ready_at: float
     record: dict = field(default_factory=dict)
     hang: bool = False
+    partial: bool = False
 
 
 JOINS = {"text": ("vl_text",), "mp4": ("take", "refine_crop"), "webm": ("take", "refine_crop"),
@@ -756,6 +788,8 @@ class FakeComfy:
         name = wf.identify(graph, self.idx)
         job = self._job(graph, name)
         fault = self.faults.on_submit(name)
+        if fault and fault.kind == "rejected":
+            return self._rejected(job, fault)
         try:
             row = self._answer(job, fault)
         except (ValueError, OSError, subprocess.CalledProcessError) as err:
@@ -763,7 +797,19 @@ class FakeComfy:
             return 500, {"error": f"rehearsal fake could not answer: {err}", "node_errors": {}}
         self._write(row)
         self._after(job, fault)
-        return 200, {"prompt_id": job.pid, "number": job.number, "node_errors": {}}
+        return 200, {"prompt_id": job.pid, "number": job.number, "node_errors": self._node_errors(job, fault)}
+
+    def _node_errors(self, job: Job, fault) -> dict:
+        """A partial accept's errors (the media outputs the broken input feeds); {} otherwise."""
+        if not (fault and fault.kind == "partial_accept"):
+            return {}
+        return comfy_faults.node_errors(fault, job.graph, [n for n, _, ext in output_nodes(job.graph) if ext])
+
+    def _rejected(self, job: Job, fault) -> tuple[int, dict]:
+        """Every output fails validation: the engine's 400, nothing queued (GPU transcript, case B)."""
+        self._write({"ts": stamp(), "call": "prompt", "workflow": job.name, "fault": fault.kind, "rejected": True})
+        errors = comfy_faults.node_errors(fault, job.graph, [n for n, _, _ in output_nodes(job.graph)])
+        return 400, {"error": dict(comfy_faults.REJECTED), "node_errors": errors}
 
     def _job(self, graph: dict, name: str | None) -> Job:
         self.number += 1
@@ -789,8 +835,9 @@ class FakeComfy:
         return 200, ({pid: self.history[pid]} if pid in self.history else {})
 
     def _queue_item(self, job: Job) -> list:
-        node = output_node(job.graph)[0]
-        return [job.number, job.pid, job.graph, {"create_time": job.started_ms}, [node] if node else []]
+        """[number, id, graph, extra, every output node]; a partial accept lists the valid ones only."""
+        nodes = [n for n, _, ext in output_nodes(job.graph) if not (job.partial and ext)]
+        return [job.number, job.pid, job.graph, {"create_time": job.started_ms}, nodes]
 
     def _get_queue(self, _route: str, _body: bytes) -> tuple[int, dict]:
         jobs = sorted(self.jobs.values(), key=lambda j: j.number)
@@ -814,9 +861,14 @@ class FakeComfy:
         self._say("rehearsal fake: models unloaded")
         return 200, None
 
-    def _interrupt(self, _route: str, _body: bytes) -> tuple[int, None]:
-        """A hung job ignores it (F9: run 18's six interrupts); a running one ends interrupted."""
+    def _interrupt(self, _route: str, body: bytes) -> tuple[int, None]:
+        """A hung job ignores it (F9: run 18's six interrupts); a running one ends interrupted.  With no
+        prompt_id it is GLOBAL; one naming another prompt is skipped, as the engine logs (SR-5)."""
         running = min(self.jobs.values(), key=lambda j: j.number) if self.jobs else None
+        named = (json.loads(body or b"{}") or {}).get("prompt_id")
+        if named and (running is None or running.pid != named):
+            self._say(f"Prompt {named} is not currently running, skipping interrupt")
+            return 200, None
         self._write({"ts": stamp(), "call": "interrupt", "prompt_id": running.pid if running else None,
                      "ignored": bool(running and running.hang)})
         if running and not running.hang:
@@ -836,7 +888,8 @@ class FakeComfy:
         seconds = (match.rec or {}).get("seconds")
         if fault and fault.kind in ("exec_error", "exec_fatal"):
             node = output_node(job.graph)[0] or next(iter(job.graph))
-            msg = comfy_faults.error_message(fault, job.pid, node, job.started_ms + 1)
+            msg = comfy_faults.error_message(fault, job.pid, node, job.started_ms + 1,
+                                             (job.graph.get(node) or {}).get("inputs"))
             job.record, outputs = self._record(job, {}, "error", [msg], match.cls, None), {}
         elif fault and fault.kind in ("hang", "crash", "lost"):
             outputs = {}                                 # the job never finishes: nothing is written
@@ -856,15 +909,53 @@ class FakeComfy:
     # ---- outputs -------------------------------------------------------------------------
 
     def produce(self, job: Job, match: Match, fault) -> dict:
-        """The history `outputs` of an answered job, its files written into the sandbox."""
+        """The history `outputs` of an answered job, its files written into the sandbox: every
+        LoadVideo's echo first, the job's own answer, then every other output node (canned)."""
         node, slot, ext = output_node(job.graph)
         if node is None:
             return {}
+        job.partial = bool(fault and fault.kind == "partial_accept")
+        out = self.echoes(job)
+        for other, oslot, oext in output_nodes(job.graph):
+            if job.partial and oext:
+                continue                                 # its input failed validation: never ran
+            out[other] = self.primary(job, match, fault) if other == node else self.secondary(job, other, oslot, oext)
+        return out
+
+    def primary(self, job: Job, match: Match, fault) -> dict:
+        _node, slot, ext = output_node(job.graph)
         if slot == "text":
-            return {node: {"text": [self.text_answer(match, fault)]}}
+            return {"text": [self.text_answer(match, fault)]}
         sub, items = self.media_answer(job, match, ext, fault)
-        made = [{"filename": p.name, "subfolder": sub, "type": "output"} for p in items]
-        return {node: {slot: made, **({"animated": [True]} if ext in VIDEO and slot == "images" else {})}}
+        return self.media_entry(slot, ext, [self.item(p, sub, "output") for p in items])
+
+    def secondary(self, job: Job, node: str, slot: str, ext: str | None) -> dict:
+        """Another output node of the same graph (a sheet's PreviewAny): a canned answer."""
+        if slot == "text":
+            return {"text": [CANNED_TEXT]}
+        said = str((job.graph[node].get("inputs") or {}).get("filename_prefix") or "ComfyUI").replace("\\", "/")
+        sub, base = posixpath.split(said)
+        dest = self.next_path(sub, base or "ComfyUI", ext)
+        canned_media(dest, ext, job.values.get("frames"), asked_size(job.values))
+        return self.media_entry(slot, ext, [self.item(dest, sub, "output")])
+
+    def echoes(self, job: Job) -> dict:
+        """v0.41.2 reports each LoadVideo's INPUT as an output, type input (studio.comfy.outputs_by_node)."""
+        out = {}
+        for node, spec in job.graph.items():
+            name = (spec or {}).get("inputs", {}).get("file") if (spec or {}).get("class_type") == "LoadVideo" else None
+            if isinstance(name, str) and (self.root / "input" / name).is_file():
+                out[str(node)] = self.media_entry("images", "mp4", [self.item(self.root / "input" / name, "", "input")])
+        return out
+
+    @staticmethod
+    def item(path: Path, sub: str, kind: str) -> dict:
+        meta = media_metadata(path)
+        return {"filename": Path(path).name, "subfolder": sub, "type": kind, **({"metadata": meta} if meta else {})}
+
+    @staticmethod
+    def media_entry(slot: str, ext: str, items: list[dict]) -> dict:
+        return {slot: items, **({"animated": [True]} if ext in VIDEO and slot == "images" else {})}
 
     def text_answer(self, match: Match, fault) -> str:
         if fault and fault.kind == "unreadable":
@@ -938,7 +1029,8 @@ class FakeComfy:
 
     def _row(self, job: Job, match: Match, fault, outputs: dict, seconds) -> dict:
         files = [self.root / i.get("type", "output") / i.get("subfolder", "") / i["filename"]
-                 for node in outputs.values() for slot in ("images", "audio", "gifs") for i in node.get(slot, [])]
+                 for node in outputs.values() for slot in ("images", "audio", "gifs") for i in node.get(slot, [])
+                 if i.get("type") != "input"]                   # a LoadVideo's echo is no answer
         texts = [t for node in outputs.values() for t in node.get("text", [])]
         sha = sha_of(files[0]) if files else hashlib.sha256(texts[0].encode()).hexdigest() if texts else None
         return {"ts": stamp(), "call": "prompt", "prompt_id": job.pid, "number": job.number,

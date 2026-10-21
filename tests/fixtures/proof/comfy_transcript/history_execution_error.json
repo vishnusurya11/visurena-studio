@@ -1,0 +1,107 @@
+{
+ "route": "history_execution_error",
+ "method": "GET",
+ "path": "/history/352fe2cf-f8a8-48da-b98d-f3b620ede2ba",
+ "request": null,
+ "status": 200,
+ "reply": {
+  "352fe2cf-f8a8-48da-b98d-f3b620ede2ba": {
+   "prompt": [
+    12,
+    "352fe2cf-f8a8-48da-b98d-f3b620ede2ba",
+    {
+     "1": {
+      "class_type": "EmptyImage",
+      "inputs": {
+       "width": 8,
+       "height": 8,
+       "batch_size": 1,
+       "color": 0
+      }
+     },
+     "2": {
+      "class_type": "SaveImage",
+      "inputs": {
+       "images": [
+        "1",
+        0
+       ],
+       "filename_prefix": "../sr5_outside_output"
+      }
+     }
+    },
+    {
+     "create_time": 1792619139594
+    },
+    [
+     "2"
+    ]
+   ],
+   "outputs": {},
+   "status": {
+    "status_str": "error",
+    "completed": false,
+    "messages": [
+     [
+      "execution_start",
+      {
+       "prompt_id": "352fe2cf-f8a8-48da-b98d-f3b620ede2ba",
+       "timestamp": 1792619139594
+      }
+     ],
+     [
+      "execution_cached",
+      {
+       "nodes": [],
+       "prompt_id": "352fe2cf-f8a8-48da-b98d-f3b620ede2ba",
+       "timestamp": 1792619139596
+      }
+     ],
+     [
+      "execution_error",
+      {
+       "prompt_id": "352fe2cf-f8a8-48da-b98d-f3b620ede2ba",
+       "node_id": "2",
+       "node_type": "SaveImage",
+       "executed": [
+        "1"
+       ],
+       "exception_message": "**** ERROR: Saving image outside the output folder is not allowed.\n full_output_folder: D:\\Projects\\KingdomOfViSuReNa\\alpha\\ComfyUI_windows_portable\\ComfyUI\n         output_dir: D:\\Projects\\KingdomOfViSuReNa\\alpha\\ComfyUI_windows_portable\\ComfyUI\\output\n",
+       "exception_type": "Exception",
+       "traceback": [
+        "  File \"D:\\Projects\\KingdomOfViSuReNa\\alpha\\ComfyUI_windows_portable\\ComfyUI\\execution.py\", line 548, in execute\n    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"D:\\Projects\\KingdomOfViSuReNa\\alpha\\ComfyUI_windows_portable\\ComfyUI\\execution.py\", line 353, in get_output_data\n    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, v3_data=v3_data)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"D:\\Projects\\KingdomOfViSuReNa\\alpha\\ComfyUI_windows_portable\\ComfyUI\\execution.py\", line 327, in _async_map_node_over_list\n    await process_inputs(input_dict, i)\n",
+        "  File \"D:\\Projects\\KingdomOfViSuReNa\\alpha\\ComfyUI_windows_portable\\ComfyUI\\execution.py\", line 315, in process_inputs\n    result = f(**inputs)\n             ^^^^^^^^^^^\n",
+        "  File \"D:\\Projects\\KingdomOfViSuReNa\\alpha\\ComfyUI_windows_portable\\ComfyUI\\nodes.py\", line 1704, in save_images\n    full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])\n                                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+        "  File \"D:\\Projects\\KingdomOfViSuReNa\\alpha\\ComfyUI_windows_portable\\ComfyUI\\folder_paths.py\", line 566, in get_save_image_path\n    raise Exception(err)\n"
+       ],
+       "current_inputs": {
+        "images": [
+         "tensor([[[[0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.]],\n\n         [[0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.]],\n\n         [[0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.]],\n\n         [[0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.]],\n\n         [[0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.]],\n\n         [[0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.]],\n\n         [[0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.]],\n\n         [[0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.],\n          [0., 0., 0.]]]])"
+        ],
+        "filename_prefix": [
+         "../sr5_outside_output"
+        ],
+        "prompt": [
+         "{'1': {'class_type': 'EmptyImage', 'inputs': {'width': 8, 'height': 8, 'batch_size': 1, 'color': 0}}, '2': {'class_type': 'SaveImage', 'inputs': {'images': ['1', 0], 'filename_prefix': '../sr5_outside_output'}}}"
+        ],
+        "extra_pnginfo": [
+         null
+        ]
+       },
+       "current_outputs": [
+        "1",
+        "2"
+       ],
+       "timestamp": 1792619139805
+      }
+     ]
+    ]
+   },
+   "meta": {}
+  }
+ },
+ "recorded": "2026-10-21T14:45:40-0700",
+ "source": "SR-5 on the real engine 2026-10-21 14:45 PDT (ComfyUI 0.41.2, RTX 4090) through scripts/proof/record_comfy_transcript.Proxy; CPU-only graphs, 0.7 s of engine time"
+}

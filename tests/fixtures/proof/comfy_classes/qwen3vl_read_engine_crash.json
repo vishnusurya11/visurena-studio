@@ -1,0 +1,60 @@
+{
+ "class": "qwen3vl_read_engine_crash",
+ "workflow": "image_qwen3vl_caption",
+ "source": "GPU transcript 2026-10-21 (ComfyUI 0.41.2, RTX 4090), docs/audit/2026-10-21_ep02_proof/gpu/transcript/qwen3vl_read_engine_crash.json; texts cut to 120 chars, nothing else changed",
+ "prompt_http_status": 200,
+ "prompt_response": {
+  "prompt_id": "83b2eee2-0523-46cb-b92e-151e84ad62ae",
+  "number": 123,
+  "node_errors": {}
+ },
+ "result": null,
+ "studio_client_error": "EngineLost: 83b2eee2-0523-46cb-b92e-151e84ad62ae vanished: the engine restarted",
+ "execution_s": 793.81,
+ "submitted_graph": {
+  "1": {
+   "inputs": {
+    "image": "shot_01_245beba6.png"
+   },
+   "class_type": "LoadImage",
+   "_meta": {
+    "title": "Load Image (to caption)"
+   }
+  },
+  "2": {
+   "inputs": {
+    "text": "List the FIXED things in this picture -- walls, furniture, windows, doors, lamps, trees, roads, buildings, machines, water -- never a person or an animal. Output strict JSON: a list of at most 8 objects, each with these keys and nothing else: \"thing\": a short plain noun phrase; \"x\": one of LEFT, CENTRE, RIGHT (where it stands across the frame); \"y\": one of TOP, MIDDLE, BOTTOM (its band down the frame); \"depth\": one of near, far; \"size\": one of fills, large, small. Order them from the largest to the smallest.",
+    "model": "Qwen3-VL-8B-Instruct",
+    "quantization": "none",
+    "keep_model_loaded": true,
+    "temperature": 0.1,
+    "max_new_tokens": 1024,
+    "min_pixels": 200704,
+    "max_pixels": 1003520,
+    "seed": 11,
+    "attention": "sdpa",
+    "image": [
+     "1",
+     0
+    ]
+   },
+   "class_type": "Qwen3_VQA",
+   "_meta": {
+    "title": "Qwen3-VL VQA"
+   }
+  },
+  "3": {
+   "inputs": {
+    "source": [
+     "2",
+     0
+    ]
+   },
+   "class_type": "PreviewAny",
+   "_meta": {
+    "title": "Caption (collected as text output)"
+   }
+  }
+ },
+ "history_entry": {}
+}

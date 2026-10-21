@@ -1,0 +1,817 @@
+{
+ "class": "h3_face_refine",
+ "workflow": "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_facecrop_v2v_mickmumpitz",
+ "source": "GPU transcript 2026-10-21 (ComfyUI 0.41.2, RTX 4090), docs/audit/2026-10-21_ep02_proof/gpu/transcript/h3_face_refine.json; texts cut to 120 chars, nothing else changed",
+ "prompt_http_status": 200,
+ "prompt_response": {
+  "prompt_id": "37c7f548-496e-47af-98c0-606c811b6e2c",
+  "number": 5,
+  "node_errors": {}
+ },
+ "result": "success",
+ "studio_client_error": null,
+ "execution_s": 51.65,
+ "submitted_graph": {
+  "1": {
+   "inputs": {
+    "unet_name": "Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors",
+    "weight_dtype": "default"
+   },
+   "class_type": "UNETLoader",
+   "_meta": {
+    "title": "Load Diffusion Model"
+   }
+  },
+  "2": {
+   "inputs": {
+    "model": [
+     "1",
+     0
+    ],
+    "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+    "strength_model": 1.0
+   },
+   "class_type": "LoraLoaderModelOnly",
+   "_meta": {
+    "title": "Turbo LoRA ema_ckpt850 (native loader)"
+   }
+  },
+  "3": {
+   "inputs": {
+    "model": [
+     "lora_second",
+     0
+    ],
+    "sage_attention": "disabled",
+    "allow_compile": false
+   },
+   "class_type": "PathchSageAttentionKJ",
+   "_meta": {
+    "title": "Patch Sage Attention KJ"
+   }
+  },
+  "5": {
+   "inputs": {
+    "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+    "type": "minimax",
+    "device": "default"
+   },
+   "class_type": "CLIPLoader",
+   "_meta": {
+    "title": "Load CLIP"
+   }
+  },
+  "6": {
+   "inputs": {
+    "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+   },
+   "class_type": "VAELoader",
+   "_meta": {
+    "title": "Load VAE (video)"
+   }
+  },
+  "7": {
+   "inputs": {
+    "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+   },
+   "class_type": "VAELoader",
+   "_meta": {
+    "title": "Load VAE (audio)"
+   }
+  },
+  "8": {
+   "inputs": {
+    "clip": [
+     "5",
+     0
+    ],
+    "vae": [
+     "6",
+     0
+    ],
+    "audio_vae": [
+     "7",
+     0
+    ],
+    "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second close-up of <Subject 1>'s head and shoulders, redrawn from the guide video with the face of <Picture 1>.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] A close-up of <Subject 1>'s face at the CENTRE, his head half the frame's height; sharp angular black ink linework on the eyes, brows, nose and mouth; the face of <Picture 1>; the head moves exactly as in the guide video.\n\noverall_soundscape: Open air.\n\nnon_diegetic_music: N/A",
+    "width": 768,
+    "height": 768,
+    "length": 73,
+    "ref_image_size": "match",
+    "ref_images.ref_image_0": [
+     "18",
+     0
+    ]
+   },
+   "class_type": "MiniMaxH3ReferenceToVideo",
+   "_meta": {
+    "title": "MiniMax H3 Reference to Video"
+   }
+  },
+  "9": {
+   "inputs": {
+    "model": [
+     "4",
+     0
+    ],
+    "scheduler": "beta",
+    "steps": 8,
+    "denoise": 0.44
+   },
+   "class_type": "BasicScheduler",
+   "_meta": {
+    "title": "BasicScheduler"
+   }
+  },
+  "10": {
+   "inputs": {
+    "model": [
+     "4",
+     0
+    ],
+    "conditioning": [
+     "22",
+     0
+    ]
+   },
+   "class_type": "BasicGuider",
+   "_meta": {
+    "title": "BasicGuider"
+   }
+  },
+  "11": {
+   "inputs": {
+    "sampler_name": "euler"
+   },
+   "class_type": "KSamplerSelect",
+   "_meta": {
+    "title": "KSamplerSelect"
+   }
+  },
+  "12": {
+   "inputs": {
+    "noise_seed": 82127
+   },
+   "class_type": "RandomNoise",
+   "_meta": {
+    "title": "RandomNoise"
+   }
+  },
+  "13": {
+   "inputs": {
+    "noise": [
+     "12",
+     0
+    ],
+    "guider": [
+     "10",
+     0
+    ],
+    "sampler": [
+     "11",
+     0
+    ],
+    "sigmas": [
+     "9",
+     0
+    ],
+    "latent_image": [
+     "32",
+     0
+    ]
+   },
+   "class_type": "SamplerCustomAdvanced",
+   "_meta": {
+    "title": "SamplerCustomAdvanced"
+   }
+  },
+  "14": {
+   "inputs": {
+    "samples": [
+     "13",
+     0
+    ],
+    "vae": [
+     "6",
+     0
+    ]
+   },
+   "class_type": "VAEDecode",
+   "_meta": {
+    "title": "VAE Decode (video)"
+   }
+  },
+  "15": {
+   "inputs": {
+    "samples": [
+     "13",
+     0
+    ],
+    "vae": [
+     "7",
+     0
+    ]
+   },
+   "class_type": "VAEDecodeAudio",
+   "_meta": {
+    "title": "VAE Decode (audio)"
+   }
+  },
+  "16": {
+   "inputs": {
+    "images": [
+     "14",
+     0
+    ],
+    "audio": [
+     "15",
+     0
+    ],
+    "fps": 24,
+    "bit_depth": 8
+   },
+   "class_type": "CreateVideo",
+   "_meta": {
+    "title": "Create Video"
+   }
+  },
+  "17": {
+   "inputs": {
+    "video": [
+     "16",
+     0
+    ],
+    "filename_prefix": "proof_gpu/h3_face_refine_T26_p0",
+    "format": "mp4",
+    "format.codec": "h264",
+    "format.codec.encoding": "re-encode",
+    "format.codec.encoding.crf": 10.0
+   },
+   "class_type": "SaveVideo",
+   "_meta": {
+    "title": "Save Video"
+   }
+  },
+  "4": {
+   "class_type": "MiniMaxH3SigmaShift",
+   "inputs": {
+    "model": [
+     "attn",
+     0
+    ],
+    "shift_video": 12,
+    "shift_audio": 3.0
+   }
+  },
+  "lora_second": {
+   "class_type": "LoraLoaderModelOnly",
+   "inputs": {
+    "model": [
+     "2",
+     0
+    ],
+    "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+    "strength_model": 0.7
+   }
+  },
+  "attn": {
+   "class_type": "ModelAttentionBackend",
+   "inputs": {
+    "model": [
+     "3",
+     0
+    ],
+    "attention": "comfy kitchen attention"
+   }
+  },
+  "21": {
+   "class_type": "LoadAudio",
+   "inputs": {
+    "audio": "T26_p0_guide_de1c7a1a.wav"
+   },
+   "_meta": {
+    "title": "anchored audio"
+   }
+  },
+  "22": {
+   "class_type": "MiniMaxH3AddGuide",
+   "inputs": {
+    "positive": [
+     "8",
+     0
+    ],
+    "latent": [
+     "32",
+     0
+    ],
+    "audio_vae": [
+     "7",
+     0
+    ],
+    "audio": [
+     "21",
+     0
+    ],
+    "frame_idx": 0
+   },
+   "_meta": {
+    "title": "anchor audio @ 0"
+   }
+  },
+  "18": {
+   "class_type": "LoadImage",
+   "inputs": {
+    "image": "sheet_front_c367d8b2.png"
+   }
+  },
+  "30": {
+   "class_type": "LoadVideo",
+   "inputs": {
+    "file": "T26_p0_src_d1648a3a.mp4"
+   }
+  },
+  "31": {
+   "class_type": "GetVideoComponents",
+   "inputs": {
+    "video": [
+     "30",
+     0
+    ]
+   }
+  },
+  "32": {
+   "class_type": "H3InjectVideoLatent",
+   "inputs": {
+    "av_latent": [
+     "8",
+     1
+    ],
+    "images": [
+     "31",
+     0
+    ],
+    "vae": [
+     "6",
+     0
+    ]
+   },
+   "_meta": {
+    "title": "H3 Inject Video Latent (comfyui-mickmumpitz-nodes)"
+   }
+  }
+ },
+ "history_entry": {
+  "prompt": [
+   5,
+   "37c7f548-496e-47af-98c0-606c811b6e2c",
+   {
+    "1": {
+     "inputs": {
+      "unet_name": "Minimax-h3_Singularity_ref2va_Pruned_v1.3_int8.safetensors",
+      "weight_dtype": "default"
+     },
+     "class_type": "UNETLoader",
+     "_meta": {
+      "title": "Load Diffusion Model"
+     }
+    },
+    "2": {
+     "inputs": {
+      "model": [
+       "1",
+       0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 1.0
+     },
+     "class_type": "LoraLoaderModelOnly",
+     "_meta": {
+      "title": "Turbo LoRA ema_ckpt850 (native loader)"
+     }
+    },
+    "3": {
+     "inputs": {
+      "model": [
+       "lora_second",
+       0
+      ],
+      "sage_attention": "disabled",
+      "allow_compile": false
+     },
+     "class_type": "PathchSageAttentionKJ",
+     "_meta": {
+      "title": "Patch Sage Attention KJ"
+     }
+    },
+    "5": {
+     "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+      "type": "minimax",
+      "device": "default"
+     },
+     "class_type": "CLIPLoader",
+     "_meta": {
+      "title": "Load CLIP"
+     }
+    },
+    "6": {
+     "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+     },
+     "class_type": "VAELoader",
+     "_meta": {
+      "title": "Load VAE (video)"
+     }
+    },
+    "7": {
+     "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+     },
+     "class_type": "VAELoader",
+     "_meta": {
+      "title": "Load VAE (audio)"
+     }
+    },
+    "8": {
+     "inputs": {
+      "clip": [
+       "5",
+       0
+      ],
+      "vae": [
+       "6",
+       0
+      ],
+      "audio_vae": [
+       "7",
+       0
+      ],
+      "prompt": "subject_definitions:\n<Subject 1> is Mr. Utterson in <Picture 1>: Lank grey hair, white at the sides, falling to his collar; clean-shaven, long, gaunt, rugged, unsmiling face; black bowler hat with a pale grey band. A lean, long, bony, dry man of about forty, narrow-chested. Wearing: long black double-breasted overcoat with six white buttons, white shirt, black tie. <Picture 1> defines this man alone; each shot keeps the framing its own words describe.\n<Audio 1> is the take's complete audio track and runs silent for its whole length.\n\nsummary:\n[reference generation + audio reuse] One 3.04-second close-up of <Subject 1>'s head and shoulders, redrawn from the guide video with the face of <Picture 1>.\n\ndetailed_description:\nHand-painted 1990s Madhouse noir cel animation, London, 1886, thin fog, haze, sun from the left, shadows.\n[Shot 1] A close-up of <Subject 1>'s face at the CENTRE, his head half the frame's height; sharp angular black ink linework on the eyes, brows, nose and mouth; the face of <Picture 1>; the head moves exactly as in the guide video.\n\noverall_soundscape: Open air.\n\nnon_diegetic_music: N/A",
+      "width": 768,
+      "height": 768,
+      "length": 73,
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+       "18",
+       0
+      ]
+     },
+     "class_type": "MiniMaxH3ReferenceToVideo",
+     "_meta": {
+      "title": "MiniMax H3 Reference to Video"
+     }
+    },
+    "9": {
+     "inputs": {
+      "model": [
+       "4",
+       0
+      ],
+      "scheduler": "beta",
+      "steps": 8,
+      "denoise": 0.44
+     },
+     "class_type": "BasicScheduler",
+     "_meta": {
+      "title": "BasicScheduler"
+     }
+    },
+    "10": {
+     "inputs": {
+      "model": [
+       "4",
+       0
+      ],
+      "conditioning": [
+       "22",
+       0
+      ]
+     },
+     "class_type": "BasicGuider",
+     "_meta": {
+      "title": "BasicGuider"
+     }
+    },
+    "11": {
+     "inputs": {
+      "sampler_name": "euler"
+     },
+     "class_type": "KSamplerSelect",
+     "_meta": {
+      "title": "KSamplerSelect"
+     }
+    },
+    "12": {
+     "inputs": {
+      "noise_seed": 82127
+     },
+     "class_type": "RandomNoise",
+     "_meta": {
+      "title": "RandomNoise"
+     }
+    },
+    "13": {
+     "inputs": {
+      "noise": [
+       "12",
+       0
+      ],
+      "guider": [
+       "10",
+       0
+      ],
+      "sampler": [
+       "11",
+       0
+      ],
+      "sigmas": [
+       "9",
+       0
+      ],
+      "latent_image": [
+       "32",
+       0
+      ]
+     },
+     "class_type": "SamplerCustomAdvanced",
+     "_meta": {
+      "title": "SamplerCustomAdvanced"
+     }
+    },
+    "14": {
+     "inputs": {
+      "samples": [
+       "13",
+       0
+      ],
+      "vae": [
+       "6",
+       0
+      ]
+     },
+     "class_type": "VAEDecode",
+     "_meta": {
+      "title": "VAE Decode (video)"
+     }
+    },
+    "15": {
+     "inputs": {
+      "samples": [
+       "13",
+       0
+      ],
+      "vae": [
+       "7",
+       0
+      ]
+     },
+     "class_type": "VAEDecodeAudio",
+     "_meta": {
+      "title": "VAE Decode (audio)"
+     }
+    },
+    "16": {
+     "inputs": {
+      "images": [
+       "14",
+       0
+      ],
+      "audio": [
+       "15",
+       0
+      ],
+      "fps": 24.0,
+      "bit_depth": 8
+     },
+     "class_type": "CreateVideo",
+     "_meta": {
+      "title": "Create Video"
+     }
+    },
+    "17": {
+     "inputs": {
+      "video": [
+       "16",
+       0
+      ],
+      "filename_prefix": "proof_gpu/h3_face_refine_T26_p0",
+      "format": "mp4",
+      "format.codec": "h264",
+      "format.codec.encoding": "re-encode",
+      "format.codec.encoding.crf": 10.0
+     },
+     "class_type": "SaveVideo",
+     "_meta": {
+      "title": "Save Video"
+     }
+    },
+    "4": {
+     "class_type": "MiniMaxH3SigmaShift",
+     "inputs": {
+      "model": [
+       "attn",
+       0
+      ],
+      "shift_video": 12.0,
+      "shift_audio": 3.0
+     }
+    },
+    "lora_second": {
+     "class_type": "LoraLoaderModelOnly",
+     "inputs": {
+      "model": [
+       "2",
+       0
+      ],
+      "lora_name": "minimax_h3\\minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+      "strength_model": 0.7
+     }
+    },
+    "attn": {
+     "class_type": "ModelAttentionBackend",
+     "inputs": {
+      "model": [
+       "3",
+       0
+      ],
+      "attention": "comfy kitchen attention"
+     }
+    },
+    "21": {
+     "class_type": "LoadAudio",
+     "inputs": {
+      "audio": "T26_p0_guide_de1c7a1a.wav"
+     },
+     "_meta": {
+      "title": "anchored audio"
+     }
+    },
+    "22": {
+     "class_type": "MiniMaxH3AddGuide",
+     "inputs": {
+      "positive": [
+       "8",
+       0
+      ],
+      "latent": [
+       "32",
+       0
+      ],
+      "audio_vae": [
+       "7",
+       0
+      ],
+      "audio": [
+       "21",
+       0
+      ],
+      "frame_idx": 0
+     },
+     "_meta": {
+      "title": "anchor audio @ 0"
+     }
+    },
+    "18": {
+     "class_type": "LoadImage",
+     "inputs": {
+      "image": "sheet_front_c367d8b2.png"
+     }
+    },
+    "30": {
+     "class_type": "LoadVideo",
+     "inputs": {
+      "file": "T26_p0_src_d1648a3a.mp4"
+     }
+    },
+    "31": {
+     "class_type": "GetVideoComponents",
+     "inputs": {
+      "video": [
+       "30",
+       0
+      ]
+     }
+    },
+    "32": {
+     "class_type": "H3InjectVideoLatent",
+     "inputs": {
+      "av_latent": [
+       "8",
+       1
+      ],
+      "images": [
+       "31",
+       0
+      ],
+      "vae": [
+       "6",
+       0
+      ]
+     },
+     "_meta": {
+      "title": "H3 Inject Video Latent (comfyui-mickmumpitz-nodes)"
+     }
+    }
+   },
+   {
+    "create_time": 1792606278157
+   },
+   [
+    "17"
+   ]
+  ],
+  "outputs": {
+   "30": {
+    "images": [
+     {
+      "filename": "T26_p0_src_d1648a3a.mp4",
+      "subfolder": "",
+      "type": "input",
+      "metadata": {
+       "kind": "video",
+       "width": 768,
+       "height": 768,
+       "duration": 3.0416666666666665,
+       "fps": 24.0,
+       "frame_count": 73
+      }
+     }
+    ],
+    "animated": [
+     true
+    ]
+   },
+   "17": {
+    "images": [
+     {
+      "filename": "h3_face_refine_T26_p0_00001_.mp4",
+      "subfolder": "proof_gpu",
+      "type": "output",
+      "metadata": {
+       "kind": "video",
+       "width": 768,
+       "height": 768,
+       "duration": 3.0416666666666665,
+       "fps": 24.0,
+       "frame_count": 73
+      }
+     }
+    ],
+    "animated": [
+     true
+    ]
+   }
+  },
+  "status": {
+   "status_str": "success",
+   "completed": true,
+   "messages": [
+    [
+     "execution_start",
+     {
+      "prompt_id": "37c7f548-496e-47af-98c0-606c811b6e2c",
+      "timestamp": 1792606278158
+     }
+    ],
+    [
+     "execution_cached",
+     {
+      "nodes": [
+       "1",
+       "2",
+       "3",
+       "5",
+       "6",
+       "7",
+       "11",
+       "lora_second"
+      ],
+      "prompt_id": "37c7f548-496e-47af-98c0-606c811b6e2c",
+      "timestamp": 1792606278502
+     }
+    ],
+    [
+     "execution_success",
+     {
+      "prompt_id": "37c7f548-496e-47af-98c0-606c811b6e2c",
+      "timestamp": 1792606329811
+     }
+    ]
+   ]
+  },
+  "meta": {
+   "30": {
+    "node_id": "30",
+    "display_node": "30",
+    "parent_node": null,
+    "real_node_id": "30"
+   },
+   "17": {
+    "node_id": "17",
+    "display_node": "17",
+    "parent_node": null,
+    "real_node_id": "17"
+   }
+  }
+ }
+}

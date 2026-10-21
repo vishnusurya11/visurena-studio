@@ -39,6 +39,9 @@ ROUTES = {("POST", "/prompt"): "post_prompt", ("GET", "/queue"): "get_queue", ("
 IDLIKE = re.compile(r"^(\d+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$")
 ALLOWED_EXTRA = frozenset({"rehearsal"})
 """The fake's `rehearsal: {clock, match}` label on a history record: the one key it may add."""
+GRAPH_DEFINED = frozenset({"inputs", "current_inputs"})
+"""Keys whose contents are the submitted graph's (its input names, coerced by the engine to each
+node's types), never the contract's: only that they are there, and their kind, is compared."""
 FORWARD_TIMEOUT = 120.0
 
 
@@ -239,6 +242,8 @@ def dict_diff(real: dict, fake: dict, path: str) -> list[str]:
             out.append(f"{sub}: missing in the fake")
         elif key not in real:
             out += [] if key in ALLOWED_EXTRA else [f"{sub}: only in the fake"]
+        elif key in GRAPH_DEFINED:
+            out += [] if kind(real[key]) == kind(fake[key]) else [f"{sub}: real {kind(real[key])}, fake {kind(fake[key])}"]
         else:
             out += shape_diff(real[key], fake[key], sub)
     return out

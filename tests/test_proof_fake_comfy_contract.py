@@ -7,7 +7,8 @@ front of the fake; recording the real engine is staged run SR-5 and waits for th
 When `tests/fixtures/proof/comfy_transcript/` exists, the fake's own transcript (recorded by the
 same proxy, driven by the real client) must match it key for key and type for type.  Until it
 exists, the fake says `shape: uncalibrated` in every engine_log header, and the proof report
-caps Q6 at PARTIAL on that word."""
+caps Q6 at PARTIAL on that word.  SR-5 recorded it on the real engine on 2026-10-21 at 14:45 PDT
+(ComfyUI 0.41.2); tests/test_proof_fake_comfy_classes.py holds the fake to each recorded job class."""
 from __future__ import annotations
 
 import json
@@ -111,6 +112,18 @@ def test_the_shape_diff_names_a_missing_key_an_extra_key_and_a_changed_type():
     assert "post_prompt.node_errors: missing in the fake" in said
     assert "post_prompt.extra: only in the fake" in said
     assert "post_prompt.number: real int, fake str" in said
+
+
+def test_a_graphs_own_inputs_are_the_graphs_and_never_the_contract():
+    """A node's inputs (and an error's current_inputs) are what the client submitted, coerced by the
+    engine to each node's types: their names and types are the graph's, so only their kind is compared."""
+    real = rct.shape({"p": {"prompt": [1, {"2": {"class_type": "EmptyImage", "inputs": {"width": 8, "cfg": 1.0}}}],
+                            "status": {"messages": [["execution_error", {"current_inputs": {"images": ["t"]}}]]}}})
+    fake = rct.shape({"p": {"prompt": [1, {"2": {"class_type": "Grid", "inputs": {"seed": 1, "cfg": 1}}}],
+                            "status": {"messages": [["execution_error", {"current_inputs": {"prompt": ["x"]}}]]}}})
+    assert rct.shape_diff(real, fake, "h") == []
+    missing = rct.shape({"p": {"prompt": [1, {"2": {"class_type": "Grid"}}]}})
+    assert rct.shape_diff(real, missing, "h") != []
 
 
 def test_the_rehearsal_label_is_the_one_key_the_fake_may_add():

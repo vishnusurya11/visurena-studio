@@ -1,0 +1,34 @@
+{
+ "route": "get_internal_logs_raw",
+ "method": "GET",
+ "path": "/internal/logs/raw",
+ "request": null,
+ "status": 200,
+ "reply": {
+  "entries": [
+   {
+    "t": "2026-10-21T13:50:50.905590",
+    "m": "\u001b[32m[INFO]\u001b[0m Comfy model compiler graph breaks: 10, rogues: 43\n"
+   },
+   {
+    "t": "2026-10-21T13:50:51.014890",
+    "m": "\u001b[32m[INFO]\u001b[0m Model MiniMaxH3AudioVAE prepared for dynamic VRAM loading. 576MB Staged. 0 patches attached. Force pre-loaded 401 weights: 539 KB.\n"
+   },
+   {
+    "t": "2026-10-21T13:50:53.258034",
+    "m": "\u001b[32m[INFO]\u001b[0m Model MiniMaxH3VideoVAE prepared for dynamic VRAM loading. 4965MB Staged. 0 patches attached. Force pre-loaded 128 weights: 352 KB.\n"
+   },
+   {
+    "t": "2026-10-21T14:45:18.132353",
+    "m": "\u001b[32m[INFO]\u001b[0m Prompt f91d9c3a-065e-46d2-afe1-70b00305a30e is not currently running, skipping interrupt\n"
+   }
+  ],
+  "size": {
+   "cols": 80,
+   "rows": 24
+  }
+ },
+ "recorded": "2026-10-21T14:45:18-0700",
+ "trimmed": "reply.entries: 4 of the 300 recorded kept (first 3 and the last); every entry has the same keys",
+ "source": "SR-5 on the real engine 2026-10-21 14:45 PDT (ComfyUI 0.41.2, RTX 4090) through scripts/proof/record_comfy_transcript.Proxy; CPU-only graphs, 0.7 s of engine time"
+}
