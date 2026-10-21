@@ -1,8 +1,7 @@
 # Operator: the live-run and repair protocol
 
 This page is the one home of what you may do to a live, parked or delivered episode (deadline retro
-2026-10-20, item 14). On ep01 the repair protocol sat in four places, and the agent who launched the
-11:18 repair had two of them. Read this page before any act on a run. It names commands and links
+2026-10-20, item 14). Read this page before any act on a run. It names commands and links
 numbers. The numbers live in GATES.md's generated tables. SKILL.md is the chain, and this page is the
 hand on it.
 
@@ -18,6 +17,8 @@ You do not launch `drive.py`, you do not run a step script, and you do not edit 
 When a parked row names a CODE fault, fix it the way the fixer does: the failing test first, the fix,
 the suite, one commit by explicit path, then `autopilot.py retry N --book <codex>` (and `resume` if
 the series paused). The owner's optional acts are `pause`, `resume`, `retry N` and `park N --why`.
+
+To rehearse, never on the real run: `uv run --no-sync python scripts/proof/rehearse.py <scenario|all>` (a fenced C: sandbox, fake engines, never `library/`), then `scripts/proof/confidence.py`; do not run the board during a rehearsal.
 
 ## Before any act (all read-only)
 
@@ -89,9 +90,7 @@ the series paused). The owner's optional acts are `pause`, `resume`, `retry N` a
 ## Guards
 
 A guard you run beside a live drive (a log watcher, a kill on a pattern) is a rule like any other.
-Derive it from the code's print order, never from a guess. On ep01 at 13:54 the guard waited for
-`TINY FACE` before the rung's queueing line. The rung prints that line after judging, so a legal 41 min
-draw was killed. Key a guard on bytes written to `takes/`, or on the decider's own answer, never on a
+Derive it from the code's print order, never from a guess. Key a guard on bytes written to `takes/`, or on the decider's own answer, never on a
 log line. Run it once against a dry run of what it guards before you trust it. Never kill a process
 holding a long draw without a reason line the owner can read. A killed draw's booked round is given back
 with `step_attempts.refund`.
@@ -137,9 +136,7 @@ minted after the switch has lived 8 days. Nothing uploads unless the owner asks.
 
 ## Fixing an owner-reported defect (the agent process; the orchestrator reads this before any fleet)
 
-ep01's two picture faults cost 11.2 h of agent building while the machine waited, over 185 agents.
-- Read `docs/audit/` for an existing plan or research on the question before launching research. On
-  ep01 the same research ran twice in 20 min.
+- Read `docs/audit/` for an existing plan or research on the question before launching research.
 - **round 0** counts the defect on the real takes (CPU, minutes) and predicts a number ("moves N of
   28"). The bench is judged against that number. In ep01's round 1, two of three builds moved nothing:
   the framing floor moved 0 of 12 plans.

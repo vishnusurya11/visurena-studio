@@ -2316,6 +2316,11 @@ queue, VRAM, commit and RAM). Pinned by `tests/test_autopilot_engine_health.py`.
   ep02 is the rehearsal that turns RETRO.md's `[est]` into numbers (3.9-5.4 h projected).
 - Tests: `tests/test_the_episode_skill_reads_in_budget.py`, `tests/test_the_skill_names_the_operator_verbs.py`,
   `tests/test_the_operator_page_has_symptoms_guards_and_an_agent_budget.py`, and each package's own above.
+- **Moved here from OPERATOR.md (2026-10-21, to make room for its one rehearse line, proof harness P7):** On ep01
+  the repair protocol sat in four places, and the agent who launched the 11:18 repair had two of them. On ep01 at
+  13:54 the guard waited for `TINY FACE` before the rung's queueing line. The rung prints that line after judging,
+  so a legal 41 min draw was killed. ep01's two picture faults cost 11.2 h of agent building while the machine
+  waited, over 185 agents. On ep01 the same research ran twice in 20 min.
 
 ## The face debate (2026-10-21: five rounds, 8 proposers x 3 refuters, a 45-min GPU bench)
 
