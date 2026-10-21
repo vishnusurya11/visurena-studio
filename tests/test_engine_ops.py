@@ -140,3 +140,42 @@ def test_the_run_tree_never_includes_the_autopilot_or_a_shell_that_names_the_epi
             ProcInfo(pid=4, cmdline="bash -c \"uv run python scripts/episode/autopilot.py park 22 --why x --book 20260827135508\"", started=0.0),
             ProcInfo(pid=5, cmdline="python scripts/episode/step_09_shoot.py 20260827135508 22", started=0.0)]
     assert [p.pid for p in eo.run_tree(rows, "20260827135508", 22)] == [1, 2, 5]
+
+
+# ---- crash recovery on the real engine, 2026-10-21 (docs/audit/2026-10-21_ep02_proof/gpu/CRASH.md) ----
+
+ENGINE = "D:/p/python_embeded/python.exe -s ComfyUI/main.py --windows-standalone-build"
+
+
+def engine(pid: int) -> ProcInfo:
+    return ProcInfo(pid=pid, started=0.0, cmdline=ENGINE)
+
+
+def test_restart_reads_a_process_table_no_cache_has_aged(monkeypatch):
+    """Cycle 4: rescue_engine killed main.py, then restart() read procs' 3 s cache, still listing the
+    dead pid, and polled a dead engine for 605.7 s before it launched."""
+    from studio.command_center import procs
+    import time
+    monkeypatch.setattr(procs, "_cache", {"at": time.time(), "rows": [engine(54876)]})
+    monkeypatch.setattr(procs, "_windows_table", lambda: [])
+    monkeypatch.setattr(procs.sys, "platform", "win32")
+    assert eo._live_rows() == []
+    assert procs.list_processes() == []                       # the fresh walk is the cache from now on
+
+
+def test_an_engine_a_peer_launched_during_the_wait_is_waited_on_never_twinned():
+    """Cycle 4: a peer's restart launched main.py 60916 while this one waited; after its wait timed
+    out, restart() launched 59636 without reading the table again: two engines on one HDD."""
+    tables = iter([[engine(54876)], [engine(54876), engine(60916)]])
+    launched, killed, waits = [], [], iter([False, True])
+    ok = eo.restart(launch=lambda cmd, cwd: launched.append(cmd), wait=lambda: next(waits), root=Path("E:/p"),
+                    rows=lambda: next(tables), kill=killed.append)
+    assert ok and launched == [] and killed == [54876]
+
+
+def test_a_timed_out_engine_is_killed_and_exactly_one_engine_is_launched():
+    tables = iter([[engine(54876)], [engine(54876)]])         # the killed pid can linger a moment
+    launched, killed, waits = [], [], iter([False, True])
+    ok = eo.restart(launch=lambda cmd, cwd: launched.append(cmd), wait=lambda: next(waits), root=Path("E:/p"),
+                    rows=lambda: next(tables), kill=killed.append)
+    assert ok and len(launched) == 1 and killed == [54876]

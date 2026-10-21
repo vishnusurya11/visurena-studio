@@ -83,3 +83,15 @@ def test_classify_kinds_are_the_seven_of_the_table():
 def test_the_last_line_names_the_fault_not_the_frame():
     assert ap.last_line("a\n  File x\n\nKeyError: 0\n") == "KeyError: 0"
     assert ap.last_line("") == ""
+
+
+def test_the_engine_lost_the_real_engine_raised_reads_as_a_transient_retry():
+    """2026-10-21: the real engine died under a Qwen3-VL read, and in three kill-and-restart cycles
+    (gpu/CRASH.md) the client raised studio.comfy.EngineLost each time; the autopilot must read that
+    drive-log line as the engine's moment, never as a failed episode."""
+    import json
+    from pathlib import Path
+    rec = Path(__file__).resolve().parent / "fixtures" / "proof" / "comfy_classes" / "qwen3vl_read_engine_crash.json"
+    said = json.loads(rec.read_text(encoding="utf-8"))["studio_client_error"]
+    tail = f'Traceback (most recent call last):\n  File "studio/comfy.py", line 414, in settled\nstudio.comfy.{said}'
+    assert said.startswith("EngineLost: ") and ap.classify(tail, SIGNED) == ("retry", "engine_transient", None)

@@ -40,7 +40,10 @@ ENGINE_MARK = "ComfyUI/main.py"
 RUN_MARKS = ("drive.py", "episode.py", "scripts/episode/")
 """A command line running this episode carries one of these and the codex + number."""
 READY_SECONDS = 600.0
-"""Custom nodes load in 1-2 min; comfy.RESTART_SECONDS is the same patience."""
+"""comfy.RESTART_SECONDS is the same patience.  Measured 2026-10-21 (CRASH.md): a start took
+333, 386 and 775 s to answer /system_stats on this box (custom-node imports on the D: HDD), so
+600 s is about the median, not a bound.  A False after it launches nothing: the next tick's
+restart() finds the starting engine in the table and waits on it."""
 READY_POLL = 5.0
 
 
@@ -242,18 +245,30 @@ def wait_alive(base_url: str = HOST, seconds: float = READY_SECONDS, poll: float
 
 
 def _live_rows() -> list[ProcInfo]:
+    """The process table walked NOW: the caller's kill a moment ago made any cached one stale
+    (2026-10-21 crash cycle 4: a cached dead main.py cost 605.7 s of waiting on nothing)."""
     from studio.command_center.procs import list_processes
-    return list_processes()
+    return list_processes(fresh=True)
+
+
+def newcomers(before: Iterable[ProcInfo], now: Iterable[ProcInfo]) -> list[ProcInfo]:
+    """The engine rows of `now` that `before` did not hold: another restart's launch."""
+    seen = {p.pid for p in before}
+    return [p for p in engine_rows(now) if p.pid not in seen]
 
 
 def restart(launch: Callable[[list[str], Path], None] = _launch, wait: Callable[[], bool] = wait_alive,
             root: Path | str | None = None, rows: Callable[[], list[ProcInfo]] = _live_rows,
             kill: Callable[[int], None] = _terminate) -> bool:
     """An engine process already starting is waited on, never stacked (2026-10-18: three
-    main.py on one HDD); one that never answers is killed, then ONE launch is waited on."""
+    main.py on one HDD); one that never answers is killed, the table is read AGAIN, and an
+    engine someone launched meanwhile is waited on (2026-10-21 cycle 4: a peer's restart and
+    this one each launched one); only then is ONE launch made and waited on."""
     if (live := engine_rows(rows())) and wait():
         return True
     kill_engine(live, kill)
+    if newcomers(live, rows()):
+        return wait()
     cmd, cwd = engine_command(root)
     launch(cmd, cwd)
     return wait()
