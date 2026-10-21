@@ -154,6 +154,7 @@ def comfy_trap(monkeypatch):
 
     monkeypatch.setattr(comfy, "run", trip)
     monkeypatch.setattr(comfy, "run_text", trip)
+    monkeypatch.setattr(comfy, "VLM_CALLS", None)       # the read log never writes under library/ in a test
     # A test's `model_kept()` ends with /free: it must never unload the live
     # engine's models under a running render (speed plan #6).
     monkeypatch.setattr(comfy, "free_models", lambda: None)

@@ -522,18 +522,46 @@ def text_timeout(timeout: float, applies: bool = True) -> float:
     return max(1.0, min(timeout, ROW_DEADLINE - time.time() + ROW_GRACE_S))
 
 
+VLM_CALLS: Path | None = Path(__file__).resolve().parents[1] / "library" / "vlm_calls.jsonl"
+"""One row per engine text read (five-iterations B15.2): the ~13 s read's setup against its
+decode is unmeasured, so ep02's reads fit seconds = a + b * tokens.  None logs nothing (tests)."""
+
+
+def call_row(name: str, seconds: float, text: str, record: dict) -> dict:
+    """The read's row: wall seconds, the engine's execution seconds, the reply's size."""
+    from studio import take_phases
+    t0, t1 = take_phases.window(record)
+    return {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "workflow": name, "seconds": round(seconds, 2),
+            "node_s": round(t1 - t0, 2) if t0 and t1 else None,
+            "answer_chars": len(text), "answer_tokens": -(-len(text) // 4)}
+
+
+def log_call(row: dict) -> None:
+    """Append the row; a log that cannot be written never fails the read."""
+    if VLM_CALLS is None:
+        return
+    try:
+        with open(VLM_CALLS, "a", encoding="utf-8") as out:
+            out.write(json.dumps(row) + "\n")
+    except OSError:
+        pass
+
+
 def run_text(name: str, values: dict[str, Any], timeout: float = 600.0) -> str:
     """Fill in a text-producing workflow (a VLM caption), run it, and return the text.
     A call that outlives its (row-capped) timeout interrupts the engine, then raises."""
     template, inject = load_workflow(name)
     prompt = apply_inject(template, inject, values)
+    began = time.monotonic()
     try:
         record = wait_record(submit(keep_loaded(prompt) if KEEP_LOADED else prompt),
                              timeout=text_timeout(timeout))
     except StillRunning:
         reachable(interrupt)
         raise
-    return "\n".join(texts_of(record))
+    text = "\n".join(texts_of(record))
+    log_call(call_row(name, time.monotonic() - began, text, record))
+    return text
 
 
 TEXT_CACHE = Path(__file__).resolve().parents[1] / "library" / ".vlm_cache"
