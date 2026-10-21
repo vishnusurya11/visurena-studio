@@ -671,13 +671,18 @@ def gather(book: Path, codex: str, n: int, deps: Deps, series: dict):
         "paused": is_paused(book, series),
         "head_sha": deps.git("rev-parse", "HEAD").strip(), "media_spent_usd": deps.spent_usd(codex, n),
         "failed_sha": core_failed_sha(drive_rows), "code_dirty": episode_drive_dirty(porcelain),
-        "standing": standing_ok(book)})
+        "standing": standing_ok(book, n)})
 
 
-def standing_ok(book: Path) -> bool:
-    """The owner's standing publish approval is signed for this book (G-STANDING)."""
+def standing_ok(book: Path, n: int) -> bool:
+    """The owner's standing publish approval lists episode `n` of this book (G-STANDING)."""
     from studio import standing_approval
-    return standing_approval.ok(book)
+    return standing_approval.ok(book, n)
+
+
+def holds_still_owed(book: Path, held: list[dict]) -> list[dict]:
+    """The held masters the standing file does not list yet: a signature lifts only its own."""
+    return [row for row in held if not standing_ok(book, row["episode"])]
 
 
 # ---- the actions ---------------------------------------------------------------
@@ -959,8 +964,8 @@ def hold(book: Path, n: int, derived, deps: Deps) -> dict:
 
 def pick_unit(book: Path, deps: Deps, series: dict, uploads: list[dict], parked: list[dict]) -> int | None:
     """The next chapter past parked and held ones; with only holds left, the lowest hold
-    (never COMPLETE over a held master).  A signed standing file lifts every hold."""
-    chapters, held = deps.chapters(book), ([] if standing_ok(book) else held_units(book))
+    (never COMPLETE over a held master).  A standing file lifts the holds it lists."""
+    chapters, held = deps.chapters(book), holds_still_owed(book, held_units(book))
     n = deps.next_unit(chapters, uploads, parked + held, series["last"])
     return n if n is not None or not held else deps.next_unit(chapters, uploads, parked, series["last"])
 

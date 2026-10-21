@@ -177,8 +177,8 @@ def run(ctx, send=youtube_upload.send, build_api=None, http=urllib_get,
     """The whole last mile; the public Short URL is the LAST line printed."""
     engine, master, _qc = yp.deliverable(ctx.home, "")
     sha8 = yp.sha8(master)
-    if not standing_approval.ok(ctx.book_dir):
-        raise standing_approval.escalation(ctx.book_dir)
+    if not standing_approval.ok(ctx.book_dir, ctx.number):
+        raise standing_approval.escalation(ctx.book_dir, ctx.number)
     metadata.ensure(ctx.home, ctx.book_dir, ctx.number)  # IN-PROCESS: the $3 wall applies
     signoff.write(ctx.home, sha8, engine)
     print(f"--watched={sha8}: the master eye's measured rubric review/eye_{sha8}.json "

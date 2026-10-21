@@ -87,7 +87,8 @@ def test_a_signed_standing_file_brings_the_held_episode_back(tmp_path):
     cli, book = fx.load(), fx.book(tmp_path)
     d = _held_deps(tmp_path)
     cli.tick(book, fx.CODEX, d, 1)
-    signed = {"kind": "publish", "decision": "2026-10-01-no-human-input-at-publish", "by": "owner", "at": "2026-10-20"}
+    signed = {"kind": "publish", "decision": "2026-10-01-no-human-input-at-publish", "by": "owner", "at": "2026-10-20",
+              "episodes": [1]}
     (book / "publish").mkdir(parents=True)
     (book / "publish" / "standing.json").write_text(json.dumps(signed), encoding="utf-8")
     assert cli.tick(book, fx.CODEX, d, 2)["episode"]["n"] == 1

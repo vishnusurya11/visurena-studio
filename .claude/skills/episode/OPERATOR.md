@@ -125,7 +125,7 @@ minted after the switch has lived 8 days. Nothing uploads unless the owner asks.
 | the pin test is red after a MEASURES edit, or after an edit to look_table.py, panel_dq.py or people_count.py | they judge take content (the import closure of take_content.py) | bump that check's `GATE_VERSION` if a verdict changes, else re-pin `gate_pins.json` |
 | Telegram: "autopilot supervisor silent for N min" | the PC restarted (Windows Update) or the loop died | log on, or `schtasks /run /tn visurena-autopilot`; then `status` |
 | Telegram: "YouTube token ... open <link>" | the 7-day token | "OAuth" above |
-| state `HELD_PUBLISH` | the master is finished; step 13 waits on `publish/standing.json`, which only the owner writes | nothing: the series moves on; never write that file, never `retry` a held episode |
+| state `HELD_PUBLISH` | the master is finished; step 13 waits until `publish/standing.json` lists this episode in `episodes` (2026-10-20), which only the owner writes | nothing: the series moves on; never write that file, never `retry` a held episode |
 | event `code_moved_during_run` | HEAD moved under a live drive | normal; the supervisor keeps its code until the drive ends |
 | finish line `repair X h of a Y h cap` | each repair window against its own cap (the line once summed both against the second cap) | read each window alone |
 | finish line `killed X h in N runs` | a share of the charge and the repair the line already holds | never add it as a third part |

@@ -365,8 +365,9 @@ def downstream_lines(codex: str, number: int, home: Path) -> list[str]:
                   f"{1 + max([0] + [int(p.stem[11:]) for p in (home / 'cut').glob('master_iter*.mp4') if p.stem[11:].isdigit()])}.mp4",
             "11": "QC and the master eye on the new master's bytes",
             "12": "delivers: manifest.json names the new QC sha",
-            "13": ("PARKS on G-STANDING (no publish/standing.json): nothing uploads" if not standing_approval.ok(book)
-                   else "WOULD UPLOAD: publish/standing.json is present")}
+            "13": (f"PARKS on G-STANDING (publish/standing.json does not list ep{number:02d}): nothing uploads"
+                   if not standing_approval.ok(book, number)
+                   else f"WOULD UPLOAD: publish/standing.json lists ep{number:02d}")}
     out = []
     for step, mod in (("10", "step_10_edit"), ("11", "step_11_qc"), ("12", "step_12_deliver"), ("13", "step_13_publish")):
         try:

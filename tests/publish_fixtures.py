@@ -139,8 +139,9 @@ def prior_with(book: Path, number: int, *, description: str = "A prior episode."
          "privacy": "private", "synthetic": True, "_synthetic_note": "Local models. Cut 0badbeef: QC passed."})
 
 
-def standing(book: Path, decision: str = standing_approval.DECISION, by: str = "owner") -> Path:
-    """The owner's standing publish approval, as the owner would write it once."""
+def standing(book: Path, decision: str = standing_approval.DECISION, by: str = "owner",
+             episodes: tuple[int, ...] = (3,)) -> Path:
+    """The owner's standing publish approval, as the owner would write it, listing `episodes`."""
     return episode_home.write_json(book / "publish" / "standing.json",
                                    {"kind": "publish", "decision": decision,
-                                    "by": by, "at": "2026-10-05"})
+                                    "by": by, "at": "2026-10-05", "episodes": list(episodes)})
