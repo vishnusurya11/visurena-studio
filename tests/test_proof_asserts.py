@@ -207,6 +207,61 @@ def test_the_headline_rows_standing_on_a_canned_answer_are_mechanism(tmp_path):
     assert asserts.s0b_rows(book2, tmp_path)[0]["kind"] == "mechanism"
 
 
+@pytest.mark.parametrize("classes", [{"exact": 3, "substituted": 1}, {"exact": 3, "worker_canned": 1},
+                                     {"exact": 3, "sdk_canned": 1}, {"exact": 3, "sdk_scripted": 2}])
+def test_a_row_resting_on_a_substituted_take_or_a_canned_worker_or_claude_answer_is_mechanism(classes):
+    """AUDIT A2, A4: ep01's KEPT takes served to ep02's graphs, an empty detection, a silent transcript,
+    a canned or scripted Claude reply: none of them is the real component answering this ask."""
+    assert asserts.row("S0b", True, [], kind="quality", match_classes=classes)["kind"] == "mechanism"
+    assert asserts.row("S0b", True, [], kind="quality", match_classes={"exact": 3, "sdk_exact": 2})["kind"] == "quality"
+
+
+def test_the_run_classes_fold_the_workers_and_the_sdk_log_into_the_engines(tmp_path):
+    write_rows(tmp_path / "engine_log.jsonl", [{"header": True}, {"call": "prompt", "class": "exact", "prompt_id": "a"}])
+    write_rows(tmp_path / "workers.jsonl", [{"worker": "detect", "event": "answer", "label": "canned"},
+                                            {"worker": "whisper", "event": "answer", "label": "exact"},
+                                            {"worker": "detect", "event": "died", "line": 2}])
+    write_rows(tmp_path / "sdk_log.jsonl", [{"n": 1, "label": "canned"}, {"n": 2, "label": "scripted"}])
+    assert asserts.run_classes(tmp_path) == {"exact": 1, "worker_canned": 1, "worker_exact": 1, "sdk_canned": 1,
+                                             "sdk_scripted": 1}
+
+
+def test_a_scenario_row_that_read_an_empty_detection_never_counts_as_quality(tmp_path):
+    """AUDIT A2's red test: every engine answer exact, one face detection a memo miss (`{"dets": {}}`)."""
+    rec, book = tmp_path / "ep01", tmp_path / "library" / "b"
+    for folder in (rec / "takes" / "r2v", book / "episodes" / "ep01" / "takes" / "r2v"):
+        folder.mkdir(parents=True)
+        (folder / "T00.graph.json").write_text(json.dumps(graph(1)))
+    box = tmp_path / "box"
+    write_rows(box / "engine_log.jsonl", [{"call": "prompt", "class": "exact", "prompt_id": "a"}])
+    write_rows(box / "workers.jsonl", [{"worker": "detect", "event": "answer", "label": "canned"}])
+    rows = asserts.s0a_rows(book, recorded=rec, git=lambda *a: "", classes=asserts.run_classes(box))
+    assert rows[0]["passed"] is True and rows[0]["kind"] == "mechanism"
+
+
+def test_s0b_takes_its_classes_from_the_engine_the_workers_and_the_sdk(tmp_path):
+    _, home = book_at(tmp_path / "s0b")
+    book = home.parent.parent
+    (book / "autopilot").mkdir()
+    (book / "autopilot" / "status.json").write_text(
+        json.dumps({"episode": {"n": 2, "state": "PARKED", "reason": "escalated: EYE_TAKES"}}))
+    write_rows(tmp_path / "engine_log.jsonl", [{"call": "prompt", "class": "exact", "prompt_id": "c"}])
+    write_rows(tmp_path / "sdk_log.jsonl", [{"n": 1, "label": "scripted"}])
+    row = asserts.s0b_rows(book, tmp_path)[0]
+    assert row["kind"] == "mechanism" and row["match_classes"]["sdk_scripted"] == 1
+
+
+@pytest.mark.parametrize("reason,passed", [("escalated: EYE_TAKES", True), ("speech_gap_rendered", True),
+                                           ("parked: voice", True), ("split_voice", True),
+                                           ("brain_exhausted", False), ("parked: tick_error", False),
+                                           ("over_budget", False)])
+def test_s0b_passes_on_a_park_only_when_a_content_or_voice_gate_parked_it(reason, passed):
+    """AUDIT A4: a park caused by a memo miss or a harness fault must not score as the pre-registered
+    outcome; DESIGN 3.2 names it: a content or voice gate PARKS with its reason named."""
+    r = asserts.s0b_outcome("PARKED", reason, [], "", False)
+    assert r["passed"] is passed and (passed or "not a content or voice gate" in r["detail"])
+
+
 def test_a_take_in_flight_when_its_drive_died_may_render_once_more_after_the_death():
     rows = [{"call": "prompt", "kind": "take", "index": 1, "ts": "2026-10-21T10:00:01+00:00"},
             {"call": "prompt", "kind": "take", "index": 2, "ts": "2026-10-21T10:00:02+00:00"},

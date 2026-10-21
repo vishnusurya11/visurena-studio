@@ -153,7 +153,8 @@ def test_the_fixture_results_give_the_pre_registered_statuses():
     refused = [r["check"] for r, _ in got["Q5"]["refused"]]
     assert sorted(refused) == ["F12", "base_rate_under_6h", "time_backtest_loo"], refused
     assert len(got["Q7"]["refused"]) == 1
-    assert (got["Q6"]["k"], got["Q6"]["n"]) == (1, 2)
+    assert (got["Q6"]["k"], got["Q6"]["n"]) == (1, 1)                 # S0a, every answer exact
+    assert "S0b" in [r["check"] for r in got["Q6"]["mechanism_rows"]]   # on substituted pictures (AUDIT A4)
 
 
 def test_the_report_leads_with_its_path_never_overwrites_and_prints_no_percentage(tmp_path):
@@ -425,3 +426,12 @@ def test_a_summary_file_with_an_adapter_is_read_as_rows_and_never_named_rowless(
     cov = next(r for r in got if r["check"] == "incident_coverage")
     assert cov["_file"] == "incidents.json" and cov["n_pass"] == 1
     assert cf.rowless_files(tmp_path) == []
+
+
+@pytest.mark.parametrize("classes", [{"exact": 2, "substituted": 1}, {"exact": 2, "worker_canned": 1},
+                                     {"exact": 2, "sdk_scripted": 1}, ["exact", "substituted"]])
+def test_the_report_reads_a_substituted_take_or_a_canned_worker_as_no_quality_evidence(classes):
+    """AUDIT A2, A4: the report demotes on the same stand-in classes the asserts do, fail closed for a
+    results file written before the asserts folded them in."""
+    assert cf.contribution(row(match_classes=classes), SPEC)[0] == "mechanism"
+    assert cf.contribution(row(match_classes={"exact": 2, "substituted": 0, "sdk_exact": 4}), SPEC)[0] == "quality"

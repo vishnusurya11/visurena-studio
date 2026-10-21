@@ -26,18 +26,34 @@ BRAIN_SESSIONS = 3
 UNCAPPED = ("wall", "takes", "tiny_face")
 """attempts.json keys that count time or first renders, not retry rounds (no cap-table row)."""
 YOUTUBE = ("googleapis", "youtube", "accounts.google")
+STAND_INS = ("canned", "substituted", "worker_canned", "sdk_canned", "sdk_scripted")
+"""Answer classes that are NOT the real component answering this ask (AUDIT A2, A4): the engine's
+canned grey and its substituted recording of ANOTHER graph (ep01's kept takes served to ep02), a
+fake worker's memo miss (an empty detection, a silent transcript), a fake SDK's canned refusal and
+the brain script's scripted verdict.  A quality row resting on any of them is mechanism."""
+CONTENT_PARKS = ("EYE_PANELS", "EYE_TAKES", "MASTER", "LOOK_STATE", "CONTENT", "CROWD", "speech_gap",
+                 "split_voice", "speaker", "voice")
+"""Words a park's reason carries when a content or voice gate parked it (gates.yaml's picture
+judges, the content checks, the voice gates): S0b's pre-registered park (DESIGN 3.2, AUDIT A4)."""
 
 
 def row(check: str, passed: bool, evidence: Iterable, *, question: str | None = None, detail: str = "",
         kind: str = "mechanism", n_points: int = 1, n_distinct: int | None = None, match_classes: Mapping | None = None,
         instrument: str = "files", instrument_state: str = "n/a") -> dict:
-    """One counted row; any canned dependency makes it `mechanism` (5.1)."""
+    """One counted row; any stand-in answer under it makes it `mechanism` (5.1, AUDIT A2/A4)."""
     classes = dict(match_classes or {})
-    kind = "mechanism" if classes.get("canned") and kind == "quality" else kind
+    kind = "mechanism" if stands_in(classes) and kind == "quality" else kind
     return {"check": check, "question": question or QUESTIONS.get(check, "Q6"), "passed": bool(passed),
             "n_points": n_points, "n_distinct": n_points if n_distinct is None else n_distinct,
             "evidence": [str(e) for e in evidence], "match_classes": classes, "instrument": instrument,
             "instrument_state": instrument_state, "kind": kind, "detail": detail}
+
+
+def stands_in(classes: Mapping | Iterable | None) -> bool:
+    """Whether any answer under a row was a stand-in (STAND_INS): a count above 0, or a listed class."""
+    if isinstance(classes, Mapping):
+        return any(classes.get(k) for k in STAND_INS)
+    return any(k in STAND_INS for k in classes or ())
 
 
 def jsonl(path: Path) -> list[dict]:
@@ -245,6 +261,19 @@ def classes_of(engine_rows: Iterable[Mapping]) -> dict[str, int]:
     return dict(Counter(str(r["class"]) for r in engine_rows if r.get("class")))
 
 
+def labels_of(rows: Iterable[Mapping], prefix: str) -> Counter:
+    """`<prefix>_<label>` counts of a fake's answer rows (a death or an exit row has no label)."""
+    return Counter(f"{prefix}_{r['label']}" for r in rows if r.get("label") and r.get("event", "answer") == "answer")
+
+
+def run_classes(box: Path) -> dict[str, int]:
+    """Every answer of a run by class: the engine's (engine_log.jsonl), the fake workers'
+    (workers.jsonl, worker_*) and the fake SDK's and brain script's (sdk_log.jsonl, sdk_*)."""
+    engine = Counter(classes_of(jsonl(Path(box) / "engine_log.jsonl")))
+    workers = labels_of(jsonl(Path(box) / "workers.jsonl"), "worker")
+    return dict(engine + workers + labels_of(jsonl(Path(box) / "sdk_log.jsonl"), "sdk"))
+
+
 def canned_ids(engine_rows: Iterable[Mapping]) -> set[str]:
     return {str(r.get("prompt_id")) for r in engine_rows if r.get("class") == "canned"}
 
@@ -318,12 +347,22 @@ def publish_refusals(home: Path) -> tuple[list[str], bool]:
     return refusals, not held
 
 
+def content_park(reason: str) -> tuple[bool, str]:
+    """S0b's park counts only when a content or voice gate parked it, its reason named (AUDIT A4)."""
+    said = str(reason or "").strip()
+    if not said:
+        return False, "park with no reason"
+    if not any(w.lower() in said.lower() for w in CONTENT_PARKS):
+        return False, f"park {said!r} is not a content or voice gate's (a harness fault or a memo miss parks so)"
+    return True, f"named park: {said}"
+
+
 def s0b_outcome(state: str, reason: str, refusals: list[str], card: str, auto_clearable: bool,
                 classes: Mapping | None = None) -> dict:
     """The one pre-registered correct outcome (R2), judged before the run."""
     gates = [r.split(" ", 1)[0] for r in refusals]
     if state == "PARKED":
-        ok, said = bool(str(reason).strip()), f"named park: {reason}" if reason else "park with no reason"
+        ok, said = content_park(reason)
     elif state != "HELD_PUBLISH":
         ok, said = False, f"no terminal: {state}"
     elif not refusals:
@@ -398,7 +437,7 @@ def s0b_rows(book: Path, box: Path) -> list[dict]:
     said = [str(r.get("text", "")) for r in jsonl(Path(box) / "notify.jsonl")]
     card = " ".join([str(ep.get("reason") or ""), *held, *said])
     return [s0b_outcome(str(ep.get("state")), str(ep.get("reason") or ""), refusals, card, clearable,
-                        classes_of(jsonl(Path(box) / "engine_log.jsonl")))]
+                        run_classes(box))]
 
 
 def resubmits(engine_rows: list[Mapping]) -> int:
@@ -583,8 +622,7 @@ once; F9: the hung take at most once; F10: one resubmission; F16: none."""
 def specific(sid: str, box: Path, book: Path, sup: Mapping) -> list[dict]:
     """The pre-registered specific asserts of 3.2 that the files answer; [] for the others."""
     if sid in ("S0a", "S0b"):
-        classes = classes_of(jsonl(Path(box) / "engine_log.jsonl"))
-        return s0a_rows(book, classes=classes) if sid == "S0a" else s0b_rows(book, box)
+        return s0a_rows(book, classes=run_classes(box)) if sid == "S0a" else s0b_rows(book, box)
     if sid not in CHECKS:
         return []
     return [CHECKS[sid](sid, box, book, jsonl(Path(box) / "engine_log.jsonl"), sup)]

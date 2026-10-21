@@ -15,7 +15,8 @@ DESIGN 5.1 are enforced here, each with a test:
 - a gate is one instrument's row: it answers every question that names it, whichever question wrote it;
   while a gate is shut the question is REAL-RUN and only a check the map marks `ungated` can fail it (the
   rest ran on what the recordings do not cover);
-- a quality or compliance row with any `canned` answer is mechanism;
+- a quality or compliance row with any stand-in answer (canned, substituted, a canned worker or Claude
+  answer, a scripted verdict: asserts.STAND_INS) is mechanism;
 - a row measured by an instrument whose gate failed (`instrument_state: failed`) is INSTRUMENT FAILED and
   contributes nothing;
 - a time MEASURE (kind quality or baseline) of a time question (Q5, Q7) counts only with clock `measured` and
@@ -47,6 +48,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from studio.rehearsal.asserts import stands_in  # noqa: E402
 from studio.rehearsal.fake_comfy import shape_state  # noqa: E402
 from studio.rehearsal.time_model import under_sandbox  # noqa: E402
 
@@ -247,10 +249,9 @@ def k_of(row: dict) -> int | None:
 
 
 def has_canned(classes) -> bool:
-    """A canned dependency: 'canned' in a class list, or a canned count above 0 in a class map."""
-    if isinstance(classes, dict):
-        return bool(classes.get("canned"))
-    return "canned" in (classes or [])
+    """A stand-in dependency (asserts.STAND_INS: canned, substituted, a canned worker or Claude answer, a
+    scripted verdict): in a class list, or a count above 0 in a class map (AUDIT A2, A4)."""
+    return stands_in(classes)
 
 
 def instrument_failed(row: dict) -> bool:

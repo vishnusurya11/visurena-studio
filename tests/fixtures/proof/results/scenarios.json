@@ -1,6 +1,6 @@
 {"rows": [
  {"check": "S0a", "question": "Q6", "passed": true, "n_points": 1, "n_distinct": 1, "n_pass": 1,
-  "evidence": ["sandbox_runs/s0a/engine_log.jsonl"], "match_classes": ["exact", "substituted"], "instrument": "none", "instrument_state": "n/a", "kind": "quality"},
+  "evidence": ["sandbox_runs/s0a/engine_log.jsonl"], "match_classes": ["exact"], "instrument": "none", "instrument_state": "n/a", "kind": "quality"},
  {"check": "F1", "question": "Q6", "passed": true, "n_points": 28, "n_distinct": 3, "n_pass": 3,
   "evidence": ["sandbox_runs/f1/trace.json"], "match_classes": ["exact"], "instrument": "none", "instrument_state": "n/a", "kind": "mechanism"},
  {"check": "F9", "question": "Q6", "passed": true, "n_points": 28, "n_distinct": 2, "n_pass": 2,
