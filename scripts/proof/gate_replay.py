@@ -260,13 +260,14 @@ def hole(fixture: Path, holes) -> list[dict]:
 
 
 def orphan_crowd(fixture: Path, faults) -> list[dict]:
-    """G-CROWD-ORPHAN on every setup of the delivered plan."""
+    """G-CROWD-ORPHAN on every setup of the delivered plan; a fault is its setup's by the whole name
+    (plan_gates.fault's "<gate> setup <name>: "), so walk_on_day never takes walk_on_day_2's."""
     plan = read(fixture, "plan.json")
     if plan is None:
         return [item("plan", "unread", "no plan.json frozen")]
     said = faults(plan_ns(plan))
-    return [item(f"setup {name}", "refused" if any(f"setup {name}" in f for f in said) else "passed")
-            for name in (plan.get("setups") or {})]
+    hits = {name: [f for f in said if f" setup {name}: " in f] for name in plan.get("setups") or {}}
+    return [item(f"setup {name}", "refused" if hit else "passed", "; ".join(hit)) for name, hit in hits.items()]
 
 
 def style_light(fixture: Path, lint) -> list[dict]:

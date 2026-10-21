@@ -92,3 +92,16 @@ def test_a_native_write_two_levels_down_or_in_another_book_is_seen(repo, plant):
     target.write_text("x", encoding="utf-8") if target.suffix else target.mkdir()
     with pytest.raises(guard.RealLibraryTouched, match="REAL LIBRARY TOUCHED: "):
         guard.check(before, paths(repo))
+
+
+def test_a_new_entry_shows_even_when_the_folder_clock_did_not_move(repo):
+    """NTFS stamps a folder from a coarse system clock: an entry added in the same tick as the
+    snapshot leaves the folder's (size, mtime_ns) as they were (the flaky other_book_top case).
+    The folder's entry names are part of its stat, so the new entry still shows."""
+    other = repo / "library" / "20260827135508_the-war-of-the-worlds"
+    (other / "episodes").mkdir(parents=True)
+    before = guard.snapshot(paths(repo))
+    was = os.stat(other).st_mtime_ns
+    (other / "plan.json").write_text("x", encoding="utf-8")
+    os.utime(other, ns=(was, was))
+    assert f"REAL LIBRARY TOUCHED: {other}" in guard.touched(before, guard.snapshot(paths(repo)))

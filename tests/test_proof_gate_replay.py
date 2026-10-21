@@ -130,6 +130,24 @@ def test_g_crowd_orphan_refuses_a_crowd_no_shot_draws(tmp_path):
     assert [(r["unit"], r["verdict"]) for r in said] == [("setup inn", "refused"), ("setup road", "passed")]
 
 
+def test_a_crowd_refusal_says_what_the_gate_said(tmp_path):
+    """The triage of an unruled refusal reads its why: an empty why hid which crowd no shot draws."""
+    faults = gr.resolve("studio.plan_gates:orphan_crowd_faults")
+    put(tmp_path, "plan.json", {"setups": {"inn": {"crowd": "a dozen drinkers"}},
+                                "shots": [{"index": 0, "setup": "inn", "size": "close"}]})
+    said = gr.orphan_crowd(tmp_path, faults)
+    assert "a dozen drinkers" in said[0]["why"] and "G-CROWD-ORPHAN" in said[0]["why"]
+
+
+def test_a_crowd_refusal_belongs_to_its_whole_setup_name(tmp_path):
+    """jekyll_ep01: walk_on_day_2's fault was also counted against walk_on_day (a substring match)."""
+    faults = gr.resolve("studio.plan_gates:orphan_crowd_faults")
+    put(tmp_path, "plan.json", {"setups": {"walk": {"crowd": ""}, "walk_2": {"crowd": "three walkers"}},
+                                "shots": [{"index": 0, "setup": "walk", "size": "close"},
+                                          {"index": 1, "setup": "walk_2", "size": "close"}]})
+    assert [r["verdict"] for r in gr.orphan_crowd(tmp_path, faults)] == ["passed", "refused"]
+
+
 def test_l28_refuses_a_sun_in_a_night_setups_style_line(tmp_path):
     lint = gr.resolve("studio.episode_ref_official:l28_style_light")
     prompt = "subject_definitions:\nx\n\ndetailed_description:\nInk, low sun from the west.\n[Shot 1] a door."
@@ -266,11 +284,14 @@ def test_no_frozen_fixture_holds_an_absolute_path():
     assert found == []
 
 
-PINNED = {"G-STANDING": (28, 28, 14), "G-META-CREDIT": (42, 6, 0), "G-HOLE-SLACK": (42, 7, 0),
-          "OUTSIDE-UNREAD": (11, 0, 41), "A28-TINY-FACE": (25, 8, 41), "G-CROWD-ORPHAN": (236, 21, 0),
+PINNED = {"G-STANDING": (28, 28, 14), "G-META-CREDIT": (42, 1, 0), "G-HOLE-SLACK": (42, 7, 0),
+          "OUTSIDE-UNREAD": (11, 0, 41), "A28-TINY-FACE": (25, 8, 41), "G-CROWD-ORPHAN": (236, 19, 0),
           "L28-STYLE-LIGHT": (1044, 24, 0), "FACE-LIST": (1041, 4, 0), "ADVISORY-WORDING": (8, 8, 0)}
 """(n, hits, unread) each cheap gate replays to on the 42 frozen episodes, pinned from results/gates.json of
-2026-10-21; a change to a gate or a fixture that moves one is seen here (the dry check runs in its own test)."""
+2026-10-21; a change to a gate or a fixture that moves one is seen here (the dry check runs in its own test).
+G-CROWD-ORPHAN was 21 until its faults were matched to the WHOLE setup name (walk_on_day and scullery_wake
+had taken their _2 twins' faults).  G-META-CREDIT was 6 until a numeral before a comma counted as a numeral
+(Scarlet ep01-05's 'Chapter II, "..."'); the one left is Jekyll ep01's broken line, the gate's own case."""
 
 
 @pytest.mark.parametrize("gate_id", sorted(PINNED))

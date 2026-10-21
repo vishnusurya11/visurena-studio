@@ -54,15 +54,28 @@ def named_paths(repo: Path = settings.REPO, comfy: Path = settings.TODAY_COMFY_R
     return list(dict.fromkeys(named))
 
 
-def snapshot(paths: list[Path]) -> dict[str, tuple[int, int] | None]:
-    """path -> (size, mtime_ns), None for a path that does not exist."""
-    out: dict[str, tuple[int, int] | None] = {}
+def entry_names(folder: Path) -> str:
+    """A folder's direct entry names, sorted and joined (one directory read, no stat per entry)."""
+    try:
+        with os.scandir(folder) as entries:
+            return "\n".join(sorted(e.name for e in entries))
+    except OSError:
+        return ""
+
+
+def snapshot(paths: list[Path]) -> dict[str, tuple | None]:
+    """path -> (size, mtime_ns), plus a folder's entry names; None for a path that does not exist.
+    NTFS stamps a folder from a coarse clock, so an entry added in the snapshot's own tick leaves
+    the folder's mtime unmoved: the names catch it."""
+    out: dict[str, tuple | None] = {}
     for path in paths:
         try:
             st = os.stat(path)
-            out[str(path)] = (st.st_size, st.st_mtime_ns)
         except OSError:
             out[str(path)] = None
+            continue
+        names = (entry_names(path),) if os.path.isdir(path) else ()
+        out[str(path)] = (st.st_size, st.st_mtime_ns, *names)
     return out
 
 
