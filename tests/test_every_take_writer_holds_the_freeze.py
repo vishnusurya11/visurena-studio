@@ -87,6 +87,19 @@ NOT_A_TAKE = {
 }
 """Byte movers in a take module that write something else, and what."""
 
+SANDBOX_ONLY = {
+    "scripts/proof/face_replay.py:restore_take": "ep01's first-master take copied into the replay's sandbox room",
+    "scripts/proof/face_replay.py:copy_named": "named episode records copied into the sandbox",
+    "scripts/proof/face_replay.py:copy_if": "one record copied into the sandbox",
+    "scripts/proof/face_replay.py:refine_workflows": "the refine workflows copied into the sandbox",
+    "scripts/proof/face_replay.py:staged_picture": "a face crop png under the proof's review/ folder",
+    "scripts/proof/face_replay.py:render": "the replay's recorded tiny-face draw onto a SANDBOX take, under the fence",
+}
+"""Proof-harness writers (2026-10-21_ep02_proof DESIGN 4.1): they write only into a rehearsal sandbox, where
+no owner's repair has frozen anything.  `render` runs under the write fence (studio/rehearsal/fence.py),
+which refuses a write under the real library; the copies run before the fence is armed, each into a path
+under the sandbox it was handed.  Only a function under scripts/proof/ may be listed here."""
+
 PASS_THROUGH = {
     "studio/episode_home.py:displace": "keep_aside plus the graph; its callers decide",
     "scripts/episode/takes_r2v.py:make_room": "displaces the take a render replaces",
@@ -317,18 +330,23 @@ def writers_above(code: Code) -> set[str]:
 
 def loose_writers(code: Code) -> set[str]:
     """Functions above a take writer that are neither a writer, a pass-through, a site nor a gap."""
-    return writers_above(code) - set(TAKE_BYTES) - set(PASS_THROUGH) - set(SITES) - set(GAPS)
+    return writers_above(code) - set(TAKE_BYTES) - set(PASS_THROUGH) - set(SITES) - set(GAPS) - set(SANDBOX_ONLY)
 
 
 # ---- 1. byte writers --------------------------------------------------------------------------
 
 def test_every_byte_writer_in_a_take_module_is_sorted(code):
     found = set(byte_writers(code))
-    unsorted = found - set(TAKE_BYTES) - set(NOT_A_TAKE)
+    unsorted = found - set(TAKE_BYTES) - set(NOT_A_TAKE) - set(SANDBOX_ONLY)
     assert not unsorted, ("a new byte writer in a take module: is it a writer of T<nn>.mp4 (TAKE_BYTES, and "
                           f"then it must reach a freeze site) or does it write something else (NOT_A_TAKE)? {sorted(unsorted)}")
-    stale = (set(TAKE_BYTES) | set(NOT_A_TAKE)) - found
+    stale = (set(TAKE_BYTES) | set(NOT_A_TAKE) | set(SANDBOX_ONLY)) - found
     assert not stale, f"no longer a byte writer (drop it from the lists): {sorted(stale)}"
+
+
+def test_only_proof_harness_code_is_sandbox_only():
+    """A production writer can never hide from the freeze by calling itself a sandbox writer."""
+    assert all(k.startswith("scripts/proof/") for k in SANDBOX_ONLY), sorted(SANDBOX_ONLY)
 
 
 @pytest.mark.parametrize("key", sorted(TAKE_BYTES))
