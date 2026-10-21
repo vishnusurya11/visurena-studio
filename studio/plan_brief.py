@@ -86,6 +86,15 @@ PICTURE_RULES = [
     "person holds ONE position per drawn picture (G-TWICE): place a man once in "
     "frame+at_rest and once in end; two different anchors ('into the scullery' and "
     "'at the kitchen door') double him.",
+    "A face the chapter keeps back (he will not look up, he turns away) is withheld by "
+    "GEOMETRY until the answer's shot: from behind, past the other man's shoulder, a hand "
+    "or key insert, or a medium close with his head level, chin tucked and the hat brim's "
+    "black across his eyes, the camera at or above his eye level. Before it, never write "
+    "that he lifts his chin, tilts his head back, looks up or turns his face to the light, "
+    "never a low angle, never lamp light on his cheek -- the model lights a face at the "
+    "second the words lift it (Jekyll ep01 T10, T11) -- and he speaks no dialogue line: "
+    "the narrator reports his reply. His face is lit once, on the answer's shot, by one "
+    "timed verb: 'At 00:02 he fronts about into the lamp and lifts his chin'.",
 ]
 """The standing picture gates, told to the WRITER up front (2026-10-01, ep15:
 three generations of drafts omitted light directions because no section said
@@ -304,6 +313,13 @@ def dialogue_band(book_dir: Path | None, number: int | None) -> list[float]:
     return [plan_gates.dial_floor(speech), plan_gates.dial_ceiling(speech)]
 
 
+def dialogue_words_max(ceiling: float) -> int:
+    """The dialogue ceiling said in words of the plan's word wall (five-iterations B2):
+    ch2's 0.27 is 83 of 310 words, not a share the writer finds by refusal."""
+    from studio import plan_gates
+    return int(ceiling * plan_gates.MAX_PLAN_WORDS)
+
+
 def book_motif(book_dir: Path | None) -> str:
     """The book's recurring image: series.json's `motif`, else its first episode's
     plan's (research 04 P8: every episode repeats the first one's ritual)."""
@@ -319,7 +335,7 @@ def band(book_dir: Path | None = None, number: int | None = None) -> dict:
     """The format band, read off the contract, the grammar and the series' measured voice."""
     from studio import grammar_battery
     from studio.episode_takes import BUDGET
-    rate = spoken_rate(book_dir, number)
+    rate, dial = spoken_rate(book_dir, number), dialogue_band(book_dir, number)
     return {"min_seconds": episode_spec.MIN_SECONDS, "max_seconds": episode_spec.MAX_SECONDS,
             "words_per_second": rate, "take_seconds": BUDGET,
             "max_words_per_shot": int(rate * BUDGET),
@@ -330,7 +346,7 @@ def band(book_dir: Path | None = None, number: int | None = None) -> dict:
             "max_setup_seconds": episode_spec.MAX_SETUP_SECONDS,
             "bed_tones": list(__import__("studio.episode_bed", fromlist=["TONES"]).TONES),
             "aspect": episode_spec.canvas.DEFAULT if hasattr(episode_spec, "canvas") else "1:1",
-            "dialogue_share": dialogue_band(book_dir, number),
+            "dialogue_share": dial, "dialogue_words_max": dialogue_words_max(dial[1]),
             "turn_band": list(episode_spec.TURN_BAND),
             "grammar": episode_spec.STUDIO_GRAMMAR, "grammar_rules": grammar_battery.band(),
             "motif": book_motif(book_dir)}

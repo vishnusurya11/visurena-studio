@@ -41,7 +41,8 @@ of these is refused.
    seconds of beats and codas over the plan, and at most 310 words (G-PACE).
    Over budget, cut a line -- never a breath.
 5. **Withhold what the chapter withholds.** A name, a face or a fact the
-   chapter keeps back until its end stays back until the same moment.
+   chapter keeps back until its end stays back until the same moment; a face
+   it keeps back is withheld by geometry (the brief's picture rules).
 
 ---
 
@@ -148,7 +149,7 @@ turn, spike, reaction, runout, button, answer, act_out, tease.
 - The narrator carries the bridges; the people speak their own scenes ON
   CAMERA. `dialogue_share` in the band is THIS chapter's dial (it follows the
   chapter's own speech), and it counts dialogue only: a tale or an inner line
-  sits outside it.
+  sits outside it. `dialogue_words_max` is its ceiling in words: count them.
 - A dialogue line's shot shows the speaker's face at `close` or `medium_close`
   and lists the speaker in `faces`: the lips are driven by the line's own audio.
 - At most `max_words_per_line` words a line, at most `max_lines_per_shot` lines
