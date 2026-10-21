@@ -1,0 +1,502 @@
+{
+ "places": {
+  "black_mail_house_door": {
+   "name": "Black Mail House door and adjoining by-street",
+   "members": [
+    "black_mail_house_door"
+   ],
+   "masters": [
+    {
+     "master_id": "black_mail_house_door/wide_establishing",
+     "location": "black_mail_house_door",
+     "view": "wide_establishing",
+     "side": "",
+     "sha8": "c0184c09",
+     "derived_from": "",
+     "made_by": "fresh"
+    },
+    {
+     "master_id": "black_mail_house_door/court_entry_pavement",
+     "location": "black_mail_house_door",
+     "view": "court_entry_pavement",
+     "side": "",
+     "sha8": "bb92ee07",
+     "derived_from": "",
+     "made_by": "fresh"
+    }
+   ],
+   "states": [
+    {
+     "state_id": "night_at_four_in_the_morning_the_kerb_gas_lamp_l",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "night at four in the morning, the kerb gas lamp lit with a yellow flame, frost on the two stone steps, a coal-black sky above the gable"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "night_instead_of_morning_the_gas_lamp_lit_white_",
+     "start": {
+      "chapter": 2,
+      "scene": null
+     },
+     "until": {
+      "chapter": 2,
+      "scene": null
+     },
+     "deltas": [
+      "night instead of morning, the gas lamp lit, white frost on the cobbles, shop shutters closed along the street, the dark arched mouth of a court entry at the left edge"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "black_match_scorch_streaks_on_the_lower_door_pan",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "black match-scorch streaks on the lower door panels, knife nicks on the mouldings, Sunday shutters closed on the shop fronts"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "sunday_daylight_black_match_scorch_streaks_on_th",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "Sunday daylight, black match-scorch streaks on the door panels, the brass keyhole polished bright"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "winter_night_at_four_in_the_morning_the_kerb_gas",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "winter night at four in the morning, the kerb gas lamp lit, frost on the kerbstones"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "four_o_clock_of_a_black_winter_morning_the_kerb_",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "four o'clock of a black winter morning, the kerb gas lamp lit, the shop shutters closed, the cobbles wet, the door shut in its dark recess"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "a_bright_sunday_afternoon_the_shop_shutters_fres",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "a bright Sunday afternoon, the shop shutters freshly painted and open, the brasses shining, the by-street nearly empty"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "a_bright_sunday_afternoon_the_door_shut_in_its_r",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "a bright Sunday afternoon, the door shut in its recess, the brass keyhole plate rubbed bright against the stained paint"
+     ],
+     "source": []
+    }
+   ],
+   "variants": [
+    {
+     "master_id": "black_mail_house_door/court_entry_pavement",
+     "state_id": "sunday_daylight_black_match_scorch_streaks_on_th",
+     "view": "court_entry_pavement__sunday_daylight_black_match_scorch_streaks_on_th",
+     "parent_sha8": "bb92ee07",
+     "sha8": "1a8e8c22",
+     "made_by": "edit"
+    },
+    {
+     "master_id": "black_mail_house_door/wide_establishing",
+     "state_id": "four_o_clock_of_a_black_winter_morning_the_kerb_",
+     "view": "wide_establishing__four_o_clock_of_a_black_winter_morning_the_kerb_",
+     "parent_sha8": "c0184c09",
+     "sha8": "63692277",
+     "made_by": "edit"
+    },
+    {
+     "master_id": "black_mail_house_door/wide_establishing",
+     "state_id": "a_bright_sunday_afternoon_the_shop_shutters_fres",
+     "view": "wide_establishing__a_bright_sunday_afternoon_the_shop_shutters_fres",
+     "parent_sha8": "c0184c09",
+     "sha8": "b4e12f6e",
+     "made_by": "edit"
+    },
+    {
+     "master_id": "black_mail_house_door/wide_establishing",
+     "state_id": "a_bright_sunday_afternoon_the_door_shut_in_its_r",
+     "view": "wide_establishing__a_bright_sunday_afternoon_the_door_shut_in_its_r",
+     "parent_sha8": "c0184c09",
+     "sha8": "07e3228e",
+     "made_by": "edit"
+    }
+   ]
+  },
+  "carew_murder_lane": {
+   "name": "The lane beside the river",
+   "members": [
+    "carew_murder_lane"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "jekyll_cabinet": {
+   "name": "Dr. Jekyll’s cabinet",
+   "members": [
+    "hyde_soho_rooms",
+    "jekyll_cabinet"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "jekyll_house": {
+   "name": "Dr. Jekyll’s house and laboratory",
+   "members": [
+    "jekyll_bedroom",
+    "jekyll_house",
+    "jekyll_mirror"
+   ],
+   "masters": [
+    {
+     "master_id": "jekyll_house/hall",
+     "location": "jekyll_house",
+     "view": "hall",
+     "side": "",
+     "sha8": "0cbef055",
+     "derived_from": "",
+     "made_by": "fresh"
+    }
+   ],
+   "states": [],
+   "variants": []
+  },
+  "jekyll_laboratory": {
+   "name": "Dr. Jekyll’s laboratory building",
+   "members": [
+    "jekyll_laboratory"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "jekyll_laboratory_cabinet_room": {
+   "name": "Jekyll’s laboratory cabinet room",
+   "members": [
+    "jekyll_laboratory_cabinet_room"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "lanyon_consulting_room": {
+   "name": "Dr. Lanyon’s consulting room, Cavendish Square",
+   "members": [
+    "lanyon_consulting_room"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "lanyon_dining_room": {
+   "name": "Dr. Lanyon’s dining-room",
+   "members": [
+    "lanyon_dining_room"
+   ],
+   "masters": [
+    {
+     "master_id": "lanyon_dining_room/dining_room",
+     "location": "lanyon_dining_room",
+     "view": "dining_room",
+     "side": "",
+     "sha8": "5cea9fd5",
+     "derived_from": "",
+     "made_by": "fresh"
+    }
+   ],
+   "states": [],
+   "variants": []
+  },
+  "lanyon_house": {
+   "name": "Dr. Lanyon’s house, Cavendish Square",
+   "members": [
+    "lanyon_house"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "lanyon_table": {
+   "name": "The table in Lanyon’s house",
+   "members": [
+    "lanyon_table"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "london": {
+   "name": "London",
+   "members": [
+    "london"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "london_streets": {
+   "name": "London streets",
+   "members": [
+    "london_streets"
+   ],
+   "masters": [
+    {
+     "master_id": "london_streets/night_street",
+     "location": "london_streets",
+     "view": "night_street",
+     "side": "",
+     "sha8": "b142dc8b",
+     "derived_from": "",
+     "made_by": "fresh"
+    }
+   ],
+   "states": [],
+   "variants": []
+  },
+  "london_sunday_walks": {
+   "name": "The Sunday walks of London",
+   "members": [
+    "london_sunday_walks"
+   ],
+   "masters": [
+    {
+     "master_id": "london_sunday_walks/wide_establishing",
+     "location": "london_sunday_walks",
+     "view": "wide_establishing",
+     "side": "",
+     "sha8": "250e5c0a",
+     "derived_from": "",
+     "made_by": "fresh"
+    },
+    {
+     "master_id": "london_sunday_walks/lamplit_cross_street",
+     "location": "london_sunday_walks",
+     "view": "lamplit_cross_street",
+     "side": "",
+     "sha8": "151962f8",
+     "derived_from": "",
+     "made_by": "fresh"
+    }
+   ],
+   "states": [
+    {
+     "state_id": "black_winter_night_frost_on_the_flagstones_every",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "black winter night, frost on the flagstones, every window dark, every gas lamp lit"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "sunday_morning_shutters_closed_on_the_shop_front",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "Sunday morning, shutters closed on the shop fronts, the brasses freshly polished"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "sunday_morning_under_a_flat_grey_overcast_sky_co",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "Sunday morning under a flat grey overcast sky, cold grey daylight, the shop shutters closed and painted dark oxblood red and bone white, the brasses polished"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "three_o_clock_of_a_black_winter_morning_every_st",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "three o'clock of a black winter morning, every street lamp lit, wet cobbles shining, every window shuttered and dark"
+     ],
+     "source": []
+    },
+    {
+     "state_id": "a_bright_sunday_afternoon_the_street_broad_and_n",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 1,
+      "scene": null
+     },
+     "deltas": [
+      "a bright Sunday afternoon, the street broad and nearly empty, long shadows on the flagstones"
+     ],
+     "source": []
+    }
+   ],
+   "variants": [
+    {
+     "master_id": "london_sunday_walks/lamplit_cross_street",
+     "state_id": "black_winter_night_frost_on_the_flagstones_every",
+     "view": "lamplit_cross_street__black_winter_night_frost_on_the_flagstones_every",
+     "parent_sha8": "151962f8",
+     "sha8": "cdb37d0f",
+     "made_by": "edit"
+    },
+    {
+     "master_id": "london_sunday_walks/wide_establishing",
+     "state_id": "three_o_clock_of_a_black_winter_morning_every_st",
+     "view": "wide_establishing__three_o_clock_of_a_black_winter_morning_every_st",
+     "parent_sha8": "250e5c0a",
+     "sha8": "ec831bd1",
+     "made_by": "edit"
+    },
+    {
+     "master_id": "london_sunday_walks/wide_establishing",
+     "state_id": "a_bright_sunday_afternoon_the_street_broad_and_n",
+     "view": "wide_establishing__a_bright_sunday_afternoon_the_street_broad_and_n",
+     "parent_sha8": "250e5c0a",
+     "sha8": "4285a83d",
+     "made_by": "edit"
+    }
+   ]
+  },
+  "police_station_cell": {
+   "name": "Police station cell",
+   "members": [
+    "police_station_cell"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "portland_street_hotel": {
+   "name": "Hotel in Portland Street",
+   "members": [
+    "portland_street_hotel"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "regents_park": {
+   "name": "Regent’s Park",
+   "members": [
+    "regents_park"
+   ],
+   "masters": [],
+   "states": [],
+   "variants": []
+  },
+  "utterson_house": {
+   "name": "Mr. Utterson’s house and chambers",
+   "members": [
+    "utterson_house"
+   ],
+   "masters": [
+    {
+     "master_id": "utterson_house/business_room",
+     "location": "utterson_house",
+     "view": "business_room",
+     "side": "",
+     "sha8": "88cec721",
+     "derived_from": "",
+     "made_by": "fresh"
+    },
+    {
+     "master_id": "utterson_house/bedroom",
+     "location": "utterson_house",
+     "view": "bedroom",
+     "side": "",
+     "sha8": "dc336469",
+     "derived_from": "",
+     "made_by": "fresh"
+    }
+   ],
+   "states": [],
+   "variants": []
+  }
+ }
+}
