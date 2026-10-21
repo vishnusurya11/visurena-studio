@@ -40,7 +40,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from studio import episode_drive, episode_home  # noqa: E402
+from studio import episode_drive, episode_home, settings  # noqa: E402
 
 
 def utf8_console() -> None:
@@ -58,7 +58,10 @@ POLL_S = 30
 
 
 def git(*args: str) -> str:
-    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    """HEAD and porcelain: the checkout, or the sandbox's 1-commit repo in a rehearsal, so the
+    dirty-tree refusal never reads other builders' edits there.  Children keep cwd=ROOT."""
+    return subprocess.run(["git", *args], cwd=settings.git_root(), capture_output=True, text=True,
+                          check=True).stdout
 
 
 def quiet(env=os.environ) -> bool:

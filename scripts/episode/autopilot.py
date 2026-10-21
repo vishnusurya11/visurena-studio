@@ -56,12 +56,15 @@ from typing import Any, Callable
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from studio import settings  # noqa: E402
 from studio.command_center import procs  # noqa: E402
 
 ProcRow = procs.ProcInfo
-LIBRARY = ROOT / "library"
+LIBRARY = settings.library_root()
+"""<repo>/library, or the sandbox's in a rehearsal (2026-10-21_ep02_proof 1.2): the root, lock,
+status and book_of all follow it."""
 TASK = "visurena-autopilot"
-ENGINE_URL = os.environ.get("COMFY_URL", "http://127.0.0.1:8188")
+ENGINE_URL = settings.comfy_host(os.environ.get("COMFY_URL", "http://127.0.0.1:8188"))
 HUNG_S = 3600.0
 """A run log quiet this long while /queue shows the same prompt is a hung
 engine (memory: run 18 lost 11 h to a Qwen3-VL read nobody killed)."""
@@ -101,7 +104,9 @@ class Lazy:
 
 
 def git(*args: str) -> str:
-    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    """HEAD and porcelain from the checkout, or from the sandbox's 1-commit repo in a rehearsal."""
+    return subprocess.run(["git", *args], cwd=settings.git_root(), capture_output=True, text=True,
+                          check=True).stdout
 
 
 def notify(text: str) -> None:

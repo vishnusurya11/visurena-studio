@@ -243,8 +243,11 @@ def touched(paths: list[str]) -> list[str]:
 
 
 def changed_paths() -> list[str]:
-    """Every path that differs from HEAD, staged or not (git diff --name-only HEAD)."""
-    out = subprocess.run(["git", "diff", "--name-only", "HEAD"], cwd=ROOT, capture_output=True, text=True)
+    """Every path that differs from HEAD, staged or not (git diff --name-only HEAD); the sandbox
+    repo's in a rehearsal (2026-10-21_ep02_proof 1.2)."""
+    from studio import settings
+    out = subprocess.run(["git", "diff", "--name-only", "HEAD"], cwd=settings.git_root(), capture_output=True,
+                         text=True)
     return [line.strip() for line in out.stdout.splitlines() if line.strip()]
 
 

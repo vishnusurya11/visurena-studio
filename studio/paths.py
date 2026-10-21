@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-LIBRARY_ROOT = Path("library")
+from studio import settings
+
+LIBRARY_ROOT = settings.library_root(relative=True)
+"""Today's cwd-relative `library`, or VISURENA_LIBRARY in a rehearsal (2026-10-21_ep02_proof 1.2)."""
 
 
 def book_dir(codex_id: str, library_root: Path = LIBRARY_ROOT) -> Path:

@@ -18,9 +18,13 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
+from studio import settings
+
 WORKFLOWS = Path("D:/Projects/KingdomOfViSuReNa/alpha/comfy_studio/workflows")
-COMFY_ROOT = Path("D:/Projects/KingdomOfViSuReNa/alpha/ComfyUI_windows_portable/ComfyUI")
-HOST = "http://127.0.0.1:8188"
+COMFY_ROOT = settings.comfy_root()
+HOST = settings.comfy_host()
+"""The portable ComfyUI on :8188, or the sandbox's comfy/ and fake engine in a rehearsal
+(2026-10-21_ep02_proof 1.2)."""
 
 
 def load_workflow(name: str) -> tuple[dict, dict]:
@@ -522,7 +526,7 @@ def text_timeout(timeout: float, applies: bool = True) -> float:
     return max(1.0, min(timeout, ROW_DEADLINE - time.time() + ROW_GRACE_S))
 
 
-VLM_CALLS: Path | None = Path(__file__).resolve().parents[1] / "library" / "vlm_calls.jsonl"
+VLM_CALLS: Path | None = settings.library_root() / "vlm_calls.jsonl"
 """One row per engine text read (five-iterations B15.2): the ~13 s read's setup against its
 decode is unmeasured, so ep02's reads fit seconds = a + b * tokens.  None logs nothing (tests)."""
 
@@ -564,7 +568,7 @@ def run_text(name: str, values: dict[str, Any], timeout: float = 600.0) -> str:
     return text
 
 
-TEXT_CACHE = Path(__file__).resolve().parents[1] / "library" / ".vlm_cache"
+TEXT_CACHE = settings.library_root() / ".vlm_cache"
 TEXT_CACHE_VERSION = "1"
 """Bump when a node's behaviour changes under an unchanged workflow JSON."""
 

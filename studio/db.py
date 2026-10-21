@@ -15,9 +15,10 @@ import sqlite3
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from studio import episode_home, registry, spend
+from studio import episode_home, registry, settings, spend
 
-DB_PATH = Path("db") / "visurena_studio.db"
+DB_PATH = settings.db_path()
+"""Today's cwd-relative db/, or <sandbox>/db in a rehearsal (2026-10-21_ep02_proof 1.2)."""
 
 EVENT_VOCABULARY = ("started", "completed", "failed", "skipped", "escalated", "deferred")
 """`escalated`: the step parked its unit for an owner signature (decision

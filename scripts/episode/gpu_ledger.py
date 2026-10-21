@@ -30,8 +30,10 @@ from typing import Callable
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-LEDGER = ROOT / "library" / ".device" / "gpu_util.jsonl"
-LOCK = ROOT / "library" / ".autopilot" / "gpu.lock"
+from studio import settings  # noqa: E402
+
+LEDGER = settings.library_root() / ".device" / "gpu_util.jsonl"
+LOCK = settings.library_root() / ".autopilot" / "gpu.lock"
 EVERY_S = 5.0
 BUSY_UTIL = 5
 """A GPU at or above this util % counts as busy even when /queue shows nothing."""

@@ -577,10 +577,17 @@ def launch_preflight(connect, codex: str, number: int) -> list[str]:
     return preflight(conn, codex, number)
 
 
+def head_sha() -> str:
+    """HEAD's short sha: the checkout's, or the sandbox repo's in a rehearsal (2026-10-21_ep02_proof 1.2)."""
+    from studio import settings
+    return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=settings.git_root(), capture_output=True,
+                          text=True).stdout.strip()
+
+
 def main(codex: str, number: int, steps: list[str]) -> int:
     from studio import db
     home = episode_home.home(episode_home.book_dir(codex), number)
-    head = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+    head = head_sha()
     print(f"DRY CHECK {codex} ep{number:02d} at {head}, {time.strftime('%Y-%m-%d %H:%M')} local; "
           f"owner redo of {', '.join(steps)} assumed", flush=True)
     before, conn = snapshot(home), db.get_connection()

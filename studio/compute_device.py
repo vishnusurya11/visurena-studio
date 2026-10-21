@@ -31,9 +31,11 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Callable, Mapping
 
+from studio import settings
+
 ROOT = Path(__file__).resolve().parents[1]
-CLAIMS = ROOT / "library" / ".device" / "claims"
-LOG = ROOT / "library" / ".device" / "decisions.jsonl"
+CLAIMS = settings.library_root() / ".device" / "claims"
+LOG = settings.library_root() / ".device" / "decisions.jsonl"
 SETTING = "VISURENA_DEVICE"
 UNREACHABLE = (ConnectionError, TimeoutError)
 """What a queue probe raises while the engine is down: a decision for the CPU, not a crash."""

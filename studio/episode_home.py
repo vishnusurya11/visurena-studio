@@ -34,9 +34,11 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from studio import settings
 from studio.episode_spec import Episode
 
-LIBRARY = Path(__file__).resolve().parents[1] / "library"
+LIBRARY = settings.library_root()
+"""<repo>/library, or VISURENA_LIBRARY in a rehearsal (2026-10-21_ep02_proof 1.2)."""
 
 
 def book_dir(book_id: str) -> Path:

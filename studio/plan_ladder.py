@@ -156,9 +156,10 @@ def ladder_over_clock(improves: int = 2) -> Ladder:
 def code_sha8() -> str:
     """The code a verdict was judged under: HEAD's sha8, '' outside a checkout."""
     import subprocess
+    from studio import settings
     try:
         out = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=False,
-                             cwd=Path(__file__).resolve().parents[1])
+                             cwd=settings.git_root())
     except OSError:
         return ""
     return out.stdout.strip()[:8]

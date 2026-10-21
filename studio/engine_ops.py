@@ -22,12 +22,14 @@ import urllib.request
 from pathlib import Path
 from typing import Callable, Iterable
 
+from studio import settings
 from studio.command_center.procs import ProcInfo
 from studio.comfy import HOST
 
 ENV_PORTABLE = "COMFY_PORTABLE"
-DEFAULT_PORTABLE = "D:/Projects/KingdomOfViSuReNa/alpha/ComfyUI_windows_portable"
-"""The portable ComfyUI's folder on this box; `COMFY_PORTABLE` overrides it."""
+DEFAULT_PORTABLE = settings.comfy_portable("D:/Projects/KingdomOfViSuReNa/alpha/ComfyUI_windows_portable")
+"""The portable ComfyUI's folder on this box; `COMFY_PORTABLE` overrides it.  In a rehearsal
+it is a sandbox path that holds no engine (2026-10-21_ep02_proof 1.2)."""
 ENGINE_ARGS = ("-s", "ComfyUI/main.py", "--windows-standalone-build",
                "--disable-assets", "--reserve-vram", "2")
 """The launch the owner's hand used on 2026-09-06 (memory comfy-restart), plus

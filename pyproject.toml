@@ -56,8 +56,11 @@ voice = [
 testpaths = ["tests"]
 # `local` needs the local ComfyUI / a GPU model: free, slow, nondeterministic,
 # and excluded from the default run.  Opt in with `-m local`.
-markers = ["local: needs the local ComfyUI or a model on disk; excluded by default"]
-addopts = "-m 'not local'"
+# `rehearsal` runs the real pipeline in a sandbox against the fakes (docs/audit/2026-10-21_ep02_proof);
+# excluded by default, opt in with `-m rehearsal`.
+markers = ["local: needs the local ComfyUI or a model on disk; excluded by default",
+           "rehearsal: runs the real pipeline in a fenced sandbox on recorded engines; excluded by default"]
+addopts = "-m 'not local and not rehearsal'"
 
 [build-system]
 requires = ["hatchling"]

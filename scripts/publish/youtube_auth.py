@@ -26,7 +26,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import youtube
+from studio import settings, youtube
 
 MINTED = "YOUTUBE_REFRESH_TOKEN_AT"
 """When the refresh token was stored (epoch seconds), written beside it in .env."""
@@ -92,8 +92,9 @@ def consent(env: Path, blob: Path | None = None) -> str:
 
 
 PASTE_REDIRECT = "http://localhost:8765/"
-PENDING = Path("library") / ".youtube_consent.json"
-"""The PKCE verifier between the two halves of a pasted consent; library/ is gitignored."""
+PENDING = settings.library_root(relative=True) / ".youtube_consent.json"
+"""The PKCE verifier between the two halves of a pasted consent; library/ is gitignored.
+In a rehearsal it lands in the sandbox library (2026-10-21_ep02_proof 1.2)."""
 
 
 def code_from(url: str) -> str:
