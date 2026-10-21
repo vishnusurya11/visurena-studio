@@ -396,7 +396,7 @@ def test_the_precondition_audit_becomes_a_named_outcome_row_and_its_unknowns_are
              "props": {"status": "REAL-RUN", "why": "named by the step-02 plan"}}
     rows = cf.precondition_rows(audit)
     named = next(r for r in rows if r["check"] == "preconditions_ch2")
-    assert (named["n_distinct"], named["n_pass"], named["n_points"], named["passed"]) == (2, 2, 3, True)
+    assert (named["n_distinct"], named["n_pass"], named["n_points"], named["passed"]) == (3, 2, 3, True)  # A8
     assert named["kind"] == "mechanism" and named["question"] == "Q6"
     gap = next(r for r in rows if r["kind"] == "gap")
     assert not gap["passed"] and "a servant" in gap["detail"] and "props" in gap["detail"]
@@ -435,3 +435,13 @@ def test_the_report_reads_a_substituted_take_or_a_canned_worker_as_no_quality_ev
     results file written before the asserts folded them in."""
     assert cf.contribution(row(match_classes=classes), SPEC)[0] == "mechanism"
     assert cf.contribution(row(match_classes={"exact": 2, "substituted": 0, "sdk_exact": 4}), SPEC)[0] == "quality"
+
+
+def test_the_precondition_row_counts_every_gap_and_lists_the_unknown_and_the_owners():
+    """AUDIT A8: 8 named outcomes over 9 gaps (LB 0.565), never 8/8 with the unknown out of both numbers."""
+    gaps = [{"what": f"g{i}", "outcome": "jit"} for i in range(8)] + [{"what": "an elderly servant", "outcome": "unknown"},
+                                                                      {"what": "series paused", "outcome": "owner"}]
+    rows = cf.precondition_rows({"gaps": gaps, "props": {"status": "REAL-RUN", "why": "SR-2"}})
+    head = rows[0]
+    assert (head["n_pass"], head["n_distinct"], head["n_points"]) == (8, 10, 10)
+    assert "an elderly servant" in rows[1]["detail"] and "series paused" in rows[1]["detail"]

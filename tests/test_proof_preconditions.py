@@ -138,3 +138,18 @@ def test_the_script_writes_the_audit_and_prints_its_path_first(book, tmp_path, c
 def test_the_chapter_argument_reads_ch2_or_2():
     from scripts.proof import preconditions as script
     assert script.chapter_of("ch2") == script.chapter_of("2") == 2
+
+
+def test_a_paused_or_ended_series_is_an_owner_precondition_the_audit_lists(book):
+    """AUDIT A8: the book's autopilot/series.json said paused, last 1 ('ep02 must not start'); an
+    unattended ep02 needs the owner to change it, so the audit names it as a gap of its own."""
+    (book / "autopilot").mkdir()
+    (book / "autopilot" / "series.json").write_text(json.dumps(
+        {"first": 1, "last": 1, "paused": True, "last_why": "ep02 must not start"}), encoding="utf-8")
+    said = [g for g in pre.audit(book, 2)["gaps"] if g["kind"] == "series_state"]
+    assert len(said) == 1 and said[0]["outcome"] == "owner"
+    assert "paused" in said[0]["what"] and "last 1" in said[0]["what"]
+    (book / "autopilot" / "series.json").write_text(json.dumps({"first": 1, "last": 9, "paused": False}),
+                                                   encoding="utf-8")
+    assert not [g for g in pre.audit(book, 2)["gaps"] if g["kind"] == "series_state"]
+    assert "autopilot/series.json" in pre.audit(book, 2)["sources"]

@@ -197,17 +197,18 @@ def incident_rows(summary: dict, rows: list[dict]) -> list[dict]:
 
 
 def precondition_rows(audit: dict) -> list[dict]:
-    """DESIGN 4.3: the ch2 gaps with a rule-named outcome (a just-in-time ref step or a named park) are a
-    mechanism row (F14 tests the handling); a gap with no named outcome, and props not yet listed, are open."""
+    """DESIGN 4.3: the ch2 gaps with a rule-named outcome (a just-in-time ref step or a named park) over EVERY
+    gap (AUDIT A8: the unknown and the owner's are in the denominator); F14 tests the handling.  A gap with no
+    named outcome, an owner's precondition (series.json) and props not yet listed are open."""
     gaps, src = audit.get("gaps") or [], "results/preconditions_ch2.json"
     named = [g for g in gaps if g.get("outcome") in NAMED_OUTCOMES]
-    unknown = [str(g.get("what")) for g in gaps if g.get("outcome") not in NAMED_OUTCOMES]
+    unknown = [f"{g.get('what')} ({g.get('outcome')})" for g in gaps if g.get("outcome") not in NAMED_OUTCOMES]
     props = audit.get("props") or {}
     unknown += [f"props ({props.get('why')})"] if props.get("status") == "REAL-RUN" else []
     parks = sum(g["outcome"] == "park" for g in named)
     detail = (f"{len(named)} of {len(gaps)} ch2 gaps have a named outcome ({parks} parks, {len(named) - parks} "
               "just-in-time ref steps); F14 tests the handling")
-    row = summary_row("preconditions_ch2", "mechanism", True, len(named), len(named), len(gaps), src, detail)
+    row = summary_row("preconditions_ch2", "mechanism", True, len(named), len(gaps), len(gaps), src, detail)
     return [row] + open_gap("ch2 preconditions with no named outcome", unknown, src)
 
 

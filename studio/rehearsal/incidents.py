@@ -280,9 +280,11 @@ def episode_numbers(book: Path, last: int | None = None) -> list[int]:
 
 
 def episode_entry(read: dict) -> dict:
-    """What the report keeps of one episode's read: its ledger summary and its files."""
+    """What the report keeps of one episode's read: its ledger summary, its files, and whether it had drive
+    records at all (AUDIT A9: an episode that predates drive.jsonl is `absent`, never 0 incidents)."""
+    absent = not read.get("drive") and not any(s.endswith("drive.jsonl") for s in read["sources"])
     return {"drive": read.get("drive", {}), "incidents": len(read["incidents"]),
-            "sources": read["sources"], "missing": read["missing"]}
+            "records": "absent" if absent else "read", "sources": read["sources"], "missing": read["missing"]}
 
 
 def survey(plan: list[tuple[str, list[int]]], root: Path, rules: list[dict]) -> dict:
@@ -297,4 +299,5 @@ def survey(plan: list[tuple[str, list[int]]], root: Path, rules: list[dict]) -> 
             read = episode_incidents(book, n, root)
             found += read["incidents"]
             episodes[f"{name}/ep{n:02d}"] = episode_entry(read)
-    return {"books": books, "episodes": episodes, **tally(found, rules)}
+    sample = {k: sum(e["records"] == k for e in episodes.values()) for k in ("read", "absent")}
+    return {"books": books, "episodes": episodes, "sample": sample, **tally(found, rules)}

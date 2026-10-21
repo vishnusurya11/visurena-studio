@@ -206,3 +206,17 @@ def test_a_code_move_hand_over_is_the_commit_class_even_in_a_cut_off_log(tmp_pat
     assert incidents.classify(incidents.log_incident(log, tmp_path), rules) == ("code_moved_hold", "F7")
     log.write_text("[drive] x ep22: episode completed after 1 run(s)\n", encoding="utf-8")
     assert incidents.log_incident(log, tmp_path) is None
+
+
+def test_an_episode_with_no_drive_records_is_absent_never_zero_incidents(book, rules, tmp_path):
+    """AUDIT A9: the Scarlet episodes predate drive.jsonl and printed 'start 0 end 0 | incidents 0'
+    as if they had run clean; their sample is absent, and the survey counts them apart."""
+    (book / "episodes" / "ep02").mkdir(parents=True)
+    out = incidents.survey([("jekyll", [1, 2])], book.parent, rules)
+    assert out["episodes"]["jekyll/ep02"]["records"] == "absent"
+    assert out["episodes"]["jekyll/ep01"]["records"] == "read"
+    assert out["sample"] == {"read": 1, "absent": 1}
+    from scripts.proof import incidents as script
+    lines = script.report_lines(out, tmp_path / "x.json")
+    assert any(line.startswith("jekyll/ep02: drive records absent") for line in lines)
+    assert not any(line.startswith("jekyll/ep02: start 0") for line in lines)

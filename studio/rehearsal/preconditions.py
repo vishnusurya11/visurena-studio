@@ -37,7 +37,10 @@ GAP_RULES = {
                       "at refs/locations/<location>/<view>.png"),
     "unresolved_name": ("unknown", "02", "no registry row: the step-02 plan decides whether this person is "
                         "shown or spoken; REAL-RUN until the ch2 plan exists (SR-2)"),
+    "series_state": ("owner", "autopilot", "studio/autopilot: a paused series, or one whose `last` is before this "
+                     "chapter, starts no episode; only the owner changes autopilot/series.json (AUDIT A8)"),
 }
+SERIES = "autopilot/series.json"
 COST_OF = {"base_sheet": "base_sheet", "place_picture": "place_picture", "voice": "voice"}
 
 
@@ -103,6 +106,16 @@ def gap(kind: str, what: str, norms: dict, note: str = "") -> dict:
     return {"kind": kind, "what": what, "outcome": outcome, "step": step, "basis": basis, "note": note,
             "cost_s": cost.get("seconds"), "cost_p90_s": cost.get("p90_s"),
             "cost_basis": cost.get("basis", "no cost: not a draw")}
+
+
+def series_gaps(book: Path, chapter: int) -> list[str]:
+    """What the book's series.json says that stops this chapter's episode from starting unattended."""
+    path = Path(book) / SERIES
+    said = read_json(path) if path.is_file() else {}
+    stops = (["paused"] if said.get("paused") else []) + (
+        [f"last {said['last']}"] if isinstance(said.get("last"), int) and said["last"] < chapter else [])
+    why = f" ({said['last_why']})" if said.get("last_why") else ""
+    return [f"{SERIES}: " + ", ".join(stops) + why] if stops else []
 
 
 def book_field_gaps(said: dict) -> list[str]:
@@ -175,7 +188,7 @@ SOURCES = ("source/book.json", "analysis/registry.json", "analysis/scenes.json",
 
 
 def sources(book: Path, chapter: int) -> list[str]:
-    named = [*SOURCES, f"analysis/extraction/ch_{chapter:02d}.json", f"source/chapters/ch_{chapter:02d}.json"]
+    named = [*SOURCES, SERIES, f"analysis/extraction/ch_{chapter:02d}.json", f"source/chapters/ch_{chapter:02d}.json"]
     return [rel for rel in named if (Path(book) / rel).is_file()]
 
 
@@ -183,7 +196,8 @@ def book_gaps(book: Path, chapter: int, norm: dict) -> list[dict]:
     """The book.json fields and the chapter text the steps refuse without."""
     said = read_json(Path(book) / "source" / "book.json")
     return ([gap("book_field", k, norm) for k in book_field_gaps(said)]
-            + [gap("chapter_text", rel, norm) for rel in chapter_text_gaps(book, said, chapter)])
+            + [gap("chapter_text", rel, norm) for rel in chapter_text_gaps(book, said, chapter)]
+            + [gap("series_state", what, norm) for what in series_gaps(book, chapter)])
 
 
 def cast_gaps(book: Path, cast: dict, norm: dict) -> list[dict]:

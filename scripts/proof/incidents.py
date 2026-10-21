@@ -40,8 +40,13 @@ def report_lines(out: dict, path: Path) -> list[str]:
     lines = [str(path)]
     for ep, row in out["episodes"].items():
         d = row["drive"]
+        if row.get("records") == "absent":
+            lines.append(f"{ep}: drive records absent (no drive.jsonl): not in the sample, never 0 incidents")
+            continue
         lines.append(f"{ep}: start {d.get('start', 0)} end {d.get('end', 0)} | incidents {row['incidents']}"
                      f" | {', '.join(f'{k} x{v}' for k, v in d.get('outcomes', {}).items())}")
+    sample = out.get("sample") or {}
+    lines.append(f"sample: {sample.get('read', 0)} episodes with drive records, {sample.get('absent', 0)} absent")
     lines.append(f"classes recorded {out['recorded']}, mapped to a scenario {out['mapped']}, "
                  f"UNCOVERED {len(out['uncovered'])}")
     lines += [f"  {cid}: {row['count']} -> {row['scenario']}" for cid, row in out["classes"].items()]
