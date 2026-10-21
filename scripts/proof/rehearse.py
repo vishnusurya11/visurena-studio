@@ -1,6 +1,11 @@
 """Run a rehearsal scenario (2026-10-21_ep02_proof DESIGN 3) and write its counted rows.
 
-    uv run --no-sync python scripts/proof/rehearse.py <scenario|all|checkpoints> [--run-id ID] [--results DIR]
+    uv run --no-sync python scripts/proof/rehearse.py <scenario|memos|checkpoints|all> [--run-id ID] [--results DIR]
+
+The order before any counted row (AUDIT A3): `memos` first (the REAL detect and whisper workers read
+every recorded take, crop and line into <proof>/memos, on the CPU while ComfyUI is idle), then
+`checkpoints` (S0a), then `all`.  Every real-book sandbox gets a copy of the memos, and its manifest
+names them and ep01's recordings index; a scenario whose memos or index are absent is `absent:`.
 
 This process is the HARNESS: it never sets VISURENA_LIBRARY on itself, so it is unfenced and
 reads only (the real repo's git log for the graph diff, the stat guard, the sandbox's files).
@@ -42,9 +47,19 @@ RESULTS = PROOF / "results"
 ROW_KEYS = asserts.ROW_KEYS
 PACKAGES = {"engine": "studio.rehearsal.fake_comfy", "fakes": "studio.rehearsal.fakes",
             "sdk": "studio.rehearsal.fake_sdk", "recordings": "studio.rehearsal.recordings"}
-FILES = {"preconditions": RESULTS / "preconditions_ch2.json", "writer": SCENARIOS / "S0b" / "writer_stream.json"}
-"""Inputs a scenario stands on that are files: P2's ch2 audit, SR-2's recorded writer session."""
-REAL = ("engine", "fakes", "sdk", "recordings")
+MEMOS = PROOF / "memos"
+"""The fake workers' memos, filled by `rehearse.py memos` and copied into each sandbox (AUDIT A3)."""
+RECORDINGS = RESULTS / "recordings" / f"{sandbox.REAL_CODEX}_ep01.json"
+"""ep01's recordings index (scripts/proof/index_recordings.py): what the fake ComfyUI answers from."""
+FILES = {"preconditions": RESULTS / "preconditions_ch2.json", "writer": SCENARIOS / "S0b" / "writer_stream.json",
+         "detect_memo": MEMOS / "detect.json", "whisper_memo": MEMOS / "whisper.json", "index": RECORDINGS}
+"""Inputs a scenario stands on that are files: P2's ch2 audit, SR-2's recorded writer session, the
+filled memos and the recordings index (without them every detection, line and graph is canned)."""
+REAL = ("engine", "fakes", "sdk", "recordings", "detect_memo", "whisper_memo", "index")
+COMMANDS = ("memos", "checkpoints", "all")
+"""The steps beside the scenarios, in the order they run."""
+MEMO_KINDS = {"detect": ("take", "refine_crop"), "whisper": ("tts_line",)}
+"""Which recorded files each memo is filled from (the anime asks are made at run time: a miss there is canned)."""
 
 
 @dataclass(frozen=True)
@@ -119,6 +134,36 @@ def skippable(out: Mapping) -> bool:
 def blocked_row(sid: str, why: str) -> dict:
     return asserts.row(sid, False, [], question="Q6", instrument_state=f"blocked: {why}", n_points=0,
                        detail=f"not run: {why}")
+
+
+# ---- the memos: filled once, staged into every sandbox (AUDIT A3) ------------------------------
+
+def memo_inputs(doc: Mapping, root: Path) -> dict[str, list[Path]]:
+    """{memo: the recorded files it is filled from}, from a recordings index (paths under `root`)."""
+    rows = doc.get("entries") or doc.get("recordings") or []
+    return {memo: [Path(root) / r["path"] for r in rows if r.get("kind") in kinds and isinstance(r.get("path"), str)]
+            for memo, kinds in MEMO_KINDS.items()}
+
+
+def real_fill(out: Path, **kinds) -> dict:
+    from scripts.proof import fill_memos
+    return fill_memos.fill(out, hear=fill_memos.real_ear() if kinds.get("whisper") else None, **kinds)
+
+
+def fill_step(index: Path = RECORDINGS, out: Path = MEMOS, root: Path = settings.REAL_LIBRARY,
+              fill: Callable | None = None) -> dict:
+    """`rehearse.py memos`: the real workers read every recorded take, crop and line into the memos."""
+    got = memo_inputs(json.loads(Path(index).read_text(encoding="utf-8")), root)
+    return (fill or real_fill)(Path(out), whisper=got["whisper"], detect=got["detect"])
+
+
+def stage_inputs(box: Path) -> dict:
+    """The memos copied into the sandbox; its manifest names them and the recordings index."""
+    dest = Path(box) / "memos"
+    dest.mkdir(parents=True, exist_ok=True)
+    for memo in sorted(Path(MEMOS).glob("*.json")):
+        shutil.copy2(memo, dest / memo.name)
+    return set_manifest(box, {"memos": str(dest), "recordings": str(RECORDINGS)})
 
 
 # ---- the sandbox ----------------------------------------------------------------------------
@@ -559,6 +604,8 @@ def prepare(sid: str, sc: Scenario, box: Path | None, run_id: str | None) -> tup
         box = checkpoint_box(sc.episode, sc.checkpoint)
     if box is None:
         return None, None, f"checkpoint {sc.checkpoint} absent: run `rehearse.py checkpoints` (S0a) first"
+    if "index" in sc.needs:
+        stage_inputs(box)
     return box, Path(box) / settings.LIBRARY_DIR / sandbox.book_name(), None
 
 
@@ -668,12 +715,15 @@ def scenario_out(sid: str, path: Path, done: list[dict], untried: int, stable: l
 
 def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("scenario", choices=[*TABLE, "all", "checkpoints"])
+    p.add_argument("scenario", choices=[*TABLE, *COMMANDS])
     p.add_argument("--run-id")
     p.add_argument("--results", default=str(RESULTS))
     p.add_argument("--wall", type=float, default=3600.0)
     p.add_argument("--budget-hours", type=float, default=sweep.BUDGET_S / 3600.0, help="one shard's machine time")
     args = p.parse_args(argv)
+    if args.scenario == "memos":
+        print(json.dumps(fill_step(), default=str))
+        return 0
     sid = "S0a" if args.scenario == "checkpoints" else args.scenario
     ids = [k for k in TABLE if k != "smoke"] if sid == "all" else [sid]
     for one in ids:
