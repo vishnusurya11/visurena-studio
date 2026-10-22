@@ -470,6 +470,13 @@ def tag_of(text: str, m: re.Match) -> str:
     return rest[:cut.start()] if cut else rest
 
 
+def thought_tag(tag: str) -> bool:
+    """The tag says THOUGHT before it says any speech verb: '"If he be Mr. Hyde," he had thought' is,
+    '"Yes," said he, and thought no more of it' is not (wave 1 review, finding 8)."""
+    think, say = THOUGHT.search(tag), SAYS.search(tag)
+    return bool(think) and (say is None or think.start() < say.start())
+
+
 def honest_speech_share(paragraphs: list[str]) -> float | None:
     """Spoken words over all the chapter's words, with no length cap, and a quote whose own tag says
     it was thought ("If he be Mr. Hyde," he had thought) never counted, even opening a paragraph.
@@ -478,7 +485,7 @@ def honest_speech_share(paragraphs: list[str]) -> float | None:
     if not text.strip():
         return None
     spoken = sum(len(m.group(1).split()) for m in QUOTED_WHOLE.finditer(text)
-                 if is_speech(text, m) and not THOUGHT.search(tag_of(text, m)))
+                 if is_speech(text, m) and not thought_tag(tag_of(text, m)))
     return round(spoken / max(1, len(text.split())), 3)
 
 

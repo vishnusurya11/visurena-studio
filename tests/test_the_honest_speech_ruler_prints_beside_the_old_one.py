@@ -34,6 +34,11 @@ def test_a_thought_is_not_speech_even_when_it_opens_a_paragraph():
     assert plan_gates.honest_speech_share(said) > 0.0
 
 
+def test_a_said_tag_that_later_thinks_is_still_speech():
+    # wave 1 review, finding 8: the 40-character tag window saw "thought" after "said he" and dropped it
+    assert plan_gates.honest_speech_share(["“Yes,” said he, and thought no more of it."]) > 0.0
+
+
 def test_a_long_quote_counts_whole():
     long = ["“" + " ".join(["word"] * 200) + ".” said he."]
     assert plan_gates.speech_share(long) == 0.0 and plan_gates.honest_speech_share(long) > 0.95
