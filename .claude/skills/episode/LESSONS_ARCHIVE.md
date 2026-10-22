@@ -2458,6 +2458,21 @@ the same folder. What the debate settled, and what the bench then measured:
   production window, counts only shifts 2W+1 apart, and cannot pass until the mouths are labelled.
   Still open: a line of one long phrase hides a lag (line 25: 10 of 100 tries 12-30 f off read ok).
   Never set WINDOW or CORR_FLOOR on the 17 exam renders. The `lag` row stays ADVISORY.
+- **Wave 2 (craft A17-A22, 2026-10-21): the picture-side words say what is there, once.** Measured on ep01
+  rebuilt by the production writer on a copy (CPU; the GPU proof waits for the rehearsal window): A18 the
+  amount strip leaves one comma (T01), no beat on a block's last second (T03, T11; L16 asks for t1 - 1), no
+  insert scope tail over a second body (T07): 4 -> 0; L19 names ",," and " ," (QC: 9 of 28 recorded
+  prompts now fail a HARD rule, T01 among them). A19 G-END-NOUNS (HARD, free cure `camera_ends`): 1 of 42
+  plans on disk fires (ep01 shot 6). A20 the grid negative is never read (cfg 1.0): the graph sends "" and
+  grid_lint warns NEG (2-4 a grid). A21 PLACE_V2 outdoors, Hyde's coat kept chest-up (LEG_LENGTH), one stop at
+  joins, "The air holds", "shows one man, drawn exactly once", no walk-on clause on the staged pair, a non-face
+  FOCUS gets the cut alone; lint ROOM/WORN/STOP/AIR/SHEET/TWIN/FOCUS hard (ep01 grids AIR 22 SHEET 19 STOP 7
+  FOCUS 5 WORN 1 TWIN 1 -> 0). A22 LONG warns over 350 words (all 22 ep01 grids). A17 `Setup.time` /
+  `Shot.time` (night|dawn|day|dusk|interior-lamp, `house_style.time_of`); the ref2v style line says the hour
+  and a black (`take_line`; `live` keeps the start-frame route), the block owns the source (`block_light`
+  when the camera names none); L33 beside L28; light said twice 28 -> 0. Moved from GATES (bytes): G-WARP
+  logs the on-threes cadence (S_held/S_step, period/phase), and `measures.warp.tracks` carries
+  [{median_px, life}] in render px. Diff: `docs/audit/2026-10-21_craft_process/build/wave2_prompt_diff.md`.
 
 ## The shot framework (2026-10-21, the panel's final ruling)
 
