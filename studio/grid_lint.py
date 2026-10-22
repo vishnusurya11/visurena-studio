@@ -19,7 +19,8 @@ grids.py runs it as a hard wall before any grid is posted (and in --prompts).
 
 `warnings` never refuses (craft ruling 2026-10-21):
   NEG   a no / not / never / without outside UNWRITTEN: the grid samples at cfg 1.0, the negative
-        prompt is never read, and a negated noun is still that noun to the drawer (A20).
+        prompt is never read, and a negated noun is still that noun to the drawer (A20);
+  LONG  a prompt over LONG_WORDS words (A22).
 """
 from __future__ import annotations
 
@@ -101,8 +102,14 @@ def negations(text: str) -> list[str]:
     return [m.group(0) for m in NEGATION.finditer(text.replace(UNWRITTEN, " "))]
 
 
+LONG_WORDS = 350
+"""A22: the word count a grid prompt is named over (ep01 ran 408-1,064, median 470; Qwen's own
+rewriter writes under 200).  A warning: the 1,000-token refusal was an unmeasured vendor number."""
+
+
 def warnings(text: str) -> list[str]:
     """What the lint names and never refuses; [] says nothing."""
-    said = negations(text)
-    return [f"NEG {len(said)} negations the drawer reads as nouns (cfg 1.0 reads no negative): "
-            + ", ".join(repr(n) for n in said)] if said else []
+    said, n = negations(text), len(text.split())
+    out = [f"NEG {len(said)} negations the drawer reads as nouns (cfg 1.0 reads no negative): "
+           + ", ".join(repr(x) for x in said)] if said else []
+    return out + ([f"LONG {n} words, over the {LONG_WORDS}-word line"] if n > LONG_WORDS else [])
