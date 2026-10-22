@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 """Replay every screenplay check over every plan on disk, read-only (A3, craft ruling 2026-10-21).
 
-    uv run python scripts/episode/screenplay_replay.py <codex> [<codex> ...] [--mutate=<codex>:<n>]
-                                                       [--out=<file.json>]
+    uv run python scripts/episode/screenplay_replay.py <codex> [<codex> ...] [--mutate=<codex>:<n>[,...]]
+                                                       [--approved=<codex>:<n>[,...]] [--out=<file.json>]
 
 One harness for the ruling's screenplay rows (G-MUTE, G-STOLEN, ORPHAN-REPLY, PARAGRAPH-HOLE,
 G-REVEAL), modelled on `grammar_replay.py`.  Per plan it prints whether each check could READ the
 plan and how many times it fired: a plan whose shots cite no span of its chapter is UNREADABLE for
 a span check, never "0 fires" (old WotW and Scarlet plans carry no spans, so silence on them proves
-nothing).  `--mutate` prints each check's recall, with its Wilson interval, on code-made mutations of
-one plan: a prompt line deleted (orphan reply), a quote moved into narration (stolen line), a
+nothing); `--approved` names the owner-approved plans, and each check says how many of them it read.
+`--mutate` prints each check's recall, with its Wilson interval, pooled over code-made mutations of
+the plans named: a prompt line deleted (orphan reply), a quote moved into narration (stolen line), a
 dialogue paragraph dropped (paragraph hole).  It also prints the audience LOG rows (P6): the
 longest window with no node, and every `plain` bed span in the intro or longer than 15 s.
 
@@ -24,6 +25,7 @@ import importlib
 import json
 import re
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -111,13 +113,34 @@ def replay(book: Path, path: Path, checks: dict = CHECKS) -> dict:
     """One plan's row: readable and fires per check (None = not read, never 0)."""
     plan = json.loads(Path(path).read_text(encoding="utf-8"))
     paragraphs = chapter_of(book, Path(path))
-    return {"book": Path(book).name, "plan": str(Path(path).relative_to(book)),
+    return {"book": Path(book).name, "plan": str(Path(path).relative_to(book)), "number": number_of(Path(path)),
             "readable": {n: readable(plan, paragraphs, c.needs) for n, c in checks.items()},
             "fires": {n: fires(plan, paragraphs, c) for n, c in checks.items()}}
 
 
-def summary(rows: list[dict], checks: dict = CHECKS) -> dict[str, str]:
-    """`orphan_reply: read 1 of 2 plans, 3 fires on 1 plans`, or `not built; 1 of 2 plans readable`."""
+def number_of(path: Path) -> int:
+    return int(Path(path).parent.name[2:4])
+
+
+def is_approved(row: dict, approved: list[str]) -> bool:
+    """Whether a row is one of the owner-approved plans named `<codex>:<n>` (a CLI input, never a list
+    in code: the code tree names no book)."""
+    return any(row["book"].startswith(c) and row.get("number") == int(n)
+               for c, _, n in (a.partition(":") for a in approved))
+
+
+def approved_said(rows: list[dict], name: str, approved: list[str] | None) -> str:
+    """`approved: read 1 of 2, 0 fires` (ruling section 7, binding), or `approved: none named`."""
+    if not approved:
+        return "approved: none named"
+    mine = [r for r in rows if is_approved(r, approved)]
+    read = [r["fires"][name] for r in mine if r["fires"].get(name) is not None]
+    return f"approved: read {len(read)} of {len(mine)}, {sum(len(f) for f in read)} fires"
+
+
+def summary(rows: list[dict], checks: dict = CHECKS, approved: list[str] | None = None) -> dict[str, str]:
+    """`orphan_reply: read 1 of 2 plans, 3 fires on 1 plans; approved: read 1 of 2, 0 fires`, or
+    `not built; 1 of 2 plans readable`."""
     out = {}
     for name, check in checks.items():
         if runner(check) is None:
@@ -125,7 +148,7 @@ def summary(rows: list[dict], checks: dict = CHECKS) -> dict[str, str]:
             continue
         read = [r["fires"][name] for r in rows if r["fires"].get(name) is not None]
         out[name] = (f"{name}: read {len(read)} of {len(rows)} plans, {sum(len(f) for f in read)} fires "
-                     f"on {sum(bool(f) for f in read)} plans")
+                     f"on {sum(bool(f) for f in read)} plans; {approved_said(rows, name, approved)}")
     return out
 
 
@@ -140,6 +163,17 @@ def renumbered(plan: dict, lines: list[dict]) -> dict:
 def delete_line(plan: dict, k: int) -> dict:
     """The plan without line k, the rest renumbered."""
     return renumbered(plan, [l for i, l in enumerate(plan["lines"]) if i != k])
+
+
+def delete_prompt(plan: dict, k: int) -> dict:
+    """The plan without prompt line k AND without the shot spans that show it (a span sharing a
+    3-word run with the line): a prompt still cited on a shot is still shown, so its reply is no
+    orphan under A10's own rule (wave 0 review, major 4)."""
+    said = runs(plan["lines"][k]["text"], 3)
+    out = delete_line(plan, k)
+    for shot in out.get("shots") or []:
+        shot["source"] = [s for s in shot.get("source") or [] if not runs(s, 3) & said]
+    return out
 
 
 def quote_to_narration(plan: dict, k: int) -> dict:
@@ -164,10 +198,12 @@ def drop_paragraph(plan: dict, paragraphs: list[str], j: int) -> dict:
 
 
 def prompt_lines(plan: dict) -> list[int]:
-    """Lines that prompt the next speaker: a `?` or let us / will you / shall we / promise, followed
-    by another cast member's dialogue or tale."""
+    """Lines a cast member SPEAKS that prompt the next speaker: a `?` or let us / will you / shall we /
+    promise, followed by another cast member's dialogue or tale.  A narration or inner line is heard
+    by nobody in the scene, so it prompts no reply (wave 0 review, finding 6)."""
     lines = plan.get("lines") or []
     return [k for k, (a, b) in enumerate(zip(lines, lines[1:])) if PROMPT.search(a["text"])
+            and a["kind"] in NODE_KINDS and a["speaker"] != "narrator"
             and b["kind"] in NODE_KINDS and b["speaker"] not in (a["speaker"], "narrator")]
 
 
@@ -180,7 +216,7 @@ def dialogue_paragraphs(plan: dict, paragraphs: list[str]) -> list[int]:
 
 def mutants(plan: dict, paragraphs: list[str]) -> list[dict]:
     """Every code-made mutation of a plan, each naming the check it should wake."""
-    out = [{"name": f"delete prompt line {k}", "expect": "orphan_reply", "plan": delete_line(plan, k)}
+    out = [{"name": f"delete prompt line {k}", "expect": "orphan_reply", "plan": delete_prompt(plan, k)}
            for k in prompt_lines(plan)]
     out += [{"name": f"quote {k} into narration", "expect": "stolen_line", "plan": quote_to_narration(plan, k)}
             for k, l in enumerate(plan.get("lines") or []) if l["kind"] == "dialogue"]
@@ -188,16 +224,40 @@ def mutants(plan: dict, paragraphs: list[str]) -> list[dict]:
                    "plan": drop_paragraph(plan, paragraphs, j)} for j in dialogue_paragraphs(plan, paragraphs)]
 
 
+PLACE = re.compile(r"\b(lines?|shots?) \d+")
+
+
+def keys(found: list) -> Counter:
+    """A check's fires with their line and shot numbers blanked: a deletion renumbers the plan, so a
+    fire that only moved is the same fire (wave 0 review, finding 12)."""
+    return Counter(PLACE.sub(r"\1 #", str(f)) for f in found)
+
+
+def tally(plan: dict, paragraphs: list[str], check: Check, meant: list[dict]) -> tuple[int, int, int]:
+    """(hits, readable mutants, unreadable mutants): a hit is a mutant with a fire the clean plan lacks."""
+    base = keys(fires(plan, paragraphs, check) or [])
+    got = [fires(m["plan"], paragraphs, check) for m in meant]
+    read = [g for g in got if g is not None]
+    return sum(bool(keys(g) - base) for g in read), len(read), len(got) - len(read)
+
+
 def recall(plan: dict, paragraphs: list[str], checks: dict = CHECKS) -> dict[str, dict]:
-    """Per built check: of the mutants meant for it, how many make it fire MORE than the clean plan."""
+    """Per built check: of the readable mutants meant for it, how many wake a fire the clean plan lacks."""
+    return pooled_recall([(plan, paragraphs)], checks)
+
+
+def pooled_recall(pairs: list[tuple[dict, list[str]]], checks: dict = CHECKS) -> dict[str, dict]:
+    """Recall over the mutants of every (plan, paragraphs) named, with its Wilson interval: one plan
+    gives ep01 2 orphan mutants, and 2 of 2 has a Wilson low of 0.342 (wave 0 review, major 5)."""
     out = {}
     for name, check in checks.items():
-        if runner(check) is None or not (meant := [m for m in mutants(plan, paragraphs) if m["expect"] == name]):
+        if runner(check) is None:
             continue
-        base = len(fires(plan, paragraphs, check) or [])
-        k = sum(len(fires(m["plan"], paragraphs, check) or []) > base for m in meant)
-        low, high = wilson(k, len(meant))
-        out[name] = {"k": k, "n": len(meant), "wilson_low": low, "wilson_high": high}
+        rows = [tally(p, paras, check, [m for m in mutants(p, paras) if m["expect"] == name]) for p, paras in pairs]
+        k, n, dark = (sum(r[i] for r in rows) for i in range(3))
+        if n or dark:
+            low, high = wilson(k, n) if n else (0.0, 1.0)
+            out[name] = {"k": k, "n": n, "unreadable": dark, "wilson_low": low, "wilson_high": high}
     return out
 
 
@@ -244,20 +304,36 @@ def log_rows(path: Path) -> str:
     return f"LOG middle node: longest window with no node {s} s ({a}-{b}); plain beds {beds}"
 
 
+def flag_values(argv: list[str], flag: str) -> list[str]:
+    """Every comma-separated value of every `--<flag>=` argument."""
+    return [v for a in argv if a.startswith(f"--{flag}=") for v in a.split("=", 1)[1].split(",") if v]
+
+
+def mutate_targets(argv: list[str]) -> list[tuple[str, int]]:
+    """(codex, episode) for each `--mutate=<codex>:<n>[,<codex>:<n>...]`."""
+    return [(c, int(n)) for c, _, n in (v.partition(":") for v in flag_values(argv, "mutate"))]
+
+
+def mutated(argv: list[str]) -> list[tuple[dict, list[str]]]:
+    """The (plan, paragraphs) of every `--mutate` target, read by name."""
+    from studio import episode_home
+    out = []
+    for codex, n in mutate_targets(argv):
+        book = episode_home.book_dir(codex)
+        path = episode_home.home(book, n) / "plan.json"
+        out.append((json.loads(path.read_text(encoding="utf-8")), chapter_of(book, path)))
+    return out
+
+
 def main(argv: list[str]) -> int:
     out = next((a.split("=", 1)[1] for a in argv if a.startswith("--out=")), "")
-    mutate = next((a.split("=", 1)[1] for a in argv if a.startswith("--mutate=")), "")
     pairs = targets([a for a in argv if not a.startswith("--")])
     rows = [replay(book, path) for book, path in pairs]
     for (book, path), r in zip(pairs, rows):
         print(r["plan"], {k: (None if v is None else len(v)) for k, v in r["fires"].items()}, "|", log_rows(path))
-    print("\n".join(summary(rows).values()))
-    if mutate:
-        from studio import episode_home
-        codex, _, n = mutate.partition(":")
-        book = episode_home.book_dir(codex)
-        path = episode_home.home(book, int(n)) / "plan.json"
-        print("recall on mutations:", recall(json.loads(path.read_text(encoding="utf-8")), chapter_of(book, path)))
+    print("\n".join(summary(rows, approved=flag_values(argv, "approved")).values()))
+    if pool := mutated(argv):
+        print(f"recall on mutations of {len(pool)} plans:", pooled_recall(pool))
     if out:
         Path(out).write_text(json.dumps(rows, indent=1), encoding="utf-8")
     return 0

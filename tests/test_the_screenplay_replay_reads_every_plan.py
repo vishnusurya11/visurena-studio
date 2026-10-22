@@ -87,7 +87,8 @@ def test_a_plan_with_no_source_spans_is_unreadable_never_zero_fires(tmp_path):
     assert rows[0]["readable"] == {"orphan_reply": True, "stolen_line": True}
     assert rows[1]["readable"] == {"orphan_reply": False, "stolen_line": False}
     assert rows[1]["fires"] == {"orphan_reply": None, "stolen_line": None}
-    assert sr.summary(rows, DOUBLES)["orphan_reply"] == "orphan_reply: read 1 of 2 plans, 0 fires on 0 plans"
+    assert sr.summary(rows, DOUBLES)["orphan_reply"] == ("orphan_reply: read 1 of 2 plans, 0 fires on 0 plans; "
+                                                         "approved: none named")
 
 
 def test_a_check_whose_code_is_not_built_says_so():
