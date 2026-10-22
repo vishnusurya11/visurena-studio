@@ -350,7 +350,7 @@ round 1's 15 ep01 faces (12 kept); old rows regated before a cut. **The paste**:
 ONLY the face core (brow to chin, cheek to cheek, 0.08 feather inside), any size, redraw re-seated on the take's head; its band the take's low frequencies;
 hat, hair, ears, jaw, collar stay the take's. **Tracking** (`studio/face_track.py`): a weak face (0.3-0.6)
 only continues a track; detections go to tracks by least cost (motion, size, head colour); a head must read >= the track's own reading - 0.15; bodies make only far figures; the crop is the soft
-span (on < 120 px, off > 150) on H3's grid inside its shot, one frozen side. CLOCK: priced 110 s per face per 192 frames; 09 holds N takes x 81 s
+span (on < 120 px, off > 150) on H3's grid inside its shot, one frozen side. CLOCK: priced 11 s + 0.558 s/frame per face; 09 holds N takes x 81 s
 from its start, a re-measure cut before it; the refine is cut LAST (`fr.cut_last`, own price): `REFINE CUT`, status
 `cut`, ships flagged, a FACE_REFINE terminal holds the publish (lanes, tiny-face: + 550 s, cut first). **Selection**: no plan size, no face-at-end;
 every take with a planned face but an insert, whose dq lets it ship; each track whose smallest face (median over 51

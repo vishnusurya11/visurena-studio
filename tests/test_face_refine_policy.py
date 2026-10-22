@@ -48,9 +48,10 @@ def test_selection_reads_every_shot_of_the_take():
 
 # ---- the clock -----------------------------------------------------------------------
 
-def test_a_refine_is_priced_at_110_s_per_face_per_192_frames():
-    assert fr.price(2, 192) == pytest.approx(220.0)
-    assert fr.price(1, 96) == pytest.approx(55.0)
+def test_a_refine_is_priced_at_11_s_plus_0_558_s_per_frame_per_face():
+    """The fit COSTS.md measured (fleet C A4, 2026-10-22); it was 110 s per face per 192 frames."""
+    assert fr.price(2, 192) == pytest.approx(2 * (11.0 + 0.558 * 192))
+    assert fr.price(1, 96) == pytest.approx(11.0 + 0.558 * 96)
 
 
 def test_no_faces_cost_nothing():

@@ -24,7 +24,7 @@ ruling 2026-10-11, `studio/refs_only.py`), ships, and is flagged.
 
 At most CAP distinct grids climb per episode (gates.yaml `max_grids`); a
 third faulted grid is kept as drawn and flagged.  Each rung is priced at one
-grid render (GRID_SECONDS, 1.7 GPU min); the judged gate refuses a rung the
+grid's redraw with its rebuild and reads (RUNG_SECONDS); the judged gate refuses a rung the
 episode ceiling cannot pay for.
 """
 from __future__ import annotations
@@ -39,8 +39,10 @@ from studio import episode_home, grid_layout, grid_room, judged_gate, panel_dq, 
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
-GRID_SECONDS = 102.0
-"""One grid render: 1.7 GPU minutes (decision §2, EYE-panels)."""
+GRID_SECONDS = 70.0
+"""One warm Qwen-Image 2x2 grid render: 69.7 s measured (2026-10-21_ep02_proof/gpu/COSTS.md; the
+102 s it was held part of a load).  A cold load adds more: 141 s on D: on 10-21, 269 s on 10-22
+under a concurrent copy, unmeasured on the NVMe, so no cold term is priced (fleet C A4)."""
 RUNG_SECONDS = 1900.0
 """What a rung COSTS, measured on ep13 (2026-09-27): the redraw, the rebuild
 with its content read (1107-1224 s) and the eye's read of every panel (~740 s).

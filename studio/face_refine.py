@@ -38,9 +38,12 @@ face of 768 draws a 5-10 px eye, the mush the owner saw on ep01 T05/T06/T13/T15
 (docs/audit/2026-10-19_face_blur/pipeline_audit.md section 2).  It was 60 until
 2026-10-19: six picks ended `no_faces` because their faces were 60-110 px."""
 
-SECONDS_PER_FACE = 110.0
+FACE_FIXED_S, FACE_PER_FRAME_S = 11.0, 0.558
+"""One face's refine on the 4090: 11.0 s + 0.558 s per frame (2026-10-21_ep02_proof/gpu/COSTS.md,
+n=6: 73 frames 54.6/57.2 s, 141 frames 82.2-86.7 s, 209 frames 136.0 s; the cost follows frames,
+not face size).  It replaced 110 s per 192 frames, which had no intercept (41.8 s at 73 frames)."""
 REF_FRAMES = 192
-"""F2 on the 4090: 110 s of GPU for one face over a 192-frame take (51 s for 90)."""
+"""The frame count a take is priced at when its own is not known (the tiny-face rung's refine)."""
 CHECK_RESERVE_S = 550.0
 """A full take_dq re-measure (step_09.DQ_PASS_SECONDS): a refine must leave it its time."""
 
@@ -300,8 +303,10 @@ def face_list(rows: dict[int, dict]) -> dict:
 # ---- the clock -----------------------------------------------------------------------
 
 def price(faces: int, frames: int) -> float:
-    """GPU seconds a take's refine is priced at."""
-    return SECONDS_PER_FACE * max(faces, 0) * max(frames, 0) / REF_FRAMES
+    """GPU seconds a take's refine is priced at: the measured fit per face; nothing to refine is free."""
+    if faces <= 0 or frames <= 0:
+        return 0.0
+    return faces * (FACE_FIXED_S + FACE_PER_FRAME_S * frames)
 
 
 def cut(budget, step: str, seconds: float) -> bool:

@@ -545,7 +545,7 @@ soft span re-rendered through H3 with ONLY that person's sheet at a denoise that
 never edited). The gate (GATES.md, FACE REFINE GATE) reads identity by CCIP and clip_vision_h beside facenet
 (`studio/anime_id.py`), drift, seam, flicker and the face count; the drawn-eye score is logged. Decisions per take:
 `takes/r2v/refine.json` (`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`, `cut`). Step 09 queues it on
-the GPU lane right behind the renders and refines what the ladder left owed once at the end; ~110 s per face per take,
+the GPU lane right behind the renders and refines what the ladder left owed once at the end; ~11 s + 0.56 s/frame per face,
 cut LAST for time (V2): a cut take ships flagged and holds the publish. Assemble pastes the kept crops at CUT scale before the one upscale (owner
 2026-10-18, 24caaeb; a face under 40 px through a soft head mask); on `av3` the portable python's worker rebuilds the
 paste from its spans. The render is the SaveVideo node's output by node id (`fr.saved_node`): v0.41.2 echoes the

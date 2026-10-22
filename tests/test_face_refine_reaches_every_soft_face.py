@@ -87,12 +87,13 @@ def test_a_one_sample_dip_is_not_the_takes_face():
 
 
 def test_the_added_gpu_fits_the_six_hour_clock():
-    """Priced at 110 s per planned face per 192 frames (studio/face_refine.price)."""
+    """Priced at 11.0 s + 0.558 s per frame per planned face (studio/face_refine.price, the fit
+    COSTS.md measured; 110 s per 192 frames priced it at 1,512 s until fleet C A4, 2026-10-22)."""
     by = {c["index"]: c for c in cards()}
     total = sum(fr.price(len(by[i]["faces"]), by[i]["frames"]) for i in picks())
     already = sum(fr.price(len(by[i]["faces"]), by[i]["frames"]) for i in (8, 18))
-    assert total == pytest.approx(1512, abs=5)              # 25.2 min, the 11 takes
-    assert (total - already) / 60 == pytest.approx(19.2, abs=0.2)
+    assert total == pytest.approx(1671, abs=5)              # 27.9 min, the 11 takes
+    assert (total - already) / 60 == pytest.approx(21.2, abs=0.2)
 
 
 # ---- the rule ----------------------------------------------------------------------------
