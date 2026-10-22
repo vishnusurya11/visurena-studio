@@ -54,6 +54,19 @@ def test_a_counter_past_its_cap_fails_and_is_named(tmp_path):
     assert r["passed"] is False and "retakes 3 > 2" in r["detail"] and "engine restarts 3 > 2" in r["detail"]
 
 
+def test_a_row_only_summed_into_its_step_wall_caps_no_rounds(tmp_path):
+    """Window 3: every scenario failed A-caps on `lines 7 > 1`.  The `lines` row is `read: step`
+    (stages.yaml: a wall, no reader of its rounds); say_lines' own TERMINAL_TRIES (8) gave l19 eight
+    tries in 17.6 s.  A step-read row's `rounds` is no cap, so it never fails A-caps."""
+    from studio import step_caps
+    book, home = book_at(tmp_path)
+    (home / "attempts.json").write_text(json.dumps({"lines": {"rounds": 7, "seconds": 17.6}}))
+    assert asserts.a_caps(book, 2)["passed"] is True
+    table = {"lines": step_caps.Cap("lines", "04", 1, "episode", 600.0, read="step"),
+             "voice": step_caps.Cap("voice", "04", 2, "episode", 1800.0)}
+    assert asserts.counter_faults({"lines": {"rounds": 7}, "voice": {"rounds": 3}}, table) == ["voice 3 > 2"]
+
+
 def test_a_finished_take_submitted_again_without_a_gate_retake_is_a_rerender():
     rows = [{"call": "prompt", "kind": "take", "index": 1, "ts": 1.0}, {"call": "prompt", "kind": "take", "index": 2, "ts": 2.0},
             {"call": "prompt", "kind": "take", "index": 1, "ts": 5.0}]

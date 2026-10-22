@@ -81,7 +81,8 @@ def home_of(book: Path, n: int) -> Path:
 
 def allowed_rounds(key: str, table: Mapping) -> int | None:
     """The cap a counter answers to: relaunch.NN by autopilot's rule, plan.climbs by the plan row's
-    climbs, a phase (or `phase.thing`) by its rows x climbs; None for a time or first-render key."""
+    climbs, a phase (or `phase.thing`) by its rows x climbs; None for a time or first-render key,
+    and for a `read: step` row (only summed into its step's wall: no reader caps its rounds)."""
     base, _, rest = key.partition(".")
     if base in UNCAPPED or rest == "order":
         return None
@@ -90,7 +91,9 @@ def allowed_rounds(key: str, table: Mapping) -> int | None:
     if key == "plan.climbs":
         return table["plan"].climbs
     cap = table.get(base)
-    return None if cap is None else cap.rounds * (cap.climbs if cap.per == "climb" else 1)
+    if cap is None or cap.read == "step":
+        return None
+    return cap.rounds * (cap.climbs if cap.per == "climb" else 1)
 
 
 def counter_faults(attempts: Mapping, table: Mapping) -> list[str]:
