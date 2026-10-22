@@ -66,8 +66,7 @@ brick or a new instance of one, a line here.
 - A picture is wrong in a way no gate saw: bricks 5 and 10; Grids and panels.
 - A run stalled, parked or died, or a repair: `OPERATOR.md` (its symptom table); brick 6.
 - An owner-reported defect to fix: brick 16; OPERATOR.md "Fixing an owner-reported defect".
-- What did the last run teach: the newest dated section of the archive (today: The ep01
-  deadline retro; before it the Jekyll Kawajiri ep01 retro's 13 failures).
+- What did the last run teach: the newest dated section of the archive.
 
 ## Archive map
 
@@ -92,6 +91,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - A repair re-renders nothing it was handed (2026-10-19, + fix round)
 - A freeze holds at every place that renders (incident 2)
 - The ep01 deadline retro (2026-10-20: where 31 hours went; packages A-H)
+- Instruments first (2026-10-21, craft ruling wave 0)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

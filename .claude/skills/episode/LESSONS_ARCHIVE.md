@@ -2360,3 +2360,28 @@ the same folder. What the debate settled, and what the bench then measured:
   a flagged terminal with a CAP line.
 - Bench of 2026-10-21 (the numbers): see FINAL.md in the debate folder and `docs/calibration/face_refine.md`
   (section "The face debate bench").
+
+## Instruments first (2026-10-21, craft ruling wave 0)
+
+- **A field declared and read but never set is a false report.** `take_inputs.Inputs.reworded` existed and
+  `said()` read it; nothing set it, so QC printed "inputs: all 28 takes current" on Jekyll ep01 while 27 of
+  the 28 kept takes had rendered from other words than prompts.json, 8 of them night takes lit by "low sun
+  from the west" (L28 came after they rendered). QC now prints the words line beside the pictures line;
+  it is advisory under freeze and never re-renders.
+- **Count the rendered words, never the card file.** The census (`scripts/episode/craft_lint.py`) reads
+  `T<NN>.graph.json`; 27 of 28 prompts.json entries were not what rendered. ep01 base rates: renamed hold
+  12 (all 12 read 59-94 % frozen-whole), now in frame 19, walking pace 8 in 5, speech beside a closed mouth
+  1 (T13), sky word at night 8, repeated 6-word run 66 in 13, end as camera 1 (shot 6), garble 2.
+- **A replay that could not read a plan proved nothing on it.** The screenplay replay counts readable
+  plans per check: span checks read 16 of 42 (WotW ep13-27, Jekyll ep01), so "0 fires on the approved
+  WotW ep01-03" is unmeasured for them, not clean.
+- **Where each instrument lives (all REPORT ONLY; no gate, step or verdict moved, so GATES.md is unchanged).**
+  A1 `scripts/episode/craft_lint.py <book> <n>`: one line in every step 06 report (`takes_r2v.craft_census`),
+  never parks; a defect fix quotes it before and after. A2 QC `inputs.words` (`take_inputs.words`,
+  `stale_words`, `check(..., built=)`): `reworded` against `prompts.json`, the recorded prompt re-linted with
+  its own cast rows, spoken lines, night and frames (L16 skipped: a record keeps no line end); `current`,
+  `wall` and `inputs_ok` read the pictures alone. A3 `scripts/episode/screenplay_replay.py <codex>...
+  [--mutate=<codex>:<n>]`: the registry the wave-1 screenplay rows plug into (`fn(plan, paragraphs) ->
+  fires`), readable count per check, Wilson recall on ep01 mutations, the audience P6 LOG rows (ep01: 24.1 s
+  with no node at 62.7-86.8 s; plain beds 4.2-28.5 s and 66.1-83.8 s). A screenplay row earns shadow only
+  through this replay.

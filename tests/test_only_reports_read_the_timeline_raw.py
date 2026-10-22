@@ -9,7 +9,8 @@ stale timeline is something they print, not something they act on.
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-REPORTS = {"dossier.py", "story.py", "runcards.py", "plan_check.py", "episode_clock.py"}
+REPORTS = {"dossier.py", "story.py", "runcards.py", "plan_check.py", "episode_clock.py",
+           "screenplay_replay.py"}   # read-only over historical plans: an older placed.json prints "not measured"
 WRITER = {"timeline.py"}
 
 
