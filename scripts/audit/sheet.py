@@ -13,6 +13,11 @@ artefacts per gate, seeded by the unit's sha8 so the same page shows the same
 three tomorrow: a judge that approves slop consistently is found here, not in
 its own numbers.
 
+Above the cards, one line per gate: its terminal rows, its faults counted once
+per (artefact, rule), and its labelled precision -- the owner's casebook rows on
+the artefacts it flagged, k faults of n with the one-sided 95 % Clopper-Pearson
+lower bound, or "unlabelled" (fleet H ruling A13, A16).
+
 NO STEP READS THIS PAGE OR ITS ROWS (a test greps).  The owner does, whenever
 he likes, and writes what he finds with scripts/audit/note.py.  Free: reads
 json, writes html.  The page style is the dossier's.
@@ -28,7 +33,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.episode.dossier import CSS, esc  # noqa: E402
-from studio import audit_rows, episode_home  # noqa: E402
+from studio import audit_rows, casebook, episode_home, intervals  # noqa: E402
 from studio.audit_rows import AuditRow  # noqa: E402
 
 SAMPLE = 3
@@ -133,6 +138,45 @@ def deduped(rows: list[AuditRow]) -> list[AuditRow]:
     return list(newest.values())
 
 
+# ---- per gate: the flags and what the owner's labels say of them ------------------------
+
+def distinct_faults(rows: list[AuditRow]) -> int:
+    """Faults once per (artefact, rule): three landmark words on one panel are one."""
+    return len({(row.gate, str(f.get("where") or row.artefact), f.get("kind")) for row in rows for f in row.faults})
+
+
+def owner_rows(book: Path, unit: str) -> list:
+    """The owner's casebook rows on this unit (casebook/owner.jsonl); none when he has noted nothing."""
+    return [r for r in casebook.read_rows(Path(book) / "casebook" / casebook.OWNER)
+            if r.unit == unit and r.verdict_by == "owner"]
+
+
+def labelled(rows: list[AuditRow], owner: list) -> tuple[int, int]:
+    """(owner faults, owner rows) on the artefacts these rows flagged."""
+    names = flagged_names(rows)
+    seen = [r for r in owner if r.path in names or Path(r.path).stem in names]
+    return sum(r.verdict == "fault" for r in seen), len(seen)
+
+
+def precision_cell(k: int, n: int) -> str:
+    if n == 0:
+        return "unlabelled"
+    return f"{k}/{n} (one-sided 95 % CP lower {intervals.cp_lower(k, n):.2f})"
+
+
+def gate_table(rows: list[AuditRow], owner: list) -> str:
+    """One line per gate: terminal rows, faults, distinct (artefact, rule), labelled precision."""
+    lines = []
+    for gate in sorted({row.gate for row in rows}):
+        mine = [row for row in rows if row.gate == gate]
+        cells = (len(mine), sum(len(r.faults) for r in mine), distinct_faults(mine))
+        lines.append(f"<tr><td>{esc(gate)}</td>" + "".join(f"<td class=n>{c}</td>" for c in cells)
+                     + f"<td>{esc(precision_cell(*labelled(mine, owner)))}</td></tr>")
+    return ("<h2>Per gate <small>labelled precision is the owner's rows on what the gate flagged</small></h2>"
+            "<div class=card><table><tr><th>gate</th><th>terminal rows</th><th>faults</th>"
+            "<th>distinct (artefact, rule)</th><th>labelled precision</th></tr>" + "".join(lines) + "</table></div>")
+
+
 def flagged(rows: list[AuditRow]) -> str:
     out = [f"<h2>Flagged <small>{len(rows)} terminal rung(s); every fault with its numbers</small></h2>"]
     out += [flag_card(row) for row in rows] or ["<div class=card>nothing was flagged</div>"]
@@ -171,7 +215,8 @@ def flagged_takes_table(book: Path, unit: str) -> str:
         return ""
     strips = found(Path(book), f"episodes/{unit}/reports/strip_*.png")
     total = sum(float(r["seconds_in_master"]) for r in rows)
-    return (f"<h2>Flagged takes <small>{len(rows)} ship flagged, {total:g} s of the master</small></h2>"
+    return (f"<h2>Flagged takes <small>{len(rows)} shipped over a hard refusal, {total:g} s of the master; "
+            "soft deductions are not counted here</small></h2>"
             "<div class=card><table><tr><th>take</th><th>seconds in the master</th><th>severity</th>"
             "<th>rows</th><th>notes</th><th>strip</th></tr>"
             + "".join(flagged_take_row(r, strips) for r in rows) + "</table></div>")
@@ -244,7 +289,7 @@ def page(book: Path, unit: str, rows: list[AuditRow]) -> str:
             f"<header><h1>{esc(unit)} audit</h1><div class=sub>{esc(book.name)} &middot; "
             f"<a href='index.html' style='color:#b9b2a6'>index</a></div>"
             f"<div class=num><b>{len(rows)}</b> flagged &middot; seed <b>{esc(seed)}</b></div></header>"
-            f"<main>{flagged(rows)}{flagged_takes_table(book, unit)}{pictures_of(book, unit)}{sampled(sample(book, unit, rows, seed), seed)}</main>")
+            f"<main>{gate_table(rows, owner_rows(book, unit))}{flagged(rows)}{flagged_takes_table(book, unit)}{pictures_of(book, unit)}{sampled(sample(book, unit, rows, seed), seed)}</main>")
 
 
 def index_page(book: Path, rows: list[AuditRow]) -> str:
