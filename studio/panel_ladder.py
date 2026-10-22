@@ -49,11 +49,12 @@ deferred after the work was spent (speed plan #3)."""
 CAP = 2
 """Distinct grids that may climb per episode."""
 SUPERSEDED = "superseded"
-REDRAW_CANNOT_CURE = frozenset({"framing", "posture", "place", "unread_for_time"})
+REDRAW_CANNOT_CURE = frozenset({"framing", "posture", "place", "unread_for_time", "keypoints_unread"})
 """MEASURED on ep13 (speed plan #4): nine climbs, and no seed or reprose rung
 ever moved a framing or posture fault; a prompt fix (9cb4609) and judge fixes
 did.  Such a fault goes to keep_best, flagged, at no GPU cost.  `unread_for_time` is a panel the
-wall left unread: a redraw would redraw a picture nobody judged.  `body` and `orphan_limb` are NOT
+wall left unread: a redraw would redraw a picture nobody judged; `keypoints_unread` is a measure
+that died, not a fault of the picture.  `body` and `orphan_limb` are NOT
 here: a new seed or a reprose can move a floating hand, so they climb seed -> reprose -> flag."""
 CURES = {
     "clones": "Each person in the picture is a different man with his own face, build and dress.",

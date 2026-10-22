@@ -14,7 +14,10 @@ It LISTS faults and code judges the list.  Its reads, per panel:
 - ONE short VLM read (size, pictures) as the second vote on framing and on a
   tiled board.  A malformed answer raises `Unreadable`, never a default; an
   unread close is a fault (the face is the picture), an unread wide is not,
-  and both count against confidence.
+  and both count against confidence.  A keypoint read that went unread (no
+  JSON, or JSON of the wrong shape) is an advisory `keypoints_unread` on its
+  panel, its count is `failed` in the evidence, and it counts against
+  confidence too: the rows it feeds were not measured, never passed.
 
 Calibrated rows refuse; thin rows (hat, landmark, posture) refuse on the
 cheap rungs and are flagged at the terminal; framing has no owner positive
@@ -70,6 +73,8 @@ ADVISORY_BODY = ("body", "orphan_limb")
 """Kinds not in CALIBRATED on purpose: they join it only after P06's E1 eval reaches recall >= 0.6 and
 precision >= 0.8 (decision D8); until then they are listed, never a wall."""
 UNREAD = "unread_for_time"
+KEYPOINTS_UNREAD = "keypoints_unread"
+"""A panel whose DWPose read went unread: framing's keypoint vote, posture and orphans not measured."""
 READERS = ("keypoints", "size", "faces", "lettering")
 """The readers whose seconds the evidence names."""
 Unreadable = panel_content.Unreadable
@@ -192,13 +197,25 @@ def person_of(frames: list[dict]) -> np.ndarray | None:
 
 
 def keypoint_frames(staged: str, run: Callable) -> list[dict]:
-    """The DWPose frames of a staged picture.  An answer that is not JSON is Unreadable, a missing
-    measure for `asked`, never a crash of the judge (rehearsal window 3: plain text killed step 08)."""
+    """The DWPose frames of a staged picture.  An answer that is not JSON, or JSON whose frames hold
+    no readable people, is Unreadable, a missing measure for `asked`, never a crash of the judge
+    (rehearsal window 3: plain text killed step 08; `["text"]` or a 2-number pose still did)."""
     said = run(keypoints.WORKFLOW, {"image_1": staged}, TIMEOUT)
     try:
-        return keypoints.parse(said)
-    except (TypeError, ValueError) as bad:
+        frames = keypoints.parse(said)
+        for frame in frames:
+            keypoints.people(frame)
+        return frames
+    except (TypeError, ValueError, AttributeError) as bad:
         raise Unreadable(f"no keypoints in {str(said)[:80]!r}") from bad
+
+
+def unread_keypoints(frames: list[dict] | None, where: str) -> Fault | None:
+    """The trace of a keypoint read that went unread (`asked` gave None): an advisory, never a pass."""
+    if frames is not None:
+        return None
+    return advisory(KEYPOINTS_UNREAD, where, "the keypoint read went unread: framing's keypoint vote, "
+                    "posture and orphan limbs not measured", source="dwpose")
 
 
 def keypoint_read(staged: str, run: Callable) -> np.ndarray | None:
@@ -433,7 +450,7 @@ def short_read(staged: str, run: Callable, planned_size: str, where: str) -> tup
 
 
 def read_panel(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -> tuple[list[Fault], bool]:
-    """Every measured fault of one panel, and whether its short read was readable."""
+    """Every measured fault of one panel, and whether its short read and its keypoint read answered."""
     where, planned = path.stem, len(shot.get("faces") or [])
     prose = f"{shot.get('frame', '')} {shot.get('at_rest', '')}"
     rgb = np.asarray(Image.open(path).convert("RGB"))
@@ -445,6 +462,7 @@ def read_panel(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -
     seen = metered(t, "faces", lambda: face_rows(rgb, t["detect"], t["embed"]))
     out = [framing(shot.get("size", ""), keypoints.shot_size(pts) if pts is not None else None, read, where),
            posture_fault(pts, prose, planned, where, shot.get("size", "")), copy_fault(path, refs, where), unread,
+           unread_keypoints(frames, where),
            asked(lambda: hat_fault(staged, t["run"], seen, pts, size, where), None, t.get("stats"))
            if planned == 1 and SCORED_BOXES else None]
     out += clone_faults(seen, where) + orphan_faults(frames, shot, where)
@@ -452,7 +470,7 @@ def read_panel(shot: dict, setup: dict, path: Path, t: dict, refs: list[Path]) -
         out += asked(lambda: landmark_faults(staged, t["run"], setup.get("described", ""), where), [], t.get("stats"))
     out += metered(t, "lettering", lambda: lettering_faults(path, t["reader"], list(shot.get("faces") or []), prose,
                                                             shot.get("size") == "insert", size[0], where))
-    return [f for f in out if f], read is not None
+    return [f for f in out if f], read is not None and frames is not None
 
 
 CACHE = "eye_cache"
@@ -622,7 +640,7 @@ def finish(board: Path, plan: dict, where: tuple, stats: dict, faults: list[Faul
     if unread:
         from studio import step_caps
         print(step_caps.cap_line("panel_checks", 1, 1, spent_s, len(faults)), flush=True)
-    evidence = {k: stats[k] for k in ("reads", "cache_hits", "seconds", "unread_for_time")}
+    evidence = {k: stats[k] for k in ("reads", "cache_hits", "failed", "seconds", "unread_for_time")}
     return EyeVerdict(judge=NAME, version=VERSION, passed=not any(f.severity != "advisory" for f in faults),
                       faults=faults, confidence=jv.confidence(counts[1], counts[0]), reads=counts[0],
                       evidence=evidence)

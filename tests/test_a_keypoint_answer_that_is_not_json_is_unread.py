@@ -46,4 +46,5 @@ def test_a_judge_whose_every_answer_is_plain_text_ends_with_the_panel_unread(tmp
     verdict = panel_eye.judge(home, plan, run=lambda workflow, values, timeout=0.0: TEXT,
                               stage=lambda p: Path(p).stem, reader=lambda p: [],
                               detect=lambda rgb: [], embed=lambda rgb, box: None)
-    assert [(f.kind, f.where) for f in verdict.faults] == [("unread", "shot_01")] and not verdict.passed
+    assert [(f.kind, f.where) for f in verdict.faults] == [("unread", "shot_01"), ("keypoints_unread", "shot_01")]
+    assert not verdict.passed
