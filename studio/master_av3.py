@@ -212,7 +212,10 @@ class Watchdog:
                 self.beat()
 
     def stop(self) -> None:
+        """Halt the watch and wait out a beat in flight, so none lands after the pass has ended."""
         self.halt.set()
+        if self.thread.is_alive() and self.thread is not threading.current_thread():
+            self.thread.join()
 
 
 def kill_all(*procs) -> None:
@@ -254,7 +257,10 @@ def streamed(listing: Path, out: Path, width: int, height: int, factor: int, fps
         raise
     finally:
         dog.stop()
-        codes = finish(dec, enc, seg)
+        try:
+            codes = finish(dec, enc, seg)
+        finally:
+            end_hang_dump()
     if dog.fired:
         raise Stalled(f"the av3 pass moved no frame for {stall_s:.0f} s")
     if any(codes):
@@ -333,13 +339,21 @@ def run(job: dict, upscaler=None, hard_exit=None) -> int:
 
 
 def dump_on_hang(seconds: float = STALL_S) -> None:
-    """A hang leaves its Python stack in the log `seconds` after this call; a stderr with no fd (a
-    test) skips it.  Each call re-arms the one timer, so the pump's watchdog keeps it off while
-    frames move: armed once, it printed a false stall stack on every pass over 60 s."""
+    """A hang leaves its Python stack in the log `seconds` after this call; a stderr with no fd
+    skips it (pytest's fd capture HAS one, so a test arms it too).  Each call re-arms the one timer,
+    so the pump's watchdog keeps it off while frames move: armed once, it printed a false stall
+    stack on every pass over 60 s."""
     try:
         faulthandler.dump_traceback_later(seconds, exit=False, file=sys.stderr)
     except (OSError, ValueError):
         pass
+
+
+def end_hang_dump() -> None:
+    """The pass is over, so no hang is left to dump: the timer its beat re-armed is cancelled.
+    Left armed, it fired `stall_s` later in whatever ran next (suite keeper 2026-10-21: in the
+    test process, an access violation one test after the stalled-pump test)."""
+    faulthandler.cancel_dump_traceback_later()
 
 
 def main(argv: list[str]) -> None:
@@ -358,6 +372,8 @@ def main(argv: list[str]) -> None:
     except mu.ShortPass as short:
         print(f"CAP upscale: av3 ended short: {short} frames", file=sys.stderr, flush=True)
         raise SystemExit(SHORT)
+    finally:
+        end_hang_dump()
     print(json.dumps({"av3_frames": n, "wall_s": round(time.perf_counter() - t0, 1)}), flush=True)
 
 
