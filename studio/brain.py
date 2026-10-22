@@ -44,7 +44,8 @@ TRIAGE_DENY = [*EDIT_TOOLS, *NEVER]
 FIXER_TOOLS = [*READ_TOOLS, "Edit", "Write", "Bash(git add *)", "Bash(git commit *)",
                "Workflow(fix-parked)"]
 FIXER_DENY = ["Edit(/library/**)", *NEVER]
-WRITERS = "Write|Edit|NotebookEdit|Bash"
+WRITERS = "Write|Edit|NotebookEdit|Bash|PowerShell"
+SHELLS = ("Bash", "PowerShell")
 DENY_REASON = ("library/ data is written by the runner and its judges, never by hand, and the "
                "history is never rewritten: fix the code with its test and let the supervisor relaunch")
 STOP_REASON = ("You edited code but did not run `uv run --no-sync pytest -q` on the touched tests; "
@@ -56,6 +57,12 @@ _BASH_DENY = re.compile(
     r"|\bsign_[a-z_]*\.py\b"
     r"|\bgit\s+(?:push|reset)\b|\bgit\s+commit\b.*--amend"
     r"|\buv\s+(?:add|remove)\b")
+_PS_DENY = re.compile(
+    r"(?i)(?:^|[\s;|&(])(?:set-content|add-content|out-file|new-item|copy-item|move-item|remove-item"
+    r"|sc|ac|ni|cpi|mi|ri)\b[^\n;|&]*\blibrary[/\\]"
+    r"|\[(?:system\.)?io\.file\]::\w+\([^)\n]*\blibrary[/\\]")
+"""PowerShell's file-writing cmdlets and their aliases, aimed under library/ (group R
+R-B8, 2026-10-22: the matcher never fired on PowerShell at all)."""
 _DRIVE = re.compile(r"[A-Za-z]:[\\/](?:[^\s'\"<>|]*?[\\/])?visurena_studio[\\/]|[A-Za-z]:[\\/]")
 
 
@@ -122,8 +129,9 @@ def _under_library(repo: Path, cwd: str | None, target: str) -> bool:
     return path.resolve().is_relative_to((repo / "library").resolve())
 
 
-def _bash_writes_library(command: str) -> bool:
-    return bool(_BASH_DENY.search(command))
+def _bash_writes_library(command: str, tool: str = "Bash") -> bool:
+    """The shell patterns; PowerShell's text is also read for its own writers."""
+    return bool(_BASH_DENY.search(command) or (tool == "PowerShell" and _PS_DENY.search(command)))
 
 
 def deny_library_writes(repo: Path):
@@ -131,8 +139,8 @@ def deny_library_writes(repo: Path):
     matching on Bash.  Returns {} to allow."""
     async def hook(input_data: dict, tool_use_id: str | None, context: object) -> dict:
         tool, args = input_data.get("tool_name"), input_data.get("tool_input") or {}
-        if tool == "Bash":
-            bad = _bash_writes_library(args.get("command", ""))
+        if tool in SHELLS:
+            bad = _bash_writes_library(args.get("command", ""), tool)
         else:
             target = args.get("file_path") or args.get("notebook_path") or ""
             bad = _under_library(repo, input_data.get("cwd"), target)
