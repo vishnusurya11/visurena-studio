@@ -32,6 +32,9 @@ resolved here and only here.
 from __future__ import annotations
 
 import json
+import os
+import threading
+import time
 from pathlib import Path
 
 from studio import settings
@@ -324,8 +327,35 @@ def read_json(path: Path) -> dict | list:
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
+REPLACE_TRIES, REPLACE_WAIT_S = 4, 0.02
+"""os.replace tries over a held target, the wait doubling from 20 ms (at most 0.3 s in all)."""
+
+
 def write_json(path: Path, data) -> Path:
+    """The JSON written to a temp file beside `path`, then put in place by os.replace: a kill or a
+    failed write mid-stream leaves the old file whole (fleet E bench I1, 2026-10-22: write_text left
+    548 of 1,000 killed writes unreadable, temp + replace 0).  No fsync: it cost a median 144 ms a
+    write on the D: disk against 0.6 ms, and a killed process, the measured fault, needs none."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    text = json.dumps(data, indent=2, ensure_ascii=False)
+    temp = path.with_name(f".{path.name}.{os.getpid()}.{threading.get_ident()}.tmp")
+    try:
+        temp.write_text(text, encoding="utf-8")
+        put_in_place(temp, path, text)
+    finally:
+        temp.unlink(missing_ok=True)
     return path
+
+
+def put_in_place(temp: Path, path: Path, text: str) -> None:
+    """os.replace, retried while a reader holds `path` (Windows refuses to replace a file opened
+    without delete sharing, WinError 5); past the tries the text is written in place, the old
+    write, so a held file never loses a write."""
+    for k in range(REPLACE_TRIES):
+        try:
+            os.replace(temp, path)
+            return
+        except PermissionError:
+            time.sleep(REPLACE_WAIT_S * 2 ** k)
+    path.write_text(text, encoding="utf-8")
