@@ -55,7 +55,8 @@ def test_dialogue_words_max_is_the_ceiling_in_words():
     assert plan_gates.MAX_PLAN_WORDS == 310
 
 
-def test_the_band_carries_the_word_budget_of_its_own_ceiling():
+def test_the_band_carries_the_room_of_its_own_ceiling():
+    # the words-at-the-wall number left the band (craft ruling A4, wave 1 review finding 5)
     band = plan_brief.band()
-    assert band["dialogue_words_max"] == plan_brief.dialogue_words_max(band["dialogue_share"][1])
+    assert plan_brief.dialogue_room(band["dialogue_share"][1]) == band["dialogue_room"]
     assert band["dialogue_share"][1] == episode_spec.DIALOGUE_SHARE[1]

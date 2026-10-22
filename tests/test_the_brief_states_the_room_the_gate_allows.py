@@ -26,6 +26,13 @@ def test_the_ch1_band_states_the_room_at_every_total_it_prints():
     assert "share of the plan's own words" in room
 
 
+def test_the_band_no_longer_prints_the_words_at_the_wall_alone():
+    # wave 1 review, finding 5: the band still printed "dialogue_words_max": 108 beside the room, and the
+    # skill no longer explains it, so the writer still read the number the ruling found false
+    assert "dialogue_words_max" not in plan_brief.band(BOOK, 1)
+    assert "dialogue_words_max" not in plan_brief.band()
+
+
 def test_the_worked_row_is_the_rulings():
     assert plan_brief.dialogue_room(0.35) == ("a share of the plan's own words, dialogue only: 0.35 x its total "
                                               "(at 240 words, 84 dialogue words; at 310, 108)")

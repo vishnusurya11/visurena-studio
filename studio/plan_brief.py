@@ -341,7 +341,8 @@ def dialogue_band(book_dir: Path | None, number: int | None) -> list[float]:
 
 def dialogue_words_max(ceiling: float) -> int:
     """The dialogue ceiling said in words of the plan's word wall (five-iterations B2):
-    ch2's 0.27 is 83 of 310 words, not a share the writer finds by refusal."""
+    ch2's 0.27 is 83 of 310 words, not a share the writer finds by refusal.  It is true only at the
+    wall, so the band no longer prints it (wave 1 review, finding 5): `dialogue_room` says the room."""
     from studio import plan_gates
     return int(ceiling * plan_gates.MAX_PLAN_WORDS)
 
@@ -393,8 +394,7 @@ def band(book_dir: Path | None = None, number: int | None = None) -> dict:
             "max_setup_seconds": episode_spec.MAX_SETUP_SECONDS,
             "bed_tones": list(__import__("studio.episode_bed", fromlist=["TONES"]).TONES),
             "aspect": episode_spec.canvas.DEFAULT if hasattr(episode_spec, "canvas") else "1:1",
-            "dialogue_share": dial, "dialogue_words_max": dialogue_words_max(dial[1]),
-            "dialogue_room": dialogue_room(dial[1]),
+            "dialogue_share": dial, "dialogue_room": dialogue_room(dial[1]),
             "turn_band": list(episode_spec.TURN_BAND),
             "grammar": episode_spec.STUDIO_GRAMMAR, "grammar_rules": grammar_battery.band(),
             "motif": motif}
