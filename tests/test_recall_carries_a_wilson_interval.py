@@ -33,6 +33,6 @@ def test_more_rows_tighten_the_interval():
     assert narrow[0] > wide[0]
 
 
-def test_no_rows_is_an_empty_interval_not_a_division():
-    assert jb.wilson(0, 0) == (0.0, 0.0)
+def test_no_rows_is_the_whole_unit_interval_not_a_certain_zero():
+    assert jb.wilson(0, 0) == (0.0, 1.0)
     assert jb.recall([], by="owner").n == 0

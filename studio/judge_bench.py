@@ -16,19 +16,20 @@ by relative path, never by what was said.
 """
 from __future__ import annotations
 
-import math
 import sys
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
 from typing import Callable
 
-from studio import casebook
+from studio import casebook, intervals
 from studio.casebook import Row
 
 Judge = Callable[[Row], dict]
 GPU_MINUTES_PER_REFUSAL = 7.0
 REAL = ("owner", "agent", "default")
+ARMABLE_N = 30
+"""The convention (fleet H ruling, not a measurement): a gate's owner count is thin under 30 rows."""
 
 
 @dataclass
@@ -72,13 +73,15 @@ def run(rows: list[Row], judge: Judge, classes=None) -> list[Outcome]:
 # ---- the numbers --------------------------------------------------------------
 
 def wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
-    """The Wilson score interval of k successes in n; (0, 0) when there is nothing to count."""
+    """The Wilson score interval of k successes in n; (0, 1) when there is nothing to count."""
+    return intervals.wilson(k, n, z)
+
+
+def status(n: int) -> str:
+    """An owner count's standing: no labels, thin under the convention's 30, or armable."""
     if n == 0:
-        return 0.0, 0.0
-    p, z2 = k / n, z * z
-    centre = (p + z2 / (2 * n)) / (1 + z2 / n)
-    half = z * math.sqrt(p * (1 - p) / n + z2 / (4 * n * n)) / (1 + z2 / n)
-    return round(max(0.0, centre - half), 4), round(min(1.0, centre + half), 4)
+        return "unarmed, n=0 (NO LABELS)"
+    return f"unarmed, n={n} (thin)" if n < ARMABLE_N else f"armable, n={n}"
 
 
 def interval(k: int, n: int) -> Interval:
@@ -191,6 +194,13 @@ def _line(name: str, i: Interval) -> str:
     return f"- {name}: {i.point:.3f} [{i.low:.3f}, {i.high:.3f}] on {i.k}/{i.n}"
 
 
+def _owner_line(name: str, i: Interval) -> str:
+    """An owner line with its standing; nothing counted prints no number at all."""
+    if i.n == 0:
+        return f"- {name}: NO LABELS -- {status(0)}"
+    return f"{_line(name, i)} -- {status(i.n)}"
+
+
 def _table(table: dict[str, dict]) -> list[str]:
     head = ["| class | tp | fn | synthetic tp/n | fp | tn | unmeasured |", "|---|---|---|---|---|---|---|"]
     return head + [f"| {c} | {v['tp']} | {v['fn']} | {v['synthetic_tp']}/{v['synthetic_n']} | {v['fp']} | {v['tn']} | {v['unmeasured']} |"
@@ -205,12 +215,12 @@ def report(outcomes: list[Outcome], judge_name: str, version: str, machine_versi
              f"machine_version {machine_version or 'n/a'}; "
              f"flag rate {rate['share']:.3f}; refusals per unit {rate['per_unit']}; "
              f"expected GPU minutes {gpu_minutes(outcomes):.0f}", "",
-             _line("recall on owner rows", recall(outcomes, "owner")),
+             _owner_line("recall on owner rows", recall(outcomes, "owner")),
              _line("recall on all rows", recall(outcomes, "all")),
              _line("synthetic (own column)", recall(outcomes, "synthetic")),
              _line("reject-only recall (unknown class)", reject_recall(outcomes)),
              _line("false refusals (weighted)", false_refusals(outcomes)), ""]
-    lines += [_line(f"owner recall on {c}", i) for c, i in by_class(outcomes, "owner").items()]
+    lines += [_owner_line(f"owner recall on {c}", i) for c, i in by_class(outcomes, "owner").items()]
     lines += ["", *_table(confusion(outcomes)), "", "misses (fault rows passed), by path:"]
     lines += [f"- {p}" for p in misses(outcomes)] or ["- none"]
     return "\n".join(lines) + "\n"

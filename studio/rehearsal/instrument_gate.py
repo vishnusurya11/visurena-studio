@@ -17,10 +17,11 @@ face_eye says "0 is no drawn eye", so a score above 0 reads `good`."""
 from __future__ import annotations
 
 import json
-import math
 import re
 from pathlib import Path
 from typing import Callable, Iterable
+
+from studio import intervals
 
 MIN_N = 30
 MIN_LOWER = 0.70
@@ -35,13 +36,8 @@ KINDS = ("quality", "mechanism", "compliance")
 
 
 def wilson_lower(k: int, n: int, z: float = Z95) -> float:
-    """The Wilson score interval's lower bound for k agreements in n; 0 when nothing was counted."""
-    if n <= 0:
-        return 0.0
-    p, zz = k / n, z * z
-    centre = p + zz / (2 * n)
-    margin = z * math.sqrt(p * (1 - p) / n + zz / (4 * n * n))
-    return (centre - margin) / (1 + zz / n)
+    """The Wilson score interval's lower bound for k agreements in n (studio.intervals); 0 when nothing was counted."""
+    return intervals.wilson(k, n, z)[0] if n > 0 else 0.0
 
 
 def gate(agree: int, n: int) -> dict:
