@@ -56,6 +56,18 @@ class Interval:
 
 # ---- rows in, outcomes out ----------------------------------------------------
 
+def is_casebook(folder: Path) -> bool:
+    """A folder the bench reads: harvested labels, or an owner overlay alone (a book not yet harvested, an exhibit)."""
+    return (Path(folder) / casebook.LABELS).is_file() or (Path(folder) / casebook.OWNER).is_file()
+
+
+def with_exhibits(library_folders: list[Path], exhibits: Path) -> list[Path]:
+    """The library's casebooks plus each committed exhibit folder (tests/fixtures/casebook/<codex>) of a book
+    the library does not hold: on a clean clone the exhibits stand in, beside the library they would repeat it."""
+    held = {Path(f).parent.name[:14] for f in library_folders}
+    return list(library_folders) + sorted(p for p in Path(exhibits).glob("*") if is_casebook(p) and p.name not in held)
+
+
 def load_rows(casebook_dir: Path, kind: str) -> list[Row]:
     return [r for r in casebook.load(casebook_dir) if r.kind == kind]
 
@@ -218,6 +230,58 @@ def caught(outcomes: list[Outcome]) -> list[dict]:
             for o in outcomes if o.refused and o.row.verdict == "fault" and o.row.verdict_by == "owner"]
 
 
+def with_ledger(baseline: dict, ledger: list[dict], judge_name: str) -> dict:
+    """The baseline's catches plus every catch the append-only ledger holds for this judge."""
+    seen = {(c["codex"], c["path"]) for c in baseline.get("caught", [])}
+    extra = [{k: c[k] for k in ("codex", "sha8", "path")} for c in ledger
+             if c.get("judge") == judge_name and (c["codex"], c["path"]) not in seen]
+    return baseline | {"caught": list(baseline.get("caught", [])) + extra}
+
+
+def vacuous(baseline: dict, outcomes: list[Outcome]) -> str:
+    """Why the baseline proves nothing: benched on no owner rows while the judge now measures some; else ''."""
+    now = recall(outcomes, "owner").n + false_refusals(outcomes, "owner").n
+    if (baseline.get("recall_owner") or {}).get("n", 0) == 0 and not baseline.get("caught") and now:
+        return (f"the baseline was benched on no owner rows but the judge now measures {now}: "
+                "rebuild it with scripts/calibration/bench.py in this commit")
+    return ""
+
+
+def refused_passes(outcomes: list[Outcome]) -> list[dict]:
+    """The owner PASS rows this judge refuses: the other side's memory."""
+    return [{"codex": o.row.codex, "path": o.row.path} for o in owner_passes(outcomes) if o.refused]
+
+
+def new_refusals(baseline: dict, outcomes: list[Outcome]) -> list[str]:
+    """Owner pass rows refused now that the baseline did not refuse, by path."""
+    before = {(c["codex"], c["path"]) for c in baseline.get("refused_owner_passes", [])}
+    return sorted(c["path"] for c in refused_passes(outcomes) if (c["codex"], c["path"]) not in before)
+
+
+def class_drops(baseline: dict, outcomes: list[Outcome]) -> list[str]:
+    """Classes whose owner recall fell, however the pooled number moved: 'cls: k/n -> k/n'."""
+    before, out = baseline.get("by_class_owner", {}), []
+    for cls, now in by_class(outcomes, "owner").items():
+        was = before.get(cls)
+        if was and was["n"] and now.point < was["point"]:
+            out.append(f"{cls}: {was['k']}/{was['n']} -> {now.k}/{now.n}")
+    return out
+
+
+def armed(by_class_counts: dict) -> list[str]:
+    """The classes with the convention's 30 owner rows: only they may fail the other side."""
+    return sorted(c for c, v in by_class_counts.items() if v["n"] >= ARMABLE_N)
+
+
+def other_side(baseline: dict, outcomes: list[Outcome]) -> dict:
+    """New refusals of owner passes and falling classes; failing only where the count is armed."""
+    news, drops = new_refusals(baseline, outcomes), class_drops(baseline, outcomes)
+    live = armed({c: {"n": i.n} for c, i in by_class(outcomes, "owner").items()})
+    failing = [d for d in drops if d.split(":")[0] in live]
+    failing += news if len(owner_passes(outcomes)) >= ARMABLE_N else []
+    return {"new_refusals": news, "class_drops": drops, "failing": failing}
+
+
 def lost_catches(baseline: dict, outcomes: list[Outcome]) -> list[str]:
     """Baseline catches whose row is here and is no longer refused, by path."""
     now = {(o.row.codex, o.row.path): o.refused for o in outcomes}
@@ -254,7 +318,7 @@ def _line(name: str, i: Interval) -> str:
 def _owner_line(name: str, i: Interval) -> str:
     """An owner line with its standing; nothing counted prints no number at all."""
     if i.n == 0:
-        return f"- {name}: NO LABELS -- {status(0)}"
+        return f"- {name}: {status(0)}"
     return f"{_line(name, i)} -- {status(i.n)}"
 
 
@@ -324,7 +388,9 @@ def baseline(outcomes: list[Outcome], judge_name: str, version: str, machine_ver
             "date": date.today().isoformat(), "rows": len(outcomes), "unmeasured": unmeasured(outcomes),
             "recall_owner": _dict(recall(outcomes, "owner")), "recall_all": recall(outcomes, "all").point,
             "false_refusals_owner": _dict(false_refusals(outcomes, "owner")),
-            "false_refusals": false_refusals(outcomes).point, "caught": caught(outcomes)}
+            "false_refusals": false_refusals(outcomes).point, "caught": caught(outcomes),
+            "refused_owner_passes": refused_passes(outcomes),
+            "by_class_owner": {c: _dict(i) for c, i in by_class(outcomes, "owner").items()}}
 
 
 def main(argv: list[str]) -> int:

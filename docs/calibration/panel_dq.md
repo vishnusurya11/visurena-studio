@@ -41,3 +41,51 @@ misses (fault rows passed), by path:
 - episodes/ep09/storyboard_prev_v1/shot_20.png
 - episodes/ep09/storyboard_prev_v1/shot_21.png
 - episodes/ep09/storyboard_prev_v1/shot_22.png
+
+## Bench 2026-10-22 -- panel_dq@edf35cf7
+
+rows 197 (1 without this judge's inputs, not counted); machine_version git:71aaf69; flag rate 0.046; refused artefacts per unit {'20260827135508/ep05': 5, '20260827135508/ep07': 3, '20260827135508/ep09': 1}; distinct (artefact, rule) refusals 10; expected GPU minutes 63
+
+### owner truth (the headline)
+
+- recall on owner rows: unarmed, n=0 (NO LABELS)
+  - recall, episode-cluster bootstrap: too few clusters (0 episodes, under 10)
+- false refusals on owner rows: unarmed, n=0 (NO LABELS)
+  - false refusals, episode-cluster bootstrap: too few clusters (0 episodes, under 10)
+
+### internal consistency (agent / default / synthetic rows: the ladder agreeing with itself, not truth)
+
+- recall on all rows: 0.000 [0.000, 1.000] on 0/0
+- synthetic (own column): 0.000 [0.000, 1.000] on 0/0
+- reject-only recall (unknown class): 0.043 [0.008, 0.210] on 1/23
+- false refusals on all rows: 0.046 [0.024, 0.089] on 8/173; weighted share 0.046
+
+| class | tp | fn | synthetic tp/n | fp | tn | unmeasured |
+|---|---|---|---|---|---|---|
+| copies | 0 | 0 | 0/0 | 0 | 0 | 1 |
+| pass | 0 | 0 | 0/0 | 8 | 165 | 0 |
+| unknown | 1 | 22 | 0/0 | 0 | 0 | 0 |
+
+misses (fault rows passed), by path:
+- episodes/ep09/storyboard_prev_v1/shot_00.png
+- episodes/ep09/storyboard_prev_v1/shot_01.png
+- episodes/ep09/storyboard_prev_v1/shot_02.png
+- episodes/ep09/storyboard_prev_v1/shot_03.png
+- episodes/ep09/storyboard_prev_v1/shot_04.png
+- episodes/ep09/storyboard_prev_v1/shot_05.png
+- episodes/ep09/storyboard_prev_v1/shot_06.png
+- episodes/ep09/storyboard_prev_v1/shot_07.png
+- episodes/ep09/storyboard_prev_v1/shot_08.png
+- episodes/ep09/storyboard_prev_v1/shot_09.png
+- episodes/ep09/storyboard_prev_v1/shot_10.png
+- episodes/ep09/storyboard_prev_v1/shot_11.png
+- episodes/ep09/storyboard_prev_v1/shot_13.png
+- episodes/ep09/storyboard_prev_v1/shot_14.png
+- episodes/ep09/storyboard_prev_v1/shot_15.png
+- episodes/ep09/storyboard_prev_v1/shot_16.png
+- episodes/ep09/storyboard_prev_v1/shot_17.png
+- episodes/ep09/storyboard_prev_v1/shot_18.png
+- episodes/ep09/storyboard_prev_v1/shot_19.png
+- episodes/ep09/storyboard_prev_v1/shot_20.png
+- episodes/ep09/storyboard_prev_v1/shot_21.png
+- episodes/ep09/storyboard_prev_v1/shot_22.png

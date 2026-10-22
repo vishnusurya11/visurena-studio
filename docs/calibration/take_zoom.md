@@ -206,3 +206,41 @@ misses (fault rows passed), by path:
 - episodes/ep11/takes/r2v/attempts/T20_fail1.mp4
 - episodes/ep12/takes/r2v/attempts/T13_fail1.mp4
 - episodes/ep12/takes/r2v/attempts/T16_fail1.mp4
+
+## Bench 2026-10-22 -- take_zoom@61fd54e4
+
+rows 804 (386 without this judge's inputs, not counted); machine_version git:71aaf69; flag rate 0.047; refused artefacts per unit {'20260822113400/ep10': 6, '20260822113400/ep11': 6, '20260822113400/ep12': 3, '20260822113400/ep13': 3, '20260822113400/ep14': 2, '20260827135508/ep01': 4, '20260827135508/ep02': 2, '20260827135508/ep03': 1, '20260827135508/ep04': 1, '20260827135508/ep08': 2, '20260827135508/ep09': 3, '20260827135508/ep10': 2, '20260827135508/ep11': 3}; distinct (artefact, rule) refusals 38; expected GPU minutes 266
+
+### owner truth (the headline)
+
+- recall on owner rows: unarmed, n=0 (NO LABELS)
+  - recall, episode-cluster bootstrap: too few clusters (0 episodes, under 10)
+- false refusals on owner rows: unarmed, n=0 (NO LABELS)
+  - false refusals, episode-cluster bootstrap: too few clusters (0 episodes, under 10)
+
+### internal consistency (agent / default / synthetic rows: the ladder agreeing with itself, not truth)
+
+- recall on all rows: 0.000 [0.000, 1.000] on 0/0
+- synthetic (own column): 0.000 [0.000, 1.000] on 0/0
+- reject-only recall (unknown class): 0.235 [0.096, 0.473] on 4/17
+- false refusals on all rows: 0.085 [0.061, 0.116] on 34/401; weighted share 0.085
+
+| class | tp | fn | synthetic tp/n | fp | tn | unmeasured |
+|---|---|---|---|---|---|---|
+| pass | 0 | 0 | 0/0 | 34 | 367 | 218 |
+| unknown | 4 | 13 | 0/0 | 0 | 0 | 168 |
+
+misses (fault rows passed), by path:
+- episodes/ep11/takes/r2v/attempts/T00_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T03_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T06_fail3.mp4
+- episodes/ep11/takes/r2v/attempts/T07_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T13_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T15_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T16_fail1.mp4
+- episodes/ep11/takes/r2v/attempts/T19_fail2.mp4
+- episodes/ep11/takes/r2v/attempts/T20_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T13_fail1.mp4
+- episodes/ep12/takes/r2v/attempts/T16_fail1.mp4

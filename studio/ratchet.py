@@ -10,7 +10,9 @@ from the brain:
     3. a quieter battery -- the gates over the last delivered plans may not report
        FEWER faults unless each removed fault is asserted a false positive;
     4. forbidden edits -- no terminal, ceiling, cap, wall, share or `guard_spend`
-       moves (feedback_constants_outlive_their_world).
+       moves (feedback_constants_outlive_their_world);
+    5. the catch ledger -- docs/calibration/bench/ is denied, but caught.jsonl may
+       take added lines; a removed line is refused (fleet H ruling A10).
 
 A refusal is a sentence; the supervisor reverts the commit on any.  The test runner
 is injected (`run(ref, files) -> exit code`) so nothing here checks out or spends.
@@ -24,7 +26,10 @@ ALLOW = ("studio/**/*.py", "scripts/**/*.py", "agents/**/*.py", "tests/**/*.py",
          "architecture/plan/*.md")
 DENY = ("library/**", "**/*.verdict.json", "**/eye_*.json", "**/learnings.jsonl", "**/drive.jsonl",
         "gates.yaml", "models.yaml", "stages.yaml", "pyproject.toml", "uv.lock", ".claude/**",
-        "docs/DECISIONS.md", "architecture/decisions/**")
+        "docs/DECISIONS.md", "architecture/decisions/**", "docs/calibration/bench/**")
+LEDGER = "docs/calibration/bench/caught.jsonl"
+"""The judges' append-only catch ledger (fleet H ruling A10): the one bench file a fix may touch, and only
+by adding lines -- `ledger_cut` refuses a removed one."""
 FORBIDDEN = ("terminal:", "episode_ceiling_usd", "PLAN_LADDERS_MAX", "MAX_IMPROVE", "ROUNDS_CAP",
              "MAX_RUNS", "guard_spend")
 _CAP = re.compile(r"[A-Z_]*(?:_CAP|_WALL|_SHARE|MAX_)[A-Z_]*\s*=\s*[\d.]+")
@@ -68,9 +73,20 @@ def red_before_green(run: Callable[[str, list[str]], int], sha_old: str, sha_new
 
 
 def outside_allow_set(diff_names: list[str], allow: tuple = ALLOW, deny: tuple = DENY) -> list[str]:
-    """Every path that is denied, or allowed by nothing."""
-    return [name for name in diff_names
-            if any(matches(name, d) for d in deny) or not any(matches(name, a) for a in allow)]
+    """Every path that is denied, or allowed by nothing; the catch ledger is judged by `ledger_cut` instead."""
+    return [name for name in diff_names if name.replace("\\", "/") != LEDGER
+            and (any(matches(name, d) for d in deny) or not any(matches(name, a) for a in allow))]
+
+
+def ledger_cut(diff_text: str) -> list[str]:
+    """The lines a unified diff removes from the catch ledger: the ledger only grows."""
+    current, cut = "", []
+    for line in diff_text.splitlines():
+        if line.startswith("+++ "):
+            current = line[4:].removeprefix("b/")
+        elif current == LEDGER and line.startswith("-") and not line.startswith("---"):
+            cut.append(line)
+    return cut
 
 
 def changed_lines(diff_text: str) -> list[str]:
@@ -105,5 +121,6 @@ def check(diff_names: list[str], diff_text: str, run: Callable[[str, list[str]],
     if red_green:
         refusals.append(red_green)
     refusals += [f"forbidden edit: {line.strip()}" for line in forbidden_edits(diff_text)]
+    refusals += [f"the catch ledger may only grow: {line.strip()}" for line in ledger_cut(diff_text)]
     refusals += [f"quieter battery: {why}" for why in quieter_battery(before, after, asserted)]
     return refusals
