@@ -209,7 +209,8 @@ def route(verdict: Verdict, room: Path, try_i: int = 1, window=GOVERNING) -> dic
         kinds = {f.kind for f in fs}
         if try_i >= 2 and not progressed(room, i, sorted(kinds)) and not kinds <= FROZEN:
             continue        # a frozen take gets its second move type: G-DEAD never ships it (2026-10-14)
-        if cure := cure_of(fs, panel_clean=panel_clean(room, i), taken=attempts_of(room, i)):
+        cure = cure_of(fs, panel_clean=panel_clean(room, i), taken=attempts_of(room, i))
+        if cure and not (cure in DRAWS and repeated(room, i, fs)):      # A24: no third same-fault draw
             out.setdefault(cure, {})[i] = fs
         if cure != "head_cut" and any(f.kind == "leak" and f.evidence.get("covers") for f in fs):
             # FREE and independent of the render cure: ep24 T02 shipped at 0 with
@@ -220,7 +221,60 @@ def route(verdict: Verdict, room: Path, try_i: int = 1, window=GOVERNING) -> dic
 
 def renders_of(routed: dict[str, dict[int, list[Fault]]]) -> list[int]:
     """The takes a batched round actually re-renders."""
-    return sorted({i for cure in ("move_type", "seed", "gait_verb") for i in routed.get(cure, {})})
+    return sorted({i for cure in DRAWS for i in routed.get(cure, {})})
+
+
+DRAWS = ("move_type", "seed", "gait_verb")
+"""The cures that re-draw a take; head_cut and timeline_trim are free and never capped."""
+REPEAT_CAP = 2
+"""Draws of one take for one fault kind, across draws and runs, after which it is drawn no more (craft ruling
+A24: Jekyll ep01 T01's gait fault was drawn 10 times over 7 runs)."""
+OWED = "cures_owed.jsonl"
+
+
+def fault_key(index: int, kind: str) -> str:
+    """The attempts.json row a take's draws for one fault kind are booked under: every run reads it."""
+    return f"fault.T{index:02d}.{kind}"
+
+
+def home_of(room: Path) -> Path:
+    return Path(room).parent.parent
+
+
+def repeated(room: Path, index: int, faults: list[Fault]) -> list[str]:
+    """The fault kinds this take was already drawn REPEAT_CAP times for (attempts.json)."""
+    home = home_of(room)
+    return sorted({f.kind for f in faults if step_attempts.count(home, fault_key(index, f.kind)) >= REPEAT_CAP})
+
+
+def count_faults(home: Path, kept: dict[int, list[Fault]]) -> None:
+    """One draw booked per fault kind per take a round renders."""
+    for index, faults in kept.items():
+        for kind in sorted({f.kind for f in faults}):
+            step_attempts.spend(Path(home), fault_key(index, kind))
+
+
+def shot_of(room: Path, index: int) -> int:
+    """The plan shot a take opens on (takes/r2v/shots.json), else the take's own index."""
+    path = Path(room) / "shots.json"
+    rows = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
+    return next(((r.get("shots") or [index])[0] for r in rows if int(r.get("index", -1)) == index), index)
+
+
+def owe_plan_cures(room: Path, verdict: Verdict) -> list[dict]:
+    """A take the repeat cap stopped owes the plan a cure: one "plan cure owed: shot N motion" row per take and
+    fault kind in episodes/epNN/cures_owed.jsonl, never twice.  Routing it to a plan edit is T24."""
+    path = home_of(room) / OWED
+    seen = {(r["take"], r["fault"]) for r in map(json.loads, path.read_text(encoding="utf-8").splitlines())} \
+        if path.exists() else set()
+    rows = [{"take": i, "shot": shot_of(room, i), "field": "motion", "fault": kind, "draws": REPEAT_CAP,
+             "row": f"plan cure owed: shot {shot_of(room, i)} motion"}
+            for i, fs in sorted(curable_faults(verdict, room).items()) for kind in repeated(room, i, fs)
+            if (i, kind) not in seen]
+    if rows:
+        with open(path, "a", encoding="utf-8") as out:
+            out.writelines(json.dumps(r) + "\n" for r in rows)
+    return rows
 
 
 def signatures(verdict: Verdict) -> dict[str, list[str]]:
@@ -1095,6 +1149,7 @@ def render_round(ctx, rung: Rung, kept: dict, trims: list[int], flag: str, verdi
     """ONE batched retake of `kept` (its round counted in the room's book); its wall seconds."""
     why = why_of(rung.name, [f for fs in kept.values() for f in fs])
     count_round(room, why, signatures(verdict), takes=sorted(kept))
+    count_faults(ctx.home, kept)                         # A24: each fault kind's draws, across runs
     began = wall()
     retake(ctx, sorted(kept), why, flag, trims=trims)
     return wall() - began
@@ -1117,6 +1172,7 @@ def rungs(ctx, plan, flag: str, records: dict[int, dict] | None = None) -> judge
         """ONE batched round: free cures first (no render, no round), then the union of renderable
         cures in a single retake.  K11: changed only when bytes changed or a render ran."""
         routed = route(verdict, room, try_i=max(_try + 1, rounds_of(room, since) + 1))
+        owe_plan_cures(room, verdict)                    # A24: a take the repeat cap stopped owes the plan
         if not routed:
             return judged_gate.RungResult(False, "not routed")
         written = head_cuts(ctx, routed.get("head_cut", {}))
