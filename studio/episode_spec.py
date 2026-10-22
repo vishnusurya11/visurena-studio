@@ -185,8 +185,9 @@ class Line(BaseModel):
     telling his own story in his own voice, voice-over, over pictures of what he
     tells -- the book's words kept, outside the dialogue dial and the quote wall.
     `inner` (2026-10-17) is a character THINKING, in his own voice hushed, no lips,
-    over his own face; at most INNER_MAX_WORDS words.  ADVISORY until the owner has
-    heard the treatment (`studio.inner_voice`)."""
+    over his own face; at most INNER_MAX_WORDS words, HARD: the validator raises (letting the
+    book's own 9-14 word thoughts through is owner question Q4).  The hushed treatment
+    itself is advice until the owner has heard it (`studio.inner_voice`)."""
     speaker: str
     text: str
     shot: int = Field(ge=0)

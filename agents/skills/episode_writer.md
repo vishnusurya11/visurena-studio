@@ -321,8 +321,8 @@ extreme_close, close, medium_close, medium, full, wide.
 - The model obeys a move's DIRECTION and ignores its amount. Point every move at
   something the location picture already contains.
 - **Variety.** Choose moves from the camera catalog: at least eight distinct
-  moves in a unit, no move on more than a quarter of the shots, never the same
-  move on two consecutive shots -- except a dialogue exchange.
+  moves, no move on over a quarter of the shots (held dialogue shots
+  uncounted), never the same move twice running but in an exchange.
 - **Dialogue is held.** A shot carrying a dialogue line holds a locked-off frame
   or sits over the listener's shoulder, and the ACTOR carries the verb (leans,
   turns, lifts a hand). An exchange held so is one shot/reverse-shot unit,
