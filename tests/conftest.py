@@ -165,6 +165,8 @@ def comfy_trap(monkeypatch, comfy_root_in_tmp):
     monkeypatch.setattr(comfy, "run_text", trip)
     monkeypatch.setattr(comfy, "VLM_CALLS", None)       # the read log never writes under library/ in a test
     monkeypatch.setattr(comfy, "CHANGEOVERS", None)     # nor the model-load ledger (craft ruling A27)
+    from studio import routed_whisper                   # nor the ear's per-clip log (fleet E A2)
+    monkeypatch.setattr(routed_whisper, "WHISPER_CALLS", None)
     # A test's `model_kept()` ends with /free: it must never unload the live
     # engine's models under a running render (speed plan #6).
     monkeypatch.setattr(comfy, "free_models", lambda: None)

@@ -19,9 +19,12 @@ from __future__ import annotations
 import atexit
 import json
 import subprocess
+import time
 from contextlib import ExitStack
 from pathlib import Path
 from typing import Callable
+
+from studio import settings
 
 IDLE_S = 30.0
 """Mirror of studio/whisper_worker.IDLE_S (that file runs under another python, so it is not imported)."""
@@ -33,7 +36,22 @@ one clip may read; measured on Jekyll ep01's lines 2026-10-18 (fixture)."""
 SPAWNS = 2
 """The worker is started at most twice a batch: once, and once more after a death (A32)."""
 ERR_LOG = Path("review") / "work" / "qc_whisper.err"
+WHISPER_CALLS: Path | None = settings.library_root() / "whisper_calls.jsonl"
+"""One row per heard clip (fleet E A2, 2026-10-22), beside vlm_calls.jsonl; None logs nothing (tests)."""
 Ear = Callable[[Path], str]
+
+
+def log_heard(device: str, clip: Path, seconds: float, text: str) -> None:
+    """Append the clip's row: the device, its name, the seconds, the words.  Never fails the ear."""
+    if WHISPER_CALLS is None:
+        return
+    row = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "device": device, "clip": Path(clip).name,
+           "seconds": round(seconds, 2), "words": len(text.split())}
+    try:
+        with open(WHISPER_CALLS, "a", encoding="utf-8") as out:
+            out.write(json.dumps(row) + "\n")
+    except OSError:
+        pass
 
 
 def worker_argv(python: Path, model: str, root: str) -> list[str]:
@@ -84,10 +102,12 @@ class Worker:
                                "it had exited or was exiting") from failed
 
     def __call__(self, clip: Path) -> str:
+        began = time.monotonic()
         self.ask(clip)
         said = json.loads(self.proc.stdout.readline() or '{"error": "the worker died"}')
         if "text" not in said:
             raise RuntimeError(said.get("error", "no text"))
+        log_heard("cuda", clip, time.monotonic() - began, said["text"])
         return said["text"].strip()
 
     def poll(self):

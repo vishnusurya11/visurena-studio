@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
@@ -471,7 +472,11 @@ def transcriber(model: str = MODEL, device: str = DEVICE) -> Callable[[Path], st
     engine = _HEARD[key]
 
     def listen(clip: Path) -> str:
-        return engine.transcribe(str(clip), **whisper_options(device))["text"].strip()
+        from studio import routed_whisper
+        began = time.monotonic()
+        text = engine.transcribe(str(clip), **whisper_options(device))["text"].strip()
+        routed_whisper.log_heard(device, clip, time.monotonic() - began, text)
+        return text
 
     return listen
 

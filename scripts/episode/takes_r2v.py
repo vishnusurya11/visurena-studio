@@ -18,6 +18,7 @@ is your final frame; match the voice timeline").
 """
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -1174,14 +1175,43 @@ def cancel_pending(prompt_ids: list[str]) -> set[str]:
     return set(removed)
 
 
-def claim_one(c: dict, prompt_id: str, where, on_take, done: list, lost: list) -> None:
-    """One submitted take claimed; an interrupted, errored or timed-out one is lost."""
+RENDERS_LOG = "renders.jsonl"
+"""One row per claimed render beside the takes (fleet E A2, 2026-10-22): shots.json keeps only the
+latest draw's render_s, so retakes, lost takes and step 09's card/CPU split had no record."""
+
+
+def render_row(c: dict, prompt_id: str, began: float, record: dict | None, why: str = "") -> dict:
+    """A render's row: the engine's seconds and the wait when kept, the reason when lost."""
+    row = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "index": c["index"], "prompt_id": prompt_id,
+           "ok": record is not None, "waited_s": round(time.time() - began, 1)}
+    if record is not None:
+        row.update(render_s=record.get("render_s"), waited_s=record.get("waited_s", row["waited_s"]))
+    return {**row, "lost": why[:300]} if why else row
+
+
+def log_render(out: Path | None, row: dict) -> None:
+    """Append the row beside the take; a log that cannot be written never fails a take."""
+    if out is None:
+        return
     try:
-        record = collect(c, prompt_id, where(c))
+        with open(Path(out).parent / RENDERS_LOG, "a", encoding="utf-8") as log:
+            log.write(json.dumps(row) + "\n")
+    except OSError:
+        pass
+
+
+def claim_one(c: dict, prompt_id: str, where, on_take, done: list, lost: list) -> None:
+    """One submitted take claimed; an interrupted, errored or timed-out one is lost.  Either way
+    its row goes to renders.jsonl."""
+    out, began = where(c), time.time()
+    try:
+        record = collect(c, prompt_id, out)
     except Exception as raised:                    # interrupted, errored, timed out
         lost.append((c, str(raised)))
+        log_render(out, render_row(c, prompt_id, began, None, str(raised)))
         print(f"  T{c['index']:02d} LOST: {raised}", flush=True)
         return
+    log_render(out, render_row(c, prompt_id, began, record))
     done.append(record)
     if on_take:
         on_take(c, record)
