@@ -71,8 +71,12 @@ def test_with_no_other_passed_line_in_the_episode_there_is_nothing_to_compare(tm
 
 
 def test_the_floor_is_the_documented_one():
-    assert say.EPISODE_VOICE == 0.75
-    assert say.alternate_ok(0.75) and not say.alternate_ok(0.749)
+    """Re-set 2026-10-21 on the 16 kHz ruler (was 0.75): every calm line's mean against its
+    own speaker's other lines is >= 0.622, against another speaker's <= 0.569 (three books);
+    a line said with feeling sits FEELING_FLOOR_DROP under it (Jekyll's urgent l19, 0.514)."""
+    assert say.EPISODE_VOICE == 0.60
+    assert say.alternate_ok(0.60) and not say.alternate_ok(0.599)
+    assert say.alternate_ok(0.514, delivery="urgent") and not say.alternate_ok(0.514)
 
 
 def test_listen_all_fails_an_alternate_render_that_is_not_the_room_voice(tmp_path, monkeypatch):

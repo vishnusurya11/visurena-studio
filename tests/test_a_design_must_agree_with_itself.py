@@ -19,6 +19,9 @@ nearest neighbour's twin (<= NEAREST_CEIL).  A failing design is re-rolled with
 its register nudged AWAY from the rival, up to REROLLS times (Jekyll ep01
 review, 2026-10-13: only from a rival whose register the book filed -- the old
 default was up, and it walked Jekyll 175 -> 191 Hz).
+
+Those numbers are the old 24 kHz ruler's.  On the 16 kHz ruler (2026-10-21) Ferrier's
+clip reads 0.586 / 0.550 and was one voice all along; the gates stand at 0.45 / 0.75.
 """
 from __future__ import annotations
 
@@ -65,21 +68,28 @@ def test_a_clip_that_changes_voice_halfway_does_not(tmp_path, monkeypatch):
 
 # ---- the gates ----------------------------------------------------------------
 
-def test_the_measured_ferrier_fails_both_gates():
-    why = cast_voices.design_fault(0.498, 0.847)
-    assert "itself" in why and "0.498" in why
-    assert "nearest" in why and "0.847" in why
+def test_a_split_twin_fails_both_gates():
+    why = cast_voices.design_fault(0.40, 0.78)
+    assert "itself" in why and "0.400" in why
+    assert "nearest" in why and "0.780" in why
+
+
+def test_the_measured_ferrier_v1_passes_on_the_correct_ruler():
+    """2026-10-21, 16 kHz: Ferrier's design_v1 reads 0.586 against itself and 0.550 against
+    Young (0.498 / 0.847 on the 24 kHz ruler), and his lines from it lead Young by >= 0.16."""
+    assert cast_voices.design_fault(0.586, 0.550) == ""
 
 
 def test_the_measured_watson_passes():
-    assert cast_voices.design_fault(0.762, 0.79) == ""
+    assert cast_voices.design_fault(0.689, 0.574) == ""    # 16 kHz: self, nearest (Stamford)
 
 
 def test_the_boundaries_are_the_documented_ones():
-    assert cast_voices.SELF_FLOOR == 0.65 and cast_voices.NEAREST_CEIL == 0.80
-    assert cast_voices.design_fault(0.65, 0.80) == ""
-    assert cast_voices.design_fault(0.649, 0.80)
-    assert cast_voices.design_fault(0.65, 0.801)
+    """Re-set 2026-10-21 on the 16 kHz ruler (were 0.65 / 0.80): voice bench fix/."""
+    assert cast_voices.SELF_FLOOR == 0.45 and cast_voices.NEAREST_CEIL == 0.75
+    assert cast_voices.design_fault(0.45, 0.75) == ""
+    assert cast_voices.design_fault(0.449, 0.75)
+    assert cast_voices.design_fault(0.45, 0.751)
 
 
 # ---- the nudge: away from the rival, in the register --------------------------

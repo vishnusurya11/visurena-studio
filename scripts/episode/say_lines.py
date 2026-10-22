@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio.episode_home import episode_arg
-from studio import episode_emotion, episode_home, step_attempts, step_caps, voice, voice_ear, voice_qc, voice_say
+from studio import cast_home, episode_emotion, episode_home, step_attempts, step_caps, voice, voice_ear, voice_qc, voice_say
 from studio.episode_spec import Episode, Line
 
 SEED_BASE = 71000
@@ -29,37 +29,36 @@ ENGINE = "indextts2"
 cosine): IndexTTS2 0.799, Qwen3-TTS clone 0.728; both word-perfect.  IndexTTS2
 is ~4x slower (111 s vs 26 s cold) and the more accurate voice, which is
 what the owner asked for."""
-SIMILAR = 0.70
-"""ECAPA cosine a line of four seconds or more must reach against the designed
-voice.  Between the two engines' measured scores; a line under it is not that
-character.  Shorter lines get `similar_floor`."""
+SIMILAR = 0.60
+"""ECAPA cosine (voice_ear.RULER, 16 kHz) a calm line of four seconds or more must
+reach against the designed voice: the BACKSTOP under the cast margin (`CAST_MARGIN`),
+which is what tells one character from another.  Shorter lines get `similar_floor`.
 
-FLOORS = ((4.0, SIMILAR), (2.0, 0.65), (0.0, 0.60))
-"""(at least this many seconds, this floor).
+RE-SET 2026-10-21 on the 16 kHz ruler (voice bench fix/, 411 trusted owner-watched
+lines of three books + 18 bench takes): the lowest genuine calm line of 4 s or more
+reads Scarlet 0.626, WotW 0.728, Jekyll 0.785.  The old 0.70 refused 2 of 300 real
+Scarlet lines on the new ruler."""
 
-MEASURED on episode 10 by truncating a GENUINE line and scoring the truncation
-against its own design -- same voice, less audio:
+FLOORS = ((4.0, SIMILAR), (2.0, 0.55), (0.0, 0.50))
+"""(at least this many seconds, this floor), on voice_ear.RULER.
 
-    Ferrier ep08/l25  5.27 s 0.815 | 1.5 s 0.690 | 2.5 s 0.771 | 4.0 s 0.819
-    Watson  ep10/l26  5.84 s 0.824 | 1.5 s 0.640 | 2.5 s 0.709 | 4.0 s 0.796
-    Young   ep10/l16  5.42 s 0.853 | 1.5 s 0.677 | 2.5 s 0.708 | 4.0 s 0.826
+RE-SET 2026-10-21: the lowest genuine calm 2-4 s line reads Scarlet 0.601, WotW
+0.691, Jekyll 0.713; 1.5 s slices of long genuine lines read p1 0.524 / 0.596 /
+0.689 (the last band only shapes `similar_floor`; under SIM_MEASURABLE_S nothing is
+gated).  On the old 24 kHz ruler the floors were 0.70 / 0.65 / 0.60 (ep10's
+truncations: a correct voice loses ~0.05 at 2.5 s and 0.12-0.18 at 1.5 s)."""
 
-A correct voice loses ~0.05 at 2.5 s and 0.12-0.18 at 1.5 s.  Lucy's four lines
-run 1.5-2.6 s and three sit under 0.75 with a design that reads 0.864 on a
-2.6 s line.  A flat 0.70 refuses the TRUE voice under two seconds; a line that
-short cannot be judged harder than the encoder can hear it."""
+EPISODE_VOICE = 0.60
+"""Line-vs-line ECAPA cosine (voice_ear.RULER) an ALTERNATE-reference render must
+reach, on average, against the speaker's other passed lines in the same episode; a
+line said with feeling sits FEELING_FLOOR_DROP under it.
 
-EPISODE_VOICE = 0.75
-"""Line-vs-line ECAPA cosine an ALTERNATE-reference render must reach against
-the speaker's other passed lines in the same episode.
-
-MEASURED on episode 10: Ferrier's l27, cloned from ep08/l25 on its fourth try,
-passed the design floor at 0.701 -- by 0.001 -- and measured 0.585 / 0.589 /
-0.588 against the two lines he speaks 25 s earlier in the same room, while
-those two sit at 0.839 against each other and his lines across two episodes
-at 0.79-0.90.  The listener never hears the design clip; the listener hears
-this line after the last one.  0.75 is under every genuine pair and over the
-one that was a different man."""
+RE-SET 2026-10-21 on the 16 kHz ruler: a calm line's mean against its own speaker's
+other lines is never under Scarlet 0.622, WotW 0.746, Jekyll 0.646, and a line's mean
+against ANOTHER speaker's lines never over 0.566 / 0.569 / 0.508.  Jekyll's urgent
+l19 reads 0.514 against Enfield's calm lines, hence the drop.  The case it was set on
+(Scarlet ep10 l27, 0.585/0.589 on the old ruler) reads 0.717/0.650 on this one and
+leads Brigham Young by 0.16: on the correct ruler it was Ferrier."""
 
 
 def similar_floor(seconds: float) -> float:
@@ -116,7 +115,7 @@ def voice_fit(book: Path, records: dict, index: int, wav: Path, similarity=None)
     return round(sum(float(score(Path(wav), o)) for o in others) / len(others), 3)
 
 
-def alternate_ok(score: float | None, seconds: float = SIM_MEASURABLE_S) -> bool:
+def alternate_ok(score: float | None, seconds: float = SIM_MEASURABLE_S, delivery: str = "calm") -> bool:
     """An alternate-reference render is the man in the room, or it is not kept.
 
     Under SIM_MEASURABLE_S the encoder cannot hear enough voice to judge
@@ -124,7 +123,8 @@ def alternate_ok(score: float | None, seconds: float = SIM_MEASURABLE_S) -> bool
     already records-never-gates there, and ep16's l18 (1.75 s) was refused at
     0.74 against 0.75 on exactly that unmeasurable read.  The score is kept
     in the record either way; words and pace still gate a short line."""
-    return score is None or seconds < SIM_MEASURABLE_S or score >= EPISODE_VOICE
+    drop = 0.0 if delivery in ("", "calm") else episode_emotion.FEELING_FLOOR_DROP
+    return score is None or seconds < SIM_MEASURABLE_S or score >= EPISODE_VOICE - drop
 
 
 def reference_for(book: Path, speaker: str) -> Path:
@@ -140,14 +140,29 @@ def reference_for(book: Path, speaker: str) -> Path:
     return clip
 
 
-BEST_REFERENCE_FLOOR = 0.75
+BEST_REFERENCE_FLOOR = 0.70
+"""The similarity (voice_ear.RULER) a passed line needs to be cloned from.  RE-SET
+2026-10-21 by rank: the old 0.75 sat at the 2.9th percentile of the genuine
+owner-watched lines on the 24 kHz ruler; the same percentile on 16 kHz is 0.708."""
+
+BEST_REFERENCE_FLOORS = {voice_ear.OLD_RULER: 0.75, voice_ear.RULER: BEST_REFERENCE_FLOOR}
+"""Each stored score is judged on its own ruler's floor, never the other's."""
+
+
+def good_reference(row: dict) -> bool:
+    """A passed line's stored score clears the reference floor of the ruler it was taken on."""
+    return row.get("similarity", 0.0) >= BEST_REFERENCE_FLOORS[voice_ear.ruler_of(row)]
+
+
+def reference_rank(row: dict) -> tuple[bool, float]:
+    """Current-ruler rows first, then the higher score: two rulers' numbers are not ranked together."""
+    return voice_ear.ruler_of(row) == voice_ear.RULER, row.get("similarity", 0.0)
 
 
 def best_line_reference(records: dict, speaker: str, exclude: int | None) -> int | None:
-    """The index of the speaker's best PASSED line (similarity >= 0.75), or None."""
-    good = [(r["similarity"], i) for i, r in records.items()
-            if r.get("speaker") == speaker and r.get("passed") and i != exclude
-            and r.get("similarity", 0.0) >= BEST_REFERENCE_FLOOR]
+    """The index of the speaker's best PASSED line over its ruler's reference floor, or None."""
+    good = [(reference_rank(r), i) for i, r in records.items()
+            if r.get("speaker") == speaker and r.get("passed") and i != exclude and good_reference(r)]
     return max(good)[1] if good else None
 
 
@@ -171,11 +186,12 @@ def book_best_reference(book: Path, records: dict, speaker: str, exclude: int | 
     none -- his two passing lines sit at 0.71 and 0.74 -- so every third try
     went back to the design clip and came back the same. Episode 8 has him at
     0.815. A cast voice is a book-level asset, so the rule sees the book."""
-    here = [(r.get("similarity", 0.0), r["rel_path"], r["text"]) for i, r in records.items()
-            if r.get("speaker") == speaker and r.get("passed") and i != exclude]
-    there = [(r.get("similarity", 0.0), r["rel_path"], r["text"]) for r in other_episode_records(book)
-             if r.get("speaker") == speaker and r.get("passed") and (book / r["rel_path"]).exists()]
-    good = [g for g in here + there if g[0] >= BEST_REFERENCE_FLOOR]
+    here = [(reference_rank(r), r["rel_path"], r["text"]) for i, r in records.items()
+            if r.get("speaker") == speaker and r.get("passed") and i != exclude and good_reference(r)]
+    there = [(reference_rank(r), r["rel_path"], r["text"]) for r in other_episode_records(book)
+             if r.get("speaker") == speaker and r.get("passed") and (book / r["rel_path"]).exists()
+             and good_reference(r)]
+    good = here + there
     if not good:
         return None
     _, rel, text = max(good)
@@ -194,15 +210,26 @@ def line_reference(book: Path, records: dict, line: Line, attempt: int) -> Path:
 
 TERMINAL_TRIES = 8
 """After this many tries a line said right keeps its best try, flagged (the step parks on nothing)."""
-TERMINAL_MARGIN = 0.08
+TERMINAL_MARGIN = 0.10
 """How far under its floor a kept best try may sit: the floor is the instrument's, not the ear's
-verdict on a word (Jekyll l15: 10 tries at 0.42-0.63 against 0.65, every word heard)."""
+verdict on a word (Jekyll l15: 10 tries at 0.42-0.63 against 0.65, every word heard).  RE-SET
+2026-10-21: the old ruler's 0.08 times the genuine scores' spread ratio, 0.0535 / 0.0394 = 1.36,
+is 0.109 on 16 kHz; a try nearer another cast voice than its own is far whatever its score."""
+
+
+def outscores(new: dict, old: dict) -> bool:
+    """`new` scored at least `old` -- or `old` was scored on another ruler, which is no score
+    against this one (the newer measure wins)."""
+    if voice_ear.ruler_of(new) != voice_ear.ruler_of(old):
+        return True
+    return new.get("similarity", 0.0) >= old.get("similarity", 0.0)
 
 
 def remember_best(record: dict, wav: Path, best: dict | None, out_dir: Path) -> dict | None:
     """The best failing try whose words were heard right, its file kept as l{NN}.best.wav."""
     import shutil
-    if not record.get("words_ok") or (best is not None and best.get("similarity", 0.0) >= record.get("similarity", 0.0)):
+    if not record.get("words_ok") or (best is not None and outscores(best, record)
+                                      and voice_ear.ruler_of(best) == voice_ear.ruler_of(record)):
         return best
     source = Path(wav) if Path(wav).exists() else Path(wav).with_suffix(".prev.wav")   # a redo parks the kept try
     shutil.copyfile(source, Path(out_dir) / f"{Path(wav).stem}.best.wav")
@@ -262,7 +289,8 @@ def terminal(record: dict, best: dict | None, force: bool = False) -> dict | Non
     cured, or when no try's words were heard right (that still refuses)."""
     if (record.get("tries", 0) < TERMINAL_TRIES and not force) or best is None:
         return None
-    far = best.get("similarity", 0.0) < best.get("floor", 0.0) - TERMINAL_MARGIN
+    far = (best.get("similarity", 0.0) < best.get("floor", 0.0) - TERMINAL_MARGIN
+           or (best.get("margin") or 0.0) < 0.0)
     return dict(best, passed=True, flagged="keep_best_far" if far else "keep_best", tries=record["tries"])
 
 
@@ -321,17 +349,79 @@ def listen_all(records: list[dict], book: Path, listen, among: dict | None = Non
     for record in records:
         clip = book / record["rel_path"]
         verdict = voice_qc.check(clip, record["text"], transcribe=listen)
-        similarity = voice_ear.similarity(reference_for(book, record["speaker"]), clip)
-        floor = line_floor(verdict.seconds, record.get("delivery", "calm"))
+        heard = voice_verdict(book, record, clip, verdict.seconds)
         room = episode_voice(book, among, record)
-        passed = (verdict.passed and similarity >= floor
-                  and alternate_ok(room, verdict.seconds) and lift_ok(book, record, clip))
+        passed = (verdict.passed and not heard["voice_why"] and lift_ok(book, record, clip)
+                  and alternate_ok(room, verdict.seconds, record.get("delivery", "calm")))
         record.update(heard=verdict.heard, error_rate=verdict.error_rate, why=verdict.why, words_ok=verdict.passed,
-                      similarity=round(float(similarity), 3), floor=floor,
-                      episode_voice=room, passed=passed)
+                      episode_voice=room, passed=passed, **heard)
         if not passed:
             failed.append(record["index"])
     return failed
+
+
+CAST_MARGIN = 0.06
+"""How far a line's own cast design must lead EVERY other cast design of the book
+(ECAPA cosine, voice_ear.RULER).  The voice gate's discriminator; the floor is its backstop.
+
+SET 2026-10-21 (voice bench VERDICT step 3, fix/): across 411 trusted owner-watched lines
+of three books and today's 18 bench takes, the line's own design is nearest every time,
+and the smallest lead is Scarlet 0.145, WotW 0.231, Jekyll ep01 0.162, bench 0.100 (0.094
+on a second resampler).  A wrong voice's lead is the negative of the genuine one, so every
+one of 9,953 wrong-voice trials fails at any margin over 0.  0.06 leaves the lowest
+genuine take one paired seed-noise interval (0.034) of room; the bench's 0.08 left 0.014.
+Lines under SIM_MEASURABLE_S are not held to it: 1.5 s slices of genuine lines lead by
+as little as 0.04, 2.0 s slices by 0.099 at the least (n = 280)."""
+
+SAME_CLIP = 0.99
+"""Two cast ids whose designs score this alike are ONE clip (Scarlet's lucy_ferrier and
+lucy_ferrier_child read 1.000): one voice, not a rival."""
+
+
+def rivals_of(book: Path, speaker: str) -> dict[str, Path]:
+    """Every OTHER cast voice of the book on disk, the speaker's own clip filed twice excluded."""
+    mine = cast_home.clip(book, speaker)
+    others = {who: cast_home.clip(book, who) for who in cast_home.cast_of(book)
+              if who != speaker and cast_home.clip(book, who).exists()}
+    if not mine.exists():
+        return others
+    return {who: clip for who, clip in others.items() if voice_ear.similarity(mine, clip) < SAME_CLIP}
+
+
+def cast_margin(book: Path, speaker: str, clip: Path, own: float) -> tuple[str, float] | None:
+    """(nearest rival, own score minus the rival's): how far the line leads the rest of the
+    cast.  None when the book has no other voice to compare it with."""
+    rivals = rivals_of(book, speaker)
+    if not rivals:
+        return None
+    scored = {who: float(voice_ear.similarity(design, clip)) for who, design in rivals.items()}
+    rival = max(scored, key=scored.get)
+    return rival, round(float(own) - scored[rival], 3)
+
+
+def margin_ok(near: tuple[str, float] | None, seconds: float) -> bool:
+    """The line leads its cast by CAST_MARGIN, or it cannot be measured (too short, no cast)."""
+    return near is None or seconds < SIM_MEASURABLE_S or near[1] >= CAST_MARGIN
+
+
+def voice_why(speaker: str, similarity: float, floor: float, near, seconds: float) -> str:
+    """The voice gate's words for a refusal, "" when the voice passes."""
+    if similarity < floor:
+        return f"voice {similarity:.2f} is under its floor {floor:.2f}"
+    if not margin_ok(near, seconds):
+        return (f"sounds like {near[0]}: {speaker} leads by {near[1]:+.2f}, "
+                f"the cast margin is {CAST_MARGIN:.2f}")
+    return ""
+
+
+def voice_verdict(book: Path, record: dict, clip: Path, seconds: float) -> dict:
+    """The voice gate on one line: its own design's score, the floor, the cast margin, the ruler."""
+    similarity = float(voice_ear.similarity(reference_for(book, record["speaker"]), clip))
+    floor = line_floor(seconds, record.get("delivery", "calm"))
+    near = cast_margin(book, record["speaker"], clip, similarity)
+    return {"similarity": round(similarity, 3), "floor": floor, "ruler": voice_ear.RULER,
+            "rival": near[0] if near else None, "margin": near[1] if near else None,
+            "voice_why": voice_why(record["speaker"], similarity, floor, near, seconds)}
 
 
 def lift_ok(book: Path, record: dict, clip: Path) -> bool:
@@ -362,8 +452,8 @@ def keep_best(new: dict, previous: dict | None, wav: Path,
     elif fit and None not in fit and new.get("passed", True):
         better = fit[0] > fit[1]
     else:
-        better = alternate_ok(new.get("episode_voice"), float(new.get("seconds") or SIM_MEASURABLE_S)) and \
-            new.get("similarity", 0.0) >= previous.get("similarity", 0.0)
+        better = alternate_ok(new.get("episode_voice"), float(new.get("seconds") or SIM_MEASURABLE_S),
+                              new.get("delivery", "calm")) and outscores(new, previous)
     if better:
         prev_wav.unlink()
         return new
@@ -484,7 +574,8 @@ def main(book_id: str, number: int, redo: list[int] | None = None, clarity: bool
             r = records[line.index]
             room = f" room {r['episode_voice']:.2f}" if r.get("episode_voice") is not None else ""
             print(f"  {'ok ' if r['passed'] else 'BAD'} l{line.index:02d} wer {r['error_rate']:.2f} "
-                  f"sim {r['similarity']:.2f}/{r['floor']:.2f}{room}  {r['why']}  heard: {r['heard'][:50]}",
+                  f"sim {r['similarity']:.2f}/{r['floor']:.2f}{room}  {r['why']} {r.get('voice_why', '')}  "
+                  f"heard: {r['heard'][:50]}",
                   flush=True)
         failed = [i for i in failed if not keep_terminal(records, i, out_dir)]
         episode_home.write_json(sheet, [records[k] for k in sorted(records)])

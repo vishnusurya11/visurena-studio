@@ -58,8 +58,13 @@ who already holds which.
 ```json
 {"registers": {"narrator": 105, "henry_jekyll": 116, "edward_hyde": 126},
  "why": {"narrator": "calm low Victorian storyteller"},
- "apart": [{"pair": ["edward_hyde", "henry_jekyll"], "below": 0.55, "why": "one man, two bodies"}]}
+ "apart": [{"pair": ["edward_hyde", "henry_jekyll"], "below": 0.18, "ruler": "ecapa16",
+            "why": "one man, two bodies"}]}
 ```
+
+A ceiling names the ruler it was measured on (`ruler`); a row without one is the old 24 kHz
+ruler and `voice_register.ceilings_of` does not apply it on today's 16 kHz ear (2026-10-21:
+Jekyll's untagged 0.55 accused a Hyde-Jekyll pair that reads 0.061 at 16 kHz).
 
 File the narrator and the biggest parts from the dossier's BODY before the
 first cast (a large man of fifty sits ~105-120 Hz); the allocator places only
@@ -116,15 +121,21 @@ Every candidate design is gated in `cast_voices.judge` on four numbers:
 
 | gate | line | where |
 |---|---|---|
-| agrees with itself (half vs half, ECAPA) | >= `SELF_FLOOR` 0.65 | `design_fault` |
-| nobody's twin (nearest design, ECAPA) | <= `NEAREST_CEIL` 0.80 | `design_fault` |
+| agrees with itself (half vs half, ECAPA at 16 kHz) | >= `SELF_FLOOR` 0.45 | `design_fault` |
+| nobody's twin (nearest design, ECAPA at 16 kHz) | <= `NEAREST_CEIL` 0.75 | `design_fault` |
 | renders in its asked register (pYIN 55-400 Hz median) | within +-15 % (`voice_pitch.TOLERANCE`) | `voice_pitch.pitch_fault` |
 | a filed `apart` pair | under its `below` | `pair_fault` |
 
-The twin line is **0.80, not 0.65**. 0.65 was the first cast's same-person
-floor on the ear's pair report (`voice_ear.SAME_SPEAKER`); the design gate is
-set above the working cast's median (0.73), and WotW, which the owner liked,
-has 24 of its 28 pairs >= 0.55. A pair count is not a quality measure.
+**Re-set 2026-10-21 on the 16 kHz ruler** (the ear fed ECAPA 24 kHz until then;
+docs/audit/2026-10-21_voice_bench/fix/). Every current design of the three cast books
+agrees with itself at 0.476 or more; the closest pair, Scarlet's Lucy Ferrier vs Madame
+Sawyer, reads 0.697 and their lines still separate (worst lead 0.145), so the twin line
+sits at 0.75. The pair report's one-person line (`voice_ear.SAME_SPEAKER`, the advisory
+`collisions` print) is 0.60, the equal-error point of 411 owner-watched lines against
+their own and every other design. On the old ruler those were 0.65 / 0.80 / 0.55, and
+WotW had 24 of its 28 pairs >= 0.55: the old ruler, not the cast. A pair count is not a
+quality measure. A sheet's `gates` carry `ruler`; the look judge reads an untagged sheet
+against the old line.
 
 `register_rendered_hz` in voice.json is the MEASURED pitch of the design clip;
 `register_hz` is the ask, `register_asked_hz` the number written into the
@@ -180,7 +191,7 @@ call — card, portrait, voice, checked.
 
 | symptom | do this |
 |---|---|
-| a design is its nearest neighbour's twin (> 0.80) | recast the lighter part into a free slot, re-render, re-measure |
+| a design is its nearest neighbour's twin (> 0.75 at 16 kHz) | recast the lighter part into a free slot, re-render, re-measure |
 | a design renders outside +-15 % of its register | re-roll (the written Hz steers against the miss); if three rolls miss, re-describe it: author `voice/instruction.json` with the body and texture that make that register, no paid write |
 | a filed pair sounds alike (over its `below`) | recast the lighter of the pair with a texture the other does not have |
 | a name is said wrong ("Enfield" -> "and field") | file the respelling in `cast/say_lexicon.json` (the TTS input); `cast/ear_lexicon.json` only forgives the ear |

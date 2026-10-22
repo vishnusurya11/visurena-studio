@@ -2445,3 +2445,34 @@ build byte for byte), never the recorded words.
 - Proof (`docs/audit/2026-10-21_shot_framework/implement/RESULT.md`): the changed writer rebuilt ep01 on a
   book-shaped copy; at the delivered seed the five benched takes re-rendered within a few points of the
   delivered ones (the fixes are correctness, not liveliness, as the B1 controls said).
+
+## The voice ruler (2026-10-21, voice bench fix: the speaker gate measured at the wrong rate)
+
+- **A model fed the wrong sample rate still returns a number.** `voice_ear.embedding` and
+  `self_similarity` handed ECAPA (trained at 16 kHz; its Fbank keeps the 16 kHz default) the files'
+  native 24 kHz since 2026-09-10. Every voice was heard 1.5x slow: on Jekyll ep01's shipped lines a
+  wrong character cleared the floor in 70 of 152 trials (3 of 152 resampled); the cast's designs read
+  0.61-0.79 against each other; Hyde-Jekyll's filed 0.55 ceiling accused a pair that reads 0.061.
+  Every clip now goes through `samples_16k`, and the encoder loads its weights from the folder
+  (`pretrained_path` named the HF repo: every load asked huggingface.co).
+- **A new ruler re-sets every number set on the old one, and the two are never mixed.** Every new
+  score carries `ruler: ecapa16`; a stored score without it is `ecapa24` (`voice_ear.ruler_of`). A best
+  reference is judged on its own ruler's floor and current-ruler rows rank first; a redo or best try on
+  another ruler loses to the new measure; a filed pair ceiling with no tag is not applied on 16 kHz
+  (`voice_register.ceilings_of`; Jekyll's proposed `below: 0.18, ruler: ecapa16` is in the bench's
+  fix/registers_proposed.json for the owner -- library data is not code's to rewrite).
+- **A floor alone cannot make a speaker gate; the cast can.** On 16 kHz the old floors still let 10 of
+  296 Jekyll wrong voices through and a calm floor everywhere refused real lines. The rule that works
+  is the cast margin: a line's own design leads every other cast design by `CAST_MARGIN` 0.06. Across
+  411 owner-watched lines of three books + 18 bench takes the own design is nearest every time (least
+  lead: Scarlet 0.145, WotW 0.231, Jekyll ep01 0.162, bench 0.100) and all 9,953 wrong-voice trials
+  fail; the floor (0.60 / 0.55, 0.20 lower felt) is the backstop for a voice that is nobody in the cast.
+- **Known-bad cases are re-measured before their constants are carried over.** Ferrier's design_v1,
+  which set SELF_FLOOR 0.65 and NEAREST_CEIL 0.80 (0.498 self, 0.847 to Young), reads 0.586 / 0.550 on
+  16 kHz and his five lines from it lead Young by 0.16 or more; ep10 l27, which set EPISODE_VOICE 0.75,
+  reads 0.717 / 0.650 against his room. Both were the old ruler's faults. New values and the data behind
+  each: docs/audit/2026-10-21_voice_bench/fix/CALIBRATION.md.
+- **Where it lives.** LISTEN (GATES.md): own design leads the cast by `say_lines.CAST_MARGIN` 0.06, floors
+  0.60 / 0.55 (0.20 lower felt); keep_best_far also when the kept try is nearer a rival than its own; an
+  alternate-reference render reaches `EPISODE_VOICE` 0.60 (0.40 felt) against its room; speaker_check's
+  `SAME_SPEAKER_FLOOR` is 0.53 (worst real calm pair of three books 0.567, two speakers p99 0.50-0.56).

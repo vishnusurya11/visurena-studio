@@ -211,11 +211,16 @@ def registers_of(book) -> dict[str, int]:
     return {who: int(hz) for who, hz in (_filed(book).get("registers") or {}).items()}
 
 
-def ceilings_of(book, who: str) -> dict[str, float]:
-    """The similarity ceilings `who` must stay under, by the other member of each pair."""
-    out = {}
+def ceilings_of(book, who: str, ruler: str = "") -> dict[str, float]:
+    """The similarity ceilings `who` must stay under, by the other member of each pair,
+    filed on `ruler` (the ear's current one by default).  A row with no `ruler` was filed
+    on the old 24 kHz ruler and is not a ceiling on the new one (voice bench 2026-10-21:
+    Hyde-Jekyll's 0.55 accused a pair that measures 0.06 at 16 kHz)."""
+    from studio import voice_ear
+
+    ruler, out = ruler or voice_ear.RULER, {}
     for row in _filed(book).get("apart") or []:
         pair = list(row.get("pair") or [])
-        if who in pair and len(pair) == 2:
+        if who in pair and len(pair) == 2 and voice_ear.ruler_of(row) == ruler:
             out[pair[1 - pair.index(who)]] = float(row["below"])
     return out

@@ -45,12 +45,14 @@ LINE = "It is better that one should perish than that many be led astray."
 # ---- the floor ----------------------------------------------------------------
 
 def test_the_floor_is_the_measured_truncation_loss():
-    assert say.similar_floor(5.3) == 0.70
-    assert say.similar_floor(4.0) == 0.70
-    assert say.similar_floor(3.99) == 0.65
-    assert say.similar_floor(2.0) == 0.65
-    assert say.similar_floor(1.99) == 0.60
-    assert say.similar_floor(1.5) == 0.60
+    """Re-set 2026-10-21 on the 16 kHz ruler (was 0.70 / 0.65 / 0.60 on 24 kHz): under the
+    lowest genuine owner-watched line of each band, three books (voice bench fix/)."""
+    assert say.similar_floor(5.3) == 0.60
+    assert say.similar_floor(4.0) == 0.60
+    assert say.similar_floor(3.99) == 0.55
+    assert say.similar_floor(2.0) == 0.55
+    assert say.similar_floor(1.99) == 0.50
+    assert say.similar_floor(1.5) == 0.50
 
 
 def test_lucys_true_voice_at_one_and_a_half_seconds_now_passes(tmp_path, monkeypatch):
@@ -69,7 +71,7 @@ def test_a_long_line_still_needs_the_full_floor(tmp_path, monkeypatch):
     sf.write(str(clip), np.zeros(int(5.8 * RATE), dtype="float32"), RATE)
     records = [{"index": 26, "rel_path": "l26.wav", "text": "x", "speaker": "john_watson", "reference": "design.wav"}]
     monkeypatch.setattr(say, "reference_for", lambda book, who: clip)
-    monkeypatch.setattr(say.voice_ear, "similarity", lambda ref, clip: 0.64)
+    monkeypatch.setattr(say.voice_ear, "similarity", lambda ref, clip: 0.58)   # under the 16 kHz 0.60
     assert say.listen_all(records, tmp_path, lambda c: "x") == [26]
 
 

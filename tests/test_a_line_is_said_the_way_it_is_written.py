@@ -136,7 +136,7 @@ def test_a_line_said_with_feeling_has_a_lower_similarity_floor():
     from scripts.episode import say_lines as say
     assert say.line_floor(3.0, "calm") == say.similar_floor(3.0)
     assert say.line_floor(3.0, "shouting") == round(say.similar_floor(3.0) - ee.FEELING_FLOOR_DROP, 2)
-    assert 0.40 <= say.line_floor(2.5, "hushed") < 0.60
+    assert 0.30 <= say.line_floor(2.5, "hushed") < 0.55     # 16 kHz ruler, 2026-10-21
 
 
 def test_a_line_too_short_to_measure_is_not_judged_on_similarity():

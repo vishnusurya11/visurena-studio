@@ -3,8 +3,8 @@
 Two measurements, both of which the repo was doing badly.
 
 WHO IS SPEAKING.  `voice.similarity` uses Resemblyzer -- GE2E, 2019, roughly
-5% EER on VoxCeleb1.  ECAPA-TDNN measures 0.73% on the same set, an order of
-magnitude sharper, and the difference matters because the whole cast currently
+5% EER on VoxCeleb1.  ECAPA-TDNN measures 0.80% on the same set (its model
+card, README lines 37-39), several times sharper, and the difference matters because the whole cast currently
 scores a MEDIAN 0.70 against a 0.65 same-person line.  With a blunt instrument
 you cannot tell "these voices are genuinely alike" from "this encoder cannot
 separate them", and those two findings call for opposite fixes.
@@ -28,14 +28,35 @@ from pathlib import Path
 ECAPA = ("D:/Projects/KingdomOfViSuReNa/alpha/ComfyUI_windows_portable/ComfyUI"
          "/models/spkrec/ecapa")
 
-SAME_SPEAKER = 0.55
-"""ECAPA cosine at or above which two clips are one person.
+RULER = "ecapa16"
+"""The ruler every score this module makes is on: ECAPA fed 16 kHz mono.  A stored
+score carries it (`ruler`) so it is never compared with a number on another ruler."""
 
-NOT Resemblyzer's 0.65 -- a different encoder has a different scale, and
-carrying the old number across would be the classic mistake.  0.55 is the
-conventional operating point for ECAPA on VoxCeleb-like audio and is a
-STARTING GUESS here: recalibrate against a pair known to be the same character
-and a pair known not to be, then write the measured number in its place."""
+OLD_RULER = "ecapa24"
+"""Every score taken before 2026-10-21: the files' native 24 kHz fed to the 16 kHz
+model.  A stored score with no `ruler` tag is on this one (`ruler_of`)."""
+
+SAME_SPEAKER = 0.60
+"""ECAPA cosine (RULER) at or above which two clips are one person.
+
+MEASURED 2026-10-21 (voice bench fix/): the equal-error point between 411 trusted
+owner-watched lines scored against their own cast design and the same lines against
+every other design of their book (9,809 trials; Scarlet, WotW, Jekyll) is 0.60 --
+0.24 % of real lines under it, 0.22 % of wrong voices at or over it.  Per book:
+0.605 / 0.585 / 0.535.  On the old 24 kHz ruler this was 0.55, a starting guess."""
+
+SAME_SPEAKER_BY_RULER = {OLD_RULER: 0.55, RULER: SAME_SPEAKER}
+"""SAME_SPEAKER on each ruler: an old sheet is read against the line it was gated on."""
+
+
+def ruler_of(row: dict) -> str:
+    """The ruler a stored score was taken on: its tag, else the old ruler."""
+    return row.get("ruler") or OLD_RULER
+
+
+def same_speaker(ruler: str) -> float:
+    """The one-person line on `ruler`."""
+    return SAME_SPEAKER_BY_RULER[ruler]
 
 _MODEL = {}
 _HEARD: dict[tuple[str, int, int], object] = {}
@@ -98,8 +119,11 @@ def encoder(device: str = "") -> object:
             extra = {"local_strategy": LocalStrategy.COPY_SKIP_CACHE}
         except (ImportError, AttributeError):  # pragma: no cover - older speechbrain
             extra = {}
+        # The weights from the folder too: hyperparams.yaml names the HF repo as
+        # `pretrained_path`, so every load asked huggingface.co (2026-10-21).
         _MODEL[device] = EncoderClassifier.from_hparams(
-            source=ECAPA, savedir=ECAPA, run_opts={"device": device}, **extra)
+            source=ECAPA, savedir=ECAPA, run_opts={"device": device},
+            overrides={"pretrained_path": ECAPA}, **extra)
     return _MODEL[device]
 
 
@@ -119,16 +143,14 @@ def embedding(clip: Path, device: str = ""):
     """The 192-d ECAPA embedding of one file, computed once and kept.
 
     Cached on size and mtime, so a re-rendered clip is re-read: comparing a
-    cast of N is N*(N-1)/2 pairs but only N voices."""
-    import soundfile as sf
-
+    cast of N is N*(N-1)/2 pairs but only N voices.  Heard at 16 kHz mono, the
+    rate ECAPA was trained on (`samples_16k`)."""
     device = device or best_device()
     path = Path(clip)
     stat = path.stat()
     key = (str(path), stat.st_size, int(stat.st_mtime))
     if key not in _HEARD:
-        wave, _ = sf.read(str(path))
-        _HEARD[key] = embed_samples(wave, device)
+        _HEARD[key] = embed_samples(samples_16k(path), device)
     return _HEARD[key]
 
 
@@ -143,10 +165,8 @@ def self_similarity(clip: Path, device: str = "") -> float:
     in the book is 0.815 and his median 0.726 against Watson's 0.855.  The
     fault is visible at cast time, from one file, before a line is said."""
     import numpy as np
-    import soundfile as sf
 
-    wave, _ = sf.read(str(clip), dtype="float32", always_2d=True)
-    mono = wave.mean(axis=1)
+    mono = samples_16k(clip)
     half = len(mono) // 2
     a, b = embed_samples(mono[:half], device), embed_samples(mono[half:], device)
     return float(np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9))
@@ -194,6 +214,15 @@ def mono_16k(clip: Path):
     samples, rate = sf.read(str(clip), dtype="float32", always_2d=True)
     wave = torch.from_numpy(samples.mean(axis=1)).unsqueeze(0)
     return wave if rate == 16000 else torchaudio.functional.resample(wave, rate, 16000)
+
+
+def samples_16k(clip: Path):
+    """The clip as 16 kHz mono float32 samples, what ECAPA is fed.
+
+    MEASURED 2026-10-21 (voice bench VERDICT row 9): fed the files' native 24 kHz,
+    ECAPA heard every voice 1.5x slow and a wrong character cleared the line floor
+    in 70 of 152 ep01 trials; resampled, 3 of 152."""
+    return mono_16k(clip).squeeze(0).numpy()
 
 
 def pitch(clip: Path, device: str = "") -> float:

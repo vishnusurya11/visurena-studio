@@ -93,6 +93,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - The ep01 deadline retro (2026-10-20: where 31 hours went; packages A-H)
 - Instruments first (2026-10-21, craft ruling wave 0)
 - The shot framework (2026-10-21: prompt-writer defects; the framework rows)
+- The voice ruler (2026-10-21)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

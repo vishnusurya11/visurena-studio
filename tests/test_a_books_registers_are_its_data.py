@@ -32,7 +32,8 @@ INSTRUCTION = json.loads((ROOT / "tests/fixtures/voice_instruction_ferrier.json"
 
 FILED = {"registers": {"narrator": 105, "big_man": 116},
          "why": {"narrator": "calm low storyteller"},
-         "apart": [{"pair": ["big_man", "small_man"], "below": 0.55, "why": "one man, two bodies"}]}
+         "apart": [{"pair": ["big_man", "small_man"], "below": 0.18, "ruler": "ecapa16",
+                    "why": "one man, two bodies"}]}
 
 
 def file_registers(book: Path, body: dict = FILED) -> Path:
@@ -54,8 +55,8 @@ def test_a_book_with_none_filed_has_none(tmp_path):
 
 def test_a_pair_ceiling_binds_both_ways(tmp_path):
     file_registers(tmp_path)
-    assert voice_register.ceilings_of(tmp_path, "small_man") == {"big_man": 0.55}
-    assert voice_register.ceilings_of(tmp_path, "big_man") == {"small_man": 0.55}
+    assert voice_register.ceilings_of(tmp_path, "small_man") == {"big_man": 0.18}
+    assert voice_register.ceilings_of(tmp_path, "big_man") == {"small_man": 0.18}
     assert voice_register.ceilings_of(tmp_path, "narrator") == {}
 
 

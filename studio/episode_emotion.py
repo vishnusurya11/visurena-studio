@@ -50,7 +50,13 @@ vector moves the feeling while the timbre stays on the speaker's own clip."""
 FEELING_FLOOR_DROP = 0.2
 """How far a line said WITH feeling may sit under the calm similarity floor.
 ep13 MEASURED: shouts that lifted +4.8 and +7.9 st scored 0.58 and 0.44 against
-the cast clip; a designed clip that was another man's voice scored 0.13-0.28."""
+the cast clip; a designed clip that was another man's voice scored 0.13-0.28.
+
+RE-MEASURED 2026-10-21 on the 16 kHz ruler (voice bench fix/), and kept: the binding
+case is Jekyll ep01's Enfield, his urgent l19 against his calm l08 at 0.394 line-vs-line
+-- under speaker_spread.SAME_SPEAKER_FLOOR (0.53) by 0.136, so the drop must be at least
+that plus one paired seed-noise interval (0.034): 0.17.  A 2-4 s feeling line's floor is
+then 0.35 against the lowest genuine one, 0.461."""
 
 
 def vector_for(register: str) -> dict:

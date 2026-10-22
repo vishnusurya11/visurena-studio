@@ -129,7 +129,8 @@ def main(book_id: str, number: int) -> None:
         allow = {pair: allowance(pair, said) for pair in sims}
         out = spread(sims, allow=allow)
         under = [list(p) for p, s in sims.items() if s < SAME_SPEAKER_FLOOR - allow[p]]
-        report[who] = out | {"lines": len(lines), "under": under}   # step 04's revoice reads these
+        report[who] = out | {"lines": len(lines), "under": under,   # step 04's revoice reads these
+                             "ruler": voice_ear.RULER}
         mark = "" if out["ok"] else "SPLIT VOICE"
         worst = f"{out['worst']:.2f}" if out["worst"] is not None else "n/a"
         print(f"{who:<34} lines {len(lines):>2}  worst pair {worst} "

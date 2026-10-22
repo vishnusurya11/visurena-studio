@@ -14,10 +14,12 @@ def test_a_published_episodes_worst_pair_still_passes():
 
 def test_two_men_under_one_name_fail():
     """ep05: the neighbour's l05 and l24 each passed against the design clip and
-    measured 0.58 against EACH OTHER -- two different men in one part."""
-    sims = {("l05", "l24"): 0.58, ("l05", "l09"): 0.91}
+    measured 0.58 against EACH OTHER -- two different men in one part (24 kHz ruler).
+    On the 16 kHz ruler two DIFFERENT speakers' lines in one episode read median 0.20-0.30,
+    p99 0.50-0.56 (three books, 2026-10-21); a split part reads like them."""
+    sims = {("l05", "l24"): 0.50, ("l05", "l09"): 0.91}
     out = spread(sims)
-    assert not out["ok"] and out["worst"] == 0.58
+    assert not out["ok"] and out["worst"] == 0.50
     assert worst_pair(sims) == ("l05", "l24")
 
 
@@ -27,9 +29,11 @@ def test_one_line_is_always_consistent_with_itself():
 
 def test_the_floor_passes_every_episode_already_published():
     """ep01 0.76, ep02 0.76, ep03 0.72 were watched, approved and published;
-    the one real split measured 0.58. The floor has to clear the first three."""
-    assert SAME_SPEAKER_FLOOR < 0.72
-    assert SAME_SPEAKER_FLOOR > 0.58
+    the one real split measured 0.58. The floor has to clear the first three (24 kHz).
+    Re-set 2026-10-21 on 16 kHz: the worst calm same-speaker pair of the owner-watched
+    episodes of three books is 0.567 (Scarlet); different speakers read p99 0.502-0.561."""
+    assert SAME_SPEAKER_FLOOR < 0.567
+    assert SAME_SPEAKER_FLOOR > 0.502
 
 
 # ---- P11: a line under two seconds is unconfirmed by the pair measure; its register is checked

@@ -178,18 +178,19 @@ def read_limbs(picture: Path, estimate, acc: Reads, where: str) -> None:
 
 
 def voice_fault(book_dir, who: str, where: str) -> Fault | None:
-    """The cast voice sheet's measured gate, re-read: a rival at or above SAME_SPEAKER."""
+    """The cast voice sheet's measured gate, re-read: a rival at or above the one-person line
+    of the ruler the sheet was measured on (an untagged sheet is the old 24 kHz ruler)."""
     if book_dir is None:
         return None
     sheet = cast_home.sheet_path(book_dir, who)
     if not sheet.exists():
         return None
-    from studio.voice_ear import SAME_SPEAKER
+    from studio import voice_ear
     gates = (json.loads(sheet.read_text(encoding="utf-8")).get("gates") or {})
-    nearest = gates.get("nearest_similarity")
-    if nearest is not None and float(nearest) >= SAME_SPEAKER:
+    nearest, wall = gates.get("nearest_similarity"), voice_ear.same_speaker(voice_ear.ruler_of(gates))
+    if nearest is not None and float(nearest) >= wall:
         return Fault(kind="voice", where=where, evidence={"nearest": gates.get("nearest"), "similarity": nearest,
-                                                          "wall": SAME_SPEAKER})
+                                                          "wall": wall, "ruler": voice_ear.ruler_of(gates)})
     return None
 
 

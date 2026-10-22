@@ -15,9 +15,14 @@ rendered 0.922 between the same two lines.
 """
 from __future__ import annotations
 
-SAME_SPEAKER_FLOOR = 0.70
-"""CALIBRATED 2026-09-20 on the episodes the owner watched and published, which
-is the only calibration set that counts.  Their worst same-speaker pairs are
+SAME_SPEAKER_FLOOR = 0.53
+"""RE-SET 2026-10-21 on the 16 kHz ruler (voice bench fix/), on the same calibration
+set -- the episodes the owner watched -- now three books: the worst calm same-speaker
+pair reads Scarlet 0.567, WotW 0.640, Jekyll 0.649; pairs of DIFFERENT speakers in one
+episode read p99 0.531 / 0.561 / 0.502.  0.53 leaves the worst real pair 0.037 of room.
+
+CALIBRATED 2026-09-20 on the old 24 kHz ruler at 0.70, on the episodes the owner
+watched and published, which is the only calibration set that counts.  Their worst same-speaker pairs are
 ep01 0.76, ep02 0.76, ep03 0.72 -- all fine to the ear.  The one genuine split
 measured 0.58 (ep05's neighbour, two men in one part; rewriting the voice sheet
 took the same pair to 0.922).  A floor of 0.86, which the band between DIFFERENT

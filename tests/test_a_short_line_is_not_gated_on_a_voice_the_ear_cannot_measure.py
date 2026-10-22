@@ -18,7 +18,7 @@ spec.loader.exec_module(sl)
 
 
 def test_a_short_clip_records_but_never_gates_episode_voice():
-    assert sl.alternate_ok(0.74, seconds=1.75) is True     # unmeasurable: recorded, not gated
-    assert sl.alternate_ok(0.74, seconds=4.0) is False     # measurable: the floor rules
+    assert sl.alternate_ok(0.55, seconds=1.75) is True     # unmeasurable: recorded, not gated
+    assert sl.alternate_ok(0.55, seconds=4.0) is False     # measurable: the floor rules (0.60, 16 kHz)
     assert sl.alternate_ok(0.80, seconds=4.0) is True
     assert sl.alternate_ok(None, seconds=1.0) is True      # design-clip render: nothing to judge

@@ -47,9 +47,17 @@ problem was only ever that we accepted the first draw out of it.
 Two, not more, until the gain is measured: each candidate is a ~45 s render,
 so this multiplies the cast's wall clock directly."""
 
-SELF_FLOOR = 0.65
-"""Half-vs-half ECAPA cosine a design clip must reach against ITSELF.
+SELF_FLOOR = 0.45
+"""Half-vs-half ECAPA cosine (voice_ear.RULER) a design clip must reach against ITSELF.
 
+RE-SET 2026-10-21 on the 16 kHz ruler (voice bench fix/): every current design of the
+three cast books reads 0.476 (Stamford) or more, and every one of them has shipped lines.
+The clip this gate was set on, Ferrier's design_v1, reads 0.586 -- inside the working
+range -- and his five lines rendered from it score 0.67-0.82 against it and lead Brigham
+Young by 0.16 or more: on the correct ruler it was one voice.  So no design is known to
+fail this gate on 16 kHz; 0.45 is a backstop under every voice that works.
+
+On the old 24 kHz ruler (0.65):
 MEASURED on the cast of A Study in Scarlet after episode 10: Watson 0.762,
 Drebber 0.770, Lucy 0.721, Young 0.706, Holmes 0.704, Hope 0.695, Stangerson
 0.559, Ferrier 0.498.  Ferrier's clip is two voices; every line cloned from it
@@ -57,9 +65,17 @@ is cloned from an average, and his median line similarity across the book is
 0.726 against Watson's 0.855.  0.65 sits under every voice that works and over
 the two that do not."""
 
-NEAREST_CEIL = 0.80
-"""ECAPA cosine above which a design is its nearest neighbour's twin.
+NEAREST_CEIL = 0.75
+"""ECAPA cosine (voice_ear.RULER) above which a design is its nearest neighbour's twin.
 
+RE-SET 2026-10-21 on the 16 kHz ruler (voice bench fix/): the pair it was set on,
+Ferrier (design_v1) vs Young, reads 0.550 there (0.847 on 24 kHz), and the closest pair
+of the three cast books, Scarlet's Lucy Ferrier vs Madame Sawyer, reads 0.697 while
+Lucy's lines still lead Sawyer's design by 0.145 at the worst (Hyde-Lanyon 0.648, worst
+lead 0.274).  No pair on this ruler is known to be twins; 0.75 sits 0.05 over the closest
+pair whose lines separate, and the line gate's cast margin catches a pair that does not.
+
+On the old 24 kHz ruler (0.80):
 MEASURED: Ferrier vs Young 0.847, the highest pair in the cast -- and three of
 Ferrier's five lines score HIGHER against Young's design than against his own.
 These two men share every dialogue scene of episode 10.  Next pairs: Drebber-
@@ -374,7 +390,7 @@ def sheet_of(who: str, got: voice_persona.VoiceInstruction, pick: Pick) -> dict:
                              f"median of voiced frames, on the design clip",
             "instruction": got.model_dump(), "persona": got.persona(), "sheet": got.sheet(),
             "passage": PASSAGE, "clip": pick.clip.name,
-            "gates": {"self_similarity": round(pick.self_similarity, 3),
+            "gates": {"ruler": voice_ear.RULER, "self_similarity": round(pick.self_similarity, 3),
                       "nearest": pick.rival, "nearest_similarity": round(pick.nearest, 3),
                       "pitch_error": round(voice_pitch.pitch_error(pick.measured_hz, asked), 3),
                       "fault": pick.fault}}
