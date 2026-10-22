@@ -96,6 +96,17 @@ def test_a_named_terminal_has_a_state_a_reason_and_a_notify_line(tmp_path):
     assert asserts.a_named(book, 2, ["ep02 PARKED (a reason nobody wrote)"])["passed"] is False
 
 
+def test_an_unclassified_park_is_a_crash_never_a_named_stop(tmp_path):
+    """S0a, 2026-10-21: `unclassified: FileNotFoundError ... plan.json` passed A-named; only S0a's own
+    n=0 row caught the crash.  The classifier's 'I do not know' names nothing."""
+    book, _ = book_at(tmp_path)
+    (book / "autopilot").mkdir()
+    status = {"episode": {"n": 2, "state": "PARKED", "reason": "unclassified: FileNotFoundError: plan.json"}}
+    (book / "autopilot" / "status.json").write_text(json.dumps(status))
+    r = asserts.a_named(book, 2, ["ep02 PARKED (unclassified)"])
+    assert r["passed"] is False and "unclassified" in r["detail"]
+
+
 def test_the_park_vocabulary_is_read_from_the_code():
     words = asserts.vocabulary()
     assert {"engine", "step_cap", "brain_exhausted", "over_budget", "youtube_token_expired"} <= words
@@ -208,7 +219,8 @@ def test_the_headline_rows_standing_on_a_canned_answer_are_mechanism(tmp_path):
 
 
 @pytest.mark.parametrize("classes", [{"exact": 3, "substituted": 1}, {"exact": 3, "worker_canned": 1},
-                                     {"exact": 3, "sdk_canned": 1}, {"exact": 3, "sdk_scripted": 2}])
+                                     {"exact": 3, "sdk_canned": 1}, {"exact": 3, "sdk_scripted": 2},
+                                     {"exact": 3, "sdk_substituted": 6}])
 def test_a_row_resting_on_a_substituted_take_or_a_canned_worker_or_claude_answer_is_mechanism(classes):
     """AUDIT A2, A4: ep01's KEPT takes served to ep02's graphs, an empty detection, a silent transcript,
     a canned or scripted Claude reply: none of them is the real component answering this ask."""

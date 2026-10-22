@@ -26,11 +26,13 @@ BRAIN_SESSIONS = 3
 UNCAPPED = ("wall", "takes", "tiny_face")
 """attempts.json keys that count time or first renders, not retry rounds (no cap-table row)."""
 YOUTUBE = ("googleapis", "youtube", "accounts.google")
-STAND_INS = ("canned", "substituted", "worker_canned", "sdk_canned", "sdk_scripted")
+STAND_INS = ("canned", "substituted", "worker_canned", "sdk_canned", "sdk_substituted", "sdk_scripted")
 """Answer classes that are NOT the real component answering this ask (AUDIT A2, A4): the engine's
 canned grey and its substituted recording of ANOTHER graph (ep01's kept takes served to ep02), a
-fake worker's memo miss (an empty detection, a silent transcript), a fake SDK's canned refusal and
-the brain script's scripted verdict.  A quality row resting on any of them is mechanism."""
+fake worker's memo miss (an empty detection, a silent transcript), a fake SDK's canned refusal, its
+writer parts folded from a target plan (`writer_plan`: S0a's and F5's plan is ep01's own, not the
+writer answering this brief) and the brain script's scripted verdict.  A quality row resting on
+any of them is mechanism."""
 CONTENT_PARKS = ("EYE_PANELS", "EYE_TAKES", "MASTER", "LOOK_STATE", "CONTENT", "CROWD", "speech_gap",
                  "split_voice", "speaker", "voice")
 """Words a park's reason carries when a content or voice gate parked it (gates.yaml's picture
@@ -230,6 +232,11 @@ def stem(reason: str) -> str:
     return re.split(r"[:\s{]", str(reason).strip(), maxsplit=1)[0]
 
 
+UNNAMED = "unclassified"
+"""The autopilot's classifier's 'no pattern matched' (`unclassified: <last line>`): a traceback it
+could not name.  S0a's `unclassified: FileNotFoundError ... plan.json` is a crash, never A-named's pass."""
+
+
 def a_named(book: Path, n: int, notify: Iterable[str]) -> dict:
     """The terminal state is in the enum with a reason; each park reason is in the vocabulary;
     a notify line names the episode's terminal."""
@@ -242,6 +249,7 @@ def a_named(book: Path, n: int, notify: Iterable[str]) -> dict:
     reasons = [r.get("reason", "") for r in jsonl(Path(book) / "autopilot" / "parked.jsonl") if r.get("episode") == n]
     words, said = vocabulary(), [line for line in notify if f"ep{n:02d}" in line]
     faults = [] if ep.get("state") in State.__members__ and str(ep.get("reason") or "").strip() else [f"state {ep}"]
+    faults += [f"a crash, not a named stop: {ep.get('reason')}"] * (stem(ep.get("reason") or "") == UNNAMED)
     faults += [f"park reason not in the vocabulary: {r}" for r in reasons if stem(r) not in words]
     faults += [] if said else [f"no notify line names ep{n:02d}"]
     return row("A-named", not faults, ["autopilot/status.json", "autopilot/parked.jsonl", "notify.jsonl"],
@@ -611,12 +619,67 @@ def f_worker(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mappin
     return row(sid, bool(died) and not over, ["workers.jsonl"], detail="; ".join(over) or f"starts {starts}")
 
 
+STEP_RAN = re.compile(r"^--- step (\d{2}) \([^)]*\) \|", re.MULTILINE)
+"""The runner's line for a step it STARTED (`--- step 02 (plan) | <label> ---`); a skipped step's
+`--- step 01 (bind) skipped: output exists` is not one."""
+
+
+def stop_said(book: Path) -> str:
+    """The unit's stop in words: status.json's state and reason, and every parked.jsonl row."""
+    state, reason = state_of(book)
+    return " ".join([state, reason] + [json.dumps(r) for r in jsonl(Path(book) / "autopilot" / "parked.jsonl")])
+
+
+def f_plan_refused(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F5: step 02 ran and nothing after it started (no engine call from 03 on); the draft set aside
+    as plan.deferred.json; the stop named `plan`.  A run that died before step 02 never met its fault."""
+    from studio.plan_ladder import DEFERRED
+    ran, said = set(STEP_RAN.findall(drive_logs(book))), stop_said(book)
+    faults = [] if "02" in ran else ["step 02 never ran: the planted refusal was never met"]
+    faults += [f"step {s} started past the refused plan" for s in sorted(ran) if s > "02"]
+    faults += [] if any(Path(book).glob(f"episodes/ep*/{DEFERRED}")) else [f"no {DEFERRED}"]
+    faults += [] if re.search(r"plan", said, re.I) else ["the stop is not named plan"]
+    state, reason = state_of(book)
+    return row(sid, not faults, ["episodes", "autopilot/status.json", "autopilot/parked.jsonl"],
+               detail="; ".join(faults + [f"ended {state or 'no state'}: {reason}"]))
+
+
+GAPS = "gaps.json"
+"""F14's planted gaps (faults.plant_all's rows), left in the sandbox by the harness when it plants them."""
+
+
+def gap_met(book: Path, gap: Mapping, said: str) -> bool:
+    """A planted gap was met: the stop names it, or its just-in-time step put it back on disk."""
+    from studio.rehearsal.faults import gap_target
+    target = gap_target(gap)
+    if str(gap.get("what") or "\0") in said or str(target.get("path") or "\0") in said:
+        return True
+    if target.get("path"):
+        return (Path(book) / target["path"]).is_file()
+    record = Path(book) / target["record"]
+    doc = json.loads(record.read_text(encoding="utf-8")) if record.is_file() else {}
+    return (target.get("field") or target.get("key")) in doc
+
+
+def f_gaps(sid: str, box: Path, book: Path, engine: list[Mapping], sup: Mapping) -> dict:
+    """F14: each planted gap ends in its just-in-time step or a stop NAMED with it; a run that stopped
+    before a gap's step never met it (the first window: every gap unmet behind a step-01 park)."""
+    path = Path(box) / GAPS
+    gaps = [g for g in json.loads(path.read_text(encoding="utf-8")) if g.get("present")] if path.is_file() else []
+    said, (state, reason) = stop_said(book), state_of(book)
+    missed = [f"{g.get('kind')} {g.get('what')}" for g in gaps if not gap_met(book, g, said)]
+    faults = (["no gap planted"] if not gaps else []) + [f"never met: {', '.join(missed[:6])}"] * bool(missed)
+    return row(sid, not faults, [GAPS, "autopilot/status.json"],
+               detail="; ".join(faults + [f"{len(gaps)} gap(s); ended {state or 'no state'}: {reason}"]))
+
+
 CHECKS = {"F1": resubmitted(lambda n: n == 1, "1"), "F1b": f_engine_park, "F2": f_drives, "F3": f_no_take,
-          "F4": f_reboot, "F6": f_oauth, "F7": f_commit, "F7b": f_commit, "F8": f_repair,
+          "F4": f_reboot, "F5": f_plan_refused, "F6": f_oauth, "F7": f_commit, "F7b": f_commit, "F8": f_repair,
           "F9": resubmitted(lambda n: n <= 1, "<= 1"), "F10": resubmitted(lambda n: n == 1, "1"), "F13": f_corrupt,
-          "F15": f_brain, "F16": resubmitted(lambda n: n == 0, "0"), "F17": f_worker}
+          "F14": f_gaps, "F15": f_brain, "F16": resubmitted(lambda n: n == 0, "0"), "F17": f_worker}
 """Each scenario's pre-registered specific check (3.2).  F1: the take in flight rendered again exactly
-once; F9: the hung take at most once; F10: one resubmission; F16: none."""
+once; F9: the hung take at most once; F10: one resubmission; F16: none.  F11 and F18 have none yet:
+their common rows (A-caps, A-named, A-canned, A-torn) are all that scores them."""
 
 
 def specific(sid: str, box: Path, book: Path, sup: Mapping) -> list[dict]:

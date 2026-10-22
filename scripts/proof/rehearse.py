@@ -25,7 +25,6 @@ import argparse
 import importlib.util
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -260,7 +259,7 @@ def clear_run(box: Path) -> None:
     for name in (trace.TRACES, trace.WRITES):
         shutil.rmtree(Path(box) / name, ignore_errors=True)
     for name in ("supervisor.json", "tripwire.jsonl", "notify.jsonl", "engine_log.jsonl", "vl_consumers.jsonl",
-                 faults.KILL_REQUEST, "kill.done"):
+                 faults.KILL_REQUEST, "kill.done", asserts.GAPS):
         (Path(box) / name).unlink(missing_ok=True)
 
 
@@ -302,7 +301,9 @@ def plant_row(box: Path, book: Path, sc: Scenario) -> dict:
     if kind == "worker_death":
         return faults.add(box, faults.worker_death(f["worker"], f["line"]))
     if kind == "gaps":
-        return {"gaps": faults.plant_all(book, json.loads(FILES["preconditions"].read_text(encoding="utf-8")))}
+        gaps = faults.plant_all(book, json.loads(Path(FILES["preconditions"]).read_text(encoding="utf-8")))
+        (Path(box) / asserts.GAPS).write_text(json.dumps(gaps, indent=1), encoding="utf-8")   # F14's check reads it
+        return {"gaps": gaps}
     return {"none": True}
 
 
@@ -397,9 +398,8 @@ def fault_moment(engine_rows: list[Mapping]) -> tuple[float, int | None]:
     return at, asserts.take_index(hit)
 
 
-STEP_RAN = re.compile(r"^--- step (\d{2}) \([^)]*\) \|", re.MULTILINE)
-"""The runner's line for a step it STARTED (`--- step 02 (plan) | <label> ---`); a skipped step's
-`--- step 01 (bind) skipped: output exists` writes no timing row and is not one."""
+STEP_RAN = asserts.STEP_RAN
+"""The runner's line for a step it STARTED; a skipped step writes no timing row and is not one."""
 
 
 def steps_since(home: Path, since: float) -> list[str]:
@@ -566,24 +566,57 @@ def point_classes(rows) -> dict:
     return out
 
 
-def summary_row(sc: Scenario, results: list[dict], planned: int, stability: list[dict] | None = None) -> dict:
+def summary_row(sc: Scenario, results: list[dict], planned: int, stability: list[dict] | None = None,
+                guard: Mapping | None = None) -> dict:
     """Passes over DISTINCT recovery traces (3.3): the scenario's own counted row.  A sweep's n is
     only as good as its trace is stable: with no replay, or a replay that traced differently, the
-    trace instrument FAILED and the row counts nothing (R14: noise is never n)."""
-    t = sweep.tally(results, planned)
-    classes: dict = {}
-    for r in results:
-        for k, v in (r.get("match_classes") or point_classes(r.get("rows") or ())).items():
-            classes[k] = classes.get(k, 0) + v
+    trace instrument FAILED and the row counts nothing (R14: noise is never n).  A failed real-library
+    guard fails the scenario too (F5, 2026-10-21: the guard row failed and this row said passed)."""
+    t, classes, walled = sweep.tally(results, planned), summed_classes(results), guard_note(guard)
     ok = t["n_distinct"] > 0 and t["passed_distinct"] == t["n_distinct"] and not t["failing"] and not t["untried"]
     rest = f"; {t['untried']} untried: run again to continue the sweep" if t["untried"] else ""
     state, why = trace_state(stability, t["untried"])
     holes = sorted({h for r in results for h in r.get("instrument_failed") or ()})
-    said = asserts.row(sc.id, ok and state != asserts.FAILED, [f"results/{sc.id}.json"], n_points=t["tried"],
-                       n_distinct=t["n_distinct"], match_classes=classes, instrument="trace", instrument_state=state,
+    said = asserts.row(sc.id, ok and state != asserts.FAILED and not walled, [f"results/{sc.id}.json"],
+                       n_points=t["tried"], n_distinct=t["n_distinct"], match_classes=classes, instrument="trace",
+                       instrument_state=state,
                        detail=f"{t['passed_distinct']}/{t['n_distinct']} distinct traces passed; failing {t['failing'][:5]}"
-                              f"{rest}{why}" + (f"; instrument failed in points: {holes}" if holes else ""))
+                              f"{rest}{why}{walled}" + (f"; instrument failed in points: {holes}" if holes else ""))
     return {**said, "planned": planned}
+
+
+def summed_classes(results: list[dict]) -> dict:
+    """Every point's answers by match class, summed."""
+    classes: dict = {}
+    for r in results:
+        for k, v in (r.get("match_classes") or point_classes(r.get("rows") or ())).items():
+            classes[k] = classes.get(k, 0) + v
+    return classes
+
+
+def guard_note(guard: Mapping | None) -> str:
+    """What the summary says of a FAILED real-library guard ('' for a clean one, or one whose
+    instrument could not measure: that counts neither way)."""
+    if not guard or guard.get("passed") or asserts.instrument_failed(guard):
+        return ""
+    return f"; A-real guard failed: {str(guard.get('detail') or '')[:300]}"
+
+
+def code_state(git: Callable[..., str] | None = None) -> dict:
+    """The code a run ran on: the live repo's HEAD and its tracked files' changes under studio/,
+    scripts/ and agents/ (a sandbox drive imports the live tree, not the sandbox's git)."""
+    from studio.rehearsal import graph_diff
+    run = git or graph_diff.repo_git()
+    dirty = run("status", "--porcelain", "--untracked-files=no", "--", "studio", "scripts", "agents")
+    return {"head": run("rev-parse", "HEAD").strip(), "dirty": sorted(x for x in dirty.splitlines() if x.strip())}
+
+
+def code_note(start: Mapping, end: Mapping) -> str:
+    """'' when the code held still over the run; else what moved, for the summary's detail."""
+    if dict(start) == dict(end):
+        return ""
+    return (f"; code moved during the run: HEAD {str(start.get('head'))[:8]} -> {str(end.get('head'))[:8]}, "
+            f"tracked changes {len(start.get('dirty') or ())} -> {len(end.get('dirty') or ())}")
 
 
 def trace_state(stability: list[dict] | None, untried: int) -> tuple[str, str]:
@@ -734,12 +767,17 @@ def run_scenario(sid: str, results: Path = RESULTS, box: Path | None = None, run
     box, book, refused = cleared_to_run(Path(results), sid, sc, box, run_id)
     if refused:
         return refused
+    code = {"start": code_state()}
     before, carried = prior_shard(Path(results), sid, box)
     done, planned, stable = run_points(box, book, sc, every, wall, {p["id"] for p in before}, budget_s)
-    kept = before + [{k: v for k, v in d.items() if k != "rows"} for d in done]
+    kept, code["end"] = before + [{k: v for k, v in d.items() if k != "rows"} for d in done], code_state()
     stable = None if stable is None else prior_stability(Path(results), sid, box) + stable
-    rows = carried + [r for d in done for r in d["rows"]] + [guard_row(snap, since=began), summary_row(sc, kept, planned, stable)]
-    path = write_results(Path(results), sid, rows, {"box": str(box), "points": kept, "planned": planned, "stability": stable})
+    walled = guard_row(snap, since=began)
+    summary = summary_row(sc, kept, planned, stable, guard=walled)
+    summary["detail"] += code_note(code["start"], code["end"])
+    rows = carried + [r for d in done for r in d["rows"]] + [walled, summary]
+    path = write_results(Path(results), sid, rows, {"box": str(box), "points": kept, "planned": planned,
+                                                    "stability": stable, "code": code})
     return scenario_out(sid, path, done, planned - len(kept), stable)
 
 
