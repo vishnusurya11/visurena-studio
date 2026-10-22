@@ -1426,7 +1426,7 @@ def craft_census(episode, built: list[dict]) -> str:
     from scripts.episode import craft_lint
     try:
         return craft_lint.built_line(episode, built)
-    except (KeyError, TypeError, ValueError, AttributeError) as why:
+    except Exception as why:        # any census fault: it sits between prompts.json and the HARD lint wall
         return f"craft census: not measured ({why!r})"
 
 

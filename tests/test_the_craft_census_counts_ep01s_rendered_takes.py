@@ -38,7 +38,7 @@ def test_the_census_prints_the_rulings_numbers_on_ep01():
 
 def test_the_census_counts_the_repeats_and_garbles_it_sees_on_ep01():
     counts, _ = cl.episode_census(EP01)
-    assert len(counts["repeated 6-word run"]) == 13
+    assert len(counts["repeated 6-grams"]) == 13
     assert sorted(counts["garble"]) == [1, 6]          # T01 ',,'  T06 'with the camera tilts up now in frame'
 
 
@@ -98,7 +98,7 @@ def test_an_end_that_is_a_camera_sentence_is_named_by_shot():
     shots = [{"index": 0, "end": "the lamp at the TOP edge"},
              {"index": 6, "end": "The camera tilts up from the wet cobbles to the lamp"},
              {"index": 7, "end": "he pans for gold"}, {"index": 8}]
-    assert cl.end_camera(shots) == [6, 7]
+    assert cl.end_camera(shots) == [6]          # a bare verb is no camera (wave 0 review, finding 10)
 
 
 def test_the_census_never_parks_on_an_unreadable_prompt():

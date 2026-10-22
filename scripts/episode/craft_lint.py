@@ -18,11 +18,11 @@ import re
 import sys
 from collections import Counter
 from pathlib import Path
-from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import house_style, take_currency  # noqa: E402
+from studio.take_inputs import night_of  # noqa: E402,F401  (one night rule for the census and QC)
 
 DD = re.compile(r"detailed_description:\n(.*?)(?:\n\n[a-z_]+:|\Z)", re.S)
 SENTENCE = re.compile(r"(?<=[.!?])(?<!\bMr\.)(?<!\bMrs\.)(?<!\bDr\.)\s+(?=[A-Z<])")
@@ -30,8 +30,13 @@ SPOKEN = re.compile(r"<d>.*?</d>", re.S)
 SPEECH = re.compile(r"\b(?:speak|speaks|speaking|says|saying|answers?|answering|asks?|asking|talks?|"
                     r"screams?|shouts?|cries|replies|replying|tells?)\b", re.I)
 GARBLE = re.compile(r",,|\.,|\s,|with the camera \w+(?: \w+)? now in frame")
-CAMERA_END = re.compile(r"^\s*the camera\b|\b(?:pushes|pulls back|pulls out|tracks|pans|tilts|dollies|"
-                        r"cranes|orbits|zooms|racks)\b", re.I)
+CAMERA_END = re.compile(r"^\s*the camera\b|\bcamera\b[^.;]{0,30}?\b(?:pushes|pulls back|pulls out|tracks|pans|"
+                        r"tilts|dollies|cranes|orbits|zooms|racks|rises|holds)\b", re.I)
+"""An `end` that opens "The camera" or gives the camera a move; a bare verb is not one ("he pans
+for gold", "cart tracks": wave 0 review finding 10)."""
+BLOCK = re.compile(r"\[Shot \d+\] From \d\d:\d\d to (\d\d:\d\d)\.(.*?)(?=\[Shot \d+\]|\Z)", re.S)
+INSERT_SCOPE = "only that object and what touches it is in frame"
+SUBJECT = re.compile(r"<Subject (\d+)>")
 BOILER = ("continues to the last frame of the shot", "through the last frame", "at the first frame the focus",
           "the frame's height", "mouth shapes every syllable")
 """The builder's fixed sentences: said in every block by design, so never a repeat."""
@@ -65,7 +70,9 @@ def now_in_frame(dd: str) -> int:
 
 
 def walking_pace(dd: str) -> int:
-    """Every "walking pace" the pace cure wrote (ep01: "walks at a walking pace" on 5 takes)."""
+    """Every literal "walking pace" (ep01: 8 in 5 takes).  Seven of them are the gait tautology
+    ("walks at a walking pace", 4 takes); T01's is "at a normal walking pace" on a walk, the form
+    the ruling benches before it is cut (T19)."""
     return dd.lower().count("walking pace")
 
 
@@ -80,7 +87,8 @@ def sky_at_night(dd: str, night: bool) -> int:
 
 
 def six_word_repeat(dd: str) -> int:
-    """Distinct 6-word runs said twice or more in the blocks, the builder's fixed sentences aside."""
+    """Distinct 6-grams said twice or more in the blocks, the builder's fixed sentences aside.  The
+    unit is the overlapping 6-gram: one repeated 10-word phrase counts 5 (the line says "6-grams")."""
     text = re.sub(r"\d\d:\d\d", "", body(dd).lower())
     for fixed in BOILER:
         text = text.replace(fixed, " | ")              # a fixed sentence breaks a run, never makes one
@@ -94,6 +102,18 @@ def garbles(dd: str) -> int:
     return len(GARBLE.findall(body(dd)))
 
 
+def beat_at_end(dd: str) -> int:
+    """A beat stamped "At <the block's last second>": nothing can start on the last frame
+    (A18: T03 and T11, "At 00:05" in a block that ends at 00:05)."""
+    return sum(len(re.findall(rf"\bAt {end}\b", text)) for end, text in BLOCK.findall(dd))
+
+
+def insert_second_body(dd: str) -> int:
+    """Blocks whose insert scope ("only that object and what touches it") stands over a second body
+    (A18: T07, the girl running into the boots insert)."""
+    return sum(INSERT_SCOPE in text and len(set(SUBJECT.findall(text))) >= 2 for _, text in BLOCK.findall(dd))
+
+
 def end_camera(shots: list) -> list[int]:
     """Plan shots whose `end` opens with "The camera" or carries a camera verb (ep01 shot 6)."""
     return [int(_get(s, "index")) for s in shots if CAMERA_END.search(str(_get(s, "end") or ""))]
@@ -104,8 +124,9 @@ def _get(row, key):
 
 
 TAKE_CLASSES = (("renamed hold", renamed_hold), ("now in frame", now_in_frame), ("walking pace", walking_pace),
-                ("speech beside a closed mouth", speech_closed), ("repeated 6-word run", six_word_repeat),
-                ("garble", garbles))
+                ("speech beside a closed mouth", speech_closed), ("repeated 6-grams", six_word_repeat),
+                ("garble", garbles), ("beat at block end", beat_at_end),
+                ("insert scope with a second body", insert_second_body))
 
 
 def census(prompts: dict, night: dict, shots: list) -> dict[str, dict[int, int]]:
@@ -115,6 +136,13 @@ def census(prompts: dict, night: dict, shots: list) -> dict[str, dict[int, int]]
     out["sky word at night"] = {i: n for i, dd in texts.items() if (n := sky_at_night(dd, bool(night.get(i))))}
     out["end as camera"] = {i: 1 for i in end_camera(shots)}
     return out
+
+
+def readable_census(prompts: dict, night: dict, shots: list) -> tuple[dict[str, dict[int, int]], int]:
+    """The census over the prompts that carry a `detailed_description`, and how many did: an
+    unreadable prompt is not a clean take (wave 0 review: n counted it, every class at 0)."""
+    readable = {int(i): p for i, p in prompts.items() if detailed(p)}
+    return census(readable, night, shots), len(readable)
 
 
 def said(name: str, hits: dict[int, int]) -> str:
@@ -132,16 +160,11 @@ def line(counts: dict[str, dict[int, int]], n: int) -> str:
     return f"craft census, {n} takes (report only): " + "; ".join(said(k, v) for k, v in counts.items())
 
 
-def night_of(setup) -> bool:
-    """Whether a setup (a plan dict or a Setup) is at night: `house_style.is_night`'s rule."""
-    return house_style.is_night(SimpleNamespace(**setup) if isinstance(setup, dict) else setup)
-
-
 def recorded(take_dir: Path, records: list[dict]) -> dict[int, str]:
     """{take: the prompt it RENDERED from}, off each take's own graph; a take with none is left out."""
-    said = {int(r["index"]): take_currency.recorded_prompt(Path(take_dir) / f"T{int(r['index']):02d}.mp4")
-            for r in records}
-    return {i: p for i, p in said.items() if p is not None}
+    got = {int(r["index"]): take_currency.recorded_prompt(Path(take_dir) / f"T{int(r['index']):02d}.mp4")
+           for r in records}
+    return {i: p for i, p in got.items() if p is not None}
 
 
 def episode_census(home: Path) -> tuple[dict[str, dict[int, int]], int]:
@@ -153,7 +176,7 @@ def episode_census(home: Path) -> tuple[dict[str, dict[int, int]], int]:
     prompts = recorded(take_dir, records)
     setups = plan.get("setups") or {}
     night = {int(r["index"]): night_of(setups[r["setup"]]) for r in records if r.get("setup") in setups}
-    return census(prompts, night, plan.get("shots") or []), len(prompts)
+    return readable_census(prompts, night, plan.get("shots") or [])
 
 
 def built_line(episode, built: list[dict]) -> str:
@@ -161,7 +184,10 @@ def built_line(episode, built: list[dict]) -> str:
     prompts = {int(c["index"]): c.get("prompt") for c in built}
     night = {int(c["index"]): night_of(episode.setups[c["setup"]]) for c in built
              if c.get("setup") in episode.setups}
-    return line(census(prompts, night, list(episode.shots)), len(prompts))
+    counts, n = readable_census(prompts, night, list(episode.shots))
+    if not n and prompts:
+        return f"craft census: not measured (0 of {len(prompts)} cards carry a detailed_description)"
+    return line(counts, n)
 
 
 def main(argv: list[str]) -> int:
