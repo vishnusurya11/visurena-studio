@@ -466,9 +466,7 @@ Board states, gaps, bench rules: `LESSONS_ARCHIVE.md`, "Gate notes moved out of 
 Decision `2026-09-24-automate-the-taste-gates` (owner). `gates.yaml` names who signs
 each gate; every refs/episode row is `auto`. A judge signs `pass` or `flagged`, never
 `fault`, never a waiver; a terminal rung writes a flagged verdict, a learning and an
-audit row (`library/<book>/audit/rows.jsonl`); no step reads the audit sheet. Each
-judge is benched against the casebook (`scripts/calibration/bench.py`) and a ratchet
-test refuses a commit that loses a catch. `fitted_on` is carried on every measure.
+audit row (`library/<book>/audit/rows.jsonl`); no step reads the audit sheet.
 
 | gate | judge | measures | ladder | terminal | errs toward |
 |---|---|---|---|---|---|
@@ -479,11 +477,11 @@ test refuses a commit that loses a catch. `fitted_on` is carried on every measur
 | EYE takes (episode/09) | `judge:take_eye@1` | dq rows incl. pass-through, rotation, leak, cut vote, lag; content; identity vs sheet; clones | seed → move type → shorter → head cut → re-plan the cell (priced); the router reads `take_ladder.CURE_RATES` (dated): a cure under 20 % over 4+ tries is dropped for its class; gait → `gait_verb`; an S warp → `warp_gate.cure`, an Se-only warp → none; early clones (clone rows carry `t`, the sample's second; all t <= 0.3 s) → head cut, else one seed on a clean panel | a still from the panel on a narration shot (≤2, never adjacent), else the best recorded draw (fewest hard rows, then lowest Se, read from `T<nn>.dq.json` attempts; the last draw is archived) kept and flagged, high on dialogue/turn/button; every kept fault stamped `evidence.settled` = still / keep_best / high (K5); dropped cure classes land as one `watch` audit row; a signed eye whose fingerprint names the current takes is kept on step 09 re-entry (no re-judge) | refuse where calibrated; "cannot tell" on wides |
 | MASTER (episode/11) | `judge:master_eye@1` | qc hard rows; shadow, faces, board, repeats, story from measures; a 30-frame read; cross-take identity; the face strip (`studio/face_strip`, 4 crops a tier, `FACE_ASK`) LOG ONLY (V3), never a fault, its `review/face_labels_<sha8>.json` the label source for any face metric | one retake through the take ladder, then its recut (no free recut: step 11's master is already current); a rung that changed no take sha8 (nor shots.json sha8) takes no recut and no second eye, books no round, prints `CAP master: retake of Txx changed no take, no recut`; a retake is priced from measured retake seconds, floor 9 min; `review/work/eye_reads.json` keys each frame read (take sha8, frame, slow, reader, prompt sha; never the plan row, A31) so only misses are read; a flagged take (K7) gets 3 extra frames and a `parts` ask, a vanishing limb is a low advisory `body` fault naming the shot (D8) | the rubric flagged with evidence; never waived by a judge | refuse → retake on measured fields; flag on story |
 
-The owner's eye: `library/<book>/audit/<unit>.html` (`scripts/audit/sheet.py`), every
-flag with its numbers beside the wall and a seeded sample of passes per gate; a finding
-is `scripts/audit/note.py <codex> <unit> <artefact> <class> "<words>"` → the casebook
-overlay → the bench → the ratchet. What still needs a signature: PUBLISH, paid credits,
-OVERRIDE, the synthetic declaration; `RENDER_HOLD` is the brake.
+The owner's eye: `library/<book>/audit/<unit>.html` (`scripts/audit/sheet.py`): flags
+beside their walls, each gate's labelled precision, a seeded sample of passes; a finding
+is `scripts/audit/note.py <codex> <unit> <artefact> <class> "<words>"` (it keeps the
+dq json) → casebook → commit `bench.py --all` + `--exhibits`, or the ratchet fails
+(fleet H). Still signed: PUBLISH, paid credits, OVERRIDE, synthetic; `RENDER_HOLD` brakes.
 
 
 ## The run itself (five-hour plan, 2026-09-30)

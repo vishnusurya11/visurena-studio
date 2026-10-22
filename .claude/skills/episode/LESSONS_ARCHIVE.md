@@ -1652,6 +1652,20 @@ the old grammar the owner replaced. Jekyll ep01 `plan_v3.json`: 0 rows, VERDICT 
   a RULER row means a code ruler disagrees with the plan: fix the ruler, not the plan. Not a
   blocker until clean on ep01 and one WotW plan (D12).
 
+### Judges: the bench sentence and the owner's eye (moved from GATES.md, fleet H 2026-10-22)
+
+- Each judge is benched against the casebook (`scripts/calibration/bench.py`) and a ratchet
+  test refuses a commit that loses a catch. `fitted_on` is carried on every measure.
+- The owner's eye (old wording): every flag with its numbers beside the wall and a seeded sample
+  of passes per gate; a finding goes note.py → the casebook overlay → the bench → the ratchet.
+  What still needs a signature: PUBLISH, paid credits, OVERRIDE, the synthetic declaration.
+- Fleet H (2026-10-22): the bench headline is owner rows only and prints `unarmed, n=0 (NO
+  LABELS)` with no labels; the ratchet fails an empty baseline once owner rows are measured
+  (rebuild with `bench.py --all` in the same commit), keeps catches in the append-only
+  `docs/calibration/bench/caught.jsonl`, and reads `tests/fixtures/casebook/` exhibits
+  (`bench.py --exhibits`) on a clean clone. The owner's label queue is
+  `scripts/calibration/label_queue.py`.
+
 ## Jekyll Kawajiri ep01 retro (2026-10-19; 15 code packages P01-P15, docs P16)
 
 The run: `episodes/ep01/cut/master_iter1.mp4`, 2026-10-18 22:54 PDT, 3,348 frames, QC passed with
