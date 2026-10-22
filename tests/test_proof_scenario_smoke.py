@@ -325,6 +325,18 @@ def test_the_loop_ends_on_the_word_its_pre_tick_hook_returns(tmp_path):
     assert out["terminal"] == "BOUNDED" and out["ticks"] == 3 and len(out["states"]) == 2
 
 
+def test_a_bounded_stop_still_hands_a_moved_head_over_once_the_drive_is_down(tmp_path):
+    """F7, window 3: a commit under a live drive is handed over only after the drive ends
+    (autopilot.hand_over), and the round the drive ends in is the round the bound fires.  The
+    word ended the run before hand_over ran, so F7 read `handovers 0` with the commit landed."""
+    ap = fake_autopilot(["RUNNING"] * 5)
+    words, heads = iter([None, None, "BOUNDED"]), iter([None, None, "def456"])
+    ap.hand_over = lambda book, codex, deps, born: next(heads)
+    out = supervisor.loop(ap, tmp_path, "9999", 2, deps_stub(), expected=5, every=0, wall_s=60,
+                          before=lambda run: next(words))
+    assert out["terminal"] == "BOUNDED" and out["handovers"] == ["def456"] and len(out["states"]) == 2
+
+
 def test_a_refused_rehearsal_writes_its_blocked_row_and_never_raises(tmp_path, monkeypatch):
     def refuse():
         from studio.rehearsal import activate

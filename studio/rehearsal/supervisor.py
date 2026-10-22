@@ -207,12 +207,15 @@ def loop(ap, book: Path, codex: str, n: int, deps, expected: int, every: float, 
 
 
 def go_round(ap, book: Path, codex: str, n: int, deps, out: dict, before: Callable[[dict], str | None] | None) -> None:
-    """One round: the pre-tick hook (its word ends the run), a moved HEAD handed over, one real tick."""
+    """One round: the pre-tick hook, a moved HEAD handed over, one real tick.  The hook's word ends
+    the run AFTER the hand-over: the round a bounded drive ends in is the round a commit made under
+    it is handed over (autopilot.hand_over waits for the drive; F7, window 3)."""
     out["ticks"] += 1
-    if before is not None and (word := before(out)):
+    word = before(out) if before is not None else None
+    hand_over(ap, book, codex, deps, out)
+    if word:
         out["terminal"] = word
         return
-    hand_over(ap, book, codex, deps, out)
     doc = one_tick(ap, book, codex, deps, out["ticks"], out)
     out["terminal"] = terminal_of(doc, n)
     out["acting"] += bool(doc) and (doc.get("episode") or {}).get("action") != WAIT
