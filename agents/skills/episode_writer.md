@@ -153,7 +153,7 @@ turn, spike, reaction, runout, button, answer, act_out, tease.
 - A dialogue line's shot shows the speaker's face at `close` or `medium_close`
   and lists the speaker in `faces`: the lips are driven by the line's own audio.
 - At most `max_words_per_line` words a line, at most `max_lines_per_shot` lines
-  a shot, at most `max_voices` speakers in the unit, the narrator counted.
+  a shot, at most `max_voices` voices, narrator in; `voices_kept`: who.
 - Lines are numbered 0..n−1 in playback order, and each names the shot it plays
   on; a line's shot never precedes an earlier line's shot. A shot with no line
   names a beat or a coda, or it is a hole.

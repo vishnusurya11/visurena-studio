@@ -369,18 +369,27 @@ def book_motif(book_dir: Path | None) -> str:
     return ""
 
 
+def voices_kept(motif: str) -> str:
+    """Who keeps a voice past the cap (craft ruling A14): ch2 keeps Poole ("Mr. Hyde has a key." pays off
+    ep01's key) and folds Lanyon into narration.  Said beside `max_voices`; the cap does not move."""
+    named = f" ({motif})" if motif else ""
+    return (f"past max_voices speakers, keep the ones whose lines carry the answer or the motif{named}; "
+            f"fold the rest into narration")
+
+
 def band(book_dir: Path | None = None, number: int | None = None) -> dict:
     """The format band, read off the contract, the grammar and the series' measured voice."""
     from studio import grammar_battery
     from studio.episode_takes import BUDGET
-    rate, dial = spoken_rate(book_dir, number), dialogue_band(book_dir, number)
+    rate, dial, motif = spoken_rate(book_dir, number), dialogue_band(book_dir, number), book_motif(book_dir)
     return {"min_seconds": episode_spec.MIN_SECONDS, "max_seconds": episode_spec.MAX_SECONDS,
             "words_per_second": rate, "take_seconds": BUDGET,
             "max_words_per_shot": int(rate * BUDGET),
             "floors": first_frame_floors(),
             "max_words_per_line": episode_spec.MAX_WORDS,
             "max_lines_per_shot": episode_spec.MAX_LINES_PER_SHOT,
-            "max_voices": episode_spec.MAX_SPEAKING, "max_setups": episode_spec.MAX_SETUPS,
+            "max_voices": episode_spec.MAX_SPEAKING, "voices_kept": voices_kept(motif),
+            "max_setups": episode_spec.MAX_SETUPS,
             "max_setup_seconds": episode_spec.MAX_SETUP_SECONDS,
             "bed_tones": list(__import__("studio.episode_bed", fromlist=["TONES"]).TONES),
             "aspect": episode_spec.canvas.DEFAULT if hasattr(episode_spec, "canvas") else "1:1",
@@ -388,7 +397,7 @@ def band(book_dir: Path | None = None, number: int | None = None) -> dict:
             "dialogue_room": dialogue_room(dial[1]),
             "turn_band": list(episode_spec.TURN_BAND),
             "grammar": episode_spec.STUDIO_GRAMMAR, "grammar_rules": grammar_battery.band(),
-            "motif": book_motif(book_dir)}
+            "motif": motif}
 
 
 # ---- build and render ---------------------------------------------------------------
