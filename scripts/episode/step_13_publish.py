@@ -27,7 +27,10 @@ so this step only assembles and sends:
                when the book has none anywhere), its description gains the
                '— Watch in order —' block and the previous episode a Next line,
                each once (scripts/publish/youtube_playlist.py; growth apply
-               2026-10-21).  Behind the same standing hand as the upload.
+               2026-10-21).  Behind the same standing hand as the upload.  A
+               failure is an advisory flag in learnings.jsonl, never a stop (the
+               video is already public; decision 2026-10-21, for the owner's
+               veto): the poll and done() go on, a re-run retries the upkeep.
   G-SHORTS     advisory terminal: GET youtube.com/shorts/<id> until the final
                URL still says /shorts/ at 200 (cap 600 s); the honest outcome
                is recorded in uploads.jsonl either way, never a stop -- the
@@ -48,9 +51,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.publish import metadata, signoff, youtube_playlist, youtube_privacy, youtube_upload  # noqa: E402
-from studio import book_playlist, standing_approval, step_cli  # noqa: E402
+from studio import book_playlist, publish_lock, standing_approval, step_cli  # noqa: E402
 from studio import youtube_publish as yp  # noqa: E402
-from studio.learnings import Learning, record  # noqa: E402
+from studio.learnings import Learning, load, record  # noqa: E402
 
 STEP_ID = "13"
 NAME = "publish"
@@ -169,9 +172,32 @@ def keep_in_order(ctx, video_id: str, build_api) -> None:
     recorded run makes no call at all."""
     if book_playlist.done(ctx.book_dir, "in_order", video_id):
         return
-    pid = youtube_playlist.upkeep((build_api or youtube_privacy._build_api)(), ctx.book_dir,
-                                  ctx.number, video_id)
+    try:
+        pid = youtube_playlist.upkeep((build_api or youtube_privacy._build_api)(), ctx.book_dir,
+                                      ctx.number, video_id)
+    except (Exception, SystemExit) as why:  # noqa: BLE001 - every cause is a flag after public
+        return flag_in_order(ctx, why)
+    clear_in_order(ctx)
     print(f"G-INORDER: in order on {book_playlist.playlist_url(pid)}")
+
+
+def clear_in_order(ctx) -> None:
+    """A retry that lands closes the earlier flag with a pass row, so the publish lock
+    (the last row per gate) does not hold a later recut's upload on it."""
+    path = Path(ctx.home) / "learnings.jsonl"
+    last = publish_lock.last_by_gate(load(path)).get("G-INORDER") if path.exists() else None
+    if last and last.terminal:
+        record(path, Learning(step=STEP_ID, gate="G-INORDER", action="pass", note="upkeep retried and landed"))
+
+
+def flag_in_order(ctx, why: BaseException) -> None:
+    """A failed upkeep is a recorded flag, as G-SHORTS is (decision 2026-10-21, for the
+    owner's veto): the video is already public, so the poll and done() go on and a later
+    step-13 run retries the upkeep, every act of which is idempotent."""
+    note = f"in-order upkeep failed: {type(why).__name__}: {why}"[:160]
+    record(Path(ctx.home) / "learnings.jsonl",
+           Learning(step=STEP_ID, gate="G-INORDER", action="flag", terminal=True, note=note))
+    print(f"G-INORDER: {note}; recorded, not a stop -- the video is public; a re-run of step 13 retries it")
 
 
 # ---- the step ---------------------------------------------------------------------

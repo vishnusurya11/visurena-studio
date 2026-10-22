@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from scripts.episode import step_13_publish
-from scripts.publish import metadata
-from studio import episode_home, plan_verdict, youtube
+from scripts.publish import metadata, youtube_playlist
+from studio import episode_home, plan_verdict, publish_lock, youtube
 from studio import youtube_publish as yp
 from tests.publish_fixtures import FakeCtx, book_with, episode_with, standing
 from tests.youtube_fakes import FakeYouTube, video
@@ -118,3 +120,25 @@ def test_the_public_episode_joins_its_book_playlist_once(tmp_path, monkeypatch, 
     rows = [json.loads(line) for line in (book / "uploads.jsonl").read_text(encoding="utf-8").splitlines()]
     assert [r.get("event") for r in rows].count("in_order") == 1
     assert capsys.readouterr().out.strip().splitlines()[-1] == "https://www.youtube.com/shorts/vid1"
+
+
+@pytest.mark.parametrize("why", [SystemExit("the description would be 5012 characters, over YouTube's 5000"),
+                                 RuntimeError("HttpError 403 quotaExceeded")])
+def test_a_failed_upkeep_is_a_recorded_flag_and_the_poll_still_runs(tmp_path, monkeypatch, capsys, why):
+    """Decision 2026-10-21 (for the owner's veto): the video is already public, so a failed
+    G-INORDER is a flag, as G-SHORTS is -- the poll runs, done() turns true, and a later
+    step-13 run retries the upkeep, every act idempotent."""
+    ctx, book, home, sha8 = episode(tmp_path, monkeypatch)
+    yt, real = channel(), youtube_playlist.upkeep
+    monkeypatch.setattr(youtube_playlist, "upkeep", lambda *a, **k: (_ for _ in ()).throw(why))
+    step_13_publish.run(ctx, send=fake_send, build_api=lambda: yt,
+                        http=lambda url: (200, "https://www.youtube.com/shorts/vid1"), sleep=lambda s: None)
+    assert "G-INORDER" in (home / "learnings.jsonl").read_text(encoding="utf-8")
+    assert step_13_publish.done(ctx) is True
+    assert capsys.readouterr().out.strip().splitlines()[-1] == "https://www.youtube.com/shorts/vid1"
+    monkeypatch.setattr(youtube_playlist, "upkeep", real)
+    step_13_publish.run(ctx, send=fake_send, build_api=lambda: yt, http=None, sleep=lambda s: None)
+    rows = [json.loads(line) for line in (book / "uploads.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [r.get("event") for r in rows].count("in_order") == 1
+    assert [r.get("event") for r in rows].count("shorts_poll") == 1
+    assert not [t for t in publish_lock.open_terminals(home) if t.startswith("G-INORDER")]  # a recut may upload
