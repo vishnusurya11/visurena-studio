@@ -174,7 +174,63 @@ def dry_check(codex: str, number: int) -> list[str]:
     return repair_dry_check.launch_preflight(db.get_connection, codex, number)
 
 
-def refuse_launch(home: Path, label: str, lines: list[str]) -> int:
+REFUSE_NOW = {"chapter_text"}
+"""A gap no step runs past: with no chapter text there is no plan (craft ruling A23).  Every other gap parks
+at its own step, and a publish-only gap always parks, never refuses."""
+RUN_DAYS = 6 / 24
+"""The owner's machine budget for one episode (<= 6 h): a token that dies inside it dies before step 13."""
+TOKEN_DAYS = 7.0
+"""A Testing consent's refresh token dies at 7 days (scripts/publish/youtube_auth.py)."""
+
+
+def preflight(book: Path, number: int, env: Path | None = None, now: float | None = None) -> list[str]:
+    """t=0 (craft ruling A23): every gap the episode will meet, each "refuse now: ..." or "will park at step
+    N: ...", before a second is spent (Jekyll ep01 charged 6.69 h before step 13 refused a book.json with no
+    `series`).  The proof harness's chapter audit, then the two publish doors it does not hold."""
+    env = ROOT / ".env" if env is None else Path(env)
+    now = time.time() if now is None else now
+    return audit_lines(Path(book), number) + standing_lines(Path(book), number) + token_lines(env, now)
+
+
+def audit_lines(book: Path, number: int) -> list[str]:
+    """The chapter audit's parks (scripts/proof/preconditions.py, imported, never moved: the proof harness owns
+    it); a book whose records cannot be read is said, never a crash."""
+    from scripts.proof import preconditions as proof
+    try:
+        out = proof.pre.audit(book, number)
+    except (OSError, ValueError, KeyError, TypeError) as why:
+        return [f"preflight: book records not read ({type(why).__name__}: {str(why)[:120]})"]
+    return [finding(g) for g in out["gaps"] if g["outcome"] == "park"]
+
+
+def finding(g: dict) -> str:
+    head = "refuse now" if g["kind"] in REFUSE_NOW else f"will park at step {g['step']}"
+    return f"{head}: {g['kind']} {g['what']} ({g['basis'][:100]})"
+
+
+def standing_lines(book: Path, number: int) -> list[str]:
+    """G-STANDING: step 13 uploads only an episode publish/standing.json lists (no upload unless asked)."""
+    from studio import standing_approval
+    if standing_approval.ok(book, number):
+        return []
+    return [f"will park at step 13: G-STANDING {standing_approval.FILE} does not list ep{number:02d}"]
+
+
+def token_lines(env: Path, now: float) -> list[str]:
+    """The YouTube token's age off .env's stamp: one that dies inside the run's budget parks step 13."""
+    from scripts.publish import youtube_auth
+    age = youtube_auth.token_age_days(env, now)
+    if age is not None and age + RUN_DAYS < TOKEN_DAYS:
+        return []
+    said = "has no recorded age" if age is None else f"is {age} days old (a Testing consent dies at 7)"
+    return [f"will park at step 13: the YouTube token {said}; youtube_auth.py re-consents"]
+
+
+def refusals(lines: list[str]) -> list[str]:
+    return [line for line in lines if line.startswith("refuse now")]
+
+
+def refuse_launch(home: Path, label: str, lines: list[str], why: str = "dry_check") -> int:
     """A refused launch is a run that refused: its lines in this launch's run log (the autopilot reads that
     tail), a run row and an end row that closes no repair window (the owner's order stays owed)."""
     sha, n, text = git("rev-parse", "HEAD").strip(), first_log_number(home), "\n".join(lines) + "\n"
@@ -182,7 +238,7 @@ def refuse_launch(home: Path, label: str, lines: list[str]) -> int:
     ledger(home, {"event": "start", "sha": sha})
     ledger(home, run_row(n, sha, text))
     ledger(home, {"event": "end", "code": 2, "sha": sha, "clock_spent": False, "paused_at_boundary": False,
-                  "refused": "dry_check"})
+                  "refused": why})
     notify(f"{label}: " + "\n".join(lines))
     return 2
 
@@ -196,6 +252,11 @@ def main(codex: str, number: int) -> int:
     home.mkdir(parents=True, exist_ok=True)
     if refused := dry_check(codex, number):
         return refuse_launch(home, label, refused)
+    if refusals(found := preflight(episode_home.book_dir(codex), number)):
+        return refuse_launch(home, label, found, why="preflight")
+    if found:                                     # A23: said at t=0, the run goes on to its first park
+        print("\n".join(found), flush=True)
+        notify(f"{label}: t=0 preflight:\n" + "\n".join(found))
     # THE BOOK'S TITLE CARDS EXIST BEFORE ANY EPISODE RUNS (owner design,
     # 2026-09-30): the card depends only on the book, so it is baked book-wide
     # in one i2v session, outside the episode's clock, never mid-run.
