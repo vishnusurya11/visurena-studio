@@ -6,7 +6,7 @@ completed run is proof the step never shelled out for anything."""
 from __future__ import annotations
 
 from scripts.episode import step_13_publish
-from tests.test_step_13_publishes_and_polls import FakeApi, episode, fake_send
+from tests.test_step_13_publishes_and_polls import channel, episode, fake_send
 
 
 def test_metadata_is_called_in_process_never_via_run_script(tmp_path, monkeypatch):
@@ -18,7 +18,8 @@ def test_metadata_is_called_in_process_never_via_run_script(tmp_path, monkeypatc
         return home / "youtube.json"
 
     monkeypatch.setattr(step_13_publish.metadata, "ensure", spy)
-    step_13_publish.run(ctx, send=fake_send, build_api=FakeApi,
+    yt = channel()
+    step_13_publish.run(ctx, send=fake_send, build_api=lambda: yt,
                         http=lambda url: (200, "https://www.youtube.com/shorts/vid1"),
                         sleep=lambda s: None)
     assert calls == [(ctx.home, ctx.book_dir, 3)]  # one direct call, this process

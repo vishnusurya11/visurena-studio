@@ -22,6 +22,12 @@ so this step only assembles and sends:
                --watched=<sha8> is satisfied by the judge-filled eye rubric
                review/eye_<sha8>.json under decision
                2026-10-01-no-human-input-at-publish.
+  G-INORDER    after YouTube RETURNED public (never before): the episode joins
+               its book's playlist at its episode-order place (made public only
+               when the book has none anywhere), its description gains the
+               '— Watch in order —' block and the previous episode a Next line,
+               each once (scripts/publish/youtube_playlist.py; growth apply
+               2026-10-21).  Behind the same standing hand as the upload.
   G-SHORTS     advisory terminal: GET youtube.com/shorts/<id> until the final
                URL still says /shorts/ at 200 (cap 600 s); the honest outcome
                is recorded in uploads.jsonl either way, never a stop -- the
@@ -41,8 +47,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.publish import metadata, signoff, youtube_privacy, youtube_upload  # noqa: E402
-from studio import standing_approval, step_cli  # noqa: E402
+from scripts.publish import metadata, signoff, youtube_playlist, youtube_privacy, youtube_upload  # noqa: E402
+from studio import book_playlist, standing_approval, step_cli  # noqa: E402
 from studio import youtube_publish as yp  # noqa: E402
 from studio.learnings import Learning, record  # noqa: E402
 
@@ -156,6 +162,18 @@ def record_poll(ctx, video_id: str, got: dict) -> None:
               f"recorded, not a stop -- the video is public")
 
 
+def keep_in_order(ctx, video_id: str, build_api) -> None:
+    """G-INORDER: the PUBLIC episode joins its book's playlist in episode order, its
+    description gains the '— Watch in order —' block and the episode before it a
+    Next line -- each once (youtube_playlist.upkeep; recorded in uploads.jsonl).  A
+    recorded run makes no call at all."""
+    if book_playlist.done(ctx.book_dir, "in_order", video_id):
+        return
+    pid = youtube_playlist.upkeep((build_api or youtube_privacy._build_api)(), ctx.book_dir,
+                                  ctx.number, video_id)
+    print(f"G-INORDER: in order on {book_playlist.playlist_url(pid)}")
+
+
 # ---- the step ---------------------------------------------------------------------
 
 def done(ctx) -> bool:
@@ -188,6 +206,7 @@ def run(ctx, send=youtube_upload.send, build_api=None, http=urllib_get,
         print(f"NOT-PUBLIC: YouTube did not return public for {video_id}; the ledger "
               f"records what happened, and nothing more is claimed")
         raise SystemExit(f"https://youtu.be/{video_id} is NOT public; fix the channel, re-run")
+    keep_in_order(ctx, video_id, build_api)
     if not poll_row(ctx.book_dir, video_id):
         record_poll(ctx, video_id, poll_shorts(video_id, http=http, sleep=sleep))
     print(f"https://www.youtube.com/shorts/{video_id}")

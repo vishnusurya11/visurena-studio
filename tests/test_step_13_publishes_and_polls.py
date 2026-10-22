@@ -1,6 +1,6 @@
 """The whole last mile against fakes: the upload row, the privacy flip row and
-the shorts_poll row land in uploads.jsonl, the public Short URL is the LAST
-line printed, done() turns true only after the public row + poll row, and a
+the shorts_poll row land in uploads.jsonl, the episode joins its book's
+playlist, the public Short URL is the LAST line printed, done() turns true only after the public row + poll row, and a
 re-run on the same sha8 uploads nothing (yp.uploaded idempotence).  Nothing
 reaches the network: send, build_api and http are injected; the credentials
 reader is stubbed; the metadata call is guarded so a paid call is impossible."""
@@ -13,31 +13,13 @@ from scripts.publish import metadata
 from studio import episode_home, plan_verdict, youtube
 from studio import youtube_publish as yp
 from tests.publish_fixtures import FakeCtx, book_with, episode_with, standing
+from tests.youtube_fakes import FakeYouTube, video
 
 
-class _Call:
-    def __init__(self, got):
-        self.got = got
-
-    def execute(self):
-        return self.got
-
-
-class FakeApi:
-    """The two videos() calls youtube_privacy makes, over one privacy cell."""
-
-    def __init__(self):
-        self.privacy = "private"
-
-    def videos(self):
-        return self
-
-    def list(self, **kwargs):
-        return _Call({"items": [{"status": {"privacyStatus": self.privacy}}]})
-
-    def update(self, **kwargs):
-        self.privacy = kwargs["body"]["status"]["privacyStatus"]
-        return _Call({"id": kwargs["body"]["id"], "status": {"privacyStatus": self.privacy}})
+def channel() -> FakeYouTube:
+    """The channel as the upload left it: vid1 private, no playlist yet."""
+    return FakeYouTube(videos={"vid1": video('A. B. Author: The Test Book — Ep 03/09 — "The Red Weed"',
+                                             "A measured episode.", privacy="private")})
 
 
 def fake_send(path, body, creds):
@@ -73,7 +55,8 @@ def test_the_run_uploads_flips_polls_and_ends_with_the_url(tmp_path, monkeypatch
     ctx, book, home, sha8 = episode(tmp_path, monkeypatch)
     answers = iter([(200, "https://www.youtube.com/watch?v=vid1"),
                     (200, "https://www.youtube.com/shorts/vid1")])
-    step_13_publish.run(ctx, send=fake_send, build_api=FakeApi,
+    yt = channel()
+    step_13_publish.run(ctx, send=fake_send, build_api=lambda: yt,
                         http=lambda url: next(answers), sleep=lambda s: None)
     rows = [json.loads(line) for line in
             (book / "uploads.jsonl").read_text(encoding="utf-8").splitlines()]
@@ -88,7 +71,8 @@ def test_the_run_uploads_flips_polls_and_ends_with_the_url(tmp_path, monkeypatch
 
 def test_a_re_run_with_the_same_cut_uploads_nothing(tmp_path, monkeypatch, capsys):
     ctx, book, home, sha8 = episode(tmp_path, monkeypatch)
-    step_13_publish.run(ctx, send=fake_send, build_api=FakeApi,
+    yt = channel()
+    step_13_publish.run(ctx, send=fake_send, build_api=lambda: yt,
                         http=lambda url: (200, "https://www.youtube.com/shorts/vid1"),
                         sleep=lambda s: None)
     boom = lambda *a, **k: (_ for _ in ()).throw(AssertionError("sent twice"))  # noqa: E731
@@ -107,7 +91,8 @@ def test_done_is_false_before_the_public_and_poll_rows(tmp_path, monkeypatch):
 
 def test_a_poll_that_never_sees_a_short_is_a_recorded_flag_not_a_stop(tmp_path, monkeypatch, capsys):
     ctx, book, home, sha8 = episode(tmp_path, monkeypatch)
-    step_13_publish.run(ctx, send=fake_send, build_api=FakeApi,
+    yt = channel()
+    step_13_publish.run(ctx, send=fake_send, build_api=lambda: yt,
                         http=lambda url: (200, "https://www.youtube.com/watch?v=vid1"),
                         sleep=lambda s: None)
     poll = next(json.loads(line) for line in
@@ -116,4 +101,20 @@ def test_a_poll_that_never_sees_a_short_is_a_recorded_flag_not_a_stop(tmp_path, 
     assert "/watch" in poll["final_url"]
     learned = (home / "learnings.jsonl").read_text(encoding="utf-8")
     assert "G-SHORTS" in learned
+    assert capsys.readouterr().out.strip().splitlines()[-1] == "https://www.youtube.com/shorts/vid1"
+
+
+def test_the_public_episode_joins_its_book_playlist_once(tmp_path, monkeypatch, capsys):
+    """Growth apply 2026-10-21: step 13 now keeps the book's playlist and the
+    '— Watch in order —' block; a book with no playlist anywhere gets one, public."""
+    ctx, book, home, sha8 = episode(tmp_path, monkeypatch)
+    yt = channel()
+    step_13_publish.run(ctx, send=fake_send, build_api=lambda: yt,
+                        http=lambda url: (200, "https://www.youtube.com/shorts/vid1"), sleep=lambda s: None)
+    (pid, held), = yt.lists.items()
+    assert held["items"] == ["vid1"] and held["privacy"] == "public"
+    assert yt.store["vid1"]["snippet"]["description"].endswith(
+        f"— Watch in order —\nAll episodes in order: https://www.youtube.com/playlist?list={pid}")
+    rows = [json.loads(line) for line in (book / "uploads.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [r.get("event") for r in rows].count("in_order") == 1
     assert capsys.readouterr().out.strip().splitlines()[-1] == "https://www.youtube.com/shorts/vid1"
