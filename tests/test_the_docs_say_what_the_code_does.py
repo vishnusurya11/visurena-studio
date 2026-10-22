@@ -31,4 +31,8 @@ def test_the_inner_cap_is_documented_as_hard():
 
 def test_the_skill_states_the_held_dialogue_exemption_of_the_move_share():
     text = re.sub(r"\s+", " ", SKILL.read_text(encoding="utf-8"))
-    assert "no move on over a quarter of the shots (held dialogue shots uncounted)" in text
+    # wave 1 review, finding 12: on a grammar plan (every current plan) moves_faults leaves out EVERY
+    # held shot, and the swap had dropped "in a unit"
+    assert "at least eight distinct moves in a unit" in text
+    assert ("no move on over a quarter of the shots (held dialogue shots uncounted; on a grammar plan, "
+            "every held shot)") in text
