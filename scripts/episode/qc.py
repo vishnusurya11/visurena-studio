@@ -393,12 +393,25 @@ def voice_floor(rows: list[dict] | None) -> dict:
                                         f"similarity floor at 0.0" + (f" ({named})" if named else "")}
 
 
+def line_rows(path: Path) -> list[dict] | None:
+    """lines.json's rows (a list, or a dict's `lines`); None with no file; a ValueError on anything else."""
+    if not path.is_file():
+        return None
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    rows = doc.get("lines") if isinstance(doc, dict) else doc
+    if not isinstance(rows, list):
+        raise ValueError(f"{path.name} holds no list of lines")
+    return rows
+
+
 def voice_floor_rows(i: SimpleNamespace, report: dict) -> dict:
-    """The voice-floor block off the episode's lines.json, inside the inputs block; never in the verdict."""
-    path = episode_home.lines_dir(i.book, i.number) / "lines.json"
-    doc = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
-    report.setdefault("inputs", {})["voice_floor"] = voice_floor(doc["lines"] if isinstance(doc, dict) and "lines" in doc
-                                                                 else doc)
+    """The voice-floor block off the episode's lines.json, inside the inputs block; never in the verdict.
+    A file it cannot read is "not measured": a report row never fails step 11 (wave 1 review, finding 7)."""
+    try:
+        block = voice_floor(line_rows(episode_home.lines_dir(i.book, i.number) / "lines.json"))
+    except Exception as why:
+        block = {"dropped": {}, "line": f"voice floor: not measured ({type(why).__name__}: {str(why)[:120]})"}
+    report.setdefault("inputs", {})["voice_floor"] = block
     return report
 
 

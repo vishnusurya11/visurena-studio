@@ -2423,7 +2423,8 @@ the same folder. What the debate settled, and what the bench then measured:
   measured" and the HARD gates after it run. G-MUTE reads the verb's sense: a negated verb ("does not
   speak", "never answers"), "said nothing" and "answers the door" move no mouth
   (`screenplay_grammar.silent_sense`). Its listens cure rewrites only a verb with no object after it;
-  "tells Utterson the story" is left as written and still reports.
+  "tells Utterson the story" is left as written and still reports. QC's voice floor row reads a
+  lines.json it cannot parse, or one with no list of lines, as "not measured" (`qc.line_rows`).
 - **A ruler finds a known shift before it reads a take** (lip-sync GAVEL, 2026-10-21, ruling 11).
   `measure/mouth.lag` took the z-scored `voice_envelope` through `av_sync.envelope` again, whose
   `np.abs` folded every silence into a bump: a mouth open on voice_22's words k frames late read
@@ -2503,13 +2504,29 @@ build byte for byte), never the recorded words.
   is the cast margin: a line's own design leads every other cast design by `CAST_MARGIN` 0.06. Across
   411 owner-watched lines of three books + 18 bench takes the own design is nearest every time (least
   lead: Scarlet 0.145, WotW 0.231, Jekyll ep01 0.162, bench 0.100) and all 9,953 wrong-voice trials
-  fail; the floor (0.60 / 0.55, 0.20 lower felt) is the backstop for a voice that is nobody in the cast.
+  fail; the floor (0.60 / 0.55, 0.12 lower felt) is the backstop for a voice that is nobody in the cast.
 - **Known-bad cases are re-measured before their constants are carried over.** Ferrier's design_v1,
   which set SELF_FLOOR 0.65 and NEAREST_CEIL 0.80 (0.498 self, 0.847 to Young), reads 0.586 / 0.550 on
   16 kHz and his five lines from it lead Young by 0.16 or more; ep10 l27, which set EPISODE_VOICE 0.75,
   reads 0.717 / 0.650 against his room. Both were the old ruler's faults. New values and the data behind
   each: docs/audit/2026-10-21_voice_bench/fix/CALIBRATION.md.
 - **Where it lives.** LISTEN (GATES.md): own design leads the cast by `say_lines.CAST_MARGIN` 0.06, floors
-  0.60 / 0.55 (0.20 lower felt); keep_best_far also when the kept try is nearer a rival than its own; an
-  alternate-reference render reaches `EPISODE_VOICE` 0.60 (0.40 felt) against its room; speaker_check's
-  `SAME_SPEAKER_FLOOR` is 0.53 (worst real calm pair of three books 0.567, two speakers p99 0.50-0.56).
+  0.60 / 0.55 (0.12 lower felt); keep_best_far also when the kept try does not lead its cast by the
+  margin; an alternate-reference render reaches `EPISODE_VOICE` 0.60 (0.48 felt) against its room;
+  speaker_check's `SAME_SPEAKER_FLOOR` is 0.53 (worst real calm pair of three books 0.567, two speakers
+  p99 0.50-0.56), 0.17 lower ONCE when either line of the pair is felt.
+- **The rule that judges a try also picks the try that is kept** (two reviews of 68079e2). The margin
+  decided pass/fail, but `remember_best` and a redo's `keep_best` still ranked tries by raw similarity:
+  a try in Lanyon's voice at 0.65 beat Utterson's own at 0.58 and the terminal shipped it as passed, and
+  a redo that failed the margin deleted a passing take. Tries now rank ruler, leads-its-cast, score
+  (`try_rank`); a redo ranks passed first; `keep_best_far` reads the gate's own `margin_ok`.
+- **A constant kept across a ruler change is re-derived like the rest.** FEELING_FLOOR_DROP stayed
+  0.20 while every other gap was rescaled, and it disarmed two guards: a voice from outside the cast
+  passed Jekyll's gate 13/296 (3 with no drop), and the pair allowance, taken per felt line, held two
+  felt lines to 0.13 (18 of 21 different-speaker pairs passed). Of 24 genuine felt lines one needs any
+  drop (Enfield l19 0.461): line drop 0.12 (10/296), pair drop 0.17 once (2/21, no genuine pair refused).
+- **In-sample constants get a held-out number.** Left one book out, the same rules set on the other two
+  refuse 3/300 Scarlet, 0/92 WotW and 1/37 Jekyll real lines and pass 0 in-cast wrong voices. A refused
+  real take is a retake, not a fault. The real exposure is a voice outside the cast: 18/8,093 Scarlet,
+  1/1,564 WotW, 10/296 Jekyll trials pass, guarded then by speaker_check's line-vs-line pairs
+  (fix/calibrate4.py -> reviewed.json, RESULT.md).
