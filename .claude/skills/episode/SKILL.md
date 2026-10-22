@@ -60,7 +60,7 @@ repair, and the symptom table are `OPERATOR.md`.
 | 07-08 board, panels | panel gates; EYE_PANELS climbs only on redraw-curable faults | the ladder; `redo 08` when takes wait on panels |
 | 09 shoot | HARD take rows; EYE_TAKES climbs on hard faults | the batched ladder; a hung engine is killed and restarted, twice at most |
 | 11 qc | any QC row, incl. the sound band | `redo 10` / `redo 09` by the row's kind, else PARK |
-| 13 publish | the publish lock; the $0.10 reserve keeps the metadata call alive | upload, public flip, `uploads.jsonl` row → PUBLISHED, the book playlist and the Watch-in-order links kept (G-INORDER), one Telegram with the URL |
+| 13 publish | the publish lock; the $0.10 reserve keeps the metadata call alive | upload, public flip, `uploads.jsonl` row → PUBLISHED, G-INORDER, a Telegram + URL |
 | money | `$3.00` media wall (`guard_spend`) | `OverBudget` is a ladder terminal; a signed plan relaunches once past step 02, an unsigned one PARKs |
 
 **The non-negotiables.**
@@ -176,7 +176,7 @@ The references sheets and voices live in their own department: `uv run python re
 | 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix, the master upscaled once: hqdn3d per shot + realesr-animevideov3 4x (`av3`, 2026-10-18). |
 | 11 | qc | `uv run python scripts/episode/step_11_qc.py <book> <n>` | Measure the DELIVERED master, never the intention. |
 | 12 | deliver | `uv run python scripts/episode/step_12_deliver.py <book> <n>` | manifest.json beside the master (every gate verdict, every rung, timing totals), the deliverable's full path printed first, notify() through the platform. |
-| 13 | publish | `uv run python scripts/episode/step_13_publish.py <book> <n>` | The last mile, unattended (decision 2026-10-05, under the standing hand of 2026-10-01): youtube.json from one guarded structured call, the director's sign-off rendered from measures only, the gated upload, the public flip, then G-INORDER (2026-10-21): the public episode joins its book's playlist at its episode-order place (the id read from the book video's `compilation/youtube.json` or the previous episode's own block; a public playlist is made only when the book has none anywhere), its description gains the "— Watch in order —" block (Previous, All episodes in order, the whole book) and the previous episode a Next line, each once, recorded in `uploads.jsonl` (`scripts/publish/youtube_playlist.py`); then the /shorts/ poll -- the public Short URL is the last line printed. |
+| 13 | publish | `uv run python scripts/episode/step_13_publish.py <book> <n>` | The last mile, unattended (decision 2026-10-05, under the standing hand of 2026-10-01): youtube.json from one guarded structured call, the director's sign-off rendered from measures only, the gated upload, the public flip, the /shorts/ poll -- the public Short URL is the last line printed. |
 <!-- /registry:episode -->
 
 **The algorithm** (generated from `stages.yaml` steps and `caps:` by the same command; a test
