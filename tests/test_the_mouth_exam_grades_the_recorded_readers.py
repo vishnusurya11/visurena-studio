@@ -72,3 +72,13 @@ def test_the_facemesh_reader_fails_the_exam_so_its_lag_row_stays_advisory():
 def test_the_facemesh_reader_also_fails_at_its_production_window():
     got = exam.grade(exam.facemesh_fit, lines(), renders(), facemesh(), mouth.WINDOW)
     assert (got["wrong_line"], got["shift"], got["offset"], got["pass"]) == (7, 9, 0, False)
+
+
+def test_the_face_crop_motion_reader_fails_the_exam_too():
+    """Recorded 2026-10-21, mouth_motion frozen at 38537e7 and run once: it reads every T22 render
+    at -1 f (score 0.74-0.82) but loses T19 A_s1 (-6 f, 0.27) and T25 A_s1 (+20 f, the window's
+    edge), and reads the no-audio renders at +1 f and +4 f, not +12 and +16."""
+    from studio.measure import mouth_motion as mm
+    got = exam.grade(mm.fit, lines(), renders(), mm.load_series(FIX / "exam_motion.json"))
+    assert (got["wrong_line"], got["shift"], got["offset"], got["pass"]) == (8, 8, 0, False)
+    assert (got["rows"]["T22_N_s1"]["lag"], got["rows"]["T25_N_s1"]["lag"]) == (1, 4)

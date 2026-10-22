@@ -2438,6 +2438,14 @@ the same folder. What the debate settled, and what the bench then measured:
   +-1 frame", were read folded. The row stays ADVISORY and its number still proves nothing: unfolded,
   FaceMesh fails the wrong-line exam (12 of 17, bar 9 of 10) and the known-offset one (0 of 2). Next is
   the exam as a fixture, then a new reader (`docs/audit/2026-10-21_lipsync_audio_ref/VERDICT.md`).
+- **No mouth reader has passed the exam, so no lag number moves a take** (2026-10-21, GAVEL steps 2-3).
+  `measure/mouth_exam.py` grades any reader on 17 bench renders (pre-registered, `.../exam/PREREG_exam.md`):
+  right line over both wrong ones on 9 of 10, shift-null p < 0.05 on 9 of 10, the no-audio offsets
+  (+12, +16 f) within 2 f. FaceMesh (b5e9cff) 7/10, 10/10, 0/2; the face_yolov8m lower-face motion
+  reader (`measure/mouth_motion.py`, frozen at 38537e7 on five other ep01 takes, run once) 8/10, 8/10,
+  0/2. By eye the no-audio mouths do not sit at the soundtrack offsets (T22 N opens at f13: line f6,
+  own voice f23), so the offset criterion needs frame-labelled truth before a third reader is built.
+  The `lag` row stays ADVISORY; GATES.md is unchanged.
 
 ## The shot framework (2026-10-21, the panel's final ruling)
 
