@@ -949,6 +949,17 @@ SPEAKING = re.compile(r",?\s+(?:as|while)\s+(?:he|she|they)\s+(?:speaks?|talks?|
 """"At 00:05, as the line ends, ... as he speaks": the line has ended (Jekyll ep01 T1/2/14/17)."""
 
 
+def follow_marks(t0: int, t1: int, n: int, line_end: int | None = None) -> list[int]:
+    """The seconds `n` follow-on clauses start at: spread inside the block, or the first at the line's
+    end and the rest after it.  None is the block's last second or past it -- a beat stamped "At 00:05"
+    in a block that ends at 00:05 can start on no frame (ep01 T03 and T11, craft ruling A18) -- so a
+    line that ends on (or past) the end stamps its first follow-on at t1 - 1; [] when no second is left."""
+    if line_end is None:
+        return beats(t0, t1, n)
+    first = min(line_end, t1 - 1)
+    return ([first] + beats(first, t1, n - 1)) if first >= t0 else []
+
+
 def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -> list[str]:
     """D4 / D10 / D5: every clause after the first gets its own whole second, a
     dialogue segment times its first follow-on from the LINE END, and the last clause
@@ -958,7 +969,7 @@ def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -
         return []
     if line_end is not None:     # every follow-on is timed from the line's end: none is spoken (P8, T22/T23)
         rest = [SPEAKING.sub("", c) for c in rest]
-    marks = ([line_end] + beats(line_end, t1, len(rest) - 1)) if line_end is not None else beats(t0, t1, len(rest))
+    marks = follow_marks(t0, t1, len(rest), line_end)
     if not marks:   # a segment too short for a first beat: every clause rides the tail (ep11 shot 5, 1.5 s)
         return [f"Then {', then '.join(rest)}, and {motion_noun(rest[-1])} continues to the last frame of the shot."]
     out: list[str] = []
@@ -966,7 +977,7 @@ def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -
         if k >= len(marks):                                   # the seconds ran out (3.4)
             out[-1] = out[-1].rstrip(".") + f", then {clause}."
             continue
-        ended = line_end is not None and k == 0
+        ended = line_end is not None and k == 0 and marks[0] == line_end
         lead = f"At {stamp(marks[k])}, as the line ends," if ended else f"At {stamp(marks[k])}"
         out.append(f"{lead} {SPEAKING.sub('', clause) if ended else clause}.")
     out[-1] = out[-1].rstrip(".") + f", and {motion_noun(rest[-1])} continues to the last frame of the shot."
@@ -1358,8 +1369,8 @@ def framing(k: int, seg: dict, pic: int, faces: list[str], names=()) -> str:
             head, rest = split_frame(phrase)
             text = (f"At {stamp(seg['t'])} the shot cuts to {head}"
                     f"{': ' + rest if rest else ''}.")
-        if seg["size"] == "insert":
-            return text[:-1] + "; only that object and what touches it is in frame."
+        if seg["size"] == "insert" and not second_body(seg, faces):
+            return text[:-1] + f"; {INSERT_TAIL}."
         return text
     if k == 1:
         text = f"The shot begins from <Picture {pic}>: {phrase}."
@@ -1367,9 +1378,20 @@ def framing(k: int, seg: dict, pic: int, faces: list[str], names=()) -> str:
         head, rest = split_frame(phrase)
         text = (f"At {stamp(seg['t'])} the shot cuts to {head}, beginning from <Picture {pic}>"
                 f"{': ' + rest if rest else ''}.")
-    if seg["size"] == "insert":
+    if seg["size"] == "insert" and not second_body(seg, faces):
         return text[:-1] + f"; only what <Picture {pic}> shows is in frame."
     return text
+
+
+INSERT_TAIL = "only that object and what touches it is in frame"
+"""An insert's scope, said only while one body is in it (craft ruling A18)."""
+
+
+def second_body(seg: dict, faces: list[str]) -> bool:
+    """A second staged body in the insert's frame or motion: then "only that object" is false --
+    ep01 T07's girl runs into the boots insert, under a tail that shut her out."""
+    said = tagged(f"{seg.get('frame') or ''} {seg.get('motion') or ''}", faces)
+    return len(set(re.findall(r"<Subject (\d+)>", said))) >= 2
 
 
 LOW_BLOCK, HIGH_BLOCK, MARGIN, CAMERA_CAP = 150, 240, 15, 45
@@ -2070,12 +2092,14 @@ def l15_summary_length(text, facts):
 
 
 def l16_dialogue_tail(text, facts):
-    """Measured: 6 of 8 dialogue segments froze at the second their line ended."""
+    """Measured: 6 of 8 dialogue segments froze at the second their line ended.  A line that ends
+    on its block's last second is followed from the second before it (`follow_marks`, A18)."""
     out = []
     for line in facts.get("lines", []):
         found = [b for b in blocks(text) if b[0] == line["block"]]
         after = [secs(s) for b in found for s in re.findall(r"\bAt (\d\d:\d\d)", b[3])]
-        if found and not any(s >= round(line["end"]) for s in after):
+        due = min([round(line["end"])] + [b[2] - 1 for b in found])
+        if found and not any(s >= due for s in after):
             out.append(f"L16 DIALOGUE TAIL [Shot {line['block']}]: no beat at or after {stamp(line['end'])}")
     return out
 
@@ -2107,11 +2131,22 @@ def sentences(body: str) -> list[str]:
     return [s.strip() for s in SENTENCE.split(body.strip()) if s.strip()]
 
 
+STRAY_COMMA = re.compile(r"\.,|,\s*,|\s,")
+
+
+def stray_commas(body: str) -> list[str]:
+    """The distinct stray commas in a block's own words -- '.,', ',,', ' ,' -- the spoken lines
+    aside (a line is the book's).  Widened from '.,' by craft ruling A18 (ep01 T01 "profile,, feet")."""
+    said = re.sub(r"<d>.*?</d>", "LINE", body, flags=re.S)
+    return sorted({re.sub(r"\s+", " ", m.group(0)) for m in STRAY_COMMA.finditer(said)})
+
+
 def l19_crowd(text, facts):
     """Episode 9's setup crowd caption went into 30 of 30 blocks verbatim, up to
     eight times over, ending `.,`.  One long sentence lives in one block."""
     seen: dict[str, list[int]] = {}
-    out = [f"L19 CROWD [Shot {k}]: the block carries '.,'" for k, a, b, body in blocks(text) if ".," in body]
+    out = [f"L19 CROWD [Shot {k}]: the block carries {mark!r}" for k, a, b, body in blocks(text)
+           for mark in stray_commas(body)]
     for k, a, b, body in blocks(text):
         for said in {re.sub(r"\d\d:\d\d", "", s) for s in sentences(body)}:
             if len(said.split()) >= LONG_SENTENCE:

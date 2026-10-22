@@ -76,9 +76,10 @@ def repair_aim(aim: str) -> str:
 
 
 def strip_amounts(text: str) -> str:
-    """The camera text with every travel amount and distance gone."""
+    """The camera text with every travel amount and distance gone, one comma where a cut amount
+    stood between two ("walk in profile, a long stride, feet" -> "in profile, feet": ep01 T01, A18)."""
     out = " ".join(SAID.sub("", text or "").split())
-    return re.sub(r"\s+,", ",", out).strip(" ,")
+    return re.sub(r",(?:\s*,)+", ",", re.sub(r"\s+,", ",", out)).strip(" ,")
 
 
 def has_pace(text: str) -> bool:
