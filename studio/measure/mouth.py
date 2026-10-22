@@ -4,8 +4,12 @@ the wav's envelope, in FRAMES.
 `av_sync.take_lag` measures the MUX -- the take's own soundtrack against the
 wav that drove it -- and cannot fail.  This reads the MOUTH: MediaPipe
 FaceMesh's inner-lip landmarks (13 over 14) per frame, the gap over the eye
-distance, smoothed over three frames, and `av_sync.lag_seconds` on the two
-per-frame signals (sr 1, hop 1.0: the same correlation, its unit a frame).
+distance, smoothed over three frames, and the peak of that track's
+cross-correlation with the voice's per-frame envelope within +-WINDOW frames.
+
+The voice is z-scored ONCE (`voice_envelope`) and never passed through
+`av_sync.envelope` again: its `np.abs` folded the silences into bumps, and a
+mouth open on the words 5 f late read +19 f (GAVEL 2026-10-21, ruling 11).
 
 Two owner-caught lagging takes against seven passes, unbenched: the row is
 ADVISORY, and its cure is the shorter take, never a seed.  A mouth the
@@ -25,6 +29,9 @@ FPS = 24
 SMOOTH = 3
 CORR_FLOOR = 0.3
 LAG_TOL_FRAMES = 2
+WINDOW = 12
+"""The lag search, frames each way (0.5 s), the GAVEL's +-8..12 f (2026-10-21):
+the unwindowed search read the folded peak +13 and +17 f out on T22 and T19."""
 READABLE = 0.5
 FITTED_ON = "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
 MODEL = Path(__file__).resolve().parents[1] / "models" / "face_landmarker.task"
@@ -65,13 +72,32 @@ def voice_envelope(wav: np.ndarray, sr: int, fps: int = FPS) -> np.ndarray:
     return av_sync.envelope(wav, sr, 1.0 / fps)
 
 
-def peak_corr(a: np.ndarray, b: np.ndarray) -> float:
-    """The normalised peak of the cross-correlation of two z-scored signals."""
+def zscore(x: np.ndarray) -> np.ndarray:
+    """Mean 0, sd 1, the SIGN KEPT -- never `av_sync.envelope`, whose `np.abs`
+    folds a z-scored voice's silences into bumps; a flat signal is all zeros."""
+    x = np.asarray(x, dtype=float)
+    return (x - x.mean()) / (x.std() + 1e-9)
+
+
+def xcorr_at(za: np.ndarray, zb: np.ndarray, k: int) -> float:
+    """sum of za[t] * zb[t - k] over the overlap, over the full length: the
+    biased estimate, so a short overlap cannot outscore the aligned one."""
+    n = len(za)
+    if k >= 0:
+        return float(np.dot(za[k:], zb[:n - k]) / n)
+    return float(np.dot(za[:k], zb[-k:]) / n)
+
+
+def best_lag(a: np.ndarray, b: np.ndarray, window: int = WINDOW) -> tuple[int, float]:
+    """(frames, correlation) of the peak within +-window; positive when `a` is late."""
     n = min(len(a), len(b))
     if n < 2:
-        return 0.0
-    za, zb = av_sync.envelope(a[:n], 1, 1.0), av_sync.envelope(b[:n], 1, 1.0)
-    return float(np.correlate(za, zb, mode="full").max() / n)
+        return 0, 0.0
+    za, zb = zscore(a[:n]), zscore(b[:n])
+    w = min(window, n - 1)
+    cs = {k: xcorr_at(za, zb, k) for k in range(-w, w + 1)}
+    k = max(cs, key=lambda j: (cs[j], -abs(j)))
+    return k, cs[k]
 
 
 def lag(ap: np.ndarray, voice: np.ndarray, fps: int = FPS) -> dict:
@@ -79,14 +105,12 @@ def lag(ap: np.ndarray, voice: np.ndarray, fps: int = FPS) -> dict:
     seen = readable(ap)
     if seen < READABLE:
         return {"measured": False, "why": "no readable face", "readable": seen, "fitted_on": FITTED_ON}
-    track = smooth(fill(ap))
-    corr = peak_corr(track, voice)
+    frames, corr = best_lag(smooth(fill(ap)), voice)
     if corr < CORR_FLOOR:
         return {"measured": False, "why": f"no correlation with the voice ({corr:.2f})", "corr": round(corr, 3),
-                "readable": seen, "fitted_on": FITTED_ON}
-    frames = int(round(av_sync.lag_seconds(track, voice, 1, 1.0)))
+                "readable": seen, "window": WINDOW, "fitted_on": FITTED_ON}
     return {"measured": True, "lag_frames": frames, "lag_s": round(frames / fps, 3), "corr": round(corr, 3),
-            "readable": seen, "fitted_on": FITTED_ON}
+            "readable": seen, "window": WINDOW, "fitted_on": FITTED_ON}
 
 
 def row(got: dict | None):

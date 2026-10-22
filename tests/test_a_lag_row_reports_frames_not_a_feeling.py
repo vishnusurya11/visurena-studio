@@ -9,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 
-from studio import av_sync
 from studio.measure import mouth
 
 FIX = Path(__file__).resolve().parent / "fixtures" / "flow"
@@ -19,13 +18,21 @@ def arrays() -> dict:
     return json.loads((FIX / "lag_arrays.json").read_text(encoding="utf-8"))
 
 
-def test_the_recorded_lag_reads_in_frames_through_av_sync():
+def test_the_recorded_lag_reads_in_frames():
     a = arrays()
     ap, voice = np.array(a["aperture"]), np.array(a["voice"])
     got = mouth.lag(ap, voice, fps=a["fps"])
     assert got["lag_frames"] == a["lag_frames"] and got["measured"] is True
     assert got["lag_s"] == round(a["lag_frames"] / a["fps"], 3)
-    assert got["lag_frames"] == int(round(av_sync.lag_seconds(mouth.fill(ap), voice, 1, 1.0)))
+
+
+def test_a_z_scored_voice_reads_the_same_lag_as_the_raw_one():
+    """`voice_envelope` hands `lag` a z-scored voice: its sign is kept, never
+    folded by a second `av_sync.envelope` (GAVEL 2026-10-21, ruling 11)."""
+    a = arrays()
+    ap, voice = np.array(a["aperture"]), np.array(a["voice"])
+    z = (voice - voice.mean()) / voice.std()
+    assert mouth.lag(ap, z, fps=a["fps"])["lag_frames"] == a["lag_frames"]
 
 
 def test_the_row_names_frames_seconds_and_correlation():

@@ -2419,6 +2419,17 @@ the same folder. What the debate settled, and what the bench then measured:
   (Jekyll: Hyde from ep02 ch2 index 24). A15: per-speaker rates lose out of sample (MAE 0.623 s vs
   0.619 s, 1012 lines), so nothing ships; a pause model wins (0.572 s), not wired. A16: the honest
   speech ruler prints beside the old (ch1 0.628 vs 0.279); the dial switch is the owner's (Q1).
+- **A ruler finds a known shift before it reads a take** (lip-sync GAVEL, 2026-10-21, ruling 11).
+  `measure/mouth.lag` took the z-scored `voice_envelope` through `av_sync.envelope` again, whose
+  `np.abs` folded every silence into a bump: a mouth open on voice_22's words k frames late read
+  k + 14 or 15, and a mouth that WAS the envelope read corr 0.43. The voice is now z-scored once, sign
+  kept (`mouth.zscore`), and the peak is searched within `mouth.WINDOW` = +-12 f
+  (`tests/test_the_mouth_ruler_finds_a_known_shift.py`: within 1 f on -10..+10). Jekyll ep01 delivered,
+  folded -> fixed: T19 +17 -> 0 f (corr 0.31, 73 % read), T22 +13 -> +8 f (0.58), T25 -1 -> -1 f
+  (0.62). Every advisory `lag` row before this, and the 2026-10-11 speed-arm rule "mouth.lag within
+  +-1 frame", were read folded. The row stays ADVISORY and its number still proves nothing: unfolded,
+  FaceMesh fails the wrong-line exam (12 of 17, bar 9 of 10) and the known-offset one (0 of 2). Next is
+  the exam as a fixture, then a new reader (`docs/audit/2026-10-21_lipsync_audio_ref/VERDICT.md`).
 
 ## The shot framework (2026-10-21, the panel's final ruling)
 
