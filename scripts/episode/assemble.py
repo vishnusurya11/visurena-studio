@@ -179,9 +179,19 @@ against a zeroed negative.  So `[inst]` is a lever and `""` is the absence of
 one.  Episodes 1, 2 and 4 shipped silent beds on ACE-Step.
 
 `--bed=yue2` stays reachable.  The one experiment worth its twenty minutes if
-the owner wants YuE2 back is `cot="off"`: it plans no ABC score at all, drops
+the owner wants YuE2 back was `cot="off"`: it plans no ABC score at all, drops
 the word "transcription" from the instruction, and turns CFG on for the first
-time.  If that sings too, the levers are exhausted."""
+time.
+
+IT HAS BEEN RUN, TWICE.  Test E3, 2026-10-16/17: cot=off stayed unsung on the
+trample bed (2 of 2) and SANG on the cheque bed (2 of 2); only the native no-ABC
+graph (blank ABC, AR cfg 1.01, KSampler cfg 3) passed all three of its beds.
+Fleet A bench B1, 2026-10-22, the same native no-ABC graph on ten tone-length
+renders: 9 unsung, 1 sung (`bed_gate`, the clip's own seconds), against 0 of 8
+for ACE-Step 1.5 here.  So the levers are not exhausted, but they are not a
+guarantee either.  No owner listen of any YuE2 bed has been recorded, and
+`--bed=yue2` still routes to the olmpack cot="full" graph, the variant that
+sang most -- switching it is an engine choice for the owner, not a fix."""
 
 BED_TARGET_LUFS = -25.6
 """Where the bed SITS, replacing a fixed -11 dB trim.
@@ -263,7 +273,10 @@ TRAILER (`music_tone`, `audio_minimax_music_3`), and it was written into this
 module as though it had been measured on YuE2.  It had not.  Episode 3's bed then
 sang invented English verse for 101 of its 157.8 seconds -- 64 % -- and shipped,
 because nothing between the generator and the mix ever listened to it.  Hence
-`bed_sings()` below: the marker is now VERIFIED per bed, not asserted here."""
+`bed_gate.refuse` in `bed()` and `tone_sings()` in `one_tone`: the marker is now
+VERIFIED per bed and per tone, not asserted here.  (Until 2026-10-22 the toned
+path -- the one that ships -- never listened; this docstring named a `bed_sings()`
+that did not exist.)"""
 
 
 def bed_request(engine: str, seconds: float, seed: int,
@@ -359,13 +372,33 @@ def is_short(live: float, want: float) -> bool:
     return live < LIVE_SHARE * want
 
 
-def tone_fault(out: Path, loudness: float | None, target: float, want: float) -> str:
-    """Why this generation cannot be used: "empty", "short", or "" when it can."""
+def tone_fault(out: Path, loudness: float | None, target: float, want: float,
+               ear=None) -> str:
+    """Why this generation cannot be used: "empty", "short", "sings", or "" when it can."""
     if episode_bed.is_dead(loudness, target):
         return "empty"
     if is_short(episode_bed.live_seconds(out), want):
         return "short"
+    if tone_sings(out, ear):
+        return "sings"
     return ""
+
+
+def tone_sings(out: Path, ear=None) -> bool:
+    """Does this tone sing?  `bed_gate` listens, as it does for `bed()`.
+
+    The toned path never listened (fleet A skeptic M1, 2026-10-22): `one_tone`
+    re-rolled only an empty or short tone.  MEASURED on bench B1 with this same
+    gate: production ACE-Step tones refused 0 of 8, YuE2 native no-ABC 1 of 10.
+    An ear that cannot be reached is UNVERIFIED, said out loud, and not a refusal."""
+    from studio import bed_gate
+
+    why = bed_gate.refuse(out, ear)
+    if why == bed_gate.UNVERIFIED:
+        print(f"    WARNING: {out.name} is UNVERIFIED -- no transcriber was reachable. "
+              f"Listen to it before publishing.", flush=True)
+        return False
+    return bool(why)
 
 
 def book_tones(out: Path) -> dict:
@@ -388,14 +421,16 @@ def refuse(out: Path, roll: int, fault: str, loudness: float | None, target: flo
     kept = out.with_name(f"{out.stem}.{fault}{roll + 1}{out.suffix}")
     out.rename(kept)
     heard = (f"{loudness:.1f} LUFS against {target:.1f}" if fault == "empty" and loudness is not None
+             else "words heard over the music" if fault == "sings"
              else f"{episode_bed.live_seconds(kept):.1f} s of music in a {want:.1f} s ask")
     print(f"    {out.stem[4:]}: came back {fault} ({heard}). Kept as {kept.name}; "
           f"re-rolling ({roll + 1}/{BED_ROLLS}).", flush=True)
     return kept
 
 
-def one_tone(room: Path, number: int, tone: str, want: float, engine: str) -> Path:
-    """One tone, generated, levelled, and RE-ROLLED if it comes back empty or short.
+def one_tone(room: Path, number: int, tone: str, want: float, engine: str,
+             ear=None) -> Path:
+    """One tone, generated, levelled, and RE-ROLLED if it comes back empty, short or sung.
 
     MEASURED on episode 6's first assemble: five tones in one pass, four within
     0.2 dB of target and `grave` at -58.0 against -29.0.  `level` printed the
@@ -418,13 +453,13 @@ def one_tone(room: Path, number: int, tone: str, want: float, engine: str) -> Pa
             loudness = integrated(out)
         except Exception:
             loudness = None
-        fault = tone_fault(out, loudness, target, want)
+        fault = tone_fault(out, loudness, target, want, ear)
         if not fault:
             level(out, target)
             print(f"    {tone:10s} {want:6.1f}s at {target:6.1f} LUFS -> {out.name}", flush=True)
             return out
         refuse(out, roll, fault, loudness, target, want)
-    raise SystemExit(f"the {tone} bed came back empty or short {BED_ROLLS} times. The same "
+    raise SystemExit(f"the {tone} bed came back empty, short or singing {BED_ROLLS} times. The same "
                      f"prose made the other tones in the same pass, so this is the model and "
                      f"not the ask: check ComfyUI, then re-run assemble.")
 

@@ -120,7 +120,7 @@ def test_a_short_tone_is_re_rolled_under_the_same_bound(tmp_path, monkeypatch):
     monkeypatch.setattr(assemble, "integrated", lambda p: -30.5)
     monkeypatch.setattr(assemble, "level", lambda p, t: p)
     room = tmp_path / "audio"; room.mkdir()
-    got = assemble.one_tone(room, 10, "light", 27.7, "acestep")
+    got = assemble.one_tone(room, 10, "light", 27.7, "acestep", ear=lambda p: "")
     assert got == room / "bed_light.wav" and episode_bed.live_seconds(got) > 26.0
     assert len(seeds) == 2 and seeds[0] != seeds[1]
     assert (room / "bed_light.short1.wav").exists(), "the refused roll is kept, named for why"
