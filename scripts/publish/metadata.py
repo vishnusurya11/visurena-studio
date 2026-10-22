@@ -92,9 +92,10 @@ def book_said(book) -> dict:
 ORDINALS = ("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten")
 
 
-NUMBERED = re.compile(r"^([IVXLC]+)\. ")
-"""A chapter title that carries its own numeral: 'I. UNDER FOOT.' (WotW).  Jekyll's are
-named only ('STORY OF THE DOOR'), and the old partition read the name as the numeral."""
+NUMBERED = re.compile(r"^([IVXLC]+)\.(?: |$)")
+"""A chapter title that carries its own numeral: 'I. UNDER FOOT.' (WotW), or the numeral
+alone ('II.').  Jekyll's are named only ('STORY OF THE DOOR'), and the old partition read
+the name as the numeral."""
 
 
 def chapter_marker(book, number: int) -> tuple[str, str, int]:
@@ -129,15 +130,27 @@ def house_style(prior_docs: list[dict]) -> tuple[str, str]:
 def attribution(book, number: int, prior_docs: list[dict]) -> str:
     """The attribution line, composed: a chapter number is a fact, never prose
     (ep18 dry run: the model wrote 'Chapter XVIII of Book One')."""
-    roman, title, part = chapter_marker(book, number)
-    division, year = house_style(prior_docs)
+    roman, title, _part = chapter_marker(book, number)
+    _division, year = house_style(prior_docs)
     said = book_said(book)
     work = said.get("display_title") or said.get("title", "")
     if not roman:
-        return f'"{title}", Chapter {number} of {work} by {said.get("author", "")}, in the public domain.'
+        named = f'"{title}", ' if title else ""
+        return f'{named}Chapter {number} of {work} by {said.get("author", "")}, in the public domain.'
     dated = f" ({year})" if year else ""
-    return (f"Chapter {roman} of {division} {ORDINALS[part - 1]} of {said.get('author', '')}'s "
-            f"{work}{dated}, \"{title}\", in the public domain.")
+    named = f', "{title}"' if title else ""
+    return (f"Chapter {roman}{of_part(book, number, prior_docs)} of {said.get('author', '')}'s "
+            f"{work}{dated}{named}, in the public domain.")
+
+
+def of_part(book, number: int, prior_docs: list[dict]) -> str:
+    """' of Book Two' when the book's record puts the chapter in a part; '' when its
+    part is 0 or unrecorded -- a book with no parts has no 'Part One' (Jekyll ep01's
+    live line; The Time Machine's numbered chapters would have said it too)."""
+    part = int(book_said(book)["chapters"][number].get("part") or 0)
+    if part < 1:
+        return ""
+    return f" of {house_style(prior_docs)[0]} {ORDINALS[part - 1]}"
 
 
 def composed_attribution(book, number: int, prior_docs: list[dict]) -> str | None:
