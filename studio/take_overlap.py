@@ -83,13 +83,33 @@ def read_doc(path: Path) -> dict | list | None:
         return None
 
 
+_SHA8: dict[tuple[str, int, int], str] = {}
+"""take_dq.take_sha8 by (path, size, mtime_ns): the lanes poll every POLL_S, a take is hashed once."""
+
+
+def bytes_sha8(take: Path) -> str:
+    """The take's byte key (take_dq.take_sha8), hashed once per version of the file."""
+    stat = take.stat()
+    key = (str(take), stat.st_size, stat.st_mtime_ns)
+    if key not in _SHA8:
+        from scripts.episode import take_dq
+        _SHA8[key] = take_dq.take_sha8(take)
+    return _SHA8[key]
+
+
+def describes(doc: dict, take: Path, dq: Path) -> bool:
+    """The verdict is of these bytes: its `take_sha8` when it has one (fleet E A5, 2026-10-22: a
+    take copied back with the same bytes was stale by mtime and measured again), else newer than them."""
+    if doc.get("take_sha8"):
+        return doc["take_sha8"] == bytes_sha8(take)
+    return dq.stat().st_mtime >= take.stat().st_mtime
+
+
 def fresh(take: Path, code: str, any_code: bool = False) -> bool:
-    """The take has a dq verdict newer than its bytes, by this measuring code."""
+    """The take has a dq verdict of its bytes, by this measuring code."""
     dq = take.with_suffix(".dq.json")
-    if not take.exists() or not dq.exists() or dq.stat().st_mtime < take.stat().st_mtime:
-        return False
-    doc = read_doc(dq)
-    return isinstance(doc, dict) and (any_code or doc.get("measures_sha8") == code)
+    doc = read_doc(dq) if take.exists() and dq.exists() else None
+    return isinstance(doc, dict) and describes(doc, take, dq) and (any_code or doc.get("measures_sha8") == code)
 
 
 def landed(room: Path, code: str, any_code: bool = False, skip: set[int] = frozenset()) -> list[int]:
