@@ -55,6 +55,7 @@ TAKE_BYTES = {
 """The five functions whose own bytes land on (or leave) T<nn>.mp4."""
 
 NOT_A_TAKE = {
+    "studio/episode_home.py:put_in_place": "write_json's temp JSON moved onto its target (fleet E A3)",
     "scripts/episode/assemble.py:quiet_bed": "the episode bed wav",
     "scripts/episode/assemble.py:generate": "one bed roll wav",
     "scripts/episode/assemble.py:refuse": "a refused bed roll, renamed for why",
