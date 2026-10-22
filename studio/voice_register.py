@@ -191,7 +191,10 @@ this book, and the pairs that must never sound alike.
 
     {"registers": {"narrator": 105, ...},
      "why": {"narrator": "calm low Victorian storyteller", ...},
-     "apart": [{"pair": ["edward_hyde", "henry_jekyll"], "below": 0.55, "why": "..."}]}
+     "apart": [{"pair": ["edward_hyde", "henry_jekyll"], "below": 0.18, "ruler": "ecapa16", "why": "..."}]}
+
+A row with no `ruler` was measured on the old 24 kHz ruler (`ecapa24`) and is not applied
+on the current one (`ceilings_of`)
 
 The shape a book's PREFER table used to have in code (Jekyll ep01 review,
 2026-10-13: the Scarlet table fixed Scarlet; every other book got the raw

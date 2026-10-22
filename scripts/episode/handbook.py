@@ -216,8 +216,9 @@ STAGES = [
      "the wardrobe contract wherever a hand, hat or jacket shows, props named in motion present in "
      "frame, sub-shot faces named."),
     ("2", "Lines (AUDIO FIRST)", "say_lines.py &lt;book&gt; &lt;ep&gt; [--redo=18]", "free, local GPU",
-     "Every line spoken by its cast voice on IndexTTS2 and measured. Whisper WER &lt;= 0.20 and ECAPA "
-     "&gt;= 0.70; a redo keeps the better of the two tries; from the third try the reference is the "
+     "Every line spoken by its cast voice on IndexTTS2 and measured. Whisper WER &lt;= 0.20, ECAPA "
+     "(16 kHz) &gt;= 0.60 / 0.55 and its own design ahead of every other cast voice by 0.06; a redo "
+     "keeps the better of the two tries; from the third try the reference is the "
      "speaker's own best line. Nothing downstream exists until this does: the picture is cut to the "
      "voice, never the other way round.",
      "the listen gate, twice, then your ear"),

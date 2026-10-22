@@ -51,7 +51,7 @@ truncations: a correct voice loses ~0.05 at 2.5 s and 0.12-0.18 at 1.5 s)."""
 EPISODE_VOICE = 0.60
 """Line-vs-line ECAPA cosine (voice_ear.RULER) an ALTERNATE-reference render must
 reach, on average, against the speaker's other passed lines in the same episode; a
-line said with feeling sits FEELING_FLOOR_DROP under it.
+line said with feeling sits `feeling_drop` under it.
 
 RE-SET 2026-10-21 on the 16 kHz ruler: a calm line's mean against its own speaker's
 other lines is never under Scarlet 0.622, WotW 0.746, Jekyll 0.646, and a line's mean
@@ -73,14 +73,18 @@ against his cast clip; 2.5 s slices min 0.51.  ep13's 'What are we?' failed as
 three different men.  Words and pace still gate a short line."""
 
 
+def feeling_drop(delivery: str) -> float:
+    """How far a line said with feeling sits under a calm floor: FEELING_FLOOR_DROP, else 0."""
+    return 0.0 if delivery in ("", "calm") else episode_emotion.FEELING_FLOOR_DROP
+
+
 def line_floor(seconds: float, delivery: str) -> float:
     """The floor for THIS line: none when it is too short to measure; a line said
     with feeling sits FEELING_FLOOR_DROP under the calm floor (the embedding moves
     with pitch and effort)."""
     if seconds < SIM_MEASURABLE_S:
         return 0.0
-    drop = 0.0 if delivery in ("", "calm") else episode_emotion.FEELING_FLOOR_DROP
-    return round(similar_floor(seconds) - drop, 2)
+    return round(similar_floor(seconds) - feeling_drop(delivery), 2)
 
 
 def episode_voice(book: Path, records: dict, record: dict, similarity=None) -> float | None:
@@ -123,8 +127,7 @@ def alternate_ok(score: float | None, seconds: float = SIM_MEASURABLE_S, deliver
     already records-never-gates there, and ep16's l18 (1.75 s) was refused at
     0.74 against 0.75 on exactly that unmeasurable read.  The score is kept
     in the record either way; words and pace still gate a short line."""
-    drop = 0.0 if delivery in ("", "calm") else episode_emotion.FEELING_FLOOR_DROP
-    return score is None or seconds < SIM_MEASURABLE_S or score >= EPISODE_VOICE - drop
+    return score is None or seconds < SIM_MEASURABLE_S or score >= EPISODE_VOICE - feeling_drop(delivery)
 
 
 def reference_for(book: Path, speaker: str) -> Path:
@@ -214,22 +217,27 @@ TERMINAL_MARGIN = 0.10
 """How far under its floor a kept best try may sit: the floor is the instrument's, not the ear's
 verdict on a word (Jekyll l15: 10 tries at 0.42-0.63 against 0.65, every word heard).  RE-SET
 2026-10-21: the old ruler's 0.08 times the genuine scores' spread ratio, 0.0535 / 0.0394 = 1.36,
-is 0.109 on 16 kHz; a try nearer another cast voice than its own is far whatever its score."""
+is 0.109 on 16 kHz, set at 0.10 (two decimals, like every floor); a try that does not lead its
+cast by CAST_MARGIN is far whatever its score."""
 
 
-def outscores(new: dict, old: dict) -> bool:
-    """`new` scored at least `old` -- or `old` was scored on another ruler, which is no score
-    against this one (the newer measure wins)."""
-    if voice_ear.ruler_of(new) != voice_ear.ruler_of(old):
-        return True
-    return new.get("similarity", 0.0) >= old.get("similarity", 0.0)
+def leads_cast(row: dict) -> bool:
+    """A stored try passes the cast-margin test the gate applies (`margin_ok`): it leads
+    every other cast voice by CAST_MARGIN, or its margin cannot be measured."""
+    near = None if row.get("margin") is None else (row.get("rival"), row["margin"])
+    return margin_ok(near, float(row.get("seconds") or SIM_MEASURABLE_S))
+
+
+def try_rank(row: dict) -> tuple[bool, bool, float]:
+    """How two tries of one line are ordered: a current-ruler score first (two rulers'
+    numbers are not ranked together), then a try that leads its cast, then the score."""
+    return voice_ear.ruler_of(row) == voice_ear.RULER, leads_cast(row), row.get("similarity", 0.0)
 
 
 def remember_best(record: dict, wav: Path, best: dict | None, out_dir: Path) -> dict | None:
-    """The best failing try whose words were heard right, its file kept as l{NN}.best.wav."""
+    """The best failing try whose words were heard right (`try_rank`), its file kept as l{NN}.best.wav."""
     import shutil
-    if not record.get("words_ok") or (best is not None and outscores(best, record)
-                                      and voice_ear.ruler_of(best) == voice_ear.ruler_of(record)):
+    if not record.get("words_ok") or (best is not None and try_rank(best) >= try_rank(record)):
         return best
     source = Path(wav) if Path(wav).exists() else Path(wav).with_suffix(".prev.wav")   # a redo parks the kept try
     shutil.copyfile(source, Path(out_dir) / f"{Path(wav).stem}.best.wav")
@@ -284,13 +292,12 @@ def ear_cure(book: Path, record: dict, among: dict, listen) -> bool:
 
 def terminal(record: dict, best: dict | None, force: bool = False) -> dict | None:
     """keep_best flagged: the best rightly heard try once the line has had TERMINAL_TRIES;
-    `keep_best_far` when it sits more than TERMINAL_MARGIN under its floor (step caps,
-    2026-10-18: voice is tier 2, it never parks the episode).  None while it may still be
-    cured, or when no try's words were heard right (that still refuses)."""
+    `keep_best_far` when it sits more than TERMINAL_MARGIN under its floor or does not lead
+    its cast by CAST_MARGIN (step caps, 2026-10-18: voice is tier 2, it never parks the
+    episode).  None while it may still be cured, or when no try's words were heard right."""
     if (record.get("tries", 0) < TERMINAL_TRIES and not force) or best is None:
         return None
-    far = (best.get("similarity", 0.0) < best.get("floor", 0.0) - TERMINAL_MARGIN
-           or (best.get("margin") or 0.0) < 0.0)
+    far = best.get("similarity", 0.0) < best.get("floor", 0.0) - TERMINAL_MARGIN or not leads_cast(best)
     return dict(best, passed=True, flagged="keep_best_far" if far else "keep_best", tries=record["tries"])
 
 
@@ -435,10 +442,16 @@ def lift_ok(book: Path, record: dict, clip: Path) -> bool:
     return record["lift_st"] >= episode_emotion.LIFT_ST
 
 
+def redo_rank(row: dict) -> tuple:
+    """A redo's order of two tries: the one the gate passed first, then `try_rank`."""
+    return (bool(row.get("passed")), *try_rank(row))
+
+
 def keep_best(new: dict, previous: dict | None, wav: Path,
               fit: tuple[float | None, float | None] | None = None, clarity: bool = False) -> dict:
-    """A redo never makes a line worse: the try with the higher similarity
-    stays on disk as l{NN}.wav, the other is deleted.  An alternate-reference
+    """A redo never makes a line worse: a passing try beats a failing one, then the
+    higher `try_rank` (ruler, leads its cast, similarity) stays on disk as l{NN}.wav,
+    the other is deleted.  An alternate-reference
     render that is not the man in the room never wins, whatever it scored
     against the design clip.  With `fit` (each try's mean similarity to the
     speaker's other lines in this episode) the closer try wins -- the measure a
@@ -453,7 +466,7 @@ def keep_best(new: dict, previous: dict | None, wav: Path,
         better = fit[0] > fit[1]
     else:
         better = alternate_ok(new.get("episode_voice"), float(new.get("seconds") or SIM_MEASURABLE_S),
-                              new.get("delivery", "calm")) and outscores(new, previous)
+                              new.get("delivery", "calm")) and redo_rank(new) >= redo_rank(previous)
     if better:
         prev_wav.unlink()
         return new

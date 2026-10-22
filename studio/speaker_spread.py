@@ -38,7 +38,7 @@ def worst_pair(sims: dict[tuple[str, str], float]) -> tuple[str, str] | None:
 def spread(sims: dict[tuple[str, str], float], allow: dict | None = None) -> dict:
     """Whether every pair of one speaker's lines agrees, and the worst pair.
     `allow` lowers a pair's floor for its emotional deliveries (say_lines'
-    FEELING_FLOOR_DROP per non-calm line; ep13, 2026-09-28)."""
+    FEELING_PAIR_DROP once when either line is felt; ep13 2026-09-28, re-set 2026-10-21)."""
     allow = allow or {}
     worst = min(sims.values()) if sims else None
     ok = all(sim >= SAME_SPEAKER_FLOOR - allow.get(pair, 0.0) for pair, sim in sims.items())

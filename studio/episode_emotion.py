@@ -47,16 +47,23 @@ narrator's urgent, cold and shouted lines fell to 0.25-0.54 similarity.  The
 vector moves the feeling while the timbre stays on the speaker's own clip."""
 
 
-FEELING_FLOOR_DROP = 0.2
-"""How far a line said WITH feeling may sit under the calm similarity floor.
-ep13 MEASURED: shouts that lifted +4.8 and +7.9 st scored 0.58 and 0.44 against
-the cast clip; a designed clip that was another man's voice scored 0.13-0.28.
+FEELING_FLOOR_DROP = 0.12
+"""How far a line said WITH feeling may sit under the calm similarity floor (say_lines'
+design floor and an alternate render's room score).  ep13 MEASURED on the old ruler:
+shouts that lifted +4.8 and +7.9 st scored 0.58 and 0.44 against the cast clip.
 
-RE-MEASURED 2026-10-21 on the 16 kHz ruler (voice bench fix/), and kept: the binding
-case is Jekyll ep01's Enfield, his urgent l19 against his calm l08 at 0.394 line-vs-line
--- under speaker_spread.SAME_SPEAKER_FLOOR (0.53) by 0.136, so the drop must be at least
-that plus one paired seed-noise interval (0.034): 0.17.  A 2-4 s feeling line's floor is
-then 0.35 against the lowest genuine one, 0.461."""
+RE-SET 2026-10-21 on the 16 kHz ruler (voice bench fix/calibrate4.py, reviewed.json): of
+24 genuine felt lines (Jekyll only; Scarlet and WotW have none) one needs a drop at all,
+Enfield's urgent l19 (0.461 at 3.9 s against 0.55).  One seed-noise interval (0.034) under
+it is 0.427, a drop of 0.12; its room score 0.514 clears 0.60 - 0.12 the same way.  The
+old 0.20 let a voice from outside the cast through Jekyll's gate 13/296 times; 0.12, 10."""
+
+FEELING_PAIR_DROP = 0.17
+"""How far under speaker_spread.SAME_SPEAKER_FLOOR a pair of one speaker's lines may sit
+when either line is said with feeling -- ONCE per pair.  RE-SET 2026-10-21: the binding
+case is Jekyll ep01's Enfield, his urgent l19 against his calm l08 at 0.394, 0.136 under
+0.53; plus one seed-noise interval is 0.17.  Taken per felt line (0.20 each) a two-felt
+pair was held to 0.13 and 18 of 21 pairs of different speakers passed; now 2 of 21."""
 
 
 def vector_for(register: str) -> dict:

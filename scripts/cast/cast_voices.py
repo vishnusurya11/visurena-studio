@@ -23,9 +23,6 @@ PASSAGE = ("I have looked at this a long while, and I know now what it is. "
            "You may think what you like of me, but you will hear me out first.")
 """One passage for the whole cast, so the VOICE is the only variable."""
 
-APART = voice_ear.SAME_SPEAKER
-"""ECAPA cosine at or above which two clips are the same person."""
-
 CANDIDATES = 2
 """How many voices are auditioned per character before one is cast.
 
@@ -186,12 +183,13 @@ def design(book: Path, who: str, instruct: str) -> Path:
 
 
 def collisions(book: Path, cast: list[str]) -> list[tuple[str, str, float]]:
-    """Every pair of rendered voices that measures as one person."""
+    """Every pair of rendered designs that are twins: over NEAREST_CEIL, the design gate's own
+    design-vs-design line (SAME_SPEAKER is a line-vs-design line; 2026-10-21 review)."""
     clips = {who: cast_home.clip(book, who) for who in cast
              if cast_home.clip(book, who).exists()}
     return sorted(((one, other, score)
                    for (one, other), score in voice_ear.apart(clips).items()
-                   if score >= APART), key=lambda row: -row[2])
+                   if score > NEAREST_CEIL), key=lambda row: -row[2])
 
 
 @dataclass(frozen=True)
@@ -506,7 +504,7 @@ def main() -> None:
     print("\n=== measured similarity ===")
     near = collisions(book, [c["id"] for c in cards])
     if not near:
-        print(f"  every pair below {APART} -- the cast is distinct")
+        print(f"  every pair at or below {NEAREST_CEIL} -- the cast is distinct")
     else:
         for one, other, score in near:
             print(f"  COLLISION {one} vs {other}: {score:.2f}")

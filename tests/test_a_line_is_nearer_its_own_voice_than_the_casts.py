@@ -115,3 +115,11 @@ def test_a_real_line_said_in_the_wrong_voice_is_refused(tmp_path):
     own = say.voice_ear.similarity(book / "cast" / "utterson" / "voice" / "design.wav", clip, "cpu")
     rival, margin = say.cast_margin(book, "utterson", clip, own)
     assert rival == "narrator" and not say.margin_ok((rival, margin), 4.0)
+
+
+def test_a_cast_id_that_shares_the_speakers_clip_is_not_a_rival(tmp_path, monkeypatch):
+    """Scarlet's lucy_ferrier and lucy_ferrier_child read 1.000: one clip filed twice, one voice."""
+    book = cast_book(tmp_path / "book", {who: blank(tmp_path / f"{who}.wav") for who in ("lucy", "lucy_child", "hope")})
+    shared = lambda a, b: 1.0 if {Path(a).parent.parent.name, Path(b).parent.parent.name} <= {"lucy", "lucy_child"} else 0.3
+    monkeypatch.setattr(say.voice_ear, "similarity", shared)
+    assert set(say.rivals_of(book, "lucy")) == {"hope"}

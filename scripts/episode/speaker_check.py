@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import episode_home, voice_ear
-from studio.episode_emotion import FEELING_FLOOR_DROP, f0_median
+from studio.episode_emotion import FEELING_PAIR_DROP, f0_median
 from studio.speaker_spread import SAME_SPEAKER_FLOOR, spread
 
 
@@ -60,7 +60,8 @@ def omitted_stems(book: Path, number: int) -> set[str]:
 
 
 def allowance(pair: tuple[str, str], said: dict[str, str]) -> float:
-    return sum(FEELING_FLOOR_DROP for stem in pair if said.get(stem, "calm") != "calm")
+    """FEELING_PAIR_DROP once when either line of the pair is said with feeling, else 0."""
+    return FEELING_PAIR_DROP if any(said.get(stem, "calm") != "calm" for stem in pair) else 0.0
 
 
 REGISTER_ST = 4.0
