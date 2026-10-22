@@ -15,6 +15,7 @@ import atexit
 import json
 import os
 import subprocess
+import time
 from contextlib import ExitStack
 from pathlib import Path
 from typing import Callable
@@ -113,34 +114,59 @@ def queue_busy() -> bool:
         return True
 
 
+IDLE_MARGIN_S = 15.0
+"""A worker idle this close to its IDLE_S line (studio/face_detect_worker) may be shutting down: a take
+asked then got EOF, "the worker died", and MTCNN read the rest (FastH3 bench T06, 2026-10-21)."""
+
+
 class Finder:
-    """take, frames -> boxes per sampled frame: the YOLO worker, else MTCNN (`loose`)."""
+    """take, frames -> boxes per sampled frame: the YOLO worker, else MTCNN (`loose`).  A worker that
+    dies is replaced once for the same take; only a second death in a row hands takes to MTCNN.
+    `reader_of[str(take)]` says which reader read each take ("yolo" | "mtcnn")."""
 
     def __init__(self, loose: Callable, route: Callable | None = None, start: Callable | None = None,
-                 busy: Callable[[], bool] | None = None, claim: Callable | None = None):
+                 busy: Callable[[], bool] | None = None, claim: Callable | None = None,
+                 clock: Callable[[], float] | None = None):
         if route is None:
             from studio.compute_device import device_for as route
         if claim is None:
             from studio.compute_device import claim
         self.loose, self.route, self.busy, self.claim = loose, route, busy or queue_busy, claim
         self.start = start or (lambda device: Worker(spawn(device)))
+        self.clock = clock or time.monotonic
         self.worker, self.device, self.broken, self.held = None, "", False, ExitStack()
+        self.since, self.reader_of = 0.0, {}
         atexit.register(self.close)
 
     def __call__(self, take: Path, frames: list) -> Dets:
-        if not self.broken:
+        for attempt in (1, 2):
+            if self.broken:
+                break
             try:
-                return self.ready()(take)
+                return self.read(take)
             except Exception as failed:
-                print(f"FACE DETECT -> mtcnn: the YOLO worker failed ({failed}); MTCNN reads the rest", flush=True)
-                self.broken = True
                 self.close()
+                self.broken = attempt == 2
+                print(f"FACE DETECT: the YOLO worker failed ({failed}); "
+                      + ("MTCNN reads the rest" if self.broken else "a fresh worker reads the take again"), flush=True)
+        self.reader_of[str(take)] = "mtcnn"
         return by_frames(frames, self.loose)
+
+    def read(self, take: Path) -> Dets:
+        """The take read by the live worker, its idle clock restarted by the answer."""
+        dets = self.ready()(take)
+        self.since, self.reader_of[str(take)] = self.clock(), "yolo"
+        return dets
+
+    def stale(self) -> bool:
+        """The worker exited, or sat idle near its IDLE_S line, where it may be shutting down."""
+        from studio.face_detect_worker import IDLE_S
+        return self.worker.exited() or self.clock() - self.since >= IDLE_S - IDLE_MARGIN_S
 
     def ready(self):
         """The live worker; a GPU one that sees a render arrive is swapped for a CPU one, and one
-        that idled out between two takes is started again (never handed to MTCNN for that)."""
-        if self.worker is not None and self.worker.exited():
+        that idled out (or is near its idle line) between two takes is started again."""
+        if self.worker is not None and self.stale():
             print("FACE DETECT: the worker idled out between takes; started again", flush=True)
             self.close()
         if self.worker is not None and self.device == "cuda" and self.busy():
@@ -154,7 +180,7 @@ class Finder:
     def open(self, device: str) -> None:
         if device == "cuda":
             self.held.enter_context(self.claim("face detect worker"))
-        self.worker, self.device = self.start(device), device
+        self.worker, self.device, self.since = self.start(device), device, self.clock()
 
     def close(self) -> None:
         if self.worker is not None:

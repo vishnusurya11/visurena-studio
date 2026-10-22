@@ -519,6 +519,9 @@ class TakeWork:
     warp_min_px: float | None = None
     yolo_min_px: float | None = None
     """The smallest face the warp gate logged, and the smallest the tracker found (A26)."""
+    detector: str = ""
+    """Which reader found the take's faces ("yolo" | "mtcnn", studio/face_detect.Finder.reader_of): MTCNN
+    reads lamps as faces on cel art (FastH3 bench REPEATABILITY.md, 2026-10-21)."""
 
 
 @dataclass(frozen=True)
@@ -561,7 +564,9 @@ def queue_take(book: Path, number: int, index: int, card: dict, engine, loose, d
     dq = read(room / f"T{index:02d}.dq.json", None)
     work.clause, work.warp_min_px = fr.readable_clause(card, dq), warp_gate.smallest_face(fr.warp_measure(dq))
     work.cuts = cut_frames(work.frames)
-    tracks, sources = soft_tracks(work, *take_tracks(work.frames, find(take, work.frames), work.cuts, Same(work.frames)))
+    dets = find(take, work.frames)
+    work.detector = getattr(find, "reader_of", {}).get(str(take), "")
+    tracks, sources = soft_tracks(work, *take_tracks(work.frames, dets, work.cuts, Same(work.frames)))
     if not tracks:
         return work
     refs = [str(r) for r in card.get("refs", [])]
@@ -678,7 +683,7 @@ def gate_job(book: Path, work: TakeWork, job: Job, detect, embed, loose=None, an
     boxes = face_gate.face_boxes(face_track.fill(job.track, len(work.frames)), job.windows, life, side)
     m = face_gate.measure(src_w, ref_w, to768(sampled(src_w)), sampled(ref768), vec, detect, embed, moved,
                           job.face_px / side, job.soft, face_gate.centres_of(boxes))
-    m = replace(m, **face_gate.extras(src_w, ref_w, boxes), **anime_terms(anime, book, job, src_w, ref768, detect, loose),
+    m = replace(m, **face_gate.extras(src_w, ref_w, boxes, job.face_px), **anime_terms(anime, book, job, src_w, ref768, detect, loose),
                 turn=turn_of(src_w, ref768, detect))
     kept, why = fr.decide(m)
     return {"who": job.person.who, "crop": f"{OUT}/{stem}.mp4", "track": f"{OUT}/{stem}.json", "kept": kept,
@@ -698,7 +703,8 @@ def decide_take(room: Path, book: Path, work: TakeWork, detect, embed, engine, q
     entry = {"status": status, "take_sha8": work.sha, "people": people, "decided": stamp(),
              "gpu_s_priced": round(fr.price(len(work.jobs), len(work.frames)), 1),
              **clock_columns(work, queued_at, time.time()),
-             "readable_clause": work.clause, "warp_min_px": work.warp_min_px, "yolo_min_px": work.yolo_min_px}
+             "readable_clause": work.clause, "warp_min_px": work.warp_min_px, "yolo_min_px": work.yolo_min_px,
+             "detector": work.detector}
     write_entry(room, work.index, entry)
     print(f"T{work.index:02d} {status}: " + ("; ".join(f"{p['who']} {'KEPT' if p['kept'] else 'fell back'} ({p['why']})"
                                                     for p in people) or "nothing to refine"), flush=True)

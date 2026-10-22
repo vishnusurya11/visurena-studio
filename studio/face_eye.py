@@ -71,7 +71,21 @@ def eye_score(g: np.ndarray) -> float:
     return float(sum(pupils(g)[:2]))
 
 
-def track_eyes(crops: list[np.ndarray], boxes: list) -> float | None:
-    """The median eye score over a track's crops, each read at its own face box."""
+READABLE_PX = 24.0
+"""A face this many render pixels tall draws a pupil the measure can find (a ~2 px pupil, 10 px at
+128).  On the FastH3 bench every YOLO-read face from 24 px up read above 0 except one reader miss
+(T26 Enfield A seed 3, 63 px); Hyde's 11 px far figure reads 0, which is the size, not the reader
+(docs/audit/2026-10-21_fasth3_faces/REPEATABILITY.md)."""
+
+
+def unread_zero(score: float | None, px: float) -> float | None:
+    """A 0 on a face READABLE_PX or taller is the reader's miss: None (unread), never a score of 0."""
+    return None if score is None or (score == 0.0 and px >= READABLE_PX) else score
+
+
+def track_eyes(crops: list[np.ndarray], boxes: list, px: float | None = None) -> float | None:
+    """The median eye score over a track's crops, each read at its own face box; given the face's
+    render height `px`, a 0 on a readable face is None (`unread_zero`)."""
     scores = [eye_score(face_gray(c, b)) for c, b in zip(crops, boxes)]
-    return float(np.median(scores)) if scores else None
+    median = float(np.median(scores)) if scores else None
+    return median if px is None else unread_zero(median, px)

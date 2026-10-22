@@ -367,11 +367,12 @@ def face_boxes(boxes, wins: list, life: tuple[int, int], side: int) -> list:
     return out
 
 
-def extras(src_w: list, ref_w: list, boxes: list) -> dict:
-    """The logged measures beside the walls: drift inside the face box, the drawn-eye scores."""
+def extras(src_w: list, ref_w: list, boxes: list, px: float | None = None) -> dict:
+    """The logged measures beside the walls: drift inside the face box, the drawn-eye scores (None,
+    unread, for a 0 on a face `px` render pixels tall at face_eye.READABLE_PX or more)."""
     from studio import face_eye
     n = min(len(src_w), len(ref_w), len(boxes))
     d = drift(src_w[:n], ref_w[:n], boxes[:n])
-    e_src, e_ref = face_eye.track_eyes(src_w[:n:2], boxes[:n:2]), face_eye.track_eyes(ref_w[:n:2], boxes[:n:2])
+    e_src, e_ref = (face_eye.track_eyes(w[:n:2], boxes[:n:2], px) for w in (src_w, ref_w))
     r = lambda v: None if v is None else round(v, 2)
     return {"drift": r(d), "eye_src": r(e_src), "eye_ref": r(e_ref)}

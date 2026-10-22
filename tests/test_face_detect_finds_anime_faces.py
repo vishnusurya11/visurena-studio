@@ -140,12 +140,13 @@ def test_a_render_that_arrives_moves_a_gpu_worker_to_the_cpu():
     assert [w.device for w in started] == ["cuda", "cpu"] and started[0].closed
 
 
-def test_a_failed_worker_hands_the_take_and_the_rest_to_mtcnn():
+def test_a_worker_that_fails_twice_hands_the_take_and_the_rest_to_mtcnn():
+    """One fresh worker is tried first (2026-10-21 REPEATABILITY.md); the second failure is MTCNN's."""
     find, started = finder(fail=True)
     frames = [np.zeros((8, 8, 3), np.uint8)] * 7
     assert find(Path("a.mp4"), frames) == {t: [{"box": [2, 2, 8, 8], "score": 0.7}] for t in range(0, 7, fd.EVERY)}
     find(Path("b.mp4"), frames)
-    assert len(started) == 1 and started[0].closed
+    assert len(started) == 2 and all(w.closed for w in started)
 
 
 @pytest.mark.local

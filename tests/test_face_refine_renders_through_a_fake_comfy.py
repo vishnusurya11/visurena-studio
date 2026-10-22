@@ -262,3 +262,23 @@ def test_every_take_row_names_the_readable_clause_that_sent_it_to_the_tracker(tm
     entry = json.loads((w.room / "refine.json").read_text())["T00"]
     assert entry["readable_clause"] == "no_tracks" and entry["warp_min_px"] is None
     assert entry["yolo_min_px"] == pytest.approx(30.7, abs=0.5)
+
+
+# ---- REPEATABILITY (FastH3 bench 2026-10-21): the row names the reader that found its faces -----------
+
+def test_every_take_row_names_the_detector_that_read_it(tmp_path):
+    """A take read by MTCNN (the Finder's last resort) finds lamps as faces on cel art; the row says so."""
+    w = Room(tmp_path)
+
+    class Find:
+        reader_of: dict = {}
+
+        def __call__(self, take, frames):
+            self.reader_of[str(take)] = "mtcnn"
+            return fd.by_frames(frames, detect_one)
+
+        def close(self):
+            pass
+    cli.refine(w.book, 1, None, engine=Engine(tmp_path), detect=detect_one, loose=detect_one, embed=embed,
+               find=Find(), within="")
+    assert json.loads((w.room / "refine.json").read_text())["T00"]["detector"] == "mtcnn"
