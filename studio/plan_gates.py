@@ -456,6 +456,32 @@ def speech_share(paragraphs: list[str]) -> float | None:
     return round(spoken / max(1, len(text.split())), 3)
 
 
+# THE HONEST SPEECH RULER (craft ruling A16): printed beside `speech_share`, never read by the dial
+# until the owner has seen the table and switches it (Q1); the floor and ceiling follow the ruler.
+QUOTED_WHOLE = re.compile(r"[\"\u201c]([^\"\u201c\u201d]+)[\"\u201d]")
+"""A quoted run of any length: QUOTED stops at 600 characters and drops ch1's 841-word Enfield tale."""
+THOUGHT = re.compile(r"\b(?:thought|thinks|wondered|reflected|mused)\b", re.I)
+
+
+def tag_of(text: str, m: re.Match) -> str:
+    """The narration right after a quote, up to the next quote or line (its own tag)."""
+    rest = text[m.end():m.end() + 40]
+    cut = re.search(r"[\"\u201c\n]", rest)
+    return rest[:cut.start()] if cut else rest
+
+
+def honest_speech_share(paragraphs: list[str]) -> float | None:
+    """Spoken words over all the chapter's words, with no length cap, and a quote whose own tag says
+    it was thought ("If he be Mr. Hyde," he had thought) never counted, even opening a paragraph.
+    Jekyll ch1: 0.628 against the old ruler's 0.279."""
+    text = "\n".join(paragraphs)
+    if not text.strip():
+        return None
+    spoken = sum(len(m.group(1).split()) for m in QUOTED_WHOLE.finditer(text)
+                 if is_speech(text, m) and not THOUGHT.search(tag_of(text, m)))
+    return round(spoken / max(1, len(text.split())), 3)
+
+
 def dial_floor(speech: float | None) -> float:
     """The dialogue dial's floor: the contract's, or the chapter's own share when
     it speaks less (ep22, 2026-10-07: II.v 'The Stillness' speaks no line and the
