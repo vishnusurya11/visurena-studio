@@ -512,10 +512,10 @@ LAST_FAMILY: str | None = None
 def free_on_family(family: str) -> bool:
     """Free the engine's models when the GPU family changes (krea -> vl -> h3);
     True when it freed.  Best effort, never raises; a blank family changes nothing."""
-    global LAST_FAMILY, CHANGEOVER
+    global LAST_FAMILY
     if not family or family == LAST_FAMILY:
         return False
-    CHANGEOVER = {"model": family, "why": f"{LAST_FAMILY or 'nothing'} -> {family}", "began": time.monotonic()}
+    open_changeover({"model": family, "why": f"{LAST_FAMILY or 'nothing'} -> {family}", "began": time.time()})
     LAST_FAMILY = family                 # the first call frees too: another process may have staged models
     try:
         free_models()
@@ -527,26 +527,52 @@ def free_on_family(family: str) -> bool:
 CHANGEOVERS: Path | None = settings.library_root() / "changeovers.jsonl"
 """One row per model load (craft ruling A27): the family the engine changed to, why, and the seconds from the
 free to the first job done on it (load and that job; `node_s` is the engine's own window).  None logs nothing."""
-CHANGEOVER: dict | None = None
-"""The changeover the first job on the new family has not closed yet."""
+
+
+def open_path() -> Path | None:
+    """The open changeover, on disk beside the ledger: the drive frees (step_runner) and the step's own child
+    process waits on the job (stage_run.launch), so memory in one process closed nothing (wave-3 review)."""
+    return None if CHANGEOVERS is None else Path(CHANGEOVERS).with_name(Path(CHANGEOVERS).stem + ".open.json")
+
+
+def open_changeover(said: dict) -> None:
+    """Open a changeover; a later free replaces one no job closed.  Never raises."""
+    if (path := open_path()) is not None:
+        try:
+            path.write_text(json.dumps(said), encoding="utf-8")
+        except OSError:
+            pass
+
+
+def claim_changeover() -> dict | None:
+    """The open changeover, taken by exactly one process: only one rename of the file can win."""
+    path = open_path()
+    if path is None or not path.exists():
+        return None
+    mine = path.with_name(f"{path.name}.{os.getpid()}")
+    try:
+        os.rename(path, mine)
+        said = json.loads(mine.read_text(encoding="utf-8"))
+        mine.unlink()
+    except (OSError, ValueError):
+        return None
+    return said if isinstance(said, dict) else None
 
 
 def changed_over(record: dict) -> None:
-    """Close the open changeover with its row on the first completed job; a later job is no load.  A ledger
-    that cannot be written never fails the job."""
-    global CHANGEOVER
-    if CHANGEOVER is None or CHANGEOVERS is None:
+    """Close the open changeover with its row on the first job done after the free, in any process; a later
+    job is no load.  A ledger that cannot be written, or a record it cannot read, never fails the job."""
+    if (said := claim_changeover()) is None:
         return
-    from studio import take_phases
-    t0, t1 = take_phases.window(record)
-    row = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "model": CHANGEOVER["model"], "why": CHANGEOVER["why"],
-           "seconds": round(time.monotonic() - CHANGEOVER["began"], 2),
-           "node_s": round(t1 - t0, 2) if t0 and t1 else None}
-    CHANGEOVER = None
     try:
+        from studio import take_phases
+        t0, t1 = take_phases.window(record)
+        row = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "model": said["model"], "why": said["why"],
+               "seconds": round(time.time() - float(said["began"]), 2),
+               "node_s": round(t1 - t0, 2) if t0 and t1 else None}
         with open(CHANGEOVERS, "a", encoding="utf-8") as out:
             out.write(json.dumps(row) + "\n")
-    except OSError:
+    except (OSError, KeyError, TypeError, ValueError, IndexError, AttributeError):
         pass
 
 

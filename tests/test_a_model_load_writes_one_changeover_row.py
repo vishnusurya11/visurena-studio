@@ -8,6 +8,9 @@ library/changeovers.jsonl: {model, why, seconds (free to first job done), node_s
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -22,7 +25,6 @@ def ledger(tmp_path, monkeypatch):
     path = tmp_path / "changeovers.jsonl"
     monkeypatch.setattr(comfy, "CHANGEOVERS", path)
     monkeypatch.setattr(comfy, "LAST_FAMILY", "krea")
-    monkeypatch.setattr(comfy, "CHANGEOVER", None)
     return path
 
 
@@ -53,3 +55,25 @@ def test_a_ledger_that_cannot_be_written_never_fails_the_job(ledger, monkeypatch
 
 def test_no_ledger_in_a_test_writes_nothing(monkeypatch):
     assert comfy.CHANGEOVERS is None
+
+
+CHILD = """
+import json, sys
+from pathlib import Path
+from studio import comfy
+comfy.CHANGEOVERS = Path(sys.argv[1])
+comfy.changed_over(json.loads(sys.argv[2]))
+"""
+
+
+def test_the_job_in_the_steps_own_process_closes_the_drives_free(ledger):
+    """Wave-3 review: the drive frees (step_runner._free_family) and the step's script, a child process
+    (stage_run.launch), waits on the job; an open changeover held in one process's memory wrote no row in
+    production.  The open changeover is on disk, and the first job done in any process closes it."""
+    comfy.free_on_family("h3")
+    root = Path(comfy.__file__).resolve().parents[1]
+    subprocess.run([sys.executable, "-c", CHILD, str(ledger), json.dumps(RECORD)], cwd=root, check=True)
+    [row] = rows(ledger)                            # written by the child, the job that ran after the free
+    comfy.changed_over(RECORD)                      # the drive's own later job is no load
+    assert rows(ledger) == [row]
+    assert row["model"] == "h3" and row["why"] == "krea -> h3" and row["node_s"] == 42.5
