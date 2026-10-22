@@ -614,8 +614,17 @@ class Desk:
         self.retire_climb()
         if verdict.terminal == DEFER:
             return defer(self.plan, verdict)
+        if not self.plan.exists():
+            raise SystemExit(self.nothing_kept(verdict))
         return plan_verdict.sign(self.plan, verdict.summary(), signed_by=verdict.signer,
                                  faults=[f.model_dump() for f in verdict.faults], flagged=bool(verdict.terminal))
+
+    def nothing_kept(self, verdict: Verdict) -> str:
+        """The SAFETY stop of a keep-best with no plan.json: the contract refused every draft, so
+        there is no best to keep (S0a, 2026-10-21: it died on FileNotFoundError, read `unclassified`)."""
+        said = self.pending or [f.note for f in verdict.faults if f.note]
+        return ("SAFETY: plan_builder: the climb ended keep_best but no draft ever reached plan.json; "
+                "the last refusal: " + "; ".join(said)[:600])
 
 
 def tier_one(verdict: Verdict) -> list[str]:
