@@ -2,7 +2,8 @@
 2.5, 2.6; R7, R8, R19).
 
 ONE `sys.addaudithook` per process.  Armed, it raises RehearsalTripwire and appends a
-`<sandbox>/tripwire.jsonl` row on: a write-capable open, rename, remove, mkdir, rmdir, copy,
+`<sandbox>/tripwire.jsonl` row on: a write-capable open, rename, remove, mkdir (of a folder not
+already there), rmdir, copy,
 move, utime or chmod, and ANY sqlite3.connect, under a real root (the real library, db/ with
 its -journal/-wal companions, the ComfyUI root, docs/DECISIONS.md, docs/episode_handbook.html);
 a process launch off the allowlist (ffmpeg/ffprobe with no output under a real root, git only
@@ -147,10 +148,21 @@ def sqlite_path(database) -> str | None:
     return None if text in ("", ":memory:") else text
 
 
+def folder_already_there(event: str, args: tuple) -> bool:
+    """An os.mkdir of a folder that exists changes nothing: it raises FileExistsError.  speechbrain's
+    fetch mkdirs ECAPA's own folder under the ComfyUI root at every load (window 2, 2026-10-21: the
+    fence tripped step 04 on it).  A mkdir relative to a dir_fd is not judged here."""
+    dir_fd = args[2] if len(args) > 2 else None
+    path = norm(args[0]) if event == "os.mkdir" and dir_fd in (None, -1) else None
+    return path is not None and os.path.isdir(path)
+
+
 def event_refusal(fence: Fence, event: str, args: tuple) -> str | None:
     """Why this audit event is refused in a rehearsal, or None."""
     if event == "open":
         return write_refusal(fence, args[0], "open for writing") if writes(args[1], args[2]) else None
+    if folder_already_there(event, args):
+        return None
     if event in PATH_EVENTS:
         return next((r for i in PATH_EVENTS[event] if (r := write_refusal(fence, args[i], event))), None)
     if event == "sqlite3.connect":

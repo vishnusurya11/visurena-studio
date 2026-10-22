@@ -86,6 +86,19 @@ def test_reads_of_a_root_and_writes_in_the_sandbox_pass(armed):
     assert trips(box) == []
 
 
+def test_a_mkdir_of_a_folder_already_there_passes_and_a_new_one_still_trips(armed):
+    """Window 2 (2026-10-21 20:42 PDT): speechbrain's fetch runs `savedir.mkdir(exist_ok=True)` on
+    ECAPA's own folder at every load, and the fence tripped step 04 on a mkdir that creates nothing."""
+    lib, _, box = armed
+    book = lib / JEKYLL
+    (book / "episodes").mkdir(parents=True, exist_ok=True)
+    os.makedirs(book / "episodes", exist_ok=True)
+    assert trips(box) == []
+    with pytest.raises(fence.RehearsalTripwire):
+        (book / "episodes" / "ep02").mkdir(parents=True, exist_ok=True)
+    assert not (book / "episodes" / "ep02").exists() and len(trips(box)) == 1
+
+
 def test_a_disarmed_fence_refuses_nothing(tmp_path):
     fence.disarm()
     (tmp_path / "x.txt").write_text("x", encoding="utf-8")
