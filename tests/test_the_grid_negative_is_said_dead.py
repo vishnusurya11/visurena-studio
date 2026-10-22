@@ -33,10 +33,12 @@ def test_the_house_negative_is_not_sent_either(monkeypatch):
     assert graph(monkeypatch)["5"]["inputs"]["negative_prompt"] == ""
 
 
-def test_neg_warns_on_each_negation_outside_unwritten():
-    warned = [w for w in grid_lint.warnings(S09_BINDING) if w.startswith("NEG")]
-    assert len(warned) == 1 and "2 negations" in warned[0]
-    assert "never dressed alike" in warned[0] and "no lettering" in warned[0]
+def test_neg_warns_on_each_negation_outside_the_fixed_sentences():
+    """The builder's own binding and layout negations are exempt like UNWRITTEN (wave-2 review: NEG fired on 22
+    of 22 ep01 grids from them alone, so it carried no signal); an authored one still warns."""
+    assert [w for w in grid_lint.warnings(S09_BINDING) if w.startswith("NEG")] == []
+    warned = [w for w in grid_lint.warnings(S09_BINDING + " He does not look up.") if w.startswith("NEG")]
+    assert len(warned) == 1 and "1 negations" in warned[0] and "not look up" in warned[0]
 
 
 def test_the_unwritten_sentence_alone_warns_nothing():

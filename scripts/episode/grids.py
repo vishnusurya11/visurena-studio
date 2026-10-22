@@ -361,7 +361,8 @@ def body_of(shot) -> str:
         parts.append(rest)
     if found := creature_insert(shot):
         parts.append(whole_subject(f"the {found[0]}", f"its {found[1]}"))
-    if said := varied_group(" ".join(parts), len(getattr(shot, "faces", None) or [])):   # walk-ons, not the cast
+    if said := varied_group(" ".join(parts), len(getattr(shot, "faces", None) or []),
+                            int(getattr(shot, "extras", 0) or 0)):            # walk-ons, by the plan's count
         parts.append(said)
     return " ".join(parts)
 

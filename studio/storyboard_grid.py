@@ -923,16 +923,25 @@ def framing(size: str, peopled: bool, body: str, move: str = "") -> str:
 
 FACE_TAILS = ("medium", "medium_close", "close", "extreme_close")
 """The sizes whose PEOPLED_CUT tail puts a head, a face or the eyes in the middle of the panel."""
-FOCUS = re.compile(r"FOCUS OF THE PICTURE IS\s+(.*?)(?=\s+(?:at|in|on) the [A-Z]{3,}|[;:]|"
+FOCUS = re.compile(r"FOCUS OF THE PICTURE IS\s+(.*?)(?=\s+(?:at|in|on) the (?-i:[A-Z]{3,})|[;:]|"
                    r"(?<!\bMr)(?<!\bMrs)(?<!\bDr)\.(?:\s|$)|$)", re.I | re.S)
-FACE_WORDS = re.compile(r"\b(?:faces?|heads?|eyes|profile|expression|mouth|lips)\b", re.I)
+FACE_WORDS = re.compile(r"\b(?:faces?|heads?|eyes?|profile|expression|mouth|lips|jaw|chin|cheeks?|cheekbones?|"
+                        r"brows?|forehead|nose|beard|moustache|whiskers|grin|gaze|stare|hair)\b", re.I)
+PERSON = re.compile(r"\b(?:man|men|woman|women|boy|girl|child|children|gentlem[ae]n|figures?|people|pair|"
+                    r"walkers?|tramps?|strangers?|constables?|policem[ae]n|servants?)\b", re.I)
+PART = re.compile(r"\b(?:hands?|fists?|fingers|knuckles|palms?|wrists?|arms?|boots?|feet|foot|legs?|knees?|"
+                  r"gloves?|collar|sleeve|cuff|coat|cane|stick|key|keyhole|lock|door|knocker|handle|letter|"
+                  r"cheque|coins|sovereigns|gold)\b", re.I)
+"""A part or a thing: a FOCUS on it under a person's name is no face (s09's fist, night_door P1's hand)."""
 
 
 def face_focus(body: str) -> bool:
-    """Is the panel's named FOCUS a face (or is no focus named)?  ep01 s09 and night_door P1 put "head
-    and shoulders fill the centre" under a FOCUS on a fist and a hand (craft ruling A21)."""
+    """Is the panel's named FOCUS a face or a person (or is no focus named)?  ep01 s09 and night_door P1
+    put "head and shoulders fill the centre" under a FOCUS on a fist and a hand (craft ruling A21); a jaw,
+    a gaze or "the two men" keep the framing tail (wave-2 review: s23 and night_door P2 lost it)."""
     hit = FOCUS.search(body or "")
-    return not hit or bool(FACE_WORDS.search(hit.group(1)))
+    said = hit.group(1) if hit else ""
+    return not hit or bool(FACE_WORDS.search(said)) or bool(PERSON.search(said) and not PART.search(said))
 
 
 RISE_ROOM, RISE_ROOM_SIZES = ("; the place the camera rises over fills the top third of the panel, and the "
@@ -952,7 +961,7 @@ COUNTED = re.compile(
 GROUP_COUNTS = {w: n for n, w in enumerate(("two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"), 2)}
 
 
-def varied_group(body: str, named: int = 0) -> str:
+def varied_group(body: str, named: int = 0, extras: int = 0) -> str:
     """Tell a counted group of walk-ons that its members differ from each other.
 
     MEASURED 2026-09-20 on ep06 shot 10: "three young men ... in cheap dark
@@ -960,15 +969,17 @@ def varied_group(body: str, named: int = 0) -> str:
     drawn three times. `no_duplicates` binds the NAMED cast; a walk-on has no
     name to bind, so the count is the hook.  A count no larger than the shot's
     `named` staged faces is that cast ("the two men" on ep01 night_door's bound
-    pair, craft ruling A21): their sheets bind them, so nothing is said.
+    pair, craft ruling A21): their sheets bind them, so nothing is said -- unless the plan's own `extras`
+    holds that many walk-ons ("two constables" in a two-face shot, the ep06 duplicate class).
     """
     found = COUNTED.search(body or "")
-    if not found or GROUP_COUNTS.get(found.group(1).lower(), 0) <= named:
+    count = GROUP_COUNTS.get(found.group(1).lower(), 0) if found else 0
+    if not found or extras < count <= named:
         return ""
     count, _, noun = found.groups()
     who = f"{count} {noun}".lower()
     their = pronoun_of(noun)
-    return (f"The {who} are {count} different individuals: each one has {their} own face, "
+    return (f"The {who} are {count.lower()} different individuals: each one has {their} own face, "
             f"own build, own hair and own hat, each wears the clothes a little differently, "
             f"and each stands and gestures in a way of {their} own.")
 

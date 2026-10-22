@@ -92,7 +92,9 @@ def wears(text: str) -> list[str]:
 
 BOUND = re.compile(r"The \w+ in <image(\d+)> wears: ([^\n]*?)\.(?:\s|$)")
 GARMENT = r"<image{n}>'s (?:[\w-]+ ){{0,2}}?(coat|overcoat|jacket|cloak|waistcoat)\b"
-TWIN = re.compile(r"\bThe (\w+) [\w ]*?are \w+ different individuals\b")
+TWIN = re.compile(r"\bThe (\w+) (?:[\w ]*? )?(\w+) are \w+ different individuals\b")
+GENERIC = {"men", "women", "people", "figures", "them"}
+"""How the pair a panel stages is counted ("the two men"); "two constables" are walk-ons (`Shot.extras`)."""
 FACE_FILL = re.compile(r"Framing: [^.\n]*\b(?:head and shoulders fill|the face fills|the eyes fill|the head sits)\b")
 AIR = re.compile(r"\bthick with (?:an? )?thin\b", re.I)
 
@@ -108,7 +110,8 @@ def panel_faults(text: str, people: set[str] | None = None) -> list[str]:
     out = []
     for para in text.split("\n\n"):
         staged = {n for n in re.findall(r"<image(\d+)>", para) if people is None or n in people}
-        if (m := TWIN.search(para)) and 0 < GROUP_COUNTS.get(m.group(1).lower(), 99) <= len(staged):
+        if (m := TWIN.search(para)) and 0 < GROUP_COUNTS.get(m.group(1).lower(), 99) <= len(staged) \
+                and m.group(2).lower() in GENERIC:
             out.append(f"TWIN walk-on clause on the panel's own staged people: {m.group(0)!r}")
         if FACE_FILL.search(para) and not face_focus(para):
             out.append(f"FOCUS the framing fills with a face the FOCUS is not: {para[:48]!r}")
@@ -139,8 +142,14 @@ NEGATION = re.compile(r"\b(?:no|not|never|without)\b(?:\s+[\w'-]+){0,2}", re.I)
 
 
 def negations(text: str) -> list[str]:
-    """Each negation with the two words after it, the fixed UNWRITTEN sentence aside."""
-    return [m.group(0) for m in NEGATION.finditer(text.replace(UNWRITTEN, " "))]
+    """Each negation with the two words after it, the builder's fixed sentences aside (UNWRITTEN, the
+    layout's lettering, the binding's dress: wave-2 review, NEG fired on 22 of 22 ep01 grids from them)."""
+    return [m.group(0) for m in NEGATION.finditer(FIXED_NEG.sub(" ", text.replace(UNWRITTEN, " ")))]
+
+
+FIXED_NEG = re.compile(r",? (?:with )?no lettering anywhere|are never dressed alike(?: and never wear the same hat, "
+                       r"in any panel, without exception)?|and in no other panel\. A panel that names nobody has "
+                       r"nobody in it")
 
 
 LONG_WORDS = 350
