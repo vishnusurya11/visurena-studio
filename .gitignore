@@ -89,3 +89,9 @@ client_secret*.json
 # Audits, experiments, debates and their media stay on disk, never in git (owner 2026-10-16):
 # git holds only what a fresh clone needs to run, plus the docs and images the README and wiki use.
 docs/audit/
+
+# Scratch at the repo root (2026-10-21, public-repo hygiene): btr.pdf was a saved web page
+# with a .pdf name, and ffmpeg's two-pass stats land in the working directory of whatever ran it.
+/*.pdf
+ffmpeg2pass-*.log
+ffmpeg2pass-*.log.mbtree
