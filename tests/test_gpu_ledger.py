@@ -67,8 +67,8 @@ def test_minutes_per_step_split_busy_idle_and_claimed():
             + [{"ts": t, "gpu_util": 0, "queue_running": 0, "claims": 1} for t in range(60, 120, 5)]  # 12 claimed
             + [{"ts": t, "gpu_util": 0, "queue_running": 0, "claims": 0} for t in range(120, 180, 5)])  # 12 idle
     got = mod.minutes_per_step(rows, [("09", 0.0, 90.0), ("10", 90.0, 180.0)], every=5.0)
-    assert got["09"] == {"busy": 1.0, "claimed": 0.5, "idle": 0.0}
-    assert got["10"] == {"busy": 0.0, "claimed": 0.5, "idle": 1.0}
+    assert got["09"] == {"busy": 1.0, "claimed": 0.5, "idle": 0.0, "unsampled": 0.0}
+    assert got["10"] == {"busy": 0.0, "claimed": 0.5, "idle": 1.0, "unsampled": 0.0}
 
 
 def test_the_time_line_names_charged_wall_and_dead():

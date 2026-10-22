@@ -12,7 +12,7 @@ ComfyUI's private bytes.  A probe that fails writes `probe_error` and the loop
 goes on: a ledger that stops is the thing it was built to catch.
 
 The autopilot starts it beside a drive.  `minutes_per_step` and `time_line` are
-what the finish report reads: busy / claimed / idle minutes per step, and the
+what the finish report reads: busy / claimed / idle / unsampled minutes per step, and the
 'charged | wall | dead' line (run_clock.dead_gaps, contract K4).  Every probe is
 a `Probes` field, so the tests reach no GPU, no engine and no process table.
 """
@@ -35,8 +35,12 @@ from studio import settings  # noqa: E402
 LEDGER = settings.library_root() / ".device" / "gpu_util.jsonl"
 LOCK = settings.library_root() / ".autopilot" / "gpu.lock"
 EVERY_S = 5.0
-BUSY_UTIL = 5
-"""A GPU at or above this util % counts as busy even when /queue shows nothing."""
+BUSY_UTIL = 30
+"""A GPU at or above this util % counts as busy even when /queue shows nothing.  It was 5, and an
+idle card reads a median 4 and a p90 6 (fleet E A1, 2026-10-22): queue_running or util >= 30 matched
+ComfyUI's own job windows on 99.3 % of 2,623 samples (bench G1)."""
+BUCKETS = ("busy", "claimed", "idle", "unsampled")
+"""unsampled: step time no sample covers (the sampler down or not yet started), never idle or busy."""
 
 
 @dataclass
@@ -103,13 +107,15 @@ def kind(row: dict) -> str:
 
 
 def minutes_per_step(rows: list[dict], spans: list[tuple[str, float, float]], every: float = EVERY_S) -> dict:
-    """{step: {busy, claimed, idle}} in minutes, each sample worth `every` seconds."""
-    count = {step: {"busy": 0, "claimed": 0, "idle": 0} for step, _, _ in spans}
-    for row in rows:
-        for step, start, end in spans:
-            if start <= row.get("ts", -1) < end:
-                count[step][kind(row)] += 1
-    return {step: {k: round(v * every / 60.0, 2) for k, v in got.items()} for step, got in count.items()}
+    """{step: {busy, claimed, idle, unsampled}} in minutes, each sample worth `every` seconds; the
+    rest of a step's span is unsampled (a step that runs twice sums both spans)."""
+    seconds = {step: dict.fromkeys(BUCKETS, 0.0) for step, _, _ in spans}
+    for step, start, end in spans:
+        inside = [row for row in rows if start <= row.get("ts", -1) < end]
+        for row in inside:
+            seconds[step][kind(row)] += every
+        seconds[step]["unsampled"] += max(0.0, end - start - len(inside) * every)
+    return {step: {k: round(v / 60.0, 2) for k, v in got.items()} for step, got in seconds.items()}
 
 
 def time_line(charged_s: float, wall_s: float, dead_s: float) -> str:
@@ -146,10 +152,12 @@ def step_spans(home) -> list[tuple[str, float, float]]:
 
 
 def finish_report(home, rows: list[dict] | None = None) -> str:
-    """finish_line, then busy/claimed/idle minutes per step when the GPU ledger's rows are given."""
+    """finish_line, then busy/claimed/idle/unsampled minutes per step when the GPU ledger's rows are
+    given; advisory, never a gate (an idle share as a wall is a constant calibrated on one episode)."""
     lines = [finish_line(home)]
     per = minutes_per_step(rows, step_spans(home)) if rows else {}
-    lines += [f"  step {s}: busy {m['busy']} | claimed {m['claimed']} | idle {m['idle']} min" for s, m in per.items()]
+    lines += [f"  step {s}: busy {m['busy']} | claimed {m['claimed']} | idle {m['idle']} | "
+              f"unsampled {m['unsampled']} min" for s, m in per.items()]
     return "\n".join(lines)
 
 
