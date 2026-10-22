@@ -368,10 +368,11 @@ def consistency_lines(outcomes: list[Outcome]) -> list[str]:
             f"{_line('false refusals on all rows', fr)}; weighted share {fr.weighted:.3f}"]
 
 
-def report(outcomes: list[Outcome], judge_name: str, version: str, machine_version: str = "") -> str:
+def report(outcomes: list[Outcome], judge_name: str, version: str, machine_version: str = "",
+           standing: str = "shipped") -> str:
     """The markdown for docs/calibration/<judge>.md: owner truth, then the ladder, the table, misses by path."""
     rate = flag_rate(outcomes)
-    lines = [f"## Bench {date.today().isoformat()} -- {judge_name}@{version}", "",
+    lines = [f"## Bench {date.today().isoformat()} -- {judge_name}@{version}", "", f"standing: {standing}", "",
              f"rows {len(outcomes)} ({unmeasured(outcomes)} without this judge's inputs, not counted); "
              f"machine_version {machine_version or 'n/a'}; "
              f"flag rate {rate['share']:.3f}; refused artefacts per unit {rate['per_unit']}; "
@@ -402,7 +403,7 @@ def main(argv: list[str]) -> int:
     entry = registry.get(argv[1])
     folder = episode_home.book_dir(argv[0]) / "casebook"
     outcomes = run(load_rows(folder, entry.kind), entry.judge, entry.classes)
-    print(report(outcomes, entry.name, entry.version))
+    print(report(outcomes, entry.name, entry.version, standing=entry.standing))
     return 0
 
 

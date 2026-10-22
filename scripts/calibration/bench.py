@@ -48,14 +48,14 @@ def outcomes_for(entry, folders: list[Path]) -> list[jb.Outcome]:
 
 
 def write(docs_dir: Path, name: str, outcomes: list[jb.Outcome], version: str,
-          machine_version: str = "") -> tuple[Path, Path]:
+          machine_version: str = "", standing: str = "shipped") -> tuple[Path, Path]:
     """Append the report to <name>.md (created with a heading when absent); replace bench/<name>.json."""
     doc, base = Path(docs_dir) / f"{name}.md", Path(docs_dir) / "bench" / f"{name}.json"
     doc.parent.mkdir(parents=True, exist_ok=True)
     base.parent.mkdir(parents=True, exist_ok=True)
     head = "" if doc.exists() else f"# {name} calibration\n\nBenched by scripts/calibration/bench.py against the casebooks.\n"
     with doc.open("a", encoding="utf-8") as fh:
-        fh.write(head + "\n" + jb.report(outcomes, name, version, machine_version))
+        fh.write(head + "\n" + jb.report(outcomes, name, version, machine_version, standing))
     base.write_text(json.dumps(jb.baseline(outcomes, name, version, machine_version), indent=2), encoding="utf-8")
     return doc, base
 
@@ -98,7 +98,7 @@ def machine_version() -> str:
 def bench_one(name: str, folders: list[Path], docs_dir: Path = DOCS) -> dict:
     entry = registry.get(name)
     outcomes = outcomes_for(entry, folders)
-    doc, base = write(docs_dir, name, outcomes, entry.version, machine_version())
+    doc, base = write(docs_dir, name, outcomes, entry.version, machine_version(), entry.standing)
     append_ledger(Path(docs_dir) / "bench" / "caught.jsonl", name, jb.caught(outcomes))
     r = jb.recall(outcomes, "owner")
     return {"judge": name, "rows": len(outcomes), "recall_owner": f"{r.k}/{r.n}",

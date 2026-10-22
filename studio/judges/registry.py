@@ -11,6 +11,14 @@ stored flag is the verdict, and the wrapper says so in its values.
 A judge returns {"refused": bool, "classes": [fault classes], "values": {}}.
 Its `version` is the sha8 of the module it wraps: a changed wall is a
 changed version, and the baseline records which one it was benched on.
+Its `standing` says what the bench may read into it: `shipped`, or why not.
+
+A NEW VLM second-opinion reader is registered through `vlm_entry` (fleet H
+ruling A20): it may flag, never refuse -- and so never remove a flag another
+judge raised -- until its calibration record meets PREREG B1 rule 4 (one-sided
+Clopper-Pearson lower bounds of 0.80 on sensitivity and specificity, over 30
+owner faults and 30 owner passes) AND the owner says go.  The VLM refusals
+that exist today (panel_content) are untouched: demoting them is the owner's.
 """
 from __future__ import annotations
 
@@ -20,8 +28,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from studio import face_end as fe, panel_content, panel_dq as pd, take_look as tl, take_verdict as tv, take_zoom as tz
+from studio import (face_end as fe, intervals, panel_content, panel_dq as pd, stillness as st, take_look as tl,
+                    take_verdict as tv, take_zoom as tz, warp_gate as wg)
 from studio.casebook import Row
+from studio.measure import mouth
 
 Judge = Callable[[Row], dict]
 
@@ -33,6 +43,7 @@ class Entry:
     classes: tuple[str, ...]
     version: str
     judge: Judge
+    standing: str = "shipped"
 
 
 def module_version(module) -> str:
@@ -144,6 +155,73 @@ def take_verdict_judge(row: Row) -> dict:
     return refusal(not passed, [GATE_CLASS.get(n, "unknown") for n in failing], {"score": score, "failing": failing})
 
 
+def measure_of(row: Row, name: str) -> dict | None:
+    return ((row.machine.get("take_dq") or {}).get("measures") or {}).get(name)
+
+
+def stillness_judge(row: Row) -> dict:
+    """`stillness.is_still` on the stored frozen-whole share and the take's seconds; a planned still is exempt
+    and a row the grammar demoted to an advisory refuses nothing."""
+    g, seconds = gate_of(row, "frozen-whole"), (row.machine.get("take_dq") or {}).get("seconds")
+    if not g or g.get("value") is None or seconds is None:
+        return refusal(False, [], {"note": "not measured"})
+    note = g.get("note", "")
+    exempt = "(planned still)" in note or "ADVISORY" in note
+    still = st.is_still({"static_share": float(g["value"])}, float(seconds), exempt)
+    return refusal(still, ["frozen_share"], {"static_share": g["value"], "seconds": seconds})
+
+
+def warp_judge(row: Row) -> dict:
+    """`warp_gate.row` on the stored G-WARP measure: HARD on S over its wall only, the state recomputed."""
+    m = measure_of(row, "warp")
+    if not m or "share" not in m:
+        return refusal(False, [], {"note": "not measured"})
+    gate = wg.row(m)
+    return refusal(gate.hard and not gate.ok, ["blur_warp"], {"S": m.get("S"), "note": gate.note})
+
+
+def mouth_lag_judge(row: Row) -> dict:
+    """`mouth.row` on the stored mouth-to-voice lag: out of tolerance is a flag (production keeps it advisory)."""
+    got = measure_of(row, "lag")
+    if not got or not got.get("measured"):
+        return refusal(False, [], {"note": "not measured"})
+    gate = mouth.row(got)
+    return refusal(not gate.ok, ["lip_lag"], {"lag_frames": got.get("lag_frames"), "note": gate.note})
+
+
+# ---- new VLM readers: flag only until calibrated (A20) ----------------------------
+
+VETO_LOWER, VETO_N = 0.80, 30
+"""PREREG B1 rule 4: both one-sided CP lower bounds >= 0.80, on >= 30 owner faults and >= 30 owner passes."""
+
+
+def may_refuse(calibration: dict | None) -> bool:
+    """A VLM reader's record clears rule 4 and carries the owner's go."""
+    c = calibration or {}
+    if c.get("faults", 0) < VETO_N or c.get("passes", 0) < VETO_N or c.get("owner_go") is not True:
+        return False
+    return (intervals.cp_lower(c["caught"], c["faults"]) >= VETO_LOWER
+            and intervals.cp_lower(c["cleared"], c["passes"]) >= VETO_LOWER)
+
+
+def flag_only(judge: Judge) -> Judge:
+    """The reader's word kept as flags in its values; its refusal never stands."""
+    def flagged(row: Row) -> dict:
+        said = judge(row)
+        values = dict(said.get("values") or {})
+        values["flags"] = sorted(set(said.get("classes") or [])) if said.get("refused") else []
+        return refusal(False, [], values)
+    return flagged
+
+
+def vlm_entry(name: str, kind: str, classes: tuple, version: str, judge: Judge,
+              calibration: dict | None = None) -> Entry:
+    """A new VLM second opinion's entry: flag only unless its calibration may refuse."""
+    if may_refuse(calibration):
+        return Entry(name, kind, classes, version, judge, "veto: calibrated past B1 rule 4, owner go")
+    return Entry(name, kind, classes, version, flag_only(judge), "flag only: uncalibrated VLM reader (A20)")
+
+
 # ---- panel judges ---------------------------------------------------------------
 
 PANEL_CLASS = {"people": "extra_people", "clone": "copies", "missing": "missing_people", "blur": "blur_warp",
@@ -197,6 +275,12 @@ JUDGES = {
     "panel_dq": Entry("panel_dq", "panel", tuple(sorted(set(PANEL_CLASS.values()))), module_version(pd), panel_dq_judge),
     "panel_content": Entry("panel_content", "panel", ("copies", "extra_people", "missing_people", "lettering", "posture", "hour", "landform"),
                            module_version(panel_content), panel_content_judge),
+    "stillness": Entry("stillness", "take", ("frozen_share",), module_version(st), stillness_judge,
+                       "uncertified, log only: the flow core under-reads 33-58 % on a dark, flat frame (fleet H skeptic F1)"),
+    "warp_gate": Entry("warp_gate", "take", ("blur_warp",), module_version(wg), warp_judge,
+                       "shipped; fitted on 27 clips with no owner labels"),
+    "mouth_lag": Entry("mouth_lag", "take", ("lip_lag",), module_version(mouth), mouth_lag_judge,
+                       "advisory: production never refuses on it; no mouth reader passes the exam (2026-10-21)"),
 }
 
 

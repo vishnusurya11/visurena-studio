@@ -145,10 +145,15 @@ def zoom_summary(z: dict | None) -> dict | None:
     return out
 
 
+KEPT_MEASURES = ("warp", "lag")
+"""The dq record's measures a registered judge re-reads (warp_gate, mouth_lag); the rest stay on disk."""
+
+
 def dq_summary(rec: dict, planned: dict) -> dict:
     return {"score": rec.get("score"), "passed": rec.get("passed"), "attempt": rec.get("attempt", 0),
             "file": rec.get("file"), "gates": rec.get("gates", []), "zoom": zoom_summary(rec.get("zoom")),
-            "planned": planned, "take_sha8": rec.get("take_sha8", "")}
+            "planned": planned, "take_sha8": rec.get("take_sha8", ""), "seconds": rec.get("seconds"),
+            "measures": {k: v for k, v in (rec.get("measures") or {}).items() if k in KEPT_MEASURES}}
 
 
 GATE_CLASS = {"warp": "blur_warp", "frozen-whole": "frozen_share", "frozen-share": "frozen_share",
