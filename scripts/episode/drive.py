@@ -194,11 +194,12 @@ def preflight(book: Path, number: int, env: Path | None = None, now: float | Non
 
 def audit_lines(book: Path, number: int) -> list[str]:
     """The chapter audit's parks (scripts/proof/preconditions.py, imported, never moved: the proof harness owns
-    it); a book whose records cannot be read is said, never a crash."""
-    from scripts.proof import preconditions as proof
+    it); a book whose records cannot be read, or an audit that breaks, is said, never a crash (the harness is
+    still in build: a fault in its file must not stop a production launch)."""
     try:
+        from scripts.proof import preconditions as proof
         out = proof.pre.audit(book, number)
-    except (OSError, ValueError, KeyError, TypeError) as why:
+    except Exception as why:
         return [f"preflight: book records not read ({type(why).__name__}: {str(why)[:120]})"]
     return [finding(g) for g in out["gaps"] if g["outcome"] == "park"]
 

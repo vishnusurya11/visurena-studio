@@ -89,6 +89,17 @@ def test_an_unreadable_book_is_said_and_never_crashes(tmp_path, env):
     assert any(l.startswith("preflight: book records not read") for l in lines) and not drive.refusals(lines)
 
 
+def test_an_audit_that_breaks_never_stops_the_launch(book, env, monkeypatch):
+    """Wave-3 review: the audit is the proof harness's file, still in build; any fault in it (here an
+    AttributeError, the four caught types aside) is said, and never refuses or crashes the drive at t=0."""
+    def broken(b, n):
+        raise AttributeError("'NoneType' object has no attribute 'get'")
+    monkeypatch.setattr(proof.pre, "audit", broken)
+    lines = drive.preflight(book, 2, env, NOW)
+    assert any(l.startswith("preflight: book records not read (AttributeError") for l in lines)
+    assert not drive.refusals(lines)
+
+
 def test_the_launch_refuses_at_t0_on_a_refuse_now_line(tmp_path, monkeypatch):
     said = []
     monkeypatch.setattr(drive, "git", lambda *a: "" if a[0] == "status" else "abc123")
