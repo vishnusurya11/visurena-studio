@@ -93,11 +93,13 @@ def ep01_audited() -> dict[int, ti.Inputs]:
     return {int(r["index"]): ti.check(BOOK / r["rel_path"], [], built.get(int(r["index"]))) for r in records()}
 
 
-def test_ep01_has_27_takes_from_older_words_and_8_failing_a_current_hard_rule():
+def test_ep01_has_27_takes_from_older_words_and_9_failing_a_current_hard_rule():
+    """8 night takes lit by a sun (L28), and T01's rendered "in profile,, feet" since craft ruling A18
+    widened L19 to the doubled comma."""
     block = ti.words(ep01_audited(), records(), BOOK, night())
     assert len(block["reworded"]) == 27 and block["reworded"][0] == "T00" and "T01" not in block["reworded"]
-    assert sorted(block["fail"]) == ["T00", "T06", "T07", "T08", "T09", "T10", "T11", "T12"]
-    assert block["line"] == ("words: 27 of 28 rendered from older words; 8 of 28 fail a current HARD rule, at "
+    assert sorted(block["fail"]) == ["T00", "T01", "T06", "T07", "T08", "T09", "T10", "T11", "T12"]
+    assert block["line"] == ("words: 27 of 28 rendered from older words; 9 of 28 fail a current HARD rule, at "
                              "least (L7 L9 L10 L11 L12 L16 L17 unread) (advisory under freeze)")
 
 
@@ -107,5 +109,5 @@ def test_the_qc_block_carries_the_words_and_the_wall_does_not_read_them():
                                                         read(BOOK / "episodes" / "ep01" / "plan.json")["setups"].items()}))
     report = {"inputs": {"ok": True, "line": "inputs: all 28 takes current"}}
     out = qc.words_rows(i, report, audited=ep01_audited())
-    assert out["inputs"]["words"]["line"].startswith("words: 27 of 28 rendered from older words; 8 of 28 fail")
+    assert out["inputs"]["words"]["line"].startswith("words: 27 of 28 rendered from older words; 9 of 28 fail")
     assert qc.inputs_ok(out) is True

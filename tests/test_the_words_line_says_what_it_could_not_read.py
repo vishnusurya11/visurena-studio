@@ -54,7 +54,7 @@ def test_a_take_with_no_recorded_prompt_is_not_counted_as_compared(tmp_path):
 
 def test_the_ep01_line_counts_what_it_compared_and_names_the_rules_it_could_not_feed():
     block = ti.words(audited(ti.built_prompts(TAKES)), records(), BOOK, night())
-    assert block["line"].startswith("words: 27 of 28 rendered from older words; 8 of 28 fail a current HARD rule")
+    assert block["line"].startswith("words: 27 of 28 rendered from older words; 9 of 28 fail a current HARD rule")
     assert "at least" in block["line"] and "L16" in block["line"] and "L7" in block["line"]
     assert block["line"].endswith("(advisory under freeze)")
 
