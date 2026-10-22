@@ -183,6 +183,21 @@ def quote_to_narration(plan: dict, k: int) -> dict:
     return renumbered(plan, lines)
 
 
+def silence_line(plan: dict, k: int) -> dict:
+    """Line k told as a tale, word for word: its face still speaks on the shot, with no lips driven."""
+    lines = copy.deepcopy(plan["lines"])
+    lines[k] = {**lines[k], "kind": "tale"}
+    return renumbered(plan, lines)
+
+
+def silenceable(plan: dict) -> list[int]:
+    """Dialogue lines whose shot says its face speaks (G-MUTE's verbs): told as a tale, that face is mute."""
+    from studio import screenplay_grammar as sg
+    shots = {s["index"]: s for s in plan.get("shots") or []}
+    return [k for k, l in enumerate(plan.get("lines") or []) if l["kind"] == "dialogue"
+            and any(sg.SPEECH_VERB.search(str(shots.get(l["shot"], {}).get(f) or "")) for f in sg.MUTE_FIELDS)]
+
+
 def runs(text: str, n: int = 4) -> set[str]:
     words = normal(text).split()
     return {" ".join(words[i:i + n]) for i in range(len(words) - n + 1)}
@@ -239,6 +254,8 @@ def mutants(plan: dict, paragraphs: list[str]) -> list[dict]:
            for k in prompt_lines(plan)]
     out += [{"name": f"quote {k} into narration", "expect": "stolen_line", "plan": quote_to_narration(plan, k)}
             for k in stealable(plan, paragraphs)]
+    out += [{"name": f"dialogue {k} told as a tale", "expect": "silent_speaker", "plan": silence_line(plan, k)}
+            for k in silenceable(plan)]
     return out + [{"name": f"drop paragraph {j}", "expect": "paragraph_hole",
                    "plan": drop_paragraph(plan, paragraphs, j)} for j in dialogue_paragraphs(plan, paragraphs)]
 

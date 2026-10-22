@@ -1752,6 +1752,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-SOURCE shot \d+: span .* is not in the chapter"), "source_spans"),
     (re.compile(r"QUOTE\s+: \["), "quote_trim"),
     (re.compile(r"carries a gap mark"), "strip_gap_marks"),      # A6: the CONTRACT row
+    (re.compile(r"G-MUTE shot \d+"), "mute_listens"),            # A8: shadow today, so repair never sees it
     # The stage families sit ABOVE the legal_props catch-all: its bare 'prop '
     # alternative would otherwise swallow them into a no-op cure.
     (re.compile(r"G-STAGE setup \S+: bare creature word"), "strip_creatures"),
@@ -1895,6 +1896,25 @@ def strip_gap_marks(doc: dict) -> dict:
         if "\u2026" in text:
             text = GAP.sub(" ", text).strip()
             line["text"] = text if not text or text[-1] in ".!?" else text + "."
+    return doc
+
+
+def listened(verb: str) -> str:
+    """The listening form of a speech verb: speaks -> listens, answering -> listening, said -> listened."""
+    low = verb.lower()
+    form = ("listening" if low.endswith("ing") else "listens" if low.endswith("s")
+            else "listened" if low in ("spoke", "said", "told") or low.endswith("ed") else "listen")
+    return form.capitalize() if verb[0].isupper() else form
+
+
+def mute_listens(doc: dict, indices: list[int]) -> dict:
+    """G-MUTE's free cure (craft ruling A8): on each named shot every speech verb in frame, motion
+    and at_rest becomes a listening verb; a shot whose face speaks is never named."""
+    from studio.screenplay_grammar import MUTE_FIELDS, SPEECH_VERB
+    for s in doc.get("shots") or []:
+        if s.get("index") in indices:
+            for field in MUTE_FIELDS:
+                s[field] = SPEECH_VERB.sub(lambda m: listened(m.group(0)), s.get(field) or "")
     return doc
 
 

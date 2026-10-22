@@ -15,6 +15,8 @@ advice on every older plan.  $0.
 """
 from __future__ import annotations
 
+import re
+
 from studio import story_layer
 from studio.episode_spec import ACTS, HANDLE, INNER_MAX_WORDS
 from studio.plan_gates import CAPTION_WALL, fault, held_seconds
@@ -182,6 +184,43 @@ def inner_advisories(episode) -> list[str]:
     said = [l.index for l in episode.lines if l.kind == "inner"]
     return [f"G-INNER lines {said}: the inner voice (hushed in the speaker's own engine, close-mic in "
             f"assemble) is ADVISORY until the owner has heard it"] if said else []
+
+
+# ---- G-MUTE: no speech verb on a face that does not speak (craft ruling A8, shadow) -------------------
+
+SPEECH_VERB = re.compile(r"\b(speak|speaks|speaking|spoke|say|says|saying|said|answer|answers|answering|answered|"
+                         r"ask|asks|asking|asked|tell|tells|telling|told|reply|replies|replying|replied|"
+                         r"shout|shouts|shouting|shouted|scream|screams|screaming|screamed)\b", re.I)
+"""What H3 reads as a moving mouth.  Take audio carries dialogue only (takes_r2v.py:693-703)."""
+MUTE_SIZES = ("extreme_close", "close", "medium_close", "medium")
+"""Sizes whose mouth reads; a full or wide's scream is the take-prompt C13 class, not this one."""
+MUTE_FIELDS = ("frame", "motion", "at_rest")
+
+
+def _get(row, key):
+    return row.get(key) if isinstance(row, dict) else getattr(row, key, None)
+
+
+def speaks_on(lines: list[dict], shot) -> bool:
+    """A face of this shot has a DIALOGUE line on it (a tale or narration drives no lips)."""
+    faces = set(_get(shot, "faces") or [])
+    return any(l.get("kind") == "dialogue" and l.get("shot") == _get(shot, "index") and l.get("speaker") in faces
+               for l in lines)
+
+
+def mute_faults(plan, paragraphs=()) -> list[str]:
+    """G-MUTE (shadow): a speech verb in a readable face's frame, motion or at_rest with no dialogue
+    line of that face's on the shot.  Jekyll ep01: shots 13 ("speaking") and 15 ("answering")."""
+    shots = plan.get("shots") if isinstance(plan, dict) else getattr(plan, "shots", None)
+    lines, out = story_layer._rows(plan), []
+    for shot in shots or []:
+        if _get(shot, "size") not in MUTE_SIZES or not _get(shot, "faces") or speaks_on(lines, shot):
+            continue
+        verbs = [m.group(0) for f in MUTE_FIELDS for m in SPEECH_VERB.finditer(str(_get(shot, f) or ""))]
+        if verbs:
+            out.append(fault("G-MUTE", f"shot {_get(shot, 'index')}", "a speech verb on a face with no dialogue "
+                             "line on its shot (a tale or narration drives no lips)", ", ".join(verbs), "listens"))
+    return out
 
 
 def location_of(episode, setup: str) -> str:
