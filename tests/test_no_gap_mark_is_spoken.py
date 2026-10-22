@@ -23,8 +23,15 @@ def line(text: str) -> episode_spec.Line:
 
 
 def test_the_screenplays_gap_mark_is_a_contract_fault():
+    # the Episode refuses it, because only the plan knows whether its book uses the mark (wave 1
+    # review, finding 6: tests/test_a_gap_mark_the_book_has_is_spoken.py); a bare Line cannot say
+    import json
+    doc = json.loads((Path(__file__).parent / "fixtures" / "craft" / "episodes" / "ep01" / "plan.json")
+                     .read_text(encoding="utf-8"))
+    next(l for l in doc["lines"] if l["index"] == 3)["text"] = SEEK
     with pytest.raises(ValidationError, match="line 3 carries a gap mark"):
-        line(SEEK)
+        episode_spec.Episode(**doc)
+    assert line(SEEK).text == SEEK
 
 
 def test_the_books_own_three_dots_still_pass():

@@ -2411,7 +2411,7 @@ the same folder. What the debate settled, and what the bench then measured:
 - **Wave 1 (craft A4-A16, 2026-10-21).** Brief: `dialogue_room` (a share of the plan's own words; ep01
   had 1-2 spare, not 26), `voices_kept` beside `max_voices`, one screenplay scene per adjacent beat+room
   run (ch1 3 -> 1), invented elements marked, "the chapter wins"; the tease only from NEXT CHAPTER rows.
-  Contract: no `\u2026` gap mark in a line (free cure). Shadow rows, printed by plan_check CRAFT SHADOW
+  Contract: no `…` gap mark in a line (free cure). Shadow rows, printed by plan_check CRAFT SHADOW
   and never counted (replay on 42 plans; approved = WotW ep01-03, Scarlet ep05/07): G-MUTE 20 fires,
   approved 0, recall 100/100; G-STOLEN 63, approved 13 (Watson relaying an account: no cure without the
   owner); ORPHAN-REPLY read 16, 3 fires, recall 3/3 (Wilson low 0.44: the bar needs 9 mutants, the disk
@@ -2425,6 +2425,8 @@ the same folder. What the debate settled, and what the bench then measured:
   (`screenplay_grammar.silent_sense`). Its listens cure rewrites only a verb with no object after it;
   "tells Utterson the story" is left as written and still reports. QC's voice floor row reads a
   lines.json it cannot parse, or one with no list of lines, as "not measured" (`qc.line_rows`).
+  A `…` is refused only when the chapter does not use it: `Episode.book_gap_mark`, set from the
+  book by `plan_gates.at_series_rate`; the strip cure closes the gap before punctuation.
 - **A ruler finds a known shift before it reads a take** (lip-sync GAVEL, 2026-10-21, ruling 11).
   `measure/mouth.lag` took the z-scored `voice_envelope` through `av_sync.envelope` again, whose
   `np.abs` folded every silence into a bump: a mouth open on voice_22's words k frames late read

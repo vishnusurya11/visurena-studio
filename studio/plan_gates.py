@@ -2090,7 +2090,17 @@ def at_series_rate(doc: dict, book, number: int) -> dict:
     when it carries none (a draft written before the rate was persisted: ep19's
     aside, 2026-10-06), so the contract projects at the pace the battery and
     the cures measure by -- an aside cured to 134 s at 2.5 w/s read as 117 s
-    at the default 3.0 and the repair threw the cure away."""
+    at the default 3.0 and the repair threw the cure away.  It also sets the
+    book's one typographic fact the contract cannot read itself: `book_gap_mark`."""
     if not doc.get("words_per_second"):
         doc["words_per_second"] = series_rate(book, number)
+    doc["book_gap_mark"] = book_gap_mark(book, number)
     return doc
+
+
+def book_gap_mark(book, number: int) -> bool:
+    """The chapter's own text uses the gap mark `…`, so a line's `…` is the book's (craft ruling A6:
+    only a mark the book does not have is refused; wave 1 review, finding 6)."""
+    from studio import plan_brief
+    from studio.episode_spec import GAP_MARK
+    return any(GAP_MARK in p for p in plan_brief.chapter_paragraphs(Path(book), number)[1])

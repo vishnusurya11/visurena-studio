@@ -214,16 +214,6 @@ class Line(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def _no_gap_mark(self) -> "Line":
-        # craft ruling A6: the screenplay cut a tag out of a quote and left its gap mark ("If he
-        # be Mr. Hyde, … I shall be Mr. Seek."); TTS reads it as a pause the book never had.
-        # The book's own ASCII "..." is not this mark.  Free cure: plan_cures.strip_gap_marks.
-        if GAP_MARK in self.text:
-            raise ValueError(f"line {self.index} carries a gap mark ({GAP_MARK}); a cut in a quote is not "
-                             f"spoken -- say the line whole")
-        return self
-
-    @model_validator(mode="after")
     def _short_enough_to_land(self) -> "Line":
         if self.words() > MAX_WORDS:
             raise ValueError(f"line {self.index} is {self.words()} words; the wall is {MAX_WORDS}")
@@ -541,6 +531,10 @@ class Episode(BaseModel):
     the brief knows it (plan_brief.band), else the contract's projection.  The
     brief and the contract must agree (ep22, 2026-10-07: 2.5 against 3.0 and an
     honest plan 'projects to 106 s')."""
+    book_gap_mark: bool = False
+    """The chapter's own text uses the gap mark `…` (plan_gates.at_series_rate sets it from the
+    book): then a line's `…` is the book's and is spoken.  Craft ruling A6 refuses only a mark
+    the book does not have (wave 1 review, finding 6)."""
     question: str = ""
     """The one question this episode answers, in Armstrong's form: "Today, can
     X do Y?"  Answered before the episode ends, or the episode has no reason to
@@ -861,6 +855,17 @@ class Episode(BaseModel):
                                  f"lips stay in one readable frame)")
             if self.shot_seconds(shot) - shot.cuts[-1].at_s < MIN_SUB:
                 raise ValueError(f"shot {shot.index}: the last sub-shot projects shorter than {MIN_SUB} s")
+        return self
+
+    @model_validator(mode="after")
+    def _no_gap_mark_the_book_lacks(self) -> "Episode":
+        # craft ruling A6: the screenplay cut a tag out of a quote and left its gap mark ("If he
+        # be Mr. Hyde, … I shall be Mr. Seek."); TTS reads it as a pause the book never had.
+        # The book's own ASCII "..." is not this mark.  Free cure: plan_cures.strip_gap_marks.
+        for line in [] if self.book_gap_mark else self.lines:
+            if GAP_MARK in line.text:
+                raise ValueError(f"line {line.index} carries a gap mark ({GAP_MARK}) the book does not have; "
+                                 f"a cut in a quote is not spoken -- say the line whole")
         return self
 
     @model_validator(mode="after")

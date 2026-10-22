@@ -1886,6 +1886,8 @@ def body_clause(doc: dict) -> dict:
 
 
 GAP = re.compile(r"\s*\u2026+\s*")
+SPACE_BEFORE_STOP = re.compile(r"\s+([,;:.!?])")
+"""The gap a stripped mark leaves before punctuation: "Wait \u2026, I go." must not read "Wait , I go."."""
 
 
 def strip_gap_marks(doc: dict) -> dict:
@@ -1894,7 +1896,7 @@ def strip_gap_marks(doc: dict) -> dict:
     for line in doc.get("lines") or []:
         text = str(line.get("text") or "")
         if "\u2026" in text:
-            text = GAP.sub(" ", text).strip()
+            text = SPACE_BEFORE_STOP.sub(r"\1", GAP.sub(" ", text)).strip()
             line["text"] = text if not text or text[-1] in ".!?" else text + "."
     return doc
 
