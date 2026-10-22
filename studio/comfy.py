@@ -14,6 +14,7 @@ import os
 import shutil
 import time
 import urllib.request
+import uuid
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
@@ -139,23 +140,21 @@ def _open(request, timeout: float = 60.0):
             time.sleep(RESTART_POLL)
 
 
-def save_prefix(graph: dict) -> str | None:
-    """The `filename_prefix` a graph writes under: its identity in the queue."""
-    for node in graph.values():
-        if node.get("class_type", "").startswith("Save"):
-            got = node.get("inputs", {}).get("filename_prefix")
-            if got:
-                return got
-    return None
-
-
-def already_queued(queue: dict, prefix: str) -> str | None:
-    """The prompt id of a running or pending job writing `prefix`, if any."""
+def already_queued(queue: dict, prompt_id: str) -> str | None:
+    """`prompt_id` when a running or pending job carries it, else None.  The job's identity is the
+    client id `submit` posted, never its `filename_prefix`: `trailer_say`, `ep_bed` and `ep_title`
+    are constants and `ep_take_05` names no episode, so a prefix adopted another job (fleet E A4)."""
     for key in ("queue_running", "queue_pending"):
-        for item in queue.get(key, []):
-            if len(item) > 2 and save_prefix(item[2]) == prefix:
-                return item[1]
+        if any(len(item) > 1 and item[1] == prompt_id for item in queue.get(key, [])):
+            return prompt_id
     return None
+
+
+def took(prompt_id: str) -> bool:
+    """The engine holds the job: queued, running, or already in its history."""
+    if already_queued(reachable(_get, "/queue") or {}, prompt_id):
+        return True
+    return bool((reachable(_get, f"/history/{prompt_id}") or {}).get(prompt_id))
 
 
 CLAIM_WAIT_S = 30.0
@@ -194,12 +193,13 @@ def submit(workflow: dict, timeout: float = 180.0) -> str:
     busy ComfyUI answers slowly while having ALREADY queued the job.  MEASURED
     on WotW ep04 (2026-09-19): take 11 was queued SEVEN times and take 01 twice
     behind a 694 s take, ~45 min of GPU spent rendering the same seed.  So a
-    timeout here asks the queue whether the job landed instead of re-POSTing."""
+    timeout here asks the engine whether the job landed instead of re-POSTing, by the client
+    prompt id this POST carries (one id, so the second POST, if any, cannot run twice either)."""
     wait_foreign_claims()
-    body = json.dumps({"prompt": workflow}).encode("utf-8")
+    own = str(uuid.uuid4())
+    body = json.dumps({"prompt": workflow, "prompt_id": own}).encode("utf-8")
     request = urllib.request.Request(
         f"{HOST}/prompt", data=body, headers={"Content-Type": "application/json"})
-    prefix = save_prefix(workflow)
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return accepted(json.loads(response.read()))
@@ -207,9 +207,8 @@ def submit(workflow: dict, timeout: float = 180.0) -> str:
         if isinstance(failure, urllib.error.HTTPError):
             raise RuntimeError(
                 f"ComfyUI rejected the workflow: {failure.read().decode()[:900]}") from None
-        landed = already_queued(reachable(_get, "/queue") or {}, prefix) if prefix else None
-        if landed:
-            return landed
+        if took(own):
+            return own
         with _open(request) as response:                 # engine really was down
             return accepted(json.loads(response.read()))
 
