@@ -189,12 +189,19 @@ def location_of(episode, setup: str) -> str:
     return str(getattr(found, "location", "") or setup)
 
 
-def tease_advisories(episode) -> list[str]:
-    """G-TEASE (advisory): the tease names its image and loops to the hook's place."""
+NOT_ASKED = "G-TEASE: tease not asked (the brief gave no NEXT CHAPTER rows); advisory, never a fault"
+
+
+def tease_advisories(episode, next_rows=None) -> list[str]:
+    """G-TEASE (advisory): the tease names its image and loops to the hook's place.  Without the
+    brief's NEXT CHAPTER rows a tease was never asked (craft ruling A13: the writer is never given
+    chapter N+1, and 0 of 30 plans managed one), so it says so and reads nothing else."""
     shots = cut(episode)
     tease = [s for s in shots if s.section == "tease"]
     if not tease:
         return []
+    if not next_rows:
+        return [NOT_ASKED]
     out = [] if getattr(episode, "tease", "") else ["G-TEASE: the plan's `tease` names no next-chapter image"]
     if location_of(episode, tease[0].setup) != location_of(episode, shots[0].setup):
         out.append(f"G-TEASE shot {tease[0].index}: the tease does not return to the hook's place "

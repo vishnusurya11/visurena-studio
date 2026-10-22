@@ -100,9 +100,9 @@ amount). Every number below is in `grammar_rules`; count them.
   shot (G-MA).
 - `motif`: the book's recurring image (the band's `motif`, else name it once in
   the first episode). The hook shows it.
-- Optional TEASE: one last shot, `section: "tease"`, after the button, picture
-  only, `coda_s` 2-4 s, at the hook's place, showing the NEXT chapter's first
-  image; name that image in `tease`.
+- Optional TEASE, only from the NEXT CHAPTER rows when the brief gives them:
+  a last silent shot, `section: "tease"`, `coda_s` 2-4 s, at the hook's place,
+  their motif image named in `tease`.
 
 ---
 

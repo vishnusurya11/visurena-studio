@@ -115,9 +115,10 @@ def test_a_tease_loops_to_the_hooks_place():
     setups = {"door": SimpleNamespace(location="door"), "desk": SimpleNamespace(location="study")}
     shots = [_shot(0, "hook", setup="door"), _shot(1, "button"), _shot(2, "tease", setup="desk", faces=())]
     ep = _ep(shots, setups=setups, tease="the lawyer at his desk")
-    assert sg.tease_advisories(ep)
+    rows = ["the lawyer at his desk"]                       # the brief's NEXT CHAPTER rows (A13)
+    assert sg.tease_advisories(ep, rows)
     shots[2].setup = "door"
-    assert sg.tease_advisories(ep) == []
+    assert sg.tease_advisories(ep, rows) == []
 
 
 def test_the_screenplay_numbers_are_one_table():
