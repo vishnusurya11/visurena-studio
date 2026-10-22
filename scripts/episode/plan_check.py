@@ -325,8 +325,13 @@ def shadow_rows(ep, book: Path, number: int) -> list[str]:
 
 def craft_shadow_gate(ep, book: Path, number: int) -> int:
     """Shadow rows print as advice and never count: each earns a wall only through
-    scripts/episode/screenplay_replay.py (readable plans, approved plans, recall on mutations)."""
-    found = shadow_rows(ep, book, number)
+    scripts/episode/screenplay_replay.py (readable plans, approved plans, recall on mutations).
+    A detector that cannot read the plan says so, and the HARD gates after it still run."""
+    try:
+        found = shadow_rows(ep, book, number)
+    except Exception as why:          # a report row never stops step 02 (wave 1 review, finding 1)
+        print("CRAFT SHADOW : not measured", f"({type(why).__name__}: {(str(why).splitlines() or [''])[0][:140]})")
+        return 0
     print("CRAFT SHADOW :", f"{len(found)} advisory" if found else "clean")
     for f in found:
         print("  advisory:", f[:170])
