@@ -415,6 +415,36 @@ def voice_floor_rows(i: SimpleNamespace, report: dict) -> dict:
     return report
 
 
+GRAMMAR = "locked on the grammar"
+"""The words a take wall row the grammar demoted carries (stillness.advisory_note and its older form)."""
+
+
+def cross_stage(take_dir: Path, home: Path) -> dict:
+    """Craft ruling A26: the take HARD rows the grammar demoted, beside the plan cures that lock those shots
+    (`registry.CROSS_STAGE`), as one known pair.  Report only."""
+    from studio.judges import registry
+    gates = [g for p in sorted(Path(take_dir).glob("T??.dq.json"))
+             for g in (json.loads(p.read_text(encoding="utf-8")).get("gates") or [])]
+    demoted = sum(g.get("name") in registry.CROSS_STAGE and GRAMMAR in str(g.get("note") or "") for g in gates)
+    cures = Path(home) / "plan.cures.jsonl"
+    rows = [json.loads(l) for l in cures.read_text(encoding="utf-8").splitlines() if l.strip()] if cures.exists() else []
+    holds = sum("hold_extra_pushes" in (r.get("cures") or []) for r in rows)
+    return {"demoted": demoted, "holds": holds,
+            "line": f"cross-stage: {demoted} take HARD rows demoted ({GRAMMAR}); {holds} hold_extra_pushes plan "
+                    f"cures (a known pair, reported, not muted: the shot-framework panel's question)"}
+
+
+def cross_stage_rows(i: SimpleNamespace, report: dict) -> dict:
+    """The cross-stage block, inside the inputs block (never in the verdict); a file it cannot read is "not
+    measured", never a failed step 11."""
+    try:
+        block = cross_stage(i.take_dir, episode_home.home(i.book, i.number))
+    except Exception as why:
+        block = {"line": f"cross-stage: not measured ({type(why).__name__}: {str(why)[:120]})"}
+    report.setdefault("inputs", {})["cross_stage"] = block
+    return report
+
+
 def inputs_ok(report: dict) -> bool:
     """HARD: no take in the master was rendered from a superseded or redrawn
     picture.  A report written before the row existed carries no block."""
@@ -580,7 +610,7 @@ def with_lines(report: dict, hear, spent: bool = False) -> dict:
 def measure(book_id: str, number: int, engine: str, listen, spent: bool = False) -> dict:
     """The whole report: the cheap rows, then (if they pass) every line heard."""
     i = load_inputs(book_id, number, engine)
-    report = voice_floor_rows(i, inputs_rows(i, edit_rows(i, head_rows(i))))
+    report = cross_stage_rows(i, voice_floor_rows(i, inputs_rows(i, edit_rows(i, head_rows(i)))))
     report = with_lines(report, lambda: heard_on_master(i.master, i.lines, i.work, listen), spent)
     report["passed"] = verdict(report)
     return report
@@ -632,6 +662,8 @@ def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) ->
         print(words["line"])
     if floor := report["inputs"].get("voice_floor"):
         print(floor["line"])
+    if pair := report["inputs"].get("cross_stage"):
+        print(pair["line"])
     for take, row in report["inputs"]["stale"].items():
         print(f"  {take}: stale {row['stale']} superseded {row['superseded']} missing {row['missing']}")
     for sheet in report["sheets"]:

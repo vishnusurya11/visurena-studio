@@ -119,6 +119,11 @@ def look_judge(row: Row) -> dict:
     return refusal(gate.hard and not gate.ok, ["no_black_floor"], {"p5": m["p5"], "note": gate.note})
 
 
+CROSS_STAGE = {"frozen-whole": "hold_extra_pushes"}
+"""A take wall whose HARD rows a plan cure feeds (craft ruling A26): the plan's `hold_extra_pushes` locks a
+shot, and the take gate's frozen-whole row on it is demoted "locked on the grammar".  QC prints both counts as
+one known pair; whether holds should move is the shot-framework panel's question, so nothing is muted here."""
+
 GATE_CLASS = {"frozen-at-start": "frozen_start", "frozen-share": "frozen_share", "foreign": "foreign_picture",
               "cut-landing": "cut_early", "drift": "off_board", "coherence off-board": "off_board",
               "last-vs-cell": "off_board", "cut": "cut_early", "churn": "blur_warp", "zoom": "over_push",
