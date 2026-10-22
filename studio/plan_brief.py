@@ -359,6 +359,15 @@ def dialogue_room(ceiling: float) -> str:
             f"(at {ROOM_TOTALS[0]} words, {rows[0]} dialogue words; at {ROOM_TOTALS[1]}, {rows[1]})")
 
 
+def book_gap_mark(book_dir: Path | None, number: int | None) -> bool:
+    """The chapter's own text uses `…` (craft ruling A6): the writer's draft carries the fact from here,
+    so the contract never refuses the book's own mark; False when no chapter is named."""
+    if book_dir is None or not number:
+        return False
+    from studio import plan_gates
+    return plan_gates.book_gap_mark(book_dir, number)
+
+
 def book_motif(book_dir: Path | None) -> str:
     """The book's recurring image: series.json's `motif`, else its first episode's
     plan's (research 04 P8: every episode repeats the first one's ritual)."""
@@ -395,6 +404,7 @@ def band(book_dir: Path | None = None, number: int | None = None) -> dict:
             "bed_tones": list(__import__("studio.episode_bed", fromlist=["TONES"]).TONES),
             "aspect": episode_spec.canvas.DEFAULT if hasattr(episode_spec, "canvas") else "1:1",
             "dialogue_share": dial, "dialogue_room": dialogue_room(dial[1]),
+            "book_gap_mark": book_gap_mark(book_dir, number),
             "turn_band": list(episode_spec.TURN_BAND),
             "grammar": episode_spec.STUDIO_GRAMMAR, "grammar_rules": grammar_battery.band(),
             "motif": motif}

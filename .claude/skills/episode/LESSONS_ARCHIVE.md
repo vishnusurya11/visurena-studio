@@ -2426,7 +2426,8 @@ the same folder. What the debate settled, and what the bench then measured:
   "tells Utterson the story" is left as written and still reports. QC's voice floor row reads a
   lines.json it cannot parse, or one with no list of lines, as "not measured" (`qc.line_rows`).
   A `…` is refused only when the chapter does not use it: `Episode.book_gap_mark`, set from the
-  book by `plan_gates.at_series_rate`; the strip cure closes the gap before punctuation.
+  book by `plan_gates.at_series_rate` and, for the writer's draft, by the band (`plan_brief.book_gap_mark`,
+  a CODE_SET field); the strip cure closes the gap before punctuation.
 - **A ruler finds a known shift before it reads a take** (lip-sync GAVEL, 2026-10-21, ruling 11).
   `measure/mouth.lag` took the z-scored `voice_envelope` through `av_sync.envelope` again, whose
   `np.abs` folded every silence into a bump: a mouth open on voice_22's words k frames late read

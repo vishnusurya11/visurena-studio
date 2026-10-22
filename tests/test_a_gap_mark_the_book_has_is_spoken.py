@@ -51,3 +51,23 @@ def test_a_chapter_that_uses_the_mark_lets_its_lines_carry_it(tmp_path):
 def test_the_strip_leaves_no_gap_before_punctuation():
     doc = {"lines": [{"index": 0, "text": "Wait …, I go."}, {"index": 1, "text": "No …! Not now…"}]}
     assert [l["text"] for l in plan_cures.strip_gap_marks(doc)["lines"]] == ["Wait, I go.", "No! Not now."]
+
+
+# ---- the writer's path: the band carries the fact and the code sets it (suite run after c38d88f) -------
+
+def test_the_writer_never_sets_the_fact_and_the_band_gives_it(tmp_path):
+    from agents import episode_writer as ew
+    from studio import plan_brief
+    assert "book_gap_mark" in ew.CODE_SET_FIELDS and "book_gap_mark" not in ew.Draft.model_fields
+    assert plan_brief.band(CRAFT, 1)["book_gap_mark"] is False
+    assert plan_brief.band()["book_gap_mark"] is False
+
+
+def test_a_draft_from_a_book_that_uses_the_mark_keeps_its_line():
+    from agents import episode_writer as ew
+    from tests.test_episode_writer import canned_draft
+    draft = canned_draft()
+    draft["lines"][0]["text"] = draft["lines"][0]["text"].rstrip(".") + " …"
+    with pytest.raises(ValidationError, match="carries a gap mark"):
+        ew.to_episode(ew.Draft.model_validate(draft), {"band": {"book_gap_mark": False}})
+    assert ew.to_episode(ew.Draft.model_validate(draft), {"band": {"book_gap_mark": True}}).book_gap_mark

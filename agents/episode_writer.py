@@ -49,9 +49,10 @@ class Bed(BaseModel):
     tone: str
 
 
-CODE_SET_FIELDS = frozenset({"words_per_second", "grammar"})
+CODE_SET_FIELDS = frozenset({"words_per_second", "grammar", "book_gap_mark"})
 """Contract fields the code sets, never the writer: the Draft mirrors every other one.
-`grammar` (2026-10-17) comes from the band: a writer free to leave it empty would."""
+`grammar` (2026-10-17) comes from the band: a writer free to leave it empty would.
+`book_gap_mark` (craft ruling A6) is the book's fact, read off the chapter into the band."""
 
 
 class Draft(BaseModel):
@@ -85,6 +86,7 @@ def to_episode(draft: Draft, brief: dict | None = None) -> Episode:
     if band.get("words_per_second"):
         doc["words_per_second"] = float(band["words_per_second"])
     doc["grammar"] = band.get("grammar", "")
+    doc["book_gap_mark"] = bool(band.get("book_gap_mark"))
     doc["motif"] = doc.get("motif") or band.get("motif", "")
     setups: dict[str, dict] = {}
     for setup in doc.pop("setups"):
