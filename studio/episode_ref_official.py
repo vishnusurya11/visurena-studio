@@ -1302,8 +1302,8 @@ def segments(shots: list[Shot], placed: list[dict], offset: float, frames: int,
         start = by[shot.index]["t_start"] - offset
         out.append(dict(cell(shot), shot=shot.index, sub=0, t=grid_seconds(start, fps), setup=setup))
         for k, cut in enumerate(shot.cuts, start=1):
-            out.append(dict(cell(cut), shot=shot.index, sub=k,
-                            t=grid_seconds(start + cut.at_s, fps), setup=setup))
+            out.append(dict(cell(cut), shot=shot.index, sub=k, time=getattr(shot, "time", "") or "",
+                            t=grid_seconds(start + cut.at_s, fps), setup=setup))    # a cut keeps its shot's hour
     return close_segments(out, frames, fps)
 
 
@@ -2227,7 +2227,8 @@ def l28_style_light(text, facts):
 
 
 DAY_SKY = re.compile(house_style.SKY_SOURCE.pattern.replace("sunlight|", "sunlit|sunlight|"), re.I)
-NIGHT_WORD = re.compile(r"\b(?:night|midnight|moon|moonlight|moonlit|small hours)\b", re.I)
+NIGHT_WORD = house_style.NIGHT
+"""The hour reader's own night words (wave-2 review: a wider list here refused what `time_of` called day)."""
 LIGHT_SIDE = re.compile(r"\b(?:light|sun|lamp|glow|moon|fire|flame|candle)\w*(?:\s+(?:light|comes|falls|falling|"
                         r"streams|pours|spills|shines|is))*\s+from the (?:upper |lower )?(left|right)\b", re.I)
 """A light given a frame side ("sun from the left", "the corner lamp light comes from the upper RIGHT"); a
@@ -2236,9 +2237,10 @@ runner "from the LEFT edge" under a lamp is no light's side."""
 
 def l33_light_once(text, facts):
     """L33 LIGHT-ONCE (craft ruling A17): the take's light holds to its one hour and one direction.
-    A sky word in a night take's blocks (the style line is L28's), a night word in a day take, and
-    a block whose light sides disagree with the style line's (ep01 C1: style "low sun from the
-    west" over a block's "corner lamp light comes from the upper RIGHT")."""
+    A sky word in a night take's blocks (the style line is L28's), a night word in a take whose hour
+    is read or declared day (an unread hour checks none), and two frame sides (left, right) given to
+    the light in one block or its style line.  A compass bearing ("low sun from the west") is no
+    frame side: ep01 C1's style sun was L28's catch, not this rule's."""
     dd = sections(text).get("detailed_description") or ""
     style, body = (dd.split("\n", 1) + [""])[:2]
     said = re.sub(r"<d>.*?</d>", " ", body, flags=re.S)

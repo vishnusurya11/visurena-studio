@@ -131,11 +131,17 @@ HARD count is a floor and the line says so (wave 0 review, finding 8)."""
 SPOKEN = re.compile(r"<d>\[English\] (.*?)</d>", re.S)
 
 
-def night_of(setup) -> bool:
-    """Whether a setup (a plan dict or a Setup) is at night: `house_style.is_night`'s rule."""
+def night_of(setup, shot=None) -> bool:
+    """Whether a setup (a plan dict or a Setup) is at night, under `shot`'s own hour when it has one."""
+    return hour_of(setup, shot) == "night"
+
+
+def hour_of(setup, shot=None) -> str:
+    """The take writer's hour (`house_style.time_of`) for a plan dict or a Setup, and a shot dict or Shot."""
     from types import SimpleNamespace
     from studio import house_style
-    return house_style.is_night(SimpleNamespace(**setup) if isinstance(setup, dict) else setup)
+    ns = lambda x: SimpleNamespace(**x) if isinstance(x, dict) else x
+    return house_style.time_of(ns(setup), ns(shot))
 
 
 def recorded_facts(said: str, night: bool = False, frames: int | None = None) -> dict:
@@ -177,12 +183,21 @@ def words_line(reworded: int, compared: int, failing: int, read: int, dark: int)
     return f"words: {head}; {hard} (advisory under freeze)"
 
 
-def words(audited: dict[int, Inputs], records: list[dict], book: Path, night: dict[int, bool]) -> dict:
+def take_hours(records: list[dict], setups: dict, shots: list) -> dict[int, str]:
+    """{take: its hour} as the take writer reads it: the setup's, under the take's first shot's own `time`."""
+    by = {int(s["index"] if isinstance(s, dict) else s.index): s for s in shots}
+    return {int(r["index"]): hour_of(setups[r["setup"]], by.get((r.get("shots") or [None])[0]))
+            for r in records if r.get("setup") in setups}
+
+
+def words(audited: dict[int, Inputs], records: list[dict], book: Path, night: dict[int, bool],
+          hours: dict[int, str] | None = None) -> dict:
     """The QC provenance block: which audited takes rendered from older words, and which recorded
-    prompts fail a HARD rule today.  It never refuses and never re-renders: the owner sees the count."""
+    prompts fail a HARD rule today.  It never refuses and never re-renders: the owner sees the count.
+    `hours` gives L33 each take's hour; without one its day check reads nothing."""
     rows = {int(r["index"]): r for r in records}
     found = {i: stale_words(Path(book) / rows[i]["rel_path"], night.get(i), record_facts(rows[i])["frames"],
-                            record_facts(rows[i])) for i in sorted(audited)}
+                            {**record_facts(rows[i]), "time": (hours or {}).get(i, "")}) for i in sorted(audited)}
     fail = {f"T{i:02d}": bad for i, bad in found.items() if bad}
     read = [i for i, bad in found.items() if bad is not None]
     reworded = [f"T{i:02d}" for i, v in sorted(audited.items()) if v.reworded]

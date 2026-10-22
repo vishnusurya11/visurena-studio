@@ -251,13 +251,12 @@ is fine, a plan written terse everywhere is not.
   recurring place, `view` is one of its drawn views (empty is the master).
   Never invent a new view id for a framing, an hour or a state of a place:
   write the master and say what has CHANGED in `place_state`, as nouns ("the
-  front door forced open, dust on every sill"); step 03 derives it from the
-  master in one edit. A new part of a place (a room never drawn) may
-  get a new view id, drawn once and kept. One place at several hours:
-  each shot's `time` (night, dawn, day, dusk, interior-lamp) says its own.
-- **Never describe a known room again from scratch.** G-PLACE rewrites a
-  lookalike location id to its member and a new room under an old id to its
-  master.
+  front door forced open"); step 03 derives it from the master in one edit. A room never drawn may get a new view id, drawn once
+  and kept. A setup's `time` is its hour (night, dawn, day, dusk,
+  interior-lamp); a shot at another sets its own.
+- **Never describe a known room again from scratch.** `described` keeps to
+  what the drawn picture shows. G-PLACE rewrites a lookalike id to its
+  member, a new room under an old id to its master.
 - `described` is the place in one paragraph of nouns in positions. `geometry`
   lays out the establishing WIDE: each relation restated as WHICH FRAME EDGE at
   WHAT APPARENT SIZE with what between. Relational prepositions alone are the

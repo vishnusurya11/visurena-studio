@@ -296,12 +296,14 @@ def test_no_frozen_fixture_holds_an_absolute_path():
 
 PINNED = {"G-STANDING": (28, 28, 14), "G-META-CREDIT": (42, 1, 0), "G-HOLE-SLACK": (42, 7, 0),
           "OUTSIDE-UNREAD": (11, 0, 41), "A28-TINY-FACE": (25, 8, 41), "G-CROWD-ORPHAN": (236, 19, 0),
-          "L28-STYLE-LIGHT": (1044, 24, 0), "FACE-LIST": (1041, 4, 0), "ADVISORY-WORDING": (8, 8, 0)}
+          "L28-STYLE-LIGHT": (1044, 27, 0), "FACE-LIST": (1041, 4, 0), "ADVISORY-WORDING": (8, 8, 0)}
 """(n, hits, unread) each cheap gate replays to on the 42 frozen episodes, pinned from results/gates.json of
 2026-10-21; a change to a gate or a fixture that moves one is seen here (the dry check runs in its own test).
 G-CROWD-ORPHAN was 21 until its faults were matched to the WHOLE setup name (walk_on_day and scullery_wake
 had taken their _2 twins' faults).  G-META-CREDIT was 6 until a numeral before a comma counted as a numeral
-(Scarlet ep01-05's 'Chapter II, "..."'); the one left is Jekyll ep01's broken line, the gate's own case."""
+(Scarlet ep01-05's 'Chapter II, "..."'); the one left is Jekyll ep01's broken line, the gate's own case.
+L28-STYLE-LIGHT was 24 until the hour reader knew the moon (craft wave-2 review): WotW ep25 canal_bridge_road says
+"Moonlight from the LEFT" beside "at dusk", so it is night, and its T11-T13 shipped "low sun raking" lines."""
 
 
 @pytest.mark.parametrize("gate_id", sorted(PINNED))

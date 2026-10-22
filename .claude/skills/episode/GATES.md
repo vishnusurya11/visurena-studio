@@ -187,8 +187,8 @@ The take lint (`episode_ref_official.check`) runs on every built prompt:
 Run it before any audio or picture exists. **HARD.**
 
 **L28 STYLE-LIGHT** (2026-10-19, `episode_ref_official.l28_style_light`): the style line of a take
-on a night setup (`house_style.is_night`: the NIGHT words in `described` or `place_state`) names
-sun / sunlight / sunshine / daylight / dawn -- a refusal at build. A17: the line says the hour (`time_of`)
+at night (`house_style.time_of`: `Shot.time`, `Setup.time`, else the setup's words; unread is "") names
+sun / sunlight / sunshine / daylight / dawn -- a refusal at build. A17: the line says the hour
 and a black; **L33** refuses sky words at night, night words by day, two light sides. **A crowd has five channels and one
 rule:** the setup's people crowd is drawn only where the shot declares extras > 0 -- lint P13
 cover, grid `crowd_clause`, grid `crowd_block` sheet text, take `crowd_of`, soundscape life.

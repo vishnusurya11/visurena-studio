@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import house_style, take_currency  # noqa: E402
 from studio.episode_ref_official import CAMERA_IN_END  # noqa: E402
-from studio.take_inputs import night_of  # noqa: E402,F401  (one night rule for the census and QC)
+from studio.take_inputs import night_of, take_hours  # noqa: E402,F401  (one hour rule: the writer's, census, QC)
 
 DD = re.compile(r"detailed_description:\n(.*?)(?:\n\n[a-z_]+:|\Z)", re.S)
 SENTENCE = re.compile(r"(?<=[.!?])(?<!\bMr\.)(?<!\bMrs\.)(?<!\bDr\.)\s+(?=[A-Z<])")
@@ -183,15 +183,14 @@ def episode_census(home: Path) -> tuple[dict[str, dict[int, int]], int]:
     records = json.loads((take_dir / "shots.json").read_text(encoding="utf-8"))
     prompts = recorded(take_dir, records)
     setups = plan.get("setups") or {}
-    night = {int(r["index"]): night_of(setups[r["setup"]]) for r in records if r.get("setup") in setups}
+    night = {i: h == "night" for i, h in take_hours(records, setups, plan.get("shots") or []).items()}
     return readable_census(prompts, night, plan.get("shots") or [])
 
 
 def built_line(episode, built: list[dict]) -> str:
     """Step 06's line over the cards it just built (what will render), against the plan's setups."""
     prompts = {int(c["index"]): c.get("prompt") for c in built}
-    night = {int(c["index"]): night_of(episode.setups[c["setup"]]) for c in built
-             if c.get("setup") in episode.setups}
+    night = {i: h == "night" for i, h in take_hours(built, episode.setups, list(episode.shots)).items()}
     counts, n = readable_census(prompts, night, list(episode.shots))
     if not n and prompts:
         return f"craft census: not measured (0 of {len(prompts)} cards carry a detailed_description)"

@@ -373,9 +373,9 @@ def words_rows(i: SimpleNamespace, report: dict, audited: dict) -> dict:
     from studio import take_inputs
     setups = getattr(getattr(i, "episode", None), "setups", None) or {}
     try:
-        night = {int(r["index"]): take_inputs.night_of(setups[r["setup"]]) for r in i.records
-                 if r.get("setup") in setups}
-        report["inputs"]["words"] = take_inputs.words(audited, i.records, i.book, night)
+        hours = take_inputs.take_hours(i.records, setups, getattr(getattr(i, "episode", None), "shots", None) or [])
+        night = {k: hour == "night" for k, hour in hours.items()}         # the writer's hour, a shot's own first
+        report["inputs"]["words"] = take_inputs.words(audited, i.records, i.book, night, hours)
     except Exception as why:          # a report row never fails step 11 (wave 0 review, finding 5)
         report["inputs"]["words"] = {"line": f"words: not measured ({why!r})"}
     return report

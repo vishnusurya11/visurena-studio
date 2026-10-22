@@ -540,14 +540,21 @@ def style_faults(where: str, light: str) -> list[str]:
 SKY_SOURCE = re.compile(r"\b(?:sun|sunlight|sunshine|daylight|dawn)\b", re.I)
 """What may not light a night setup (L28)."""
 
-NIGHT = re.compile(r"\b(?:night|midnight|moonlit|small hours|o'clock of a (?:black )?(?:\w+ )?morning|"
+NIGHT = re.compile(r"(?<!\blast )\b(?:nights?(?![-\w])|midnight|moon(?:light|lit|rise)?|small hours|after dark|"
+                   r"(?:in|after) the dark(?=\s*(?:[,.;:…]|in\b|$))|o'clock of a (?:black )?(?:\w+ )?morning|"
                    r"(?:one|two|three|four) in the morning)\b", re.I)
+"""The one night vocabulary, `time_of`'s and L33's (wave-2 review: L33 knew "moon" and the reader did not, so
+a moonlit road was "day" and L33 refused its words; "night-watchman" and "last night" are no hour)."""
+
+
 def is_night(setup) -> bool:
-    """A setup `described` or `place_state` puts at night."""
-    return bool(NIGHT.search(f"{getattr(setup, 'described', '')} {getattr(setup, 'place_state', '')}"))
+    """A setup the hour reader puts at night (`time_of`): QC, the census and L28 read the writer's hour."""
+    return time_of(setup) == "night"
 
 
 DUSK = re.compile(r"\b(?:dusk|sunset|sundown|twilight|gloaming|nightfall)\b", re.I)
+EVENING = re.compile(r"\bevening\b(?! dress)", re.I)
+"""Dusk when no lamp lights the place: an evening parlour by its fire stays interior-lamp."""
 DAWN = re.compile(r"\b(?:dawn|daybreak|sunrise|first light)\b", re.I)
 DAYLIT_TEXT = re.compile(r"\b(?:sun|sunlit|sunlight|sunshine|daylight|day|morning|noon|afternoon)\b", re.I)
 TIME_SAID = {"night": "at night", "dawn": "at dawn", "day": "by day", "dusk": "at dusk", "interior-lamp": "indoors"}
@@ -564,17 +571,21 @@ def clock_of(text: str) -> str:
 
 def time_of(setup, shot=None) -> str:
     """The one hour of a take: the shot's own `time`, else the setup's, else read from the setup's
-    `described` and `place_state` -- an indoor place lit by a burning practical and no sky is
-    interior-lamp; everything else is day (craft ruling A17)."""
+    `described` and `place_state` (craft ruling A17); "" when no word names one -- an unread hour,
+    never a guessed "day" (wave-2 review: four WotW night setups were lit "by day")."""
     said = getattr(shot, "time", "") or getattr(setup, "time", "")
-    if said:
-        return said
+    if said or setup is None:
+        return said or ""
     text = f"{getattr(setup, 'described', '') or ''} {getattr(setup, 'place_state', '') or ''}"
-    if hour := clock_of(text):
-        return hour
-    indoors = setup is not None and not getattr(setup, "outdoors", False)
-    lamp = any(LAMPS.search(c) and LIT.search(c) for c in clauses(text))
-    return "interior-lamp" if indoors and lamp and not DAYLIT_TEXT.search(text) else "day"
+    return clock_of(text) or lamp_hour(setup, text) or ("dusk" if EVENING.search(text) else "") \
+        or ("day" if DAYLIT_TEXT.search(text) else "")
+
+
+def lamp_hour(setup, text: str) -> str:
+    """A place lit by a burning practical and no day word: interior-lamp indoors, night under the sky."""
+    if DAYLIT_TEXT.search(text) or not any(LAMPS.search(c) and LIT.search(c) for c in clauses(text)):
+        return ""
+    return "night" if getattr(setup, "outdoors", False) else "interior-lamp"
 
 
 LAMPS = re.compile(r"\b(?:lamps?|lamplight|gaslight|gas|candles?|candlelight|fire|firelight|hearth|grate|coals?|"

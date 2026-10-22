@@ -166,7 +166,7 @@ INNER_MAX_WORDS = 8
 Size = Literal["insert", "extreme_close", "close", "medium_close", "medium", "full", "wide"]
 Hour = Literal["", "night", "dawn", "day", "dusk", "interior-lamp"]
 """The one hour a setup (or a shot) is lit at (craft ruling A17).  Empty: code reads it from the
-setup's `described` and `place_state` (`house_style.time_of`)."""
+setup's `described` and `place_state` (`house_style.time_of`); a text naming no hour stays unread."""
 READABLE = {"close", "medium_close"}
 """Where a speaking mouth reads on a phone: a dialogue shot must be one of these."""
 
