@@ -2419,6 +2419,11 @@ the same folder. What the debate settled, and what the bench then measured:
   (Jekyll: Hyde from ep02 ch2 index 24). A15: per-speaker rates lose out of sample (MAE 0.623 s vs
   0.619 s, 1012 lines), so nothing ships; a pause model wins (0.572 s), not wired. A16: the honest
   speech ruler prints beside the old (ch1 0.628 vs 0.279); the dial switch is the owner's (Q1).
+- **Wave 1 review fixes (2026-10-21).** A shadow detector that raises prints "CRAFT SHADOW : not
+  measured" and the HARD gates after it run. G-MUTE reads the verb's sense: a negated verb ("does not
+  speak", "never answers"), "said nothing" and "answers the door" move no mouth
+  (`screenplay_grammar.silent_sense`). Its listens cure rewrites only a verb with no object after it;
+  "tells Utterson the story" is left as written and still reports.
 - **A ruler finds a known shift before it reads a take** (lip-sync GAVEL, 2026-10-21, ruling 11).
   `measure/mouth.lag` took the z-scored `voice_envelope` through `av_sync.envelope` again, whose
   `np.abs` folded every silence into a bump: a mouth open on voice_22's words k frames late read

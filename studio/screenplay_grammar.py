@@ -195,6 +195,23 @@ SPEECH_VERB = re.compile(r"\b(speak|speaks|speaking|spoke|say|says|saying|said|a
 MUTE_SIZES = ("extreme_close", "close", "medium_close", "medium")
 """Sizes whose mouth reads; a full or wide's scream is the take-prompt C13 class, not this one."""
 MUTE_FIELDS = ("frame", "motion", "at_rest")
+SILENT_BEFORE = re.compile(r"\b(?:not|never|no|nor|without|cannot|can't|won't|doesn't|don't|didn't|unable to|"
+                           r"refuses? to|fails? to)\s+(?:[\w']+\s+){0,2}$", re.I)
+SILENT_AFTER = re.compile(r"\s+(?:nothing|none|not a word|no (?:word|answer|reply)|(?:the |a )?(?:door|bell|"
+                          r"knock|summons)\b)", re.I)
+"""A speech verb that moves no mouth (wave 1 review, finding 2): "does not speak", "said nothing",
+"answers the door"."""
+
+
+def silent_sense(m: re.Match) -> bool:
+    """The verb `m` matched is negated, says nothing, or answers a door: no mouth moves."""
+    return bool(SILENT_BEFORE.search(m.string[max(0, m.start() - 40):m.start()])
+                or SILENT_AFTER.match(m.string, m.end()))
+
+
+def spoken_verbs(text: str) -> list[re.Match]:
+    """The speech verbs of `text` that move a mouth."""
+    return [m for m in SPEECH_VERB.finditer(text) if not silent_sense(m)]
 
 
 def _get(row, key):
@@ -216,7 +233,7 @@ def mute_faults(plan, paragraphs=()) -> list[str]:
     for shot in shots or []:
         if _get(shot, "size") not in MUTE_SIZES or not _get(shot, "faces") or speaks_on(lines, shot):
             continue
-        verbs = [m.group(0) for f in MUTE_FIELDS for m in SPEECH_VERB.finditer(str(_get(shot, f) or ""))]
+        verbs = [m.group(0) for f in MUTE_FIELDS for m in spoken_verbs(str(_get(shot, f) or ""))]
         if verbs:
             out.append(fault("G-MUTE", f"shot {_get(shot, 'index')}", "a speech verb on a face with no dialogue "
                              "line on its shot (a tale or narration drives no lips)", ", ".join(verbs), "listens"))

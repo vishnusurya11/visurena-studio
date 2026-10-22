@@ -1907,14 +1907,28 @@ def listened(verb: str) -> str:
     return form.capitalize() if verb[0].isupper() else form
 
 
+NO_OBJECT = re.compile(r"\s*(?:$|[,.;:!?)—-]|(?:and|or|but|while|as|then|to|on|in|at|by|beside|from|into|"
+                       r"across|toward|towards|under|near)\b|\w+ly\b)", re.I)
+"""What may follow a speech verb that takes no object: "listens" reads right only there (wave 1 review,
+finding 3: "tells Utterson the story" -> "listens Utterson the story")."""
+
+
+def listenable(m: re.Match) -> bool:
+    """The speech verb `m` matched moves a mouth and has no object after it."""
+    from studio.screenplay_grammar import silent_sense
+    return not silent_sense(m) and bool(NO_OBJECT.match(m.string, m.end()))
+
+
 def mute_listens(doc: dict, indices: list[int]) -> dict:
     """G-MUTE's free cure (craft ruling A8): on each named shot every speech verb in frame, motion
-    and at_rest becomes a listening verb; a shot whose face speaks is never named."""
+    and at_rest that moves a mouth and has no object becomes a listening verb.  A verb with an object
+    is left as written (the row keeps firing on it); a shot whose face speaks is never named."""
     from studio.screenplay_grammar import MUTE_FIELDS, SPEECH_VERB
     for s in doc.get("shots") or []:
         if s.get("index") in indices:
             for field in MUTE_FIELDS:
-                s[field] = SPEECH_VERB.sub(lambda m: listened(m.group(0)), s.get(field) or "")
+                s[field] = SPEECH_VERB.sub(lambda m: listened(m.group(0)) if listenable(m) else m.group(0),
+                                           s.get(field) or "")
     return doc
 
 
