@@ -25,6 +25,19 @@ class ContentFiltered(Exception):
     """Provider refused the request (content filter). Not retryable — the caller
     decides whether to skip. Real-run 2026-08-23: Doyle's murder scenes trip it."""
 
+class LimitWait(Exception):
+    """The usage window is shut until `resets_at` (epoch s; None = not said): the step
+    stops at once and the autopilot waits for the window, never a sleep here and never
+    a burned attempt (group R ruling A1, 2026-10-22: the 3 s + 10 s ladder slept inside
+    a window shut for hours, then the brain was asked three times and parked)."""
+    retryable = False
+
+    def __init__(self, resets_at: float | None, window: str | None = None):
+        until = "unknown" if resets_at is None else f"{float(resets_at):.0f}"
+        super().__init__(f"usage window {window or 'unknown'} shut until {until}")
+        self.resets_at, self.window = resets_at, window
+
+
 MODELS_PATH = Path("models.yaml")
 ENV_PATH = Path(".env")
 
@@ -449,7 +462,7 @@ def structured(tier: str, prompt: str, schema, *, retries: int = 3,
             result = _structured_once(agent, prompt, schema, retries, local, tier)
             _record_spend(tier, local)
             return result
-        except (StructuredOutputException, ContentFiltered):
+        except (StructuredOutputException, ContentFiltered, LimitWait):
             raise
         except Exception as failed:
             if attempt == transient_retries or getattr(failed, "retryable", True) is False:

@@ -21,7 +21,7 @@ PAUSED = 3
 """drive()'s code for a run that stopped at a boundary (C3_verdict #7)."""
 
 
-ERROR_LINE = re.compile(r"^((?:\w+\.)*\w*(?:Error|Exception|OverBudget|Exit)):")
+ERROR_LINE = re.compile(r"^((?:\w+\.)*\w*(?:Error|Exception|OverBudget|Exit|LimitWait|RateLimited)):")
 """A `<Class>: <why>` line: a traceback's last line, or the wall's own printed one."""
 
 

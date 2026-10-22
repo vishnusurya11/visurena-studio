@@ -27,6 +27,7 @@ from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, HookMatcher, R
 from pydantic import BaseModel
 
 from studio import registry, spend
+from studio.llm import LimitWait
 
 ROOT = Path(__file__).resolve().parents[1]
 """The repo root: the writer session's cwd."""
@@ -89,12 +90,35 @@ def refuse_api_key(env=None) -> None:
                             "the owner's login; unset it (and delete it from .env)")
 
 
-class RateLimited(Exception):
-    """The subscription window is shut; `resets_at` is when it opens (epoch seconds)."""
+class RateLimited(LimitWait):
+    """The subscription window is shut; `resets_at` is when it opens (epoch seconds),
+    `window` the event's rateLimitType, or `said` when only the result's text told."""
 
-    def __init__(self, resets_at: float | None):
-        super().__init__(f"rate limited until {resets_at}")
-        self.resets_at = resets_at
+    def __init__(self, resets_at: float | None, window: str | None = None):
+        super().__init__(resets_at, window)
+        self.args = (f"rate limited: {self.args[0]}",)
+
+
+LIMIT_WORDS = re.compile(r"usage limit|session limit|weekly limit|hit your (?:\w+ )?limit|limit reached", re.I)
+LEGACY_RESET = re.compile(r"limit reached\|(\d{9,11})")
+
+
+def limit_said(text: str) -> RateLimited | None:
+    """A failed result whose text says the window shut, with no rejected event (the
+    shape never captured, skeptic M2): the same wait, its epoch only when the legacy
+    `limit reached|<epoch>` form carries one."""
+    if not LIMIT_WORDS.search(text or ""):
+        return None
+    epoch = LEGACY_RESET.search(text)
+    return RateLimited(float(epoch.group(1)) if epoch else None, "said")
+
+
+def rejected(message) -> RateLimited | None:
+    """A RateLimitEvent whose status is rejected, as the wait it means."""
+    if not isinstance(message, RateLimitEvent) or message.rate_limit_info.status != "rejected":
+        return None
+    info = message.rate_limit_info
+    return RateLimited(info.resets_at, getattr(info, "rate_limit_type", None))
 
 
 class Verdict(BaseModel):
@@ -236,7 +260,8 @@ def verdict_of(result: ResultMessage | None) -> Verdict:
     if result.terminal_reason not in (None, "completed"):
         raise BrainFailed(f"terminal_reason {result.terminal_reason}")
     if result.is_error or result.subtype != "success":
-        raise BrainFailed(f"{result.subtype}: {result.errors or result.result}")
+        raise limit_said(f"{result.errors or ''} {result.result or ''}") or BrainFailed(
+            f"{result.subtype}: {result.errors or result.result}")
     if result.structured_output is None:
         raise BrainFailed("no structured output: the verdict is JSON, never prose")
     return Verdict.model_validate(result.structured_output)
@@ -262,8 +287,8 @@ async def turn(prompt: str, options: ClaudeAgentOptions, *, transport=None) -> t
     async with ClaudeSDKClient(options=options, transport=transport) as client:
         await client.query(prompt)
         async for message in client.receive_response():
-            if isinstance(message, RateLimitEvent) and message.rate_limit_info.status == "rejected":
-                raise RateLimited(message.rate_limit_info.resets_at)
+            if shut := rejected(message):
+                raise shut
             if isinstance(message, ResultMessage):
                 result = message
     return verdict_of(result), receipt_of(result)
@@ -341,10 +366,13 @@ async def ask_structured(prompt: str, schema_model, *, model: str, effort: str =
                                transport=transport) as client:
         await client.query(prompt)
         async for message in client.receive_response():
-            if isinstance(message, RateLimitEvent) and message.rate_limit_info.status == "rejected":
-                raise RateLimited(message.rate_limit_info.resets_at)
+            if shut := rejected(message):
+                raise shut
             if isinstance(message, ResultMessage):
                 result = message
     if result is None or result.is_error or result.subtype != "success" or result.structured_output is None:
+        if result is not None and (result.is_error or result.subtype != "success"):
+            raise limit_said(str(result.result or "")) or BrainFailed(
+                f"no structured answer: {result.subtype} {result.result!s:.200}")
         raise BrainFailed(f"no structured answer: {getattr(result, 'subtype', None)} {getattr(result, 'result', '')!s:.200}")
     return schema_model.model_validate(result.structured_output), receipt_of(result)
