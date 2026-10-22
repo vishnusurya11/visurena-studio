@@ -149,7 +149,7 @@ turn, spike, reaction, runout, button, answer, act_out, tease.
 - The narrator carries the bridges; the people speak their own scenes ON
   CAMERA. `dialogue_share` in the band is THIS chapter's dial (it follows the
   chapter's own speech), and it counts dialogue only: a tale or an inner line
-  sits outside it. `dialogue_words_max` is its ceiling in words: count them.
+  sits outside it. `dialogue_room` is its room: a share of YOUR words.
 - A dialogue line's shot shows the speaker's face at `close` or `medium_close`
   and lists the speaker in `faces`: the lips are driven by the line's own audio.
 - At most `max_words_per_line` words a line, at most `max_lines_per_shot` lines

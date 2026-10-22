@@ -320,6 +320,18 @@ def dialogue_words_max(ceiling: float) -> int:
     return int(ceiling * plan_gates.MAX_PLAN_WORDS)
 
 
+ROOM_TOTALS = (240, 310)
+"""The plan sizes the worked row prints: ep01's 239 words, and the 310-word wall."""
+
+
+def dialogue_room(ceiling: float) -> str:
+    """The ceiling as G-DIAL measures it: a share of the plan's OWN words (craft ruling A4).  "108 words"
+    was true only at the 310-word wall; ep01 had 82 of 239 = 0.343, 1-2 words spare, not 26."""
+    rows = [f"{int(ceiling * t)}" for t in ROOM_TOTALS]
+    return (f"a share of the plan's own words, dialogue only: {ceiling} x its total "
+            f"(at {ROOM_TOTALS[0]} words, {rows[0]} dialogue words; at {ROOM_TOTALS[1]}, {rows[1]})")
+
+
 def book_motif(book_dir: Path | None) -> str:
     """The book's recurring image: series.json's `motif`, else its first episode's
     plan's (research 04 P8: every episode repeats the first one's ritual)."""
@@ -347,6 +359,7 @@ def band(book_dir: Path | None = None, number: int | None = None) -> dict:
             "bed_tones": list(__import__("studio.episode_bed", fromlist=["TONES"]).TONES),
             "aspect": episode_spec.canvas.DEFAULT if hasattr(episode_spec, "canvas") else "1:1",
             "dialogue_share": dial, "dialogue_words_max": dialogue_words_max(dial[1]),
+            "dialogue_room": dialogue_room(dial[1]),
             "turn_band": list(episode_spec.TURN_BAND),
             "grammar": episode_spec.STUDIO_GRAMMAR, "grammar_rules": grammar_battery.band(),
             "motif": book_motif(book_dir)}
