@@ -192,7 +192,13 @@ def person_of(frames: list[dict]) -> np.ndarray | None:
 
 
 def keypoint_frames(staged: str, run: Callable) -> list[dict]:
-    return keypoints.parse(run(keypoints.WORKFLOW, {"image_1": staged}, TIMEOUT))
+    """The DWPose frames of a staged picture.  An answer that is not JSON is Unreadable, a missing
+    measure for `asked`, never a crash of the judge (rehearsal window 3: plain text killed step 08)."""
+    said = run(keypoints.WORKFLOW, {"image_1": staged}, TIMEOUT)
+    try:
+        return keypoints.parse(said)
+    except (TypeError, ValueError) as bad:
+        raise Unreadable(f"no keypoints in {str(said)[:80]!r}") from bad
 
 
 def keypoint_read(staged: str, run: Callable) -> np.ndarray | None:
