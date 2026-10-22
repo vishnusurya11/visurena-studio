@@ -95,12 +95,13 @@ class TestItRefusesToGuess:
 
 
 class TestTheComfyEar:
-    def test_the_clean_transcript_is_the_first_plain_text(self, tmp_path):
+    def test_the_clean_transcript_is_the_first_plain_text(self, tmp_path, monkeypatch):
         clip = tmp_path / "a.wav"
         clip.write_bytes(b"RIFF")
         heard = voice_qc.comfy_transcriber(run=lambda values: [" hello there", "{'text': 'x'}"])
         import studio.comfy as comfy
-        comfy.stage_image = lambda p: p.name  # no server in a test
+        # no server in a test; monkeypatch puts the real stage_image back, or every later test stages bare names
+        monkeypatch.setattr(comfy, "stage_image", lambda p: p.name)
         assert heard(clip) == "hello there"
 
 
