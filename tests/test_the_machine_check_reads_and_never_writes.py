@@ -24,8 +24,18 @@ def test_arso_off_by_policy_is_said():
     assert any(l.startswith("ARSO: off") for l in lines)
 
 
-def test_arso_with_no_policy_is_the_windows_default():
-    assert any(l.startswith("ARSO: on") for l in mc.report(reader({}), NOW))
+def test_arso_with_no_policy_and_no_user_toggle_read_is_unread_never_on():
+    """Wave-3 review: "ARSO: on" was printed from the absence of a policy alone; the user's own toggle
+    (Winlogon/UserARSO/<SID>/OptOut) decides it and was never read."""
+    lines = mc.report(reader({}), NOW, sid="S-1-5-21-1")
+    assert not any(l.startswith("ARSO: on") for l in lines)
+    assert any(l.startswith("ARSO: unread") for l in lines)
+
+
+def test_arso_reads_the_users_own_toggle():
+    assert any(l.startswith("ARSO: off") for l in mc.report(reader({"OptOut": 1}), NOW, sid="S-1-5-21-1"))
+    assert any(l.startswith("ARSO: on") for l in mc.report(reader({"OptOut": 0}), NOW, sid="S-1-5-21-1"))
+    assert any(l.startswith("ARSO: unread") for l in mc.report(reader({"OptOut": 0}), NOW, sid=None))
 
 
 def test_active_hours_are_printed():
