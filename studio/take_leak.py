@@ -148,14 +148,18 @@ def row(got: dict | None):
 
 def dino_embed(image: np.ndarray) -> np.ndarray:
     """The production embedder: DINOv3 through the `image_embed` workflow.
-    Stages the picture, runs the graph, parses the vector it prints."""
+    Stages the picture, runs the graph, parses the vector it prints.  The
+    picture is written in a folder that goes when the call does: the staged
+    copy is the one the graph reads (it left a png in %TEMP% per call)."""
     import tempfile
 
     from PIL import Image
 
     from studio import comfy
 
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp:
-        Image.fromarray(np.asarray(image)).save(tmp.name)
-        text = comfy.run_text(EMBED_WORKFLOW, {"image_1": comfy.stage_image(Path(tmp.name))})
+    with tempfile.TemporaryDirectory() as folder:
+        picture = Path(folder) / "embed.png"
+        Image.fromarray(np.asarray(image)).save(picture)
+        staged = comfy.stage_image(picture)
+    text = comfy.run_text(EMBED_WORKFLOW, {"image_1": staged})
     return np.array(json.loads(text), dtype=float).ravel()

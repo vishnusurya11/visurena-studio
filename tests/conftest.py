@@ -141,10 +141,18 @@ def paid_and_live_trap(monkeypatch):
 # reader takes an injected callable; one constructed without injection trips
 # here, and the failure names the reason.
 
+@pytest.fixture(scope="session")
+def comfy_root_in_tmp(tmp_path_factory):
+    """One stand-in ComfyUI root per session: `stage_image` copied every test's
+    picture into the REAL `ComfyUI/input/` (426 tmp*_cdc0bebf.png, 2026-10-21)."""
+    return tmp_path_factory.mktemp("comfy_root")
+
+
 @pytest.fixture(autouse=True)
-def comfy_trap(monkeypatch):
-    """`studio.comfy.run` and `run_text` raise for the whole test.  The real
-    functions come back as the fixture's value, for `real_comfy` only."""
+def comfy_trap(monkeypatch, comfy_root_in_tmp):
+    """`studio.comfy.run` and `run_text` raise for the whole test, and the root
+    `stage_image` copies under is a session folder, never the engine's.  The
+    real functions come back as the fixture's value, for `real_comfy` only."""
     from studio import comfy
 
     real = {"run": comfy.run, "run_text": comfy.run_text, "free_models": comfy.free_models}
@@ -152,6 +160,7 @@ def comfy_trap(monkeypatch):
     def trip(*_args, **_kwargs):
         raise RuntimeError("a test reached ComfyUI")
 
+    monkeypatch.setattr(comfy, "COMFY_ROOT", comfy_root_in_tmp)
     monkeypatch.setattr(comfy, "run", trip)
     monkeypatch.setattr(comfy, "run_text", trip)
     monkeypatch.setattr(comfy, "VLM_CALLS", None)       # the read log never writes under library/ in a test
@@ -161,6 +170,31 @@ def comfy_trap(monkeypatch):
     from studio.command_center import comfy_tap        # the board's GPU card reads /queue (2026-10-12)
     monkeypatch.setattr(comfy_tap, "fetch_queue", trip)
     return real
+
+
+@pytest.fixture(autouse=True)
+def router_trap(monkeypatch, comfy_root_in_tmp):
+    """No test asks the live compute router or writes under the real library's
+    `.device/`: an unrouted `card_free` slept 300 s per test and wrote 21 rows
+    into the real decisions file (2026-10-21).  The default probe trips (the
+    router answers cpu, naming it), and `card_free` without a route raises."""
+    from studio import compute_device as cd
+    from studio import master_upscale as mu
+
+    real_card_free = mu.card_free
+
+    def trip(*_args, **_kwargs):
+        raise RuntimeError("a test reached the compute router")
+
+    def card_free(job, need_gb, route=None, sleep=None, clock=None):
+        if route is None:
+            trip()
+        return real_card_free(job, need_gb, route=route, sleep=sleep, clock=clock)
+
+    monkeypatch.setattr(cd, "LOG", comfy_root_in_tmp / "device" / "decisions.jsonl")
+    monkeypatch.setattr(cd, "CLAIMS", comfy_root_in_tmp / "device" / "claims")
+    monkeypatch.setattr(cd, "default_probe", trip)
+    monkeypatch.setattr(mu, "card_free", card_free)
 
 
 @pytest.fixture()

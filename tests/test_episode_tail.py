@@ -133,6 +133,8 @@ def test_the_rtx_master_keeps_every_frame_from_zero_without_holes(tmp_path, monk
     monkeypatch.setattr(ep, "W", 64)
     monkeypatch.setattr(ep, "H", 112)
     monkeypatch.setattr(mu, "Rtx", Nearest)
+    # the card is free: unrouted, this asked the live router, slept 300 s and measured lanczos (2026-10-21)
+    monkeypatch.setattr(mu, "card_free", lambda *a, **k: True)
     master = clip(tmp_path / "master.mp4", 1.0, size="64x112")
     card = clip(tmp_path / "card.mp4", 0.5, size="64x112")
     out = ep.tail(master, card, tmp_path / "out.mp4", tmp_path, upscale=mu.CHOICES["rtx4x"])
