@@ -159,6 +159,11 @@ def measure_of(row: Row, name: str) -> dict | None:
     return ((row.machine.get("take_dq") or {}).get("measures") or {}).get(name)
 
 
+DEMOTED = ("(planned still)", "ADVISORY", "locked on the grammar")
+"""A frozen-whole note that says the row was exempt or demoted; older dq records wrote "(locked on the grammar)"
+beside HARD and signed the take a pass all the same (Scarlet ep01, eight takes)."""
+
+
 def stillness_judge(row: Row) -> dict:
     """`stillness.is_still` on the stored frozen-whole share and the take's seconds; a planned still is exempt
     and a row the grammar demoted to an advisory refuses nothing."""
@@ -166,7 +171,7 @@ def stillness_judge(row: Row) -> dict:
     if not g or g.get("value") is None or seconds is None:
         return refusal(False, [], {"note": "not measured"})
     note = g.get("note", "")
-    exempt = "(planned still)" in note or "ADVISORY" in note
+    exempt = any(word in note for word in DEMOTED)
     still = st.is_still({"static_share": float(g["value"])}, float(seconds), exempt)
     return refusal(still, ["frozen_share"], {"static_share": g["value"], "seconds": seconds})
 

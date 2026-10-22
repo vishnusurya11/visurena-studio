@@ -39,6 +39,8 @@ def test_stillness_re_judges_the_stored_share_against_the_shipped_wall():
     assert short["refused"] is False
     planned = [g | {"note": "80% static, run 6.0s (planned still)"} for g in GATES]
     assert registry.get("stillness").judge(take({"gates": planned, "seconds": 6.0}))["refused"] is False
+    older = [g | {"note": "84% static, run 1.04s HARD: the whole frame stands still (locked on the grammar)"} for g in GATES]
+    assert registry.get("stillness").judge(take({"gates": older, "seconds": 6.0}))["refused"] is False
 
 
 def test_warp_and_mouth_lag_re_judge_their_stored_measures():
