@@ -15,6 +15,12 @@ Every rule is a class the Jekyll ep01 audit found in a DRAWN grid prompt
   SLOT  a bracketed description after a slot ("<image1> (light-brown top hat)"):
         the sheet and its wears line are the one description.
 
+Craft ruling A21 (2026-10-21), each a class the builder no longer writes:
+  ROOM  "this exact room" on an outdoor setup;   WORN  a slot's coat named in the prose, absent from its
+  "wears:" line;   STOP  a doubled full stop;   AIR  "thick with thin";   SHEET  "seen from several angles";
+  TWIN  the walk-on clause counting the panel's own staged people;   FOCUS  a face filling the framing
+  under a FOCUS that is no face.
+
 grids.py runs it as a hard wall before any grid is posted (and in --prompts).
 
 `warnings` never refuses (craft ruling 2026-10-21):
@@ -26,7 +32,7 @@ from __future__ import annotations
 
 import re
 
-from studio.storyboard_grid import PHYSIQUE, UNWRITTEN
+from studio.storyboard_grid import DOUBLE_STOP, GROUP_COUNTS, PHYSIQUE, UNWRITTEN, face_focus
 
 P14 = (re.compile(r"\b(?:door|door's|panels?|brown|blistered)\s+picture\b", re.I),
        re.compile(r"\bpicture\s+of\s+the\s+(?:\w+\s+){0,2}(?:door|panels?)\b", re.I),
@@ -84,14 +90,49 @@ def wears(text: str) -> list[str]:
             for m in WEARS.finditer(text) if (hit := PHYSIQUE.search(m.group(1)))]
 
 
-def faults(text: str, nouns: dict[int, str] | None = None, names: list[str] | None = None) -> list[str]:
+BOUND = re.compile(r"The \w+ in <image(\d+)> wears: ([^\n]*?)\.(?:\s|$)")
+GARMENT = r"<image{n}>'s (?:[\w-]+ ){{0,2}}?(coat|overcoat|jacket|cloak|waistcoat)\b"
+TWIN = re.compile(r"\bThe (\w+) [\w ]*?are \w+ different individuals\b")
+FACE_FILL = re.compile(r"Framing: [^.\n]*\b(?:head and shoulders fill|the face fills|the eyes fill|the head sits)\b")
+AIR = re.compile(r"\bthick with (?:an? )?thin\b", re.I)
+
+
+def worn(text: str) -> list[str]:
+    """WORN: a garment the prose gives a slot ("<image2>'s coat collar") that its wears line lacks."""
+    return [f"WORN <image{m.group(1)}>'s {g} is named and not in its wears line" for m in BOUND.finditer(text)
+            for g in dict.fromkeys(re.findall(GARMENT.format(n=m.group(1)), text)) if g not in m.group(2)]
+
+
+def panel_faults(text: str, people: set[str] | None = None) -> list[str]:
+    """TWIN and FOCUS, read one panel (paragraph) at a time."""
+    out = []
+    for para in text.split("\n\n"):
+        staged = {n for n in re.findall(r"<image(\d+)>", para) if people is None or n in people}
+        if (m := TWIN.search(para)) and 0 < GROUP_COUNTS.get(m.group(1).lower(), 99) <= len(staged):
+            out.append(f"TWIN walk-on clause on the panel's own staged people: {m.group(0)!r}")
+        if FACE_FILL.search(para) and not face_focus(para):
+            out.append(f"FOCUS the framing fills with a face the FOCUS is not: {para[:48]!r}")
+    return out
+
+
+def wording(text: str, outdoors: bool = False) -> list[str]:
+    """ROOM, STOP, AIR and SHEET (craft ruling A21)."""
+    out = ["ROOM a place under the sky called 'this exact room'"] if outdoors and "this exact room" in text else []
+    out += [f"STOP doubled full stop at {m.start()}" for m in DOUBLE_STOP.finditer(text)]
+    out += [f"AIR oxymoron {m.group(0)!r}" for m in AIR.finditer(text)]
+    return out + (["SHEET 'seen from several angles' on a one-figure crop"] if "seen from several angles" in text else [])
+
+
+def faults(text: str, nouns: dict[int, str] | None = None, names: list[str] | None = None,
+           outdoors: bool = False) -> list[str]:
     """Every fault in one grid prompt; [] is clean.  `nouns` {slot: man|woman|girl|boy},
-    `names` the book's name tokens an unstaged line may not carry."""
+    `names` the book's name tokens an unstaged line may not carry, `outdoors` the setup's."""
     out = p14(text) + p15(text, names or []) + p16(text, nouns or {}) + wears(text)
     out += [f"CASE garbled capital {m.group(0)!r}" for m in CASE.finditer(text)]
     out += [f"CURE glued as a noun phrase: {m.group(0)!r}" for m in CURE.finditer(text)]
     out += [f"SLOT bracketed description after a slot at {m.start()}" for m in SLOT.finditer(text)]
-    return out
+    people = {str(k) for k in nouns} if nouns else None
+    return out + worn(text) + panel_faults(text, people) + wording(text, outdoors)
 
 
 NEGATION = re.compile(r"\b(?:no|not|never|without)\b(?:\s+[\w'-]+){0,2}", re.I)

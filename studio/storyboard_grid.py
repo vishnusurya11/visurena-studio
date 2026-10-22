@@ -284,8 +284,15 @@ def _items(p: dict, bare: bool, chest: bool) -> list[str]:
     items; a bareheaded panel drops the hat, a chest-up one what is below it."""
     items = list(p["clothes"]) if p.get("clothes") is not None else worn_items(p.get("wear", ""))
     if chest:
-        items = [", ".join(x for x in i.split(", ") if not BELOW_CHEST.search(x)) for i in items]
+        items = [", ".join(x for x in (LEG_LENGTH.sub("", y) for y in i.split(", ")) if not BELOW_CHEST.search(x))
+                 for i in items]
     return [i for i in items if i and not (bare and HEADWEAR.search(i))]
+
+
+LEG_LENGTH = re.compile(r"\b(?:knee|ankle|calf|thigh|hip|floor)-(?:length|high|deep)\s+", re.I)
+"""A garment's length said by a leg word: the word goes, the garment stays.  BELOW_CHEST read "knee" in
+Hyde's "knee-length black double-breasted coat" and the chest-up binding dropped his coat while the panel
+gripped its collar (ep01 s09, craft ruling A21)."""
 
 
 HAND_WEAR = re.compile(r"\b(?:gloves?|mittens?|cuffs?|sleeves?|rings?)\b", re.I)
@@ -307,10 +314,9 @@ def _binding(p: dict, bare: bool = False, chest: bool = False, hands: bool = Fal
         return f"Only the hands of {who} are in the picture{', in the sleeves of ' + worn if worn else ''}, as drawn on <image{ref}>."
     items = _items(p, bare, chest)
     # ep16 shot 19: a wide naming one woman drew all four poses of her
-    # turnaround sheet as four women; the sheet is one person, drawn once
-    one = noun_of(p)
-    once = (f" <image{ref}> is a reference sheet of one {one} seen from several "
-            f"angles; that one {one} appears exactly once in each picture.")
+    # turnaround sheet as four women; the sheet is one person, drawn once.  The staged picture is the
+    # one-figure front crop since ep16, so "a reference sheet ... seen from several angles" was false (A21)
+    once = f" <image{ref}> shows one {noun_of(p)}, drawn exactly once in each picture."
     head = who[0].upper() + who[1:]
     return (f"{head} wears: {'; '.join(items)}." if items else f"{head}.") + once
 
@@ -457,6 +463,11 @@ def brief_place(described: str, light: str = "") -> str:
 ROOM_V2 = ("<image{n}> is this exact room, already drawn: every panel is set in it, with the "
            "same walls, furniture, windows and light.")
 """A chained grid's room -- the setup's first-drawn panel (studio/grid_room)."""
+PLACE_V2 = ("<image{n}> is this exact place, already drawn: every panel is set in it, with the "
+            "same ground, buildings and light.")
+"""ROOM_V2 under the sky (`Setup.outdoors`): 16 of ep01's 22 grids called a street a room with furniture (A21)."""
+DOUBLE_STOP = re.compile(r"(?<!\.)\.\.(?!\.)")
+"""A clause that ends in a stop, joined by a template that adds one (7 of ep01's 22 grids)."""
 CONSTANT_V2 = ("The location is identical in every panel and never changes -- the same ground, "
                "the same horizon, the same weather and the same hour of light in all of them.")
 """v1's sentence, dropped by v2 on 2026-09-22 and back on 2026-09-28: nothing else
@@ -466,7 +477,7 @@ in the prompt said the place may not change between panels."""
 def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[int], str],
                    cast: list[dict], style_slot: int, props: list[dict] | None = None, *,
                    room: int | None = None, geometry: str = "", light: str = "",
-                   style: str = "", medium: str = "illustration") -> str:
+                   style: str = "", medium: str = "illustration", outdoors: bool = False) -> str:
     """Layout (one line), the room when the grid is chained, the panels SUBJECT
     FIRST, one binding line per person, the place with its geometry, the style.
     No description is truncated -- the sheet in the slot carries the face and
@@ -504,9 +515,9 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
              f"Every panel is set at {refs}, at the same hour: {said}. {CONSTANT_V2}")
     if geometry.strip():
         where += " " + geometry.strip()
-    lead = [ROOM_V2.format(n=room)] if room is not None else []
+    lead = [(PLACE_V2 if outdoors else ROOM_V2).format(n=room)] if room is not None else []
     parts = [layout] + lead + blocks + binding + [where, (style or STYLE_V2).format(n=style_slot)]
-    return "\n\n".join(_one_picture(x) if single else x for x in parts)
+    return "\n\n".join(DOUBLE_STOP.sub(".", _one_picture(x) if single else x) for x in parts)
 
 
 def grid_shape(n: int) -> tuple[int, int]:
@@ -904,7 +915,24 @@ def framing(size: str, peopled: bool, body: str, move: str = "") -> str:
         return f"the frame is filled by the {thing.group(1).lower()}, close, from edge to edge"
     if peopled and size in OTS_CUT and OVER_SHOULDER.search(body or ""):
         return OTS_CUT[size]
-    return cut_clause(size, peopled) + (RISE_ROOM if move == "crane_up" and size in RISE_ROOM_SIZES else "")
+    cut = cut_clause(size, peopled)
+    if peopled and size in FACE_TAILS and not face_focus(body):
+        cut = cut.split(";")[0]                    # the cut alone: its tail names a face the focus is not
+    return cut + (RISE_ROOM if move == "crane_up" and size in RISE_ROOM_SIZES else "")
+
+
+FACE_TAILS = ("medium", "medium_close", "close", "extreme_close")
+"""The sizes whose PEOPLED_CUT tail puts a head, a face or the eyes in the middle of the panel."""
+FOCUS = re.compile(r"FOCUS OF THE PICTURE IS\s+(.*?)(?=\s+(?:at|in|on) the [A-Z]{3,}|[;:]|"
+                   r"(?<!\bMr)(?<!\bMrs)(?<!\bDr)\.(?:\s|$)|$)", re.I | re.S)
+FACE_WORDS = re.compile(r"\b(?:faces?|heads?|eyes|profile|expression|mouth|lips)\b", re.I)
+
+
+def face_focus(body: str) -> bool:
+    """Is the panel's named FOCUS a face (or is no focus named)?  ep01 s09 and night_door P1 put "head
+    and shoulders fill the centre" under a FOCUS on a fist and a hand (craft ruling A21)."""
+    hit = FOCUS.search(body or "")
+    return not hit or bool(FACE_WORDS.search(hit.group(1)))
 
 
 RISE_ROOM, RISE_ROOM_SIZES = ("; the place the camera rises over fills the top third of the panel, and the "
@@ -921,16 +949,21 @@ COUNTED = re.compile(
     r"labourers|shopmen|of them)\b", re.I)
 
 
-def varied_group(body: str) -> str:
+GROUP_COUNTS = {w: n for n, w in enumerate(("two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"), 2)}
+
+
+def varied_group(body: str, named: int = 0) -> str:
     """Tell a counted group of walk-ons that its members differ from each other.
 
     MEASURED 2026-09-20 on ep06 shot 10: "three young men ... in cheap dark
     suits and bowlers" is three men and ONE wardrobe, and came back as one man
     drawn three times. `no_duplicates` binds the NAMED cast; a walk-on has no
-    name to bind, so the count is the hook.
+    name to bind, so the count is the hook.  A count no larger than the shot's
+    `named` staged faces is that cast ("the two men" on ep01 night_door's bound
+    pair, craft ruling A21): their sheets bind them, so nothing is said.
     """
     found = COUNTED.search(body or "")
-    if not found:
+    if not found or GROUP_COUNTS.get(found.group(1).lower(), 0) <= named:
         return ""
     count, _, noun = found.groups()
     who = f"{count} {noun}".lower()

@@ -19,7 +19,7 @@ grids = importlib.util.module_from_spec(spec)
 sys.modules["grids_solid"] = grids
 spec.loader.exec_module(grids)
 
-OLD_SENTENCE = " The air is thick with fog, damp haze in every frame, softening the far distance."
+OLD_SENTENCE = " The air holds fog, damp haze in every frame, softening the far distance."   # A21's wording
 SOLID = (" The haze hangs behind the figures; every figure stays solid, sharp-edged and opaque"
          " to the frame edge.")
 STREET = SimpleNamespace(outdoors=True, described="A street at night, a gas lamp", location="", light="")

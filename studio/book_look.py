@@ -56,7 +56,8 @@ def atmosphere(book) -> str:
     return str(declared(book).get("atmosphere", "") or "").strip().rstrip(".").strip()
 
 
-ATMOSPHERE_AIR = " The air is thick with {atmosphere} in every frame, softening the far distance."
+ATMOSPHERE_AIR = " The air holds {atmosphere} in every frame, softening the far distance."
+""""The air holds", not "is thick with": every ep01 grid said "thick with thin fog" (craft ruling A21)."""
 SOLID_FIGURES = (" The haze hangs behind the figures; every figure stays solid, sharp-edged and opaque"
                  " to the frame edge.")
 ATMOSPHERE_GRID = ATMOSPHERE_AIR + SOLID_FIGURES

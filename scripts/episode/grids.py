@@ -361,7 +361,7 @@ def body_of(shot) -> str:
         parts.append(rest)
     if found := creature_insert(shot):
         parts.append(whole_subject(f"the {found[0]}", f"its {found[1]}"))
-    if said := varied_group(" ".join(parts)):          # a count of walk-ons is not one man repeated
+    if said := varied_group(" ".join(parts), len(getattr(shot, "faces", None) or [])):   # walk-ons, not the cast
         parts.append(said)
     return " ".join(parts)
 
@@ -457,7 +457,7 @@ def built(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
     here = ep.setups[shots[0].setup]
     text = compose(version, blocks, cols, rows, (place_slots, here.described), cast, style_slot, props,
                    room=room_slot, geometry=place_words(here), light=getattr(here, "light", "") or "",
-                   **look_for(book, here, " ".join(body_of(s) for s in shots)))
+                   outdoors=bool(getattr(here, "outdoors", False)), **look_for(book, here, " ".join(body_of(s) for s in shots)))
     return text, slots, cast
 
 
@@ -506,10 +506,10 @@ def staging(book: Path, slots: dict, cast: list[dict]) -> dict:
             "words_only": [p["entity"] for p in cast if not p.get("ref")]}
 
 
-def lint_wall(text: str, cast: list[dict], names: list[str]) -> None:
+def lint_wall(text: str, cast: list[dict], names: list[str], outdoors: bool = False) -> None:
     """A grid whose prompt the lint refuses never reaches the GPU (studio/grid_lint)."""
     nouns = {p["ref"]: p.get("noun", "") for p in cast if p.get("ref")}
-    if bad := grid_lint.faults(text, nouns, names):
+    if bad := grid_lint.faults(text, nouns, names, outdoors):
         raise SystemExit("REFUSED: grid lint: " + " | ".join(bad))
     for said in grid_lint.warnings(text):          # never refuses (craft ruling A20, A22)
         print(f"grid lint warning: {said[:200]}", flush=True)
@@ -563,7 +563,7 @@ def main(book_id: str, number: int, setup: str, cols: int, rows: int, tag: str =
     shots = grid_shots(ep, setup, cols, rows, only)
     room = room_of(book, number, ep, setup, [s.index for s in shots])
     text, slots, cast = built(book, ep, setup, shots, cols, rows, version, room=room)
-    lint_wall(text, cast, name_tokens(book))
+    lint_wall(text, cast, name_tokens(book), bool(getattr(ep.setups[setup], "outdoors", False)))
     name = grid_name(number, setup, cols, rows, tag)
     seed = 40500 + sum(s.index for s in shots) + seed_bump
     print(f"{name}: shots {[s.index for s in shots]} | slots {sorted(slots)} | prompt {len(text)} chars",
@@ -600,7 +600,8 @@ def dry_run(book: Path, number: int, ep, rows: list[dict]) -> int:
         shots = [s for s in ep.shots if s.index in row["shots"]]
         room = room_of(book, number, ep, row["setup"], row["shots"])
         text, slots, cast = built(book, ep, row["setup"], shots, row["cols"], row["rows"], room=room)
-        faults = grid_lint.faults(text, {p["ref"]: p.get("noun", "") for p in cast if p.get("ref")}, names)
+        faults = grid_lint.faults(text, {p["ref"]: p.get("noun", "") for p in cast if p.get("ref")}, names,
+                                  bool(getattr(ep.setups[row["setup"]], "outdoors", False)))
         faults += [f"UNDRAWN staged picture not on disk: {episode_home.relative(book, Path(p))}"
                    for p in slots.values() if not Path(p).exists()]
         bad += bool(faults)
