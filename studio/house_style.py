@@ -193,20 +193,31 @@ def panel_look() -> str:
 
 
 def live(setup=None) -> str:
-    """The style line for a RENDERED take; with a setup, under ITS light."""
+    """The style line for a RENDERED take; with a setup, under ITS light (the start-frame route)."""
+    return _rendered(setup, light_for(setup))
+
+
+def take_line(setup=None, shot=None) -> str:
+    """The ref2v take's style line: the setup's HOUR (`shot` may override it) and its black.  The
+    source and its direction are the block's light sentence's alone: said here too they were said
+    twice on 28 of 28 ep01 takes, and on 8 night takes as a sun (craft ruling A17)."""
+    return _rendered(setup, style_light(setup, shot))
+
+
+def _rendered(setup, light: str) -> str:
     from studio.book_look import under_sky        # fog outdoors only (2026-10-13)
     if _atmosphere and under_sky(setup):
-        return _aired(setup)
-    line = _live_line(where_for(setup), setup)
+        return _aired(setup, light)
+    line = _live_line(where_for(setup), light)
     # A place name that pushes the line past its wall gives way to the
     # episode's place: the wall held on ep05-08 and a long name broke it.
-    return line if len(line.split()) <= MAX_STYLE_WORDS else _live_line(_where, setup)
+    return line if len(line.split()) <= MAX_STYLE_WORDS else _live_line(_where, light)
 
 
-def _live_line(where: str, setup=None) -> str:
+def _live_line(where: str, light: str) -> str:
     if _look:
-        return f"{_look}, {where}, {light_for(setup)}."
-    return LIVE.format(where=where, light=light_for(setup))
+        return f"{_look}, {where}, {light}."
+    return LIVE.format(where=where, light=light)
 
 
 # ---- the book's atmosphere: words reserved before the light gets any ------------
@@ -230,9 +241,9 @@ def compact_lights(light: str) -> list[str]:
     return list(dict.fromkeys(p for p in (light, first, bare, black) if p))
 
 
-def _aired(setup=None) -> str:
+def _aired(setup, light: str) -> str:
     """The first line under the wall, fullest light first; the shortest when none fits."""
-    lines = [_aired_line(where, light) for light in compact_lights(light_for(setup))
+    lines = [_aired_line(where, said) for said in compact_lights(light)
              for where in dict.fromkeys((where_for(setup), _where))]
     return next((l for l in lines if len(l.split()) <= MAX_STYLE_WORDS),
                 min(lines, key=lambda l: len(l.split())))
@@ -438,7 +449,7 @@ def light_for(setup, rendered: bool = True) -> str:
     or whose phrase would fail the vocabulary or the style wall.  A NIGHT setup never falls
     back to a sky source: it keeps its lamp, bare if the wall leaves no room for more."""
     described = getattr(setup, "described", "") or ""
-    clause, night = lit_clause(described), is_night(setup)
+    clause, night = lit_clause(described), time_of(setup) == "night"
     source = source_of(clause) or source_of(sentence_of(described, clause)) or (night and source_of(described))
     if not source:
         return sky_free_light() if night else _light
@@ -529,10 +540,53 @@ def style_faults(where: str, light: str) -> list[str]:
 SKY_SOURCE = re.compile(r"\b(?:sun|sunlight|sunshine|daylight|dawn)\b", re.I)
 """What may not light a night setup (L28)."""
 
-NIGHT = re.compile(r"\b(?:night|midnight|o'clock of a (?:black )?(?:\w+ )?morning)\b", re.I)
+NIGHT = re.compile(r"\b(?:night|midnight|moonlit|small hours|o'clock of a (?:black )?(?:\w+ )?morning|"
+                   r"(?:one|two|three|four) in the morning)\b", re.I)
 def is_night(setup) -> bool:
     """A setup `described` or `place_state` puts at night."""
     return bool(NIGHT.search(f"{getattr(setup, 'described', '')} {getattr(setup, 'place_state', '')}"))
+
+
+DUSK = re.compile(r"\b(?:dusk|sunset|sundown|twilight|gloaming|nightfall)\b", re.I)
+DAWN = re.compile(r"\b(?:dawn|daybreak|sunrise|first light)\b", re.I)
+DAYLIT_TEXT = re.compile(r"\b(?:sun|sunlit|sunlight|sunshine|daylight|day|morning|noon|afternoon)\b", re.I)
+TIME_SAID = {"night": "at night", "dawn": "at dawn", "day": "by day", "dusk": "at dusk", "interior-lamp": "indoors"}
+"""How the take's style line says the hour (craft ruling A17): a time, never a source."""
+
+
+def clock_of(text: str) -> str:
+    """The hour a text names, night first, else ''."""
+    for hour, said in (("night", NIGHT), ("dusk", DUSK), ("dawn", DAWN)):
+        if said.search(text or ""):
+            return hour
+    return ""
+
+
+def time_of(setup, shot=None) -> str:
+    """The one hour of a take: the shot's own `time`, else the setup's, else read from the setup's
+    `described` and `place_state` -- an indoor place lit by a burning practical and no sky is
+    interior-lamp; everything else is day (craft ruling A17)."""
+    said = getattr(shot, "time", "") or getattr(setup, "time", "")
+    if said:
+        return said
+    text = f"{getattr(setup, 'described', '') or ''} {getattr(setup, 'place_state', '') or ''}"
+    if hour := clock_of(text):
+        return hour
+    indoors = setup is not None and not getattr(setup, "outdoors", False)
+    lamp = any(LAMPS.search(c) and LIT.search(c) for c in clauses(text))
+    return "interior-lamp" if indoors and lamp and not DAYLIT_TEXT.search(text) else "day"
+
+
+LAMPS = re.compile(r"\b(?:lamps?|lamplight|gaslight|gas|candles?|candlelight|fire|firelight|hearth|grate|coals?|"
+                   r"embers?|lanterns?|torch(?:es)?|stove|forge)\b", re.I)
+"""A practical that burns: PRACTICALS without the openings (a lit window is daylight's)."""
+
+
+def style_light(setup=None, shot=None) -> str:
+    """What the take's style line says of the light: the hour and a black, never a source or a
+    direction -- the block's light sentence owns those (ep01: 28 of 28 takes said the light twice)."""
+    black = black_of(light_for(setup)) or black_of(_light)
+    return ", ".join(p for p in (TIME_SAID.get(time_of(setup, shot), "") if setup is not None else "", black) if p)
 
 
 DAYLIT = re.compile(r"\b(?:daylight|sunlight)\b", re.I)

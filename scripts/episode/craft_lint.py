@@ -86,6 +86,13 @@ def sky_at_night(dd: str, night: bool) -> int:
     return len(house_style.SKY_SOURCE.findall(dd)) if night else 0
 
 
+def light_twice(dd: str) -> int:
+    """1 when the style line names a light source or gives one a direction beside the block's own
+    light sentence (C1, A17: ep01's 28 of 28 -- "sun from the left", "lamp from the left")."""
+    style = dd.split("\n", 1)[0]
+    return int(bool(house_style.SOURCES.search(style) or house_style.SIDE.search(style)))
+
+
 def six_word_repeat(dd: str) -> int:
     """Distinct 6-grams said twice or more in the blocks, the builder's fixed sentences aside.  The
     unit is the overlapping 6-gram: one repeated 10-word phrase counts 5 (the line says "6-grams")."""
@@ -124,7 +131,8 @@ def _get(row, key):
 
 
 TAKE_CLASSES = (("renamed hold", renamed_hold), ("now in frame", now_in_frame), ("walking pace", walking_pace),
-                ("speech beside a closed mouth", speech_closed), ("repeated 6-grams", six_word_repeat),
+                ("speech beside a closed mouth", speech_closed), ("light said twice", light_twice),
+                ("repeated 6-grams", six_word_repeat),
                 ("garble", garbles), ("beat at block end", beat_at_end),
                 ("insert scope with a second body", insert_second_body))
 

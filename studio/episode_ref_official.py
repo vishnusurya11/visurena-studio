@@ -42,7 +42,7 @@ import re
 
 from studio.episode_spec import BANNED_PROPS, Line, Setup, Shot
 
-def style_line(setup=None) -> str:
+def style_line(setup=None, shot=None) -> str:
     """The style line for this run, from `studio.house_style`, under the
     SETUP's own light when one is given.
 
@@ -56,8 +56,11 @@ def style_line(setup=None) -> str:
     shadow") reached 30/30 take blocks including the moon, lamp and candle
     setups (dq10/J.md §4).  `house_style.light_for` reads the setup's own
     source clause; the episode light is its fallback.
+
+    Since craft ruling A17 the line says the take's HOUR (`shot` may override the setup's) and a
+    black; the source and direction are the block's light sentence's alone (`block_light`).
     """
-    return house_style.live(setup)
+    return house_style.take_line(setup, shot)
 LEAD = "Watson"
 """The one character the limp rule watches (owner: Watson limps on his stick)."""
 MAX_PICTURES = 9
@@ -1286,7 +1289,8 @@ def cell(framed) -> dict:
     return {"frame": framed.frame, "motion": framed.motion, "faces": list(framed.faces),
             "size": framed.size, "crowd": framed.crowd, "end_frame": framed.end,
             "camera": framed.camera, "at_rest": framed.at_rest, "changed": framed.changed,
-            "still": bool(getattr(framed, "still", False)), "extras": int(getattr(framed, "extras", 0) or 0)}
+            "still": bool(getattr(framed, "still", False)), "extras": int(getattr(framed, "extras", 0) or 0),
+            "time": getattr(framed, "time", "") or ""}
 
 
 def segments(shots: list[Shot], placed: list[dict], offset: float, frames: int,
@@ -1511,6 +1515,17 @@ def light_sentence(light: str) -> str:
     return " ".join(under_cap(clauses, LIGHT_CAP)).strip(" ,;") + "."
 
 
+def block_light(seg: dict) -> str:
+    """The light sentence when the plan's `camera` names none: the setup's own source and direction
+    (`house_style.light_for`), since the style line no longer carries them (craft ruling A17).  A
+    shot set at another hour than its setup's gets none: the setup's source is that other hour's."""
+    setup = seg.get("setup")
+    if setup is None or (seg.get("time") and seg["time"] != house_style.time_of(setup)):
+        return ""
+    phrase = house_style.light_for(setup)
+    return f"The light is {phrase}." if phrase else ""
+
+
 LENS = re.compile(r",?\s*(?:through\s+)?an?\s+\d{2,3}\s*mm\s+lens\b", re.I)
 
 
@@ -1543,7 +1558,7 @@ def detail(seg: dict, want: int) -> list[str]:
     if where := trim(calm(lensless(position)), CAMERA_CAP):
         out.append(f"The camera is {position_lead(where)}.")
         want -= len(where.split())
-    if lit := light_sentence(light):
+    if lit := light_sentence(light) or ("" if house_style.lit_clauses(position) else block_light(seg)):
         out.append(lit)
         want -= len(lit.split())
     if rest := trim(calm(seg.get("at_rest", "")), max(REST_FLOOR, want)):
@@ -1687,7 +1702,7 @@ def describe(shots: list[Shot], placed: list[dict], lines: list[Line], at: dict,
            "at": at, "offset": offset,
            "ids": voice_id(lines, narrator), "seen": set(), "cast": cast, "names": names_of(cast),
            "watson": lead_tag(faces), "no_ends": no_ends, "crowd_at": crowd_block(segs), "life": {}}
-    text = "\n".join([style_line(setup)] + [segment_text(k, seg, cells[k - 1], ctx)
+    text = "\n".join([style_line(setup, shots[0])] + [segment_text(k, seg, cells[k - 1], ctx)
                                             for k, seg in enumerate(segs, start=1)])
     return text, ctx["life"]
 
@@ -2211,6 +2226,31 @@ def l28_style_light(text, facts):
     return [f"L28 STYLE-LIGHT: a night setup's style line says {hit.group(0)!r}: {line[:90]!r}"] if hit else []
 
 
+DAY_SKY = re.compile(house_style.SKY_SOURCE.pattern.replace("sunlight|", "sunlit|sunlight|"), re.I)
+NIGHT_WORD = re.compile(r"\b(?:night|midnight|moon|moonlight|moonlit|small hours)\b", re.I)
+LIGHT_SIDE = re.compile(r"\b(?:light|sun|lamp|glow|moon|fire|flame|candle)\w*(?:\s+(?:light|comes|falls|falling|"
+                        r"streams|pours|spills|shines|is))*\s+from the (?:upper |lower )?(left|right)\b", re.I)
+"""A light given a frame side ("sun from the left", "the corner lamp light comes from the upper RIGHT"); a
+runner "from the LEFT edge" under a lamp is no light's side."""
+
+
+def l33_light_once(text, facts):
+    """L33 LIGHT-ONCE (craft ruling A17): the take's light holds to its one hour and one direction.
+    A sky word in a night take's blocks (the style line is L28's), a night word in a day take, and
+    a block whose light sides disagree with the style line's (ep01 C1: style "low sun from the
+    west" over a block's "corner lamp light comes from the upper RIGHT")."""
+    dd = sections(text).get("detailed_description") or ""
+    style, body = (dd.split("\n", 1) + [""])[:2]
+    said = re.sub(r"<d>.*?</d>", " ", body, flags=re.S)
+    out = [f"L33 LIGHT-ONCE: a night take says {m.group(0)!r}" for m in DAY_SKY.finditer(said)
+           if facts.get("night")]
+    out += [f"L33 LIGHT-ONCE: a day take says {m.group(0)!r}" for m in NIGHT_WORD.finditer(style + " " + said)
+            if facts.get("time") == "day"]
+    lit = {m.group(1).lower() for m in LIGHT_SIDE.finditer(style)}
+    return out + [f"L33 LIGHT-ONCE [Shot {k}]: the light comes from {sorted(sides)}" for k, a, b, block in blocks(text)
+                  if len(sides := lit | {m.group(1).lower() for m in LIGHT_SIDE.finditer(block)}) > 1]
+
+
 MOVER = re.compile(r"\bthe camera\b|\bcontinues?\b|\b(?:is|are) \w+ing\b|"
                    r"\b(?:comes?|goes?|moves?|runs?|settles?|falls?|rises?)\b", re.I)
 """What a closing sentence may name as moving besides an `ACTION` verb: the camera,
@@ -2280,7 +2320,8 @@ def l23_pace_on_a_thing(text, facts):
 RULES = (l1_negation, l2_stillness, l3_slow, l4_action, l5_coverage, l6_stamps, l7_pins, l8_pace,
          l9_limp, l10_life, l11_pictures, l12_speakers, l13_task_type, l14_length,
          l15_summary_length, l16_dialogue_tail, l17_cross_cut, l18_banned_prop,
-         l19_crowd, l20_style, l21_arrival, l22_absent_mouth, l23_pace_on_a_thing, l24_glued_pace, l28_style_light)
+         l19_crowd, l20_style, l21_arrival, l22_absent_mouth, l23_pace_on_a_thing, l24_glued_pace, l28_style_light,
+         l33_light_once)
 
 
 def lint(text: str, facts: dict | None = None) -> list[str]:
@@ -2395,6 +2436,7 @@ def prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fp
     actually put in (one block, or none when it did not fit); without it the
     take's crowd block is assumed to carry the crowd."""
     at_block = crowd_block(segs)
+    hour = (segs[0].get("time") if segs else "") or house_style.time_of(setup)    # A17: a shot's own hour wins
     if life is None:
         life = {at_block + 1: crowd_of(segs[at_block])} if at_block is not None else {}
     lines = [{"block": 1 + next(i for i, s in enumerate(segs) if s["t"] - 1e-6 <= a < s["t_to"] - 1e-6),
@@ -2405,7 +2447,7 @@ def prompt_facts(frames, segs, faces, spoken, at, offset, setup, strip, refs, fp
             "cells_staged": cells_staged,
             "plate": len(faces) + 1 if has_plate else None, "strip": strip,
             "pins": [(i + 1, s["t"]) for i, s in enumerate(segs)], "lines": lines,
-            "life": life, "watson": lead_tag(faces), "night": night_fact(setup)}
+            "life": life, "watson": lead_tag(faces), "night": hour == "night", "time": hour}
 
 
 BLOCK_HEAD = re.compile(r"(\[Shot \d+\] From \d\d:\d\d to \d\d:\d\d\.)")

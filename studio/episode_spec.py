@@ -164,6 +164,9 @@ INNER_MAX_WORDS = 8
 """An inner line is a thought, not a speech (research 04 P3; G1 voice test 2026-10-16:
 5- and 7-word lines)."""
 Size = Literal["insert", "extreme_close", "close", "medium_close", "medium", "full", "wide"]
+Hour = Literal["", "night", "dawn", "day", "dusk", "interior-lamp"]
+"""The one hour a setup (or a shot) is lit at (craft ruling A17).  Empty: code reads it from the
+setup's `described` and `place_state` (`house_style.time_of`)."""
 READABLE = {"close", "medium_close"}
 """Where a speaking mouth reads on a phone: a dialogue shot must be one of these."""
 
@@ -358,6 +361,9 @@ class Shot(Framed):
     exits: list[str] = Field(default_factory=list)
     """Who LEAVES in this shot: after it a wide of the scene no longer shows him,
     and a return is a new entrance.  The motion shows him going."""
+    time: Hour = ""
+    """This shot's own hour when its setup is used at more than one (ch2's vigil: one door at
+    morning, noon and night).  Empty: the setup's (craft ruling A17)."""
     sounds: list[Sound] = Field(default_factory=list)
     """The sound effects on this shot (root cause 2026-09-26, D10): a gun, a shell
     burst, a splash.  G-SOUND refuses a shot whose prose names a loud event and
@@ -490,6 +496,10 @@ class Setup(BaseModel):
     """What has CHANGED about this place now, as nouns ('front door forced open,
     dust on every sill').  Step 03 derives it from the place's picture in ONE
     edit and the setup's view becomes that variant; empty is the picture itself."""
+    time: Hour = ""
+    """The hour this place is lit at: night, dawn, day, dusk or interior-lamp.  Empty: read by code
+    from `described` and `place_state` (`house_style.time_of`); a shot's own `time` overrides it.
+    The take's style line says it, and L33 holds every word of the take to it (craft ruling A17)."""
     props: list[str] = Field(default_factory=list)
     """Prop plates attached as references (`plate_<name>.png`): the one that
     binds a vehicle across the setups that share it.  The cab was bound by

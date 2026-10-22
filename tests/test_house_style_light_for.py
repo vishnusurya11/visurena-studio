@@ -113,4 +113,4 @@ def test_ep10s_evening_and_bedroom_lines_carry_no_sun():
         line = ro.style_line(Setup(**plan["setups"][name]))
         assert "sun" not in line.lower(), (name, line)
         assert words(line) <= hs.MAX_STYLE_WORDS, line
-    assert "sun" in ro.style_line(Setup(**plan["setups"]["farm_path_morning"]))
+    assert "by day" in ro.style_line(Setup(**plan["setups"]["farm_path_morning"]))   # A17: the hour, not the sun

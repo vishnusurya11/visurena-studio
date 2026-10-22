@@ -174,5 +174,7 @@ def test_the_sheet_and_take_builders_read_it_rather_than_a_constant():
     from studio import episode_seq_board as sq
     from studio import episode_take_prompt as tp
     hs.adopt(UTAH_WHERE, UTAH_LIGHT)
-    for said in (sq.style_line(), ro.style_line(), tp.style_line(), eb.still_line()):
+    for said in (sq.style_line(), tp.style_line(), eb.still_line()):
         assert "1881 London" not in said and UTAH_LIGHT in said
+    # the ref2v take's line says the place and the black; its source is the block's (craft ruling A17)
+    assert UTAH_WHERE in ro.style_line() and "black shadows" in ro.style_line() and "sun" not in ro.style_line()
