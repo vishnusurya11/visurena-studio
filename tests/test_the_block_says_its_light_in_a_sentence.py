@@ -63,6 +63,21 @@ def test_t07_says_its_light_once():
     assert cl.light_twice(said) == 0
 
 
+def test_the_authors_light_placement_at_a_frame_side_is_kept():
+    """Wave-3 review: `unlit` also struck the plan author's own placement of the one light, rendered on ep01 and
+    never a second source (T11 "yellow lamp glow falls along the LEFT edge onto his cheek", T22 "sunlight falls
+    from the LEFT edge onto his cheekbone", T16, T12).  A clause that puts the light at a frame side stays."""
+    rest = f"{FLOOR} The door fills the RIGHT third in shadow; yellow lamp glow falls along the LEFT edge onto his cheek."
+    said = " ".join(ro.detail(seg(camera="low; the kerb gas lamp light comes from the LEFT", at_rest=rest), 80))
+    assert "yellow lamp glow falls along the LEFT edge onto his cheek" in said
+
+
+def test_ep01_close_shots_keep_their_face_light():
+    for index, words in ((11, "onto his cheek"), (12, "glints on the gold from the LEFT"),
+                         (16, "a bar of sunlight crosses the RIGHT edge"), (22, "onto his cheekbone")):
+        assert words in sf.detailed(sf.take_prompt(index)), index
+
+
 def test_follow_marks_never_stamps_the_last_second():
     assert ro.follow_marks(0, 5, 2, line_end=5) == [4]
     assert ro.follow_marks(3, 4, 1, line_end=9) == [3]

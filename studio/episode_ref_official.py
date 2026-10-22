@@ -1532,15 +1532,19 @@ def block_light(seg: dict) -> str:
 LIGHT_EFFECT = re.compile(r"\b(?:lamplight|candlelight|firelight|gaslight|moonlight|sunlight|daylight|torchlight|"
                           r"shin(?:e|es|ing)|glow(?:s|ing)?|gleam(?:s|ing)?|lit by)\b", re.I)
 """A clause that says light falling (ep01 T07's fill: "..., shining with lamplight.")."""
+PLACED = re.compile(r"(?-i:\b(?:LEFT|RIGHT|TOP|BOTTOM|CENTRE)\b)|\bfrom the (?:upper |lower )?(?:left|right)\b", re.I)
+"""A clause that puts the one light at a frame side: the author's placement, never a second source (wave-3
+review: T11's "lamp glow falls along the LEFT edge onto his cheek" and T22's cheekbone were struck)."""
 
 
 def unlit(text: str, floor: int = 0) -> str:
-    """`text` without the trailing clauses past its first `floor` words that say light falling: the
-    at-rest's fill in a block that already says its light (wave-2 review of A17: T07's freed budget
-    added "..., shining with lamplight.").  The author's floor and every sentence head stay."""
+    """`text` without the trailing clauses past its first `floor` words that say light falling and put it at
+    no frame side: the at-rest's fill in a block that already says its light (wave-2 review of A17: T07's
+    freed budget added "..., shining with lamplight.").  The author's floor, a light placed at a frame side
+    and every sentence head stay."""
     out, n = [], 0
     for part in re.split(r"(?<=[,;.])\s+", text or ""):
-        if n >= floor and LIGHT_EFFECT.search(part) and out and out[-1][-1:] in ",;":
+        if n >= floor and LIGHT_EFFECT.search(part) and not PLACED.search(part) and out and out[-1][-1:] in ",;":
             out[-1] = out[-1][:-1] + part[-1] if part[-1:] == "." else out[-1]
         else:
             out.append(part)
