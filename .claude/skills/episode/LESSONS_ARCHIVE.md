@@ -2402,6 +2402,23 @@ the same folder. What the debate settled, and what the bench then measured:
   fires`), readable count per check, Wilson recall on ep01 mutations, the audience P6 LOG rows (ep01: 24.1 s
   with no node at 62.7-86.8 s; plain beds 4.2-28.5 s and 66.1-83.8 s). A screenplay row earns shadow only
   through this replay.
+- **An instrument that read nothing says "not measured".** Wave 0 review: no prompts.json printed "0 of 28
+  rendered from older words"; an unreadable prompt was a clean census take; a deleted prompt still cited
+  on its shot made no orphan. Now: `take_inputs.built_prompts` is None, the HARD count names the rules a
+  record cannot feed ("at least"), QC names every line shipped at voice floor 0.0 (ep01 l06 l11 l20), the
+  census counts readable prompts and sees A18 ("beat at block end", "insert scope with a second body"),
+  and the replay pools `--mutate` plans, scores only NEW fires, and reports `--approved=<codex>:<n>`.
+- **Wave 1 (craft A4-A16, 2026-10-21).** Brief: `dialogue_room` (a share of the plan's own words; ep01
+  had 1-2 spare, not 26), `voices_kept` beside `max_voices`, one screenplay scene per adjacent beat+room
+  run (ch1 3 -> 1), invented elements marked, "the chapter wins"; the tease only from NEXT CHAPTER rows.
+  Contract: no `\u2026` gap mark in a line (free cure). Shadow rows, printed by plan_check CRAFT SHADOW
+  and never counted (replay on 42 plans; approved = WotW ep01-03, Scarlet ep05/07): G-MUTE 20 fires,
+  approved 0, recall 100/100; G-STOLEN 63, approved 13 (Watson relaying an account: no cure without the
+  owner); ORPHAN-REPLY read 16, 3 fires, recall 3/3 (Wilson low 0.44: the bar needs 9 mutants, the disk
+  holds 3); PARAGRAPH-HOLE read 16, recall 20/20; G-REVEAL reads only a book with `series_map.json`
+  (Jekyll: Hyde from ep02 ch2 index 24). A15: per-speaker rates lose out of sample (MAE 0.623 s vs
+  0.619 s, 1012 lines), so nothing ships; a pause model wins (0.572 s), not wired. A16: the honest
+  speech ruler prints beside the old (ch1 0.628 vs 0.279); the dial switch is the owner's (Q1).
 
 ## The shot framework (2026-10-21, the panel's final ruling)
 
