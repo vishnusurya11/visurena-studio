@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 """Harvest the casebook's regenerable rows for one book.
 
-    uv run python scripts/calibration/harvest_labels.py <codex> [--rejudge] [--prose <file>...]
+    uv run python scripts/calibration/harvest_labels.py <codex> [--rejudge] [--prose <file>...] [--out <dir>]
 
-Writes library/<book>/casebook/labels.jsonl, one row per (artefact, verdict
+Writes library/<book>/casebook/labels.jsonl (or <dir>/labels.jsonl with
+`--out`, which touches nothing under the library), one row per (artefact, verdict
 source), from two kinds of source:
 
 - the MACHINE json beside each artefact: `T??.dq.json` (the kept take, a
@@ -414,15 +415,21 @@ def harvest(codex: str, book: Path, rejudge=None, extra_prose: list[Path] = ()) 
     return stamp(rows, book, published_units(book))
 
 
+def option(argv: list[str], name: str) -> str | None:
+    """The value after `name` on the command line; None when it is absent."""
+    return argv[argv.index(name) + 1] if name in argv and argv.index(name) + 1 < len(argv) else None
+
+
 def main(argv: list[str]) -> int:
-    args = [a for a in argv if not a.startswith("--")]
+    out_dir = option(argv, "--out")
+    args = [a for a in argv if not a.startswith("--") and a != out_dir]
     if not args:
         print(__doc__)
         return 2
     book = episode_home.book_dir(args[0])
     extra = args[1:] if "--prose" in argv else []
     rows = harvest(book.name[:14], book, rejudge_attempts if "--rejudge" in argv else None, extra)
-    out = casebook.write_rows(book / "casebook" / casebook.LABELS, rows)
+    out = casebook.write_rows(Path(out_dir or book / "casebook") / casebook.LABELS, rows)
     print(json.dumps({"wrote": str(out)} | counts(rows), indent=2))
     return 0
 
