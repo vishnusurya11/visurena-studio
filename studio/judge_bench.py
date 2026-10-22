@@ -47,6 +47,7 @@ class Interval:
     high: float
     n: int
     k: int
+    weighted: float | None = None
 
 
 # ---- rows in, outcomes out ----------------------------------------------------
@@ -123,29 +124,43 @@ def by_class(outcomes: list[Outcome], by: str = "owner") -> dict[str, Interval]:
     return {c: interval(sum(o.refused for o in rows), len(rows)) for c, rows in sorted(out.items())}
 
 
-def false_refusals(outcomes: list[Outcome]) -> Interval:
-    """The weighted share of pass rows refused; the interval on the row count."""
-    rows = [o for o in outcomes if measured(o) and o.row.verdict == "pass"]
+def weighted_share(rows: list[Outcome]) -> float:
+    """The share of pass rows refused, each weighted by who said it passed (owner 1 / agent 0.75 / default 0.5)."""
     total = sum(casebook.weight(o.row) for o in rows)
-    refused = sum(casebook.weight(o.row) for o in rows if o.refused)
-    share = refused / total if total else 0.0
-    low, high = wilson(round(share * len(rows)), len(rows))
-    return Interval(round(share, 4), low, high, len(rows), sum(o.refused for o in rows))
+    return round(sum(casebook.weight(o.row) for o in rows if o.refused) / total, 4) if total else 0.0
+
+
+def false_refusals(outcomes: list[Outcome], by: str = "all") -> Interval:
+    """The raw count of pass rows refused, with its interval; the weighted share rides beside it."""
+    who = REAL if by == "all" else (by,)
+    rows = [o for o in outcomes if measured(o) and o.row.verdict == "pass" and o.row.verdict_by in who]
+    i = interval(sum(o.refused for o in rows), len(rows))
+    i.weighted = weighted_share(rows)
+    return i
+
+
+def distinct_refusals(outcomes: list[Outcome]) -> set[tuple[str, str, str]]:
+    """Each refusal once per (codex, artefact, rule): two rows on one take, or three words of one rule, are one."""
+    return {(o.row.codex, o.row.path, cls) for o in outcomes if o.refused for cls in (o.classes or ["unknown"])}
+
+
+def refused_artefacts(outcomes: list[Outcome]) -> dict[tuple[str, str], str]:
+    """(codex, artefact) -> its unit, for every artefact refused at least once: one retake each."""
+    return {(o.row.codex, o.row.path): o.row.unit for o in outcomes if o.refused}
 
 
 def flag_rate(outcomes: list[Outcome]) -> dict:
-    """Refusals per unit (keyed codex/unit: two books number their units alike) and the share overall."""
+    """Refused artefacts per unit (keyed codex/unit: two books number their units alike) and the share overall."""
     per_unit: dict[str, int] = {}
-    for o in outcomes:
-        if o.refused:
-            key = f"{o.row.codex}/{o.row.unit}"
-            per_unit[key] = per_unit.get(key, 0) + 1
-    share = sum(per_unit.values()) / len(outcomes) if outcomes else 0.0
+    for (codex, _), unit in refused_artefacts(outcomes).items():
+        per_unit[f"{codex}/{unit}"] = per_unit.get(f"{codex}/{unit}", 0) + 1
+    artefacts = {(o.row.codex, o.row.path) for o in outcomes}
+    share = sum(per_unit.values()) / len(artefacts) if artefacts else 0.0
     return {"share": round(share, 4), "per_unit": dict(sorted(per_unit.items()))}
 
 
 def gpu_minutes(outcomes: list[Outcome], per_refusal: float = GPU_MINUTES_PER_REFUSAL) -> float:
-    return per_refusal * sum(o.refused for o in outcomes)
+    return per_refusal * len(refused_artefacts(outcomes))
 
 
 def misses(outcomes: list[Outcome], by: str = "all") -> list[str]:
@@ -207,32 +222,54 @@ def _table(table: dict[str, dict]) -> list[str]:
                    for c, v in table.items()]
 
 
+def _dict(i: Interval) -> dict:
+    return {"point": i.point, "low": i.low, "high": i.high, "n": i.n, "k": i.k}
+
+
+def headline(outcomes: list[Outcome]) -> dict:
+    """The owner's numbers alone: no agent, default or synthetic row can move them."""
+    return {"recall": _dict(recall(outcomes, "owner")), "false_refusals": _dict(false_refusals(outcomes, "owner")),
+            "by_class": {c: _dict(i) for c, i in by_class(outcomes, "owner").items()}}
+
+
+def owner_lines(outcomes: list[Outcome]) -> list[str]:
+    lines = ["### owner truth (the headline)", "",
+             _owner_line("recall on owner rows", recall(outcomes, "owner")),
+             _owner_line("false refusals on owner rows", false_refusals(outcomes, "owner"))]
+    return lines + [_owner_line(f"owner recall on {c}", i) for c, i in by_class(outcomes, "owner").items()]
+
+
+def consistency_lines(outcomes: list[Outcome]) -> list[str]:
+    """Agent, default and synthetic rows: the ladder agreeing with itself, never truth."""
+    fr = false_refusals(outcomes, "all")
+    return ["### internal consistency (agent / default / synthetic rows: the ladder agreeing with itself, not truth)", "",
+            _line("recall on all rows", recall(outcomes, "all")),
+            _line("synthetic (own column)", recall(outcomes, "synthetic")),
+            _line("reject-only recall (unknown class)", reject_recall(outcomes)),
+            f"{_line('false refusals on all rows', fr)}; weighted share {fr.weighted:.3f}"]
+
+
 def report(outcomes: list[Outcome], judge_name: str, version: str, machine_version: str = "") -> str:
-    """The markdown for docs/calibration/<judge>.md: numbers, the table, misses by path."""
+    """The markdown for docs/calibration/<judge>.md: owner truth, then the ladder, the table, misses by path."""
     rate = flag_rate(outcomes)
     lines = [f"## Bench {date.today().isoformat()} -- {judge_name}@{version}", "",
              f"rows {len(outcomes)} ({unmeasured(outcomes)} without this judge's inputs, not counted); "
              f"machine_version {machine_version or 'n/a'}; "
-             f"flag rate {rate['share']:.3f}; refusals per unit {rate['per_unit']}; "
-             f"expected GPU minutes {gpu_minutes(outcomes):.0f}", "",
-             _owner_line("recall on owner rows", recall(outcomes, "owner")),
-             _line("recall on all rows", recall(outcomes, "all")),
-             _line("synthetic (own column)", recall(outcomes, "synthetic")),
-             _line("reject-only recall (unknown class)", reject_recall(outcomes)),
-             _line("false refusals (weighted)", false_refusals(outcomes)), ""]
-    lines += [_owner_line(f"owner recall on {c}", i) for c, i in by_class(outcomes, "owner").items()]
+             f"flag rate {rate['share']:.3f}; refused artefacts per unit {rate['per_unit']}; "
+             f"distinct (artefact, rule) refusals {len(distinct_refusals(outcomes))}; "
+             f"expected GPU minutes {gpu_minutes(outcomes):.0f}", ""]
+    lines += owner_lines(outcomes) + [""] + consistency_lines(outcomes)
     lines += ["", *_table(confusion(outcomes)), "", "misses (fault rows passed), by path:"]
     lines += [f"- {p}" for p in misses(outcomes)] or ["- none"]
     return "\n".join(lines) + "\n"
 
 
 def baseline(outcomes: list[Outcome], judge_name: str, version: str, machine_version: str = "") -> dict:
-    r = recall(outcomes, "owner")
     return {"judge": judge_name, "version": version, "machine_version": machine_version,
             "date": date.today().isoformat(), "rows": len(outcomes), "unmeasured": unmeasured(outcomes),
-            "recall_owner": {"point": r.point, "low": r.low, "high": r.high, "n": r.n, "k": r.k},
-            "recall_all": recall(outcomes, "all").point, "false_refusals": false_refusals(outcomes).point,
-            "caught": caught(outcomes)}
+            "recall_owner": _dict(recall(outcomes, "owner")), "recall_all": recall(outcomes, "all").point,
+            "false_refusals_owner": _dict(false_refusals(outcomes, "owner")),
+            "false_refusals": false_refusals(outcomes).point, "caught": caught(outcomes)}
 
 
 def main(argv: list[str]) -> int:

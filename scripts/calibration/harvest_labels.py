@@ -192,13 +192,21 @@ losing attempt (an agent fault)."""
     return rows
 
 
+def panel_was_refused(dq: dict, content: dict | None) -> bool:
+    """A panel of a redrawn set is a fault only when a check of its own refused it: a flag, or a failed content read."""
+    return bool(dq.get("flags")) or (content or {}).get("passed") is False
+
+
 def panel_rows(codex: str, unit: str, dq_rows: list, content_rows: list, planned: dict, source: str,
                version: str, folder: str = "storyboard", refused: bool = False) -> list[Row]:
-    """One row per panel: a pass by default, or an agent fault for a superseded set."""
+    """One row per panel: a pass by default; in a superseded set an agent fault, but only for a panel
+    something refused -- a redraw of the whole board is no reason against the panels nothing flagged."""
     content = {r.get("shot"): r for r in content_rows or []}
     rows = []
     for r in dq_rows or []:
         shot = r.get("shot")
+        if refused and not panel_was_refused(r, content.get(shot)):
+            continue
         rows.append(Row(codex=codex, unit=unit, kind="panel", path=f"episodes/{unit}/{folder}/shot_{int(shot):02d}.png",
                         verdict="fault" if refused else "pass", fault_class="unknown" if refused else None,
                         verdict_by="agent" if refused else "default", source=source, machine_version=version,
