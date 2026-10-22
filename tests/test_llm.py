@@ -105,6 +105,7 @@ def test_structured_fills_usage_dict():
     usage = {}
     llm.structured("workhorse", "p", Toy, _agent=FakeAgentWithUsage(Toy(answer="x")),
                    usage=usage)
+    assert usage.pop("duration_s") >= 0.0          # the call's seconds (fleet C A2)
     assert usage == {"input_tokens": 4200, "output_tokens": 310, "total_tokens": 4510,
                      "tier": "workhorse"}
 

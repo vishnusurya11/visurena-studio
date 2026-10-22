@@ -201,6 +201,8 @@ def guard_spend(model: str, prompt: str, ceiling: float | None = None, tier: str
 
 
 _TRANSIENT_BACKOFF = (3, 10)  # seconds between transient-error retries
+_clock = time.monotonic
+"""The clock a model call is timed by (fleet C A2); a test hands in a fake one."""
 
 
 class _NativeStructuredCaller:
@@ -404,7 +406,7 @@ def _record_spend(tier: str, usage: dict) -> None:
         spend.record(_SPEND["conn"], _SPEND["codex_id"], _SPEND["stage"],
                      _SPEND["step_id"] or "", tier, model,
                      usage.get("input_tokens", 0), usage.get("output_tokens", 0),
-                     unit=_SPEND.get("unit"))
+                     unit=_SPEND.get("unit"), duration_s=usage.get("duration_s"))
     except Exception:                      # never break a call that already succeeded
         pass
 
@@ -453,7 +455,7 @@ def structured(tier: str, prompt: str, schema, *, retries: int = 3,
     decoding — no agent loop, no tool cycles). Two retry ladders:
     - schema violations (StructuredOutputException): up to `retries` immediate re-asks
     - transient failures (connection errors): up to `transient_retries` with backoff.
-    Pass `usage={}` to receive token counts (input/output/total + tier) back.
+    Pass `usage={}` to receive token counts (input/output/total + tier) and the call's `duration_s` back.
     `_agent` is the test seam (a fake caller; no test may call a paid API)."""
     agent = _agent or _caller_for(tier)
     for attempt in range(transient_retries + 1):
@@ -483,16 +485,22 @@ def re_ask(prompt: str, exc: Exception) -> str:
             "Return the whole answer again with every refusal fixed.")
 
 
+def timed(usage: dict | None, began: float) -> dict | None:
+    """The usage with the call's seconds since `began` (fleet C A2); the caller's dict is not touched."""
+    return {**usage, "duration_s": round(_clock() - began, 3)} if usage else usage
+
+
 def _structured_once(agent, prompt, schema, retries, usage, tier):
     last_error, asked = None, prompt
     for _ in range(retries):
+        began = _clock()
         try:
             result = agent(asked, structured_output_model=schema)
             if usage is not None:
-                usage.update(_extract_usage(result), tier=tier)
+                usage.update(_extract_usage(result), tier=tier, duration_s=round(_clock() - began, 3))
             return _validated(result.structured_output, schema)
         except StructuredOutputException as exc:
-            _record_spend(tier, getattr(exc, "usage", None))   # a refused reply was still paid for
+            _record_spend(tier, timed(getattr(exc, "usage", None), began))   # a refused reply was still paid for
             last_error, asked = exc, re_ask(prompt, exc)
     raise last_error
 

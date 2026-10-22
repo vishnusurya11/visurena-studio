@@ -61,25 +61,37 @@ def init(conn: sqlite3.Connection) -> None:
     from studio import db
     conn.executescript(_DDL)
     db._add_column(conn, "usage", "unit", "TEXT")   # the money wall sums by unit
+    db._add_column(conn, "usage", "duration_s", "REAL")   # fleet C A2: a call's seconds
+    db._add_column(conn, "usage", "out_tok_s", "REAL")    # and its output tokens per second
     conn.commit()
+
+
+def out_rate(output_tokens: int, duration_s: float | None) -> float | None:
+    """Output tokens per second of one call; None when the call was not timed."""
+    if not duration_s or duration_s <= 0:
+        return None
+    return round(output_tokens / duration_s, 3)
 
 
 def record(conn: sqlite3.Connection, codex_id: str, stage: str, step_id: str,
            tier: str | None, model: str | None,
-           input_tokens: int, output_tokens: int, unit: str | None = None) -> float | None:
+           input_tokens: int, output_tokens: int, unit: str | None = None,
+           duration_s: float | None = None) -> float | None:
     """Append one call's usage. Returns its cost, or None if the model is unpriced.
     `unit` names the production below the book (an episode, a pack); NULL for a
-    book-level stage (decision 2026-09-25: a unit's paid cost is answerable)."""
+    book-level stage (decision 2026-09-25: a unit's paid cost is answerable).
+    `duration_s` is the call's seconds (fleet C A2: the 37-206 min writer step had
+    no split into calls and rate); NULL, with a NULL rate, when it was not timed."""
     from studio import db
 
     init(conn)
-    db._add_column(conn, "usage", "unit", "TEXT")
     usd = cost(model or "", input_tokens, output_tokens)
+    seconds = round(duration_s, 3) if duration_s is not None else None
     conn.execute(
-        "INSERT INTO usage (recorded_at, codex_id, stage, step_id, tier, model,"
-        " input_tokens, output_tokens, cost_usd, unit) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (db.utc_now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"), codex_id, stage, step_id,
-         tier, model, input_tokens, output_tokens, usd, unit))
+        "INSERT INTO usage (recorded_at, codex_id, stage, step_id, tier, model, input_tokens,"
+        " output_tokens, cost_usd, unit, duration_s, out_tok_s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (db.utc_now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"), codex_id, stage, step_id, tier, model,
+         input_tokens, output_tokens, usd, unit, seconds, out_rate(output_tokens, duration_s)))
     conn.commit()
     return usd
 
