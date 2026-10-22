@@ -1416,7 +1416,18 @@ def prompts(book_id: str, number: int) -> None:
     built = cards(book, episode, number)
     out = episode_home.write_json(episode_home.takes_dir(book, number, "r2v") / "prompts.json", built)
     print(f"take cards -> {out}", flush=True)
+    print(craft_census(episode, built), flush=True)
     lint_wall(book, episode, built)
+
+
+def craft_census(episode, built: list[dict]) -> str:
+    """The craft census line over the cards just built (A1, craft ruling 2026-10-21): a base rate per
+    defect class, report only.  It never parks the step: a census that cannot read the cards says so."""
+    from scripts.episode import craft_lint
+    try:
+        return craft_lint.built_line(episode, built)
+    except (KeyError, TypeError, ValueError, AttributeError) as why:
+        return f"craft census: not measured ({why!r})"
 
 
 def retake_list(argv: list[str]) -> list[int]:
