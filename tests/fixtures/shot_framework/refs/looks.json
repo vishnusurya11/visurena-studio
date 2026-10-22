@@ -1,0 +1,718 @@
+{
+ "book": "20260827135504_the-strange-case-of-dr-jekyll-and-mr-hyde",
+ "characters": {
+  "gabriel_john_utterson": {
+   "base": "base",
+   "base_sha8": "",
+   "body": "A lean, long, bony, dry man of about forty, narrow-chested.",
+   "looks": {
+    "base": {
+     "layers": {
+      "headwear": "black bowler hat with a pale grey band",
+      "hair": "lank grey hair, white at the sides, falling to his collar",
+      "face": "clean-shaven, long, gaunt, rugged, unsmiling face",
+      "top": "long black double-breasted overcoat with six white buttons, white shirt, black tie",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "bowler",
+      "hair_colour": "grey",
+      "facial_hair": "none",
+      "top": "coat",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "base",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "henry_jekyll": {
+   "base": "respectable_physician",
+   "base_sha8": "",
+   "body": "A large, broad, heavy-set, handsome man of fifty, tall and of fine build, with a full, broad, smooth face and large, firm, white and comely hands.",
+   "looks": {
+    "respectable_physician": {
+     "layers": {
+      "headwear": "tall black silk top hat",
+      "hair": "thick iron-grey hair, silver-grey at the temples and sides, brushed back from a high forehead",
+      "face": "full, broad, smooth, clean-shaven face",
+      "top": "long black frock coat, black waistcoat, white shirt, black tie",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "top_hat",
+      "hair_colour": "grey",
+      "facial_hair": "none",
+      "top": "dress",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "respectable_physician",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "edward_hyde": {
+   "base": "base",
+   "base_sha8": "",
+   "body": "A small, slight, sinister young man of about twenty-five, adult in build but a head shorter than other men, narrow-shouldered and pale, with lean, corded, knuckly pale hands.",
+   "looks": {
+    "base": {
+     "layers": {
+      "headwear": "soft black felt wideawake hat, low flat crown, wide floppy brim",
+      "hair": "coarse, unkempt black hair",
+      "face": "clean-shaven, pale smooth cheeks; thin lips curled in a wide, cold grin",
+      "top": "knee-length black double-breasted coat, white shirt",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "felt_hat",
+      "hair_colour": "dark",
+      "facial_hair": "none",
+      "top": "coat",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    },
+    "shrunken_borrowed_clothes": {
+     "layers": {
+      "headwear": "soft black felt wideawake hat, low flat crown, wide floppy brim",
+      "hair": "coarse, unkempt black hair",
+      "face": "clean-shaven, pale smooth cheeks; thin upper lip curled in a cold sneer",
+      "top": "clothes hanging formlessly, too large, on shrunken limbs; corded, hairy hand",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "felt_hat",
+      "hair_colour": "dark",
+      "facial_hair": "none",
+      "top": "",
+      "dirt": ""
+     },
+     "source": [
+      {
+       "chapter": 10,
+       "quote": "my clothes hung formlessly on my shrunken limbs; the hand that lay on my knee was corded and hairy. I was once more Edward Hyde"
+      }
+     ],
+     "sheet": "",
+     "made_by": "fresh",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "base",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    },
+    {
+     "look": "shrunken_borrowed_clothes",
+     "start": {
+      "chapter": 10,
+      "scene": 7
+     },
+     "until": null
+    }
+   ]
+  },
+  "richard_enfield": {
+   "base": "frock_coat_topper",
+   "base_sha8": "",
+   "body": "A compact, upright, broad-shouldered gentleman of about forty, a well-dressed man about town with a heavy jaw and a lined face, who carries a black walking cane.",
+   "looks": {
+    "frock_coat_topper": {
+     "layers": {
+      "headwear": "dove-grey top hat with a wide brown hatband",
+      "hair": "receding brown hair",
+      "face": "clean-shaven",
+      "top": "mid-grey long frock coat with black lapels, cream waistcoat, navy bow tie, black gloves, black walking cane",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "top_hat",
+      "hair_colour": "brown",
+      "facial_hair": "none",
+      "top": "dress",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "frock_coat_topper",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "child_of_hyde_incident": {
+   "base": "base",
+   "base_sha8": "",
+   "body": "A small girl of about nine, thin and quick, in a plain grey pinafore dress over a dark-red long-sleeved blouse, and black boots.",
+   "looks": {
+    "base": {
+     "layers": {
+      "headwear": "small soft grey woollen bonnet",
+      "hair": "fair hair in two plaits",
+      "face": "smooth-cheeked, blue eyes",
+      "top": "plain grey pinafore dress over a dark-red long-sleeved blouse, and black boots",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "bonnet",
+      "hair_colour": "fair",
+      "facial_hair": "none",
+      "top": "dress",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "base",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "poole": {
+   "base": "household_livery",
+   "base_sha8": "",
+   "body": "Poole is Jekyll’s butler, described as solemn. A well-dressed, solemn, ageing butler of about fifty-five, of middling height, thickset and dignified, in plain black household livery with a white shirt front.",
+   "looks": {
+    "household_livery": {
+     "layers": {
+      "headwear": "round black felt hat with narrow brim",
+      "hair": "thinning straw-coloured sandy hair, combed flat",
+      "face": "short sandy beard",
+      "top": "plain black household livery with white shirt front",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "felt_hat",
+      "hair_colour": "fair",
+      "facial_hair": "beard",
+      "top": "shirt",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "household_livery",
+     "start": {
+      "chapter": 2,
+      "scene": null
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "reginald_lanyon": {
+   "base": "rosy_dapper",
+   "base_sha8": "",
+   "body": "Initially described as a rosy man. A hearty, healthy, dapper, ruddy, red-faced gentleman with a boisterous and decided manner.",
+   "looks": {
+    "rosy_dapper": {
+     "layers": {
+      "headwear": "black silk top hat with a white band",
+      "hair": "thick shock of prematurely white hair",
+      "face": "full white side-whiskers; ruddy, red-faced",
+      "top": "dapper navy-blue frock coat, white waistcoat, black cravat",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "top_hat",
+      "hair_colour": "white",
+      "facial_hair": "sideburns",
+      "top": "dress",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    },
+    "pale_fallen": {
+     "layers": {
+      "headwear": "grey silk top hat",
+      "hair": "thick shock of prematurely white hair",
+      "face": "visibly balder and older; flesh fallen away; pale",
+      "top": "dapper gentleman's dress",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "top_hat",
+      "hair_colour": "white",
+      "facial_hair": "",
+      "top": "dress",
+      "dirt": ""
+     },
+     "source": [
+      {
+       "chapter": 6,
+       "quote": "The rosy man had grown pale; his flesh had fallen away; he was visibly balder and older"
+      }
+     ],
+     "sheet": "",
+     "made_by": "fresh",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": true
+    }
+   },
+   "timeline": [
+    {
+     "look": "rosy_dapper",
+     "start": {
+      "chapter": 2,
+      "scene": null
+     },
+     "until": null
+    },
+    {
+     "look": "pale_fallen",
+     "start": {
+      "chapter": 6,
+      "scene": 3
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "carew_policeman": {
+   "base": "base_uniform",
+   "base_sha8": "",
+   "body": "A tall, spare London police constable of about thirty-five with bushy eyebrows and a lined face.",
+   "looks": {
+    "base_uniform": {
+     "layers": {
+      "headwear": "rounded dark-blue police helmet with a gold star badge",
+      "hair": "close-cropped black hair",
+      "face": "thick white moustache; lined face, bushy eyebrows",
+      "top": "long dark-blue police greatcoat with a black leather belt, light-blue shirt, black boots",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "helmet",
+      "hair_colour": "dark",
+      "facial_hair": "moustache",
+      "top": "coat",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "base_uniform",
+     "start": {
+      "chapter": 1,
+      "scene": null
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "inspector_newcomen": {
+   "base": "yard_inspector",
+   "base_sha8": "",
+   "body": "A stout, keen-eyed Scotland Yard inspector of about forty-five, square and solid, in a dark plain-clothes overcoat.",
+   "looks": {
+    "yard_inspector": {
+     "layers": {
+      "headwear": "brown bowler hat",
+      "hair": "close-cropped ginger hair",
+      "face": "heavy ginger walrus moustache",
+      "top": "dark plain-clothes overcoat, stout and square-built",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "bowler",
+      "hair_colour": "red",
+      "facial_hair": "moustache",
+      "top": "coat",
+      "dirt": ""
+     },
+     "source": [
+      {
+       "chapter": 4,
+       "quote": "If you will come with me in my cab, I think I can take you to his house."
+      }
+     ],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "yard_inspector",
+     "start": {
+      "chapter": 4,
+      "scene": 3
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "mr_guest": {
+   "base": "base",
+   "base_sha8": "",
+   "body": "A neat, quiet head clerk of about forty, slight and attentive, a student of handwriting, in a dark clerk's frock coat.",
+   "looks": {
+    "base": {
+     "layers": {
+      "headwear": "brown derby hat",
+      "hair": "bald crown ringed by a fringe of short dark hair",
+      "face": "trim dark beard",
+      "top": "dark clerk's frock coat",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "bowler",
+      "hair_colour": "dark",
+      "facial_hair": "beard",
+      "top": "dress",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "base",
+     "start": {
+      "chapter": 5,
+      "scene": null
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "carew_housemaid": {
+   "base": "nightgown_shawl",
+   "base_sha8": "",
+   "body": "The dossier identifies her only as an unnamed maid or housemaid. A young housemaid of about twenty, romantic and gentle, in a long white nightgown with a shawl about her shoulders.",
+   "looks": {
+    "nightgown_shawl": {
+     "layers": {
+      "headwear": "white frilled maid's cap",
+      "hair": "dark-brown hair pinned up",
+      "face": "smooth-cheeked",
+      "top": "long white nightgown with a shawl about her shoulders",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "cap",
+      "hair_colour": "dark",
+      "facial_hair": "none",
+      "top": "dress",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "nightgown_shawl",
+     "start": {
+      "chapter": 4,
+      "scene": null
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  },
+  "hyde_driver": {
+   "base": "base",
+   "base_sha8": "",
+   "body": "A burly London cabman of about fifty, broad and weathered, in a heavy many-caped driving coat.",
+   "looks": {
+    "base": {
+     "layers": {
+      "headwear": "battered low cloth cap",
+      "hair": "straw-fair hair",
+      "face": "drooping fair moustache",
+      "top": "heavy many-caped driving coat",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "cap",
+      "hair_colour": "fair",
+      "facial_hair": "moustache",
+      "top": "coat",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "base",
+     "start": {
+      "chapter": 10,
+      "scene": null
+     },
+     "until": null
+    }
+   ]
+  },
+  "hyde_hotel_waiter": {
+   "base": "hotel_waiter",
+   "base_sha8": "",
+   "body": "A thin, nervous hotel waiter of about twenty-five in a black waistcoat, white shirt and long white apron.",
+   "looks": {
+    "hotel_waiter": {
+     "layers": {
+      "headwear": "bare-headed",
+      "hair": "slicked-down ginger hair parted in the middle",
+      "face": "clean-shaven",
+      "top": "black waistcoat, white shirt, long white apron",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "none",
+      "hair_colour": "red",
+      "facial_hair": "none",
+      "top": "waistcoat",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "hotel_waiter",
+     "start": {
+      "chapter": 10,
+      "scene": null
+     },
+     "until": null
+    }
+   ]
+  },
+  "hyde_housekeeper": {
+   "base": "black_stuff_gown",
+   "base_sha8": "",
+   "body": "An old housekeeper with an evil face smoothed by hypocrisy and excellent manners, in a black stuff gown.",
+   "looks": {
+    "black_stuff_gown": {
+     "layers": {
+      "headwear": "black lace cap",
+      "hair": "silvery-white hair drawn back tight",
+      "face": "ivory-faced and smooth-cheeked, evil face smoothed by hypocrisy",
+      "top": "black stuff gown",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "cap",
+      "hair_colour": "grey",
+      "facial_hair": "none",
+      "top": "dress",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "black_stuff_gown",
+     "start": {
+      "chapter": 10,
+      "scene": null
+     },
+     "until": null
+    }
+   ]
+  },
+  "sir_danvers_carew": {
+   "base": "base",
+   "base_sha8": "",
+   "body": "An aged, beautiful, courtly gentleman of about seventy, slender and upright, with a kindly old-world face and a gentle manner, dressed with old-fashioned elegance.",
+   "looks": {
+    "base": {
+     "layers": {
+      "headwear": "bare-headed",
+      "hair": "long silky white hair swept back from brow",
+      "face": "short, neat white beard; kindly old-world face",
+      "top": "old-fashioned elegant dress, slender and upright gentleman",
+      "dirt": "",
+      "other": ""
+     },
+     "markers": {
+      "headwear": "none",
+      "hair_colour": "white",
+      "facial_hair": "beard",
+      "top": "dress",
+      "dirt": ""
+     },
+     "source": [],
+     "sheet": "",
+     "made_by": "base",
+     "parent_sha8": "",
+     "seed": 0,
+     "face_change": false
+    }
+   },
+   "timeline": [
+    {
+     "look": "base",
+     "start": {
+      "chapter": 4,
+      "scene": 1
+     },
+     "until": {
+      "chapter": 9,
+      "scene": null
+     }
+    }
+   ]
+  }
+ }
+}

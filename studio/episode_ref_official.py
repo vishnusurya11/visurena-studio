@@ -203,14 +203,19 @@ def shot_list(numbers) -> str:
 # ---- the drawer's prose, read by a camera -----------------------------------
 
 CALM = ((r"\bstays\b", "is"), (r"\bstay\b", "are"), (r"\bremains\b", "is"), (r"\bremain\b", "are"),
-        (r"\bholds\b", "keeps"), (r"\bhold\b", "keep"), (r"\bheld\b", ""), (r"\bwaits\b", "stands"),
+        (r"(?<!camera )\bholds\b", "keeps"), (r"(?<!camera )\bhold\b", "keep"), (r"\bheld\b", ""),
+        (r"\bwaits\b", "stands"),
         (r"\bwait\b", "stand"), (r"\bpauses\b", "settles"), (r"\bpause\b", "settle"),
         (r"\b(still|motionless|unmoving|frozen|unchanged)\b", ""))
 """Every stillness word, rewritten as the POSITION it describes.  The plan's
 prose is written for a storyboard artist drawing one frame, so it says `held`,
 `stays` and `waits`; measured, a segment carrying two or more stillness words
 rendered 0.77 frozen against 0.47 (L2).  The picture is the same, the verb is
-one a camera can roll on."""
+one a camera can roll on.
+
+THE CAMERA'S OWN HOLD IS SPARED (shot framework D-a, 2026-10-21): "The camera holds a locked-off frame"
+is the catalog's locked move, and calmed it reached ep01 T10/T13/T15/T26 as "The camera keeps ...", a
+verb the catalog does not hold.  The L2 lint allows that one hold (`CAMERA_HOLD`)."""
 
 
 def calm(text: str) -> str:
@@ -490,8 +495,13 @@ CLAUSE = re.compile(r",|\band (?=(?:the|a|an|both|his|her|their|its|two|three|fo
 "head and shoulders" is one subject, "and the wheat reduced" is the next."""
 
 
+CAMERA_END = re.compile(r"^\s*the camera\b", re.I)
+"""An `end` that is the camera's own sentence is a move, never a layout: "the corner gas lamp" read as a
+frame corner, and ep01 T06 arrived "with the camera tilts up now in frame" (shot framework D-d)."""
+
+
 def is_layout(end: str) -> bool:
-    return bool(LAYOUT.search(end))
+    return bool(LAYOUT.search(end)) and not CAMERA_END.match(end)
 
 
 def end_noun(end: str, names=()) -> str:
@@ -934,6 +944,18 @@ def motion_noun(clause: str) -> str:
 
 SPEAKING = re.compile(r",?\s+(?:as|while)\s+(?:he|she|they)\s+(?:speaks?|talks?|says it)\b", re.I)
 """"At 00:05, as the line ends, ... as he speaks": the line has ended (Jekyll ep01 T1/2/14/17)."""
+
+
+SPEECH_VERB = re.compile(r"\s+(?:speaks?|talks?)\s+and(?=\s)|\s+and\s+(?:speaks?|talks?)\b|"
+                         r"\s+(?:speaking|talking)\b|" + SPEAKING.pattern, re.I)
+"""A speech verb joined to an action or a figure: "speaks and taps", "turns and speaks", "as he speaks",
+"toward the man speaking on the pavement"."""
+
+
+def unspoken(motion: str) -> str:
+    """The motion of a segment no dialogue line lands on, its speech verbs off.  ep01 T13 (a silent
+    track) said "<Subject 1> speaks" beside "<Subject 1>'s mouth is closed" (shot framework D-b)."""
+    return ";".join(SPEECH_VERB.sub("", part) for part in (motion or "").split(";"))
 
 
 def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -> list[str]:
@@ -1572,9 +1594,10 @@ def block_parts(k: int, seg: dict, pic: int, ctx: dict) -> list[tuple[str, bool]
     t0, t1, faces = int(round(seg["t"])), seg["end"], ctx["faces"]
     here = lines_under(ctx["lines"], ctx["at"], ctx["offset"], seg["t"], seg["t_to"])
     spoken = [l for l in here if l.kind == "dialogue"]
+    seg = seg if spoken else {**seg, "frame": unspoken(seg["frame"])}     # a silent track says no speech (D-b)
     end = int(round(sum(ctx["at"][spoken[0].index]) - ctx["offset"])) if spoken else None
     paced = paced_motion(offscreen(seg["motion"], faces), seg["t_to"] - seg["t"])
-    motion = tagged(limp_clause(paced), faces)
+    motion = tagged(limp_clause(paced if spoken else unspoken(paced)), faces)
     mouth = mouth_of(seg, faces, ctx["cast"])
     voice = lambda ls: voice_events(ls, ctx["at"], ctx["offset"], ctx["ids"], faces, ctx["physical"],
                                     mouth, mouth_action(motion, mouth), t0, t1, ctx["seen"])
@@ -1807,8 +1830,14 @@ def l2_stillness(text, facts):
     that hold the body."""
     still = still_blocks(facts)
     body = " ".join(b for k, a, z, b in blocks(text) if k not in still) if still else text
-    bad = sorted({m.group(0).lower() for m in STILL.finditer(scrub(body).replace("holds a static shot", " "))})
+    body = CAMERA_HOLD.sub(" ", scrub(body).replace("holds a static shot", " "))
+    bad = sorted({m.group(0).lower() for m in STILL.finditer(body)})
     return [f"L2 STILLNESS: {bad}"] if bad else []
+
+
+CAMERA_HOLD = re.compile(r"\bthe camera holds\b", re.I)
+"""The catalog's locked move, said by the camera itself (`calm` spares it, D-a 2026-10-21): the one
+`hold` besides "holds a static shot" that names the camera, not the picture."""
 
 
 def l3_slow(text, facts):
@@ -2163,11 +2192,16 @@ def l21_arrival(text, facts):
     out = []
     for k, a, b, body in blocks(text):
         last = (sentences(body) or [""])[-1]
-        if m := LAYOUT.search(last):
+        if m := LAYOUT.search(CAMERA_TAIL.split(last)[0]):
             out.append(f"L21 ARRIVAL [Shot {k}]: the block ends on a layout, not a movement: {m.group(0)!r}")
         elif not (MOVER.search(last) or ACTION.search(last) or GAIT.search(last)):
             out.append(f"L21 ARRIVAL [Shot {k}]: the block's last sentence names nothing that moves")
     return out
+
+
+CAMERA_TAIL = re.compile(r",\s+and the camera\b", re.I)
+"""Where an arrival trails the plan's own camera `end` (`arrival_end`): a move, so a "corner gas lamp" in it
+is a street corner, never a frame corner (ep01 T06, shot framework D-d)."""
 
 
 ABSENT_MOUTH = re.compile(r"(?<![>\w])([A-Z][a-z]+(?: [A-Z][a-z]+)*)'s mouth is closed")

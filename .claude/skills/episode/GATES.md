@@ -119,10 +119,6 @@ five words the bed did not know and the episode was refused at assembly.
   per take. The take length has one home, `episode_takes.BUDGET`.
 - **The critic's count** (`judges/plan.declared_count`): any `extras=N` (N >= 1) on a shot whose
   setup stages a crowd is declared (G-CROWD asks >= 1; ep01 shots 1 and 18 were called invented).
-- **Downstream replay** (advisory, $0, read-only): `scripts/episode/downstream_replay.py <codex>
-  <n>` replays step 05 `packed()`, the hold cure and the dry take-prompt lint on the signed plan;
-  a RULER row means a code ruler disagrees with the plan: fix the ruler, not the plan. Not a
-  blocker until clean on ep01 and one WotW plan (D12).
 
 **2026-09-28 addition:** G-SETUP (HARD before anything is rendered, advisory
 after) -- a setup holds at most `MAX_SETUP_SECONDS` = 50 s of projected picture;

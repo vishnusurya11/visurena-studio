@@ -1615,6 +1615,13 @@ Replays: C1 ep25 regrid 2/2 PASS, ep25 round 0 0/1 FAIL, ep27 study_table 3/3 PA
   WotW ep19-27 face takes and 37 of 97 Scarlet ep08-14 (STRANGER on stylised, turned or small
   faces; walk-ons) and 2 of 10 Jekyll HEL v1.
 
+### Downstream replay (moved from GATES.md's 2026-10-19 additions, 2026-10-21)
+
+- **Downstream replay** (advisory, $0, read-only): `scripts/episode/downstream_replay.py <codex>
+  <n>` replays step 05 `packed()`, the hold cure and the dry take-prompt lint on the signed plan;
+  a RULER row means a code ruler disagrees with the plan: fix the ruler, not the plan. Not a
+  blocker until clean on ep01 and one WotW plan (D12).
+
 ## Jekyll Kawajiri ep01 retro (2026-10-19; 15 code packages P01-P15, docs P16)
 
 The run: `episodes/ep01/cut/master_iter1.mp4`, 2026-10-18 22:54 PDT, 3,348 frames, QC passed with
@@ -2385,3 +2392,25 @@ the same folder. What the debate settled, and what the bench then measured:
   fires`), readable count per check, Wilson recall on ep01 mutations, the audience P6 LOG rows (ep01: 24.1 s
   with no node at 62.7-86.8 s; plain beds 4.2-28.5 s and 66.1-83.8 s). A screenplay row earns shadow only
   through this replay.
+
+## The shot framework (2026-10-21, the panel's final ruling)
+
+Ruling `docs/audit/2026-10-21_shot_framework/FRAMEWORK.md`; benches `.../bench/BENCH.md` and
+`docs/audit/2026-10-21_prompt_bench/BENCH.md`; proof `.../implement/RESULT.md`.
+
+**Prompt-writer defects (Phase A).** The red tests build ep01's take prompts with the production
+writer on `tests/fixtures/shot_framework/` (`tests/shot_framework_fixtures.py` matches the step 06
+build byte for byte), never the recorded words.
+- D-a: `calm()` turned the camera's "holds" into "keeps" on 12 of ep01's 28 takes ("The camera keeps
+  over <Subject 2>'s shoulder"). It spares "the camera holds"; L2 allows that one hold (`CAMERA_HOLD`).
+- D-b: a segment no dialogue line lands on says no speech verb, frame or motion (`unspoken`): T13's
+  silent track said "speaks" beside "mouth is closed".
+- D-d: an `end` that is the camera's own sentence is no layout ("corner gas lamp" read as a frame
+  corner gave T06 "with the camera tilts up now in frame"); it trails the arrival as a clause, and
+  the tilt is still said 3 times.
+- D-e: the night style line keeps its lamp (b83eac4); the test locks it on T06 and T10.
+- D-f: `move_rebalance.cell_aims` joins a one-word comma piece to its list (shots 21/24 were cured
+  "tilts up from the gaunt to the rugged"); `aims_for` starts a tilt up on the ground noun (shot 8
+  tilted "from the man to the cobbles").
+- HELD for bench R2-3: D-c (the action said twice) and the D-d count. B2's camera nearly held
+  (+14/+17 px against +38.5) when the verb was said once.

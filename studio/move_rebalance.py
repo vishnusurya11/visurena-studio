@@ -118,7 +118,7 @@ def cell_aims(shot: dict, setup: dict | None = None) -> list[str]:
     and no setup-prop token the shot's pre-rewrite frame+motion does not
     already name (G-SOURCE: a cure never acquires a new unspanned claim)."""
     at_rest = PARENTHESES.sub("", shot.get("at_rest") or "")
-    clauses = [c for c in re.split(r"[;.,]", at_rest) if c.strip()]
+    clauses = [c for s in re.split(r"[;.]", at_rest) for c in comma_clauses(s) if c.strip()]
     clauses.sort(key=lambda c: "FOCUS" not in c)        # stable: FOCUS clause first
     prose = f"{shot.get('frame') or ''} {shot.get('motion') or ''}".lower()
     banned = NOT_AIMS | {t for t in prop_tokens(setup) if not re.search(rf"\b{re.escape(t)}\b", prose)}
@@ -128,6 +128,36 @@ def cell_aims(shot: dict, setup: dict | None = None) -> list[str]:
         if noun and noun not in out and noun not in banned and not possessed(noun, clause):
             out.append(noun)
     return [n for n in out if cell_gates.in_cell(n, probe(shot))]
+
+
+def comma_clauses(sentence: str) -> list[str]:
+    """A sentence's comma clauses, a one-word piece joined to the piece after it: "the lawyer's
+    gaunt, rugged, unsmiling face" is one noun phrase (ep01 shots 21, 24 were cured to "tilts up from
+    the gaunt to the rugged", shot framework D-f), "the man at the CENTRE, one boot lifted" is two."""
+    out: list[str] = []
+    glue = False                                   # the last piece was one word: the next joins it
+    for piece in sentence.split(","):
+        single = len(piece.split()) == 1
+        if out and (glue or single):
+            out[-1] = f"{out[-1]},{piece}"
+        else:
+            out.append(piece)
+        glue = single
+    return out
+
+
+GROUND = re.compile(r"\b(?:cobbles?|flagstones?|pavement|kerb|floor|ground|road|steps?|boots?|feet|"
+                    r"gravel|grass|mud|snow|carpet|rug|boards|planks)\b", re.I)
+"""What a tilt up starts from: the ground the cell holds (ep01 shot 8 tilted "from the man to the cobbles")."""
+
+
+def aims_for(move: str, shot: dict, setup: dict | None = None) -> list[str]:
+    """The aims a move's template takes: the faces for a follow, ground first for a tilt up
+    (a tilt rises from the cobbles to what stands on them), else the cell's aims in order."""
+    if move in TRACKS_SUBJECT:
+        return figure_aims(shot)
+    aims = cell_aims(shot, setup)
+    return sorted(aims, key=lambda n: not GROUND.fullmatch(n)) if move == "tilt_up" else aims
 
 
 def possessed(noun: str, clause: str) -> bool:
@@ -201,10 +231,9 @@ def candidates(shot: dict, counts: Counter, prev_id: str, next_id: str,
     """Every size-legal head the gates accept, least-used move first.  A
     dialogue shot only ever goes locked (the catalog: locked carries dialogue best)."""
     legal = ["locked"] if dialogue else LEGAL.get(shot.get("size") or "", ["locked"])
-    aims, figures = cell_aims(shot, setup), figure_aims(shot)
     sns = setup_ns(setup)
     travel = amount_for(plan_gates.cap_for(probe(shot), sns)[0], seconds)
-    heads = [render_head(m, figures if m in TRACKS_SUBJECT else aims, travel)
+    heads = [render_head(m, aims_for(m, shot, setup), travel)
              for m in sorted(legal, key=lambda m: (counts.get(m, 0), legal.index(m)))]
     return [h for h in heads if h is not None and head_ok(probe(shot), h, prev_id, next_id, sns)]
 

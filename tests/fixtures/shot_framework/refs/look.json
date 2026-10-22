@@ -1,0 +1,32 @@
+{
+ "look": "anime_kawajiri_noir",
+ "name": "Kawajiri Madhouse noir (Prism anime_kawajiri_madhouse_90s), drawn by Krea2",
+ "lead": "The image is a hand-painted 1990s cel animation frame in the Madhouse manner, with crisp, sharp black lines and angular anatomy with long tapered limbs, flat, unmodulated colour fills and hard-edged shadow shapes with large solid black masses, hard rim light on edges, airbrushed misty backgrounds and 35mm film grain, depicting a scene from a Gothic Victorian novel in a palette of dark indigo, teal and charcoal night, with ochre and amber lamplight and blood-red and sickly green accents.",
+ "take": "Hand-painted 1990s Madhouse noir cel animation",
+ "atmosphere": "thin fog, haze",
+ "refs": {
+  "workflow": "image_krea2_turbo_t2i",
+  "lead": "Hand-painted 1990s cel animation, as in Ninja Scroll: crisp sharp black lines, angular anatomy with long narrow faces, hard two-tone cel shading with large solid black shadow masses, hard rim light, dark indigo, teal and charcoal night with amber, blood-red and sickly green accents, airbrushed misty backgrounds, heavy film grain. Flat unblended colour on the figures, mature adult faces with narrow eyes, grainy celluloid texture.",
+  "recap": "Rendered throughout as hand-painted 1990s cel animation with large black shadow masses and heavy film grain.",
+  "steps": 8,
+  "cfg": 1,
+  "megapixels": 1,
+  "frames": {
+   "characters": {
+    "tags": "Full-length front view at eye level, the lone figure centred from hat to boots against a plain dark indigo backdrop. Cold side light from the left, a hard amber rim light down the figure's right edge, the left half in solid black."
+   },
+   "locations": {
+    "tags": "Wide establishing shot at eye level, the place empty of people, one hard light source."
+   }
+  },
+  "entities": {}
+ },
+ "evidence": [
+  "docs/audit/2026-10-18_jekyll_kawajiri_poc/POC.md (chain_sheet.jpg: Krea2 sheets + place, Qwen panels, H3 takes hold the look)",
+  "prism/styles/anime_kawajiri_madhouse_90s.json (models.krea2 style/recap; models.qwen_image_2_1 style = the grid lead)"
+ ],
+ "decision": "2026-10-18 owner: Kawajiri Madhouse noir drawn by Krea2 (Prism card anime_kawajiri_madhouse_90s); ep01 rebuilt from zero. Supersedes 2026-10-13 style 2 Hellsing Ultimate (refs/superseded/look_hellsing_2026-10-18.json)",
+ "by": "owner",
+ "at": "2026-10-18",
+ "recipe_note": "POC recipe 1:1: Krea2 turbo t2i, 8 steps, cfg 1, 1 MP, refine_prompt off, no LoRA; words = the card's krea2 style + the avoid list said positively + the subject (the row's words) + the camera + the recap; no lens mm; a sheet is one 2:3 front figure."
+}

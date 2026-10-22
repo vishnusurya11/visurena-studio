@@ -1,0 +1,68 @@
+{
+  "id": "london_sunday_walks",
+  "name": "The Sunday walks of London",
+  "aliases": [
+    "the Sunday walks of London",
+    "the streets of London and the square",
+    "the streets of London"
+  ],
+  "region": "london",
+  "lat": 51.5074,
+  "lon": -0.1278,
+  "approximate": true,
+  "scenes": [
+    {
+      "chapter": 1,
+      "scene": 1,
+      "day": 1,
+      "track": "main",
+      "time_of_day": "DAY",
+      "what_happens": "The narrator characterizes Utterson, his habits, his friendships, and his weekly walks with Enfield.",
+      "characters": [
+        "gabriel_john_utterson",
+        "richard_enfield"
+      ]
+    },
+    {
+      "chapter": 8,
+      "scene": 2,
+      "day": 17,
+      "track": "main",
+      "time_of_day": "NIGHT",
+      "what_happens": "Utterson and Poole cross the deserted, stormy streets and arrive at the house, where Poole cautiously gains entry.",
+      "characters": [
+        "gabriel_john_utterson",
+        "poole"
+      ]
+    }
+  ],
+  "visitors": [
+    {
+      "id": "gabriel_john_utterson",
+      "scenes": 2
+    },
+    {
+      "id": "richard_enfield",
+      "scenes": 1
+    },
+    {
+      "id": "poole",
+      "scenes": 1
+    }
+  ],
+  "state_changes": [],
+  "first_appearance": 1,
+  "profile": {
+    "visual": "London streets and the square, shown at two contrasting moments. In Chapter 1, they form the setting for Utterson and Enfield’s regular Sunday walks; the dossier gives no specific architectural, material, or lighting details beyond the urban streets and square. In Chapter 8, the streets are deserted and stormy at night as Utterson and Poole cross them toward the house.",
+    "atmosphere": "Ordinary and companionable during the Sunday walks in Chapter 1; deserted, stormy, and tense during the nighttime crossing in Chapter 8.",
+    "significance": "The walks provide a recurring social setting for Utterson and Enfield and establish one of Utterson’s weekly habits. Later, the London streets become the route through which Utterson and Poole approach the house during a crisis.",
+    "evolution": [
+      {
+        "chapter": 8,
+        "change": "The setting shifts from a familiar daytime route for weekly walks to deserted, stormy streets crossed at night by Utterson and Poole as they approach the house."
+      }
+    ],
+    "sensory": "The dossier supports stormy nighttime conditions in Chapter 8 and the visual impression of deserted streets. No specific smells, textures, or sounds are stated.",
+    "inferred_notes": "The streets and square are treated as an approximate London location; the dossier does not identify a precise square, neighborhood, architecture, or season."
+  }
+}

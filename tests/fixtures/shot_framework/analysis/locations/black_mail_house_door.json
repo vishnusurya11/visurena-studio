@@ -1,0 +1,277 @@
+{
+  "id": "black_mail_house_door",
+  "name": "Black Mail House door and adjoining by-street",
+  "aliases": [
+    "the by-street beside the place with the door",
+    "a by-street in a busy quarter of London, beside the sinister door",
+    "the place with the door",
+    "the entry of the court",
+    "the by-street, in front of the door"
+  ],
+  "region": "london",
+  "lat": 51.51,
+  "lon": -0.134,
+  "approximate": true,
+  "scenes": [
+    {
+      "chapter": 1,
+      "scene": 2,
+      "day": 1,
+      "track": "main",
+      "time_of_day": "DAY",
+      "what_happens": "During their Sunday walk, Utterson and Enfield pass the neglected door, and Enfield announces that it is connected with an odd story.",
+      "characters": [
+        "richard_enfield",
+        "gabriel_john_utterson"
+      ]
+    },
+    {
+      "chapter": 1,
+      "scene": 3,
+      "day": 2,
+      "track": "main",
+      "time_of_day": "NIGHT",
+      "what_happens": "Enfield recounts how Hyde tramples a child, pays her family with a cheque signed by a respectable man, and spends the night before the cheque is verified.",
+      "characters": [
+        "edward_hyde",
+        "child_of_hyde_incident",
+        "hyde_incident_crowd",
+        "child_family",
+        "henry_jekyll",
+        "sawbones",
+        "hyde_incident_women",
+        "gabriel_john_utterson"
+      ]
+    },
+    {
+      "chapter": 1,
+      "scene": 4,
+      "day": 3,
+      "track": "main",
+      "time_of_day": "DAY",
+      "what_happens": "Enfield explains why he calls the building Black Mail House and describes its secretive appearance while he and Utterson continue walking.",
+      "characters": [
+        "gabriel_john_utterson",
+        "richard_enfield"
+      ]
+    },
+    {
+      "chapter": 1,
+      "scene": 5,
+      "day": 3,
+      "track": "main",
+      "time_of_day": "DAY",
+      "what_happens": "Utterson presses Enfield for Hyde’s name and description, reveals that he knows the respectable cheque drawer, and agrees to keep the matter secret.",
+      "characters": [
+        "gabriel_john_utterson",
+        "richard_enfield",
+        "edward_hyde"
+      ]
+    },
+    {
+      "chapter": 2,
+      "scene": 4,
+      "day": 4,
+      "track": "main",
+      "time_of_day": "DAY",
+      "what_happens": "Utterson intercepts Hyde, demands to see his face, and is left horrified by the man’s appearance and behavior.",
+      "characters": [
+        "gabriel_john_utterson",
+        "edward_hyde"
+      ]
+    },
+    {
+      "chapter": 7,
+      "scene": 1,
+      "day": 16,
+      "track": "main",
+      "time_of_day": "DAY",
+      "what_happens": "On their Sunday walk, Utterson and Enfield stop at the door and decide to enter the court to look toward Jekyll’s windows.",
+      "characters": [
+        "gabriel_john_utterson",
+        "richard_enfield"
+      ]
+    },
+    {
+      "chapter": 7,
+      "scene": 3,
+      "day": 17,
+      "track": "main",
+      "time_of_day": "DAY",
+      "what_happens": "Jekyll’s sudden look of terror drives the two men away in silence, and they acknowledge their shared horror in the neighbouring thoroughfare.",
+      "characters": [
+        "gabriel_john_utterson",
+        "richard_enfield"
+      ]
+    }
+  ],
+  "visitors": [
+    {
+      "id": "gabriel_john_utterson",
+      "scenes": 7
+    },
+    {
+      "id": "richard_enfield",
+      "scenes": 5
+    },
+    {
+      "id": "edward_hyde",
+      "scenes": 3
+    },
+    {
+      "id": "child_of_hyde_incident",
+      "scenes": 1
+    },
+    {
+      "id": "hyde_incident_crowd",
+      "scenes": 1
+    },
+    {
+      "id": "child_family",
+      "scenes": 1
+    },
+    {
+      "id": "henry_jekyll",
+      "scenes": 1
+    },
+    {
+      "id": "sawbones",
+      "scenes": 1
+    },
+    {
+      "id": "hyde_incident_women",
+      "scenes": 1
+    }
+  ],
+  "state_changes": [
+    {
+      "chapter": 1,
+      "day": 2,
+      "subtype": "injury",
+      "change": "The child is trampled and left screaming, though the doctor says she is not much the worse."
+    },
+    {
+      "chapter": 1,
+      "day": 2,
+      "subtype": "possession",
+      "change": "Hyde provides ten pounds in gold and a cheque for the balance as payment to the child’s family."
+    },
+    {
+      "chapter": 1,
+      "day": 2,
+      "subtype": "other",
+      "change": "The child’s family, the doctor, Enfield, and Hyde spend the rest of the night in Enfield’s chambers."
+    },
+    {
+      "chapter": 1,
+      "day": 2,
+      "subtype": "knowledge",
+      "change": "The bank verifies that the cheque is genuine."
+    },
+    {
+      "chapter": 1,
+      "day": 3,
+      "subtype": "knowledge",
+      "change": "Utterson reveals that he already knows the name of the other party, the respectable cheque drawer."
+    },
+    {
+      "chapter": 1,
+      "day": 3,
+      "subtype": "knowledge",
+      "change": "Enfield confirms that Hyde still possesses the key and that Enfield saw him use it less than a week earlier."
+    },
+    {
+      "chapter": 1,
+      "day": 3,
+      "subtype": "relationship",
+      "change": "Utterson and Enfield agree never to refer to the matter again."
+    },
+    {
+      "chapter": 2,
+      "day": 4,
+      "subtype": "knowledge",
+      "change": "Utterson identifies Hyde by description and sees his face, gaining direct knowledge of him."
+    },
+    {
+      "chapter": 2,
+      "day": 4,
+      "subtype": "possession",
+      "change": "Hyde gives Utterson his address."
+    },
+    {
+      "chapter": 7,
+      "day": 16,
+      "subtype": "knowledge",
+      "change": "Utterson tells Enfield that he once saw Hyde and shared Enfield’s repulsion."
+    },
+    {
+      "chapter": 7,
+      "day": 16,
+      "subtype": "knowledge",
+      "change": "Enfield reveals that he discovered the door was a back way to Dr. Jekyll’s."
+    },
+    {
+      "chapter": 7,
+      "day": 16,
+      "subtype": "other",
+      "change": "Utterson becomes uneasy about Jekyll and decides to enter the court to look toward the windows."
+    },
+    {
+      "chapter": 7,
+      "day": 17,
+      "subtype": "other",
+      "change": "Jekyll’s expression changes from a smile to abject terror and despair, and the window is thrust down."
+    },
+    {
+      "chapter": 7,
+      "day": 17,
+      "subtype": "other",
+      "change": "Utterson and Enfield become pale and display shared horror after leaving the court."
+    }
+  ],
+  "first_appearance": 1,
+  "profile": {
+    "visual": "A neglected door opening from a by-street in a busy quarter of London. The building is described as secretive and sinister, with an entry leading into a court and a back way to Dr. Jekyll’s house. From the court, Jekyll’s windows can be seen. The evidence does not specify the door’s colour, materials, architectural details, surrounding buildings, or interior condition.",
+    "atmosphere": "Secretive, sinister, and unsettling. In daylight it carries an ominous association beneath the ordinary movement of a busy London quarter. The place becomes charged with dread as visitors connect it to Hyde, the trampled child, and Jekyll’s terrified appearance at the window.",
+    "significance": "The door is the public-facing entrance and concealed link between Hyde’s activities and Dr. Jekyll’s respectable home. It is where Enfield’s story of Hyde’s violence and the suspicious cheque begins, where Utterson first confronts Hyde, and where Utterson and Enfield later witness Jekyll’s terror. The site anchors the mystery of the relationship between Hyde and Jekyll.",
+    "evolution": [
+      {
+        "chapter": 1,
+        "change": "The neglected, secretive door is introduced during Utterson and Enfield’s Sunday walk as the site of an odd story. Enfield explains that Hyde trampled a child, paid her family with gold and a cheque, and used this entrance; Utterson learns that Hyde still possesses its key."
+      },
+      {
+        "chapter": 2,
+        "change": "The doorway becomes the place where Utterson intercepts Hyde, demands to see his face, and experiences direct horror at Hyde’s appearance and behaviour."
+      },
+      {
+        "chapter": 7,
+        "change": "The door’s significance expands when Enfield reveals that it is a back way to Dr. Jekyll’s house. Utterson and Enfield enter the court to look toward Jekyll’s windows; after Jekyll’s smile changes to terror and despair and the window is thrust down, the place becomes associated with shared horror."
+      }
+    ],
+    "sensory": "The evidence supports the visual impression of a neglected door in a busy London by-street and the emotional sensation of unease, horror, and secrecy. No specific smells, sounds, lighting effects, or textures are given beyond the ordinary setting of a Sunday walk and the contrast between the public thoroughfare and the concealed court.",
+    "inferred_notes": "The description of the door as sinister and secretive is explicit in the dossier. Any further details about its colour, construction, age, surrounding architecture, the court’s dimensions, or the exact appearance of Jekyll’s windows would be invented and are therefore omitted.",
+    "design": {
+      "views": [
+        {
+          "id": "wide_establishing",
+          "prompt": "THE FOCUS OF THE PICTURE IS a sinister two-storey block of building thrusting its gable forward onto a narrow London by-street, its facade filling the whole frame from the left edge to the right edge. The upper storey is one flat, blank, unbroken forehead of discoloured, damp-stained grey plaster, a single smooth plaster surface running from the eaves down to the door lintel and across the full width of the frame. The lower storey holds one low door alone, blistered and distained, its brown paint peeling in scabs, set in a shallow sunken recess above two worn stone steps, the plaster around it scratched and grimy. Wet black cobbles in the foreground, a cold iron gas lamp at the kerb on the right, grey fog on a dim London morning, a sense of prolonged and sordid negligence.",
+          "book_evidence": [
+            {
+              "chapter": 1,
+              "quote": "a certain sinister block of building thrust forward its gable on the street"
+            },
+            {
+              "chapter": 1,
+              "quote": "nothing but a door on the lower storey and a blind forehead of discoloured wall on the upper"
+            },
+            {
+              "chapter": 1,
+              "quote": "was blistered and distained"
+            }
+          ],
+          "why": "owner 2026-10-12: the master is described as a LAYOUT (a flat blank upper wall, one blistered door below); 'no window' drew windows"
+        }
+      ]
+    }
+  }
+}
