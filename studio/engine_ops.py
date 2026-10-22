@@ -40,7 +40,10 @@ ENGINE_MARK = "ComfyUI/main.py"
 RUN_MARKS = ("drive.py", "episode.py", "scripts/episode/")
 """A command line running this episode carries one of these and the codex + number."""
 READY_SECONDS = 600.0
-"""comfy.RESTART_SECONDS is the same patience.  Measured 2026-10-21 (CRASH.md): a start took
+"""comfy.RESTART_SECONDS is twice this patience (fleet C A6, 2026-10-22): the restart() that launches
+waits it, the next tick's restart() finds that engine starting and waits it again before any kill,
+so the client waits both (an engine found already starting gets one wait, then the kill)
+(tests/test_the_client_waits_out_a_slow_engine_start.py).  Measured 2026-10-21 (CRASH.md): a start took
 333, 386 and 775 s to answer /system_stats on this box (custom-node imports on the D: HDD), so
 600 s is about the median, not a bound.  A False after it launches nothing: the next tick's
 restart() finds the starting engine in the table and waits on it."""

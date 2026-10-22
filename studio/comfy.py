@@ -112,11 +112,14 @@ def transient(said: str) -> bool:
     """Whether an execution failure belongs to the retriable class."""
     return any(mark in (said or "") for mark in TRANSIENT)
 
-RESTART_SECONDS = 600.0
+RESTART_SECONDS = 1200.0
 """How long a call waits for an engine that cannot be reached.  The GPU is
 shared: another session restarts ComfyUI under a run (run 11 died twice to
 it), and a model-laden engine is back within minutes.  One that is not is
-a failure the caller should see."""
+a failure the caller should see.  Twice engine_ops.READY_SECONDS (fleet C A6,
+2026-10-22): a start measured 333-775 s to /system_stats (CRASH.md), and the
+supervisor that launched it waits READY_SECONDS, then again on its next tick,
+before it kills; at 600 s the client gave up on an engine still importing."""
 
 RESTART_POLL = 5.0
 

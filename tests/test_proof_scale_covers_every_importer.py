@@ -131,7 +131,7 @@ def scaled(tmp_path):
 
 
 def test_a_scaled_rehearsal_divides_the_constants_their_importers_and_defaults(scaled):
-    assert comfy.RESTART_SECONDS == 10.0 and comfy.QUEUE_SECONDS == 120.0
+    assert comfy.RESTART_SECONDS == 20.0 and comfy.QUEUE_SECONDS == 120.0
     assert run_budget.EPISODE_CEILING_SECONDS == 300 and episode_run.OWNER_LIMIT_SECONDS == 360
     assert comfy.stuck.__defaults__[0] == 0.5
     assert episode_run.EpisodeContext.__init__.__kwdefaults__["ceiling"] == 300
@@ -156,17 +156,17 @@ def test_the_cap_table_walls_are_scaled(tmp_path):
         assert step_caps.wall_s("takes") == before / 60
     finally:
         fakes.uninstall()
-    assert step_caps.wall_s("takes") == before and comfy.RESTART_SECONDS == 600.0
+    assert step_caps.wall_s("takes") == before and comfy.RESTART_SECONDS == 1200.0
 
 
 def test_scale_one_changes_nothing(tmp_path):
     fakes.install({"scale": 1}, tmp_path)
     try:
-        assert comfy.RESTART_SECONDS == 600.0 and run_budget.OWNER_LIMIT_SECONDS == 6 * 3600
+        assert comfy.RESTART_SECONDS == 1200.0 and run_budget.OWNER_LIMIT_SECONDS == 6 * 3600
     finally:
         fakes.uninstall()
 
 
 def test_the_list_is_printed_with_the_scale(tmp_path):
     lines = scale.listing(60)
-    assert any("studio.comfy.RESTART_SECONDS 600.0 -> 10.0" in x for x in lines)
+    assert any("studio.comfy.RESTART_SECONDS 1200.0 -> 20.0" in x for x in lines)
