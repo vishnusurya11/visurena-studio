@@ -202,7 +202,8 @@ def shot_list(numbers) -> str:
 
 # ---- the drawer's prose, read by a camera -----------------------------------
 
-CALM = ((r"\bstays\b", "is"), (r"\bstay\b", "are"), (r"\bremains\b", "is"), (r"\bremain\b", "are"),
+CALM = ((r"\bcamera holds over\b", "camera keeps over"),
+        (r"\bstays\b", "is"), (r"\bstay\b", "are"), (r"\bremains\b", "is"), (r"\bremain\b", "are"),
         (r"(?<!camera )\bholds\b", "keeps"), (r"(?<!camera )\bhold\b", "keep"), (r"\bheld\b", ""),
         (r"\bwaits\b", "stands"),
         (r"\bwait\b", "stand"), (r"\bpauses\b", "settles"), (r"\bpause\b", "settle"),
@@ -215,7 +216,9 @@ one a camera can roll on.
 
 THE CAMERA'S OWN HOLD IS SPARED (shot framework D-a, 2026-10-21): "The camera holds a locked-off frame"
 is the catalog's locked move, and calmed it reached ep01 T10/T13/T15/T26 as "The camera keeps ...", a
-verb the catalog does not hold.  The L2 lint allows that one hold (`CAMERA_HOLD`)."""
+verb the catalog does not hold.  The L2 lint allows that one hold (`CAMERA_HOLD`).  OVER A SHOULDER the head
+stays "keeps over": the proof re-render of T13 with "holds over" scored under its delivered take gate on 3 of 3
+renders, the pre-registered failure (docs/audit/2026-10-21_shot_framework/implement/RESULT.md)."""
 
 
 def calm(text: str) -> str:
@@ -946,18 +949,6 @@ SPEAKING = re.compile(r",?\s+(?:as|while)\s+(?:he|she|they)\s+(?:speaks?|talks?|
 """"At 00:05, as the line ends, ... as he speaks": the line has ended (Jekyll ep01 T1/2/14/17)."""
 
 
-SPEECH_VERB = re.compile(r"\s+(?:speaks?|talks?)\s+and(?=\s)|\s+and\s+(?:speaks?|talks?)\b|"
-                         r"\s+(?:speaking|talking)\b|" + SPEAKING.pattern, re.I)
-"""A speech verb joined to an action or a figure: "speaks and taps", "turns and speaks", "as he speaks",
-"toward the man speaking on the pavement"."""
-
-
-def unspoken(motion: str) -> str:
-    """The motion of a segment no dialogue line lands on, its speech verbs off.  ep01 T13 (a silent
-    track) said "<Subject 1> speaks" beside "<Subject 1>'s mouth is closed" (shot framework D-b)."""
-    return ";".join(SPEECH_VERB.sub("", part) for part in (motion or "").split(";"))
-
-
 def beat_sentences(motion: str, t0: int, t1: int, line_end: int | None = None) -> list[str]:
     """D4 / D10 / D5: every clause after the first gets its own whole second, a
     dialogue segment times its first follow-on from the LINE END, and the last clause
@@ -1594,10 +1585,9 @@ def block_parts(k: int, seg: dict, pic: int, ctx: dict) -> list[tuple[str, bool]
     t0, t1, faces = int(round(seg["t"])), seg["end"], ctx["faces"]
     here = lines_under(ctx["lines"], ctx["at"], ctx["offset"], seg["t"], seg["t_to"])
     spoken = [l for l in here if l.kind == "dialogue"]
-    seg = seg if spoken else {**seg, "frame": unspoken(seg["frame"])}     # a silent track says no speech (D-b)
     end = int(round(sum(ctx["at"][spoken[0].index]) - ctx["offset"])) if spoken else None
     paced = paced_motion(offscreen(seg["motion"], faces), seg["t_to"] - seg["t"])
-    motion = tagged(limp_clause(paced if spoken else unspoken(paced)), faces)
+    motion = tagged(limp_clause(paced), faces)
     mouth = mouth_of(seg, faces, ctx["cast"])
     voice = lambda ls: voice_events(ls, ctx["at"], ctx["offset"], ctx["ids"], faces, ctx["physical"],
                                     mouth, mouth_action(motion, mouth), t0, t1, ctx["seen"])

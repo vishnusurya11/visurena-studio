@@ -2459,9 +2459,13 @@ build byte for byte), never the recorded words.
 - B-6: `docs/calibration/camera_catalog.md` "The shot framework" (A1-A5, A7, path and distinct-cell n, the
   bench rows) reaches the writer whole through `plan_brief.camera_catalog`; the writer skill states G-RISE
   and G-HOLD.
-- Proof (`docs/audit/2026-10-21_shot_framework/implement/RESULT.md`): the changed writer rebuilt ep01 on a
-  book-shaped copy; at the delivered seed the five benched takes re-rendered within a few points of the
-  delivered ones (the fixes are correctness, not liveliness, as the B1 controls said).
+- Proof (`docs/audit/2026-10-21_shot_framework/implement/RESULT.md`, pre-registered): the changed writer rebuilt
+  ep01 on a book-shaped copy and 5 takes re-rendered at the delivered seed (13.2 GPU min). T06, T10 (on its
+  confirm seed), T15 and T26 pass; frozen moved -3..+3 points: the fixes are correctness, not liveliness.
+  T13 FAILED twice (take gate 42.5/42.8 vs 43.5; Enfield facenet 0.57/0.55 vs 0.63), and its D-a-only arm
+  failed the gate too (42.2). So, by the rule: D-b is REVERTED whole (a silent track's speech is left to
+  the plan's G-MUTE), and D-a is reverted over a shoulder only ("keeps over" stays); the locked-off hold
+  passed 3 of 3. The margins are 1-1.3 gate points at n = 1-2: a rule kept, not a law found.
 
 ## The voice ruler (2026-10-21, voice bench fix: the speaker gate measured at the wrong rate)
 
