@@ -361,7 +361,20 @@ def inputs_rows(i: SimpleNamespace, report: dict) -> dict:
     from scripts.episode.assemble import stills_of
     from studio import take_inputs
     skip = set(stills_of(i.take_dir, i.book))
-    report["inputs"] = take_inputs.report(take_inputs.audit(i.records, i.book, i.number, skip))
+    audited = take_inputs.audit(i.records, i.book, i.number, skip, take_inputs.built_prompts(i.take_dir))
+    report["inputs"] = take_inputs.report(audited)
+    return words_rows(i, report, audited)
+
+
+def words_rows(i: SimpleNamespace, report: dict, audited: dict) -> dict:
+    """The words beside the pictures (craft ruling A2): how many kept takes rendered from older words
+    than the cards', and how many recorded prompts fail a HARD rule today.  Report only: `inputs_ok`
+    reads the pictures alone, and nothing re-renders (advisory under freeze)."""
+    from studio import take_inputs
+    setups = getattr(getattr(i, "episode", None), "setups", None) or {}
+    night = {int(r["index"]): take_inputs.night_of(setups[r["setup"]]) for r in i.records
+             if r.get("setup") in setups}
+    report["inputs"]["words"] = take_inputs.words(audited, i.records, i.book, night)
     return report
 
 
@@ -578,6 +591,8 @@ def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) ->
     print(f"takes: {takes['pass']}/{takes['of']} pass | fail {takes['fail']} | "
           f"budget spent {takes['budget_spent']} | worst {takes['worst']}")
     print(report["inputs"]["line"])
+    if words := report["inputs"].get("words"):
+        print(words["line"])
     for take, row in report["inputs"]["stale"].items():
         print(f"  {take}: stale {row['stale']} superseded {row['superseded']} missing {row['missing']}")
     for sheet in report["sheets"]:
