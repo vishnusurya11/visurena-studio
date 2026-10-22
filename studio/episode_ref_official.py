@@ -1522,8 +1522,30 @@ def block_light(seg: dict) -> str:
     setup = seg.get("setup")
     if setup is None or (seg.get("time") and seg["time"] != house_style.time_of(setup)):
         return ""
-    phrase = house_style.light_for(setup)
-    return f"The light is {phrase}." if phrase else ""
+    head = house_style.light_for(setup).split(",")[0].strip()       # the black is the style line's
+    if not head:
+        return ""
+    verb = "falls across" if re.search(r"light\b", head) else "lights"
+    return f"The {head} {verb} the scene."      # "The light is lamp, shadows." was the wave-2 garble
+
+
+LIGHT_EFFECT = re.compile(r"\b(?:lamplight|candlelight|firelight|gaslight|moonlight|sunlight|daylight|torchlight|"
+                          r"shin(?:e|es|ing)|glow(?:s|ing)?|gleam(?:s|ing)?|lit by)\b", re.I)
+"""A clause that says light falling (ep01 T07's fill: "..., shining with lamplight.")."""
+
+
+def unlit(text: str, floor: int = 0) -> str:
+    """`text` without the trailing clauses past its first `floor` words that say light falling: the
+    at-rest's fill in a block that already says its light (wave-2 review of A17: T07's freed budget
+    added "..., shining with lamplight.").  The author's floor and every sentence head stay."""
+    out, n = [], 0
+    for part in re.split(r"(?<=[,;.])\s+", text or ""):
+        if n >= floor and LIGHT_EFFECT.search(part) and out and out[-1][-1:] in ",;":
+            out[-1] = out[-1][:-1] + part[-1] if part[-1:] == "." else out[-1]
+        else:
+            out.append(part)
+        n += len(part.split())
+    return " ".join(out)
 
 
 LENS = re.compile(r",?\s*(?:through\s+)?an?\s+\d{2,3}\s*mm\s+lens\b", re.I)
@@ -1561,7 +1583,9 @@ def detail(seg: dict, want: int) -> list[str]:
     if lit := light_sentence(light) or ("" if house_style.lit_clauses(position) else block_light(seg)):
         out.append(lit)
         want -= len(lit.split())
-    if rest := trim(calm(seg.get("at_rest", "")), max(REST_FLOOR, want)):
+    rest = calm(seg.get("at_rest", ""))
+    if rest := trim(unlit(rest, REST_FLOOR) if lit or house_style.lit_clauses(position) else rest,
+                    max(REST_FLOOR, want)):
         out.append(f"At the first frame {lower_lead(rest)}.")
     return out
 
