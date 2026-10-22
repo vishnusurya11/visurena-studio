@@ -314,12 +314,13 @@ def grammar_gate(ep, book: Path, number: int, rate: float) -> int:
 
 def shadow_rows(ep, book: Path, number: int) -> list[str]:
     """The craft ruling's shadow rows (2026-10-21, A8-A12) over this plan and its chapter."""
-    from studio import screenplay_checks, screenplay_grammar, story_layer
+    from studio import screenplay_checks, screenplay_grammar, series_map, story_layer
     paragraphs = plan_brief.chapter_paragraphs(book, number)[1]
     after = plan_brief.chapter_paragraphs(book, number + 1)[1]
     return (story_layer.stolen_lines(ep, paragraphs) + screenplay_grammar.mute_faults(ep)
             + screenplay_checks.orphan_replies(ep, paragraphs)
-            + screenplay_checks.paragraph_holes(ep, paragraphs, after))
+            + screenplay_checks.paragraph_holes(ep, paragraphs, after)
+            + (screenplay_grammar.reveal_faults(ep, paragraphs, smap) if (smap := series_map.load(book)) else []))
 
 
 def craft_shadow_gate(ep, book: Path, number: int) -> int:

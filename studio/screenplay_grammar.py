@@ -223,6 +223,49 @@ def mute_faults(plan, paragraphs=()) -> list[str]:
     return out
 
 
+# ---- G-REVEAL: a withheld face is not lifted to the camera early (craft ruling A12, shadow) ----------
+
+LIFT = re.compile(r"\blifts? (?:his|her|its) chin\b|\bturns? (?:his|her|its) (?:[\w']+ )?face up\b|\blow angle\b"
+                  r"|\b(?:light|glow|lamp\w*|flame)\b[^.;]{0,40}\bcheek\b|\bshow\w* (?:[\w']+ ){0,3}face\b", re.I)
+"""What lifts a face to the viewer: a raised chin, a face turned up, a low angle, light on the cheek, a
+move that widens to show it.  Jekyll ep01: shots 0, 9 and 11, before the book shows Hyde (ch2 index 24)."""
+REVEAL_SIZES = ("extreme_close", "close", "medium_close")
+REVEAL_FIELDS = ("frame", "motion", "at_rest", "end", "camera")
+
+
+def lifted(shot) -> list[str]:
+    """The lift words of a close or medium close shot; none at any other size."""
+    if _get(shot, "size") not in REVEAL_SIZES:
+        return []
+    return [m.group(0) for f in REVEAL_FIELDS for m in LIFT.finditer(str(_get(shot, f) or ""))]
+
+
+def too_early(reveal, number: int, shot, paragraphs: list[str]) -> bool:
+    """Before the reveal's episode, or in it with no span placing the shot at or after its paragraph."""
+    from studio import plan_gates
+    if number != reveal.episode:
+        return number < reveal.episode
+    from types import SimpleNamespace
+    at = plan_gates.event_paragraph(SimpleNamespace(source=list(_get(shot, "source") or [])), paragraphs)
+    return not at or at - 1 < reveal.paragraph
+
+
+def reveal_faults(plan, paragraphs: list[str], smap) -> list[str]:
+    """G-REVEAL (shadow): a lift verb on a scheduled entity's close or medium close before the series map
+    lets the viewer see it."""
+    number = int(_get(plan, "number") or 0)
+    shots = plan.get("shots") if isinstance(plan, dict) else getattr(plan, "shots", None)
+    out = []
+    for shot in shots or []:
+        for who in _get(shot, "faces") or []:
+            reveal, words = smap.of(who), lifted(shot)
+            if reveal and words and too_early(reveal, number, shot, paragraphs):
+                out.append(fault("G-REVEAL", f"shot {_get(shot, 'index')}", f"{who}'s face lifted to the camera "
+                                 f"before episode {reveal.episode}, paragraph {reveal.paragraph} (\"{reveal.words}\")",
+                                 ", ".join(words), "no lift"))
+    return out
+
+
 def location_of(episode, setup: str) -> str:
     found = (getattr(episode, "setups", None) or {}).get(setup)
     return str(getattr(found, "location", "") or setup)

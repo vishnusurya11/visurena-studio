@@ -43,7 +43,8 @@ class Check:
     """A callable, or "module:function" imported when the replay runs."""
     needs: str
     """What a plan must carry to be read: `plan` (lines), `chapter` (its chapter too), `spans`
-    (a shot source span that lands in its chapter)."""
+    (a shot source span that lands in its chapter), `map` (its book's series_map.json; the check is
+    called fn(plan, paragraphs, series_map))."""
 
 
 CHECKS = {c.name: c for c in (
@@ -51,7 +52,7 @@ CHECKS = {c.name: c for c in (
     Check("stolen_line", "studio.story_layer:stolen_lines", "chapter"),           # A9 G-STOLEN
     Check("orphan_reply", "studio.screenplay_checks:orphan_replies", "spans"),     # A10
     Check("paragraph_hole", "studio.screenplay_checks:paragraph_holes", "spans"),  # A11
-    Check("reveal_early", "studio.screenplay_grammar:reveal_faults", "plan"),      # A12 G-REVEAL
+    Check("reveal_early", "studio.screenplay_grammar:reveal_faults", "map"),       # A12 G-REVEAL
 )}
 NODE_SECTIONS = ("spike", "turn", "answer", "payoff", "act_out")
 NODE_KINDS = ("dialogue", "tale")
@@ -88,10 +89,12 @@ def spans(plan: dict) -> list[str]:
     return [s for shot in plan.get("shots") or [] for s in shot.get("source") or []]
 
 
-def readable(plan: dict, paragraphs: list[str], needs: str) -> bool:
-    """Whether a plan carries what a check reads: lines, its chapter, or a span landing in it."""
+def readable(plan: dict, paragraphs: list[str], needs: str, smap=None) -> bool:
+    """Whether a plan carries what a check reads: lines, its chapter, a span landing in it, or a map."""
     if not plan.get("lines"):
         return False
+    if needs == "map":
+        return smap is not None
     if needs == "plan":
         return True
     if needs == "chapter":
@@ -99,10 +102,12 @@ def readable(plan: dict, paragraphs: list[str], needs: str) -> bool:
     return any(span_paragraph(s, paragraphs) is not None for s in spans(plan))
 
 
-def fires(plan: dict, paragraphs: list[str], check: Check) -> list | None:
+def fires(plan: dict, paragraphs: list[str], check: Check, smap=None) -> list | None:
     """The check's fires, or None when it is not built or cannot read this plan."""
     run = runner(check)
-    return None if run is None or not readable(plan, paragraphs, check.needs) else list(run(plan, paragraphs))
+    if run is None or not readable(plan, paragraphs, check.needs, smap):
+        return None
+    return list(run(plan, paragraphs, smap) if check.needs == "map" else run(plan, paragraphs))
 
 
 def chapter_of(book: Path, path: Path) -> list[str]:
@@ -111,11 +116,12 @@ def chapter_of(book: Path, path: Path) -> list[str]:
 
 def replay(book: Path, path: Path, checks: dict = CHECKS) -> dict:
     """One plan's row: readable and fires per check (None = not read, never 0)."""
+    from studio import series_map
     plan = json.loads(Path(path).read_text(encoding="utf-8"))
-    paragraphs = chapter_of(book, Path(path))
+    paragraphs, smap = chapter_of(book, Path(path)), series_map.load(book)
     return {"book": Path(book).name, "plan": str(Path(path).relative_to(book)), "number": number_of(Path(path)),
-            "readable": {n: readable(plan, paragraphs, c.needs) for n, c in checks.items()},
-            "fires": {n: fires(plan, paragraphs, c) for n, c in checks.items()}}
+            "readable": {n: readable(plan, paragraphs, c.needs, smap) for n, c in checks.items()},
+            "fires": {n: fires(plan, paragraphs, c, smap) for n, c in checks.items()}}
 
 
 def number_of(path: Path) -> int:
