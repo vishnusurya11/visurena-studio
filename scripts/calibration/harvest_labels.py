@@ -148,7 +148,7 @@ def zoom_summary(z: dict | None) -> dict | None:
 def dq_summary(rec: dict, planned: dict) -> dict:
     return {"score": rec.get("score"), "passed": rec.get("passed"), "attempt": rec.get("attempt", 0),
             "file": rec.get("file"), "gates": rec.get("gates", []), "zoom": zoom_summary(rec.get("zoom")),
-            "planned": planned}
+            "planned": planned, "take_sha8": rec.get("take_sha8", "")}
 
 
 GATE_CLASS = {"warp": "blur_warp", "frozen-whole": "frozen_share", "frozen-share": "frozen_share",
@@ -365,6 +365,26 @@ def rejudge_attempts(book: Path, unit: str) -> None:
     indices = sorted(int(p.name[1:3]) for p in (book / "episodes" / unit / "takes" / ENGINE).glob("T??.dq.json"))
     if indices:
         take_dq.main(book.name[:14], int(unit[2:]), indices, attempts=True)
+
+
+def of_these_bytes(machine: dict, book: Path, artefact: str) -> bool:
+    """A dq record that names the bytes it judged must name this file's; one that names none is taken."""
+    named = (machine.get("take_dq") or {}).get("take_sha8")
+    return not named or named == casebook.sha8_of(Path(book) / artefact)
+
+
+def machine_for(codex: str, book: Path, artefact: str) -> dict | None:
+    """The machine snapshot an owner row of `artefact` carries, read through the harvest's own rows;
+    None when no json judged these bytes (the row then waits on the needs-rejudge list)."""
+    unit = UNIT.search(artefact)
+    if not unit:
+        return None
+    ep_dir = Path(book) / "episodes" / f"ep{unit.group(1)}"
+    rows = episode_take_rows(codex, ep_dir.name, ep_dir, "") + episode_panel_rows(codex, ep_dir.name, ep_dir, "")
+    for r in rows:
+        if artefact in (r.path, locate(Path(book), r.path)) and of_these_bytes(r.machine, book, artefact):
+            return casebook.snapshot(r.machine) or None
+    return None
 
 
 def counts(rows: list[Row]) -> dict:

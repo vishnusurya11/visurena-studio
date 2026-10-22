@@ -29,6 +29,10 @@ VERDICTS = ("pass", "fault")
 BY = ("owner", "agent", "default", "synthetic", "unverified")
 WEIGHTS = {"owner": 1.0, "agent": 0.75, "default": 0.5, "synthetic": 0.0, "unverified": 0.0}
 LABELS, OWNER = "labels.jsonl", "owner.jsonl"
+NEEDS_REJUDGE = "needs_rejudge.jsonl"
+"""Owner rows noted on a file with no machine json of its own bytes: the bench cannot measure them yet."""
+SNAPSHOT_KEYS = ("take_dq", "content", "panel_dq", "panel_content", "planned")
+"""What an owner row keeps of the machine json: the judges' inputs, never the harvest's shipped-flagged stamp."""
 
 CLASSES = (
     "frozen_start", "frozen_share", "foreign_picture", "cut_early", "off_board",
@@ -60,6 +64,16 @@ class Row(BaseModel):
     region: list[int] | None = None
     machine: dict = {}
     machine_version: str = ""
+    stratum: str = ""
+    p_select: float | None = None
+    seen_by_owner: bool = False
+    session_id: str = ""
+    rubric_version: str = ""
+    repeat_of: str = ""
+    latency_ms: int | None = None
+    """The label session's fields (fleet H ruling A6): the stratum an item was drawn from, its inclusion
+    probability across every stratum it belongs to, whether the owner saw it, which sitting, which rubric,
+    the item it repeats (test-retest), and how long he took."""
 
     @field_validator("kind")
     @classmethod
@@ -88,6 +102,13 @@ class Row(BaseModel):
         if v.startswith(("/", "\\")) or (len(v) > 1 and v[1] == ":"):
             raise ValueError(f"path {v!r} is absolute; a row names a file relative to its book")
         return v.replace("\\", "/")
+
+    @field_validator("p_select")
+    @classmethod
+    def _probability(cls, v):
+        if v is not None and not 0.0 < v <= 1.0:
+            raise ValueError(f"p_select {v} is not an inclusion probability in (0, 1]")
+        return v
 
     @field_validator("region")
     @classmethod
@@ -150,13 +171,26 @@ def shadowed(rows: list[Row], overlay: list[Row]) -> list[Row]:
     return [r for r in rows if not (r.verdict_by == "default" and (r.kind, r.path) in spoken_for)]
 
 
+def snapshot(machine: dict | None) -> dict:
+    """The judges' inputs out of a machine dict; the harvest's label stamp left behind."""
+    return {k: v for k, v in (machine or {}).items() if k in SNAPSHOT_KEYS}
+
+
+def borrowed(overlay: list[Row], harvested: list[Row]) -> list[Row]:
+    """An overlay row with no machine takes the harvested row's on the same artefact -- same bytes only."""
+    twins = {(r.kind, r.path, r.sha8): r.machine for r in harvested if r.sha8 and r.machine}
+    return [r if r.machine else r.model_copy(update={"machine": snapshot(twins.get((r.kind, r.path, r.sha8)))})
+            for r in overlay]
+
+
 def load(casebook_dir: Path) -> list[Row]:
     """The bench's rows: labels + owner overlay, unverified dropped, defaults
-    shadowed by the overlay's rows on the same artefact."""
+    shadowed by the overlay's rows on the same artefact, an old overlay row given
+    the harvested machine of its own bytes."""
     folder = Path(casebook_dir)
-    overlay = [r for r in read_rows(folder / OWNER) if counted(r)]
-    labels = [r for r in read_rows(folder / LABELS) if counted(r)]
-    return shadowed(labels, overlay) + overlay
+    harvested = read_rows(folder / LABELS)
+    overlay = borrowed([r for r in read_rows(folder / OWNER) if counted(r)], harvested)
+    return shadowed([r for r in harvested if counted(r)], overlay) + overlay
 
 
 def append_owner(casebook_dir: Path, row: Row) -> Path:
@@ -184,20 +218,38 @@ def kind_of(artefact: str) -> str:
     raise ValueError(f"{artefact}: not a sheet, plan, grid, panel, take or master path")
 
 
-def owner_row(codex: str, unit: str, artefact: str, cls: str, words: str, book: Path) -> Row:
-    """The owner's row: a fault of the named class, or a pass; the file's sha8 when it is there."""
+def owner_row(codex: str, unit: str, artefact: str, cls: str, words: str, book: Path,
+              machine: dict | None = None) -> Row:
+    """The owner's row: a fault of the named class, or a pass; the file's sha8 when it is there, and the
+    snapshot of the machine json that judged those bytes."""
     today = db.utc_now().strftime("%Y-%m-%d")
     if cls != "pass" and cls not in CLASSES:
         raise ValueError(f"{cls!r} is not a fault class; one of pass, {', '.join(CLASSES)}")
     return Row(codex=codex, unit=unit, kind=kind_of(artefact), path=artefact,
                sha8=sha8_of(Path(book) / artefact),
                verdict="pass" if cls == "pass" else "fault", fault_class=None if cls == "pass" else cls,
-               verdict_by="owner", verdict_at=today, source=f"owner note {today}: {words.strip()}")
+               verdict_by="owner", verdict_at=today, source=f"owner note {today}: {words.strip()}",
+               machine=snapshot(machine))
 
 
-def note_owner(book: Path, codex: str, unit: str, artefact: str, cls: str, words: str) -> Path:
+def append_needs_rejudge(casebook_dir: Path, row: Row) -> Path:
+    """An owner row the bench cannot measure yet, onto the casebook's needs-rejudge list."""
+    target = Path(casebook_dir) / NEEDS_REJUDGE
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"path": row.path, "kind": row.kind, "unit": row.unit, "sha8": row.sha8,
+                             "noted_at": row.verdict_at}) + "\n")
+    return target
+
+
+def note_owner(book: Path, codex: str, unit: str, artefact: str, cls: str, words: str,
+               machine: dict | None = None) -> Path:
     """One finding of the owner's onto the end of the book's owner.jsonl -- the
-    one door for scripts/audit/note.py and for a redo order's note."""
+    one door for scripts/audit/note.py and for a redo order's note.  A row with
+    no machine snapshot also goes on the needs-rejudge list."""
     if not words.strip():
         raise ValueError("say what was seen: the words may not be empty")
-    return append_owner(Path(book) / "casebook", owner_row(codex, unit, artefact, cls, words, book))
+    row = owner_row(codex, unit, artefact, cls, words, book, machine)
+    if not row.machine:
+        append_needs_rejudge(Path(book) / "casebook", row)
+    return append_owner(Path(book) / "casebook", row)
