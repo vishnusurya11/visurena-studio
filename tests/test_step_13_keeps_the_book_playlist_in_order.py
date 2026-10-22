@@ -140,3 +140,37 @@ def test_a_description_past_the_wall_stops_before_it_is_sent(tmp_path):
     else:
         raise AssertionError("a description over 5000 characters was sent")
     assert not [w for w in yt.writes if w[0] == "videos.update snippet" and w[1]["id"] == E2]
+
+
+# ---- a re-run adds nothing twice (review 2026-10-21) -------------------------------
+
+UPKEEP = {"playlist", "playlist_item", "watch_block", "next_line", "in_order"}
+
+
+def test_a_run_cut_short_before_the_next_line_resumes_without_a_second_write(tmp_path, monkeypatch):
+    book, yt = jekyll(tmp_path, (1, E1), (2, E2)), channel()
+    real = ypl.next_link
+    monkeypatch.setattr(ypl, "next_link", lambda *a, **k: (_ for _ in ()).throw(RuntimeError("cut")))
+    try:
+        ypl.upkeep(yt, book, 2, E2)
+    except RuntimeError:
+        pass
+    monkeypatch.setattr(ypl, "next_link", real)
+    ypl.upkeep(yt, book, 2, E2)
+    assert yt.lists[PID]["items"] == [E1, E2]
+    assert [w[0] for w in yt.writes].count("playlistItems.insert") == 1
+    assert [w[1]["id"] for w in yt.writes if w[0] == "videos.update snippet"] == [E2, E1]
+    assert yt.store[E2]["snippet"]["description"].count(bp.MARK) == 1
+
+
+def test_a_ledger_that_lost_its_upkeep_rows_still_writes_nothing_twice(tmp_path):
+    """The second guard: every act reads the live channel before it writes."""
+    book, yt = jekyll(tmp_path, (1, E1), (2, E2)), channel()
+    ypl.upkeep(yt, book, 2, E2)
+    before = len(yt.writes)
+    kept = [r for r in ledger(book) if r.get("event") not in UPKEEP]
+    (book / "uploads.jsonl").write_text("".join(json.dumps(r) + "\n" for r in kept), encoding="utf-8")
+    ypl.upkeep(yt, book, 2, E2)
+    assert len(yt.writes) == before
+    assert yt.lists[PID]["items"] == [E1, E2]
+    assert yt.store[E1]["snippet"]["description"].count("Next:") == 1
