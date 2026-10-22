@@ -17,6 +17,7 @@ call.  A test drives `turn` through a fake Transport; no test spends.
 from __future__ import annotations
 
 import json
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -68,6 +69,24 @@ _DRIVE = re.compile(r"[A-Za-z]:[\\/](?:[^\s'\"<>|]*?[\\/])?visurena_studio[\\/]|
 
 class BrainFailed(Exception):
     """The session ended without a verdict the supervisor may act on."""
+
+
+class ApiKeyVisible(BrainFailed):
+    """An Anthropic key is in the environment: the claude child would bill it instead of
+    the owner's login (owner 2026-10-07; group R R-B3, 2026-10-22).  Never retried."""
+    retryable = False
+
+
+API_KEYS = ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN")
+
+
+def refuse_api_key(env=None) -> None:
+    """Refuse the spawn while a key is visible; the message names it, never its value.
+    The options env merges ONTO os.environ, so no allowlist there can take it away."""
+    env = os.environ if env is None else env
+    if seen := [name for name in API_KEYS if env.get(name)]:
+        raise ApiKeyVisible(f"{', '.join(seen)} is set: a claude session would bill it instead of "
+                            "the owner's login; unset it (and delete it from .env)")
 
 
 class RateLimited(Exception):
@@ -238,6 +257,7 @@ def receipt_of(result: ResultMessage) -> dict:
 async def turn(prompt: str, options: ClaudeAgentOptions, *, transport=None) -> tuple[Verdict, dict]:
     """One session, one prompt, one verdict.  `transport` is the SDK's seam for a
     fake; None spawns the bundled claude.exe."""
+    refuse_api_key()
     result = None
     async with ClaudeSDKClient(options=options, transport=transport) as client:
         await client.query(prompt)
@@ -315,6 +335,7 @@ def writer_options(schema_model, *, model: str, effort: str = "medium", turns: i
 async def ask_structured(prompt: str, schema_model, *, model: str, effort: str = "medium", transport=None):
     """One session, one prompt, one validated instance of `schema_model`; the
     receipt carries the SDK's usage so the ledger keeps the tokens at no cost."""
+    refuse_api_key()
     result = None
     async with ClaudeSDKClient(options=writer_options(schema_model, model=model, effort=effort),
                                transport=transport) as client:

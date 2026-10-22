@@ -29,15 +29,21 @@ MODELS_PATH = Path("models.yaml")
 ENV_PATH = Path(".env")
 
 
+NEVER_LOADED = "ANTHROPIC_"
+"""A .env name the loader never copies into os.environ: an Anthropic key there would
+win over the owner's login in every claude child (group R R-B3, 2026-10-22)."""
+
+
 def _load_dotenv(path: Path = ENV_PATH) -> None:
-    """Tiny .env loader: KEY=VALUE lines, never overrides real env vars."""
+    """Tiny .env loader: KEY=VALUE lines, never overrides real env vars, never an ANTHROPIC_* name."""
     if not path.exists():
         return
     for line in path.read_text(encoding="utf-8").splitlines():
         line = line.strip()
         if line and not line.startswith("#") and "=" in line:
             key, _, value = line.partition("=")
-            os.environ.setdefault(key.strip(), value.strip())
+            if not key.strip().startswith(NEVER_LOADED):
+                os.environ.setdefault(key.strip(), value.strip())
 
 
 def load_models_config(path: Path = MODELS_PATH) -> dict:
@@ -445,8 +451,8 @@ def structured(tier: str, prompt: str, schema, *, retries: int = 3,
             return result
         except (StructuredOutputException, ContentFiltered):
             raise
-        except Exception:
-            if attempt == transient_retries:
+        except Exception as failed:
+            if attempt == transient_retries or getattr(failed, "retryable", True) is False:
                 raise
             time.sleep(_TRANSIENT_BACKOFF[min(attempt, len(_TRANSIENT_BACKOFF) - 1)])
 
