@@ -16,6 +16,7 @@ by relative path, never by what was said.
 """
 from __future__ import annotations
 
+import random
 import sys
 from dataclasses import dataclass, field
 from datetime import date
@@ -30,6 +31,9 @@ GPU_MINUTES_PER_REFUSAL = 7.0
 REAL = ("owner", "agent", "default")
 ARMABLE_N = 30
 """The convention (fleet H ruling, not a measurement): a gate's owner count is thin under 30 rows."""
+MIN_CLUSTERS = 10
+"""The convention (fleet H skeptic on A4): a percentile bootstrap under-covers with fewer episodes."""
+BOOT_REPS = 2000
 
 
 @dataclass
@@ -149,6 +153,44 @@ def refused_artefacts(outcomes: list[Outcome]) -> dict[tuple[str, str], str]:
     return {(o.row.codex, o.row.path): o.row.unit for o in outcomes if o.refused}
 
 
+def by_episode(rows: list[Outcome]) -> list[tuple[int, int]]:
+    """(refused, rows) per episode, keyed codex/unit: the cluster a take belongs to."""
+    tally: dict[str, list[int]] = {}
+    for o in rows:
+        cell = tally.setdefault(f"{o.row.codex}/{o.row.unit}", [0, 0])
+        cell[0] += int(o.refused)
+        cell[1] += 1
+    return [tuple(v) for _, v in sorted(tally.items())]
+
+
+def boot_shares(clusters: list[tuple[int, int]], reps: int = BOOT_REPS, seed: int = 0) -> list[float]:
+    """The refused share of `reps` resamples of whole episodes, drawn with replacement, seeded."""
+    rng, out = random.Random(seed), []
+    for _ in range(reps):
+        draw = [clusters[rng.randrange(len(clusters))] for _ in clusters]
+        out.append(sum(k for k, _ in draw) / sum(n for _, n in draw))
+    return sorted(out)
+
+
+def effective_n(clusters: list[tuple[int, int]], shares: list[float]) -> float:
+    """p(1-p) over the bootstrap variance: how many independent rows the clustered rows are worth."""
+    n = sum(c for _, c in clusters)
+    p, mean = sum(k for k, _ in clusters) / n, sum(shares) / len(shares)
+    var = sum((x - mean) ** 2 for x in shares) / len(shares)
+    return min(n, round(p * (1 - p) / var, 1)) if var > 0 else n
+
+
+def clustered(rows: list[Outcome]) -> dict:
+    """The episode-cluster bootstrap's 95 % percentile interval and effective n; refused under 10 episodes."""
+    clusters = by_episode(rows)
+    if len(clusters) < MIN_CLUSTERS:
+        return {"low": None, "high": None, "clusters": len(clusters), "n_eff": None,
+                "note": f"too few clusters ({len(clusters)} episodes, under {MIN_CLUSTERS})"}
+    shares = boot_shares(clusters)
+    return {"low": round(shares[int(0.025 * len(shares))], 4), "high": round(shares[int(0.975 * len(shares)) - 1], 4),
+            "clusters": len(clusters), "n_eff": effective_n(clusters, shares), "note": ""}
+
+
 def flag_rate(outcomes: list[Outcome]) -> dict:
     """Refused artefacts per unit (keyed codex/unit: two books number their units alike) and the share overall."""
     per_unit: dict[str, int] = {}
@@ -232,10 +274,23 @@ def headline(outcomes: list[Outcome]) -> dict:
             "by_class": {c: _dict(i) for c, i in by_class(outcomes, "owner").items()}}
 
 
+def _cluster_line(name: str, rows: list[Outcome]) -> str:
+    b = clustered(rows)
+    if b["note"]:
+        return f"  - {name}, episode-cluster bootstrap: {b['note']}"
+    return f"  - {name}, episode-cluster bootstrap: [{b['low']:.3f}, {b['high']:.3f}] over {b['clusters']} episodes, effective n {b['n_eff']}"
+
+
+def owner_passes(outcomes: list[Outcome]) -> list[Outcome]:
+    return [o for o in outcomes if measured(o) and o.row.verdict == "pass" and o.row.verdict_by == "owner"]
+
+
 def owner_lines(outcomes: list[Outcome]) -> list[str]:
     lines = ["### owner truth (the headline)", "",
              _owner_line("recall on owner rows", recall(outcomes, "owner")),
-             _owner_line("false refusals on owner rows", false_refusals(outcomes, "owner"))]
+             _cluster_line("recall", faults(outcomes, "owner")),
+             _owner_line("false refusals on owner rows", false_refusals(outcomes, "owner")),
+             _cluster_line("false refusals", owner_passes(outcomes))]
     return lines + [_owner_line(f"owner recall on {c}", i) for c, i in by_class(outcomes, "owner").items()]
 
 
