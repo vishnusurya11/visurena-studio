@@ -162,12 +162,31 @@ def fill_step(index: Path = RECORDINGS, out: Path = MEMOS, root: Path = settings
     return (fill or real_fill)(Path(out), whisper=got["whisper"], detect=got["detect"])
 
 
+def text_rows(doc: Mapping, memo: Mapping) -> dict[str, str]:
+    """{text: key of a recorded line's words: its transcript}: the index's transcript rows (wav sha ->
+    wav) joined to its tts_line rows (wav -> text).  A replayed line never has the recorded bytes."""
+    from studio.rehearsal.workers import text_key
+    rows = doc.get("entries") or doc.get("recordings") or []
+    words = {r.get("path"): (r.get("fields") or {}).get("text") for r in rows if r.get("kind") == "tts_line"}
+    heard = {(r.get("fields") or {}).get("wav"): memo.get(r.get("key")) for r in rows if r.get("kind") == "transcript"}
+    return {text_key(words[wav]): said for wav, said in heard.items() if words.get(wav) and said is not None}
+
+
+def stage_whisper(memo: Path, dest: Path) -> None:
+    """The whisper memo into the sandbox with its rows by words (`text_rows`) added."""
+    got = json.loads(memo.read_text(encoding="utf-8"))
+    doc = json.loads(Path(RECORDINGS).read_text(encoding="utf-8")) if Path(RECORDINGS).is_file() else {}
+    dest.write_text(json.dumps({**got, **text_rows(doc, got)}, indent=1), encoding="utf-8")
+
+
 def stage_inputs(box: Path) -> dict:
     """The memos copied into the sandbox; its manifest names them and the recordings index."""
     dest = Path(box) / "memos"
     dest.mkdir(parents=True, exist_ok=True)
     for memo in sorted(Path(MEMOS).glob("*.json")):
         shutil.copy2(memo, dest / memo.name)
+    if (Path(MEMOS) / "whisper.json").is_file():
+        stage_whisper(Path(MEMOS) / "whisper.json", dest / "whisper.json")
     return set_manifest(box, {"memos": str(dest), "recordings": str(RECORDINGS)})
 
 

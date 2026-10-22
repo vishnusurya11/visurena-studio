@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Callable, Mapping
 
 from studio.rehearsal import fakes
-from studio.rehearsal.workers import detect_key, file_key, images_key, read_memo  # noqa: F401  (shared keys)
+from studio.rehearsal.workers import detect_key, file_key, heard, images_key, read_memo  # noqa: F401  (shared keys)
 
 WORKERS = Path(__file__).resolve().with_name("workers")
 KINDS = {"detect": ("studio.face_detect", "studio.face_detect_worker"),
@@ -65,10 +65,9 @@ def memo_ear(manifest: Mapping, box: Path) -> Callable[..., Callable[[Path], str
         memo = read_memo(memo_path(manifest, box, "whisper"))
 
         def listen(clip: Path) -> str:
-            key = file_key(clip)
-            label = "exact" if key in memo else "canned"
+            text, label, key = heard(clip, memo)
             fakes.log(box, "workers", {"worker": "cpu_ear", "event": "answer", "label": label, "key": key})
-            return memo.get(key, "") if key else ""
+            return text
         return listen
     return transcriber
 

@@ -6,7 +6,9 @@ asked line, exiting on EOF or after `idle` seconds without one.  It answers from
 the asked file's BYTES (a take for the detector, the pictures in order for anime id, a wav for
 whisper), filled by the REAL workers on the CPU (scripts/proof/fill_memos.py).  A miss is
 `canned` and refuses: an empty detection, an error for an identity ask (the terms stay unread),
-an EMPTY transcript (never the requested text).  On ask number `die_at` (1-based, 0 = never) it
+an EMPTY transcript (never the requested text).  A wav whose bytes miss but whose lines.json words
+are a recorded line's (`text:` key) hears that recording's transcript, `substituted`: a replayed
+line is re-encoded and padded, so its bytes never match (rehearsal window 2).  On ask number `die_at` (1-based, 0 = never) it
 exits without answering.  Every answer, death and exit is a row in the log file it is given.
 
     python studio/rehearsal/workers/fake_<kind>_worker.py <memo.json> <die_at> <idle_s> <log.jsonl>
@@ -65,9 +67,33 @@ def answer_anime(ask: dict, memo: dict) -> tuple[dict, str, str | None]:
     return (dict(memo[key]), "exact", key) if key in memo else ({"error": CANNED_ID}, "canned", key)
 
 
+def text_key(text: str) -> str:
+    """A whisper memo key by a line's WORDS (`text:` + sha256), beside the keys by bytes."""
+    return "text:" + hashlib.sha256(str(text).encode("utf-8")).hexdigest()
+
+
+def said_text(clip) -> str | None:
+    """The text lines.json beside `clip` gives the line whose file it is; None when there is none."""
+    sheet = Path(clip).with_name("lines.json")
+    rows = read_memo(sheet) if sheet.is_file() else []
+    named = [r for r in rows if isinstance(r, dict) and Path(str(r.get("rel_path") or "")).name == Path(clip).name]
+    return str(named[-1]["text"]) if named and named[-1].get("text") else None
+
+
+def heard(clip, memo: dict) -> tuple[str, str, str | None]:
+    """(transcript, label, key): the recorded bytes (exact); else a recorded line's words, served
+    re-encoded and padded by the fake engine and voice_say (substituted); else nothing (canned)."""
+    key = file_key(clip)
+    if key in memo:
+        return memo[key], "exact", key
+    text = said_text(clip)
+    by_words = text_key(text) if text else None
+    return (memo[by_words], "substituted", by_words) if by_words in memo else ("", "canned", key)
+
+
 def answer_whisper(ask: dict, memo: dict) -> tuple[dict, str, str | None]:
-    key = file_key(ask.get("clip", ""))
-    return ({"text": memo[key]}, "exact", key) if key in memo else ({"text": ""}, "canned", key)
+    text, label, key = heard(ask.get("clip", ""), memo)
+    return {"text": text}, label, key
 
 
 def lines(source, idle: float | None):

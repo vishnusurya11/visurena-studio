@@ -26,10 +26,12 @@ BRAIN_SESSIONS = 3
 UNCAPPED = ("wall", "takes", "tiny_face")
 """attempts.json keys that count time or first renders, not retry rounds (no cap-table row)."""
 YOUTUBE = ("googleapis", "youtube", "accounts.google")
-STAND_INS = ("canned", "substituted", "worker_canned", "sdk_canned", "sdk_substituted", "sdk_scripted")
+STAND_INS = ("canned", "substituted", "worker_canned", "worker_substituted", "sdk_canned", "sdk_substituted",
+             "sdk_scripted")
 """Answer classes that are NOT the real component answering this ask (AUDIT A2, A4): the engine's
 canned grey and its substituted recording of ANOTHER graph (ep01's kept takes served to ep02), a
-fake worker's memo miss (an empty detection, a silent transcript), a fake SDK's canned refusal, its
+fake worker's memo miss (an empty detection, a silent transcript), a fake ear's transcript of the
+recording with the same words (a replayed line's bytes never match), a fake SDK's canned refusal, its
 writer parts folded from a target plan (`writer_plan`: S0a's and F5's plan is ep01's own, not the
 writer answering this brief) and the brain script's scripted verdict.  A quality row resting on
 any of them is mechanism."""
