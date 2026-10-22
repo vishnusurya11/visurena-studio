@@ -116,3 +116,17 @@ def test_a_re_run_after_a_sung_tone_moves_the_seed(tmp_path):
     before = assemble.bed_seed(room / "bed_light.wav", 10)
     (room / "bed_light.sings1.wav").write_bytes(b"")
     assert assemble.bed_seed(room / "bed_light.wav", 10) != before
+
+
+def test_a_second_assemble_that_sings_again_does_not_collide_with_the_kept_roll(tmp_path, monkeypatch):
+    """A model that sings once sings again: roll 1 of the re-run met `.sings1.wav` and Windows
+    refused the rename, killing the assemble after the GPU time (reviewer, 2026-10-22)."""
+    from scripts.episode import assemble
+
+    fake_engine(monkeypatch, tmp_path, [])
+    room = tmp_path / "audio"; room.mkdir()
+    (room / "bed_light.sings1.wav").write_bytes(b"old")
+    with pytest.raises(SystemExit, match="sing"):
+        assemble.one_tone(room, 10, "light", 27.7, "acestep", ear=singing_ear)
+    assert (room / "bed_light.sings1.wav").read_bytes() == b"old", "a kept roll is never overwritten"
+    assert len(list(room.glob("bed_light.sings*.wav"))) == 1 + assemble.BED_ROLLS

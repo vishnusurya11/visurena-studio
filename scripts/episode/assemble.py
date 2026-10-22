@@ -419,6 +419,8 @@ def refuse(out: Path, roll: int, fault: str, loudness: float | None, target: flo
            want: float) -> Path:
     """Keep the refused roll on disk, named for why, and say so."""
     kept = out.with_name(f"{out.stem}.{fault}{roll + 1}{out.suffix}")
+    while kept.exists():                  # a re-run's roll never overwrites an earlier kept one
+        kept = kept.with_name(f"{kept.stem}x{kept.suffix}")
     out.rename(kept)
     heard = (f"{loudness:.1f} LUFS against {target:.1f}" if fault == "empty" and loudness is not None
              else "words heard over the music" if fault == "sings"
