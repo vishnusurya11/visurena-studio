@@ -61,11 +61,12 @@ def test_a_mouth_that_is_the_voice_correlates_with_it():
 
 
 def test_the_search_stays_inside_its_window():
-    """A mouth 20 f off is not chased onto the next syllable: no read leaves +-WINDOW."""
+    """A mouth 20 f off is not chased onto the next syllable, nor clipped to +-WINDOW and reported:
+    its peak lies past the window, so the ruler cannot tell (skeptic 2026-10-21, finding 3)."""
     wav, sr = line()
     got = mouth.lag(mouth_on(voiced(wav, sr), 20), mouth.voice_envelope(wav, sr))
     assert 8 <= mouth.WINDOW <= 12 and got["window"] == mouth.WINDOW
-    assert abs(got.get("lag_frames", 0)) <= mouth.WINDOW
+    assert got["measured"] is False and "lag_frames" not in got
 
 
 def test_zscore_keeps_the_sign_and_a_flat_signal_is_zeros():

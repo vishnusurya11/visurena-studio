@@ -2447,6 +2447,17 @@ the same folder. What the debate settled, and what the bench then measured:
   0/2. By eye the no-audio mouths do not sit at the soundtrack offsets (T22 N opens at f13: line f6,
   own voice f23), so the offset criterion needs frame-labelled truth before a third reader is built.
   The `lag` row stays ADVISORY; GATES.md is unchanged.
+- **A window clips a peak; it never removes one, and an exam's truth must not come from its ruler**
+  (skeptic 2026-10-21 on b5e9cff and exam v1). Delivered T19 read 0 f at corr 0.307 inside +-12 f,
+  while its peak, +16 f at 0.388, sat past the window; a mouth 12-30 f off read exactly +-12, measured,
+  on 26-53 % of synthetic tries. `mouth.lag` now looks +-`GUARD` (40) frames and says "cannot tell" for
+  a peak at or past +-12 (T19 A_s1 and A_s2 now cannot tell; T22 +8, T25 -1 unchanged; synthetic edge
+  reads 0 of 400). Exam v1's offsets (+12, +16) are `best_lag` of the soundtracks it then scores (a
+  reader that always says +14 passes v1), and its overlapping shifts hold 1-4 independent windows.
+  `measure/mouth_exam_v2.py` grades the lag on every LABELLED render (eye-marked open runs) at the
+  production window, counts only shifts 2W+1 apart, and cannot pass until the mouths are labelled.
+  Still open: a line of one long phrase hides a lag (line 25: 10 of 100 tries 12-30 f off read ok).
+  Never set WINDOW or CORR_FLOOR on the 17 exam renders. The `lag` row stays ADVISORY.
 
 ## The shot framework (2026-10-21, the panel's final ruling)
 

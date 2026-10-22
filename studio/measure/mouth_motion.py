@@ -2,9 +2,11 @@
 the line's phrases.
 
 FaceMesh reads a photographic face; on Jekyll ep01's cel faces it read 1-2 % of the medium
-shots and failed the exam (studio/measure/mouth_exam.py: 7 of 10 wrong-line, 0 of 2 known
-offsets).  face_yolov8m (the face refine's anime-trained detector, studio/face_detect.py) finds
-those faces from about 37 px, and studio/face_track.py links and smooths its boxes.  This reads:
+shots T03, T20, T23 (their delivered .dq.json; the 17 exam renders were picked readable, and it
+reads 66-100 % of their frames, tests/fixtures/mouth/exam_facemesh.json) and failed the exam
+(studio/measure/mouth_exam.py: 7 of 10 wrong-line, 0 of 2 known offsets).  face_yolov8m (the
+face refine's anime-trained detector, studio/face_detect.py) finds those faces from about 37 px,
+and studio/face_track.py links and smooths its boxes.  This reads:
 
 - the speaker = the face track with the most face (sum of its heights), its smoothed box;
 - per frame, that box as a 64 x 64 grey crop; the motion of the lower face (rows 0.55-0.85 of

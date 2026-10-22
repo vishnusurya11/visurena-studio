@@ -9,7 +9,8 @@ cross-correlation with the voice's per-frame envelope within +-WINDOW frames.
 
 The voice is z-scored ONCE (`voice_envelope`) and never passed through
 `av_sync.envelope` again: its `np.abs` folded the silences into bumps, and a
-mouth open on the words 5 f late read +19 f (GAVEL 2026-10-21, ruling 11).
+mouth open on the words 5 f late read +19 f (GAVEL 2026-10-21, ruling 11).  A peak at or past
+the window's edge (searched +-GUARD) is "cannot tell", never the clipped in-window number.
 
 Two owner-caught lagging takes against seven passes, unbenched: the row is
 ADVISORY, and its cure is the shorter take, never a seed.  A mouth the
@@ -32,6 +33,10 @@ LAG_TOL_FRAMES = 2
 WINDOW = 12
 """The lag search, frames each way (0.5 s), the GAVEL's +-8..12 f (2026-10-21):
 the unwindowed search read the folded peak +13 and +17 f out on T22 and T19."""
+GUARD = 40
+"""Frames each way the ruler LOOKS before it trusts a read inside +-WINDOW (skeptic 2026-10-21,
+finding 3): delivered T19 read 0 f at 0.307 in the window while its peak, +16 f at 0.388, sat past
+it; a peak at or past the window's edge is "cannot tell", never a clipped number."""
 READABLE = 0.5
 FITTED_ON = "two owner-caught lagging takes against seven passes, unbenched: advisory; the cure is the shorter take"
 MODEL = Path(__file__).resolve().parents[1] / "models" / "face_landmarker.task"
@@ -100,15 +105,30 @@ def best_lag(a: np.ndarray, b: np.ndarray, window: int = WINDOW) -> tuple[int, f
     return k, cs[k]
 
 
+def past_window(a: np.ndarray, b: np.ndarray, window: int = WINDOW, guard: int = GUARD):
+    """(frames, corr) of the +-guard peak when it lies at or past +-window; None when inside."""
+    k, corr = best_lag(a, b, guard)
+    return (k, corr) if abs(k) >= window else None
+
+
+def unmeasured(why: str, seen: float, **more) -> dict:
+    return {"measured": False, "why": why, "readable": seen, "window": WINDOW, "fitted_on": FITTED_ON} | more
+
+
 def lag(ap: np.ndarray, voice: np.ndarray, fps: int = FPS) -> dict:
-    """The mouth's lag in frames against the voice; positive when the mouth is late."""
+    """The mouth's lag in frames against the voice; positive when the mouth is late.  Cannot tell
+    with no readable face, no correlation, or a peak at or past the +-WINDOW search."""
     seen = readable(ap)
     if seen < READABLE:
-        return {"measured": False, "why": "no readable face", "readable": seen, "fitted_on": FITTED_ON}
-    frames, corr = best_lag(smooth(fill(ap)), voice)
+        return unmeasured("no readable face", seen)
+    mouth_track = smooth(fill(ap))
+    frames, corr = best_lag(mouth_track, voice)
     if corr < CORR_FLOOR:
-        return {"measured": False, "why": f"no correlation with the voice ({corr:.2f})", "corr": round(corr, 3),
-                "readable": seen, "window": WINDOW, "fitted_on": FITTED_ON}
+        return unmeasured(f"no correlation with the voice ({corr:.2f})", seen, corr=round(corr, 3))
+    far = past_window(mouth_track, voice)
+    if far:
+        return unmeasured(f"the peak lies at {far[0]:+d} f (corr {far[1]:.2f}), at or past the +-{WINDOW} f search",
+                          seen, peak_frames=far[0], corr=round(far[1], 3))
     return {"measured": True, "lag_frames": frames, "lag_s": round(frames / fps, 3), "corr": round(corr, 3),
             "readable": seen, "window": WINDOW, "fitted_on": FITTED_ON}
 
