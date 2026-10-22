@@ -10,10 +10,11 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 LITERAL = re.compile(r"""/\s*["']library["']|Path\(\s*["']library["']\s*\)""")
-SCANNED = ("studio", "scripts/episode", "scripts/publish", "scripts/proof", "scripts/refs")
+SCANNED = ("studio", "scripts/episode", "scripts/publish", "scripts/proof", "scripts/refs", "scripts/cast")
 """scripts/refs is on the episode path: step 01 runs cast_rows.py (book_dir from build_pack), step 03
 imports build_pack.  Unscanned, build_pack's `parents[2] / "library"` sent the first real rehearsal's
-ep02 bind to the real library ("no book matching '99991021000000'", 2026-10-21 17:45 PDT)."""
+ep02 bind to the real library ("no book matching '99991021000000'", 2026-10-21 17:45 PDT).
+scripts/cast is on it too: step 04 runs cast_voices.py for a speaker with no voice clip (S0b, F14)."""
 ALLOWED = {
     "studio/settings.py": "the one place a library root is chosen",
     "studio/brain.py": "_under_library DENIES a brain tool write under the repo's real library; it never "

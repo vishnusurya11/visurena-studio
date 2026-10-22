@@ -83,7 +83,8 @@ def test_the_record_step_casts_its_own_speakers_first(tmp_path):
 
 def test_the_voice_script_accepts_the_folder_name(tmp_path, monkeypatch):
     from scripts.cast import cast_voices
+    from studio import episode_home
     (tmp_path / "library" / f"{CODEX}_a-book").mkdir(parents=True)
-    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(episode_home, "LIBRARY", tmp_path / "library")
     assert cast_voices.book_dir(f"{CODEX}_a-book").name == f"{CODEX}_a-book"
     assert cast_voices.book_dir(CODEX).name == f"{CODEX}_a-book"

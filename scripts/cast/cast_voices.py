@@ -16,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import cast_home, voice_ear, voice_persona, voice_pitch, voice_register  # noqa: E402
+from studio import cast_home, episode_home, voice_ear, voice_persona, voice_pitch, voice_register  # noqa: E402
 from studio import voice  # noqa: E402
 
 PASSAGE = ("I have looked at this a long while, and I know now what it is. "
@@ -142,12 +142,12 @@ def gender_of(card: dict) -> str:
 
 def book_dir(codex_id: str) -> Path:
     """The library folder for a codex id, or for the folder's own name (a
-    runner hands the step the folder name; the ledger uses the 14-digit id)."""
-    stem = codex_id[:14] if len(codex_id) > 14 and codex_id[14] == "_" else codex_id
-    found = sorted(Path("library").glob(f"{stem}_*"))
-    if not found:
-        raise SystemExit(f"no book in library/ for codex id {codex_id}")
-    return found[0]
+    runner hands the step the folder name; the ledger uses the 14-digit id),
+    under episode_home's library: the sandbox's in a rehearsal (2026-10-21_ep02_proof 1.2)."""
+    try:
+        return episode_home.book_dir(codex_id)
+    except FileNotFoundError as gone:
+        raise SystemExit(f"no book in library/ for codex id {codex_id}: {gone}") from gone
 
 
 def world(book: Path) -> tuple[str, str]:
