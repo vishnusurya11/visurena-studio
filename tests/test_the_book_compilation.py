@@ -59,8 +59,8 @@ def test_the_concat_list_names_every_part_in_order(tmp_path):
 
 def test_the_title_calls_it_an_adaptation_never_the_complete_book():
     """Owner 2026-10-11: it is our adapted screenplay, not the complete book."""
-    title = bc.title("H. G. Wells: The War of the Worlds", 27)
-    assert title == "H. G. Wells: The War of the Worlds — Full Adaptation, All 27 Episodes"
+    title = bc.title("H. G. Wells: The War of the Worlds", 27, author="H. G. Wells")
+    assert title == "The War of the Worlds by H. G. Wells — Full Story Adaptation, All 27 Chapters"
     assert "Complete" not in title and len(title) <= yp.TITLE_MAX
 
 
@@ -116,9 +116,9 @@ def test_the_footer_names_the_books_own_author_and_says_adapted():
 
 
 def test_the_intro_counts_the_episodes_and_names_no_other_book():
-    text = bc.intro(book="A Study in Scarlet", episodes=14)
-    assert text.startswith("A Study in Scarlet, told from beginning to end as one film")
-    assert "in 14 episodes" in text and "Martian" not in text
+    text = bc.intro(book="A Study in Scarlet", author="Arthur Conan Doyle", episodes=14)
+    assert text.startswith("A Study in Scarlet by Arthur Conan Doyle, told from beginning to end as one film")
+    assert "in 14 chapters" in text and "Martian" not in text
 
 
 def test_the_book_video_opens_on_its_main_title_then_runs_title_first():

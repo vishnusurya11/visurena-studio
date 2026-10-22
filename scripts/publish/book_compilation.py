@@ -28,6 +28,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import book_compilation as bc  # noqa: E402
+from studio import book_playlist  # noqa: E402
 from studio import episode_home, youtube, youtube_publish as yp  # noqa: E402
 from studio.trailer_assemble import clip_seconds  # noqa: E402
 
@@ -179,9 +180,11 @@ def metadata(book: Path, parts: list, lead_s: float = 0.0) -> dict:
     series = first["title"].split(" — Ep")[0]
     name = source.get("display_title") or source["title"]
     lines = bc.chapter_lines([(n, t, s) for n, t, _, s in parts], lead_s=lead_s)
-    text = bc.description(lines, intro=bc.intro(book=name, episodes=len(parts)),
-                          footer=bc.footer(author=source["author"], book=name))
-    return {"title": bc.title(series, len(parts)), "description": text,
+    pid = book_playlist.recorded_id(book)
+    intro = bc.intro(book=name, author=source["author"], episodes=len(parts),
+                     playlist_url=book_playlist.playlist_url(pid) if pid else "")
+    text = bc.description(lines, intro=intro, footer=bc.footer(author=source["author"], book=name))
+    return {"title": bc.title(series, len(parts), author=source["author"]), "description": text,
             "tags": first.get("tags", []), "synthetic": True, "chapters": lines}
 
 

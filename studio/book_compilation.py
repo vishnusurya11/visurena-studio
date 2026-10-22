@@ -132,11 +132,27 @@ def title_first(chapters: list[tuple[Path, Path]]) -> list[Path]:
     return [p for title_video, main_video in chapters for p in (title_video, main_video)]
 
 
-def title(series: str, chapters: int) -> str:
-    """`<series> — Full Adaptation, All <n> Episodes`, inside YouTube's wall.
-    An ADAPTATION, never 'the complete book': the episodes are our abridged
-    screenplay of the novel, not its full text (owner, 2026-10-11)."""
-    return yp.elided(f"{series} — Full Adaptation, All {chapters} Episodes", yp.TITLE_MAX)
+ALL_ROOM = 90
+"""'All' is the one word the title can spare: past this many characters it goes first.
+Calibrated on the two titles live since 2026-10-21 -- Scarlet's would be 98 with it,
+WotW's is 77 with it."""
+
+
+def search_lead(series: str, author: str) -> str:
+    """The book's name as a viewer types it: `H. G. Wells: The War of the Worlds` ->
+    `The War of the Worlds` (the author follows anyway); a character lead stays."""
+    head, sep, rest = series.partition(": ")
+    return rest.strip() if sep and head.strip() == author.strip() else series.strip()
+
+
+def title(series: str, chapters: int, *, author: str) -> str:
+    """`<book> by <author> — Full Story Adaptation, All <n> Chapters`, the live shape
+    since 2026-10-21: the search term first.  An ADAPTATION, never 'the complete
+    book': our abridged screenplay of the novel, not its full text (owner, 2026-10-11)."""
+    head = f"{search_lead(series, author)} by {author} — Full Story Adaptation, "
+    whole = f"{head}All {chapters} Chapters"
+    said = whole if len(whole) <= ALL_ROOM else f"{head}{chapters} Chapters"
+    return yp.elided(said, yp.TITLE_MAX)
 
 
 def footer(*, author: str, book: str) -> str:
@@ -148,11 +164,15 @@ def footer(*, author: str, book: str) -> str:
             f"are {author}'s story, adapted; the performances are synthetic.")
 
 
-def intro(*, book: str, episodes: int) -> str:
-    """What the video is, in the book's own name; no other book's plot."""
-    return (f"{book}, told from beginning to end as one film: our screen adaptation of the novel, "
-            f"in {episodes} episodes, each one chapter of the book. "
-            "Use the chapters above to jump to any episode.")
+def intro(*, book: str, author: str, episodes: int, playlist_url: str = "") -> str:
+    """What the video is, in the book's own name; no other book's plot.  The book's
+    playlist is linked when one is recorded, and left out -- never a placeholder --
+    when none is."""
+    text = (f"{book} by {author}, told from beginning to end as one film: our dramatised screen "
+            f"adaptation of the novel in {episodes} chapters, each one also a Short. "
+            "Use the chapters above to jump to any part.")
+    link = f"\n\nEvery chapter as its own Short, in order: {playlist_url}"
+    return text + (link if playlist_url else "")
 
 
 # ---- the door: nothing uploads that a check can catch (retro, 2026-10-11) ----------
