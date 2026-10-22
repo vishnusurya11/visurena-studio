@@ -4,7 +4,9 @@ YouTube (`youtube_upload.send`, `youtube_privacy._build_api`, `youtube_auth.refr
 the REAL token_note, step 13's `urllib_get`) answers by the manifest's `youtube`:
   refuse         (default) every call raises PublishRefused: an upload in S0 fails it
   invalid_grant  the recorded ep19 RefreshError (2026-10-07 19:14Z) from the send, the API and the refresh
-  permit         a would_upload / would_flip row and an answer in the API's shape; nothing leaves
+  permit         a would_upload / would_flip row and an answer in the API's shape; nothing leaves;
+                 G-INORDER's snippet, playlist and item writes are would_set_snippet /
+                 would_make_playlist / would_add_item rows (growth review 2026-10-21)
 Each call is a <sandbox>/youtube.jsonl row.  The defaults bound at def time (step 13's run and
 poll_shorts, youtube_upload.main, token_note) are rebound with the module attributes.
 drive.notify and the autopilot's Deps.notify are captured to <sandbox>/notify.jsonl (the
@@ -12,6 +14,7 @@ sibling notify_bench.py is refused at launch by the fence besides).  engine_ops.
 kill_engine reach fake_comfy.restart() (package P3), imported when first called."""
 from __future__ import annotations
 
+import copy
 import importlib
 import itertools
 from pathlib import Path
@@ -56,23 +59,79 @@ def gate(manifest: Mapping, box: Path, call: str) -> None:
 
 
 class FakeYouTube:
-    """The videos() calls youtube_privacy makes, answered from what this rehearsal uploaded."""
+    """The calls step 13 makes -- youtube_privacy's flip (videos.list/update status) and
+    youtube_playlist's G-INORDER upkeep (videos snippet, playlists, playlistItems) --
+    answered from what this rehearsal uploaded and made; every write is a would_* row."""
 
-    def __init__(self, box: Path, status: dict):
-        self.box, self.status = box, status
+    def __init__(self, box: Path, held: dict, lists: dict):
+        self.box, self.held, self.lists = box, held, lists
 
-    def videos(self) -> "FakeYouTube":
-        return self
+    def videos(self) -> "_Videos":
+        return _Videos(self)
 
-    def list(self, part: str = "", id: str = "") -> "_Done":
-        found = self.status.get(id)
-        return _Done({"items": [{"id": id, "status": dict(found)}] if found else []})
+    def playlists(self) -> "_Playlists":
+        return _Playlists(self)
+
+    def playlistItems(self) -> "_Items":  # noqa: N802 - the client's own name
+        return _Items(self)
+
+    def log(self, event: str, **row) -> None:
+        fakes.log(self.box, "youtube", {"event": event, **row})
+
+
+class _Videos:
+    """videos.list answers only the parts asked; update REPLACES one part, as YouTube's does."""
+
+    def __init__(self, yt: FakeYouTube):
+        self.yt = yt
+
+    def list(self, part: str = "", id: str = "", **_) -> "_Done":  # noqa: A002 - the client's own name
+        found = self.yt.held.get(id)
+        parts = {p.strip(): copy.deepcopy(found[p.strip()]) for p in part.split(",") if found and p.strip() in found}
+        return _Done({"items": [{"id": id, **parts}] if found else []})
 
     def update(self, part: str = "", body: dict | None = None) -> "_Done":
-        body = body or {}
-        self.status[body.get("id", "")] = dict(body.get("status") or {})
-        fakes.log(self.box, "youtube", {"event": "would_flip", "video_id": body.get("id"), "status": body.get("status")})
-        return _Done({"id": body.get("id"), "status": dict(body.get("status") or {})})
+        body = copy.deepcopy(body or {})
+        self.yt.held.setdefault(body.get("id", ""), {})[part] = copy.deepcopy(body.get(part) or {})
+        self.yt.log("would_flip" if part == "status" else f"would_set_{part}", video_id=body.get("id"),
+                    **{part: body.get(part)})
+        return _Done(body)
+
+
+class _Playlists:
+    def __init__(self, yt: FakeYouTube):
+        self.yt = yt
+
+    def list(self, part: str = "", **_) -> "_Done":
+        return _Done({"items": [{"id": k, "snippet": {"title": v["title"], "description": v["description"]}}
+                                for k, v in self.yt.lists.items()]})
+
+    def insert(self, part: str = "", body: dict | None = None) -> "_Done":
+        pid, said = f"rehearsalPL{len(self.yt.lists) + 1:04d}", (body or {}).get("snippet") or {}
+        self.yt.lists[pid] = {"title": said.get("title", ""), "description": said.get("description", ""), "items": []}
+        self.yt.log("would_make_playlist", playlist_id=pid, body=body)
+        return _Done({"id": pid})
+
+
+class _Items:
+    """A playlist this rehearsal never made (a recorded id from the copied library) reads
+    empty and is held from its first insert; the real API would 404 the read."""
+
+    def __init__(self, yt: FakeYouTube):
+        self.yt = yt
+
+    def held(self, pid: str) -> list[str]:
+        return self.yt.lists.setdefault(pid, {"title": "", "description": "", "items": []})["items"]
+
+    def list(self, part: str = "", playlistId: str = "", **_) -> "_Done":  # noqa: N803
+        return _Done({"items": [{"contentDetails": {"videoId": v}} for v in self.held(playlistId)]})
+
+    def insert(self, part: str = "", body: dict | None = None) -> "_Done":
+        said = (body or {}).get("snippet") or {}
+        held, vid = self.held(said.get("playlistId", "")), said["resourceId"]["videoId"]
+        held.insert(said.get("position", len(held)), vid)
+        self.yt.log("would_add_item", playlist_id=said.get("playlistId"), video_id=vid, position=said.get("position"))
+        return _Done({"id": f"rehearsalitem{len(held):04d}"})
 
 
 class _Done:
@@ -86,21 +145,23 @@ class _Done:
 # ---- the fakes of one install --------------------------------------------------------------
 
 class Channel:
-    """One rehearsal's YouTube: send, build_api, get and refresh, sharing the statuses it uploaded."""
+    """One rehearsal's YouTube: send, build_api, get and refresh, sharing the videos it
+    uploaded (snippet + status, as the upload body said) and the playlists it made."""
 
     def __init__(self, manifest: Mapping, box: Path):
-        self.manifest, self.box, self.status, self.serial = manifest, box, {}, itertools.count(1)
+        self.manifest, self.box, self.serial = manifest, box, itertools.count(1)
+        self.held, self.lists = {}, {}
 
     def send(self, path, body: dict, creds) -> dict:
         gate(self.manifest, self.box, "send")
         video_id = f"rehearsal{next(self.serial):04d}"
-        self.status[video_id] = dict((body or {}).get("status") or {})
+        self.held[video_id] = {p: copy.deepcopy((body or {}).get(p) or {}) for p in ("snippet", "status")}
         fakes.log(self.box, "youtube", {"event": "would_upload", "video_id": video_id, "path": str(path), "body": body})
-        return {"id": video_id, "status": dict(self.status[video_id])}
+        return {"id": video_id, "status": dict(self.held[video_id]["status"])}
 
     def build_api(self) -> FakeYouTube:
         gate(self.manifest, self.box, "build_api")
-        return FakeYouTube(self.box, self.status)
+        return FakeYouTube(self.box, self.held, self.lists)
 
     def get(self, url: str) -> tuple[int, str]:
         gate(self.manifest, self.box, "urllib_get")
