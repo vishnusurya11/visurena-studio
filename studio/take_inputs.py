@@ -17,6 +17,7 @@ needs no GPU.  A stale name whose md5[:8] matches a file in its picture's own
 from __future__ import annotations
 
 import hashlib
+import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -39,6 +40,10 @@ class Inputs:
     reworded: bool = False
     """Rendered from other words than the card's now (Jekyll ep01 iter7 T06: the ranker kept the iter6
     render, made before the plan's cure, over the cured one)."""
+    compared: bool = False
+    """Both words were there to compare: the card's now and the take's recorded prompt.  A take
+    that was not compared is never counted as matching (wave 0 review: an absent prompts.json
+    printed "0 of 28 rendered from older words")."""
 
     def said(self) -> str:
         """`current`, or the reasons: unknown provenance, older words, stale names, missing names."""
@@ -91,9 +96,11 @@ def check(take: Path, pictures: list, built: str | None = None) -> Inputs:
     stale, missing = sorted(staged - want), sorted(want - staged)
     unknown = take_currency.provenance_unknown(take)
     old = superseded_by_digest(pictures) if stale else {}
+    compared = built is not None and take_currency.recorded_prompt(take) is not None
     return Inputs(current=not (unknown or stale or missing), staged=sorted(staged), stale=stale,
                   missing=missing, superseded=[n for n in stale if digest_of(n) in old],
-                  unknown_provenance=unknown, reworded=built is not None and reworded_from(take, built))
+                  unknown_provenance=unknown, reworded=compared and reworded_from(take, built),
+                  compared=compared)
 
 
 def reworded_from(take: Path, built: str) -> bool:
@@ -102,12 +109,12 @@ def reworded_from(take: Path, built: str) -> bool:
     return said is not None and said.strip() != (built or "").strip()
 
 
-def built_prompts(take_dir: Path) -> dict[int, str]:
-    """{take: the card's words now}, off the last build's `prompts.json`; {} when there is none."""
+def built_prompts(take_dir: Path) -> dict[int, str] | None:
+    """{take: the card's words now}, off the last build's `prompts.json`; None when step 06 wrote
+    none, so nothing is compared (never an empty build every take "matches")."""
     path = Path(take_dir) / "prompts.json"
     if not path.is_file():
-        return {}
-    import json
+        return None
     return {int(c["index"]): c.get("prompt") or "" for c in json.loads(path.read_text(encoding="utf-8"))}
 
 
@@ -115,6 +122,12 @@ def built_prompts(take_dir: Path) -> dict[int, str]:
 
 UNRECORDED = ("l16_dialogue_tail",)
 """HARD rules that read what a recorded prompt does not keep: the second each spoken line ends."""
+UNREAD = ("L7", "L9", "L10", "L11", "L12", "L16", "L17")
+"""HARD rules a re-lint of a recorded prompt cannot feed, so a take passes them by default: the
+segment pins (L7), the lead's limp (L9), the crowd's life (L10), the plate and strip pictures
+(L11), the speaker set (L12 reads it off the prompt's own lines), the line-end seconds (L16,
+skipped) and the line crossings (L17).  The P rules (`prompt_lint`) are not re-run either, so the
+HARD count is a floor and the line says so (wave 0 review, finding 8)."""
 SPOKEN = re.compile(r"<d>\[English\] (.*?)</d>", re.S)
 
 
@@ -134,32 +147,48 @@ def recorded_facts(said: str, night: bool = False, frames: int | None = None) ->
             "lines": [{"text": t} for t in SPOKEN.findall(said)]}
 
 
-def stale_words(take: Path, night: bool = False, frames: int | None = None) -> list[str]:
-    """Today's HARD lint faults on the words this take RENDERED from; none without a graph."""
+def record_facts(rec: dict) -> dict:
+    """The lint facts a take RECORD keeps beside its graph: its frames, fps and reference count."""
+    return {"frames": int(rec.get("frames") or 0) or None, "fps": rec.get("fps", 24),
+            "refs": len(rec.get("refs") or [])}
+
+
+def stale_words(take: Path, night: bool | None = False, frames: int | None = None,
+                extra: dict | None = None) -> list[str] | None:
+    """Today's HARD lint faults on the words this take RENDERED from; None without a recorded
+    prompt (not measured, never clean).  An unknown night (None) skips L28: it cannot be read."""
     from studio import episode_ref_official as ro
     said = take_currency.recorded_prompt(take)
     if said is None:
-        return []
-    facts = recorded_facts(said, night, frames)
-    return [f for rule in ro.RULES if rule.__name__ not in UNRECORDED for f in rule(said, facts)]
+        return None
+    facts = {**recorded_facts(said, bool(night), frames), **(extra or {})}
+    skip = UNRECORDED + (("l28_style_light",) if night is None else ())
+    return [f for rule in ro.RULES if rule.__name__ not in skip for f in rule(said, facts)]
 
 
-def words_line(reworded: int, failing: int, of: int) -> str:
-    """`words: 27 of 28 rendered from older words; 8 fail a current HARD rule (advisory under freeze)`."""
-    return (f"words: {reworded} of {of} rendered from older words; {failing} fail a current HARD rule "
-            f"(advisory under freeze)")
+def words_line(reworded: int, compared: int, failing: int, read: int, dark: int) -> str:
+    """`words: 27 of 28 rendered from older words; 8 of 28 fail a current HARD rule, at least
+    (L7 ... unread) (advisory under freeze)`; an input it did not have is "not measured"."""
+    head = (f"{reworded} of {compared} rendered from older words" if compared
+            else "older words not measured (no prompts.json from step 06)")
+    unread = list(UNREAD) + ([f"L28 unread on {dark} takes"] if dark else [])
+    hard = (f"{failing} of {read} fail a current HARD rule, at least ({' '.join(unread)} unread)" if read
+            else "HARD rules not measured (no take recorded its prompt)")
+    return f"words: {head}; {hard} (advisory under freeze)"
 
 
 def words(audited: dict[int, Inputs], records: list[dict], book: Path, night: dict[int, bool]) -> dict:
     """The QC provenance block: which audited takes rendered from older words, and which recorded
     prompts fail a HARD rule today.  It never refuses and never re-renders: the owner sees the count."""
     rows = {int(r["index"]): r for r in records}
-    fail = {f"T{i:02d}": bad for i in sorted(audited)
-            if (bad := stale_words(Path(book) / rows[i]["rel_path"], night.get(i, False),
-                                   int(rows[i].get("frames") or 0) or None))}
+    found = {i: stale_words(Path(book) / rows[i]["rel_path"], night.get(i), record_facts(rows[i])["frames"],
+                            record_facts(rows[i])) for i in sorted(audited)}
+    fail = {f"T{i:02d}": bad for i, bad in found.items() if bad}
+    read = [i for i, bad in found.items() if bad is not None]
     reworded = [f"T{i:02d}" for i, v in sorted(audited.items()) if v.reworded]
-    return {"of": len(audited), "reworded": reworded, "fail": fail,
-            "line": words_line(len(reworded), len(fail), len(audited))}
+    compared = sum(v.compared for v in audited.values())
+    return {"of": len(audited), "compared": compared, "reworded": reworded, "fail": fail, "read": len(read),
+            "line": words_line(len(reworded), compared, len(fail), len(read), sum(i not in night for i in read))}
 
 
 def card_pictures(rec: dict, book: Path, number: int) -> list[Path]:

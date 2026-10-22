@@ -372,9 +372,33 @@ def words_rows(i: SimpleNamespace, report: dict, audited: dict) -> dict:
     reads the pictures alone, and nothing re-renders (advisory under freeze)."""
     from studio import take_inputs
     setups = getattr(getattr(i, "episode", None), "setups", None) or {}
-    night = {int(r["index"]): take_inputs.night_of(setups[r["setup"]]) for r in i.records
-             if r.get("setup") in setups}
-    report["inputs"]["words"] = take_inputs.words(audited, i.records, i.book, night)
+    try:
+        night = {int(r["index"]): take_inputs.night_of(setups[r["setup"]]) for r in i.records
+                 if r.get("setup") in setups}
+        report["inputs"]["words"] = take_inputs.words(audited, i.records, i.book, night)
+    except Exception as why:          # a report row never fails step 11 (wave 0 review, finding 5)
+        report["inputs"]["words"] = {"line": f"words: not measured ({why!r})"}
+    return report
+
+
+def voice_floor(rows: list[dict] | None) -> dict:
+    """Lines that shipped with their similarity floor dropped to 0.0 (ruling T18: Jekyll ep01 l11
+    passed at 0.325 against a floor set to 0.0, and no report said so).  Report only."""
+    if rows is None:
+        return {"dropped": {}, "line": "voice floor: not measured (no lines.json)"}
+    dropped = {f"l{int(r['index']):02d}": r.get("similarity") for r in rows
+               if r.get("passed") and r.get("floor") is not None and float(r["floor"]) == 0.0}
+    named = ", ".join(f"{k} {v}" for k, v in dropped.items())
+    return {"dropped": dropped, "line": f"voice floor: {len(dropped)} of {len(rows)} lines shipped with the "
+                                        f"similarity floor at 0.0" + (f" ({named})" if named else "")}
+
+
+def voice_floor_rows(i: SimpleNamespace, report: dict) -> dict:
+    """The voice-floor block off the episode's lines.json, inside the inputs block; never in the verdict."""
+    path = episode_home.lines_dir(i.book, i.number) / "lines.json"
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else None
+    report.setdefault("inputs", {})["voice_floor"] = voice_floor(doc["lines"] if isinstance(doc, dict) and "lines" in doc
+                                                                 else doc)
     return report
 
 
@@ -543,7 +567,7 @@ def with_lines(report: dict, hear, spent: bool = False) -> dict:
 def measure(book_id: str, number: int, engine: str, listen, spent: bool = False) -> dict:
     """The whole report: the cheap rows, then (if they pass) every line heard."""
     i = load_inputs(book_id, number, engine)
-    report = inputs_rows(i, edit_rows(i, head_rows(i)))
+    report = voice_floor_rows(i, inputs_rows(i, edit_rows(i, head_rows(i))))
     report = with_lines(report, lambda: heard_on_master(i.master, i.lines, i.work, listen), spent)
     report["passed"] = verdict(report)
     return report
@@ -593,6 +617,8 @@ def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) ->
     print(report["inputs"]["line"])
     if words := report["inputs"].get("words"):
         print(words["line"])
+    if floor := report["inputs"].get("voice_floor"):
+        print(floor["line"])
     for take, row in report["inputs"]["stale"].items():
         print(f"  {take}: stale {row['stale']} superseded {row['superseded']} missing {row['missing']}")
     for sheet in report["sheets"]:
