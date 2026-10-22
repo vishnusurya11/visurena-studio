@@ -25,6 +25,7 @@ import argparse
 import importlib.util
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -60,6 +61,10 @@ COMMANDS = ("memos", "checkpoints", "all")
 """The steps beside the scenarios, in the order they run."""
 MEMO_KINDS = {"detect": ("take", "refine_crop"), "whisper": ("tts_line",)}
 """Which recorded files each memo is filled from (the anime asks are made at run time: a miss there is canned)."""
+EP01_PLAN = ROOT / "tests" / "fixtures" / "proof" / "sdk_streams" / "jekyll_ep01_plan.json"
+"""ep01's delivered plan (the library's, same content): the episode writer's `substituted` answer."""
+WRITER_PLAN = "writer_plan.json"
+"""The sandbox copy of the writer's target plan, renumbered to the scenario's episode."""
 
 
 @dataclass(frozen=True)
@@ -82,7 +87,8 @@ def take(sid: str, kind: str, why: str, detail: str | None = None) -> Scenario:
 TABLE: dict[str, Scenario] = {s.id: s for s in (
     Scenario("smoke", 2, "after_12", 1, needs=(), fault={"kind": "tear", "record": ".autopilot/heartbeat.json"},
              why="one checkpoint, one take, one fault: the supervisor's torn heartbeat read by the real tick"),
-    Scenario("S0a", 1, "fresh", 60, fault={"kind": "none", "checkpoints": True}, why="ep01 replayed fresh"),
+    Scenario("S0a", 1, "fresh", 60, fault={"kind": "none", "checkpoints": True, "writer_plan": "ep01"},
+             why="ep01 replayed fresh, the writer answered from ep01's own plan"),
     Scenario("S0b", 2, "fresh", 60, needs=(*REAL, "writer"), fault={"kind": "none"}, why="ep02 on SR-2's plan"),
     take("F1", "crash", "engine crash mid-09"), take("F1b", "lost", "engine never returns"),
     take("F9", "hang", "ComfyUI hang"), take("F10", "exec_error", "transient exec error"),
@@ -231,6 +237,24 @@ def launch_supervisor(box: Path, sc: Scenario, cleared: bool, every: float, wall
             "error": (done.stderr or done.stdout)[-800:], "spent": [], "drives_alive": []}
 
 
+def writer_plan(box: Path, sc: Scenario) -> Path | None:
+    """The scenario's writer target (`writer_plan: ep01`) copied into the sandbox with its number set
+    to the scenario's episode (F5: ep01's plan renumbered); None when the scenario names none."""
+    if sc.fault.get("writer_plan") != "ep01":
+        return None
+    doc = {**json.loads(EP01_PLAN.read_text(encoding="utf-8")), "number": sc.episode}
+    path = Path(box) / WRITER_PLAN
+    path.write_text(json.dumps(doc, indent=1, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+def point_manifest(box: Path, sc: Scenario) -> dict:
+    """A point's manifest fields before its fault: no fault, its bound, its checkpoints, its writer."""
+    plan = writer_plan(box, sc)
+    return {**faults.CLEAN, "bound": sc.bound, "checkpoints": bool(sc.fault.get("checkpoints")),
+            "writer_plan": str(plan) if plan else None}
+
+
 def clear_run(box: Path) -> None:
     """A point's own traces, writes and logs start empty (they are not in a checkpoint)."""
     for name in (trace.TRACES, trace.WRITES):
@@ -373,11 +397,15 @@ def fault_moment(engine_rows: list[Mapping]) -> tuple[float, int | None]:
     return at, asserts.take_index(hit)
 
 
+STEP_RAN = re.compile(r"^--- step (\d{2}) \([^)]*\) \|", re.MULTILINE)
+"""The runner's line for a step it STARTED (`--- step 02 (plan) | <label> ---`); a skipped step's
+`--- step 01 (bind) skipped: output exists` writes no timing row and is not one."""
+
+
 def steps_since(home: Path, since: float) -> list[str]:
-    """Steps whose `--- step NN` line a drive run logged after `since` (the steps that ran)."""
-    from studio.rehearsal import supervisor
+    """Steps whose started line a drive run logged after `since` (the steps that ran)."""
     logs = [p for p in Path(home).glob("drive_run*.log") if p.stat().st_mtime >= since]
-    return sorted({s for p in logs for s in supervisor.STEP_LINE.findall(p.read_text(encoding="utf-8", errors="replace"))})
+    return sorted({s for p in logs for s in STEP_RAN.findall(p.read_text(encoding="utf-8", errors="replace"))})
 
 
 def shape_of(engine_rows: list[Mapping]) -> str:
@@ -389,7 +417,7 @@ def run_point(box: Path, book: Path, sc: Scenario, point: sweep.Point, cleared: 
     if sc.checkpoint != "fresh":
         sandbox.restore(box, sc.checkpoint)
     clear_run(box)
-    set_manifest(box, {**faults.CLEAN, "bound": sc.bound, "checkpoints": bool(sc.fault.get("checkpoints"))})
+    set_manifest(box, point_manifest(box, sc))
     planted, before, began = plant(box, book, sc, point), asserts.jsonl(book / "uploads.jsonl"), time.monotonic()
     saved = len(asserts.jsonl(asserts.home_of(book, sc.episode) / PHASES))
     sup = launch_supervisor(box, sc, cleared, every, wall)
@@ -419,7 +447,7 @@ def baseline(box: Path, book: Path, sc: Scenario, cleared: bool, every: float, w
     if sc.checkpoint != "fresh":
         sandbox.restore(box, sc.checkpoint)
     clear_run(box)
-    set_manifest(box, {**faults.CLEAN, "bound": sc.bound, "record_writes": True, "checkpoints": False})
+    set_manifest(box, {**point_manifest(box, sc), "record_writes": True, "checkpoints": False})
     began = time.monotonic()
     launch_supervisor(box, sc, cleared, every, wall)
     set_manifest(box, {"record_writes": False})
@@ -589,6 +617,10 @@ def checkpoint_box(n: int, name: str, base: Path | None = None) -> Path | None:
     return next((b for b in boxes if (b / "checkpoints" / name).is_dir()), None)
 
 
+FIXTURE_TESTS = {"smoke": "tests/test_proof_scenario_smoke.py"}
+"""A fixture scenario's sandbox is built by its test (the stand-in book), never by the CLI."""
+
+
 def prepare(sid: str, sc: Scenario, box: Path | None, run_id: str | None) -> tuple[Path | None, Path | None, str | None]:
     """(sandbox, book, why it cannot run): a staged fixture, a fresh sandbox of the real book (S0a
     names it for its checkpoints), or the S0a sandbox holding the scenario's checkpoint."""
@@ -598,6 +630,9 @@ def prepare(sid: str, sc: Scenario, box: Path | None, run_id: str | None) -> tup
         set_manifest(box, {"comfy_host": f"http://127.0.0.1:{free_port()}"})
         sandbox.checkpoint(box, sc.checkpoint)
         return box, book, None
+    if (fixture / "book").is_dir():
+        return None, None, (f"a fixture scenario: its sandbox is built by its test, run "
+                            f"`uv run --no-sync python -m pytest {FIXTURE_TESTS.get(sid, 'tests/')}`")
     if sc.checkpoint == "fresh":
         name = CHECKPOINT_RUN.format(n=sc.episode) if sid == "S0a" else sid
         box = real_box(run_id or f"{name}_{uuid.uuid4().hex[:8]}", sc)
@@ -726,7 +761,7 @@ def main(argv: list[str]) -> int:
         print(json.dumps(fill_step(), default=str))
         return 0
     sid = "S0a" if args.scenario == "checkpoints" else args.scenario
-    ids = [k for k in TABLE if k != "smoke"] if sid == "all" else [sid]
+    ids = [k for k in TABLE if k not in ("smoke", "S0a")] if sid == "all" else [sid]   # S0a is `checkpoints`
     for one in ids:
         out = run_scenario(one, Path(args.results), run_id=args.run_id, every=5.0, wall=args.wall,
                            budget_s=args.budget_hours * 3600.0)
