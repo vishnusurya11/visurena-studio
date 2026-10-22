@@ -12,7 +12,7 @@ missing input, or an unread picture.
 
 | gate | measures | kind |
 |---|---|---|
-| CONTRACT | `episode_spec` validation: lengths, voices (at most 4), dialogue 5-20%, negations, "slow", driven lips at close/medium close, beat before the button | HARD |
+| CONTRACT | `episode_spec` validation: lengths, voices (at most 4), dialogue 5-20%, negations, "slow", driven lips at close/medium close, beat before the button, no gap mark in a line (A6, cured free) | HARD |
 | G-LIGHT | every setup names a light source with a direction; no overhead sun outdoors | HARD |
 | G-SIZE | a close or medium close names its head fraction | HARD |
 | G-SCALE | a shot that is not a wide never carries its setup's wide geometry | HARD |

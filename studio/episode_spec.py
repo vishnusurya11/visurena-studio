@@ -214,6 +214,16 @@ class Line(BaseModel):
         return self
 
     @model_validator(mode="after")
+    def _no_gap_mark(self) -> "Line":
+        # craft ruling A6: the screenplay cut a tag out of a quote and left its gap mark ("If he
+        # be Mr. Hyde, … I shall be Mr. Seek."); TTS reads it as a pause the book never had.
+        # The book's own ASCII "..." is not this mark.  Free cure: plan_cures.strip_gap_marks.
+        if GAP_MARK in self.text:
+            raise ValueError(f"line {self.index} carries a gap mark ({GAP_MARK}); a cut in a quote is not "
+                             f"spoken -- say the line whole")
+        return self
+
+    @model_validator(mode="after")
     def _short_enough_to_land(self) -> "Line":
         if self.words() > MAX_WORDS:
             raise ValueError(f"line {self.index} is {self.words()} words; the wall is {MAX_WORDS}")
@@ -223,6 +233,8 @@ class Line(BaseModel):
         return self
 
 
+GAP_MARK = "…"
+"""The screenplay's elision mark (A6): never spoken."""
 MIN_SUB = 2.5
 BANNED_PROPS = ("glove",)
 """Words no frame or motion may carry: the drawer draws what the text says,

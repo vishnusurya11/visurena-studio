@@ -1751,6 +1751,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-MOVES|G-STILL|G-AIM|G-ANCHOR|\bM2 shot \d+:"), "rebalance_heads"),
     (re.compile(r"G-SOURCE shot \d+: span .* is not in the chapter"), "source_spans"),
     (re.compile(r"QUOTE\s+: \["), "quote_trim"),
+    (re.compile(r"carries a gap mark"), "strip_gap_marks"),      # A6: the CONTRACT row
     # The stage families sit ABOVE the legal_props catch-all: its bare 'prop '
     # alternative would otherwise swallow them into a no-op cure.
     (re.compile(r"G-STAGE setup \S+: bare creature word"), "strip_creatures"),
@@ -1880,6 +1881,20 @@ def body_clause(doc: dict) -> dict:
         cell = " ".join(str(s.get(k) or "") for k in ("frame", "at_rest", "motion"))
         if plan_gates.limb_hit(s.get("size") or "", cell):
             s["at_rest"] = (s.get("at_rest") or "").rstrip() + BODY_CLAUSE
+    return doc
+
+
+GAP = re.compile(r"\s*\u2026+\s*")
+
+
+def strip_gap_marks(doc: dict) -> dict:
+    """A6's free cure: every gap mark leaves the spoken text, which still ends on a stop
+    ("If he be Mr. Hyde, \u2026 I shall be Mr. Seek." -> "If he be Mr. Hyde, I shall be Mr. Seek.")."""
+    for line in doc.get("lines") or []:
+        text = str(line.get("text") or "")
+        if "\u2026" in text:
+            text = GAP.sub(" ", text).strip()
+            line["text"] = text if not text or text[-1] in ".!?" else text + "."
     return doc
 
 

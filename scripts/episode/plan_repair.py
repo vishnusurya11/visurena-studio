@@ -311,6 +311,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc = pc.clear_orphan_crowds(doc)
         elif name == "clamp_beds":
             doc = pc.clamp_beds(doc)
+        elif name == "strip_gap_marks":                # craft ruling A6: a CONTRACT row, cured free
+            doc = pc.strip_gap_marks(doc)
         elif name == "strip_amounts":                  # the anime-TV grammar (2026-10-17)
             doc = pc.strip_amounts(doc)
         elif name in ("hold_extra_pushes", "ots_medium_close", "lock_two_shot"):
