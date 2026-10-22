@@ -12,7 +12,7 @@ missing input, or an unread picture.
 
 | gate | measures | kind |
 |---|---|---|
-| CONTRACT | `episode_spec` validation: lengths, voices (at most 4), dialogue 5-20%, negations, "slow", driven lips at close/medium close, beat before the button, no gap mark in a line (A6, cured free) | HARD |
+| CONTRACT | `episode_spec` validation: lengths, voices (at most 4), dialogue 5-20%, negations, "slow", driven lips at close/medium close, beat before the button, no gap mark (A6, cured) | HARD |
 | G-LIGHT | every setup names a light source with a direction; no overhead sun outdoors | HARD |
 | G-SIZE | a close or medium close names its head fraction | HARD |
 | G-SCALE | a shot that is not a wide never carries its setup's wide geometry | HARD |
@@ -78,8 +78,8 @@ a legacy plan. Calibration replay: `LESSONS_ARCHIVE.md`, "Grammar calibration".
 | G-REACT | after each exchange of 2+ speakers, a silent face (or one inner line) | 17; 3 | HARD |
 | G-MA | >= 3 shots holding beat + coda >= 1.2 s | 12; 3 | HARD |
 | G-INNER | an inner line over its speaker's own face; the "owner has not heard it" note | -- | HARD / advisory note |
-| G-TEASE, G-MOTIF | given NEXT CHAPTER rows, the tease loops to the hook and names its image, else "not asked" (A13); a grammar plan names its motif | -- | advisory |
-| CRAFT SHADOW (craft A8-A12) | G-MUTE (a speech verb on a readable face with no dialogue line; cure `mute_listens` waits); G-STOLEN (narration with >= 3 content bigrams of one cast quote); ORPHAN-REPLY, PARAGRAPH-HOLE (`screenplay_checks`); G-REVEAL (a face lift before `series_map.json` allows) | `screenplay_replay.py` | advisory, never counted |
+| G-TEASE, G-MOTIF | the tease (NEXT CHAPTER rows only, A13) loops to the hook's place and names its image; a grammar plan names its motif | -- | advisory |
+| CRAFT SHADOW (A8-A12) | G-MUTE, G-STOLEN, ORPHAN-REPLY, PARAGRAPH-HOLE, G-REVEAL: LESSONS_ARCHIVE "Instruments first" | `screenplay_replay.py` | advisory, uncounted |
 | G-DIAL ceiling (every plan) | dialogue <= the chapter's speech + 0.08, inside 0.20-0.35 (`dial_ceiling`) | never lower than the old 0.20 | HARD |
 
 Also: G-MOVES on a grammar plan leaves locked and over-the-shoulder shots out of the share and the
