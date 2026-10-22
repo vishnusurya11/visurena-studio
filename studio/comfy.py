@@ -418,6 +418,7 @@ def wait_record(prompt_id: str, timeout: float = 3600.0, poll: float = 0.5) -> d
         if record is not None:
             settled(prompt_id, record)
             if record.get("status", {}).get("completed"):
+                changed_over(record)                     # A27: the first job after a free closes its load row
                 return record
         time.sleep(poll)
     raise StillRunning(prompt_id, timeout)
@@ -511,15 +512,42 @@ LAST_FAMILY: str | None = None
 def free_on_family(family: str) -> bool:
     """Free the engine's models when the GPU family changes (krea -> vl -> h3);
     True when it freed.  Best effort, never raises; a blank family changes nothing."""
-    global LAST_FAMILY
+    global LAST_FAMILY, CHANGEOVER
     if not family or family == LAST_FAMILY:
         return False
+    CHANGEOVER = {"model": family, "why": f"{LAST_FAMILY or 'nothing'} -> {family}", "began": time.monotonic()}
     LAST_FAMILY = family                 # the first call frees too: another process may have staged models
     try:
         free_models()
     except Exception:
         return False
     return True
+
+
+CHANGEOVERS: Path | None = settings.library_root() / "changeovers.jsonl"
+"""One row per model load (craft ruling A27): the family the engine changed to, why, and the seconds from the
+free to the first job done on it (load and that job; `node_s` is the engine's own window).  None logs nothing."""
+CHANGEOVER: dict | None = None
+"""The changeover the first job on the new family has not closed yet."""
+
+
+def changed_over(record: dict) -> None:
+    """Close the open changeover with its row on the first completed job; a later job is no load.  A ledger
+    that cannot be written never fails the job."""
+    global CHANGEOVER
+    if CHANGEOVER is None or CHANGEOVERS is None:
+        return
+    from studio import take_phases
+    t0, t1 = take_phases.window(record)
+    row = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "model": CHANGEOVER["model"], "why": CHANGEOVER["why"],
+           "seconds": round(time.monotonic() - CHANGEOVER["began"], 2),
+           "node_s": round(t1 - t0, 2) if t0 and t1 else None}
+    CHANGEOVER = None
+    try:
+        with open(CHANGEOVERS, "a", encoding="utf-8") as out:
+            out.write(json.dumps(row) + "\n")
+    except OSError:
+        pass
 
 
 ROW_DEADLINE: float | None = None
