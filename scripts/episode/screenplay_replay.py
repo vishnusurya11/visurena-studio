@@ -207,11 +207,21 @@ def prompt_lines(plan: dict) -> list[int]:
             and b["kind"] in NODE_KINDS and b["speaker"] not in (a["speaker"], "narrator")]
 
 
+SPEECH = re.compile("[“\"]([^“”\"]+)[”\"]")
+
+
+def says_speech(plan: dict, paragraph: str) -> bool:
+    """A line or a span of the plan shares a 4-word run with the paragraph's quoted words: dropping a
+    paragraph whose speech the plan never said makes no hole, so it is no mutant (WotW ep25's five)."""
+    said = set().union(*[runs(t) for t in [l["text"] for l in plan.get("lines") or []] + spans(plan)])
+    return bool(runs(" ".join(SPEECH.findall(paragraph))) & said)
+
+
 def dialogue_paragraphs(plan: dict, paragraphs: list[str]) -> list[int]:
-    """Paragraphs the plan's spans reach that hold a quote and 40 words or more."""
+    """Paragraphs the plan's spans reach that hold a quote, 40 words or more, and speech the plan says."""
     reached = {span_paragraph(s, paragraphs) for s in spans(plan)} - {None}
     return sorted(j for j in reached if len(paragraphs[j].split()) >= HOLE_WORDS
-                  and re.search("[“\"]", paragraphs[j]))
+                  and SPEECH.search(paragraphs[j]) and says_speech(plan, paragraphs[j]))
 
 
 def stealable(plan: dict, paragraphs: list[str]) -> list[int]:
