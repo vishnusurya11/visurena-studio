@@ -1399,6 +1399,26 @@ fixes. Each lesson below cost at least one launch. Tracker rows A38-A74 in
   the weather, a slowed or still take, or no detector. A missing measurement never moves or drops a sound, and QC
   listens where the cue was laid.
 
+- **Fleet group A, audio (2026-10-22).** The four lessons below came from the audio bench and its skeptic
+  (docs/audit/2026-10-22_fleet/A_Audio/).
+- **Every toned bed is listened to.** The production bed is `toned_bed` -> `one_tone`, and it re-rolled
+  only an empty or short tone; `bed_gate` ran only in the old single `bed()`. `tone_sings` now runs
+  `bed_gate.refuse` on each tone: a sung tone is kept as `bed_<tone>.sings<roll>.wav` (which `bed_seed`
+  counts), re-rolled under `BED_ROLLS`, and the assemble stops if every roll sings; no ear reachable
+  is UNVERIFIED and printed, never silence. Bench B1: ACE-Step 1.5 tones refused 0/8, YuE2 native
+  no-ABC 1/10. `--bed=yue2` still routes to olmpack cot=full (the variant that sang most): an engine
+  choice for the owner, not a fix.
+- **No non-commercial or territory-limited weights in the shipped chain without the owner and his
+  attorney.** YuE2 and MERT2 are CC BY-NC 4.0, Fish S2 is the Fish Audio Research License (commercial
+  use needs a separate licence), HunyuanVideo-Foley excludes the EU, UK and South Korea, MMAudio is
+  CC BY-NC per the fleet reports (not on disk, not read). Shipped today: ACE-Step 1.5 (MIT), Stable Audio 3 (Stability AI Community
+  License, $1M revenue line, attribution clause), IndexTTS 2.5 (bilibili). Card:
+  docs/audit/2026-10-22_fleet/A_Audio/LICENCES.md. Facts only, never legal advice.
+- **No audio pass rule may use mouth lag.** That ruler failed its exam (2026-10-21_lipsync_audio_ref).
+- **The duck is built dynamic but has never engaged.** Depth = clamp(bed peak + 24, 4, 18) dB; on the
+  shipped Jekyll ep01 bed peaks run -39.6 to -20.2 LUFS, so all 22 lines duck exactly 4.0 dB. Dormant,
+  no measured need: do not "wire a dynamic duck", and do not call the shipped duck dynamic.
+
 ## The take model follows the planned size (2026-10-18, main session on measured evidence)
 
 - **The sharper model boils where the face is small.** The owner picked Wuli 8-step HQ int8 (V4) for its faces:
@@ -2569,23 +2589,3 @@ build byte for byte), never the recorded words.
   (fix/calibrate4.py -> reviewed.json, RESULT.md).
 
 - **Moved here from SKILL.md (read budget, 2026-10-22):** the autopilot PARKS with a reason — a row in `parked.jsonl` and one Telegram — never a wait on a person. SKILL.md now says "(a parked.jsonl row)" and names WAIT_QUOTA, the shut-usage-window wait (decision 2026-10-22_agent_task_runner).
-
-## Audio (fleet group A, 2026-10-22)
-
-- **Every toned bed is listened to.** The production bed is `toned_bed` -> `one_tone`, and it re-rolled
-  only an empty or short tone; `bed_gate` ran only in the old single `bed()`. `tone_sings` now runs
-  `bed_gate.refuse` on each tone: a sung tone is kept as `bed_<tone>.sings<roll>.wav` (which `bed_seed`
-  counts), re-rolled under `BED_ROLLS`, and the assemble stops if every roll sings; no ear reachable
-  is UNVERIFIED and printed, never silence. Bench B1: ACE-Step 1.5 tones refused 0/8, YuE2 native
-  no-ABC 1/10. `--bed=yue2` still routes to olmpack cot=full (the variant that sang most): an engine
-  choice for the owner, not a fix.
-- **No non-commercial or territory-limited weights in the shipped chain without the owner and his
-  attorney.** YuE2 and MERT2 are CC BY-NC 4.0, Fish S2 is the Fish Audio Research License (commercial
-  use needs a separate licence), HunyuanVideo-Foley excludes the EU, UK and South Korea, MMAudio is
-  CC BY-NC per the fleet reports (not on disk, not read). Shipped today: ACE-Step 1.5 (MIT), Stable Audio 3 (Stability AI Community
-  License, $1M revenue line, attribution clause), IndexTTS 2.5 (bilibili). Card:
-  docs/audit/2026-10-22_fleet/A_Audio/LICENCES.md. Facts only, never legal advice.
-- **No audio pass rule may use mouth lag.** That ruler failed its exam (2026-10-21_lipsync_audio_ref).
-- **The duck is built dynamic but has never engaged.** Depth = clamp(bed peak + 24, 4, 18) dB; on the
-  shipped Jekyll ep01 bed peaks run -39.6 to -20.2 LUFS, so all 22 lines duck exactly 4.0 dB. Dormant,
-  no measured need: do not "wire a dynamic duck", and do not call the shipped duck dynamic.
