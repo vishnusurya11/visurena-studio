@@ -58,6 +58,17 @@ LEGAL = {
 """Catalog order per size.  tilt_down/crane_down/rack_focus are the IGNORED set
 (G-STILL), handheld and orbit are untested / one-per-episode: never offered."""
 
+NOT_A_CURE = frozenset({"push_slow"})
+"""Legal for a size, never written by a cure (shot framework ruling 1, 2026-10-21): a push un-froze 8 of 8
+benched holds and cut a head or hat on 4 of them.  The writer may still push on a realisation (G-PUSH)."""
+
+
+def cure_moves(size: str, dialogue: bool = False) -> list[str]:
+    """The moves a cure may write for this size, in catalog order: LEGAL less NOT_A_CURE."""
+    legal = ["locked"] if dialogue else LEGAL.get(size or "", ["locked"])
+    return [m for m in legal if m not in NOT_A_CURE]
+
+
 AMOUNT_LADDER = [("a hand's breadth", 1.0), ("a forearm", 2.5), ("a head's height", 3.0),
                  ("a short stride", 5.0), ("a stride", 10.0), ("two strides", 20.0)]
 """The rungs a cure may write, in `plan_gates.AMPLITUDE`'s own words and units."""
@@ -230,7 +241,7 @@ def candidates(shot: dict, counts: Counter, prev_id: str, next_id: str,
                setup: dict | None, seconds: float, dialogue: bool = False) -> list[str]:
     """Every size-legal head the gates accept, least-used move first.  A
     dialogue shot only ever goes locked (the catalog: locked carries dialogue best)."""
-    legal = ["locked"] if dialogue else LEGAL.get(shot.get("size") or "", ["locked"])
+    legal = cure_moves(shot.get("size") or "", dialogue)
     sns = setup_ns(setup)
     travel = amount_for(plan_gates.cap_for(probe(shot), sns)[0], seconds)
     heads = [render_head(m, aims_for(m, shot, setup), travel)

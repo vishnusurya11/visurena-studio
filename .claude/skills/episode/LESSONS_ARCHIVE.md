@@ -1615,6 +1615,16 @@ Replays: C1 ep25 regrid 2/2 PASS, ep25 round 0 0/1 FAIL, ep27 study_table 3/3 PA
   WotW ep19-27 face takes and 37 of 97 Scarlet ep08-14 (STRANGER on stylised, turned or small
   faces; walk-ons) and 2 of 10 Jekyll HEL v1.
 
+### Grammar calibration and the critic's count (moved from GATES.md, 2026-10-21)
+
+Calibrated by replaying 41 plans (`scripts/episode/grammar_replay.py`; WotW ep01-27,
+Scarlet ep01-14, Jekyll ep01): the mechanical walls fire on none of the owner-approved WotW ep01-03 /
+Scarlet ep05, ep07; the grammar-definitional ones fire on almost every legacy plan, and those fires are
+the old grammar the owner replaced. Jekyll ep01 `plan_v3.json`: 0 rows, VERDICT clean.
+
+- **The critic's count** (`judges/plan.declared_count`): any `extras=N` (N >= 1) on a shot whose
+  setup stages a crowd is declared (G-CROWD asks >= 1; ep01 shots 1 and 18 were called invented).
+
 ### Downstream replay (moved from GATES.md's 2026-10-19 additions, 2026-10-21)
 
 - **Downstream replay** (advisory, $0, read-only): `scripts/episode/downstream_replay.py <codex>
@@ -2414,3 +2424,24 @@ build byte for byte), never the recorded words.
   tilted "from the man to the cobbles").
 - HELD for bench R2-3: D-c (the action said twice) and the D-d count. B2's camera nearly held
   (+14/+17 px against +38.5) when the verb was said once.
+
+**The framework rows (Phase B).** Only what the gavel adopted on measured evidence; bench-first items wait.
+- B-1: a push is no freeze cure. It un-froze 8 of 8 benched holds and cut a head or hat on 4 of 8 (end/first
+  face 1.77-2.23; "stop before the crop" did nothing). `move_rebalance.NOT_A_CURE` keeps `push_slow` LEGAL for
+  a size (`face_floor` reads it) and out of every cure (`cure_moves`, `move_llm.head_prompt`). G-PUSH's 2 and
+  G-LOCKED's 0.5 are unchanged. `take_ladder.SUBSTITUTE["frozen"]` still pushes on a legacy plan (C-2, R2-4).
+- B-2 G-RISE: one crane_up from a wide/full an episode, no dialogue on it (writer rows); 3-5 s (voice advice).
+  ep01 replay: shot 18 is the one rise, 5.25 s advised.
+- B-3 G-HOLD (advice): a silent locked medium..close of `stillness.MIN_SECONDS` or more is cut, not pushed.
+  ep01 replay names shots 10, 13, 15 -- exactly the measured frozen holds (81 %, 94 %, 87 %); T26 (86 %, 2.7 s)
+  is under the wall, as the grammar allows.
+- B-4: a push planned on a panel G-FRAME reads drawn a size wide gets a `push_note` in panel_dq.json (n = 1:
+  ep01 shot 15, planned MC, drawn full, a push reached 2.23).
+- B-5: a crane_up wide/full panel draws the place it rises over in the top third, the people in the lower half
+  (`storyboard_grid.RISE_ROOM`; ep01 shot 18's shipped cell). The follow clause waits for R2-7.
+- B-6: `docs/calibration/camera_catalog.md` "The shot framework" (A1-A5, A7, path and distinct-cell n, the
+  bench rows) reaches the writer whole through `plan_brief.camera_catalog`; the writer skill states G-RISE
+  and G-HOLD.
+- Proof (`docs/audit/2026-10-21_shot_framework/implement/RESULT.md`): the changed writer rebuilt ep01 on a
+  book-shaped copy; at the delivered seed the five benched takes re-rendered within a few points of the
+  delivered ones (the fixes are correctness, not liveliness, as the B1 controls said).

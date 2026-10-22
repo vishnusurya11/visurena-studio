@@ -491,6 +491,9 @@ camera verb; amounts, angles and negations are ignored.
   travel amount. A legacy plan kept amounts for G-MOVE; a grammar plan writes none
   (G-PUSH refuses one; the repair round strips it for $0).
 - Use at least 8 moves an episode, drawn from `docs/calibration/camera_catalog.md`.
+- Shot framework (catalog): a setup opens on a pull reveal or a follow; one rise
+  (G-RISE); action is follow, boots insert, reaction close; talk locked; a push is no
+  freeze cure, a silent 5 s hold is cut (G-HOLD).
 
 **Look at a 5-frame strip of every take before the cut.** Watch for a person
 or prop sliding against the set, a picture that changes into another, and a

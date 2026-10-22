@@ -39,7 +39,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import (book_look, cast_alias, cast_refs, continuity, episode_home, grid_lint, grid_room,  # noqa: F401
-                    look_table, pack_refs)
+                    look_table, pack_refs, plan_gates)
 from studio.comfy import load_workflow, stage_image, submit, wait
 from studio.episode_home import episode_arg
 from studio.episode_ref_official import age_of
@@ -451,7 +451,7 @@ def built(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
         book, ep.setups[shots[0].setup], {**char_slots, **prop_slots}, room)
     said_as = {p["entity"]: p["name"] for p in cast}
     blocks = [{"size": SAID[s.size], "body": body_of(s),
-               "cut": framing(s.size, bool(s.faces), body_of(s)),
+               "cut": framing(s.size, bool(s.faces), body_of(s), move_of(s)),
                "who": [said_as[f] for f in people_in(book, [s]) if f in said_as],
                "extras": getattr(s, "extras", 0)} for s in shots]
     here = ep.setups[shots[0].setup]
@@ -459,6 +459,11 @@ def built(book: Path, ep, setup: str, shots: list, cols: int, rows: int,
                    room=room_slot, geometry=place_words(here), light=getattr(here, "light", "") or "",
                    **look_for(book, here, " ".join(body_of(s) for s in shots)))
     return text, slots, cast
+
+
+def move_of(shot) -> str:
+    """The shot's catalog move, so the panel draws the room the move needs (a rise: `framing`'s RISE_ROOM)."""
+    return plan_gates.move_id(getattr(shot, "motion", "") or "", getattr(shot, "camera", "") or "")
 
 
 def place_slots_for(book: Path, here, slots: dict, room: Path | None) -> tuple[dict, list, int, int | None]:

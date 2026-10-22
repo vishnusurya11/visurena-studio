@@ -895,15 +895,23 @@ OTS_CUT = {
 feet" while Enfield was only a shoulder in the BOTTOM LEFT corner."""
 
 
-def framing(size: str, peopled: bool, body: str) -> str:
+def framing(size: str, peopled: bool, body: str, move: str = "") -> str:
     """The cut, said against what the cell holds: an insert is filled by its thing
     (the hands, the lock), never a whole figure (Jekyll ep01 shots 9 and 10 came
-    back full-length); an over-the-shoulder wide or full keeps its near shoulder cut."""
+    back full-length); an over-the-shoulder wide or full keeps its near shoulder cut;
+    a rise from a wide or full draws the room it rises into (`RISE_ROOM`)."""
     if size == "insert" and (thing := INSERT_THING.search(body or "")):
         return f"the frame is filled by the {thing.group(1).lower()}, close, from edge to edge"
     if peopled and size in OTS_CUT and OVER_SHOULDER.search(body or ""):
         return OTS_CUT[size]
-    return cut_clause(size, peopled)
+    return cut_clause(size, peopled) + (RISE_ROOM if move == "crane_up" and size in RISE_ROOM_SIZES else "")
+
+
+RISE_ROOM, RISE_ROOM_SIZES = ("; the place the camera rises over fills the top third of the panel, and the "
+                              "people stand in the lower half"), ("wide", "full")
+"""Shot framework A1 / B-5 (2026-10-21): H3 obeys the first-frame cell, and a move pointed past what the cell
+holds invents contradictory content, so a rise opens on the room it rises into.  ep01 shot 18 (shipped,
+verdict 95; bench T18 rose 4 of 4) was drawn with its walkers in the BOTTOM half under a sky in the TOP quarter."""
 
 
 COUNTED = re.compile(

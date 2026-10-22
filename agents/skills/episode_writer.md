@@ -67,6 +67,13 @@ amount). Every number below is in `grammar_rules`; count them.
   lamp flame wavers) (G-LOCKED). At most `max_pushes` pushes in the episode
   (G-PUSH), and NO amount on any camera head -- never "a hand's breadth", "a
   forearm", "two strides": name the direction and what the move arrives at.
+- One bird's-eye an episode, on the text's own vantage: a RISE (`crane_up`) from
+  an eye-level wide or full whose top third holds the place it rises over, the
+  cast in the lower half. It carries no dialogue line (its faces end tiny; the
+  face reads on the next cut) and lasts `rise_seconds` (G-RISE).
+- A push is no freeze cure. A silent locked hold at medium, medium close or
+  close of `hold_seconds` or more renders frozen: split its line across a
+  reaction or an insert, each piece shorter (G-HOLD).
 - A two-person reaction is a locked MEDIUM two-shot, the actor carrying the verb
   (G-TWO). The payoff line is a locked CLOSE (G-PAYOFF).
 - Over-the-shoulder is medium_close: the near shoulder and the back of the head

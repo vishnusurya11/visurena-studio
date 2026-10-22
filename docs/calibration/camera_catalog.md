@@ -83,6 +83,57 @@ Status starts at `untested`. Each trial records the take, the measured result
 | dutch | "the camera is canted at a slant, the street running diagonally" | -- | ignored: the horizon stays level | unsupported (D7: the same draw as D6, level) |
 | eye_ecu | extreme close on the eyes | -- | the grid path redraws the staged room | unsupported (D5 ECU arm: 3 of 3 seeds drew a street wide or a full figure; no take) |
 
+## The shot framework (2026-10-21; panel ruling `docs/audit/2026-10-21_shot_framework/FRAMEWORK.md`)
+
+Path for every row: **Kawajiri panel** (the storyboard panel is the take's first frame), graph by size
+(insert..medium Wuli 8-step; full/wide Spark = Singularity v1.3 + Ref2V LoRA x2). Write direction only, no
+amount, never "slowly". Each camera sentence parses to one catalog id.
+
+| id | type | first frame (the panel) | verb | evidence on this path (distinct-cell n) |
+|---|---|---|---|---|
+| A1 | RISE, the bird's-eye | eye-level wide or full; what the camera rises over drawn in the top third, the cast in the lower half | crane_up | ep01 shot 18 shipped (verdict 95); bench T18 rose 4 of 4, 0 clones (n = 1) |
+| A2 | PULL_REVEAL, the establisher | a medium close or close on a detail the place picture also holds | pull_reveal | ep01 shots 0, 9, 14, 16, 27 shipped, none in the ladder (n = 5) |
+| A3 | FOLLOW, a walk | a medium or full, the walker drawn side-on or from behind, room ahead of him | follow | ep01 shot 1 shipped; a walk bound to the camera ran 3 % / 1 % frozen (n = 2) |
+| A4 | STRIDE_INSERT, the impact | insert at cobble height: boots, ground, one object, no face | locked (boots_low) | D2: 1 of 1, no faces, no clones (n = 1) |
+| A5 | REACTION_CLOSE | a close of one face, 100 px or more of 768 | locked | ep01 shots 4, 22, 25 shipped; D5 (n = 4) |
+| A7 | INSERT RISE, 3 s or less | an insert with something drawn above the object | crane_up | ep01 shot 7 shipped, night (n = 1) |
+
+Templates: A1 "The camera rises above <subject>, looking down over <what the top third holds> across the whole
+shot as <subject> <continuous verb>." then "By 00:0N the frame arrives on a high view of <place>, <cast> small
+at the BOTTOM." A2 "The camera pulls back from <detail> across the whole shot, widening to show <what the place
+picture holds>." A3 "The camera tracks beside <figure> as he walks <along a cell landmark / toward the RIGHT
+edge> across the whole shot." then at most 2 gestures. A4 "The camera holds a locked-off frame at cobble height;
+<boot> strides across <ground> past <object>." A5 "The camera holds a locked-off frame; <actor verb>."
+
+The rules:
+- **G-RISE**: one rise an episode, from a wide or full, on the text's own vantage; no dialogue on it (its faces
+  end at 22-35 px; the face reads on the next cut); 3-5 s by the voice.
+- **Each setup opens moving**: A2 or A3, or an eye-level wide with a mover; it cuts in, and may close on A1.
+  No more than 4 close or medium-close shots in a row; never the same move twice running.
+- **Action is cut, not morphed**: A3 then A4 then A5. One active body per take; no two named bodies touch.
+- **Bind, then gesture**: a continuous verb (walk, run, climb) rides the camera sentence "across the whole shot";
+  at most 2 discrete gestures after it. First/Then/Finally beats stopped a walk (T06 3 % -> 68 % frozen).
+- **A walk never comes toward the lens**: the cell sets the axis (shot 06's cell faced the camera: 4 of 4 renders
+  walked into the lens). Draw the walker side-on or from behind.
+- **A push is no freeze cure.** It un-froze 8 of 8 benched holds and cut a head or hat on 4 of 8 (end/first face
+  1.77-2.23). At most 2 pushes an episode, on a realisation, on a cell drawn at its planned size; the cures never
+  write one. A silent locked hold at medium..close from 5 s is cut in two across a reaction or an insert
+  (**G-HOLD**, advisory): locked holds with a gentle verb were alive 0 of 6.
+- Angle is a picture, not a word: a high or low view comes from a drawn panel or by arriving with A1.
+- Rejected on this path: crane_down (became a follow), an angle held locked (82-100 % static), orbit, a two-body
+  fight in one take, "keeping him at the CENTRE" on any move. tilt_up stays unmeasured: the eye saw no tilt where
+  the band read +14/+17 px; the visible tilt read +38.5 px.
+
+Bench trial rows (2026-10-21, Kawajiri panel):
+
+| cell | graph | move asked | obeyed (meter / eye) | overrun end/first | frozen | distinct-cell n |
+|---|---|---|---|---|---|---|
+| ep01 shot 10 (medium two-shot, night) | Wuli | locked | drifted in / men step closer | 1.10 | 0.78 | 1 |
+| ep01 shot 10 | Wuli | push x2 seeds | 2/2 / Hyde's brim cut 2/2 | 1.77, 1.86 | 0.01, 0.15 | 1 |
+| ep01 shot 15 (cell drawn full, plan MC) | Wuli | locked | creeps in / hat cut | 1.24 | 0.81 | 2 |
+| ep01 shot 15 | Wuli | push x2 seeds | 2/2 / crown cut on s1 | 2.23, 1.51 | 0.02, 0.00 | 2 |
+| ep01 shot 06 (full, night) | Spark v1.3 | tilt_up, walk bound | band +14/+17 / no tilt 2/2; walked to the lens | 2.64, 2.07 | 0.63, 0.35 | 1 |
+
 ## Smoothness: blur and warp, measured (ep02, 2026-09-19)
 
 `scripts/episode/motion_quality.py <book> <n>` measures every take on grey

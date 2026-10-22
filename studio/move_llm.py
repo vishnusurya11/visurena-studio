@@ -91,7 +91,7 @@ def head_prompt(shot: dict, setup: dict | None, counts: dict, prev_id: str,
     """The spec's one-shot contract, built from the shot's own words; the
     legal moves list least-used first, so the model leans the same way the
     mechanical cure does."""
-    legal = mr.LEGAL.get(shot.get("size") or "", ["locked"])
+    legal = mr.cure_moves(shot.get("size") or "")              # never a push (NOT_A_CURE)
     legal = sorted(legal, key=lambda m: (counts.get(m, 0), legal.index(m)))
     cap = plan_gates.cap_for(mr.probe(shot), mr.setup_ns(setup))[0]
     return PROMPT.format(

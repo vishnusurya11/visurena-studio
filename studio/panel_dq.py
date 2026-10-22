@@ -262,6 +262,17 @@ def frame_record(present: list[dict], planned: int, size: str, prose: str) -> di
     return out | ({"frame_note": FRAME_NOTE} if out["frame_advisory"] else {}) | tiny_face_record(face_h)
 
 
+PUSH_NOTE = ("push advisory: the panel is drawn a size wider than its plan, so a push travels a size too far "
+             "(ep01 shot 15: planned medium close, drawn full-length, end/first face 2.23, crown cut); hold it "
+             "locked or redraw the panel at its size")
+
+
+def push_on_wide_cell(record: dict, move: str) -> dict:
+    """{push_note} when a push is planned on a panel G-FRAME reads drawn a size wide, else {} (advisory, n = 1,
+    shot framework B-4 2026-10-21).  It rides beside the frame record, never in the flags."""
+    return {"push_note": PUSH_NOTE} if move == "push_slow" and (record or {}).get("frame_advisory") else {}
+
+
 def stacked(frame) -> float:
     """The strongest gutter line in the panel, 5-95%, scored BY THIRDS: a line's
     score is the second-best of its three thirds, so a gutter a figure stands

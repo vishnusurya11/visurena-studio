@@ -19,15 +19,17 @@ def framing_faults(episode, secs: dict[int, float]) -> list[str]:
     """The rows a writer can move.  The voice-measured ones are `voice_advisories`."""
     return (fg.face_faults(episode) + fg.push_faults(episode) + fg.amount_faults(episode)
             + fg.ots_faults(episode) + fg.two_shot_faults(episode)
-            + fg.payoff_faults(episode) + fg.unsupported_faults(episode))
+            + fg.payoff_faults(episode) + fg.unsupported_faults(episode) + fg.rise_faults(episode))
 
 
 def voice_advisories(episode, secs: dict[int, float]) -> list[str]:
-    """Seconds and shares the RECORDED VOICE sets (G-WIDE, G-MEDIUM, G-INSERT, G-LOCKED):
+    """Seconds and shares the RECORDED VOICE sets (G-WIDE, G-MEDIUM, G-INSERT, G-LOCKED, G-RISE's seconds,
+    G-HOLD):
     advice, never a refusal -- no writer rewrite moves them, and as walls they kept the
     Jekyll Kawajiri ep01 plan climb refusing for 30+ min (2026-10-18, cap every loop)."""
     return (fg.wide_faults(episode, secs) + fg.medium_faults(episode, secs)
-            + fg.insert_faults(episode, secs) + fg.locked_faults(episode))
+            + fg.insert_faults(episode, secs) + fg.locked_faults(episode)
+            + fg.rise_advisories(episode, secs) + fg.hold_advisories(episode, secs))
 
 
 def screenplay_faults(episode, placed: dict) -> list[str]:

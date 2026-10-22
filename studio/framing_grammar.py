@@ -44,6 +44,13 @@ MAX_PUSHES = 2
 LOCKED_SHARE = 0.5
 """The locked-off share of the cut: 'mostly locked' (05: 60 %, the actor or the
 air carries the verb -- ep02 T01/T05/T14/T22 held, and a bare hold froze 81 %)."""
+RISE_SIZES, MAX_RISES, RISE_S = ("wide", "full"), 1, (3.0, 5.0)
+"""G-RISE (shot framework A1, 2026-10-21): the bird's-eye is ONE crane_up from an eye-level wide or full, with
+no dialogue line (its faces end at 22-35 px), 3-5 s by the voice.  ep01 shot 18 shipped (verdict 95); the
+prompt bench's T18 rose 4 of 4.  An insert rise (A7) is not the bird's-eye."""
+HOLD_SIZES = ("medium", "medium_close", "close")
+"""G-HOLD (advisory, F5): a silent locked hold at these sizes from `stillness.MIN_SECONDS` is cut, not pushed:
+gentle verbs on a locked frame were alive 0 of 6 on Kawajiri Wuli (ep01 T13, T26, B1 T10/T15 controls)."""
 TWO_SHOT_SIZE = "medium"
 """A two-person reaction (D3)."""
 PAYOFF_SIZE = "close"
@@ -66,6 +73,8 @@ def band() -> dict:
             "wide_seconds": WIDE_S, "opener_wide_seconds": OPENER_WIDE_S, "medium_seconds": MEDIUM_S,
             "insert_seconds": list(INSERT_S), "max_pushes": MAX_PUSHES, "locked_share": LOCKED_SHARE,
             "two_shot_size": TWO_SHOT_SIZE, "payoff_size": PAYOFF_SIZE, "ots_tightest": OTS_TIGHTEST,
+            "max_rises": MAX_RISES, "rise_sizes": list(RISE_SIZES), "rise_seconds": list(RISE_S),
+            "hold_sizes": list(HOLD_SIZES), "hold_seconds": hold_seconds(),
             "unsupported": ["silhouette", "Dutch / canted angle", "eye close-up"],
             "face_floor_px": face_floor.FLOOR_PX, "face_px_by_size": dict(face_floor.FACE_PX)}
 
@@ -142,6 +151,46 @@ def amount_faults(episode) -> list[str]:
     return [fault("G-PUSH", f"shot {s.index}", f"the camera head names an amount ({hit.group(0)!r}) the "
                   "model ignores; name the direction only", hit.group(0), "no amount")
             for s in cut(episode) if (hit := AMOUNT.search(head_of(s.motion)))]
+
+
+def spoken_shots(episode) -> set[int]:
+    return {l.shot for l in episode.lines if l.kind == "dialogue"}
+
+
+def rises(episode) -> list:
+    """The bird's-eye candidates: a crane_up from a wide or a full."""
+    return [s for s in cut(episode) if s.size in RISE_SIZES and verb(s) == "crane_up"]
+
+
+def rise_faults(episode) -> list[str]:
+    """G-RISE: one rise an episode, and a rise carries no dialogue line (the writer's to move)."""
+    risen, spoken = rises(episode), spoken_shots(episode)
+    out = [fault("G-RISE", f"shot {s.index}", "a second rise -- the episode's one bird's-eye is spent; hold or "
+                 "cut this one", len(risen), MAX_RISES) for s in risen[MAX_RISES:]]
+    return out + [fault("G-RISE", f"shot {s.index}", "a rise carries a dialogue line -- its faces end at 22-35 px; "
+                        "put the line on the next cut", "dialogue", "no line") for s in risen if s.index in spoken]
+
+
+def rise_advisories(episode, secs: dict[int, float]) -> list[str]:
+    """G-RISE seconds by the voice: a rise holds RISE_S (advisory)."""
+    low, high = RISE_S
+    return [fault("G-RISE", f"shot {s.index}", "a rise's seconds (advisory) -- narration of 3-5 s, or split it",
+                  round(secs[s.index], 2), f"{low}-{high}")
+            for s in rises(episode) if not low - 1e-6 <= secs.get(s.index, low) <= high + 1e-6]
+
+
+def hold_seconds() -> float:
+    from studio.stillness import MIN_SECONDS
+    return MIN_SECONDS
+
+
+def hold_advisories(episode, secs: dict[int, float]) -> list[str]:
+    """G-HOLD (advisory): a silent locked hold at medium..close from MIN_SECONDS is split by the cut."""
+    spoken, wall = spoken_shots(episode), hold_seconds()
+    return [fault("G-HOLD", f"shot {s.index}", "a silent locked hold -- split the line across a reaction or an "
+                  "insert, each piece under the wall (a push is no freeze cure)", round(secs[s.index], 2), wall)
+            for s in cut(episode) if s.size in HOLD_SIZES and s.faces and verb(s) == "locked"
+            and not getattr(s, "still", False) and s.index not in spoken and secs.get(s.index, 0.0) >= wall]
 
 
 def locked_faults(episode) -> list[str]:

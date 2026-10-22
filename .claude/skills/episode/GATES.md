@@ -55,10 +55,7 @@ missing input, or an unread picture.
 **2026-10-17 additions: the anime-TV grammar (owner; `studio/grammar_battery.py`, the battery's
 `GRAMMAR` row; decision `architecture/decisions/2026-10-17_anime_tv_grammar.md`).** HARD on a plan
 declaring `grammar: anime_tv` (set by code from the band) until something is drawn from it; advice on
-a legacy plan. Calibrated by replaying 41 plans (`scripts/episode/grammar_replay.py`; WotW ep01-27,
-Scarlet ep01-14, Jekyll ep01): the mechanical walls fire on none of the owner-approved WotW ep01-03 /
-Scarlet ep05, ep07; the grammar-definitional ones fire on almost every legacy plan, and those fires are
-the old grammar the owner replaced. Jekyll ep01 `plan_v3.json`: 0 rows, VERDICT clean.
+a legacy plan. Calibration replay: `LESSONS_ARCHIVE.md`, "Grammar calibration".
 
 | gate | measures | replay (plans firing of 41; owner-approved) | kind |
 |---|---|---|---|
@@ -66,7 +63,9 @@ the old grammar the owner replaced. Jekyll ep01 `plan_v3.json`: 0 rows, VERDICT 
 | G-WIDE | <= 2 wides; each <= 4.0 s, the opener 5.0 s, by the voice ruler | 38; 5 | HARD |
 | G-MEDIUM / G-FULL | a medium <= 7.0 s / a full <= 5.0 s | 31; 4 / advisory | HARD / advisory |
 | G-INSERT | an insert 1.0-3.0 s | 39; 5 | HARD |
-| G-PUSH | <= 2 pushes; no AMOUNT on a camera head | 37; 3 | HARD, cured free (`strip_amounts`, `hold_extra_pushes`) |
+| G-PUSH | <= 2 pushes; no AMOUNT on a camera head | 37; 3 | HARD, cured free (`strip_amounts`, `hold_extra_pushes`) ; a push is no freeze cure: no cure writes one (`move_rebalance.NOT_A_CURE`) |
+| G-RISE | one crane_up from a wide/full an episode, no dialogue on it; 3-5 s by the voice | ep01: 18 at 5.25 s | HARD; seconds advisory |
+| G-HOLD | a silent locked medium..close of >= 5.0 s: split it across a reaction or an insert | ep01 shots 10, 13, 15 (81-95 % frozen) | advisory |
 | G-LOCKED | >= 0.50 of the cut locked off | 37; 4 | HARD |
 | G-TWO | a reaction with 2+ faces is a locked medium | 7; 0 | HARD; cured for $0 (`plan_cures.lock_two_shot`) when the size is medium and only the verb is wrong; a wrong size goes to the writer |
 | G-PAYOFF | a payoff shot with dialogue is a locked close | 8; 1 | HARD |
@@ -118,8 +117,6 @@ five words the bed did not know and the episode was refused at assembly.
   refine candidate (`face_floor.refine_candidates`). Never a refusal or writer call. ep01: 0 moved.
 - **Holds on a grammar plan** (`doc.grammar` set) grow no pair and report no unsplit pair: one shot
   per take. The take length has one home, `episode_takes.BUDGET`.
-- **The critic's count** (`judges/plan.declared_count`): any `extras=N` (N >= 1) on a shot whose
-  setup stages a crowd is declared (G-CROWD asks >= 1; ep01 shots 1 and 18 were called invented).
 
 **2026-09-28 addition:** G-SETUP (HARD before anything is rendered, advisory
 after) -- a setup holds at most `MAX_SETUP_SECONDS` = 50 s of projected picture;

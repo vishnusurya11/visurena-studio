@@ -78,10 +78,17 @@ def judge(shot, setup, frame: np.ndarray, control: dict[str, float], seam: bool 
         extras=getattr(shot, "extras", 0), prose=f"{shot.frame} {shot.at_rest}",
         stacked=panel_dq.stacked(frame), seam=seam)
     row["shot"], row["hour"] = shot.index, hour
-    # G-FRAME (C2_verdict #8): recorded beside the verdict, never in its flags
-    row |= panel_dq.frame_record(found, len(shot.faces or []), getattr(shot.size, "value", shot.size),
-                                 f"{shot.frame} {shot.at_rest}")
-    return row
+    return row | framing_rows(shot, found)
+
+
+def framing_rows(shot, found: list[dict]) -> dict:
+    """G-FRAME (C2_verdict #8) and the push-on-a-wide-cell note (shot framework B-4): recorded beside the
+    verdict, never in its flags."""
+    from studio import framing_grammar
+    record = panel_dq.frame_record(found, len(shot.faces or []), getattr(shot.size, "value", shot.size),
+                                   f"{shot.frame} {shot.at_rest}")
+    move = framing_grammar.verb(shot) if getattr(shot, "motion", "") else "locked"
+    return record | panel_dq.push_on_wide_cell(record, move)
 
 
 def main(book_id: str, number: int) -> int:
@@ -100,7 +107,8 @@ def main(book_id: str, number: int) -> int:
         rows.append(row)
         print(f"  {'ok  ' if row['passed'] else 'FAIL'} shot {shot.index:02d}  "
               f"faces {row['cast_faces']}/{row['planned']}  sharp {row['sharp']:.2f} ({row['hour']})  "
-              f"ink {row['ink']:.4f}  tiled {row['tiled']:.2f}  {','.join(row['flags'])}", flush=True)
+              f"ink {row['ink']:.4f}  tiled {row['tiled']:.2f}  {','.join(row['flags'])}"
+              + (f"\n        {row['push_note']}" if row.get("push_note") else ""), flush=True)
     episode_home.write_json(home / "panel_dq.json", rows)
     failed = [r["shot"] for r in rows if not r["passed"]]
     print(f"\n{len(rows) - len(failed)}/{len(ep.shots)} panels pass; failing {failed}; missing {missing}")
