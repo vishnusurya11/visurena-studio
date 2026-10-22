@@ -343,6 +343,58 @@ def _flagged_lines(got: list[dict], cond: dict) -> list[str]:
     return out
 
 
+RENDER_LOG = Path("takes") / "r2v" / "renders.jsonl"
+"""One row per claimed render (takes_r2v.log_render): the per-draw record the retake line reads."""
+
+
+def render_rows(book: Path, number: int) -> list[dict]:
+    p = episode_home.home(book, number) / RENDER_LOG
+    if not p.exists():
+        return []
+    return [json.loads(l) for l in p.read_text(encoding="utf-8").splitlines() if l.strip()]
+
+
+def render_kind(row: dict, seen: set) -> str:
+    """first / retake / lost: by the row's `tries` (fleet C A1), else an index already drawn is a retake."""
+    if not row.get("ok", True):
+        return "lost"
+    kind = ("retake" if row["tries"] else "first") if "tries" in row else (
+        "retake" if row.get("index") in seen else "first")
+    seen.add(row.get("index"))
+    return kind
+
+
+def render_tally(got: list[dict]) -> tuple[dict, dict]:
+    """({kind: [count, minutes]}, {retake reason: count}); a lost render is charged its wait."""
+    seen, sums, why = set(), {"first": [0, 0.0], "retake": [0, 0.0], "lost": [0, 0.0]}, {}
+    for r in got:
+        kind = render_kind(r, seen)
+        sums[kind][0] += 1
+        sums[kind][1] += float(r.get("render_s") or r.get("waited_s") or 0) / 60
+        if kind == "retake":
+            reason = str(r.get("retake_why") or "unnamed")[:40]
+            why[reason] = why.get(reason, 0) + 1
+    return sums, why
+
+
+def _count(n: int, word: str) -> str:
+    return f"{n} {word}" + ("" if n == 1 else "s")
+
+
+def render_line(got: list[dict]) -> str:
+    """What the renders cost (fleet C A8: render count is the lever): first draws, retakes by reason,
+    lost renders, in minutes; '' when no render was logged."""
+    if not got:
+        return ""
+    sums, why = render_tally(got)
+    (nf, mf), (nr, mr), (nl, ml) = sums["first"], sums["retake"], sums["lost"]
+    reasons = ", ".join(f"{k} {v}" for k, v in sorted(why.items(), key=lambda kv: (-kv[1], kv[0])))
+    parts = [f"{_count(nf, 'first draw')} {mf:.1f} min"]
+    parts += [f"{_count(nr, 'retake')} {mr:.1f} min ({reasons})"] if nr else []
+    parts += [f"{nl} lost {ml:.1f} min"] if nl else []
+    return "renders: " + " | ".join(parts)
+
+
 def report(book: Path, number: int) -> str:
     """Total wall time, per stage, retries counted; the norm scaled to the
     episode's own take frames and line count; every SLOW, FAIL, REFUSED,
@@ -363,4 +415,6 @@ def report(book: Path, number: int) -> str:
     lines.append(f"{'TOTAL':<12} {total:>8.0f}  ({total / 3600:.1f} h of stages; {span / 3600:.1f} h first start to last end)")
     if flagged := _flagged_lines(got, cond):
         lines += ["flagged runs:"] + flagged
+    if said := render_line(render_rows(book, number)):
+        lines.append(said)
     return "\n".join(lines)
