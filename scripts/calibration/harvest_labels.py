@@ -318,7 +318,8 @@ def published_units(book: Path) -> set[str]:
     if not path.is_file():
         return set()
     docs = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
-    return {f"ep{int(d['episode']):02d}" for d in docs if d.get("video_id")}
+    return {f"ep{int(d['episode']):02d}" for d in docs  # a poll row and the book video name no number
+            if d.get("video_id") and str(d.get("episode", "")).isdigit()}
 
 
 def locate(book: Path, rel: str) -> str:

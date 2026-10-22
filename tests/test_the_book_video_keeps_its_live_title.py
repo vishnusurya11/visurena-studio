@@ -31,8 +31,10 @@ def test_the_lead_drops_the_author_the_series_already_names():
 def test_a_long_title_spends_all_first_and_never_passes_the_wall():
     title = bc.title("Robert Louis Stevenson: Dr Jekyll and Mr Hyde", 10, author="Robert Louis Stevenson")
     assert title == "Dr Jekyll and Mr Hyde by Robert Louis Stevenson — Full Story Adaptation, All 10 Chapters"
+    past = bc.title("The Mysterious Affair at Styles", 12, author="Agatha Christie")  # 91 with "All "
+    assert past == "The Mysterious Affair at Styles by Agatha Christie — Full Story Adaptation, 12 Chapters"
     long = bc.title("A Very Long Series Name: " + "Word " * 15, 30, author="Somebody Else")
-    assert len(long) <= yp.TITLE_MAX and "Full Adaptation, All" not in long
+    assert len(long) <= yp.TITLE_MAX and "All " not in long
 
 
 def test_the_description_is_the_live_one_for_both_books():

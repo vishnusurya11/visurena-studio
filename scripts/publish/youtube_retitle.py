@@ -63,13 +63,19 @@ def chapter_of(title: str) -> str:
     return title.split("—")[0].strip()
 
 
+def titled_episode(row: dict) -> bool:
+    """An upload or retitle row of a numbered episode.  A shorts_poll or playlist
+    upkeep row names no episode, a privacy flip names no title, and the book video's
+    episode is "compilation" (Jekyll's ledger, 2026-10-21)."""
+    return isinstance(row.get("episode"), int) and bool(row.get("title"))
+
+
 def episodes(book: Path) -> list[dict]:
-    """The latest ledger row per episode -- one video each, newest cut wins."""
+    """The latest titled ledger row per episode -- one video each, newest cut wins."""
     path = yp.ledger_path(book)
     rows: dict[int, dict] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
-        if line.strip():
-            row = json.loads(line)
+        if line.strip() and titled_episode(row := json.loads(line)):
             rows[row["episode"]] = row
     return [rows[n] for n in sorted(rows)]
 

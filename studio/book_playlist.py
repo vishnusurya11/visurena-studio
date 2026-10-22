@@ -21,6 +21,7 @@ import json
 import re
 from pathlib import Path
 
+from studio import backfill
 from studio import youtube_publish as yp
 
 MARK = "— Watch in order —"
@@ -69,12 +70,14 @@ def done(book: Path, event: str, video: str) -> bool:
 
 
 def public_episodes(book: Path) -> dict[int, str]:
-    """{episode: video id} for every chapter whose newest privacy flip says public."""
-    newest: dict[str, dict] = {}
-    for r in rows(book):
+    """{episode: video id} for every chapter whose newest privacy flip says public and
+    whose video no row calls deleted (backfill.deleted_ids; growth review 2026-10-21)."""
+    said, newest = rows(book), {}
+    for r in said:
         if r.get("event") == "privacy" and isinstance(r.get("episode"), int) and r.get("video_id"):
             newest[r["video_id"]] = r
-    return {r["episode"]: vid for vid, r in newest.items() if r.get("privacy") == "public"}
+    gone = backfill.deleted_ids(said)
+    return {r["episode"]: vid for vid, r in newest.items() if r.get("privacy") == "public" and vid not in gone}
 
 
 def compilation_id(book: Path) -> str | None:
