@@ -361,7 +361,7 @@ faces win (`scene_cast.pick`), the rest are drawn from their wardrobe words.
 
 ## Pictures
 
-**The book's look and atmosphere (2026-10-13).** `refs/look.json` declares the look (`photoreal`, or a drawn look such as `anime_gothic` with its own `lead` and optional `take` words) and an `atmosphere` ("fog, damp haze"): the grid line, the grid negative, the panel's name in the take prompt and the H3 style line all read it. The house (no look.json) is unchanged byte for byte. The atmosphere fills the air OUTDOORS only (2026-10-13): a setup that is not `outdoors` and whose `described` names a room (study, parlour, cabinet, fireplace, room, hall ...; `book_look.under_sky`) gets the grid line and the H3 line without it.
+**The book's look and atmosphere (2026-10-13).** `refs/look.json` declares the look (`photoreal`, or a drawn look such as `anime_gothic` with its own `lead` and optional `take` words) and an `atmosphere` ("fog, damp haze"): the grid line, the panel's name in the take prompt and the H3 style line read it (no grid negative: cfg 1.0). The house (no look.json) is unchanged byte for byte. The atmosphere fills the air OUTDOORS only: a setup that is not `outdoors` and whose `described` names a room (study, parlour, cabinet, fireplace, room, hall ...; `book_look.under_sky`) gets the grid line and the H3 line without it.
 
 **Sheets and looks.** One sheet per character LOOK on the book's look table,
 `refs/looks.json` (owner 2026-10-10: reverses 09-18 for story-time looks): the

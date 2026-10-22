@@ -16,12 +16,16 @@ Every rule is a class the Jekyll ep01 audit found in a DRAWN grid prompt
         the sheet and its wears line are the one description.
 
 grids.py runs it as a hard wall before any grid is posted (and in --prompts).
+
+`warnings` never refuses (craft ruling 2026-10-21):
+  NEG   a no / not / never / without outside UNWRITTEN: the grid samples at cfg 1.0, the negative
+        prompt is never read, and a negated noun is still that noun to the drawer (A20).
 """
 from __future__ import annotations
 
 import re
 
-from studio.storyboard_grid import PHYSIQUE
+from studio.storyboard_grid import PHYSIQUE, UNWRITTEN
 
 P14 = (re.compile(r"\b(?:door|door's|panels?|brown|blistered)\s+picture\b", re.I),
        re.compile(r"\bpicture\s+of\s+the\s+(?:\w+\s+){0,2}(?:door|panels?)\b", re.I),
@@ -87,3 +91,18 @@ def faults(text: str, nouns: dict[int, str] | None = None, names: list[str] | No
     out += [f"CURE glued as a noun phrase: {m.group(0)!r}" for m in CURE.finditer(text)]
     out += [f"SLOT bracketed description after a slot at {m.start()}" for m in SLOT.finditer(text)]
     return out
+
+
+NEGATION = re.compile(r"\b(?:no|not|never|without)\b(?:\s+[\w'-]+){0,2}", re.I)
+
+
+def negations(text: str) -> list[str]:
+    """Each negation with the two words after it, the fixed UNWRITTEN sentence aside."""
+    return [m.group(0) for m in NEGATION.finditer(text.replace(UNWRITTEN, " "))]
+
+
+def warnings(text: str) -> list[str]:
+    """What the lint names and never refuses; [] says nothing."""
+    said = negations(text)
+    return [f"NEG {len(said)} negations the drawer reads as nouns (cfg 1.0 reads no negative): "
+            + ", ".join(repr(n) for n in said)] if said else []

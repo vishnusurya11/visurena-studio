@@ -511,6 +511,19 @@ def lint_wall(text: str, cast: list[dict], names: list[str]) -> None:
     nouns = {p["ref"]: p.get("noun", "") for p in cast if p.get("ref")}
     if bad := grid_lint.faults(text, nouns, names):
         raise SystemExit("REFUSED: grid lint: " + " | ".join(bad))
+    for said in grid_lint.warnings(text):          # never refuses (craft ruling A20, A22)
+        print(f"grid lint warning: {said[:200]}", flush=True)
+
+
+CFG = 1.0
+"""The grid sampler's cfg.  AT 1.0 THE NEGATIVE IS NEVER READ: ComfyUI skips the unconditioned pass
+(comfy/samplers.py, the cfg-1 optimisation), so NEGATIVE / negative_for reached no grid ever drawn
+(craft ruling A20).  Every guard must be said positively in the prompt; grid_lint warns on a negation."""
+
+
+def sent_negative(negative: str, cfg: float = CFG) -> str:
+    """The negative the graph carries: none at cfg 1.0, where it would be dead text."""
+    return "" if cfg == 1.0 else negative
 
 
 def graph_for(text: str, slots: dict, cols: int, rows: int, seed: int, name: str,
@@ -521,9 +534,9 @@ def graph_for(text: str, slots: dict, cols: int, rows: int, seed: int, name: str
     # NOTHING STAGED THAT THE PROMPT DOES NOT NAME: an unused LoadImage holds
     # ComfyUI's example.png -- a doll -- and the encoder reads it.
     stage_only(graph, {node: stage_image(path) for node, path in slots.items()})
-    graph["5"]["inputs"].update(prompt=text, negative_prompt=negative, resolution=1024)
+    graph["5"]["inputs"].update(prompt=text, negative_prompt=sent_negative(negative), resolution=1024)
     graph["6"]["inputs"].update(width=1024 * cols, height=1024 * rows)
-    graph["7"]["inputs"].update(seed=seed, steps=25, cfg=1.0)
+    graph["7"]["inputs"].update(seed=seed, steps=25, cfg=CFG)
     graph["9"]["inputs"]["filename_prefix"] = name
     return graph
 
@@ -594,6 +607,8 @@ def dry_run(book: Path, number: int, ep, rows: list[dict]) -> int:
         name = grid_name(number, row["setup"], row["cols"], row["rows"], row.get("tag", ""))
         print(f"===== {name} shots {row['shots']}\n{json.dumps(staging(book, slots, cast))}\n\n{text}\n\n"
               + ("lint: clean" if not faults else "lint: " + "\n  ".join(["FAULTS"] + faults)), flush=True)
+        for said in grid_lint.warnings(text):      # never counted as a fault (A20, A22)
+            print(f"lint warning: {said[:200]}", flush=True)
     print(f"{len(rows)} grids, {bad} with lint faults", flush=True)
     return 1 if bad else 0
 

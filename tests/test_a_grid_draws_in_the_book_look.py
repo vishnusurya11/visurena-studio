@@ -103,13 +103,11 @@ def test_the_look_kwargs_reach_the_prompt(tmp_path):
     assert look["medium"] == "film still" and look["style"] == book_look.grid_style(tmp_path)
 
 
-def test_the_graph_carries_the_given_negative(monkeypatch):
-    template = {k: {"inputs": {}} for k in ("3", "5", "6", "7", "9")}
-    monkeypatch.setattr(grids, "load_workflow", lambda name: (template, None))
-    monkeypatch.setattr(grids, "stage_only", lambda graph, slots: None)
-    graph = grids.graph_for("p", {}, 1, 1, 7, "g", negative="text, watermark")
-    assert graph["5"]["inputs"]["negative_prompt"] == "text, watermark"
-    assert grids.graph_for("p", {}, 1, 1, 7, "g")["5"]["inputs"]["negative_prompt"] == grids.NEGATIVE
+def test_the_graph_carries_the_given_negative_only_where_cfg_reads_it():
+    """Craft ruling A20: at the grid's cfg 1.0 the negative is never read, so the graph sends none
+    (tests/test_the_grid_negative_is_said_dead.py); a cfg that reads one gets the book's words."""
+    assert grids.sent_negative("text, watermark") == ""
+    assert grids.sent_negative("text, watermark", cfg=4.0) == "text, watermark"
 
 
 def test_a_photoreal_book_ignores_a_plan_look(tmp_path):
