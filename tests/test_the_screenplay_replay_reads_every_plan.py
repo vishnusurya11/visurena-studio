@@ -135,14 +135,14 @@ def test_drop_paragraph_takes_its_spans_and_its_lines():
 def test_ep01_mutants_name_the_check_each_should_wake():
     kinds = [m["expect"] for m in sr.mutants(clean(), paragraphs())]
     assert kinds.count("orphan_reply") == 2              # the prompts at lines 3 and 4
-    assert kinds.count("stolen_line") == 8               # every dialogue line
+    assert kinds.count("stolen_line") == 6               # the dialogue lines G-STOLEN could see moved (A9)
     assert kinds.count("paragraph_hole") >= 1
 
 
 def test_recall_counts_a_mutant_only_when_its_check_fires_more_than_on_the_clean_plan():
     out = sr.recall(clean(), paragraphs(), DOUBLES)
     assert out["orphan_reply"]["k"] == out["orphan_reply"]["n"] == 2
-    assert out["stolen_line"]["k"] == out["stolen_line"]["n"] == 8
+    assert out["stolen_line"]["k"] == out["stolen_line"]["n"] == 6
     assert out["stolen_line"]["wilson_low"] >= 0.6
     assert "paragraph_hole" not in out                    # no check registered for it here
 

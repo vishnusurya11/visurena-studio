@@ -67,3 +67,25 @@ def clean(raw: str) -> str:
         text = _LEADING.sub("", text).lstrip(" ,;")
     text = _terminate(_strip_ends(text))
     return text or _terminate(_strip_ends(raw))
+
+
+# ---- quote spans with their speaker (craft ruling A9, G-STOLEN) ------------------------------------
+
+_TAG = rf"(?:{_SAID}|says?|thought)"
+_SPEECH = re.compile("[“\"]([^“”\"]+)[”\"]")
+"""A double-quoted run: a single curly mark is also the apostrophe ("it’s"), so it never bounds speech."""
+_AFTER = re.compile(rf"^[\s,;.!?{_CLOSE}]*(?:{_TAG})\s+(?:Mr\.\s+|Mrs\.\s+|Dr\.\s+)?([A-Z][a-z]+|I|he|she)\b"
+                    rf"|^[\s,;.!?{_CLOSE}]*(?:Mr\.\s+|Mrs\.\s+|Dr\.\s+)?([A-Z][a-z]+|I|[Hh]e|[Ss]he)\s+(?:{_TAG})\b")
+"""The tag after a quote: `," said Mr. Utterson`, `," said I`, `," he asked`."""
+
+
+def speaker_of(paragraph: str, end: int) -> str:
+    """The speaker the tag right after a quote names (lowercased: "utterson", "i", "he"), or ""."""
+    hit = _AFTER.search(paragraph[end:end + 60])
+    return (hit.group(1) or hit.group(2)).lower() if hit else ""
+
+
+def quote_spans(paragraphs: list[str]) -> list[tuple[int, str, str]]:
+    """(0-based paragraph index, quoted words, speaker or "") for every quoted run of a chapter."""
+    return [(k, m.group(1).strip(), speaker_of(p, m.end())) for k, p in enumerate(paragraphs)
+            for m in _SPEECH.finditer(p) if m.group(1).strip()]

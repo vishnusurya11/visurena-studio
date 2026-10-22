@@ -243,3 +243,46 @@ def overlap(line: str, shot_text: str) -> float:
     a caption, 0.0 a line that adds only what the picture cannot show."""
     said = content_words(line)
     return len(said & content_words(shot_text)) / len(said) if said else 0.0
+
+
+# ---- G-STOLEN: narration holding a speaker's own words (craft ruling A9, advisory) -----------------
+
+STOLEN_BIGRAMS = 3
+"""Content bigrams a narration line shares with one quoted span before it is that speaker's words.
+Jekyll ep01: line 12 shares 4 with Enfield's paragraph 9, line 14 shares 5 with his paragraph 13;
+no other narration line of the plan shares more than 1."""
+FIRST_PERSON = ("i",)
+"""A first-person narrator's own quotes are his: never stolen from him."""
+
+
+def content_bigrams(text: str) -> set[tuple[str, str]]:
+    """Adjacent stemmed word pairs, a pair of two stopwords dropped ("the of" says nothing)."""
+    words = re.findall(r"[a-z']+", str(text).lower().replace("’", "'"))
+    return {(stem(a), stem(b)) for a, b in zip(words, words[1:]) if not (a in STOPWORDS and b in STOPWORDS)}
+
+
+def _rows(plan) -> list[dict]:
+    """A plan's lines as dicts, from a plan.json dict or an Episode."""
+    lines = plan.get("lines") if isinstance(plan, dict) else getattr(plan, "lines", None)
+    return [l if isinstance(l, dict) else l.model_dump() for l in lines or []]
+
+
+def stolen_from(text: str, spans: list[tuple[int, str, str]]) -> tuple[int, int, str, str] | None:
+    """(shared bigrams, paragraph, quote, speaker) of the quote this text shares most with, when it
+    reaches STOLEN_BIGRAMS; None otherwise."""
+    said = content_bigrams(text)
+    best = max(((len(said & content_bigrams(q)), k, q, who) for k, q, who in spans if who not in FIRST_PERSON),
+               default=None)
+    return best if best and best[0] >= STOLEN_BIGRAMS else None
+
+
+def stolen_lines(plan, paragraphs: list[str]) -> list[str]:
+    """G-STOLEN (advisory, no cure: ruling T1): each narration line holding a cast member's quoted words."""
+    from studio import quotes
+    spans, out = quotes.quote_spans(paragraphs), []
+    for line in _rows(plan):
+        if line.get("kind") == "narration" and (hit := stolen_from(line.get("text", ""), spans)):
+            n, k, quote, who = hit
+            out.append(f"G-STOLEN line {line['index']}: {n} content bigrams of paragraph {k}'s quote "
+                       f"\"{' '.join(quote.split()[:8])}\" ({who or 'a cast member'}) -- advisory")
+    return out

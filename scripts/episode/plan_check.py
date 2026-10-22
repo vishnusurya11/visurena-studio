@@ -312,6 +312,23 @@ def grammar_gate(ep, book: Path, number: int, rate: float) -> int:
     return len(found) if hard else 0
 
 
+def shadow_rows(ep, book: Path, number: int) -> list[str]:
+    """The craft ruling's shadow rows (2026-10-21, A8-A12) over this plan and its chapter."""
+    from studio import story_layer
+    paragraphs = plan_brief.chapter_paragraphs(book, number)[1]
+    return story_layer.stolen_lines(ep, paragraphs)
+
+
+def craft_shadow_gate(ep, book: Path, number: int) -> int:
+    """Shadow rows print as advice and never count: each earns a wall only through
+    scripts/episode/screenplay_replay.py (readable plans, approved plans, recall on mutations)."""
+    found = shadow_rows(ep, book, number)
+    print("CRAFT SHADOW :", f"{len(found)} advisory" if found else "clean")
+    for f in found:
+        print("  advisory:", f[:170])
+    return 0
+
+
 def speaker_gate(ep, book: Path, refs: list[dict]) -> int:
     """G-SPEAKER against the BOOK's narrator (studio.book_narrator), HARD; a
     character narrating beside him is printed as advice."""
@@ -352,6 +369,7 @@ def main(book_id: str, number: int, plan: str = "plan.json") -> int:
     hard += action_gate(ep)
     hard += talk_gate(ep, book, number)
     hard += grammar_gate(ep, book, number, rate)
+    hard += craft_shadow_gate(ep, book, number)       # 0: shadow rows report only
     asp = plan_gates.aspect_faults(ep, plan_gates.series_aspect(book))
     print("G-ASPECT     :", asp or "clean"); hard += len(asp)
     cf = plan_gates.crowd_faults(ep)

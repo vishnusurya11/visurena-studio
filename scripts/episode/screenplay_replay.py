@@ -214,12 +214,21 @@ def dialogue_paragraphs(plan: dict, paragraphs: list[str]) -> list[int]:
                   and re.search("[“\"]", paragraphs[j]))
 
 
+def stealable(plan: dict, paragraphs: list[str]) -> list[int]:
+    """Dialogue lines that would reach G-STOLEN's bigram floor if the narrator said them: "Indeed? And
+    what was that?" shares 0 and cannot, so it is no mutant for it (wave 0 review, finding 7)."""
+    from studio import quotes, story_layer
+    spans = quotes.quote_spans(paragraphs)
+    return [k for k, l in enumerate(plan.get("lines") or [])
+            if l["kind"] == "dialogue" and story_layer.stolen_from(l["text"], spans) is not None]
+
+
 def mutants(plan: dict, paragraphs: list[str]) -> list[dict]:
     """Every code-made mutation of a plan, each naming the check it should wake."""
     out = [{"name": f"delete prompt line {k}", "expect": "orphan_reply", "plan": delete_prompt(plan, k)}
            for k in prompt_lines(plan)]
     out += [{"name": f"quote {k} into narration", "expect": "stolen_line", "plan": quote_to_narration(plan, k)}
-            for k, l in enumerate(plan.get("lines") or []) if l["kind"] == "dialogue"]
+            for k in stealable(plan, paragraphs)]
     return out + [{"name": f"drop paragraph {j}", "expect": "paragraph_hole",
                    "plan": drop_paragraph(plan, paragraphs, j)} for j in dialogue_paragraphs(plan, paragraphs)]
 

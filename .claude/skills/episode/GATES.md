@@ -80,6 +80,7 @@ the old grammar the owner replaced. Jekyll ep01 `plan_v3.json`: 0 rows, VERDICT 
 | G-MA | >= 3 shots holding beat + coda >= 1.2 s | 12; 3 | HARD |
 | G-INNER | an inner line over its speaker's own face; the "owner has not heard it" note | -- | HARD / advisory note |
 | G-TEASE, G-MOTIF | given NEXT CHAPTER rows, the tease loops to the hook and names its image, else "not asked" (A13); a grammar plan names its motif | -- | advisory |
+| CRAFT SHADOW (craft A8-A12) | G-STOLEN (narration with >= 3 content bigrams of one cast quote) | `screenplay_replay.py` | advisory, never counted |
 | G-DIAL ceiling (every plan) | dialogue <= the chapter's speech + 0.08, inside 0.20-0.35 (`dial_ceiling`) | never lower than the old 0.20 | HARD |
 
 Also: G-MOVES on a grammar plan leaves locked and over-the-shoulder shots out of the share and the
