@@ -5,6 +5,7 @@
     sample_s, s_per_it, steps   the last finished N/N it-bar inside the window
     decode_save_s     the finished bar -> execution_success (VAE decodes, CreateVideo, SaveVideo)
     unet_reran, te_reran        the UNETLoader / CLIPLoader node absent from execution_cached
+    cached, cached_n            every class execution_cached served, counted (fleet C A1)
 
 The bar is read from ComfyUI's timestamped log ring (`/internal/logs/raw`, 300
 entries): the live engine's comfyui.log was overwritten by a failed second launch
@@ -63,6 +64,20 @@ def reran(record: dict, cls: str) -> bool | None:
     return any(k not in cached for k in ids) if ids else None
 
 
+def cached(record: dict) -> dict[str, int]:
+    """The node classes the engine served from cache, counted (fleet C A1: a job run right after
+    one on the same inputs reused its encodes, 7-10 s, and no row said so).  An id the graph does not
+    hold is counted under its id."""
+    graph = (record.get("prompt") or [None, None, {}])[2]
+    ids = [n for m in record.get("status", {}).get("messages", []) if m[0] == "execution_cached"
+           for n in m[1].get("nodes", [])]
+    out: dict[str, int] = {}
+    for i in ids:
+        cls = (graph.get(i) or {}).get("class_type", str(i))
+        out[cls] = out.get(cls, 0) + 1
+    return dict(sorted(out.items()))
+
+
 def gap(a: float | None, b: float | None) -> float | None:
     return round(b - a, 1) if a is not None and b is not None else None
 
@@ -76,7 +91,8 @@ def phases(record: dict, entries: list[dict]) -> dict:
     return {"prompt_s": gap(t0, t1), "encode_s": gap(t0, load), "first_step_gap_s": gap(load, start),
             "steps": b.get("steps"), "sample_s": b.get("sample_s"), "s_per_it": b.get("s_per_it"),
             "decode_save_s": gap(b.get("at"), t1),
-            "unet_reran": reran(record, "UNETLoader"), "te_reran": reran(record, "CLIPLoader")}
+            "unet_reran": reran(record, "UNETLoader"), "te_reran": reran(record, "CLIPLoader"),
+            "cached": (hit := cached(record)), "cached_n": sum(hit.values())}
 
 
 def ring() -> list[dict]:

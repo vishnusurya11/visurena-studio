@@ -1180,10 +1180,20 @@ RENDERS_LOG = "renders.jsonl"
 latest draw's render_s, so retakes, lost takes and step 09's card/CPU split had no record."""
 
 
+def render_shape(c: dict) -> dict:
+    """What the card rendered and its retake round (fleet C A1): frames, model, ref count, voice or
+    silence, canvas, `tries` (0 = first draw) and the reason a retake was ordered."""
+    audio = c.get("audio")
+    shape = {"frames": c.get("frames"), "model": c.get("model"), "refs": len(c.get("refs") or []),
+             "audio": bool(audio) and audio != "silence", "canvas": c.get("render_canvas"),
+             "tries": int(c.get("tries") or 0)}
+    return {**shape, "retake_why": c["retake_why"]} if c.get("retake_why") else shape
+
+
 def render_row(c: dict, prompt_id: str, began: float, record: dict | None, why: str = "") -> dict:
-    """A render's row: the engine's seconds and the wait when kept, the reason when lost."""
+    """A render's row: the card's shape, the engine's seconds and the wait when kept, the reason when lost."""
     row = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "index": c["index"], "prompt_id": prompt_id,
-           "ok": record is not None, "waited_s": round(time.time() - began, 1)}
+           "ok": record is not None, "waited_s": round(time.time() - began, 1), **render_shape(c)}
     if record is not None:
         row.update(render_s=record.get("render_s"), waited_s=record.get("waited_s", row["waited_s"]))
     return {**row, "lost": why[:300]} if why else row
