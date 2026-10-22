@@ -20,11 +20,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import book_look
+from studio import book_look, settings
 from studio.comfy import run
 from studio.refs_pack import T2I, Job, jobs_for, pending, relpath, values_for
 
-LIBRARY = Path(__file__).resolve().parents[2] / "library"
+LIBRARY = settings.library_root()
+"""<repo>/library, or VISURENA_LIBRARY in a rehearsal (2026-10-21_ep02_proof 1.2)."""
 KINDS = ("characters", "props", "locations")
 
 
