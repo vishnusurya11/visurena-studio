@@ -154,6 +154,32 @@ def test_stage_status_sorted_by_padded_step_id(conn):
     assert list(status) == ["01", "01_02", "01_10", "02"]  # text sort = pipeline order
 
 
+def one_tick(monkeypatch):
+    """Every event in one clock tick: a coarse Windows clock gives a fast started->completed one stamp."""
+    tick = datetime(2026, 10, 21, 23, 59, 0, tzinfo=timezone.utc)
+    monkeypatch.setattr(db, "utc_now", lambda: tick)
+
+
+def test_stage_status_breaks_a_same_stamp_tie_by_insertion(conn, monkeypatch):
+    """MAX(event_ts) with a bare `event` column returned the FIRST row of a tie, so "started" came back
+    for a step that had completed (test_stage_status_is_latest_event_per_step, intermittently red)."""
+    codex_id = db.insert_codex(conn, "Dracula")
+    one_tick(monkeypatch)
+    for event in ("started", "completed"):
+        db.add_event(conn, codex_id, "analysis", "01", event)
+    db.add_event(conn, codex_id, "analysis", "02", "started")
+    db.add_event(conn, codex_id, "analysis", "02", "failed")
+    assert db.stage_status(conn, codex_id, "analysis") == {"01": "completed", "02": "failed"}
+
+
+def test_unit_status_breaks_a_same_stamp_tie_by_insertion(conn, monkeypatch):
+    codex_id = db.insert_codex(conn, "Dracula")
+    one_tick(monkeypatch)
+    for event in ("started", "completed"):
+        db.add_event(conn, codex_id, "episode", "05", event, unit="ep02")
+    assert db.unit_status(conn, codex_id, "episode", "ep02") == {"05": "completed"}
+
+
 # --- pending scan ---
 
 

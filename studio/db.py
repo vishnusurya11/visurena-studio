@@ -500,15 +500,23 @@ def _project_step(conn: sqlite3.Connection, order_id: int, step_id: str, event: 
     )
 
 
-def unit_status(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> dict[str, str]:
-    """Derived status of ONE unit of a stage: latest event per step, pipeline order."""
+def latest_per_step(conn: sqlite3.Connection, where: str, params: tuple) -> dict[str, str]:
+    """{step_id: its latest event} in pipeline (= text sort) order.  Latest is the newest stamp,
+    a tie going to the later insert: two events in one clock tick share a stamp, and
+    MAX(event_ts) with a bare `event` column handed back the FIRST of them ("started" for a
+    step that had completed)."""
     rows = conn.execute(
-        "SELECT step_id, event, MAX(event_ts) AS event_ts FROM events"
-        " WHERE codex_id = ? AND stage = ? AND unit = ?"
-        " GROUP BY step_id ORDER BY step_id",
-        (codex_id, stage, unit),
+        "SELECT step_id, event FROM (SELECT step_id, event, ROW_NUMBER() OVER"
+        " (PARTITION BY step_id ORDER BY event_ts DESC, id DESC) AS newest FROM events"
+        f" WHERE {where}) WHERE newest = 1 ORDER BY step_id",
+        params,
     )
     return {row["step_id"]: row["event"] for row in rows}
+
+
+def unit_status(conn: sqlite3.Connection, codex_id: str, stage: str, unit: str) -> dict[str, str]:
+    """Derived status of ONE unit of a stage: latest event per step, pipeline order."""
+    return latest_per_step(conn, "codex_id = ? AND stage = ? AND unit = ?", (codex_id, stage, unit))
 
 
 def codex_pending_stage(
@@ -551,13 +559,7 @@ def codex_ready_for_stage(
 
 def stage_status(conn: sqlite3.Connection, codex_id: str, stage: str) -> dict[str, str]:
     """Derived status: latest event per step, in pipeline (= text sort) order."""
-    rows = conn.execute(
-        "SELECT step_id, event, MAX(event_ts) AS event_ts FROM events"
-        " WHERE codex_id = ? AND stage = ?"
-        " GROUP BY step_id ORDER BY step_id",
-        (codex_id, stage),
-    )
-    return {row["step_id"]: row["event"] for row in rows}
+    return latest_per_step(conn, "codex_id = ? AND stage = ?", (codex_id, stage))
 
 
 # --- work orders: the department table (decision 2026-09-25) ---
