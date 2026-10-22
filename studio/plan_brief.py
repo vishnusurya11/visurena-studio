@@ -32,7 +32,8 @@ SECTIONS = {
     "band": "## THE BAND (from the contract)",
     "scenes": "## THE CHAPTER'S SCENES (analysis rows)",
     "chapter_text": "## THE CHAPTER'S TEXT",
-    "screenplay": "## SCREENPLAY ELEMENTS SOURCED FROM THIS CHAPTER",
+    "screenplay": "## SCREENPLAY ELEMENTS SOURCED FROM THIS CHAPTER (where the screenplay and the chapter "
+                  "disagree, the chapter wins)",
     "cast": "## THE BOUND CAST ROWS (name people only through these)",
     "places": "## THE PLACES THIS CHAPTER VISITS",
     "camera_catalog": "## THE CAMERA CATALOG",
@@ -152,20 +153,45 @@ def _targets(book_dir: Path, targets: list[str] | None) -> list[Path]:
 
 
 def _scene_elements(scene: dict, number: int) -> list[dict]:
-    return [_pick(e, ELEMENT_FIELDS) for e in scene.get("elements", [])
-            if (e.get("source") or {}).get("chapter") == number]
+    """This chapter's elements; one the screenplay made up says `invented` (craft ruling A7: scene 1
+    invents a visible "JEKYLL" signature the book withholds)."""
+    return [{**_pick(e, ELEMENT_FIELDS), **({"invented": True} if e.get("provenance") == "invented" else {})}
+            for e in scene.get("elements", []) if (e.get("source") or {}).get("chapter") == number]
+
+
+def verbatim_dialogue(scene: dict) -> int:
+    """The scene's dialogue elements the screenplay grounded word for word in the book."""
+    return sum(e.get("kind") == "dialogue" and e.get("provenance") == "verbatim" for e in scene.get("elements", []))
+
+
+def same_run(a: dict, b: dict) -> bool:
+    return a.get("beat_id") == b.get("beat_id") and \
+        (a.get("slug") or {}).get("location_id") == (b.get("slug") or {}).get("location_id")
+
+
+def one_per_run(scenes: list[dict]) -> list[dict]:
+    """One scene per run of adjacent scenes in one beat and one room, the most verbatim dialogue kept:
+    Jekyll B01 is ch1 told three times at one door; B02's six scenes are five rooms, not a run (A7)."""
+    runs: list[list[dict]] = []
+    for scene in scenes:
+        if runs and same_run(runs[-1][-1], scene):
+            runs[-1].append(scene)
+        else:
+            runs.append([scene])
+    return [max(run, key=verbatim_dialogue) for run in runs]
 
 
 def screenplay(book_dir: Path, number: int, targets: list[str] | None = None) -> list[dict]:
     """Every screenplay scene holding an element sourced from this chapter, with
-    only those elements; every target under `screenplay/` unless told which."""
+    only those elements, one per retold run (`one_per_run`); every target under
+    `screenplay/` unless told which."""
     out = []
     for path in _targets(book_dir, targets):
-        for scene in _read(path).get("scenes", []):
-            if elements := _scene_elements(scene, number):
-                out.append({"target": path.parent.name, "number": scene.get("number"),
-                            "slug": (scene.get("slug") or {}).get("text", ""),
-                            "cast": scene.get("cast", []), "elements": elements})
+        held = [s for s in _read(path).get("scenes", []) if _scene_elements(s, number)]
+        for scene in one_per_run(held):
+            out.append({"target": path.parent.name, "number": scene.get("number"),
+                        "slug": (scene.get("slug") or {}).get("text", ""),
+                        "cast": scene.get("cast", []), "elements": _scene_elements(scene, number)})
     return out
 
 
