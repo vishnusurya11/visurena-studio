@@ -2567,3 +2567,5 @@ build byte for byte), never the recorded words.
   real take is a retake, not a fault. The real exposure is a voice outside the cast: 18/8,093 Scarlet,
   1/1,564 WotW, 10/296 Jekyll trials pass, guarded then by speaker_check's line-vs-line pairs
   (fix/calibrate4.py -> reviewed.json, RESULT.md).
+
+- **Moved here from SKILL.md (read budget, 2026-10-22):** the autopilot PARKS with a reason — a row in `parked.jsonl` and one Telegram — never a wait on a person. SKILL.md now says "(a parked.jsonl row)" and names WAIT_QUOTA, the shut-usage-window wait (decision 2026-10-22_agent_task_runner).

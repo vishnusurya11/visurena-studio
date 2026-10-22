@@ -67,6 +67,10 @@ CASES = [
     ("other REFUSED", "SystemExit: REFUSED: the plan fails the battery twice", SIGNED,
      ("brain", "refused: REFUSED: the plan fails the battery twice", None)),
     ("empty log", "", SIGNED, ("brain", "unclassified: the log is empty", None)),
+    # group R A1 (2026-10-22): a shut usage window waits for its reset, never the brain
+    ("shut usage window", "Traceback (most recent call last):\n  File x\nstudio.brain.RateLimited: rate limited: "
+     "usage window seven_day shut until 1793030400", SIGNED,
+     ("quota", "quota: studio.brain.RateLimited: rate limited: usage window seven_day shut until 1793030400", None)),
 ]
 
 
@@ -75,9 +79,9 @@ def test_classify_every_handback(label, tail, home, want):
     assert ap.classify(tail, home) == want, label
 
 
-def test_classify_kinds_are_the_seven_of_the_table():
+def test_classify_kinds_are_the_eight_of_the_table():
     kinds = {ap.classify(tail, home)[0] for _, tail, home, _ in CASES}
-    assert kinds <= ap.KINDS and ap.KINDS == {"completed", "retry", "cure", "wait", "brain", "park", "held"}
+    assert kinds <= ap.KINDS and ap.KINDS == {"completed", "retry", "cure", "wait", "brain", "park", "held", "quota"}
 
 
 def test_the_last_line_names_the_fault_not_the_frame():

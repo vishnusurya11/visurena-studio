@@ -132,6 +132,7 @@ minted after the switch has lived 8 days. Nothing uploads unless the owner asks.
 | finish line `repair X h of a Y h cap` | each repair window against its own cap (the line once summed both against the second cap) | read each window alone |
 | finish line `killed X h in N runs` | a share of the charge and the repair the line already holds | never add it as a third part |
 | state `WAIT_TREE` | uncommitted runtime code | commit your own paths the moment a run stops |
+| state `WAIT_QUOTA` | the usage window is shut; `library/.autopilot/quota.json` holds the wake time for every book | nothing: one Telegram, no brain call, it relaunches past the reset; over 8 days it parks |
 | step 03 records `stalled` in `storyboard/cells_from_picture.json` | a vision read stalled twice | a resume before the grids reads again; it is not an unreadable picture |
 | ComfyUI will not come up | run `nvidia-smi` first; "GPU is lost" needs the owner's reboot | keep the series paused, then `retry` + `resume` |
 

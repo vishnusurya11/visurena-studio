@@ -38,7 +38,7 @@ ENGINE_RESTARTS = 2
 """ComfyUI restarts per episode before PARK(engine) (ops §2)."""
 CRASHES_BEFORE_BRAIN = 3
 """A `start` row with no `end` after it is a crash; three ask the brain."""
-KINDS = {"completed", "retry", "cure", "wait", "brain", "park", "held"}
+KINDS = {"completed", "retry", "cure", "wait", "brain", "park", "held", "quota"}
 
 
 class State(str, Enum):
@@ -48,6 +48,9 @@ class State(str, Enum):
     NEEDS_BRAIN = "NEEDS_BRAIN"
     BRAIN_RUNNING = "BRAIN_RUNNING"
     WAIT_TREE = "WAIT_TREE"
+    WAIT_QUOTA = "WAIT_QUOTA"
+    """The usage window is shut: no brain call, a relaunch past its reset (group R A1,
+    2026-10-22: a shut window parked episodes brain_exhausted after three brain asks)."""
     PARKED = "PARKED"
     PAUSED = "PAUSED"
     COMPLETE = "COMPLETE"
@@ -103,11 +106,21 @@ def crashes(drive_rows: list[dict]) -> int:
     return count + open_run
 
 
+QUOTA_ERRORS = ("RateLimited", "LimitWait")
+"""The run-row error words of a shut usage window (studio.llm.LimitWait)."""
+
+
 def stops(drive_rows: list[dict]) -> int:
     """`end` rows with a non-zero code: how many times this episode has
-    already stopped and been answered -- the counter every cap reads."""
-    return sum(1 for r in drive_rows if r.get("event") == "end" and r.get("code") not in (0, None)
-               and not r.get("paused_at_boundary"))             # a boundary pause is no stop (C3 #7)
+    already stopped and been answered -- the counter every cap reads.  A
+    boundary pause (C3 #7) and a shut usage window (group R A1) are no stop."""
+    count, quota = 0, False
+    for row in drive_rows:
+        if row.get("event") == "run":
+            quota = str(row.get("error") or "").endswith(QUOTA_ERRORS)
+        elif row.get("event") == "end" and row.get("code") not in (0, None):
+            count += not (row.get("paused_at_boundary") or quota)
+    return count
 
 
 def last_row(drive_rows: list[dict], event: str) -> dict | None:
@@ -177,9 +190,27 @@ def _deferred_plan(tail: str, home: set[str]) -> tuple[str, str, tuple | None]:
     return ("retry", "plan_deferred", None)
 
 
+QUOTA_LINE = re.compile(r"usage window (\S+) shut until (\S+)")
+"""studio.llm.LimitWait's message: the window and the epoch it opens, or `unknown`."""
+
+
+def quota_of(tail: str) -> tuple[str, float | None] | None:
+    """(window, resets_at) off the last shut-window line; an unsaid epoch is None."""
+    hits = QUOTA_LINE.findall(tail or "")
+    if not hits:
+        return None
+    window, until = hits[-1]
+    try:
+        return window, float(until)
+    except ValueError:
+        return window, None
+
+
 TABLE: list[tuple[str, object]] = [
     (r"EPISODE completed", ("completed", "completed", None)),
     (r"^studio\.llm\.OverBudget:", ("park", "over_budget", None)),
+    # a shut usage window waits for its reset, never a brain turn (group R A1, 2026-10-22)
+    (QUOTA_LINE.pattern, ("quota", "quota: {line}", None)),
     (r"REFUSED to start: the working tree is dirty", ("wait", "tree_dirty", None)),
     (r"title card could not be baked", ("brain", "title_card", None)),
     (r"HELD: ", ("wait", "held", None)),
@@ -351,6 +382,8 @@ def _answer(s: Signals, n: int, kind: str, reason: str, order) -> Derived:
         return _held(s, n)
     if kind == "brain":
         return _brain(s, n, reason)
+    if kind == "quota":
+        return Derived(State.WAIT_QUOTA, reason, None, packet(s, n, reason))
     cap = RELAUNCH_CAP if kind == "retry" else CURE_CAP
     if stops(s.drive_rows) > cap:
         return _brain(s, n, f"{kind}_exhausted: {reason}")

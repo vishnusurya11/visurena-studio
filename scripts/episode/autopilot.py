@@ -71,6 +71,13 @@ engine (memory: run 18 lost 11 h to a Qwen3-VL read nobody killed)."""
 TREE_TOLD_S = 6 * 3600
 DEAD_BEAT_S = 600
 BRAIN_TIMEOUT_S = 45 * 60
+QUOTA_FILE = "quota.json"
+"""library/.autopilot/quota.json: ONE usage-window wait for every book (one login is one pool)."""
+QUOTA_MARGIN_S = 90
+QUOTA_RECHECK_S = 30 * 60
+"""An unsaid reset is looked at again after this long (group R ruling A1, 2026-10-22)."""
+QUOTA_CAP_S = 8 * 86400
+"""The longest wait: the weekly window's reach, so its known reset never parks (skeptic m4)."""
 BRAIN_ATTEMPTS = 3
 ENGINE_RESTARTS = 2
 LOG_LINES = 40
@@ -997,8 +1004,11 @@ def brain(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
     attempt = home / "brain" / f"attempt_{len(brain_attempts_of(home)) + 1:02d}.json"
     heartbeat(deps, -1, "BRAIN_RUNNING", n)
     event(book, {"event": "brain", "episode": n, "attempt": attempt.name, "reason": str(derived.reason)})
+    from studio.llm import LimitWait
     try:
         doc = deps.brain(book, codex, n, brain_packet(book, n, derived, signals, deps), attempt)
+    except LimitWait as shut:                                  # a shut window is no attempt (group R A1)
+        return open_quota(book, codex, n, f"{codex}/ep{n:02d}/brain", shut.window, shut.resets_at, deps)
     except Exception as why:                                   # the leash: a dead brain is an attempt
         doc = {"verdict": "error", "why": scrub(repr(why))}
     if not attempt.exists():
@@ -1188,9 +1198,65 @@ def act_idle(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> di
     return launch(book, codex, n, deps, "relaunch" if signals.drive_rows else "launch")
 
 
+# ---- a shut usage window (group R ruling A1, 2026-10-22) --------------------------
+
+WAITING_QUOTA = {"action": "wait_quota", "state": "WAIT_QUOTA"}
+
+
+def quota_doc(deps: Deps) -> dict:
+    return read_json(deps.root / QUOTA_FILE, {}) or {}
+
+
+def quota_shut(deps: Deps) -> bool:
+    """The global wait holds: its not_before is still ahead."""
+    return deps.now() < float(quota_doc(deps).get("not_before") or 0)
+
+
+def quota_until(now: float, resets_at: float | None) -> float:
+    """The first second worth a call: the reset plus a margin, or a re-check when unsaid."""
+    return now + QUOTA_RECHECK_S if resets_at is None else float(resets_at) + QUOTA_MARGIN_S
+
+
+def seattle(epoch: float) -> str:
+    from studio.command_center.progress_view import seattle_time
+    return f"{seattle_time(epoch):%a %d %b %H:%M} Seattle"
+
+
+def open_quota(book: Path, codex: str, n: int, stop: str, window, resets_at, deps: Deps) -> dict:
+    """Write the global wait for this stop; tell once per wait; past the cap, park."""
+    now, fresh = deps.now(), not quota_shut(deps)
+    until = quota_until(now, resets_at)
+    if until - now > QUOTA_CAP_S:
+        return park(book, codex, n, f"quota_wait_too_long: window {window} opens {seattle(until)}",
+                    {"resets_at": resets_at}, deps)
+    if not fresh:
+        until = max(until, float(quota_doc(deps)["not_before"]))
+    since = now if fresh else quota_doc(deps).get("since", now)
+    write_atomic(deps.root / QUOTA_FILE, {"not_before": until, "resets_at": resets_at, "window": window,
+                                          "stop": stop, "since": since, "book": codex, "episode": n})
+    event(book, {"event": "quota_wait", "episode": n, "window": window, "not_before": until})
+    if fresh and until > now:
+        deps.notify(f"ep{n:02d}: usage window {window} shut; waiting until {seattle(until)}, no brain call before")
+    return dict(WAITING_QUOTA)
+
+
+def wait_quota(book: Path, codex: str, n: int, signals, deps: Deps) -> dict:
+    """WAIT_QUOTA: this stop opens the wait once; it holds while shut; past it, relaunch."""
+    doc, stop = quota_doc(deps), f"{codex}/ep{n:02d}/{len(signals.drive_rows)}"
+    if doc.get("stop") != stop:
+        window, resets_at = pure().quota_of(signals.log_tail) or (None, None)
+        return open_quota(book, codex, n, stop, window, resets_at, deps)
+    if quota_shut(deps):
+        return dict(WAITING_QUOTA)
+    event(book, {"event": "quota_open", "episode": n, "quota_wait_s": round(deps.now() - float(doc.get("since") or 0))})
+    return launch(book, codex, n, deps, "relaunch")
+
+
 def act_needs_brain(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
     if derived.order:
         return cure(book, codex, n, derived, deps)
+    if quota_shut(deps):
+        return dict(WAITING_QUOTA)                              # no brain call while the window is shut
     if signals.brain_attempts >= BRAIN_ATTEMPTS:
         return park(book, codex, n, "brain_exhausted", {"reason": str(derived.reason)}, deps)
     return brain(book, codex, n, derived, signals, deps)
@@ -1230,6 +1296,8 @@ def act(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
         return note_published(book, n, signals.uploads_rows, deps)
     if state == "WAIT_TREE":
         return wait_tree(book, deps)
+    if state == "WAIT_QUOTA":
+        return wait_quota(book, codex, n, signals, deps)
     return {"action": "wait", "state": state}
 
 

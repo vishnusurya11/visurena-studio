@@ -42,13 +42,13 @@ its cast are the only inputs.
 **The series runs itself (decision 2026-10-06, `architecture/decisions/2026-10-06_autopilot_and_brain.md`).**
 The scheduled task `visurena-autopilot` runs `scripts/episode/autopilot.py run --book <codex>`
 at logon and every 5 minutes. Every 30 s it reads the disk, names ONE state (IDLE, RUNNING,
-PUBLISHED, HELD_PUBLISH, NEEDS_BRAIN, BRAIN_RUNNING, WAIT_TREE, PARKED, PAUSED, COMPLETE), takes ONE
+PUBLISHED, HELD_PUBLISH, NEEDS_BRAIN, BRAIN_RUNNING, WAIT_TREE, WAIT_QUOTA, PARKED, PAUSED, COMPLETE), takes ONE
 action, and writes `library/<book>/autopilot/status.json` + `events.jsonl`. It launches
 `drive.py` for the next chapter, retries what retries, cures through work orders, restarts a
 hung ComfyUI, asks the brain (read-only triage, a JSON verdict) when a stop is not in its
-table, and PARKS with a reason — a row in `parked.jsonl` and one Telegram — never a wait on
+table, and PARKS with a reason (a parked.jsonl row), never a wait on
 a person. Two consecutive parks pause the series. A commit restarts the loop on the new code
-once no drive runs (a live drive keeps its code); a dirty tree is WAIT_TREE.
+once no drive runs (a live drive keeps its code); a dirty tree is WAIT_TREE, a shut window WAIT_QUOTA.
 
 **Your job is WATCH + REPORT, never a hand:** what you read, every act on a live run or a
 repair, and the symptom table are `OPERATOR.md`.
