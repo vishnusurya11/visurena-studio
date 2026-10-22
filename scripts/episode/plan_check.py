@@ -391,6 +391,10 @@ def main(book_id: str, number: int, plan: str = "plan.json") -> int:
         print("   ", f[:170])
     for n in plan_gates.limb_faults(ep):          # G-LIMB: advisory, cured before the contract (plan_repair.restored)
         print("  advisory:", n[:170])
+    en = plan_gates.end_noun_faults(ep)           # craft ruling A19: HARD, cured free (plan_cures.camera_ends)
+    print("G-END-NOUNS  :", len(en) or "clean"); hard += len(en)
+    for f in en:
+        print("   ", f[:170])
     af = plan_gates.article_faults(ep)
     print("G-ARTICLE    :", len(af) or "clean"); hard += len(af)
     for f in af:

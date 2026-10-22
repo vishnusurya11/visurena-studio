@@ -503,6 +503,13 @@ CAMERA_END = re.compile(r"^\s*the camera\b", re.I)
 frame corner, and ep01 T06 arrived "with the camera tilts up now in frame" (shot framework D-d)."""
 
 
+CAMERA_IN_END = re.compile(r"^\s*the camera\b|\bcamera\b[^.;]{0,30}?\b(?:pushes|pulls back|pulls out|tracks|pans|"
+                           r"tilts|dollies|cranes|orbits|zooms|racks|rises|holds)\b", re.I)
+"""An `end` (or a clause of one) that opens "The camera" or gives the camera a move: a move is no
+picture, so it lends no noun and G-END-NOUNS refuses it at plan sign (craft ruling A19).  A bare
+verb is not one ("he pans for gold", "cart tracks": the census's wave 0 review, finding 10)."""
+
+
 def is_layout(end: str) -> bool:
     return bool(LAYOUT.search(end)) and not CAMERA_END.match(end)
 
@@ -511,10 +518,12 @@ def end_noun(end: str, names=()) -> str:
     """The one noun a layout lends the arrival: the subject of its first clause
     that has COME INTO frame (a clause that says something has left lends nothing),
     its size opener off, cut before its first verb or preposition and, past five
-    words, at its first `of`."""
+    words, at its first `of`.  A clause that moves the camera lends nothing (`CAMERA_IN_END`)."""
     text = end.rstrip(".")
     text = next((text[len(h):] for h, _ in OPENERS if text.startswith(h)), text)
     for clause in CLAUSE.split(text):
+        if CAMERA_IN_END.search(clause):
+            return ""
         if not clause.strip() or LEFT_FRAME.search(clause):
             continue
         whole = clause.strip().replace("face to face", "face-to-face")

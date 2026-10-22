@@ -22,6 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from studio import house_style, take_currency  # noqa: E402
+from studio.episode_ref_official import CAMERA_IN_END  # noqa: E402
 from studio.take_inputs import night_of  # noqa: E402,F401  (one night rule for the census and QC)
 
 DD = re.compile(r"detailed_description:\n(.*?)(?:\n\n[a-z_]+:|\Z)", re.S)
@@ -30,10 +31,9 @@ SPOKEN = re.compile(r"<d>.*?</d>", re.S)
 SPEECH = re.compile(r"\b(?:speak|speaks|speaking|says|saying|answers?|answering|asks?|asking|talks?|"
                     r"screams?|shouts?|cries|replies|replying|tells?)\b", re.I)
 GARBLE = re.compile(r",,|\.,|\s,|with the camera \w+(?: \w+)? now in frame")
-CAMERA_END = re.compile(r"^\s*the camera\b|\bcamera\b[^.;]{0,30}?\b(?:pushes|pulls back|pulls out|tracks|pans|"
-                        r"tilts|dollies|cranes|orbits|zooms|racks|rises|holds)\b", re.I)
-"""An `end` that opens "The camera" or gives the camera a move; a bare verb is not one ("he pans
-for gold", "cart tracks": wave 0 review finding 10)."""
+CAMERA_END = CAMERA_IN_END
+"""An `end` that opens "The camera" or gives the camera a move: G-END-NOUNS's own rule (A19), so the
+census counts what the plan gate refuses."""
 BLOCK = re.compile(r"\[Shot \d+\] From \d\d:\d\d to (\d\d:\d\d)\.(.*?)(?=\[Shot \d+\]|\Z)", re.S)
 INSERT_SCOPE = "only that object and what touches it is in frame"
 SUBJECT = re.compile(r"<Subject (\d+)>")

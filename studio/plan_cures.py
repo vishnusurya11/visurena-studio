@@ -1776,6 +1776,7 @@ CURES[:0] = [   # the anime-TV grammar (2026-10-17), ahead of every older patter
     (re.compile(r"G-PUSH shot \d+: a push past"), "hold_extra_pushes"),
     (re.compile(r"G-OTS shot"), "ots_medium_close"),
     (re.compile(r"G-LIMB shot"), "body_clause"),
+    (re.compile(r"G-END-NOUNS shot \d+"), "camera_ends"),          # craft ruling A19
     (re.compile(r"G-CROWD-ORPHAN setup"), "clear_orphan_crowds"),
     (re.compile(r"G-TWO shot \d+: .*measured medium/\w+ against medium/locked"), "lock_two_shot"),   # a wrong SIZE is the writer's
 ]
@@ -1931,6 +1932,18 @@ def mute_listens(doc: dict, indices: list[int]) -> dict:
             for field in MUTE_FIELDS:
                 s[field] = SPEECH_VERB.sub(lambda m: listened(m.group(0)) if listenable(m) else m.group(0),
                                            s.get(field) or "")
+    return doc
+
+
+def camera_ends(doc: dict, indices: list[int]) -> dict:
+    """G-END-NOUNS' free cure (craft ruling A19): on each named shot, an `end` (its own or a cut's)
+    that is a camera sentence is cleared with the `changed` that names the change into it.  With no
+    written end the camera's own move says the arrival (`arrival_clause`); the writer is never asked."""
+    from studio.episode_ref_official import CAMERA_IN_END
+    for s in doc.get("shots") or []:
+        for holder in ([s] + list(s.get("cuts") or [])) if s.get("index") in indices else []:
+            if CAMERA_IN_END.search(holder.get("end") or ""):
+                holder["end"], holder["changed"] = "", ""
     return doc
 
 

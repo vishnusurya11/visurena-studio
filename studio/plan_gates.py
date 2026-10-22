@@ -26,7 +26,7 @@ import statistics
 from pathlib import Path
 
 from studio import story_layer
-from studio.episode_ref_official import AMOUNT, camera_clause
+from studio.episode_ref_official import AMOUNT, CAMERA_IN_END, camera_clause
 from studio.episode_seq_board import HOLDS, TRAVEL
 from studio.episode_takes import BUDGET as _TAKE_BUDGET_S
 from studio.episode_spec import BANNED_PROPS, MAX_SETUP_SECONDS, Episode, Line, Setup, Shot
@@ -632,6 +632,16 @@ def limb_faults(episode) -> list[str]:
     return [fault("G-LIMB", f"shot {s.index}", f"{hit!r} enters from an edge with no body in the cell", 0, "a body word")
             for s in episode.shots
             if (hit := limb_hit(s.size, " ".join(str(getattr(s, k, "") or "") for k in ("frame", "at_rest", "motion"))))]
+
+
+def end_noun_faults(episode) -> list[str]:
+    """G-END-NOUNS, HARD (craft ruling A19): a shot's or a cut's `end` that opens "The camera" or
+    moves it.  `end` is the drawer's last picture, nouns in places; ep01 shot 6 wrote the tilt there
+    and the take arrived "with the camera tilts up now in frame".  plan_cures.camera_ends clears it, free."""
+    held = [(s.index, s.end) for s in episode.shots] + [(s.index, c.end) for s in episode.shots
+                                                        for c in getattr(s, "cuts", None) or []]
+    return [fault("G-END-NOUNS", f"shot {i}", "the end is a camera sentence, not a picture", 1, 0)
+            for i in dict.fromkeys(i for i, end in held if CAMERA_IN_END.search(end or ""))]
 
 
 # ---- G-STAGE and G-FACE-KIND: a machine or creature shows only as its card -------
