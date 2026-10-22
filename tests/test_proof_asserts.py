@@ -67,6 +67,19 @@ def test_a_row_only_summed_into_its_step_wall_caps_no_rounds(tmp_path):
     assert asserts.counter_faults({"lines": {"rounds": 7}, "voice": {"rounds": 3}}, table) == ["voice 3 > 2"]
 
 
+def test_a_row_only_summed_into_its_step_wall_is_held_to_that_wall_by_its_seconds():
+    """Window 3 review: ebfdb49 left five `read: step` rows with no check at all, so a runaway re-say
+    loop passed A-caps.  Production cuts such a row by its seconds (say_lines.lines_wall_s), and the
+    step wall is its rows' walls summed: a row past the whole step wall is a runaway."""
+    from studio import step_caps
+    table = {"say": step_caps.Cap("say", "04", 1, "episode", 900.0, read="step"),
+             "lines": step_caps.Cap("lines", "04", 1, "episode", 600.0, read="step"),
+             "voice": step_caps.Cap("voice", "04", 2, "episode", 1800.0)}
+    assert asserts.counter_faults({"lines": {"rounds": 7, "seconds": 17.6}}, table) == []
+    assert asserts.counter_faults({"lines": {"rounds": 900, "seconds": 3400.0}}, table) == \
+        ["lines 3400 s > step 04 wall 3300 s"]
+
+
 def test_a_finished_take_submitted_again_without_a_gate_retake_is_a_rerender():
     rows = [{"call": "prompt", "kind": "take", "index": 1, "ts": 1.0}, {"call": "prompt", "kind": "take", "index": 2, "ts": 2.0},
             {"call": "prompt", "kind": "take", "index": 1, "ts": 5.0}]

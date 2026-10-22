@@ -96,6 +96,20 @@ def allowed_rounds(key: str, table: Mapping) -> int | None:
     return cap.rounds * (cap.climbs if cap.per == "climb" else 1)
 
 
+def step_wall_of(step: str, table: Mapping) -> float:
+    """A step's wall from the table: its rows' walls summed, a climb row once per climb (step_caps)."""
+    return sum(c.wall_s * (c.climbs if c.per == "climb" else 1) for c in table.values() if c.step == step)
+
+
+def seconds_fault(key: str, value, table: Mapping) -> str | None:
+    """A `read: step` row is cut by its seconds, not its rounds: past its whole step's wall it ran away."""
+    cap = table.get(key)
+    if cap is None or cap.read != "step" or not isinstance(value, dict):
+        return None
+    spent, wall = float(value.get("seconds") or 0.0), step_wall_of(cap.step, table)
+    return f"{key} {spent:.0f} s > step {cap.step} wall {wall:.0f} s" if spent > wall else None
+
+
 def counter_faults(attempts: Mapping, table: Mapping) -> list[str]:
     out = []
     for key, value in sorted(attempts.items()):
@@ -103,11 +117,13 @@ def counter_faults(attempts: Mapping, table: Mapping) -> list[str]:
         taken = int((value or {}).get("rounds", 0)) if isinstance(value, dict) else 0
         if cap is not None and taken > cap:
             out.append(f"{key} {taken} > {cap}")
+        out += [why] if (why := seconds_fault(key, value, table)) else []
     return out
 
 
 def a_caps(book: Path, n: int, table: Mapping | None = None) -> dict:
-    """Every phase within its cap-table rounds; engine restarts <= 2; brain sessions <= 3."""
+    """Every phase within its cap-table rounds, every `read: step` row within its step wall by its
+    seconds; engine restarts <= 2; brain sessions <= 3."""
     from studio import step_caps
     home = home_of(book, n)
     attempts_path = home / "attempts.json"
