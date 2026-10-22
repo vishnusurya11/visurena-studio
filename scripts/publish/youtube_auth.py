@@ -4,7 +4,9 @@
     uv run python scripts/publish/youtube_auth.py
 
 Opens a browser, asks you to sign in as the account that owns The Keeper's
-Lantern, and requests two scopes: `youtube.upload` and `youtube.force-ssl`.
+Lantern, and requests three scopes: `youtube.upload`, `youtube.force-ssl` and
+(since 2026-10-21) `yt-analytics.readonly`.  The scopes Google grants are
+written beside the token, and every refresh asks for exactly those.
 On success it writes YOUTUBE_REFRESH_TOKEN into `.env` (which is gitignored)
 and then PROVES which channel the token actually belongs to, by calling
 `channels.list(mine=True)` and printing the title beside the YOUTUBE_CHANNEL_ID
@@ -35,10 +37,25 @@ TOKEN_WARN_DAYS = 5.0
 DAY = 86_400.0
 
 
-def store_token(env: Path, token: str, now: float | None = None) -> Path:
-    """The token and the moment it was stored: the age the launch check reads."""
+def store_token(env: Path, token: str, now: float | None = None, scopes: list[str] | None = None) -> Path:
+    """The token, the moment it was stored (the age the launch check reads) and,
+    when given, the scopes it was granted (what every refresh then asks for)."""
     youtube.save_refresh_token(env, token)
+    if scopes:
+        youtube.set_var(env, youtube.GRANTED, " ".join(scopes))
     return youtube.set_var(env, MINTED, str(time.time() if now is None else now))
+
+
+def granted(creds) -> list[str]:
+    """The scopes a consent granted: Google's answer (a string or a list), else the request.
+    Granular consent lets the owner untick one, so the request alone is not proof."""
+    got = creds.granted_scopes or creds.scopes or []
+    return got.split() if isinstance(got, str) else list(got)
+
+
+def keep(env: Path, creds) -> Path:
+    """Store a consent's refresh token with the scopes it was granted."""
+    return store_token(env, creds.refresh_token, scopes=granted(creds))
 
 
 def token_age_days(env: Path, now: float) -> float | None:
@@ -79,16 +96,16 @@ def token_note(env: Path, blob: Path | None, now: float, refresh=refresh_fails, 
             f"address it fails on (uv run python scripts/publish/youtube_auth.py --paste=<address>)")
 
 
-def consent(env: Path, blob: Path | None = None) -> str:
-    """The browser round trip.  Returns the refresh token."""
+def consent(env: Path, blob: Path | None = None):
+    """The browser round trip.  Returns the credentials (refresh token + granted scopes)."""
     from google_auth_oauthlib.flow import InstalledAppFlow
 
-    flow = InstalledAppFlow.from_client_config(youtube.client_config(env, blob), youtube.SCOPES)
+    flow = InstalledAppFlow.from_client_config(youtube.client_config(env, blob), youtube.CONSENT_SCOPES)
     creds = flow.run_local_server(port=0, prompt="consent", access_type="offline")
     if not creds.refresh_token:
         raise SystemExit("Google returned no refresh token. Re-run: the consent screen must be "
                          "shown (prompt=consent) and access must be offline.")
-    return creds.refresh_token
+    return creds
 
 
 PASTE_REDIRECT = "http://localhost:8765/"
@@ -108,7 +125,7 @@ def code_from(url: str) -> str:
 
 def paste_flow(env: Path, blob: Path | None, verifier: str | None = None):
     from google_auth_oauthlib.flow import InstalledAppFlow
-    return InstalledAppFlow.from_client_config(youtube.client_config(env, blob), youtube.SCOPES,
+    return InstalledAppFlow.from_client_config(youtube.client_config(env, blob), youtube.CONSENT_SCOPES,
                                                redirect_uri=PASTE_REDIRECT, code_verifier=verifier,
                                                autogenerate_code_verifier=verifier is None)
 
@@ -133,8 +150,8 @@ def pending_link(env: Path, blob: Path | None) -> str:
     return url
 
 
-def paste_token(env: Path, blob: Path | None, redirected: str) -> str:
-    """Half two: the pasted address's code exchanged for the refresh token."""
+def paste_token(env: Path, blob: Path | None, redirected: str):
+    """Half two: the pasted address's code exchanged for the credentials."""
     import json
     verifier = json.loads(PENDING.read_text(encoding="utf-8"))["verifier"]
     flow = paste_flow(env, blob, verifier)
@@ -142,7 +159,7 @@ def paste_token(env: Path, blob: Path | None, redirected: str) -> str:
     PENDING.unlink(missing_ok=True)
     if not flow.credentials.refresh_token:
         raise SystemExit("Google returned no refresh token; open a fresh --paste-link and consent again.")
-    return flow.credentials.refresh_token
+    return flow.credentials
 
 
 def whose_channel(env: Path) -> dict:
@@ -164,18 +181,18 @@ def main(argv: list[str]) -> None:
     blob = next((Path(a) for a in args if a.endswith(".json")), None) or default_blob()
     if blob:
         print(f"using the OAuth client from {blob} (it cannot go stale like a copied secret)")
-    print(f"scopes: {', '.join(youtube.SCOPES)}")
+    print(f"scopes: {', '.join(youtube.CONSENT_SCOPES)}")
     if "--paste-link" in argv:
         print("open on ANY device, approve, then paste the localhost address it fails on:\n")
         print(paste_link(env, blob))
         return
     pasted = next((a.split("=", 1)[1] for a in argv if a.startswith("--paste=")), None)
     if pasted:
-        store_token(env, paste_token(env, blob, pasted))
+        keep(env, paste_token(env, blob, pasted))
     else:
         print("a browser will open -- sign in as the owner of The Keeper's Lantern\n")
-        store_token(env, consent(env, blob))
-    print(f"refresh token stored in {env} (value not shown)\n")
+        keep(env, consent(env, blob))
+    print(f"refresh token stored in {env} (value not shown); granted: {', '.join(youtube.token_scopes(env))}\n")
 
     channel = whose_channel(env)
     wanted = youtube.read_env(env).get("YOUTUBE_CHANNEL_ID", "")

@@ -16,7 +16,9 @@ Two facts that decide how this is set up, both verified against Google's docs
     restricted one.
   * Scopes are fixed at consent.  `youtube.force-ssl` is asked for alongside
     `youtube.upload` NOW, because thumbnails, playlists and captions need it
-    and adding a scope later means consenting again.
+    and adding a scope later means consenting again.  `yt-analytics.readonly`
+    joined the consent on 2026-10-21; it reaches the token at the next weekly
+    re-consent, and until then refreshes ask only for the two scopes held.
 """
 from __future__ import annotations
 
@@ -25,10 +27,17 @@ from pathlib import Path
 
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload",
           "https://www.googleapis.com/auth/youtube.force-ssl"]
+"""What a token stored before its scopes were recorded was granted (every token to 2026-10-21)."""
+ANALYTICS = "https://www.googleapis.com/auth/yt-analytics.readonly"
+CONSENT_SCOPES = [*SCOPES, ANALYTICS]
+"""What the next consent asks for (owner go 2026-10-21).  A refresh asks only for the
+scopes its token was granted: Google refuses a refresh that names one more."""
 
 ENV = Path(".env")
 CLIENT_ID, CLIENT_SECRET = "YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET"
 REFRESH = "YOUTUBE_REFRESH_TOKEN"
+GRANTED = "YOUTUBE_TOKEN_SCOPES"
+"""The scopes the stored refresh token was granted, space-separated, written beside it."""
 
 
 def read_env(path: Path = ENV) -> dict[str, str]:
@@ -115,6 +124,18 @@ def save_client(path: Path, config: dict) -> Path:
     return set_var(path, CLIENT_SECRET, inner["client_secret"])
 
 
+def token_scopes(path: Path = ENV) -> list[str]:
+    """The scopes the stored token holds: its record, else SCOPES (a token stored
+    before the record existed was granted exactly those)."""
+    recorded = read_env(path).get(GRANTED, "").split()
+    return recorded or list(SCOPES)
+
+
+def can_read_analytics(path: Path = ENV) -> bool:
+    """True once a consent granted yt-analytics.readonly to the stored token."""
+    return ANALYTICS in token_scopes(path)
+
+
 def credentials(path: Path = ENV):
     """A ready-to-use Credentials object from the stored refresh token.
 
@@ -127,4 +148,4 @@ def credentials(path: Path = ENV):
         raise SystemExit(f"{REFRESH} missing from {path}: run "
                          f"`uv run python scripts/publish/youtube_auth.py` once to mint it.")
     return Credentials(None, refresh_token=env[REFRESH], token_uri="https://oauth2.googleapis.com/token",
-                       client_id=env[CLIENT_ID], client_secret=env[CLIENT_SECRET], scopes=SCOPES)
+                       client_id=env[CLIENT_ID], client_secret=env[CLIENT_SECRET], scopes=token_scopes(path))
