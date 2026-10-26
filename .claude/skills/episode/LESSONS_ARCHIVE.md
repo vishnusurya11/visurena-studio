@@ -2603,3 +2603,36 @@ build byte for byte), never the recorded words.
   (fix/calibrate4.py -> reviewed.json, RESULT.md).
 
 - **Moved here from SKILL.md (read budget, 2026-10-22):** the autopilot PARKS with a reason — a row in `parked.jsonl` and one Telegram — never a wait on a person. SKILL.md now says "(a parked.jsonl row)" and names WAIT_QUOTA, the shut-usage-window wait (decision 2026-10-22_agent_task_runner).
+
+## Speed and models parked (fleet C, 2026-10-22)
+
+Do not re-bench these without new evidence; each line says why it is parked. Numbers: docs/audit/
+2026-10-22_fleet/C_Speed_and_models/ (RULING.md, bench/BENCH.md, SKEPTIC.md).
+- **The 6 h is not in kernels.** Kernel, cache and quantisation tricks pool to 12-25 min of an episode;
+  the hours are retakes, the writer step (37-206 min), judge reads and drive overhead (ep01: 1.33 h on
+  no timing row). On one serial GPU render count beats render speed; the clock report's `renders:` line
+  counts first draws and retakes.
+- **Take model:** Singularity v1.3 (pruned int8) on Spark for wide and full, Wuli insert to medium.
+  Singularity v2 is not the default: 0 of 7 faces pass, it re-framed 2 of 4 takes, 1.12-1.28x per step
+  even cached, and 34 GB + a 15 GB text encoder cannot stay in 64 GB RAM. Open: is it a cheaper cure for a
+  frozen take than a seed (G5, blocked on a loadable path). FastH3 failed its rule (VERDICT_v2.md).
+- **EasyCache / LazyCache (core ComfyUI) at their defaults:** fail on quality. EasyCache 0.72-0.83x time,
+  T13 SSIM 0.693, G-WARP warn -> fail; LazyCache T26 identity collapsed (facenet 0.593 -> 0.058). Both RUN
+  with the turbo LoRA: the 2026-10-18 "cannot combine" sentence was false. Only defaults were screened.
+- **6 steps instead of 8:** not adopted, quality inconclusive (one face's identity veto, reader unrecorded).
+  Time 0.85-0.88x once a reused encode is counted, about 5 min an episode.
+- **640 canvas on medium shots:** fail; cut-scale face sharpness held on 2 of 4 pairs at best.
+- **Qwen-Image grid at 8 Turbo steps:** 0.30x warm time; panel_dq, panel_content and CCIP not run, so
+  no pass; the owner's taste question after they run.
+- **Third-party TeaCache / MagCache / FBCache:** a pack install and a restart of the shared engine, and no
+  H3 8-step ref2va benchmark. **torch.compile / CUDA graphs:** triton-windows 3.5.0 targets torch 2.9, the
+  engine runs 2.11, about 12 frame shapes recompile. **FP8 / INT4:** the DiT is int8 convrot already; NVFP4
+  is Blackwell-only. **Launch flags** (--fast fp16_accumulation, --cache-lru, --cache-ram,
+  --disable-dynamic-vram, --disable-pinned-memory): each needs a restart for seconds.
+- **Spark warmup 0, density 0.1, Spark off on short takes:** at most 3-4 min an episode; 10 % density
+  drew duplicate figures (2026-10-18). **SPEED sampler:** noncommercial licence. Also parked: H3VAE_TRT,
+  early abort of frozen renders, pre-touch / warm-first-job / text-encoder priming (encode is 5-7 s).
+- **Engine READY 1,500 s:** the supervisor that launched an engine already waits twice before a kill; the
+  client wait, comfy.RESTART_SECONDS, is 1,200 s to match (fleet C A6).
+- **A cold Qwen-Image load** is 141 s from D: (10-21) and 269 s under a concurrent copy (10-22), unmeasured
+  on the NVMe; panel_ladder prices no cold term until it is.
