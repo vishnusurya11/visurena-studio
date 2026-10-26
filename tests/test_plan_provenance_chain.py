@@ -59,3 +59,30 @@ def test_rows_skips_blank_and_broken_lines(tmp_path):
 def test_the_ledger_lives_beside_the_plan(tmp_path):
     plan = tmp_path / "plan.json"
     assert plan_provenance.cures_path(plan) == tmp_path / "plan.cures.jsonl"
+
+
+def test_no_op_rounds_and_a_replayed_older_row_do_not_break_the_chain(tmp_path):
+    """Jekyll ep02, 2026-10-26: five cure rounds that moved no bytes (from == to) and a
+    second climb that replayed the older draft's row (e09 -> 653) sat between the
+    signature and a recorded owner-order write, and the walker read them as a write
+    nobody recorded -- so a recorded fix could never be re-signed."""
+    plan = tmp_path / "plan.json"
+    older = write_plan_bytes(plan, {"v": 0})
+    signed = write_plan_bytes(plan, {"v": 1})
+    ledger = tmp_path / plan_provenance.CURES_FILE
+    rows = [{"from_sha8": older, "to_sha8": signed, "cures": ["strip_amounts"]},
+            {"from_sha8": signed, "to_sha8": signed, "cures": ["strip_amounts"]},
+            {"from_sha8": older, "to_sha8": signed, "cures": ["lock_two_shot"]},
+            {"from_sha8": signed, "to_sha8": signed, "cures": ["lock_two_shot"]}]
+    ledger.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    write_plan_bytes(plan, {"v": 2})
+    plan_provenance.record(plan, signed, ["owner_order_shot9"])
+    assert plan_provenance.chain(tmp_path, signed, plan_verdict.plan_sha8(plan)) == ["owner_order_shot9"]
+
+
+def test_an_unrecorded_write_after_no_op_rounds_still_breaks_the_chain(tmp_path):
+    plan = tmp_path / "plan.json"
+    signed = write_plan_bytes(plan, {"v": 1})
+    plan_provenance.record(plan, signed, ["holds"])                  # a round that moved nothing
+    write_plan_bytes(plan, {"v": "hand-edited"})                    # nobody recorded this write
+    assert plan_provenance.chain(tmp_path, signed, plan_verdict.plan_sha8(plan)) is None

@@ -59,15 +59,12 @@ def chain(plan_dir: Path, from_sha8: str, to_sha8: str) -> list[str] | None:
     is missing -- then somebody wrote bytes nobody recorded."""
     if from_sha8 == to_sha8:
         return []
-    names, at, walking = [], from_sha8, False
+    names, at = [], from_sha8
     for row in rows(plan_dir):
-        if row.get("from_sha8") != at:
-            if walking:
-                return None             # a write between rounds nobody recorded
-            continue                    # rows older than the signature's bytes
-        walking = True
+        if row.get("from_sha8") != at or row.get("to_sha8") == at:
+            continue                    # another draft's row, or a round that moved no bytes
         names.extend(str(n) for n in row.get("cures") or [])
         at = row.get("to_sha8")
         if at == to_sha8:
             return names
-    return None
+    return None                         # no recorded write reaches these bytes: someone wrote unrecorded
