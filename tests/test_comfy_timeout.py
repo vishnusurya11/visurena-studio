@@ -49,3 +49,17 @@ def test_no_row_deadline_leaves_the_timeout_alone(monkeypatch, real_comfy):
 def test_a_render_is_never_capped_by_the_row(monkeypatch):
     with comfy.row_deadline(1.0):
         assert comfy.text_timeout(3600.0, applies=False) == 3600.0
+
+
+def test_a_spent_row_still_gives_a_read_one_cold_load(monkeypatch):
+    """Jekyll ep04 step 03 re-ran on a wall 12:36 spent of 15:00; its Qwen3-VL read got 30.6 s,
+    under one cold load, was interrupted, and the drive died (2026-10-27)."""
+    monkeypatch.setattr(comfy.time, "time", lambda: 1000.0)
+    with comfy.row_deadline(970.0):                        # spent 30 s ago: 30 s with the grace
+        assert comfy.text_timeout(600.0) == comfy.READ_FLOOR_S
+
+
+def test_the_calls_own_shorter_timeout_still_wins_over_the_floor(monkeypatch):
+    monkeypatch.setattr(comfy.time, "time", lambda: 1000.0)
+    with comfy.row_deadline(970.0):
+        assert comfy.text_timeout(45.0) == 45.0

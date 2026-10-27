@@ -581,6 +581,10 @@ def changed_over(record: dict) -> None:
 ROW_DEADLINE: float | None = None
 """Epoch seconds when the current step row's cap ends, or None (set by the runner)."""
 ROW_GRACE_S = 60.0
+READ_FLOOR_S = 120.0
+"""No read is given less than one cold model load: 892 of 894 logged reads (vlm_calls.jsonl,
+2026-10-27) took under 120 s, p99 51 s.  Jekyll ep04's step 03 re-ran on a nearly spent wall
+and its read got 30.6 s, was interrupted mid-load, and the drive died."""
 
 
 @contextmanager
@@ -595,10 +599,11 @@ def row_deadline(at: float | None):
 
 
 def text_timeout(timeout: float, applies: bool = True) -> float:
-    """min(the call's timeout, the row's remaining time + grace); renders pass applies=False."""
+    """min(the call's timeout, the row's remaining time + grace, never under READ_FLOOR_S);
+    renders pass applies=False."""
     if not applies or ROW_DEADLINE is None:
         return timeout
-    return max(1.0, min(timeout, ROW_DEADLINE - time.time() + ROW_GRACE_S))
+    return min(timeout, max(READ_FLOOR_S, ROW_DEADLINE - time.time() + ROW_GRACE_S))
 
 
 VLM_CALLS: Path | None = settings.library_root() / "vlm_calls.jsonl"
