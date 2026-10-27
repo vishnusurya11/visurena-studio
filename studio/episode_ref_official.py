@@ -228,7 +228,14 @@ def calm(text: str) -> str:
     """The drawer's still-frame vocabulary, said as position instead of arrest."""
     for pattern, word in CALM:
         text = re.sub(pattern, word, text, flags=re.I)
-    return " ".join(text.split())
+    return close_gaps(" ".join(text.split()))
+
+
+def close_gaps(text: str) -> str:
+    """A dropped word's gap closed: no space before a comma, one comma where two met
+    (ep04 shot 2: "smaller still, a cane" became "smaller , a cane", a stray L19 refuses)."""
+    text = re.sub(r",(\s*,)+", ",", text)
+    return re.sub(r"\s+([,.;:])", r"\1", text)
 
 
 def trim(text: str, cap: int) -> str:
