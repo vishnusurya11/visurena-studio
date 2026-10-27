@@ -491,7 +491,7 @@ of 30 blocks on one: a still composition as the shot's destination, where ep06
 and ep07 ended with the camera moving through the last frame."""
 
 LEFT_FRAME = re.compile(r"\b(?:ha(?:s|ve) left|leaves?|gone|out of frame|carried out)\b", re.I)
-NP_END = re.compile(r"(?<![\w-])(stands?|fills?|filling|has|have|is|are|sits?|lies?|rests?|holds?|at|in|on|"
+NP_END = re.compile(r"(?<![\w-])(stands?|fills?|filling|has|have|is|are|sits?|lies?|rests?|holds?|leans|leaning|at|in|on|"
                     r"along|with|over|under|from|to|by|inside|seen|lit|drawn)(?![\w-])", re.I)
 FINITE = re.compile(r"\b(?:turns|opens|closes|points|lifts|walks|strikes|falls|runs|keeps|pushes|"
                     r"pulls|takes|grips|thrusts|swings|reaches)\b", re.I)
