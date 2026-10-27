@@ -1332,8 +1332,13 @@ def status_doc(book: Path, codex: str, n: int | None, derived, signals, series: 
                        "paused": is_paused(book, series), "next": n,
                        "state": "paused" if done["state"] == "PAUSED" or is_paused(book, series) else
                        ("complete" if n is None else "running")},
-            "episode": episode_doc(n, derived, signals, done),
+            "episode": {**episode_doc(n, derived, signals, done), **({"terminal_flags": flags_of(home_of(book, n))} if n else {})},
             "last_events": rows_of(paths_of(book).events)[-5:]}
+
+
+def flags_of(home: Path) -> list[str]:
+    """The episode's terminal non-pass gates (a judge gave up), for status.json."""
+    return importlib.import_module("studio.publish_lock").open_terminals(home)
 
 
 def episode_doc(n: int | None, derived, signals, done: dict) -> dict:

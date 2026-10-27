@@ -202,6 +202,31 @@ def flag_in_order(ctx, why: BaseException) -> None:
 
 # ---- the step ---------------------------------------------------------------------
 
+def terminal_flags(home) -> list[dict]:
+    """Every gate whose latest row is a terminal non-pass (a judge gave up), with the
+    first three notes it left; ep03 shipped over three of them under a bare QC PASS."""
+    path = Path(home) / "learnings.jsonl"
+    rows = load(path) if path.exists() else []
+    out = []
+    for gate, last in publish_lock.last_by_gate(rows).items():
+        if last.terminal and last.action != "pass":
+            notes = [r.note for r in rows if r.gate == gate and r.terminal and r.note][:3]
+            out.append({"gate": gate, "action": last.action, "notes": notes})
+    return out
+
+
+def report_flags(ctx, sha8: str) -> None:
+    """Print the terminal flags and write them to the ledger once per cut; a report,
+    never a stop (the owner ruled flagged episodes still publish)."""
+    flags = terminal_flags(ctx.home)
+    for f in flags:
+        print(f"FLAGGED: {f['gate']} {f['action']} -- " + " | ".join(n[:120] for n in f["notes"]))
+    seen = any(r.get("event") == "delivery_flags" and r.get("sha8") == sha8 for r in rows(ctx.book_dir))
+    if flags and not seen:
+        yp.record(ctx.book_dir, {"event": "delivery_flags", "episode": ctx.number, "sha8": sha8, "flags": flags,
+                                 "at": dt.datetime.now().isoformat(timespec="seconds")})
+
+
 def done(ctx) -> bool:
     """A public row and a poll row exist for THIS cut's own upload."""
     try:
@@ -227,6 +252,7 @@ def run(ctx, send=youtube_upload.send, build_api=None, http=urllib_get,
     signoff.write(ctx.home, sha8, engine)
     print(f"--watched={sha8}: the master eye's measured rubric review/eye_{sha8}.json "
           f"is the watch (judge:master_eye, decision {WHY})")
+    report_flags(ctx, sha8)
     video_id = upload(ctx, sha8, send)
     if not flip_public(ctx, video_id, build_api):
         print(f"NOT-PUBLIC: YouTube did not return public for {video_id}; the ledger "
