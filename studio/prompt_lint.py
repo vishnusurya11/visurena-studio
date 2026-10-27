@@ -259,8 +259,18 @@ def aimless(text: str) -> str:
     return re.sub(r"(?i)\btoward (?:the |mr\. |mrs\. )?[\w'-]+(?: [\w'-]+)?", " ", text)
 
 
+def without_cures(text: str) -> str:
+    """The text without the panel ladder's own cure sentences: an instruction to the drawer
+    ("Each person in the picture is a different man ...") names nobody in the scene (Jekyll ep02)."""
+    from studio import panel_ladder          # lazy: the ladder's import chain is the drawer's
+    for cure in set(panel_ladder.CURES.values()):
+        text = text.replace(cure, " ")
+    return text
+
+
 def p13_people(text: str, facts: dict) -> list[str]:
     """A person in the words who is neither staged, an extra, nor the setup's crowd."""
+    text = without_cures(text)
     staged = set(facts.get("faces") or [])
     out = [fault("P13", "unstaged person", f"'{a}' ({who}) is not staged")
            for who, names in (facts.get("aliases") or {}).items() if who not in staged
