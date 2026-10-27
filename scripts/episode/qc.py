@@ -91,6 +91,25 @@ def limit_threads(n: int = 6) -> None:
         pass
 
 
+def upscale_for(work: Path, at_cut: bool) -> dict:
+    """The upscale block of THIS report: none for the judged cut (an older master's record beside it
+    is not this file's), the work room's record for an upscaled master."""
+    return upscale_block(Path(work) / "no upscale at cut" if at_cut else work)
+
+
+def measured_path(book: Path, number: int, engine: str, at_cut: bool) -> Path:
+    """The file this QC measures: the judged cut (cut/cut_<engine>.mp4) at cut, else the master."""
+    from studio import master_upscale
+    master = episode_home.master_path(book, number, engine)
+    return master_upscale.cut_of(master) if at_cut else master
+
+
+def report_path(book: Path, number: int, engine: str, at_cut: bool) -> Path:
+    """qc_<engine>.json for a master, qc_<engine>_cut.json for the judged cut (step 11 carries it)."""
+    name = "qc" if engine == "i2v" else f"qc_{engine}"
+    return episode_home.home(book, number) / (f"{name}_cut.json" if at_cut else f"{name}.json")
+
+
 def upscale_block(work: Path) -> dict:
     """The upscale asked and used and the encoder, off work/upscale_used.json; a fallback
     (used is not asked) carries an advisory line, flagged, never a fail."""
@@ -535,15 +554,16 @@ def title_card_on_disk(book: Path, number: int) -> bool:
     return (book / "title" / f"ep{number:02d}.mp4").exists() or (book / "title" / "title.mp4").exists()
 
 
-def load_inputs(book_id: str, number: int, engine: str) -> SimpleNamespace:
-    """What every row reads: the plan, the master, the timeline, the takes, the laid lines."""
+def load_inputs(book_id: str, number: int, engine: str, at_cut: bool = False) -> SimpleNamespace:
+    """What every row reads: the plan, the master (or the judged cut), the timeline, the takes, the laid lines."""
     book = episode_home.book_dir(book_id)
     episode = episode_home.load_plan(book, number)
     placed = episode_home.load_placed(book, number, episode)   # refused when stale
     take_dir = episode_home.takes_dir(book, number, engine)
     return SimpleNamespace(
         book=book, number=number, episode=episode, placed=placed, take_dir=take_dir,
-        master=episode_home.master_path(book, number, engine), work=episode_home.work_dir(book, number, engine),
+        master=measured_path(book, number, engine, at_cut), work=episode_home.work_dir(book, number, engine),
+        at_cut=at_cut,
         lines=line_laid.laid_lines(placed, take_dir),   # where the master laid each line (ep13 T11)
         records=edit_gate.in_cut(episode_home.read_json(take_dir / "shots.json"), placed))
 
@@ -589,7 +609,7 @@ def edit_rows(i: SimpleNamespace, report: dict) -> dict:
     report["missing_cuts"] = drop_on_grid(
         missing_cuts(planned_cuts(placed), report["seen_cuts"], proven=report["edit"].get("cuts")),
         report["internal_cut_rows"])
-    report["upscale"] = upscale_block(i.work)
+    report["upscale"] = upscale_for(i.work, getattr(i, "at_cut", False))
     report["sound"] = episode_sound.presence(i.master, i.episode, i.placed)
     report["takes"] = takes_rollup(i.take_dir)
     report["sheets"] = sheets_rollup(episode_home.boards_dir(i.book, i.number), i.book)
@@ -607,26 +627,26 @@ def with_lines(report: dict, hear, spent: bool = False) -> dict:
     return {**report, "lines": hear(), "lines_measured": True}
 
 
-def measure(book_id: str, number: int, engine: str, listen, spent: bool = False) -> dict:
+def measure(book_id: str, number: int, engine: str, listen, spent: bool = False, at_cut: bool = False) -> dict:
     """The whole report: the cheap rows, then (if they pass) every line heard."""
-    i = load_inputs(book_id, number, engine)
+    i = load_inputs(book_id, number, engine, at_cut)
     report = cross_stage_rows(i, voice_floor_rows(i, inputs_rows(i, edit_rows(i, head_rows(i)))))
     report = with_lines(report, lambda: heard_on_master(i.master, i.lines, i.work, listen), spent)
     report["passed"] = verdict(report)
     return report
 
 
-def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) -> None:
+def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False, at_cut: bool = False) -> None:
     from studio import routed_whisper
     limit_threads()
     book = episode_home.book_dir(book_id)
     ear = voice_qc.any_transcriber(err_path=routed_whisper.err_log(episode_home.home(book, number)))
-    report = measure(book_id, number, engine, watched(ear), spent)
+    report = measure(book_id, number, engine, watched(ear), spent, at_cut) | {"at_cut": at_cut}
     lufs, tp = report["lufs"], report["true_peak"]
     placed = episode_home.load_placed(book, number, episode_home.load_plan(book, number))
     lines = line_laid.laid_lines(placed, episode_home.takes_dir(book, number, engine))
-    report_path = episode_home.home(book, number) / ("qc.json" if engine == "i2v" else f"qc_{engine}.json")
-    episode_home.write_json(report_path, report)
+    out = report_path(book, number, engine, at_cut)
+    episode_home.write_json(out, report)
     heard = report["lines"] or []
     said = f"{sum(row['passed'] for row in heard)}/{len(heard)}" if report["lines_measured"] else "not measured"
     grid = report["internal_cut_rows"]
@@ -670,9 +690,10 @@ def main(book_id: str, number: int, engine: str = "i2v", spent: bool = False) ->
         print(f"sheet {sheet['setup']}: {'PASS' if sheet['passed'] else 'FAIL'} | "
               f"{sheet['sheets']} draw(s), {sheet['strict_draws']} STRICT | alike "
               f"{sheet['duplicate_pairs']} | ${sheet['usd']:.2f}")
-    print(f"-> {report_path}")
+    print(f"-> {out}")
 
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    main(args[0], episode_arg(sys.argv), episode_home.engine_arg(sys.argv), "--ceiling-spent" in sys.argv)
+    main(args[0], episode_arg(sys.argv), episode_home.engine_arg(sys.argv), "--ceiling-spent" in sys.argv,
+         at_cut="--at-cut" in sys.argv)

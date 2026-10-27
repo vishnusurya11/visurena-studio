@@ -1,17 +1,21 @@
 #!/usr/bin/env python
-"""Step 11 -- qc: measure the delivered master, then the master eye judges it.
+"""Step 11 -- qc: measure the judged cut, the master eye judges it, then the ONE upscale.
 
     uv run python scripts/episode/step_11_qc.py <codex_id> <n> [--engine=r2v]
 
-Wraps scripts/episode/qc.py --engine=r2v, which stamps the sha8 it measured
-into the report beside the master (episodes/epNN/qc_<engine>.json, the pair
-studio/youtube_publish.MASTERS names).  A FAIL on its hard rows is a refusal,
-as it always was.  A PASS is read by studio.judges.master_eye: the rubric
-review/eye_<sha8>.json is filled in the judge's pen -- every field answered
-from a measure, an `n` carrying `flagged_by` and `evidence`, never a waiver --
-and a measured fault climbs studio.master_ladder (recut x2, retake x1) before
-the terminal rung signs it flagged.  Nobody is asked to watch anything.  Then
-the dossier, and the unit's audit sheet for the owner's after-the-fact look.
+Wraps scripts/episode/qc.py --engine=r2v --at-cut, which measures the finished picture at the
+cut's own scale (cut/cut_<engine>.mp4, step 10's) and stamps the sha8 it measured into
+qc_<engine>_cut.json.  A FAIL on its hard rows is a refusal, as it always was.  A PASS is read
+by studio.judges.master_eye: the rubric review/eye_<sha8>.json is filled in the judge's pen --
+every field answered from a measure, an `n` carrying `flagged_by` and `evidence`, never a
+waiver -- and a measured fault climbs studio.master_ladder (a retake, then a recut AT CUT
+SCALE) before the terminal rung signs it flagged.  Then the judged cut is upscaled once
+(assemble --upscale; owner 2026-10-18: upscale last, once -- Jekyll ep03 paid the 4x on every
+master round), and its QC report and rubric are carried to the master's sha8 (qc_<engine>.json,
+the pair studio/youtube_publish.MASTERS names) while cut/upscaled.json traces those master bytes
+to the judged cut.  The face strip (log only) is cut from the upscaled master, what the viewer
+sees.  Nobody is asked to watch anything.  Then the dossier, and the unit's audit sheet.
+A master from before the cut-scale judge (no cut on disk) is its own judged file, as it was.
 """
 from __future__ import annotations
 
@@ -24,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.episode import eye_review, face_refine as refine_step  # noqa: E402
 from studio import comfy, episode_home, face_strip as fs, judged_gate, master_ladder, panel_content as pc  # noqa: E402
-from studio import ceiling, gate_policy, step_cli, youtube_publish as yp  # noqa: E402
+from studio import ceiling, gate_policy, master_upscale, step_cli, youtube_publish as yp  # noqa: E402
 from studio.judges import master_eye  # noqa: E402
 
 STEP_ID = "11"
@@ -71,6 +75,18 @@ def pair(home: Path, engine: str) -> tuple[Path, Path]:
     raise SystemExit(f"unknown engine {engine!r}; one of {[n for n, _m, _q in yp.MASTERS]}")
 
 
+def judged_pair(home: Path, engine: str) -> tuple[Path, Path]:
+    """(the file the judges read, its QC report): the judged cut and qc_<engine>_cut.json; a master
+    from before the cut-scale judge (no cut on disk) is its own judged file, with its own report."""
+    master, qc = pair(home, engine)
+    cut = master_upscale.cut_of(master)
+    return (cut, qc.with_name(f"{qc.stem}_cut.json")) if cut.exists() else (master, qc)
+
+
+def is_cut(path: Path) -> bool:
+    return Path(path).name.startswith("cut")
+
+
 def rubric_signed(home: Path, sha8: str) -> bool:
     """Whether review/eye_<sha8>.json exists and clears eye_review's refusals:
     a judge's `n` with its flag and evidence clears; a bare `n` does not."""
@@ -81,12 +97,27 @@ def rubric_signed(home: Path, sha8: str) -> bool:
 
 
 def done(ctx) -> bool:
-    master, qc = pair(ctx.home, engine_of(getattr(ctx, "extra", None) or []))
+    engine = engine_of(getattr(ctx, "extra", None) or [])
+    master, qc = pair(ctx.home, engine)
     if not (master.exists() and qc.exists()):
         return False
     report = episode_home.read_json(qc)
-    return (bool(report.get("passed")) and report.get("sha8") == yp.sha8(master)
-            and rubric_signed(ctx.home, report["sha8"]))
+    if not (report.get("passed") and report.get("sha8") == yp.sha8(master) and rubric_signed(ctx.home, report["sha8"])):
+        return False
+    if not master_upscale.cut_of(master).exists():
+        return True                                  # a master judged itself, before the cut-scale judge
+    return traced(ctx.home, engine, report)
+
+
+def traced(home: Path, engine: str, report: dict) -> bool:
+    """A carried verdict holds only while cut/upscaled.json says these master bytes were upscaled from
+    the cut it names, that cut is the one on disk, and its own report and rubric stand."""
+    master, _qc = pair(home, engine)
+    cut, cut_qc = judged_pair(home, engine)
+    want = report.get("cut_sha8", "")
+    if not (want and master_upscale.made_from(master) == want and yp.sha8(cut) == want and cut_qc.exists()):
+        return False
+    return episode_home.read_json(cut_qc).get("sha8") == want and rubric_signed(home, want)
 
 
 # ---- the real tools: ffmpeg, the local vision model, facenet ------------------------------
@@ -163,7 +194,7 @@ def read_master(home: Path, master: Path, plan: dict, placed: dict, tools_: dict
     """(verdict, measures) from the master eye over the real tools unless given; the face strip is
     cut first, read by the eye, and its reads kept in the owner's labels file."""
     kit = tools_ or {**tools(home), "cache": master_eye.EyeCache(home, WORKFLOW, master_eye.sha8_text(ASK))}
-    strip = face_strip(home, master, placed, kit)
+    strip = [] if is_cut(master) else face_strip(home, master, placed, kit)   # the strip is the master's
     eye = {k: v for k, v in kit.items() if k in EYE_KIT}
     verdict, m = master_eye.read(home, master, plan, placed, **eye, strip=strip, face_reader=kit.get("face_reader"))
     if strip:
@@ -185,7 +216,7 @@ def qc_report(ctx, extra: list[str]) -> dict:
     (five-hour plan fix 3, 2026-09-30): qc ran 8x on ep14 at ~9 min a pass,
     and a failed report on an unchanged master was thrown away and re-measured
     with no assemble in between.  A recut changes the sha8 and qc runs again."""
-    master, qc = pair(ctx.home, engine_of(extra))
+    master, qc = judged_pair(ctx.home, engine_of(extra))
     spent = clock_spent(ctx)
     if qc.exists() and master.exists():
         report = episode_home.read_json(qc)
@@ -205,8 +236,8 @@ def qc_report(ctx, extra: list[str]) -> dict:
                 return past_ceiling(ctx, qc, report)
             raise SystemExit(f"REFUSED: qc FAIL in {qc.name} for these exact bytes ({fail_words(report)}); "
                              f"fix the cut before anyone watches it")
-    ctx.run_script("scripts/episode/qc.py", *engine_flags(extra), *(["--ceiling-spent"] if spent else []),
-                   gpu=GPU, clock="qc")
+    ctx.run_script("scripts/episode/qc.py", *engine_flags(extra), *(["--at-cut"] if is_cut(master) else []),
+                   *(["--ceiling-spent"] if spent else []), gpu=GPU, clock="qc")
     if not qc.exists():
         raise SystemExit(f"REFUSED: qc.py left no report at {qc.name}")
     report = episode_home.read_json(qc)
@@ -264,13 +295,14 @@ def judge_master(ctx, memo: dict):
     fields.  The whole read runs in ONE VL window (five-hour plan fix 5:
     ~36 frames a master, each read was reloading the judge's weights)."""
     from studio import episode_clock
-    master, _qc = pair(ctx.home, engine_of(getattr(ctx, "extra", None) or []))
+    master, _qc = judged_pair(ctx.home, engine_of(getattr(ctx, "extra", None) or []))
     plan = episode_home.read_json(ctx.home / "plan.json")
     placed = episode_home.read_timeline(ctx.home)
     with episode_clock.timed(ctx.book_dir, ctx.number, "master_eye"), comfy.model_kept():
         verdict, measures = read_master(ctx.home, master, plan, placed)
     memo.update(verdict=verdict, measures=measures)
-    ctx.log(fs.line((measures or {}).get("face_strip") or {}, yp.sha8(master)), step_id=STEP_ID)
+    if not is_cut(master):
+        ctx.log(fs.line((measures or {}).get("face_strip") or {}, yp.sha8(master)), step_id=STEP_ID)
     return verdict
 
 
@@ -281,8 +313,8 @@ def face_list_note(ctx) -> None:
 
 
 def sign_master(ctx, memo: dict, verdict) -> Path:
-    """The rubric for THESE bytes, in the judge's pen, beside its contact sheet."""
-    master, _qc = pair(ctx.home, engine_of(getattr(ctx, "extra", None) or []))
+    """The rubric for THESE bytes (the judged cut), in the judge's pen, beside its contact sheet."""
+    master, _qc = judged_pair(ctx.home, engine_of(getattr(ctx, "extra", None) or []))
     sha8 = yp.sha8(master)
     contact = contact_sheet(ctx.home, master, sha8)
     return master_eye.write_rubric(ctx.home, sha8, verdict, memo.get("measures"),
@@ -290,8 +322,8 @@ def sign_master(ctx, memo: dict, verdict) -> Path:
 
 
 def recut(ctx, extra: list[str]) -> None:
-    """The free rung: assemble again from the takes on disk, then qc the new bytes."""
-    ctx.run_script("scripts/episode/assemble.py", f"--engine={engine_of(extra)}", clock="assemble")
+    """After a retake: assemble the judged cut again (no upscale), then qc the new bytes."""
+    ctx.run_script("scripts/episode/assemble.py", f"--engine={engine_of(extra)}", "--at-cut", clock="assemble")
     qc_report(ctx, extra)
 
 
@@ -307,12 +339,101 @@ def judged(ctx, extra: list[str]) -> Path:
         terminal=master_ladder.flag)
 
 
+# ---- the one upscale, and the verdicts carried to its bytes ---------------------------------------
+
+def deliver_master(ctx, extra: list[str]) -> Path:
+    """The judged cut upscaled ONCE (assemble --upscale) and its QC report and rubric carried to the
+    master's sha8; a master already traced to the judged cut is left as it is."""
+    engine = engine_of(extra)
+    master, qc = pair(ctx.home, engine)
+    cut, _cut_qc = judged_pair(ctx.home, engine)
+    if not is_cut(cut):                                  # a master judged itself: nothing to carry
+        return master
+    if qc.exists() and traced(ctx.home, engine, episode_home.read_json(qc)) and qc_carried_to(qc, master):
+        return master
+    if master_upscale.made_from(master) != yp.sha8(cut):
+        ctx.run_script("scripts/episode/assemble.py", f"--engine={engine}", "--upscale", gpu=True, clock="assemble")
+    return carry(ctx, engine)
+
+
+def qc_carried_to(qc: Path, master: Path) -> bool:
+    return master.exists() and episode_home.read_json(qc).get("sha8") == yp.sha8(master)
+
+
+def carry(ctx, engine: str) -> Path:
+    """The cut's QC report and rubric onto the master's sha8, the master's face strip beside them;
+    refused when cut/upscaled.json does not trace the master to the judged cut."""
+    master, qc = pair(ctx.home, engine)
+    cut, cut_qc = judged_pair(ctx.home, engine)
+    if why := carry_refusal(ctx.home, master, cut, cut_qc):
+        raise SystemExit(f"REFUSED: {why}")
+    report = episode_home.read_json(cut_qc)
+    strip = strip_on_master(ctx, master)
+    episode_home.write_json(qc, carried_report(ctx, report, master, cut))
+    carry_rubric(ctx.home, report["sha8"], master, strip)
+    ctx.log(f"carried: {cut_qc.name} and eye_{report['sha8']}.json -> {master.name} {yp.sha8(master)}", step_id=STEP_ID)
+    return master
+
+
+def carry_refusal(home: Path, master: Path, cut: Path, cut_qc: Path) -> str:
+    """Why the cut's verdicts may not go onto this master, '' when they may: the master must be traced
+    to the judged cut's bytes, and that cut measured, passed and signed."""
+    digest = yp.sha8(cut)
+    if not master.exists() or master_upscale.made_from(master) != digest:
+        return f"{master.name} was not made from the judged cut {cut.name} ({digest}); the upscale left no traced master"
+    report = episode_home.read_json(cut_qc) if cut_qc.exists() else {}
+    if report.get("sha8") != digest or not report.get("passed"):
+        return f"{cut_qc.name} has not passed these cut bytes ({digest}); measure the cut first"
+    if not rubric_signed(home, digest):
+        return f"no signed rubric for the judged cut {digest}; the master eye judges the cut first"
+    return ""
+
+
+def carried_report(ctx, report: dict, master: Path, cut: Path) -> dict:
+    """The cut's report about the master's bytes: what was judged (`cut_sha8`) and what upscaled it."""
+    from scripts.episode import qc as qc_rows
+    work = ctx.home / "takes" / "work"
+    return {**report, "sha8": yp.sha8(master), "master": episode_home.relative(ctx.book_dir, master),
+            "cut_sha8": report["sha8"], "judged_on": cut.name, "at_cut": False,
+            "upscale": qc_rows.upscale_block(work)}
+
+
+def carry_rubric(home: Path, cut_sha8: str, master: Path, strip: dict) -> Path:
+    """review/eye_<master sha8>.json: the judged cut's rubric, its file and sha8 named; a rubric a
+    person answered is never written over."""
+    target = eye_review.rubric_path(home, yp.sha8(master))
+    if target.exists() and master_eye.owner_answered(episode_home.read_json(target)):
+        return target
+    doc = episode_home.read_json(eye_review.rubric_path(home, cut_sha8))
+    doc.update(sha8=yp.sha8(master), master=master.name,
+               judged_on={"file": master_upscale.cut_of(master).name, "sha8": cut_sha8})
+    if strip.get("crops"):
+        doc["face_strip"] = strip                      # log only: beside the fields, never one of them
+    return episode_home.write_json(target, doc)
+
+
+def strip_on_master(ctx, master: Path) -> dict:
+    """The face strip from the upscaled master (what the viewer sees), each crop read by the eye and
+    kept in the owner's labels file: log only, never a fault."""
+    work = Path(ctx.home) / "review" / "work" / "eye"
+    kit = {"frames": grab_frames(work), "detect": face_boxes()}
+    with comfy.model_kept():
+        rows = master_eye.read_strip(ctx.home, face_strip(ctx.home, master, episode_home.read_timeline(ctx.home), kit),
+                                     vlm_reader(work, master_eye.FACE_ASK))
+    measure = master_eye.strip_measure(rows)
+    if rows:
+        fs.write_labels(ctx.home, yp.sha8(master), rows)
+    ctx.log(fs.line(measure, yp.sha8(master)), step_id=STEP_ID)
+    return measure
+
+
 def run(ctx) -> None:
     extra = getattr(ctx, "extra", None) or []
     report = qc_report(ctx, extra)
     face_list_note(ctx)
     if not rubric_signed(ctx.home, report["sha8"]):
         judged(ctx, extra)
+    deliver_master(ctx, extra)
     ctx.run_script("scripts/episode/dossier.py", clock="dossier")
     ctx.run_script("scripts/audit/sheet.py")
 

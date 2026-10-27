@@ -41,6 +41,10 @@ SETTING = "VISURENA_MASTER_UPSCALE"
 ENCODE = ["-c:v", "libx264", "-preset", "slow", "-crf", "14", "-pix_fmt", "yuv420p",
           "-movflags", "+faststart", "-c:a", "aac", "-b:a", "256k", "-ar", "48000"]
 """`slow` and CRF 14: this runs once per episode and the file it makes is the deliverable."""
+CUT_ENCODE = ["-c:v", "libx264", "-preset", "medium", "-crf", "8", "-pix_fmt", "yuv420p",
+              "-movflags", "+faststart", "-c:a", "aac", "-b:a", "256k", "-ar", "48000"]
+"""The judged cut at 768 is the upscale's INPUT, one generation before the 4x: finer than the
+deliverable (CRF 8) so the upscale does not sharpen the cut's own encode."""
 START_SHIFT = "-0.0416667"
 """ep15 2026-10-01: the first part's one-frame start offset rides a concat
 passthrough; a constant demux shift keeps count and spacing (see assemble.tail)."""
@@ -56,6 +60,9 @@ class Upscale:
         return f"{self.engine} {self.factor}x {self.mode}".strip()
 
 
+AT_CUT = Upscale("cut", 1)
+"""The finished picture at the cut's own scale: the face paste baked in, no upscale.  Never a
+VISURENA_MASTER_UPSCALE choice -- the judged cut, not a deliverable (Jekyll ep03 retro #2)."""
 CHOICES = {"av3": Upscale("av3", 4), "rtx4x": Upscale("rtx", 4, "ULTRA"),
            "rtx2x": Upscale("rtx", 2, "ULTRA"), "lanczos": Upscale("lanczos", 2)}
 DEFAULT = "av3"
@@ -145,14 +152,15 @@ def decode_argv(listing: Path, width: int, height: int) -> list[str]:
             "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
 
 
-def encode_argv(listing: Path, out: Path, width: int, height: int, fps: int, encoder: str = "cpu") -> list[str]:
-    """Upscaled raw frames from stdin, the joined cut's sound from the listing; x264, or
-    NVENC when the router sent the encode to the GPU (studio/video_encoder)."""
+def encode_argv(listing: Path, out: Path, width: int, height: int, fps: int, encoder: str = "cpu",
+                args: list[str] | None = None) -> list[str]:
+    """Upscaled raw frames from stdin, the joined cut's sound from the listing; x264 (`args`, the
+    delivered ENCODE unless told), or NVENC when the router sent the encode to the GPU."""
     return ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
             "-s", f"{width}x{height}", "-framerate", str(fps), "-i", "-",
             "-itsoffset", START_SHIFT, "-f", "concat", "-safe", "0", "-i", str(listing),
             "-map", "0:v", "-map", "1:a", "-af", "asetpts=PTS-STARTPTS",
-            "-muxdelay", "0", "-muxpreload", "0", *video_args(ENCODE, encoder), str(out)]
+            "-muxdelay", "0", "-muxpreload", "0", *video_args(args or ENCODE, encoder), str(out)]
 
 
 Frame = Callable[["object"], "object"]
@@ -232,13 +240,13 @@ class Rtx:
 
 def streamed(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,
              upscaler: Frame, encoder: str = "cpu", paste: Frame | None = None,
-             expected_frames: int | None = None) -> int:
+             expected_frames: int | None = None, args: list[str] | None = None) -> int:
     """decode | paste at cut scale | upscale | encode; refuses a failed ffmpeg on either
     side, a failure kills the decoder rather than wait on its full pipe, and a pass
     that emitted other than `expected_frames` is a ShortPass."""
     w, h = size(width, height, up)
     dec = subprocess.Popen(decode_argv(listing, width, height), stdout=subprocess.PIPE)
-    enc = subprocess.Popen(encode_argv(listing, out, w, h, fps, encoder), stdin=subprocess.PIPE)
+    enc = subprocess.Popen(encode_argv(listing, out, w, h, fps, encoder, args), stdin=subprocess.PIPE)
     try:
         n = pump(pasted(dec.stdout.read, paste, width, height), enc.stdin.write, width, height, upscaler)
     except BaseException:
@@ -308,7 +316,10 @@ def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: 
     `wrap` is the face refine's paste (studio/face_paste.Paster), applied at CUT scale
     to every frame BEFORE the upscale (owner 2026-10-18: the upscale is the last picture
     operation, only muxing follows it); `cuts` are the frames each new
-    shot starts on (av3's denoise starts fresh there); `expected_frames` is the cut's frame count (K8)."""
+    shot starts on (av3's denoise starts fresh there); `expected_frames` is the cut's frame count (K8).
+    AT_CUT is the judged cut: the paste at 768 and no upscale, no card asked, nothing recorded as one."""
+    if up == AT_CUT:
+        return at_cut_pass(listing, out, width, height, fps, wrap, encoder, expected_frames)
     up = settled_for_card(up, upscaler)
     record_used(out, up, encoder)
     if up.engine == "lanczos":
@@ -327,6 +338,53 @@ def master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: 
         if upscaler is None:
             effect.close()
     return out
+
+
+def at_cut_pass(listing: Path, out: Path, width: int, height: int, fps: int, wrap=None,
+                encoder: str = "cpu", expected_frames: int | None = None) -> Path:
+    """decode | face paste at cut scale | encode at CUT_ENCODE: the finished picture the judges read."""
+    streamed(listing, out, width, height, AT_CUT, fps, lambda frame: frame, encoder, paste=at_cut(wrap),
+             expected_frames=expected_frames, args=CUT_ENCODE)
+    return out
+
+
+def cut_of(master: Path) -> Path:
+    """The judged cut beside its master: cut/master_r2v.mp4 -> cut/cut_r2v.mp4."""
+    return Path(master).with_name(Path(master).name.replace("master", "cut", 1))
+
+
+def with_sound_of(picture: Path, sound: Path, out: Path) -> list[str]:
+    """The upscaled picture with the judged cut's sound stream copied, never re-encoded: the loudness
+    and the true peak QC measured on the cut are the delivered ones."""
+    return ["ffmpeg", "-y", "-v", "error", "-i", str(picture), "-i", str(sound), "-map", "0:v", "-map", "1:a",
+            "-c", "copy", "-movflags", "+faststart", str(out)]
+
+
+MADE = "upscaled.json"
+"""cut/upscaled.json: {master sha8: {cut_sha8, upscale, frames, cut_frames}} -- written only by the one
+upscale, read by step 11 before it carries the cut's QC and rubric to a master's sha8."""
+
+
+def record_made(master: Path, cut: Path, upscale: str, frames: int, cut_frames: int) -> Path:
+    """These master bytes were made from these cut bytes by `upscale`, with their frame counts."""
+    from studio import youtube_publish as yp
+    path = Path(master).with_name(MADE)
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    doc[yp.sha8(master)] = {"cut_sha8": yp.sha8(cut), "cut": Path(cut).name, "upscale": upscale,
+                            "frames": frames, "cut_frames": cut_frames}
+    path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+    return path
+
+
+def made_from(master: Path) -> str:
+    """The sha8 of the cut these master bytes were upscaled from, '' when no upscale made them (another
+    file at the name) or the pass lost a frame."""
+    from studio import youtube_publish as yp
+    path = Path(master).with_name(MADE)
+    if not (path.exists() and Path(master).exists()):
+        return ""
+    row = json.loads(path.read_text(encoding="utf-8")).get(yp.sha8(master)) or {}
+    return row.get("cut_sha8", "") if row.get("frames") == row.get("cut_frames") else ""
 
 
 def av3_master(listing: Path, out: Path, width: int, height: int, up: Upscale, fps: int,

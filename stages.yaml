@@ -577,9 +577,10 @@ stages:
       retakes:      { step: "09", rounds: 2, per: episode, wall_min: 45, gate: EYE_TAKES }
       face_refine:  { step: "09", rounds: 1, per: take,    wall_min: 15 }
       assemble:     { step: "10", rounds: 1, per: pass,    wall_min: 15, read: step }
-      upscale:      { step: "10", rounds: 1, per: pass,    wall_min: 15, read: step }
+      cut_pass:     { step: "10", rounds: 1, per: pass,    wall_min: 15, read: step }   # the judged cut at 768
       qc:           { step: "11", rounds: 1, per: episode, wall_min: 30, read: step }
       master_eye:   { step: "11", rounds: 1, per: episode, wall_min: 30, gate: MASTER }
+      upscale:      { step: "11", rounds: 1, per: pass,    wall_min: 15, read: step }   # after the master eye (ep03 retro #2)
       deliver:      { step: "12", rounds: 1, per: pass,    wall_min: 2, read: step }
       publish:      { step: "13", rounds: 1, per: pass,    wall_min: 10, read: step }
     steps:
@@ -946,11 +947,12 @@ stages:
           - episodes/{unit}/audio/lines/*.wav
         out:
           - title/{unit}.mp4
-          - episodes/{unit}/cut/master_r2v.mp4
+          - episodes/{unit}/cut/cut_r2v.mp4
         desc: >-
-          Title card, measured bed, cut, mix, the master upscaled once: hqdn3d
-          per shot + realesr-animevideov3 4x (`av3`, 2026-10-18). Picture cut to the measured voice. cut/master_iterN.mp4, never
-          overwriting.
+          Title card, measured bed, cut, mix: the judged cut at 768, no upscale.
+          assemble --at-cut bakes in the face paste, card, chip and loudness; step 11
+          judges this file and upscales it once (Jekyll ep03 retro #2, 2026-10-27).
+          Picture cut to the measured voice.
         substeps:
           - id: "10_01"
             name: title
@@ -967,8 +969,8 @@ stages:
             desc: >-
               Takes trimmed to placed.json, lines at their at, mix to the
               house loudness, captions, end chip. The kept face-refine crops are
-              pasted into the master inside the RTX VSR pass, after the 4x, at
-              master scale (studio/face_paste.py).
+              pasted at cut scale in the cut pass (master_upscale.AT_CUT, CRF 8;
+              studio/face_paste.py), so no picture edit follows the upscale.
           - id: "10_04"
             name: sound
             desc: >-
@@ -976,30 +978,27 @@ stages:
               (Setup.ambience), rendered locally by Stable Audio 3 SFX
               (studio/episode_sound.py); lines offset by their delivery. QC
               fails a planned sound the master does not let you hear.
-          - id: "10_05"
-            name: upscale
-            desc: >-
-              The joined 768 cut (picture, card, chip) through NVIDIA RTX Video
-              Super Resolution in process (studio/master_upscale.py, nvidia-vfx
-              0.2): 4x standard ULTRA -> 3072 by default (owner 2026-10-14);
-              VISURENA_MASTER_UPSCALE=rtx2x gives 1536, lanczos is the fallback
-              when the GPU or nvidia-vfx is missing (printed, and named on the
-              clock). Its own `upscale` row on timing.jsonl, within assemble.
 
       - id: "11"
         name: qc
         script: step_11_qc                        # WRAP qc + eye_review + dossier
         family: vl                       # the model family the step loads (K2): text image vl tts video none
         in:
-          - episodes/{unit}/cut/master_r2v.mp4
+          - episodes/{unit}/cut/cut_r2v.mp4
           - episodes/{unit}/plan.json
           - episodes/{unit}/placed.json
         out:
+          - episodes/{unit}/qc_r2v_cut.json
+          - episodes/{unit}/cut/master_r2v.mp4
+          - episodes/{unit}/cut/upscaled.json
           - episodes/{unit}/qc_r2v.json
           - episodes/{unit}/review/eye_*.json
         desc: >-
-          Measure the DELIVERED master, never the intention. Stamps the sha8
-          it measured. No import from the edit step.
+          Measure the judged cut, never the intention; then the ONE upscale.
+          The master eye judges the cut; the judged cut is upscaled once and its
+          report and rubric carried to the master's sha8 while cut/upscaled.json
+          traces the master to that cut. Stamps the sha8 it measured. No import
+          from the edit step.
         substeps:
           - id: "11_01"
             name: measure
@@ -1022,10 +1021,20 @@ stages:
               review/eye_<sha8>.json (signed_by judge:master_eye@1); an n carries the
               judge's evidence and is never waived by a judge.
           - id: "11_04"
+            name: upscale
+            desc: >-
+              After the master eye signs: the judged cut through the upscale once
+              (assemble --upscale; studio/master_upscale.py): av3 = hqdn3d per shot +
+              realesr-animevideov3 4x -> 3072 by default (2026-10-18); rtx4x / rtx2x /
+              lanczos by VISURENA_MASTER_UPSCALE, lanczos the fallback (printed, on the
+              clock). The cut's sound is copied, never re-encoded. Kept as
+              cut/master_iterN.mp4; cut/upscaled.json records master sha8 -> cut sha8.
+              The face strip (log only) is cut from this master.
+          - id: "11_05"
             name: dossier
             desc: >-
               Code - one page of every input, prompt, picture, take, verdict.
-          - id: "11_05"
+          - id: "11_06"
             name: audit
             desc: >-
               Code - the unit's audit sheet (scripts/audit/sheet.py): every flag

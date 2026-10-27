@@ -173,8 +173,8 @@ The references sheets and voices live in their own department: `uv run python re
 | 07 | board | `uv run python scripts/episode/step_07_board.py <book> <n>` | Storyboard grids on the local image model from the plan's prose, up to three references - cast sheets first, the setup's place last. |
 | 08 | panels | `uv run python scripts/episode/step_08_panels.py <book> <n>` | One panel per shot, two machine gates, then `judge:panel_eye`. |
 | 09 | shoot | `uv run python scripts/episode/step_09_shoot.py <book> <n>` | The slow step. |
-| 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix, the master upscaled once: hqdn3d per shot + realesr-animevideov3 4x (`av3`, 2026-10-18). |
-| 11 | qc | `uv run python scripts/episode/step_11_qc.py <book> <n>` | Measure the DELIVERED master, never the intention. |
+| 10 | edit | `uv run python scripts/episode/step_10_edit.py <book> <n>` | Title card, measured bed, cut, mix: the judged cut at 768, no upscale. |
+| 11 | qc | `uv run python scripts/episode/step_11_qc.py <book> <n>` | Measure the judged cut, never the intention; then the ONE upscale. |
 | 12 | deliver | `uv run python scripts/episode/step_12_deliver.py <book> <n>` | manifest.json beside the master (every gate verdict, every rung, timing totals), the deliverable's full path printed first, notify() through the platform. |
 | 13 | publish | `uv run python scripts/episode/step_13_publish.py <book> <n>` | The last mile, unattended (decision 2026-10-05, under the standing hand of 2026-10-01): youtube.json from one guarded structured call, the director's sign-off rendered from measures only, the gated upload, the public flip, the /shorts/ poll -- the public Short URL is the last line printed. |
 <!-- /registry:episode -->
@@ -200,8 +200,8 @@ RUN(book, n): the autopilot launches drive.py; you read the disk, never call a s
 07 board     caps: grids 1/grid, 30 min
 08 panels    caps: panel_checks 1/round, 30 min; regrid 2/episode, 20 min, gate EYE_PANELS
 09 shoot     caps: takes 1/pass, 120 min; take_dq 1/round, 30 min; take_content 1/round, 20 min; take_eye 1/round, 10 min; strip 1/round, 2 min; retakes 2/episode, 45 min, gate EYE_TAKES; face_refine 1/take, 15 min
-10 edit      caps: assemble 1/pass, 15 min; upscale 1/pass, 15 min
-11 qc        caps: qc 1/episode, 30 min; master_eye 1/episode, 30 min, gate MASTER
+10 edit      caps: assemble 1/pass, 15 min; cut_pass 1/pass, 15 min
+11 qc        caps: qc 1/episode, 30 min; master_eye 1/episode, 30 min, gate MASTER; upscale 1/pass, 15 min
 12 deliver   caps: deliver 1/pass, 2 min
 13 publish   caps: publish 1/pass, 10 min
 ```

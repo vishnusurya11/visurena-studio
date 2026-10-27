@@ -338,14 +338,14 @@ def test_edit_reads_the_engine_flag_and_defaults_to_the_house_engine():
 def test_edit_launches_the_title_then_assemble_with_the_engine(ctx):
     step_10_edit.run(ctx)
     assert ctx.launched == [["scripts/episode/series_title.py", CODEX, "4"],
-                            ["scripts/episode/assemble.py", CODEX, "4", "--engine=r2v"]]
+                            ["scripts/episode/assemble.py", CODEX, "4", "--engine=r2v", "--at-cut"]]
 
 
 def test_edit_skips_a_title_card_already_animated_and_is_done_with_a_master(ctx):
     _png(ctx.book_dir / "title" / "ep04.png")
     (ctx.book_dir / "title" / "ep04.mp4").write_bytes(b"card")
     step_10_edit.run(ctx)
-    assert ctx.launched == [["scripts/episode/assemble.py", CODEX, "4", "--engine=r2v"]]
+    assert ctx.launched == [["scripts/episode/assemble.py", CODEX, "4", "--engine=r2v", "--at-cut"]]
     assert not step_10_edit.done(ctx)
     episode_home.master_path(ctx.book_dir, 4, "r2v").write_bytes(b"cut")
     assert step_10_edit.done(ctx)

@@ -94,7 +94,7 @@ def test_the_outputs_are_the_registrys_matched_on_disk_with_their_bytes_named(ep
     master = episode_home.master_path(episode.book_dir, 4, "r2v")
     by_path = {o.path: o for o in m.outputs}
     assert by_path["episodes/ep04/cut/master_r2v.mp4"].sha8 == yp.sha8(master)
-    assert by_path["episodes/ep04/cut/master_r2v.mp4"].kind == "edit"
+    assert by_path["episodes/ep04/cut/master_r2v.mp4"].kind == "qc"     # step 11 upscales the judged cut once (ep03 retro #2)
     assert by_path["episodes/ep04/plan.json"].kind == "plan"
     assert "episodes/ep04/manifest.json" not in by_path          # never names itself
     assert len(by_path) == len(m.outputs)                       # one row per file

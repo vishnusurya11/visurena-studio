@@ -1040,13 +1040,13 @@ def shots_without_takes(episode, takes: dict) -> list[int]:
 
 
 def main(book_id: str, number: int, engine: str = "i2v",
-         bed_engine: str = BED_ENGINE_DEFAULT) -> None:
+         bed_engine: str = BED_ENGINE_DEFAULT, at_cut: bool = False) -> None:
     """`engine` is the PICTURE engine (i2v/r2v); `bed_engine` is the music model.
-    Two different questions that both used to be called 'engine'."""
+    Two different questions that both used to be called 'engine'.  `at_cut`: the finished
+    picture at the cut's own scale for the judges (cut/cut_<engine>.mp4), no upscale -- step 11
+    upscales the cut it judged, once (`upscale_cut`)."""
     book = episode_home.book_dir(book_id)
-    episode = episode_home.load_plan(book, number)
-    global W, H
-    W, H = canvas.size(episode.aspect)   # the plan declares the canvas (studio/canvas.py)
+    episode = set_canvas(book, number)
     home = episode_home.home(book, number)
     work = episode_home.work_dir(book, number, engine)
     work.mkdir(parents=True, exist_ok=True)
@@ -1086,7 +1086,7 @@ def main(book_id: str, number: int, engine: str = "i2v",
     # A cue the last MEASURED master could not hear is lifted before this
     # recut (ep15: three quiet cues, no cure but editing the signed plan).
     with within(book, number, "sfx"):
-        episode_sound.cure_from_qc(home, engine)
+        episode_sound.cure_from_qc(home, report_engine(engine, at_cut))
         sound = episode_sound.layer(home, episode, placed)
     said = {r["index"]: r for r in episode_home.read_json(episode_home.lines_dir(book, number) / "lines.json")}
     offsets = [episode_emotion.offset_of(said.get(line["index"], {}).get("delivery", "calm"),
@@ -1099,25 +1099,21 @@ def main(book_id: str, number: int, engine: str = "i2v",
         mixed = mix_with_lines(cut, music, sound, [(line["at"], wavs[line["index"]]) for line in laid],
                                work / "mixed.mp4", seconds=placed["duration_s"], offsets=offsets)
     card = book / "title" / f"ep{number:02d}.mp4"
+    title = card if card.exists() else book / "title" / "title.mp4"
     # The master's NAME goes on a finished file, never on a growing one: the
     # join is `-preset slow -crf 14` over three minutes of picture, and while it
     # ran the deliverable's own path pointed at a headerless stump.  ep05's
     # master was found truncated at 133 MB that way.  See studio/finished_file.
     master = episode_home.master_path(book, number, engine)
+    if at_cut:
+        finish_cut(book, number, engine, mixed, title, master_upscale.cut_of(master))
+        return
     up, why = master_upscale.resolved()
     encoder = video_encoder.encoder_for("master encode")
-    out = upscaled_tail(book, number, mixed, card if card.exists() else book / "title" / "title.mp4",
+    out = upscaled_tail(book, number, mixed, title,
                         finished_file.scratch_for(master, work), work, up, why, encoder=encoder,
                         wrap=face_paste_wrap(work, episode_home.takes_dir(book, number, engine), up.factor))
-    out = trim(out, work)
-    out = master_loudness.into_band(out, work, measure=integrated)   # a quiet chapter's beds (ep20)
-    # THE MASTER IS A SHORT (hard requirement, owner 2026-09-30): the wall is
-    # checked on the finished file, tail card and chip included, before the
-    # name goes on it.  ep14 delivered 182.6 s -- picture 177.9 under every
-    # picture-only wall, plus the 4.46 s card -- and shipped as a video.
-    if why := episode_spec.short_refusal(video_frames(out) / FPS):
-        raise SystemExit(f"{why}; cut beats/codas or lines in the plan and re-place")
-    finished_file.publish(out, master)
+    finished_file.publish(finished(out, work), master)
     keep = next_iteration(home)
     (home / "cut" / f"master_iter{keep}.mp4").write_bytes(master.read_bytes())
     conformed = work / "title_conformed.mp4"
@@ -1125,6 +1121,110 @@ def main(book_id: str, number: int, engine: str = "i2v",
                   card=video_frames(conformed) if conformed.exists() else 0,
                   upscale=master_upscale.name_of(up), encoder=encoder)
     print(f"master -> {master}  (kept as master_iter{keep}.mp4)")
+
+
+def set_canvas(book: Path, number: int) -> Episode:
+    """The plan, with W and H rebound to the canvas it declares (studio/canvas.py)."""
+    global W, H
+    episode = episode_home.load_plan(book, number)
+    W, H = canvas.size(episode.aspect)
+    return episode
+
+
+def report_engine(engine: str, at_cut: bool) -> str:
+    """The QC report a recut reads its cue lifts from: the judged cut's (qc_<engine>_cut.json) at cut."""
+    return f"{engine}_cut" if at_cut else engine
+
+
+def finished(out: Path, work: Path) -> Path:
+    """The tail's file with its last gain, in the loudness band, and under the Short's wall."""
+    out = master_loudness.into_band(trim(out, work), work, measure=integrated)   # a quiet chapter's beds (ep20)
+    # THE MASTER IS A SHORT (hard requirement, owner 2026-09-30): the wall is
+    # checked on the finished file, tail card and chip included, before the
+    # name goes on it.  ep14 delivered 182.6 s -- picture 177.9 under every
+    # picture-only wall, plus the 4.46 s card -- and shipped as a video.
+    if why := episode_spec.short_refusal(video_frames(out) / FPS):
+        raise SystemExit(f"{why}; cut beats/codas or lines in the plan and re-place")
+    return out
+
+
+def finish_cut(book: Path, number: int, engine: str, mixed: Path, title: Path, cut: Path) -> Path:
+    """The finished picture at 768 for QC and the master eye: the face paste baked in at cut scale,
+    card, chip, the last gain and the loudness band; no upscale (owner 2026-10-18: upscale last, once).
+    Published as cut/cut_<engine>.mp4 with its layout row (upscale "cut": QC's cap for an unscaled cut)."""
+    work, home = episode_home.work_dir(book, number, engine), episode_home.home(book, number)
+    encoder = video_encoder.encoder_for("master encode")
+    wrap = face_paste_wrap(work, episode_home.takes_dir(book, number, engine), master_upscale.AT_CUT.factor)
+    with episode_clock.timed(book, number, "cut_pass", note=f"paste at cut scale; encode {encoder}", within="assemble"):
+        out = tail(mixed, title, finished_file.scratch_for(cut, work), work, number,
+                   upscale=master_upscale.AT_CUT, wrap=wrap, encoder=encoder)
+    finished_file.publish(finished(out, work), cut)
+    conformed = work / "title_conformed.mp4"
+    record_layout(home / "cut", cut, main=video_frames(mixed),
+                  card=video_frames(conformed) if conformed.exists() else 0, upscale="cut", encoder=encoder)
+    print(f"cut -> {cut}  (judged at cut scale; upscaled once after the master eye signs)")
+    return cut
+
+
+def upscale_cut(book_id: str, number: int, engine: str = "r2v") -> Path:
+    """The judged cut upscaled ONCE, its sound copied: cut/master_<engine>.mp4, kept as master_iterN,
+    laid out, and traced to the cut's bytes in cut/upscaled.json (step 11 carries the verdicts by it)."""
+    book = episode_home.book_dir(book_id)
+    set_canvas(book, number)
+    home, work = episode_home.home(book, number), episode_home.work_dir(book, number, engine)
+    master = episode_home.master_path(book, number, engine)
+    cut = master_upscale.cut_of(master)
+    if not cut.exists():
+        raise SystemExit(f"no judged cut at {cut}; step 10 makes it and step 11 judges it")
+    up, why = master_upscale.resolved()
+    encoder = video_encoder.encoder_for("master encode")
+    picture = upscaled_picture(book, number, cut, work, up, why, encoder)
+    out = finished_file.scratch_for(master, work)
+    subprocess.run(master_upscale.with_sound_of(picture, cut, out), check=True)
+    return publish_master(home, master, cut, out, up, encoder)
+
+
+def upscaled_picture(book: Path, number: int, cut: Path, work: Path, up: master_upscale.Upscale,
+                     why: str, encoder: str) -> Path:
+    """The judged cut through the upscale, no paste (it is in the cut), on its own clock row."""
+    listing = work / "upscale.txt"
+    listing.write_text(f"file '{cut.as_posix()}'\n", encoding="utf-8")
+    out = work / "upscaled_picture.mp4"
+    master_upscale.say(why)
+    note = f"{up.label()} -> {'x'.join(map(str, master_upscale.size(W, H, up)))} from {cut.name}" + (f"; {why}" if why else "")
+    with episode_clock.timed(book, number, "upscale", note=f"{note}; encode {encoder}", within="assemble"):
+        master_upscale.master(listing, out, W, H, up, FPS, wrap=None, encoder=encoder,
+                              cuts=judged_cuts(work, cut) if up.engine == "av3" else [],
+                              expected_frames=video_frames(cut))
+    return out
+
+
+def judged_cuts(work: Path, cut: Path) -> list[int]:
+    """Every frame a new shot starts on in the judged cut: the takes' joins, the card, the chip."""
+    row = layout_row(cut)
+    tails = [row["main"], row["main"] + row["card"]] if row else []
+    return sorted(set(shot_starts(work)) | {f for f in tails if f})
+
+
+def layout_row(path: Path) -> dict:
+    """cut/master_layout.json's row for THESE bytes, {} when none."""
+    from studio import book_compilation as bc, youtube_publish as yp
+    layout = Path(path).with_name(bc.LAYOUT)
+    return (episode_home.read_json(layout) if layout.exists() else {}).get(yp.sha8(path)) or {}
+
+
+def publish_master(home: Path, master: Path, cut: Path, out: Path, up: master_upscale.Upscale,
+                   encoder: str) -> Path:
+    """The upscaled file under the master's name, its numbered copy, its layout and its provenance."""
+    finished_file.publish(out, master)
+    keep = next_iteration(home)
+    (home / "cut" / f"master_iter{keep}.mp4").write_bytes(master.read_bytes())
+    row = layout_row(cut)
+    record_layout(home / "cut", master, main=row.get("main", 0), card=row.get("card", 0),
+                  upscale=master_upscale.name_of(up), encoder=encoder)
+    master_upscale.record_made(master, cut, master_upscale.name_of(up), video_frames(master), video_frames(cut))
+    print(f"master -> {master}  (upscaled once from {cut.name}; kept as master_iter{keep}.mp4)")
+    return master
 
 
 def upscaled_tail(book: Path, number: int, mixed: Path, title: Path, out: Path, work: Path,
@@ -1187,6 +1287,9 @@ def next_iteration(home: Path) -> int:
 
 if __name__ == "__main__":
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    main(args[0], episode_arg(sys.argv), episode_home.engine_arg(sys.argv),
-         next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--bed=")),
-              BED_ENGINE_DEFAULT))
+    if "--upscale" in sys.argv:
+        upscale_cut(args[0], episode_arg(sys.argv), episode_home.engine_arg(sys.argv))
+    else:
+        main(args[0], episode_arg(sys.argv), episode_home.engine_arg(sys.argv),
+             next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--bed=")),
+                  BED_ENGINE_DEFAULT), at_cut="--at-cut" in sys.argv)

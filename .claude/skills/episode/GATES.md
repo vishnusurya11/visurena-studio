@@ -564,9 +564,10 @@ holds it equal): edit the registry, never this table.
 | 09 | retakes | 2 | episode | 45 | EYE_TAKES |
 | 09 | face_refine | 1 | take | 15 |  |
 | 10 | assemble | 1 | pass | 15 |  |
-| 10 | upscale | 1 | pass | 15 |  |
+| 10 | cut_pass | 1 | pass | 15 |  |
 | 11 | qc | 1 | episode | 30 |  |
 | 11 | master_eye | 1 | episode | 30 | MASTER |
+| 11 | upscale | 1 | pass | 15 |  |
 | 12 | deliver | 1 | pass | 2 |  |
 | 13 | publish | 1 | pass | 10 |  |
 <!-- /registry:caps -->

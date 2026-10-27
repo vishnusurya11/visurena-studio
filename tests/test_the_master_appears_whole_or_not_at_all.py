@@ -76,10 +76,13 @@ def test_assemble_never_hands_the_master_name_to_ffmpeg():
     from scripts.episode import assemble
     body = inspect.getsource(assemble.main)
     assert "episode_home.master_path" in body
-    call = body[body.index("out = upscaled_tail("):body.index("trim(out")]
+    call = body[body.index("out = upscaled_tail("):body.index("finished(out")]
     assert "master_path" not in call, (
         "tail() is writing straight to the deliverable's name; it must encode "
         "into the work room and publish by rename")
+    # the judged cut and the one upscale also write in the work room and publish by rename
+    assert "finished_file.scratch_for(cut, work)" in inspect.getsource(assemble.finish_cut)
+    assert "out = finished_file.scratch_for(master, work)" in inspect.getsource(assemble.upscale_cut)
 
 
 def test_trim_does_not_rewrite_the_master_in_place():

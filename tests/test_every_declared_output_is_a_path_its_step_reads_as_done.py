@@ -112,6 +112,12 @@ def _master(book: Path) -> Path:
     return _file(episode_home.master_path(book, 4, "r2v"), b"the cut")
 
 
+def _cut(book: Path) -> Path:
+    """Step 10's judged cut at 768 (ep03 retro #2: step 11 judges it, then upscales it once)."""
+    from studio import master_upscale
+    return _file(master_upscale.cut_of(episode_home.master_path(book, 4, "r2v")), b"the judged cut")
+
+
 def _rubric(home: Path, sha8: str) -> Path:
     passing = Verdict(judge="master_eye", version="1", passed=True, confidence=1.0, reads=3)
     return master_eye.write_rubric(home, sha8, passing)
@@ -240,18 +246,24 @@ def ep10_in(book, home):
 
 
 def ep10_out(book, home):
-    return [_file(book / "title" / "ep04.mp4", b"card"), _master(book)]
+    return [_file(book / "title" / "ep04.mp4", b"card"), _cut(book)]
 
 
 def ep11_in(book, home):
-    _master(book)
+    _cut(book)
     _json(home / "plan.json", _plan_doc())
     _json(home / "placed.json", {})
 
 
 def ep11_out(book, home):
-    sha8 = yp.sha8(episode_home.master_path(book, 4, "r2v"))
-    return [_json(home / "qc_r2v.json", {"passed": True, "sha8": sha8}), _rubric(home, sha8)]
+    """The judged cut measured and signed, upscaled once, its verdicts carried to the master's bytes."""
+    from studio import master_upscale
+    cut, master = _cut(book), _master(book)
+    made = master_upscale.record_made(master, cut, "av3", 3444, 3444)
+    judged, sha8 = yp.sha8(cut), yp.sha8(master)
+    return [_json(home / "qc_r2v_cut.json", {"passed": True, "sha8": judged}), _rubric(home, judged),
+            master, made, _json(home / "qc_r2v.json", {"passed": True, "sha8": sha8, "cut_sha8": judged}),
+            _rubric(home, sha8)]
 
 
 def ep12_in(book, home):

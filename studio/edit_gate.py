@@ -36,6 +36,11 @@ SEGMENT_MEAN_AV3 = 2.5
 """The cap on an av3 master (hqdn3d temporal denoise + x4 upscale).  MEASURED on
 Jekyll ep01 (28 segments, offset 0 on all, cuts 27/27 exact): 1.47-2.10, three
 over RTX's 2.0 (T01 2.06, T11 2.102, T12 2.017).  A wrong picture reads 32-63."""
+SEGMENT_MEAN_CUT = 1.6
+"""The cap on the judged cut at 768 (no upscale; the face paste baked in, CRF 8; Jekyll ep03 retro #2).
+MEASURED on ep03's own work room, 2026-10-27: 0.50-1.36 over 28 segments (9 pasted), offset 0 on all,
+cuts 27/27; 11 of 28 sat over the unrecorded 1.0.  One episode: thin, dated, refit when a cut fails here.
+A wrong picture reads 32-63 and a wrong frame is caught by the offset, not the mean."""
 HOLD_FRAMES_DENOISED = 6
 """A run of repeats an edit hold needs on a denoised master: the temporal denoise
 smooths slow motion into 3-frame near-repeats the take does not have (ep01 T13,
@@ -46,6 +51,8 @@ def segment_cap(upscale: str) -> float:
     """The segment mean cap for the upscale that made the master ('' = unrecorded)."""
     if upscale == "av3":
         return SEGMENT_MEAN_AV3
+    if upscale == "cut":
+        return SEGMENT_MEAN_CUT
     return SEGMENT_MEAN_RTX if upscale.startswith("rtx") else SEGMENT_MEAN
 
 

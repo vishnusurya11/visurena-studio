@@ -4,9 +4,12 @@
     uv run python scripts/episode/step_10_edit.py <codex_id> <n> [--engine=r2v] [--bed=<model>]
 
 Wraps scripts/episode/series_title.py (skipped once title/epNN.mp4 exists)
-then scripts/episode/assemble.py --engine=r2v.  assemble keeps every cut as
-cut/master_iterN.mp4 and never overwrites one; the step is done when the
-engine's master exists.
+then scripts/episode/assemble.py --engine=r2v --at-cut: the finished picture at the
+cut's own scale (face paste, card, chip, loudness; no upscale) as cut/cut_<engine>.mp4,
+the file step 11's QC and master eye judge.  The one upscale follows the judges, in
+step 11 (owner 2026-10-18: upscale last, once).  The step is done when that cut is
+newer than everything it was cut from; a master from before the cut-scale judge
+(no cut on disk) is its own cut, as it was.
 """
 from __future__ import annotations
 
@@ -15,7 +18,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home, step_cli  # noqa: E402
+from studio import episode_home, master_upscale, step_cli  # noqa: E402
 
 STEP_ID = "10"
 NAME = "edit"
@@ -48,11 +51,18 @@ def inputs(ctx) -> list[Path]:
     return takes + [p for p in extra if p.exists()]
 
 
+def made(ctx, engine: str) -> Path:
+    """What this step makes: the judged cut, or (before the cut-scale judge) the master itself."""
+    master = episode_home.master_path(ctx.book_dir, ctx.number, engine)
+    cut = master_upscale.cut_of(master)
+    return cut if cut.exists() else master
+
+
 def done(ctx) -> bool:
-    """A master exists AND is newer than everything it was cut from.  ep12: a
+    """The cut exists AND is newer than everything it was cut from.  ep12: a
     retaken T16 and a new heads.json sat under a master the runner called done."""
     engine = engine_of(getattr(ctx, "extra", None) or [])
-    master = episode_home.master_path(ctx.book_dir, ctx.number, engine)
+    master = made(ctx, engine)
     if not (title_clip(ctx).exists() and master.exists()):
         return False
     if refused_cut(ctx, master, engine):
@@ -66,7 +76,7 @@ def refused_cut(ctx, master: Path, engine: str) -> bool:
     read as done on the relaunch and QC refused the same bytes again)."""
     import hashlib
     import json
-    report = ctx.home / f"qc_{engine}.json"
+    report = ctx.home / (f"qc_{engine}_cut.json" if master.name.startswith("cut") else f"qc_{engine}.json")
     if not report.exists():
         return False
     try:
@@ -83,7 +93,7 @@ def run(ctx) -> None:
     extra = getattr(ctx, "extra", None) or []
     if not title_clip(ctx).exists():
         ctx.run_script("scripts/episode/series_title.py", gpu=GPU, clock="title")
-    ctx.run_script("scripts/episode/assemble.py", *engine_flags(extra), gpu=GPU, clock="assemble")
+    ctx.run_script("scripts/episode/assemble.py", *engine_flags(extra), "--at-cut", gpu=GPU, clock="assemble")
 
 
 if __name__ == "__main__":

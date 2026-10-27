@@ -43,7 +43,7 @@ def _wire(monkeypatch, tmp_path, lufs=-14.0, sound_ok=True):
     placed = {"duration_s": 7.0, "shots": [{"index": i, "t_start": 2.0 * i} for i in range(3)]}
     inputs = SimpleNamespace(book=tmp_path, master=tmp_path / "master.mp4", work=tmp_path, placed=placed,
                              take_dir=tmp_path, lines=LINES, records=[], episode=None, number=3)
-    monkeypatch.setattr(qc, "load_inputs", lambda book_id, number, engine: inputs)
+    monkeypatch.setattr(qc, "load_inputs", lambda book_id, number, engine, at_cut=False: inputs)
     for name, value in {"integrated": lufs, "true_peak": -2.0, "clip_seconds": 160.0, "qc_code_sha8": "c0de0000",
                         "speech_band": 12.0}.items():
         monkeypatch.setattr(qc, name, lambda *a, _v=value, **k: _v)

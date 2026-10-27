@@ -67,6 +67,7 @@ NOT_A_TAKE = {
     "scripts/episode/assemble.py:black_chip": "a black chip of the cut",
     "scripts/episode/assemble.py:trim": "the trimmed master",
     "scripts/episode/assemble.py:main": "cut/master_iter<k>.mp4",
+    "scripts/episode/assemble.py:publish_master": "cut/master_iter<k>.mp4, the one upscale of the judged cut",
     "scripts/episode/face_refine.py:write_video": "a face crop under refine/",
     "scripts/episode/face_refine.py:silence": "a silent wav for a crop",
     "scripts/episode/face_refine.py:collect": "refine/T<nn>_p<k>.mp4, never T<nn>.mp4",
