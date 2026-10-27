@@ -2662,3 +2662,19 @@ What cost the morning, in order, and what now stops each one earlier.
 - **The GPU fell off the bus mid-grids (~11:57)** an hour after the supervisor's commit-low recycle
   launched an engine that died on start (09:54, launched with no log). Pause the series at once; only a
   reboot recovers it (memory: GPU lost needs reboot).
+
+- **Delivered 2026-10-27 07:28 PDT, public** (https://youtu.be/pbIWXGHy6G4), 2:52, -14.2 LUFS, 30/30 lines heard,
+  QC PASS. Stage time 5.7 h (timing.jsonl, overlapping): grids 89 min (one hung on the lost GPU), plan 61, take
+  checks 58, face refine 28, take content 27, lines 14. Wall time was a day: the GPU dropped off the bus twice
+  and ComfyUI crashed once (access violation at sampler load).
+- **A panel cure tripped the prompt lint.** The panel ladder's clones cure wrote "Each person in the picture is a
+  different man ..." into shot 5's frame; P13 read "man" as an unstaged person and every relaunch refused until
+  the brain parked (brain_exhausted). Fixed 7703f55: P13 strips `panel_ladder.CURES` first.
+- **A take the gate failed is not shipped (G-DEAD); retake it by the ladder's own cure.** T13 (from behind,
+  walking away) failed HARD on frozen-whole 83 % and a sliding gait. `take_ladder.plan_cure(doc, i, faults)` turned
+  the track into a push toward the door; the recorded cure made T13 stale and step 09 retook it alone (owner order).
+- **A stray root file holds the series (WAIT_TREE).** Launching the NVIDIA App from the repo folder wrote
+  debug.log at the root; move it out. Start desktop apps from their own folder.
+- **GPU loss here is the PCIe link, not the code.** WHEA-Logger 17 (corrected PCIe errors on root port 0:1:0,
+  Intel A70D) landed one to three minutes before each loss. Driver 610.88 -> Studio 617.42 on 2026-10-27; if it
+  recurs: reseat the 16-pin plug and the card, set the x16 slot to Gen 4 in the BIOS.
