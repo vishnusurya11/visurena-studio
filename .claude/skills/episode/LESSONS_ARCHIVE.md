@@ -2678,3 +2678,22 @@ What cost the morning, in order, and what now stops each one earlier.
 - **GPU loss here is the PCIe link, not the code.** WHEA-Logger 17 (corrected PCIe errors on root port 0:1:0,
   Intel A70D) landed one to three minutes before each loss. Driver 610.88 -> Studio 617.42 on 2026-10-27; if it
   recurs: reseat the 16-pin plug and the card, set the x16 slot to Gen 4 in the BIOS.
+
+## Jekyll ep03 (2026-10-27)
+
+Launch 08:36, public 12:04 PDT (3 h 28 min wall, no GPU loss on driver 617.42, 0 PCIe errors).
+- **A posture verb is a noun's end, like `stands`.** Shots 3 and 16 ended "The lawyer leans at the CENTRE";
+  `end_noun` knew `stands/sits/lies` but not `leans`, so the card read "with <Subject 1> leans now in frame" and
+  prompt lint P9 refused step 06 twice (the brain's relaunch on unchanged code fails the same way: fix the code,
+  not the run). `leans/leaning` joined `NP_END` (0fd793c). A new posture verb in an `end` is the next one.
+- **A new plan gate arrives with its writer line.** G-PROMPTLINT (041d16b) shipped with no line in
+  `agents/skills/episode_writer.md`; `test_every_plan_gate_is_in_the_writer_skill_or_cured` caught it a day late
+  because the full suite had not run. Run the whole suite before committing a gate.
+- **The look the strips show is the sheets' look.** Jekyll's and Utterson's base sheets share one face (gaunt,
+  long grey hair); only the hat and coat tell them apart, and the master follows them faithfully. That is a
+  cast-wide look fault (unique character looks), not an episode fault; it is the owner's call to redraw a base
+  under a public series, never a retake.
+- **This shell has no ffmpeg on PATH** (the drive's environment does; `imageio_ffmpeg.get_ffmpeg_exe()` is in the
+  venv). 153 media tests fail here for that reason alone; read the failure before reading it as a regression.
+- **Time:** take checks 45 min, plan 31, face refine 25, grids 15, panel eye 14 -- the plan writer fell from 61
+  to 31 min after the ep02 chain and lint fixes; take checks are now the clock.
