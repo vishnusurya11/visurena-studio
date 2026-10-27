@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
-from studio import book_look, refs_pack
+from studio import book_look, cast_faces, refs_pack
 from studio.judges import sheet_row
 from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
@@ -45,8 +45,9 @@ SUPERSEDED = "superseded"
 SHEET_SIZE = (1536, 1024)
 """The size every refs_pack job draws at; a row without a job is drawn the same."""
 PACK = "refs/pack.jsonl"
-HARD = frozenset({"must_noun", "lettering", "extra_limb", "lookalike", "identity"}) | sheet_row.KINDS
-"""What climbs; a SHEET-ROW contradiction too (owner 2026-10-15, the girl's lace bonnet)."""
+HARD = frozenset({"must_noun", "lettering", "extra_limb", "lookalike", "identity", cast_faces.KIND}) | sheet_row.KINDS
+"""What climbs; a SHEET-ROW contradiction too (owner 2026-10-15, the girl's lace bonnet); G-CAST,
+a base sheet at the master's collapse wall to another's (Jekyll ep03 retro, 2026-10-27)."""
 BOUND_NOTE = "bound flagged: the take identity judge catches the consequence"
 SENTENCE = re.compile(r"[^.!?]+[.!?]*")
 

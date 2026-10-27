@@ -11,7 +11,9 @@ state first) on a hard fault, and at the terminal keeps the best try of each
 sheet and signs the pack flagged with its faults listed, a learning and an
 audit row (decision 2026-09-24-automate-the-taste-gates, gates.yaml refs/LOOK).
 The refs context carries no budget and no learnings file: the ladder climbs on
-its own clock and the learnings go to refs/learnings.jsonl.
+its own clock and the learnings go to refs/learnings.jsonl.  G-CAST
+(studio/cast_faces, 2026-10-27) rides on every read: a base sheet at the master
+judge's collapse wall to another bound character's is a hard fault and climbs.
 """
 from __future__ import annotations
 
@@ -20,7 +22,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import judged_gate, learnings, manifest as unit_manifest, refs_verdict, sheet_ladder, step_cli  # noqa: E402
+from studio import cast_faces, judged_gate, learnings, manifest as unit_manifest, refs_verdict, sheet_ladder, step_cli  # noqa: E402
 from studio.judges import look  # noqa: E402
 
 STEP_ID = "04"
@@ -156,12 +158,29 @@ def judge_of(ctx, paths: list[str]):
         if fresh or not old:
             verdicts.append(look.judge(ctx.book_dir, sheet_ladder.latest(rows, fresh),
                                        bound=sheet_ladder.latest(rows, others + old), **tools_of(ctx)))
-        verdict = merged(verdicts)
+        verdict = with_cast(ctx, merged(verdicts), fresh)
         for f in verdict.faults:
             ctx.log(f"{GATE}: {f.kind} at {f.where} {f.evidence} {f.note}".strip(), step_id=STEP_ID,
-                    level="WARNING" if f.kind in look.HARD else "INFO")
+                    level="WARNING" if f.kind in look.HARD | {cast_faces.KIND} else "INFO")
         return verdict
     return judge
+
+
+def judged_cast(paths: list[str]) -> list[str]:
+    """The characters whose BASE sheet is read in full this round, in judged order."""
+    return [look.entity_of(p) for p in paths
+            if look.kind_of(p) == look.CHARACTERS and Path(p).name == cast_faces.BASE]
+
+
+def with_cast(ctx, verdict, paths: list[str]):
+    """G-CAST (Jekyll ep03 retro): every pair of the bound cast's base sheets at the master's
+    collapse wall; a pair holding a sheet read in full this round fails the verdict, the
+    ladder redraws that sheet.  Every pair's cosine lands in refs/work/cast_faces.json."""
+    found = cast_faces.faults(Path(ctx.book_dir), bound_ids(ctx.book_dir), judged_cast(paths),
+                              tools_of(ctx).get("embed"))
+    if not found:
+        return verdict
+    return verdict.model_copy(update={"passed": False, "faults": list(verdict.faults) + found})
 
 
 def sign_of(ctx):
