@@ -102,6 +102,38 @@ def projected(episode, rate: float, voice: bool = True) -> list[dict]:
     return out
 
 
+def dry_cards(book: Path, episode, number: int, rows: list[dict], rate: float) -> list[dict]:
+    """The take cards as step 06 will hold them for the lint: index, shots, faces, frames and
+    the dry-built prompt.  A take the builder's own lint refuses is left to `dry_faults`."""
+    import takes_r2v
+    from_refs = takes_r2v.cast_refs.casts_from_sheets(book)
+    placed = takes_r2v.dry_placed(rows)
+    measured = takes_r2v.dry_measured(episode, placed, rate)
+    out = []
+    for take in takes_r2v.tk.takes(placed, takes_r2v.tk.budget_for(episode)):
+        take["placed"] = placed
+        try:
+            prompt = takes_r2v.dry_prompt(book, episode, number, take, measured, from_refs)
+        except ValueError:
+            continue
+        shots = [episode.shot(i) for i in take["shots"]]
+        out.append({"index": take["shots"][0], "shots": take["shots"], "prompt": prompt,
+                    "faces": takes_r2v.dry_faces(episode, shots, from_refs), "frames": take["frames"]})
+    return out
+
+
+def card_lint_rows(book: Path, episode, number: int, rows: list[dict], rate: float) -> list[str]:
+    """prompt_lint's card rules (P1-P18, the ones step 06 runs) over the dry-built cards,
+    as G-TAKELINT rows (Jekyll ep03: P9 refused 'with <Subject 1> leans now in frame' after the voices)."""
+    import takes_r2v
+    from studio import prompt_lint
+    takes_r2v.adopt_canon(book, episode)
+    plan = episode.model_dump(mode="json") if hasattr(episode, "model_dump") else {}
+    return [f"G-TAKELINT card T{c['index']:02d}: {f}"
+            for c in dry_cards(book, episode, number, rows, rate)
+            for f in prompt_lint.take_faults(c["prompt"], prompt_lint.facts_for(book, c, plan))]
+
+
 def take_lint_gate(book: Path, episode, number: int, rate: float) -> int:
     """G-TAKELINT, HARD: episode_ref_official's REAL lint on take cards
     dry-built from the projection (takes_r2v.dry_faults), each fault remapped
@@ -110,7 +142,9 @@ def take_lint_gate(book: Path, episode, number: int, rate: float) -> int:
     builder then rewrote.  A dry build the adoptions refuse is itself a row."""
     import takes_r2v
     try:
-        rows = takes_r2v.dry_faults(book, episode, number, projected(episode, rate, voice=False), rate=rate)
+        dry = projected(episode, rate, voice=False)
+        rows = takes_r2v.dry_faults(book, episode, number, dry, rate=rate)
+        rows += card_lint_rows(book, episode, number, dry, rate)
     except SystemExit as why:
         rows = [f"G-TAKELINT dry build refused: {str(why)[:150]}"]
     print("G-TAKELINT   :", len(rows) or "clean")
