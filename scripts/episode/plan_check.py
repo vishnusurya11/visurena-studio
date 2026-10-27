@@ -119,6 +119,20 @@ def take_lint_gate(book: Path, episode, number: int, rate: float) -> int:
     return len(rows)
 
 
+def prompt_lint_gate(book: Path, number: int) -> int:
+    """G-PROMPTLINT, HARD: the plan-side prompt lint (P3/P11/P12/P13/P17) the take builder
+    runs at step 06, run here on the checked plan file (Jekyll ep02, 2026-10-26: six shots
+    named an unstaged person; the battery passed them and step 06 refused after the voices)."""
+    from studio import prompt_lint
+    plan = episode_home.read_json(episode_home.home(book, number) / PLAN_FILE.get())
+    rows = {r["entity_id"]: prompt_lint.row_words(r) for r in prompt_lint.characters(book)}
+    found = prompt_lint.plan_faults(plan, rows)
+    print("G-PROMPTLINT :", len(found) or "clean")
+    for f in found:
+        print("   ", f[:170])
+    return len(found)
+
+
 def row_text_rows(book: Path) -> list[str]:
     """G-ROWTEXT at read: every refs.json character physical and every
     analysis/props card profile text under the row lint, tagged for the cure."""
@@ -486,6 +500,7 @@ def main(book_id: str, number: int, plan: str = "plan.json") -> int:
         except SystemExit as e:
             print("TAKE BUILDER :", str(e)[:170]); hard += 1
     hard += take_lint_gate(book, ep, number, rate)
+    hard += prompt_lint_gate(book, number)
     print("SHEET TEXT   :")
     hard += sheet_text(book_id, number)
     print("VERDICT      :", "REFUSED" if hard else "clean -- lines may render")

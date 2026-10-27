@@ -2636,3 +2636,29 @@ Do not re-bench these without new evidence; each line says why it is parked. Num
   client wait, comfy.RESTART_SECONDS, is 1,200 s to match (fleet C A6).
 - **A cold Qwen-Image load** is 141 s from D: (10-21) and 269 s under a concurrent copy (10-22), unmeasured
   on the NVMe; panel_ladder prices no cold term until it is.
+
+## Jekyll ep02 first pass (2026-10-26)
+
+What cost the morning, in order, and what now stops each one earlier.
+- **The plan writer is the clock.** Two climbs, 3 writer rounds each at 10-16 min a round, spent 62 min
+  and still left two tier-1 rows (G-VARIETY 15 against 12, G-SYNC line 9) that each took one recorded
+  edit: a narration line moved to the shot before, three pull-back repeats widened to medium. Read the
+  deferred draft's rows before a third climb; most are one-field edits through `plan_provenance.record`.
+- **A recorded edit could never re-sign.** No-op cure rounds (from == to) and a second climb's replayed
+  row broke `plan_provenance.chain`, so every recorded fix would have climbed the writer again. Fixed
+  1120556: the walker skips rows that moved nothing or come from another draft; an unrecorded write still
+  breaks the chain.
+- **The plan-side prompt lint ran only at step 06.** Six shots named a person not staged in their frame
+  ("holding the small man's stare" on an Utterson single); the plan was signed, voiced and timed first.
+  plan_check now runs `prompt_lint.plan_faults` as G-PROMPTLINT (HARD), so the writer gets it at step 02.
+  Reword the action, never add a face: "his eyes fixed hard on the doorway".
+- **A restyle supersedes the cast sheets of later chapters.** The 2026-10-18 Kawajiri redraw drew only
+  ep01's cast; Lanyon and Poole had no sheet and CAST BOUND held the plan. `scripts/refs/step_02_sheets.py
+  <codex> --kind=characters --only=a,b` draws them in the book's look in ~12 s each; check them by eye.
+- **A short spoken line rushes in this voice.** "I must put my shoulder to the wheel." read at 3.96-4.73
+  words/s on 10 takes against the 3.8 wall; a `cold` delivery did not slow it. The book's full sentence,
+  with its comma ("..., if Jekyll will but let me."), gives the reader a pause. Lengthen from the book
+  before touching the wall.
+- **The GPU fell off the bus mid-grids (~11:57)** an hour after the supervisor's commit-low recycle
+  launched an engine that died on start (09:54, launched with no log). Pause the series at once; only a
+  reboot recovers it (memory: GPU lost needs reboot).

@@ -95,6 +95,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - The shot framework (2026-10-21: prompt-writer defects; the framework rows)
 - The voice ruler (2026-10-21)
 - Speed and models parked (fleet C)
+- Jekyll ep02 first pass (2026-10-26)
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,
