@@ -156,14 +156,17 @@ def shot_room(tmp_path):
     return room
 
 
-def test_the_fingerprint_moves_with_the_take_or_the_shots(tmp_path):
+def test_the_fingerprint_moves_with_the_take_its_head_or_its_still_not_its_record(tmp_path):
+    """Jekyll ep03 T04 (2026-10-27): a render rewrites shots.json even when keep_best keeps the old draw;
+    the record is not what the cut reads (tests/test_a_master_retake_must_change_an_input.py)."""
     room = shot_room(tmp_path)
     before = ml.fingerprint(tmp_path, 3)
+    (room / "shots.json").write_text("[2]", encoding="utf-8")
     assert ml.fingerprint(tmp_path, 3) == before
     (room / "T03.mp4").write_bytes(b"new take")
     assert ml.fingerprint(tmp_path, 3) != before
     after = ml.fingerprint(tmp_path, 3)
-    (room / "shots.json").write_text("[2]", encoding="utf-8")
+    (tmp_path / "heads.json").write_text('{"3": 0.2}', encoding="utf-8")
     assert ml.fingerprint(tmp_path, 3) != after
 
 
@@ -173,6 +176,8 @@ def through(tmp_path, monkeypatch, act, spent=False):
     from studio import gate_policy, step_attempts, take_ladder
     monkeypatch.setattr(take_ladder, "refuse_spent", lambda ctx, n: spent)
     monkeypatch.setattr(take_ladder, "retake", lambda ctx, idx, why, flag, trims=None: act())
+    monkeypatch.setattr(ml, "cured_plan", lambda home, shot, faults: ({}, "retake_shot: board -> move_type"))
+    monkeypatch.setattr(ml.episode_home, "write_plan", lambda path, doc: path)
     monkeypatch.setattr(step_09_shoot, "approved", lambda p: "--ok")
     monkeypatch.setattr(gate_policy, "of", lambda stage, gate: None)
     ctx = Ctx(tmp_path)

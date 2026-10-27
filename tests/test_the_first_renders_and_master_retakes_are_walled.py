@@ -38,6 +38,8 @@ def test_a_master_retake_spends_an_episode_round(tmp_path, monkeypatch):
     monkeypatch.setattr(take_ladder, "retake", renders)
     monkeypatch.setattr("scripts.episode.step_09_shoot.approved", lambda p: "--x")
     monkeypatch.setattr("studio.gate_policy.of", lambda *a: None)
+    monkeypatch.setattr(master_ladder, "cured_plan", lambda home, shot, faults: ({}, "retake_shot: board -> move_type"))
+    monkeypatch.setattr(master_ladder.episode_home, "write_plan", lambda path, doc: path)
     v = SimpleNamespace(faults=[])
     master_ladder.retake_through_take_ladder(_ctx(tmp_path, []), 3, v)
     assert calls and step_attempts.count(tmp_path, "retakes") == 1

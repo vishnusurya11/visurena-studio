@@ -1,0 +1,46 @@
+{
+ "index": 4,
+ "shots": [
+  4
+ ],
+ "section": "friction",
+ "setup": "jekyll_chair",
+ "lane": "dialogue",
+ "sizes": [
+  "medium_close"
+ ],
+ "workflow": "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang + anchors",
+ "model": "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
+ "mode": "reference-to-video from the references (--from-refs): a cast sheet for every person the take shows + this shot's storyboard panel as its first frame (the place); the dialogue wavs at their offsets anchored at frame 0",
+ "refs": [
+  "refs/characters/henry_jekyll/sheet_front.png",
+  "refs/characters/gabriel_john_utterson/sheet_front.png",
+  "episodes/ep03/storyboard/h3/shot_04.png"
+ ],
+ "faces": [
+  "henry_jekyll",
+  "gabriel_john_utterson"
+ ],
+ "ref_image_size": "match",
+ "anchors": [],
+ "audio": [
+  [
+   "l04.wav",
+   0.25
+  ]
+ ],
+ "width": 768,
+ "height": 768,
+ "fps": 24,
+ "placed_seconds": 3.916667,
+ "frames": 107,
+ "seconds": 4.46,
+ "steps": 8,
+ "seed": 84206,
+ "tries": 2,
+ "retake_why": "retake_shot: faces",
+ "measured_seconds": 4.45,
+ "render_s": 61.9,
+ "waited_s": 63.8,
+ "rel_path": "episodes/ep03/takes/r2v/T04.mp4"
+}

@@ -486,11 +486,17 @@ def substitute_id(kind: str, motion: str, dialogue: bool = False) -> str:
 def substitute(kind: str, motion: str, at_rest: str = "", dialogue: bool = False) -> str:
     """The motion with its camera head swapped; the subject's own clauses stay.
     A frozen dialogue take keeps a locked head and gains the actor's verb."""
+    verb = [ACTOR_VERB] if dialogue and ACTOR_VERB not in (motion or "") else []
+    return headed(substitute_id(kind, motion, dialogue), motion, at_rest, verb)
+
+
+def headed(move: str, motion: str, at_rest: str = "", extra: list[str] | None = None) -> str:
+    """The motion with its camera head phrased as catalog `move` (PHRASING), aimed where the old one
+    was; the subject's own clauses stay, `extra` clauses after them."""
     head, *rest = [c.strip() for c in (motion or "").split(";")]
     _cam, subject = ro.camera_clause(head)
-    new = PHRASING[substitute_id(kind, motion, dialogue)].format(aim=aim_of(motion, at_rest))
-    verb = [ACTOR_VERB] if dialogue and ACTOR_VERB not in (motion or "") else []
-    return "; ".join([new] + ([subject] if subject else []) + verb + [c for c in rest if c])
+    new = PHRASING[move].format(aim=aim_of(motion, at_rest))
+    return "; ".join([new] + ([subject] if subject else []) + list(extra or []) + [c for c in rest if c])
 
 
 def move_type(doc: dict, index: int, faults: list[Fault]) -> dict:

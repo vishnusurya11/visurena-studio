@@ -178,6 +178,8 @@ def master_retake(ep01, monkeypatch) -> list:
     monkeypatch.setattr(take_ladder, "retake", lambda *a, **k: calls.append(a[1]))
     monkeypatch.setattr(step_09_shoot, "approved", lambda p: "--ok")
     monkeypatch.setattr(gate_policy, "of", lambda stage, gate: None)
+    monkeypatch.setattr(master_ladder, "cured_plan", lambda home, shot, faults: ({}, "retake_shot: board -> move_type"))
+    monkeypatch.setattr(master_ladder.episode_home, "write_plan", lambda path, doc: path)
     ctx = SimpleNamespace(home=ep01.home, stage="episode", log=lambda *a, **k: None)
     master_ladder.retake_through_take_ladder(ctx, 1, SimpleNamespace(faults=[]))
     return calls

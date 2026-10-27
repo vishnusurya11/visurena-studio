@@ -14,14 +14,17 @@ rung's body when it exists, and a test hands in a fake.
 """
 from __future__ import annotations
 
+import copy
 import hashlib
+import json
+import os
 import time
 from pathlib import Path
 from typing import Callable
 
-from studio import judged_gate, step_attempts
+from studio import episode_home, judged_gate, plan_gates, step_attempts, stillness
 from studio.judges import master_eye
-from studio.judges.verdict import Verdict
+from studio.judges.verdict import Fault, Verdict
 from studio.ladder import Ladder, Rung
 
 RETAKE_SECONDS = 9 * 60.0
@@ -59,10 +62,12 @@ def recuttable(v: Verdict) -> bool:
     return worst_shot(v) is not None
 
 
-def fingerprint(home, shot: int) -> tuple[str, str]:
-    """(the named take sha8, shots.json sha8): what a retake can change."""
+def fingerprint(home, shot: int) -> tuple[str, str, str]:
+    """(the take, heads.json, stills.json) sha8s: what the cut READS that a retake can move.  Not
+    shots.json: every render rewrites its record (seed, tries, render_s), and ep03 T04's record changed
+    while keep_best put the old draw back -- the master was recut, upscaled and judged for the same bytes."""
     room = Path(home) / "takes" / "r2v"
-    return tuple(sha8_of(room / name) for name in (f"T{shot:02d}.mp4", "shots.json"))
+    return sha8_of(room / f"T{shot:02d}.mp4"), sha8_of(Path(home) / "heads.json"), sha8_of(room / "stills.json")
 
 
 def sha8_of(path: Path) -> str:
@@ -109,13 +114,14 @@ def rungs(v: Verdict, recut: Recut, retake: Retake, moved: Round | None = None,
     take is followed by a recut; one that changed nothing is said and takes none."""
     moved = moved if moved is not None else Round()
 
-    def take(rung: Rung, _i: int, current: Verdict) -> None:
+    def take(rung: Rung, _i: int, current: Verdict) -> judged_gate.RungResult:
         shot = worst_shot(current)
         moved.changed = shot is not None and changed_by(retake(shot, current))
         if moved.changed:
             recut()
-        else:
-            print(f"CAP master: retake of T{shot or 0:02d} changed no take, no recut", flush=True)
+            return judged_gate.RungResult(True)
+        print(f"CAP master: retake of T{shot or 0:02d} changed no take, no recut", flush=True)
+        return judged_gate.RungResult(False, f"retake of T{shot or 0:02d} changed no take")
     return judged_gate.Rungs(ladder_for(v, seconds), take)
 
 
@@ -154,21 +160,133 @@ def refuse_frozen(ctx, shot: int) -> bool:
 
 
 def retake_through_take_ladder(ctx, shot: int, v: Verdict) -> bool:
-    """One round of the take ladder over the named shot, under the render flag
-    the RENDER row earns; True when it changed the take or shots.json (then the master
-    is recut and read again), False when it was refused or left the bytes (K11 mirrored).
+    """One round of the take ladder over the named shot, its INPUT changed first (the cure its
+    master faults route to), under the render flag the RENDER row earns; True when the cut's inputs
+    moved (then the master is recut and read again), False when refused or left the bytes (K11).
     Loaded when asked: the step imports nothing of step 09."""
     from scripts.episode import step_09_shoot
     from studio import gate_policy, take_ladder
-    faults = [f for f in v.faults if f.kind in master_eye.MEASURED]
     if refuse_frozen(ctx, shot):                         # an owner's repair froze the delivered take
         return False
-    if take_ladder.refuse_spent(ctx, len(faults)):       # the episode's 2 retake rounds: keep the master
+    if take_ladder.refuse_spent(ctx, len(faults_on(v, shot))):   # the episode's 2 retake rounds
         return False
-    began, before = time.time(), fingerprint(ctx.home, shot)
-    take_ladder.retake(ctx, [shot], take_ladder.why_of("retake_shot", faults),
-                       step_09_shoot.approved(gate_policy.of(ctx.stage, "RENDER")))
+    doc, why = cured_plan(ctx.home, shot, faults_on(v, shot))
+    if doc is None:                                      # nothing a render can change holds the fault
+        owe_panel(ctx.home, shot, faults_on(v, shot))
+        return refuse_noop(ctx, shot, why)
+    began, before, kept = time.time(), fingerprint(ctx.home, shot), as_it_was(ctx.home, shot)
+    episode_home.write_plan(Path(ctx.home) / "plan.json", doc)
+    take_ladder.retake(ctx, [shot], why, step_09_shoot.approved(gate_policy.of(ctx.stage, "RENDER")))
     if fingerprint(ctx.home, shot) == before:
-        return False
+        put_back(ctx.home, shot, kept)
+        return refuse_noop(ctx, shot, "kept its earlier draw (keep_best ranked it over the cure's roll)")
     step_attempts.spend(ctx.home, take_ladder.RETAKES, time.time() - began)
     return True
+
+
+# ---- which input a master fault can change -------------------------------------------------------
+
+FIELD_CURE = {"board": "move_type", "faces": "push_slow"}
+"""What a measured master field can change on a take.  `board` (the last frame off its panel): the
+take ladder's move-type table for last-vs-cell.  `faces` (a small face at a close): a push toward it --
+H3 obeys the cell and the camera verb, never an amount, and a seed reroll never grew a face (ep03 T04:
+0.093 of the height on two draws).  `repeats` and `shadow` live in the panels and the grade: no render
+moves them, so no retake is ordered for them."""
+
+
+def faults_on(v: Verdict, shot: int) -> list[Fault]:
+    """The measured master faults whose evidence names this shot."""
+    return [f for f in v.faults if f.kind in master_eye.MEASURED and shot in shots_in(f.evidence)]
+
+
+def spoken(doc: dict, shot: int) -> bool:
+    return any(line.get("kind") == "dialogue" and line.get("shot") == shot for line in doc.get("lines") or [])
+
+
+def pushed(doc: dict, shot: int) -> tuple[str, str]:
+    """(the shot's motion as a push toward its face, '') or ('', why it may not): a spoken line's camera
+    never travels; a locked grammar shot is never pushed (G-PUSH); a push already pushes."""
+    from studio import take_ladder
+    s = take_ladder.shot_doc(doc, shot)
+    if spoken(doc, shot):
+        return "", "a spoken take's camera never travels and a seed cannot grow a face; the panel owns its framing"
+    if doc.get("grammar") and stillness.locked(s["motion"]):
+        return "", "a locked grammar shot is never pushed (G-PUSH); the panel owns its framing"
+    if plan_gates.move_id(s["motion"], "") == "push_slow":
+        return "", "it already pushes in; the panel owns its framing"
+    return take_ladder.headed("push_slow", s["motion"], s.get("at_rest", "")), ""
+
+
+def off_board(doc: dict, shot: int) -> tuple[str, str]:
+    """(the shot's motion under the take ladder's move-type cure for last-vs-cell, why when it is the same)."""
+    from studio import take_ladder
+    edited = take_ladder.move_type(copy.deepcopy(doc), shot, [Fault(kind="last-vs-cell", where=f"T{shot:02d}")])
+    return take_ladder.shot_doc(edited, shot)["motion"], "the move-type table has no other move for it"
+
+
+def cured_motion(doc: dict, shot: int, kinds: set[str]) -> tuple[str, str, str]:
+    """(the cured motion, the cure, why none): board first, then faces."""
+    kind = next((k for k in FIELD_CURE if k in kinds), None)
+    if kind is None:
+        return "", "", "lives in the panels or the grade; no render moves it"
+    motion, why = off_board(doc, shot) if kind == "board" else pushed(doc, shot)
+    return motion, f"{kind} -> {FIELD_CURE[kind]}", why
+
+
+def cured_plan(home, shot: int, faults: list[Fault]) -> tuple[dict | None, str]:
+    """(the plan with this shot's input changed, the retake's `why`) or (None, why nothing can)."""
+    from studio import take_ladder
+    path, kinds = Path(home) / "plan.json", {f.kind for f in faults}
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    named = ", ".join(sorted(kinds)) or "no measured fault"
+    if not any(s.get("index") == shot for s in doc.get("shots") or []):
+        return None, f"{named}: shot {shot} is not in the plan"
+    motion, cure, why = cured_motion(doc, shot, kinds)
+    if not motion or motion == take_ladder.shot_doc(doc, shot)["motion"]:
+        return None, f"{named}: {why}"
+    take_ladder.shot_doc(doc, shot)["motion"] = motion
+    return doc, f"retake_shot: {cure}"
+
+
+def refuse_noop(ctx, shot: int, what: str) -> bool:
+    """A retake that would buy (or bought) no new bytes, said where the run's log reads it."""
+    line = f"NO-OP master: T{shot:02d} {what}; no recut, the master flags"
+    print(line, flush=True)
+    if hasattr(ctx, "log"):
+        ctx.log(line, level="WARNING")
+    return False
+
+
+def owe_panel(home, shot: int, faults: list[Fault]) -> list[dict]:
+    """One "panel cure owed" row per field no render can move, in the take ladder's cures_owed.jsonl,
+    never twice: the frame is the panel's to change (the board, not the camera)."""
+    from studio import take_ladder
+    path = Path(home) / take_ladder.OWED
+    lines = path.read_text(encoding="utf-8").splitlines() if path.exists() else []
+    seen = {(r["take"], r["fault"]) for r in map(json.loads, lines)}
+    rows = [{"take": shot, "shot": shot, "field": "frame", "fault": kind,
+             "row": f"panel cure owed: shot {shot} frame (master {kind})"}
+            for kind in sorted({f.kind for f in faults}) if (shot, kind) not in seen]
+    if rows:
+        with open(path, "a", encoding="utf-8") as out:
+            out.writelines(json.dumps(r) + "\n" for r in rows)
+    return rows
+
+
+def as_it_was(home, shot: int) -> tuple[str | None, float | None]:
+    """(plan.json's text, the take's mtime) before a retake: what a retake that changed nothing puts back."""
+    plan, take = Path(home) / "plan.json", Path(home) / "takes" / "r2v" / f"T{shot:02d}.mp4"
+    return (plan.read_text(encoding="utf-8") if plan.exists() else None,
+            take.stat().st_mtime if take.exists() else None)
+
+
+def put_back(home, shot: int, kept: tuple[str | None, float | None]) -> None:
+    """The kept take was drawn from the old words, so the old words go back (else every currency
+    check reads it stale); and its bytes under their old time -- keep_best's swap re-dated them, and
+    step 10's `done` would read the unchanged take as newer than the master and recut it."""
+    text, stamp = kept
+    if text is not None:
+        (Path(home) / "plan.json").write_text(text, encoding="utf-8")
+    take = Path(home) / "takes" / "r2v" / f"T{shot:02d}.mp4"
+    if stamp is not None and take.exists():
+        os.utime(take, (stamp, stamp))
