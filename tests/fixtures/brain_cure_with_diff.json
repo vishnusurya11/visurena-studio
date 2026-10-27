@@ -1,0 +1,11 @@
+{
+ "verdict": "cure",
+ "why": "Step 06 did not refuse on plan quality -- the plan already cleared the battery and was kept_best. It refused because `end_noun()` in studio/episode_ref_official.py built a garbled end-noun clause: its FINITE guard (line 496) lists the verbs that must blank the \"with X now in frame\" arrival (turns, opens, closes, points, lifts, walks, strikes, falls, runs, keeps, pushes, pulls, takes, grips, thrusts, swings, reaches) but omits \"leans\". So when a shot's written `end` opens on a lean (\"<Subject 1> leans ...\"), end_noun() treats \"<Subject 1> leans\" as a noun phrase instead of blanking it, and the builder emits \"with <Subject 1> leans now in frame\" -- exactly what prompt_lint's P9 garbled-end-noun check (studio/prompt_lint.py:197-204) correctly refuses on T03 and T16. This is a deterministic code bug, not a content/plan defect: redoing plan (round 4) would burn another round and very likely reproduce the same lean-ended shot. The fix is one line -- add \"leans\" to the FINITE regex -- then redo step 06 so prompts regenerate with the correct (blank) arrival clause for those two takes.",
+ "commit": null,
+ "order": {
+  "kind": "redo",
+  "step_id": "06"
+ },
+ "finding_row": "| F1 | step 06 prompts, T03 P9 + T16 P9 \"garbled end noun\" | 522s+206s+0.1s already spent on 3 plan rounds before this refusal; $0 so far | one-line regex fix in studio/episode_ref_official.py (add \"leans\" to FINITE) | needs fix + redo 06, not another plan round |",
+ "proposed_diff": "--- a/studio/episode_ref_official.py\n+++ b/studio/episode_ref_official.py\n@@ -494,7 +494,7 @@\n NP_END = re.compile(r\"(?<![\\w-])(stands?|fills?|filling|has|have|is|are|sits?|lies?|rests?|holds?|at|in|on|\"\n                     r\"along|with|over|under|from|to|by|inside|seen|lit|drawn)(?![\\w-])\", re.I)\n FINITE = re.compile(r\"\\b(?:turns|opens|closes|points|lifts|walks|strikes|falls|runs|keeps|pushes|\"\n-                    r\"pulls|takes|grips|thrusts|swings|reaches)\\b\", re.I)\n+                    r\"pulls|takes|grips|thrusts|swings|reaches|leans)\\b\", re.I)\n \"\"\"A verb inside a cut end noun: \"with the knuckly hand turns the key now in frame\" (T9).\"\"\"\n"
+}

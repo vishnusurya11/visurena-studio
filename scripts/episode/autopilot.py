@@ -170,8 +170,16 @@ def core_failed_sha(drive_rows: list[dict]) -> str | None:
     return importlib.import_module("studio.autopilot").failed_sha(drive_rows)
 
 
+TRANSIENT_DB = re.compile(r"\.db-(journal|wal|shm)$")
+"""SQLite's own scratch files: never the code, even with .gitignore bypassed (ep03)."""
+
+
+def without_transient(porcelain: str) -> str:
+    return "\n".join(ln for ln in porcelain.splitlines() if not TRANSIENT_DB.search(ln.strip().strip('"')))
+
+
 def episode_drive_dirty(porcelain: str) -> bool:
-    return importlib.import_module("studio.episode_drive").dirty(porcelain)
+    return importlib.import_module("studio.episode_drive").dirty(without_transient(porcelain))
 
 
 def uploads_of(book: Path) -> list[dict]:
@@ -885,7 +893,7 @@ def note_dirty_during_run(book: Path, n: int, signals, deps: Deps) -> None:
     if any(r.get("event") == "code_dirty_during_run" and r.get("drive_pid") == pid for r in rows_of(paths_of(book).events)):
         return
     from studio import episode_drive
-    names = [ln[3:].strip() for ln in signals.porcelain.splitlines() if len(ln) > 3 and episode_drive.runtime_path(ln[3:])]
+    names = [ln[3:].strip() for ln in without_transient(signals.porcelain).splitlines() if len(ln) > 3 and episode_drive.runtime_path(ln[3:])]
     event(book, {"event": "code_dirty_during_run", "episode": n, "drive_pid": pid, "files": names})
 
 
@@ -1021,18 +1029,26 @@ def judge_verdict(book: Path, codex: str, n: int, verdict: dict, deps: Deps, fai
     clean tree whose HEAD is the commit that failed (P13: a park on a dirty tree
     or on code a fix has since replaced is a false park)."""
     said, head = str(verdict.get("verdict")), deps.git("rev-parse", "HEAD").strip()
-    from studio import episode_drive
-    clean = not episode_drive.dirty(deps.git("status", "--porcelain"))
+    clean = not episode_drive_dirty(deps.git("status", "--porcelain"))
     same_head = not failed_sha or head.startswith(failed_sha) or failed_sha.startswith(head)
     if said == "park" and clean and same_head:
         return park(book, codex, n, f"brain: {verdict.get('why', '')}", verdict, deps)
     if said == "relaunch" and clean and str(verdict.get("commit")) == head:
         event(book, {"event": "brain_relaunch", "episode": n, "commit": head[:8]})
         return {"action": "brain_relaunch", "state": "IDLE"}
+    if said == "cure" and clean and is_code_fault(verdict):
+        return park(book, codex, n, f"brain: {verdict.get('why', '')}", verdict, deps)
     if said in ("retry", "cure") and clean:
         return triage_action(book, codex, n, said, verdict, deps)
     event(book, {"event": "brain_rejected", "episode": n, "verdict": said, "clean": clean, "same_head": same_head})
     return {"action": "brain_rejected", "state": "NEEDS_BRAIN"}
+
+
+def is_code_fault(verdict: dict) -> bool:
+    """A diff proposed and no commit landed: the code is broken, and relaunching it
+    repeats the failure (ep03: a correct one-line diff, the same run, a second paid
+    attempt); the park carries the diff to the fixer rung."""
+    return bool(str(verdict.get("proposed_diff") or "").strip()) and not verdict.get("commit")
 
 
 def triage_action(book: Path, codex: str, n: int, said: str, verdict: dict, deps: Deps) -> dict:
