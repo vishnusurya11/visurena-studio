@@ -95,3 +95,8 @@ docs/audit/
 /*.pdf
 ffmpeg2pass-*.log
 ffmpeg2pass-*.log.mbtree
+
+# SQLite scratch files
+*.db-journal
+*.db-wal
+*.db-shm
