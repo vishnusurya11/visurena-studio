@@ -2744,3 +2744,21 @@ every channel):
   27 panels, no new fault; shots 7 and 19 came back true inserts with nobody in them. T10 and T12 re-rendered
   from their shipped graphs with the short name: the empty-cell opener gone in both (2 of 2). Left: 10, 16,
   21, 24, 25, where the cell prose itself sets props at the frame edges of a close.
+
+## Jekyll ep05 (2026-10-28): three parks, each a cure that did not exist yet
+
+Launch 07:55, public 12:38 (https://youtu.be/uwkQRbf5oUg, 2:17, -14.1 LUFS), the first run on the ep04 quality
+retro (97be98c) and the owner's quieter mix. New cast: Mr. Guest, bound with cast_rows.py, sheet drawn, LOOK signed.
+- **A short line rushes on every seed; a written pause in the mouth's text cures it.** l05 failed 8 tries at
+  4.41-4.59 words/s and parked; `say_lines.mouth_text` (4adfb6f) paces the said_as text after a rushed try, the
+  plan and the ear's text unchanged: passed on the first paced try.
+- **PLAN keep_best accepts a tier-1 row that step 06 then refuses (brick 8).** Twice: P11 "to the safe's,"
+  (cure `close_possessives`, 8470b4e) and G-VARIETY 13 closes on Utterson against 12 (cure `widen_face_closes`,
+  9dc86d2, replayed on the plan under the whole battery first). A tier-1 row with no free cure deadlocks the run.
+- **A G-DEAD refusal read a take eye written before T00/T11/T16 were settled**; the brain's redo of 09 re-rendered
+  nothing (every take cached) and the next cut admitted them flagged. A redo of a spent ladder is not a retake.
+- **Framing after the fix:** no panel drawn wide for a close (ep04: 9), but 12 of 30 one size loose (8 mediums for
+  a close, 4 fulls for a medium close). Two medium closes were written as walks with cobbles on the BOTTOM edge.
+- **Still open:** step 03 draws a setup's lettering bait into the place master (ep05's "newspaper bills" came out
+  illegible this time); P11 does not read an aim ending on an -ing word ("to the glinting,").
+- **The mix** (owner 2026-10-28, d661c7b): every cue 6 dB under its render (was 3), a cue whose words name water 10.
