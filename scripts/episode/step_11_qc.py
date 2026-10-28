@@ -331,9 +331,19 @@ def sign_master(ctx, memo: dict, verdict) -> Path:
 
 
 def recut(ctx, extra: list[str]) -> None:
-    """After a retake: assemble the judged cut again (no upscale), then qc the new bytes."""
+    """After a retake: the take eye re-signed for the moved take set, then the judged cut assembled
+    again (no upscale) and its new bytes qc'd."""
+    resign_takes(ctx)
     ctx.run_script("scripts/episode/assemble.py", f"--engine={engine_of(extra)}", "--at-cut", clock="assemble")
     qc_report(ctx, extra)
+
+
+def resign_takes(ctx):
+    """The take eye for the takes now on disk: G-DEAD admits a kept take flagged only through the
+    eye of the CURRENT set, and a retake moves it (Jekyll ep02 T13, ep05 T00/T11/T16 refused as
+    failed).  An eye already signed for these bytes is kept, unread.  Loaded when asked."""
+    from scripts.episode import step_09_shoot
+    return step_09_shoot.judge_takes(ctx, step_09_shoot.approved(gate_policy.of(ctx.stage, "RENDER")))
 
 
 def judged(ctx, extra: list[str]) -> Path:

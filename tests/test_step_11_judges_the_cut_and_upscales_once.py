@@ -64,6 +64,7 @@ def ctx(tmp_path, monkeypatch):
     monkeypatch.setattr(step_11_qc, "contact_sheet", lambda home, master, sha8: Path(home) / "review" / f"contact_{sha8}.png")
     monkeypatch.setattr(step_11_qc, "read_master",
                         lambda home, master, plan, placed, tools_=None: judged.append(Path(master).name) or (passing(), {}))
+    monkeypatch.setattr(step_11_qc, "resign_takes", lambda ctx: None)   # test_a_recut_re_signs_the_take_eye_first
     monkeypatch.setattr(step_11_qc, "strip_on_master",
                         lambda ctx, master: {"crops": [{"take": "T01", "eye": "sharp"}], "note": "log only"})
     return context
