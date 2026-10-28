@@ -180,7 +180,7 @@ def test_several_panels_say_the_location_never_changes():
 
 
 def test_the_setup_geometry_follows_the_place():
-    text = grid_prompt_v2([panel("A"), panel("B")], 2, 1, PLACE, [], 3,
+    text = grid_prompt_v2([panel("A", size="WIDE"), panel("B")], 2, 1, PLACE, [], 3,
                           geometry="The mantelpiece holds the LEFT edge.")
     assert text.index("Maybury Hill") < text.index("The mantelpiece holds the LEFT edge.")
 

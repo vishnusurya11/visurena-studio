@@ -41,6 +41,7 @@ from studio import house_style
 import re
 
 from studio.episode_spec import BANNED_PROPS, Line, Setup, Shot
+from studio.storyboard_grid import PLACE_END
 
 def style_line(setup=None, shot=None) -> str:
     """The style line for this run, from `studio.house_style`, under the
@@ -408,7 +409,7 @@ def short_place(described: str) -> str:
     any Interior/Exterior label."""
     # A COLON ENDS THE NAME TOO: "X in 1894: a clipped lawn with ..." leaked 20-30
     # words of layout into the summary and soundscape (prompt audit, 2026-09-23).
-    parts = [p.strip() for p in re.split(r"[,:;]", described or "")]
+    parts = [p.strip() for p in PLACE_END.split(described or "")]
     head = next((p for p in parts if p and p.lower() not in LABEL), parts[0] if parts else "")
     head = head.rstrip(".")
     return re.sub(r"^(The|A|An)\b", lambda m: m.group(0).lower(), head)

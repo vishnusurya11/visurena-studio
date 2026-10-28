@@ -2723,3 +2723,24 @@ Most of the wall went to faults a chapter with new people brings, each found one
   shows 30+ free, so the supervisor recycles ComfyUI and sits silent ~16 min (the 14:59 'hang'); the brain twice
   blamed take length for short lines read fast. Code fixed today: leans (0fd793c), stray comma after calm (65dc307),
   vision-read floor 120 s (f8fa613), twin clause vs lint (c10e045), cut QC ear + edit cap (a0fcef2).
+
+## Jekyll ep04 quality retro (2026-10-28): a close-up handed the whole room
+
+The four Jekyll sign-offs counted panels drawn two sizes wider than asked: ep01 5, ep02 8, ep03 8, ep04 15
+of 27; ep04 also shipped three takes that opened on an empty room (T05 12 frames, T10 12, T12 9) and two
+inserts drawn as wides with 3 and 6 stray figures (shots 7, 19). One cause, two holes (brick 4: one rule,
+every channel):
+- **The place's name never ended at a full stop.** `short_place` (take summary, soundscape) and
+  `place_head` (a tight grid's brief place) cut at the first comma, colon or semicolon. ep04's writer wrote
+  each setup as comma-free sentences, so the "name" ran 44, 35 and 99 words (ep01-ep03: 2-30). H3 drew the
+  99-word police cell as an establishing shot, then hard-cut to the staged panel. Fix: `PLACE_END` in
+  `studio/storyboard_grid.py` also ends the name at a sentence stop (not after Mr, Mrs, Dr, St).
+- **The establishing-wide geometry reached every grid.** G-SCALE (09-22) refuses a non-wide shot carrying
+  its setup's wide geometry and 7ddba20 (09-23) briefed a tight grid's place; 97b621d (09-28) then appended
+  `place_words` (geometry + landmark) to every grid. Shot 1, "the face fills the picture", came back a
+  medium holding the trunk, window, washstand and bed the geometry listed. Fix: the geometry joins only a
+  grid that holds a WIDE cell; `TIGHT` also gains EXTREME CLOSE-UP, a label `SAID` writes.
+- **Measured, same seeds, only the prompt changed** (scratchpad bench, $0): DWPose framing faults 15 -> 5 of
+  27 panels, no new fault; shots 7 and 19 came back true inserts with nobody in them. T10 and T12 re-rendered
+  from their shipped graphs with the short name: the empty-cell opener gone in both (2 of 2). Left: 10, 16,
+  21, 24, 25, where the cell prose itself sets props at the frame edges of a close.

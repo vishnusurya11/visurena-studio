@@ -437,17 +437,20 @@ def _block_v2(label: str, s: dict) -> str:
             f"{_who_v2(s.get('who') or [], s.get('extras', 0))}")
 
 
-TIGHT = ("MEDIUM CLOSE", "BIG CLOSE-UP", "CLOSE", "INSERT")
+TIGHT = ("MEDIUM CLOSE", "BIG CLOSE-UP", "EXTREME CLOSE-UP", "CLOSE", "INSERT")
 """Sizes whose picture is a subject, not a place. ep10 shot 1, a medium close on
 the wife, drew the whole house front five seeds running (her face 0.02-0.04 of
 the frame) under a 100-word description of that house."""
+PLACE_END = re.compile(r"[:;,]|(?<!\bMr)(?<!\bMrs)(?<!\bDr)(?<!\bSt)\.(?:\s|$)")
+"""Where a place's name ends: its first clause or its first sentence.  Jekyll ep04's
+setups were comma-free sentences, and the name ran 35-99 words (2026-10-27)."""
 
 
 def place_head(described: str) -> str:
     """The place's name: its first clause.  ep14's writer wrote inventories with
     no colon and no light clause, and `split(":")` handed a 1x1 close the whole
     attic-and-street list (2026-09-28)."""
-    return re.split(r"[:;,]", described, 1)[0].strip()
+    return PLACE_END.split(described, 1)[0].strip()
 
 
 def brief_place(described: str, light: str = "") -> str:
@@ -513,8 +516,8 @@ def grid_prompt_v2(shots: list[dict], cols: int, rows: int, place: tuple[list[in
     said = brief_place(place[1], light) if all(s["size"] in TIGHT for s in shots) else place[1]
     where = (f"The picture is set at {refs}: {said}." if single else
              f"Every panel is set at {refs}, at the same hour: {said}. {CONSTANT_V2}")
-    if geometry.strip():
-        where += " " + geometry.strip()
+    if geometry.strip() and any(s["size"] == "WIDE" for s in shots):
+        where += " " + geometry.strip()     # the establishing wide's layout (G-SCALE); ep04 drew closes as rooms
     lead = [(PLACE_V2 if outdoors else ROOM_V2).format(n=room)] if room is not None else []
     parts = [layout] + lead + blocks + binding + [where, (style or STYLE_V2).format(n=style_slot)]
     return "\n\n".join(DOUBLE_STOP.sub(".", _one_picture(x) if single else x) for x in parts)
