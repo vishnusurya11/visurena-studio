@@ -2762,3 +2762,19 @@ retro (97be98c) and the owner's quieter mix. New cast: Mr. Guest, bound with cas
 - **Still open:** step 03 draws a setup's lettering bait into the place master (ep05's "newspaper bills" came out
   illegible this time); P11 does not read an aim ending on an -ing word ("to the glinting,").
 - **The mix** (owner 2026-10-28, d661c7b): every cue 6 dB under its render (was 3), a cue whose words name water 10.
+
+## Jekyll ep01-05 retro (2026-10-28): 53 launches, four stop classes
+
+Measured from the five episodes' drive logs (docs/audit/2026-10-28_jekyll_ep01-05_retro.md).
+- **Every listen-gate park was "rushed"** (ep02, ep04 x3, ep05): cured by the written pause (4adfb6f).
+- **G-DEAD refused takes the ladder had kept** (ep02 T13, ep05 T00/T11/T16): a master-ladder retake
+  moves the take set, the keep_best eye names the old fingerprint. `step_11_qc.recut` now re-signs
+  the take eye before it assembles.
+- **One row, two verdicts:** PLAN keep_best signs a tier-1 row flagged that step 06 refuses. Ten
+  plan-gate kinds still have no free cure (G-ACTION, G-BANNED-PROP, G-BED, G-COVER, G-FIRSTFRAME,
+  G-ORDER, G-PRESENT, G-PRESENT-WIDE, G-SHOUT, G-TALK); none has fired on Jekyll. Build each the
+  first time it fires, replayed under the whole battery.
+- **Place masters now carry the take's unlettered sentence** when their words hold a bait noun
+  (`scripts/refs/places.master_prompt`); ep05's "newspaper bills" became posters, T22 shipped flagged.
+- **Not a suffix rule:** P11 "-ing" aims stay open; "to the landing," is a noun.
+- **Titles** are book first, no author (owner 2026-10-28): `Dr Jekyll and Mr Hyde — Ep 05/10 — "..."`.
