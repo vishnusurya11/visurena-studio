@@ -974,7 +974,7 @@ def varied_group(body: str, named: int = 0, extras: int = 0) -> str:
     """
     found = COUNTED.search(body or "")
     count = GROUP_COUNTS.get(found.group(1).lower(), 0) if found else 0
-    if not found or extras < count <= named:
+    if not found or (count <= named and (extras < count or bound_pair(found.group(3)))):
         return ""
     count, _, noun = found.groups()
     who = f"{count} {noun}".lower()
@@ -982,6 +982,14 @@ def varied_group(body: str, named: int = 0, extras: int = 0) -> str:
     return (f"The {who} are {count.lower()} different individuals: each one has {their} own face, "
             f"own build, own hair and own hat, each wears the clothes a little differently, "
             f"and each stands and gestures in a way of {their} own.")
+
+
+def bound_pair(noun: str) -> bool:
+    """A generic noun ('men', 'women', 'people', 'figures') counted within the staged faces is
+    the bound cast, whatever the extras hold -- grid_lint's TWIN refuses the clause on it (Jekyll
+    ep04 shot 17: the lawyer and the inspector beside eight walk-ons at a gin palace)."""
+    from studio import grid_lint
+    return noun.lower() in grid_lint.GENERIC
 
 
 def pronoun_of(noun: str) -> str:
