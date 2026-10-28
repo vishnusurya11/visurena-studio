@@ -373,7 +373,7 @@ def faults(seen: Seen, frame: str, planned: int, crowd: bool,
     # one prose exemption left is an INSERT on something worn -- a collar stud
     # at a throat holds a person by necessity -- and it reads whole words now.
     worn = not planned and size == "insert" and worn_by_someone(frame)
-    if people_fault(seen, planned + extras + shoulder_figure(frame), crowd or worn, count):
+    if people_fault(seen, planned + extras + shoulder_figure(frame, planned), crowd or worn, count):
         out.append(f"{seen.people} figure(s) for {planned + extras} declared ({planned} cast + "
                    f"{extras} extras), {seen.lookalikes} of them copies of another")
     if missing_cast(seen, planned, size, frame):
@@ -394,9 +394,11 @@ SHOULDER = re.compile(r"\bover (?:the |his |her )?(?:[\w'-]+ ){0,3}shoulders?\b"
 """An over-the-shoulder shot: the near shoulder is a person (J5: ep05 s07, ep07 s24)."""
 
 
-def shoulder_figure(frame: str) -> int:
-    """One more figure for a shot framed over someone's shoulder, else none."""
-    return 1 if SHOULDER.search(shot_words(frame)) else 0
+def shoulder_figure(frame: str, planned: int) -> int:
+    """One more figure for a shot casting ONE, framed over someone's shoulder, else none.  A shot
+    casting two already names the shoulder's owner: Jekyll ep05 shots 6 and 22 drew him twice,
+    3 figures for 2 cast, and passed on the allowance."""
+    return 1 if planned < 2 and SHOULDER.search(shot_words(frame)) else 0
 
 
 GROUP = re.compile(r"\b(?:people|crowd|figures|others)\b", re.I)

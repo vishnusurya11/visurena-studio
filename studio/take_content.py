@@ -132,7 +132,7 @@ def take_faults(reads: list[Seen], planned: int, crowd: bool, flat: bool,
     out = faults(seen, frame=frame, planned=planned, crowd=crowd, flat=flat,
                  night=night, banned=banned, physical=physical, size=size, extras=extras,
                  markers=markers, count=False)
-    declared = planned + extras + pc.shoulder_figure(frame)
+    declared = planned + extras + pc.shoulder_figure(frame, planned)
     out += [f for f in [crowd_fault(reads, declared, panel_people)] if f]
     out += [f"{h} where the row says otherwise" for h in drifted(seen, physical, markers)]
     return out + pc.shape_read(reads)[0]
