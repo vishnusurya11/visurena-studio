@@ -317,6 +317,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc = pc.strip_amounts(doc)
         elif name == "close_possessives":              # P11 "the safe's," (Jekyll ep05)
             doc = pc.close_possessives(doc)
+        elif name == "widen_face_closes":              # G-VARIETY close cap (Jekyll ep05)
+            doc = pc.widen_face_closes(doc)
         elif name in ("hold_extra_pushes", "ots_medium_close", "lock_two_shot", "mute_listens", "camera_ends"):
             own = [r for r in rows if pc.cure_for(r) == name]
             doc = getattr(pc, name)(doc, shot_indices(own))

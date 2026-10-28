@@ -1780,6 +1780,7 @@ CURES[:0] = [   # the anime-TV grammar (2026-10-17), ahead of every older patter
     (re.compile(r"G-CROWD-ORPHAN setup"), "clear_orphan_crowds"),
     (re.compile(r"G-TWO shot \d+: .*measured medium/\w+ against medium/locked"), "lock_two_shot"),   # a wrong SIZE is the writer's
     (re.compile(r"P11 dangling aim: .*[\w-]+'s\s*[;,.]"), "close_possessives"),   # Jekyll ep05 T27 "the safe's,"
+    (re.compile(r"G-VARIETY plan: close/medium_close shots on"), "widen_face_closes"),   # Jekyll ep05 13 vs 12
 ]
 """Fault-text patterns -> cure names, most specific first.  A row matching
 nothing is CREATIVE and goes back to the writer, one field at a time."""
@@ -1804,6 +1805,30 @@ def close_possessives(doc: dict) -> dict:
     """P11 dangling possessive: "to the safe's, across" -> "to the safe, across" (Jekyll ep05 T27)."""
     for s in doc.get("shots") or []:
         s["motion"] = DANGLING_POSSESSIVE.sub(r"\1", s.get("motion") or "")
+    return doc
+
+
+TIGHT_HEAD = re.compile(r"^(?:Medium close|Close)\b", re.I)
+
+
+def widen_order(shot: dict) -> tuple[int, int]:
+    """Which close goes first: a plain two-person medium close, an over-the-shoulder, a single
+    medium close, a close."""
+    ots = "shoulder" in (shot.get("frame") or "").lower()
+    if shot.get("size") == "medium_close":
+        return (0 if len(shot.get("faces") or []) > 1 and not ots else 1 if ots else 2, shot.get("index", 0))
+    return (3, shot.get("index", 0))
+
+
+def widen_face_closes(doc: dict) -> dict:
+    """G-VARIETY close cap: each face's close shots past the wall become mediums, frame words too."""
+    from studio import plan_gates
+    wall = plan_gates.GRAMMAR_FACE_CLOSES if doc.get("grammar") else plan_gates.MAX_FACE_CLOSES
+    for who in {f for s in doc.get("shots") or [] for f in s.get("faces") or []}:
+        closes = sorted((s for s in doc["shots"] if s.get("size") in ("close", "medium_close")
+                         and who in (s.get("faces") or [])), key=widen_order)
+        for s in closes[:max(0, len(closes) - wall)]:
+            s["size"], s["frame"] = "medium", TIGHT_HEAD.sub("Medium shot", s.get("frame") or "")
     return doc
 
 
