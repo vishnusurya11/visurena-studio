@@ -145,9 +145,29 @@ under narration (speech 9.8 LU over the gaps; WotW ep10-12 and Sherlock
 11.3-16.5).  Effects and ambience now duck under every line, at mix time."""
 
 
-CUE_TRIM_DB = 3.0
+CUE_TRIM_DB = 6.0
 """Every cue, in the pauses too: master_iter9 (ducked) still had its loudest
-between-line moment only 3.1 dB under the voice; Sherlock's median was 6."""
+between-line moment only 3.1 dB under the voice; Sherlock's median was 6.  Was 3.0; owner
+2026-10-28 on Jekyll ep04, "slightly cool down on the sound effects": 3 dB lower."""
+WATER_TRIM_DB = 4.0
+"""A further trim on a cue whose own words name water: "especially water draining" (owner
+2026-10-28).  Ep04's water ran as ambience under whole scenes (river lapping, fog drip, a tap)."""
+WATER = re.compile(r"\b(?:water|drip\w*|drain\w*|lapping|rain\w*|gutters?|taps?|trickl\w*|splash\w*)\b", re.I)
+
+
+def cue_words(path: Path) -> str:
+    """The prompt a cue was rendered from: its own sidecar, else its ambience loop's."""
+    path = Path(path)
+    stem = path.stem.split(".")[0]
+    for side in (path.with_name(f"{stem}.json"), path.with_name("_".join(stem.split("_")[:2]) + ".loop.json")):
+        if side.exists():
+            return str(json.loads(side.read_text(encoding="utf-8")).get("prompt", ""))
+    return ""
+
+
+def trim_for(path: Path) -> float:
+    """CUE_TRIM_DB, and WATER_TRIM_DB more for a cue whose words name water."""
+    return CUE_TRIM_DB + (WATER_TRIM_DB if WATER.search(cue_words(path)) else 0.0)
 
 
 AMBIENCE_TAME = "acompressor=threshold=0.03:ratio=8:attack=5:release=250"
@@ -179,7 +199,7 @@ def ducked(cues: list[tuple[float, Path]], lines: list[tuple[float, float]], out
     for when, path in cues:
         windows = [w for w in cue_windows(lines, when, duck_depth(path)) if w[1] > 0]
         target = Path(out_dir) / f"{Path(path).stem}.ducked.wav"
-        expr = f"{db_gain(-CUE_TRIM_DB):.6f}*{duck_expr(windows)}"
+        expr = f"{db_gain(-trim_for(path)):.6f}*{duck_expr(windows)}"
         tame = f"{AMBIENCE_TAME}," if Path(path).name.startswith("amb_") else ""
         run(["ffmpeg", "-y", "-v", "error", "-i", str(path), "-af", f"{tame}volume='{expr}':eval=frame", str(target)])
         out.append((when, target))
