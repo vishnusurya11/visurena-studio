@@ -94,6 +94,16 @@ def styled(described: str, look: str) -> str:
     return f"{described} {LOOK.format(look=look.strip().rstrip('.'))}" if look.strip() else described
 
 
+def master_prompt(described: str, look: str) -> str:
+    """`styled`, then the take's unlettered sentence when the words hold lettering bait: Jekyll
+    ep05's "newspaper bills" drew posters into the master every cell and take inherits."""
+    from studio import episode_ref_official, prompt_lint
+    out = styled(described, look)
+    if re.search(rf"(?i)\b(?:{prompt_lint.BAIT})\b", described):
+        out += " " + episode_ref_official.unlettered_for(described)
+    return out
+
+
 def draw_missing(book: Path, setups: dict, draw, look: str = "") -> list[Path]:
     """Draw every missing view with `draw(prompt, target)`, from its setup's words
     in the book's look."""
@@ -101,7 +111,7 @@ def draw_missing(book: Path, setups: dict, draw, look: str = "") -> list[Path]:
     for name, loc, view, state in status(book, setups):
         if state == "missing" and picture(book, loc, view) not in made:
             target = picture(book, loc, view)
-            draw(styled(setups[name].described, look), target)
+            draw(master_prompt(setups[name].described, look), target)
             record_master(book, loc, view)
             made.append(target)
     return made
