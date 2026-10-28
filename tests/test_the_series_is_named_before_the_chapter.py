@@ -39,18 +39,15 @@ John Watson, M.D.", 56 characters, which overruns by seven.
 import pytest
 
 from studio.youtube_publish import TITLE_MAX
-from studio.youtube_publish import series_title as _series_title
+from studio.youtube_publish import series_title
+
+# Owner 2026-10-28: the series lead ("Sherlock Holmes: ", an author on the later books) is
+# gone; the book leads (test_a_title_is_the_book_and_its_number).
 
 
-def series_title(*args, **kw):
-    """These are the Scarlet book's titles, so they name its series. The series
-    used to be a hardcoded default; it is the caller's now (audit item 13)."""
-    return _series_title(*args, series="Sherlock Holmes", **kw)
-
-
-def test_the_series_comes_first():
+def test_the_book_comes_first():
     got = series_title("A Study in Scarlet", 4, 14, "What John Rance Had to Tell")
-    assert got.startswith("Sherlock Holmes: A Study in Scarlet")
+    assert got.startswith("A Study in Scarlet — Ep 04/14")
 
 
 def test_the_episode_number_is_padded_and_says_the_total():
@@ -66,7 +63,7 @@ def test_the_chapter_title_is_quoted_and_last():
 def test_the_whole_thing():
     assert series_title("A Study in Scarlet", 1, 14,
                         "You Have Been in Afghanistan, I Perceive") == (
-        'Sherlock Holmes: A Study in Scarlet — Ep 01/14 — '
+        'A Study in Scarlet — Ep 01/14 — '
         '"You Have Been in Afghanistan, I Perceive"')
 
 
@@ -79,12 +76,15 @@ def test_every_episode_of_this_book_fits_the_wall():
 
 # ---- what gives when it does not fit ---------------------------------------
 
-LONG = "A Continuation of the Reminiscences of John Watson, M.D."
+LONG = ("A Continuation of the Reminiscences of John Watson, M.D., Late of the Army "
+        "Medical Department")
+"""Chapter 13's name with Part I's "late of the Army Medical Department" run on. The real 56 fit
+whole once the series lead went."""
 
 
-def test_a_long_chapter_is_elided_not_the_series():
+def test_a_long_chapter_is_elided_not_the_book():
     got = series_title("A Study in Scarlet", 13, 14, LONG)
-    assert got.startswith("Sherlock Holmes: A Study in Scarlet — Ep 13/14")
+    assert got.startswith("A Study in Scarlet — Ep 13/14")
     assert len(got) <= TITLE_MAX
 
 
@@ -101,8 +101,8 @@ def test_an_elision_does_not_end_mid_word():
 
 
 def test_a_chapter_that_fits_is_never_touched():
-    """Thirteen of the fourteen fit whole; only chapter 13 is ever cut."""
-    cut = [c for c in CHAPTERS
+    """All fourteen fit whole under the book-first lead; only an overlong name is cut."""
+    cut = [c for c in (*CHAPTERS, LONG)
            if c not in series_title("A Study in Scarlet", 7, 14, c)]
     assert cut == [LONG]
 
@@ -139,6 +139,6 @@ CHAPTERS = (
     "John Ferrier Talks with the Prophet",
     "A Flight for Life",
     "The Avenging Angels",
-    LONG,
+    "A Continuation of the Reminiscences of John Watson, M.D.",
     "The Conclusion",
 )

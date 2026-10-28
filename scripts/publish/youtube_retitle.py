@@ -109,7 +109,7 @@ def main(argv: list[str]) -> None:
     dry = "--dry-run" in argv
 
     book = episode_home.book_dir(book_id)
-    series, name, total = series_of(book)
+    _series, name, total = series_of(book)
     rows = episodes(book)
     print(f"book      {name}")
     print(f"episodes  {len(rows)} published, series of {total}\n")
@@ -122,7 +122,7 @@ def main(argv: list[str]) -> None:
                          0.0, approval.approved_for("publish", argv))
 
     for row in rows:
-        want = yp.series_title(name, row["episode"], total, chapter_of(row["title"]), series=series)
+        want = yp.series_title(name, row["episode"], total, chapter_of(row["title"]))
         print(f"ep{row['episode']:02d}  {row['video_id']}")
         print(f"  was  {row['title']}")
         print(f"  now  {want}   ({len(want)} chars)")

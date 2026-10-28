@@ -17,7 +17,7 @@ def test_the_title_is_the_series_format(tmp_path):
     book = book_with(tmp_path, display_title="The War of the Worlds",
                      series="H. G. Wells", episodes=27, author="H. G. Wells")
     got = metadata.title_for(book, 18, {"title": "The Fifth Cylinder"})
-    assert got == 'H. G. Wells: The War of the Worlds — Ep 18/27 — "The Fifth Cylinder"'
+    assert got == 'The War of the Worlds — Ep 18/27 — "The Fifth Cylinder"'
 
 
 def test_a_book_json_without_its_series_fields_is_refused(tmp_path):

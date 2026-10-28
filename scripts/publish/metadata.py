@@ -162,8 +162,8 @@ def composed_attribution(book, number: int, prior_docs: list[dict]) -> str | Non
 
 def title_for(book, number: int, plan: dict) -> str:
     """G-META check 1: composed from the book's own words, never typed."""
-    series, display_title, total = series_of(book)
-    return yp.series_title(display_title, number, total, plan["title"], series=series)
+    _series, display_title, total = series_of(book)
+    return yp.series_title(display_title, number, total, plan["title"])
 
 
 def publish_dir(book) -> Path:

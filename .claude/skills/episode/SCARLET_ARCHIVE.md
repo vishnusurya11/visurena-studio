@@ -204,7 +204,7 @@ G-VARIETY wants 4 inserts in ~23 shots, so they cannot simply be dropped.
 contact sheet each time.
 
 **Publish PUBLIC when the owner says upload.** Write `episodes/epNN/youtube.json`
-(title `H. G. Wells: The War of the Worlds — Ep NN/27 — "<chapter>"`, the AI
+(title `The War of the Worlds — Ep NN/27 — "<chapter>"`, the AI
 disclosure, `synthetic: true`, `privacy: public`). The owner's instruction
 is the go: he does not fill forms or click buttons for the pipeline.
 `youtube_upload.py` needs `.env`, which lives in the main tree, not the
@@ -246,13 +246,18 @@ uv run python scripts/publish/youtube_retitle.py <codex_id> --dry-run       # ca
 
 ## The YouTube title
 
-**The serial and the position come FIRST; the chapter is what gets cut.**
+**The book and the position come FIRST, no author; the chapter is what gets cut.**
 `studio/youtube_publish.series_title` builds it -- never type one into
 `episodes/epNN/youtube.json` by hand:
 
 ```
-Sherlock Holmes: A Study in Scarlet — Ep 04/14 — "What John Rance Had to Tell"
+Dr Jekyll and Mr Hyde — Ep 05/10 — "Incident of the Letter"
 ```
+
+Owner 2026-10-28: "The book name and episode number 01/20 ... I don't need author". The
+author lead (`Robert Louis Stevenson: ...`) was dropped and every live Jekyll and WotW video
+retitled with `scripts/publish/youtube_retitle.py <book> --approved=publish`. Scarlet's 14
+still lead with "Sherlock Holmes", the character (its book.json names no series to retitle by).
 
 A search result, a sidebar and a phone show 40-70 characters. The first five
 episodes led with the chapter title, so a viewer saw the one thing that cannot

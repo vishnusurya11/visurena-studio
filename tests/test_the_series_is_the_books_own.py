@@ -10,22 +10,9 @@ import json
 import pytest
 
 from scripts.publish.youtube_retitle import series_of
-from studio.youtube_publish import series_title
 
-
-def test_the_series_is_named_by_the_caller():
-    got = series_title("The War of the Worlds", 8, 27, "Friday Night", series="H. G. Wells")
-    assert got == 'H. G. Wells: The War of the Worlds — Ep 08/27 — "Friday Night"'
-
-
-def test_there_is_no_default_series():
-    with pytest.raises(TypeError):
-        series_title("The War of the Worlds", 8, 27, "Friday Night")
-
-
-def test_an_empty_series_refuses():
-    with pytest.raises(ValueError, match="series"):
-        series_title("The War of the Worlds", 8, 27, "Friday Night", series=" ")
+# The title no longer names the series (owner 2026-10-28, test_a_title_is_the_book_and_its_number);
+# the book's record still says it, and the metadata brief still reads it.
 
 
 def book(tmp_path, **fields):
