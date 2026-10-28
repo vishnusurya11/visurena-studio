@@ -318,6 +318,13 @@ def seed_for(episode: int, line: Line, attempt: int) -> int:
     return SEED_BASE + episode * 1000 + line.index * 10 + attempt
 
 
+def mouth_text(text: str, lexicon: dict[str, str], prior: dict | None) -> str:
+    """What the TTS is given: the line respelled, and paced when its last try was heard rushed
+    (ep05 l05, 8 tries at 4.4-4.6 words/s).  The ear still scores the book's text."""
+    spoken = voice_say.respelled(text, lexicon)
+    return voice_say.paced(spoken) if str((prior or {}).get("why", "")).startswith("rushed") else spoken
+
+
 def render(book: Path, episode: Episode, line: Line, out_dir: Path, attempt: int,
            records: dict | None = None) -> dict:
     """One line's file and its measured seconds; nothing listened to yet."""
@@ -331,7 +338,7 @@ def render(book: Path, episode: Episode, line: Line, out_dir: Path, attempt: int
     delivery = episode_emotion.delivery_of(line)
     # THE MOUTH KNOWS THE BOOK'S NAMES (Jekyll ep01 review): the TTS is told how a
     # filed word is said; the record keeps the book's text, which the ear scores.
-    spoken = voice_say.respelled(line.text, voice_say.say_lexicon(book))
+    spoken = mouth_text(line.text, voice_say.say_lexicon(book), (records or {}).get(line.index))
     if ENGINE == "indextts2":
         said = voice_say.say(spoken, reference, reference, seed, out, index=line.index,
                              speaker=line.speaker, vector=episode_emotion.vector_for(delivery))

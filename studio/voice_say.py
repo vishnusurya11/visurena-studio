@@ -82,6 +82,25 @@ def say_lexicon(book: Path) -> dict[str, str]:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
+LINKS = ("to", "that", "and", "but", "when", "if", "for", "as", "with", "or", "at", "of")
+"""The words a speaker breathes before: where `paced` writes its pause."""
+
+
+def paced(text: str) -> str:
+    """`text` with ONE written pause, for the mouth of a line the ear heard as rushed: the first
+    inner comma, semicolon or colon becomes '...', else '...' goes before the first linking word
+    past the second, else after the middle word.  Jekyll ep04 'I think... I can take you' passed
+    where every delivery and seed of a short line read past 3.8 words/s."""
+    import re
+    if "..." in text:
+        return text
+    if (joint := re.search(r"[,;:](?=\s+\S)", text)):
+        return text[:joint.start()] + "..." + text[joint.end():]
+    words = text.split(" ")
+    at = next((i for i, w in enumerate(words) if i >= 2 and w.lower() in LINKS), len(words) // 2)
+    return " ".join(words[:at]) + "... " + " ".join(words[at:])
+
+
 def respelled(text: str, lexicon: dict[str, str]) -> str:
     """`text` with every lexicon word (whole word, any case) written as it is said."""
     import re
