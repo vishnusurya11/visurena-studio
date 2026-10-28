@@ -1779,6 +1779,7 @@ CURES[:0] = [   # the anime-TV grammar (2026-10-17), ahead of every older patter
     (re.compile(r"G-END-NOUNS shot \d+"), "camera_ends"),          # craft ruling A19
     (re.compile(r"G-CROWD-ORPHAN setup"), "clear_orphan_crowds"),
     (re.compile(r"G-TWO shot \d+: .*measured medium/\w+ against medium/locked"), "lock_two_shot"),   # a wrong SIZE is the writer's
+    (re.compile(r"P11 dangling aim: .*[\w-]+'s\s*[;,.]"), "close_possessives"),   # Jekyll ep05 T27 "the safe's,"
 ]
 """Fault-text patterns -> cure names, most specific first.  A row matching
 nothing is CREATIVE and goes back to the writer, one field at a time."""
@@ -1792,6 +1793,17 @@ def strip_amounts(doc: dict) -> dict:
     for s in doc.get("shots") or []:
         head, sep, rest = (s.get("motion") or "").partition(";")
         s["motion"] = SAID_AMOUNT.sub("", head) + sep + rest
+    return doc
+
+
+DANGLING_POSSESSIVE = re.compile(r"\b(?!(?:it|that|there|he|she|what|who|let)'s\b)([\w-]+)'s(?=\s*[;,.])", re.I)
+"""A possessive whose noun is gone, as P11 reads it -- never a contraction."""
+
+
+def close_possessives(doc: dict) -> dict:
+    """P11 dangling possessive: "to the safe's, across" -> "to the safe, across" (Jekyll ep05 T27)."""
+    for s in doc.get("shots") or []:
+        s["motion"] = DANGLING_POSSESSIVE.sub(r"\1", s.get("motion") or "")
     return doc
 
 
