@@ -1333,6 +1333,15 @@ def render(c: dict, graph: dict, out: Path, approved: bool = False) -> dict:
     return collect(c, prompt_id, out)
 
 
+def refuse_alike(book, episode) -> None:
+    """G-ALIKE, the plan battery's row repeated: two cast who read as one person never share a
+    shot (owner 2026-10-28, Jekyll ep05 deleted for two Uttersons in one frame)."""
+    from studio import cast_alike
+    shots = [{"index": s.index, "faces": list(getattr(s, "faces", None) or [])} for s in episode.shots]
+    if alike := cast_alike.faults(shots, cast_alike.marks(book)):
+        raise SystemExit("the plan stages look-alike cast:\n  " + "\n  ".join(alike))
+
+
 def refuse_long_shots(episode) -> None:
     """A shot longer than a take is a take nobody can render: refuse BEFORE
     spending.  `episode_takes.groups` caps a run of shots at BUDGET seconds and
@@ -1422,6 +1431,7 @@ def opened(book_id: str, number: int):
         raise SystemExit("G-LIGHT refuses the plan:\n  " + "\n  ".join(unlit))
     if thin := plan_gates.chapter_faults(episode, plan_brief.chapter_paragraphs(book, number)[1]):
         raise SystemExit("the plan fails the authoring gates:\n  " + "\n  ".join(thin))
+    refuse_alike(book, episode)
     refuse_long_shots(episode)
     refuse_still_motions(episode)
     # ONE LOOK PER STAGED PERSON (decision 2026-10-10): picture and words agree,

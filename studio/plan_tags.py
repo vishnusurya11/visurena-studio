@@ -21,6 +21,7 @@ BUILDER: dict[str, str] = {
     "G-TAKELINT": "takes_r2v.prompts: the step-06 take lint ('take prompts refused')",
     "CAST BOUND": "seq_boards.unbound_cast: 'the cast is not bound' (step 07)",
     "ACTOR": "seq_boards: actor_gate.hard_episode, 'the plan fails the actor gate' (step 07)",
+    "G-ALIKE": "takes_r2v.refuse_alike: cast_alike.faults, two cast who read as one person (step 06)",
 }
 CLEAN = ("clean", "all bound", "every shot", "legacy book", "no shot stages", "0")
 

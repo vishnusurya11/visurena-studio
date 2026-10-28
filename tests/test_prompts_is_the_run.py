@@ -53,6 +53,7 @@ def test_a_preview_card_carries_the_plans_own_canvas(tmp_path, aspect, size, mon
     # in HOUSE light and passes, rather than being skipped on one entry point.
     monkeypatch.setattr(tr.house_style, "faults", lambda episode: [])
     monkeypatch.setattr(tr.plan_gates, "faults", lambda episode, quote_at=None, quiet=None, speech=None: [])
+    monkeypatch.setattr(tr, "refuse_alike", lambda book, episode: None)      # G-ALIKE: no cast here
     monkeypatch.setattr(tr.episode_home, "load_plan",
                         lambda b, n: type("E", (), {"aspect": aspect, "where": "", "light": "",
                                                     "long_shots": lambda self: [],

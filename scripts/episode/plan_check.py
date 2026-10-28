@@ -23,7 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from studio import actor_gate, cast_refs, episode_home, episode_spec as spec, house_style, pack_refs, plan_brief, plan_gates, timeline_fresh
+from studio import actor_gate, cast_alike, cast_refs, episode_home, episode_spec as spec, house_style, pack_refs, plan_brief, plan_gates, timeline_fresh
 from studio import episode_takes as tk
 from studio.episode_takes import BUDGET
 
@@ -463,6 +463,10 @@ def main(book_id: str, number: int, plan: str = "plan.json") -> int:
     for f in pcf:
         print("   ", f[:170])
     hard += continuity_gates(book, ep)
+    af = cast_alike.faults(ep.model_dump()["shots"], cast_alike.marks(book))
+    print("G-ALIKE      :", len(af) or "clean"); hard += len(af)
+    for f in af:
+        print("   ", f)
     ff = plan_gates.creature_face_faults(ep, set(vocab["creatures"]))
     print("G-FACE-KIND  :", len(ff) or "clean"); hard += len(ff)
     for f in ff:

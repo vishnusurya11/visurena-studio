@@ -403,7 +403,7 @@ again — the gates read the plan, never a diff.
 
 ## What a refusal costs, and the gates that were chased
 
-- Tier 1 refusals must reach zero (CONTRACT, G-LIGHT, PLAN GATES, TAKE LENGTH, TAKE BUILDER, MOTION hard, G-TAKELINT, G-PROMPTLINT, CAST BOUND, ACTOR): a downstream step repeats them.
+- Tier 1 refusals must reach zero (CONTRACT, G-LIGHT, PLAN GATES, TAKE LENGTH, TAKE BUILDER, MOTION hard, G-TAKELINT, G-PROMPTLINT, CAST BOUND, ACTOR, G-ALIKE): a downstream step repeats them. G-ALIKE (two cast who read as one person -- same figure, hair and facial hair -- in one shot) no wording cures it: the plan parks until a base sheet is redrawn.
 - G-PROMPTLINT: a shot's words name only the people its frame stages; a person said in `motion` or `end` who is not in that shot's frame is refused.
 - Tier 2 refusals get three rounds, then the best draft is signed flagged (G-AIM, G-LAID, G-CROWD, G-REACT, G-TWO, G-PUSH, G-PRESENT, G-SYNC).
 - Tier 3 voice-measured rows (seconds, shares, counts, tail wording) are advice: never chase one.
