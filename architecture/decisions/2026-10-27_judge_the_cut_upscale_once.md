@@ -33,7 +33,7 @@ master" -> upscale again 11:46 -> qc 11:49 -> master eye 11:52 -> flag. 14 minut
    master's name is upscaled again from the judged cut; a new cut is judged first.
 4. **The face strip (log only) is cut from the upscaled master**, the one measure that wants
    full resolution (crops as the viewer sees them).
-5. **QC's edit gate reads the cut under its own cap** (`edit_gate.SEGMENT_MEAN_CUT` = 1.6).
+5. **QC's edit gate reads the cut under its own cap** (`edit_gate.SEGMENT_MEAN_CUT`: 1.6 on ep03 alone refused ep04's T02 at 1.668 live; refit 2026-10-27 to the av3 cap 2.5 x the largest measured cut-to-master segment ratio 0.778 = 1.95).
 
 ## Measured
 

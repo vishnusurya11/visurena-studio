@@ -259,7 +259,16 @@ def fail_words(report: dict) -> str:
         rows = qc_rows.failed_rows(report)
     except Exception:                                   # noqa: BLE001 -- an old report shape
         rows = []
+    rows = [unmeasured(r, report) for r in rows]
     return "failed: " + (", ".join(rows) if rows else "unknown rows")
+
+
+def unmeasured(row: str, report: dict) -> str:
+    """`line_unheard` on a report whose ear never ran says so: QC hears the lines only once the cheap
+    rows pass (C3_verdict #2), so it follows another row's fail (ep04 2026-10-27: the edit row)."""
+    if row == "line_unheard" and not report.get("lines_measured", True):
+        return "line_unheard (not measured: the ear runs only after the cheap rows pass)"
+    return row
 
 
 def clock_spent(ctx) -> bool:

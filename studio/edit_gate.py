@@ -36,11 +36,16 @@ SEGMENT_MEAN_AV3 = 2.5
 """The cap on an av3 master (hqdn3d temporal denoise + x4 upscale).  MEASURED on
 Jekyll ep01 (28 segments, offset 0 on all, cuts 27/27 exact): 1.47-2.10, three
 over RTX's 2.0 (T01 2.06, T11 2.102, T12 2.017).  A wrong picture reads 32-63."""
-SEGMENT_MEAN_CUT = 1.6
-"""The cap on the judged cut at 768 (no upscale; the face paste baked in, CRF 8; Jekyll ep03 retro #2).
-MEASURED on ep03's own work room, 2026-10-27: 0.50-1.36 over 28 segments (9 pasted), offset 0 on all,
-cuts 27/27; 11 of 28 sat over the unrecorded 1.0.  One episode: thin, dated, refit when a cut fails here.
-A wrong picture reads 32-63 and a wrong frame is caught by the offset, not the mean."""
+SEGMENT_MEAN_CUT = 1.95
+"""The cap on the judged cut at 768 (no upscale; the face paste baked in, CRF 8; Jekyll ep03 retro #2),
+set from the measured RATIO of a cut's segment means to its own av3 master's, not one cut's max.
+MEASURED 2026-10-27 by qc.edit_report (tests/fixtures/cut_segment_means.json): ep03's av3 master
+1.486-2.083 (median 1.838), the same cut at 768 0.500-1.362 (median 1.002); per segment the cut reads
+0.270-0.778 of its master (median 0.556).  SEGMENT_MEAN_AV3 2.5 x 0.778 = 1.95.  ep04's live cut
+0.777-1.668 (median 1.105) sits under it; 1.6, fitted on ep03's max alone, refused ep04's T02 at 1.668.
+Not the old 1.0: that was fitted on single-encode masters (a segment that IS its take 0.16-0.59); the
+cut is the take re-encoded three times with the paste in.  A wrong picture reads 32-63 and a wrong
+frame is caught by the offset, not the mean."""
 HOLD_FRAMES_DENOISED = 6
 """A run of repeats an edit hold needs on a denoised master: the temporal denoise
 smooths slow motion into 3-frame near-repeats the take does not have (ep01 T13,
