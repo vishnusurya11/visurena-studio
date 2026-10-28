@@ -2697,3 +2697,29 @@ Launch 08:36, public 12:04 PDT (3 h 28 min wall, no GPU loss on driver 617.42, 0
   venv). 153 media tests fail here for that reason alone; read the failure before reading it as a regression.
 - **Time:** take checks 45 min, plan 31, face refine 25, grids 15, panel eye 14 -- the plan writer fell from 61
   to 31 min after the ep02 chain and lint fixes; take checks are now the clock.
+
+## Jekyll ep04
+
+Launch 13:53, master_iter1 21:33, master_iter4 (repaired) 01:53; the episode clock 5.03 h, then the repair clock.
+Most of the wall went to faults a chapter with new people brings, each found one park at a time:
+- **New people need gender, a sheet, a look line, before the plan.** Carew, the maid, Newcomen, the policeman and
+  the housekeeper (the analysis put her first in ch10; she opens Hyde's door in ch4) each stopped the run once:
+  G-ROWGENDER at bind (the analysis rows carry no gender), CAST BOUND (no sheet), grids (no clean look line: the
+  maid's 'maid's cap' named her own name token 'maid'). Bind the chapter cast with genders, draw and sign the
+  sheets, read every new look line through `grids.layers_line` BEFORE launch.
+- **Short lines rush; a written pause slows them, a delivery does not.** l17/l26 read 4.0-4.8 words/s on cold,
+  hushed, plain and exultant alike; 'I think... I can take you' passed. Speech seconds count inner pauses.
+- **Lettering lives in the PLACE picture.** The setup said 'a gin palace with gilt lettering'; step 03 drew it
+  into the place master, and every anchor, grid and take is drawn on those pixels: rewording the shots (pass 1)
+  and redrawing the grids (pass 2) both kept GINPALOUCE. Never write signs, lettering, papers or named shops into a
+  setup; a lettered place is fixed at the place master (supersede it, owner redo of 03).
+- **A spoken take cannot be head-cut.** T05/T12 (narration) lost their plate flash to heads.json; T10 (Utterson's
+  line) cannot, and a locked camera did not stop the model opening on the staged room plate. Ships flagged.
+- **A delivered episode repairs only by owner order.** The dry check refuses to write a delivered take unnamed;
+  write the order through `command_center.actions.redo` naming every T<nn> the dry check lists.
+- **Bugs found, not yet fixed:** heads.json emptied on relaunch; ladder plan writes (panel reprose, move cures)
+  never recorded in plan.cures.jsonl; the grid cache ignores setup text; the dry check cannot plan an owner redo
+  of 03 whose view is not drawn yet (step 03 had to run alone first); `commit_free_gb` reads ~2-3 GB while Windows
+  shows 30+ free, so the supervisor recycles ComfyUI and sits silent ~16 min (the 14:59 'hang'); the brain twice
+  blamed take length for short lines read fast. Code fixed today: leans (0fd793c), stray comma after calm (65dc307),
+  vision-read floor 120 s (f8fa613), twin clause vs lint (c10e045), cut QC ear + edit cap (a0fcef2).

@@ -97,6 +97,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Speed and models parked (fleet C)
 - Jekyll ep02 first pass (2026-10-26)
 - Jekyll ep03 (2026-10-27)
+- Jekyll ep04
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,
