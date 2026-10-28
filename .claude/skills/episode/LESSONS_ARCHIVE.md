@@ -2778,3 +2778,19 @@ Measured from the five episodes' drive logs (docs/audit/2026-10-28_jekyll_ep01-0
   (`scripts/refs/places.master_prompt`); ep05's "newspaper bills" became posters, T22 shipped flagged.
 - **Not a suffix rule:** P11 "-ing" aims stay open; "to the landing," is a noun.
 - **Titles** are book first, no author (owner 2026-10-28): `Dr Jekyll and Mr Hyde — Ep 05/10 — "..."`.
+
+## Hard people checks (2026-10-28): ep05 deleted for duplicated characters
+
+Owner deleted Jekyll ep05 ("same characters duplicated multiple times ... they are hard checks ..
+things like that can't be ignored"). Every judge saw it and every terminal shipped it:
+- **G-ALIKE** (`studio/cast_alike.py`, tier 1, step 06 repeats): two cast whose look rows agree on
+  figure, hair colour (grey~white) and facial hair never share a shot -- clothes are what H3 swaps
+  (ep05 s03/s15: Jekyll drawn as a second Utterson). Fires only on Utterson+Jekyll over Jekyll's 12
+  co-staged pairs. The cure is a redrawn base sheet; the plan parks until then.
+- **Shoulder double-count** (a0cc4a4): a two-cast over-the-shoulder shot drew its shoulder's owner
+  twice (s06, s22); the cast+1 allowance holds only for a one-cast shot.
+- **G-PEOPLE** (`studio/people_faults.py`): an extra figure, a twin or a clone pair never ships
+  flagged. The master ladder's terminal refuses; G-DEAD counts such a take failed (cut if covered,
+  else refused). Replayed: it stops ep03 s19, ep04 s01/05/06/07/19 (two identical constables), ep05 s18.
+- **A known identity problem is a blocker, never an open item.** Read the contact sheet for one
+  person drawn twice before any upload.

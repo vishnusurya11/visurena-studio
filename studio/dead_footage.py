@@ -81,6 +81,13 @@ def lifted(faults: list[dict]) -> dict[int, list[dict]]:
     return out
 
 
+def admitted(kept: dict[int, list[dict]]) -> dict[int, list[dict]]:
+    """The kept takes that may ship flagged: never one whose settled faults name a duplicated or
+    extra person (G-PEOPLE, owner 2026-10-28)."""
+    from studio import people_faults
+    return {i: f for i, f in kept.items() if not any(people_faults.wrong(x) for x in f)}
+
+
 def failing_rows(record: dict) -> list[str]:
     return [g.get("name") for g in (record or {}).get("gates", []) if g.get("hard") and not g.get("ok")]
 

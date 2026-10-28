@@ -143,7 +143,12 @@ def once(first: Verdict, again: Callable[[], Verdict], moved: Round | None = Non
 
 
 def flag(v: Verdict) -> Verdict:
-    """The terminal rung: the master stays as it is; the rubric is signed flagged."""
+    """The terminal rung: the master stays as it is; the rubric is signed flagged -- unless a
+    duplicated or extra person stands (G-PEOPLE, owner 2026-10-28: a hard check), which refuses."""
+    from studio import people_faults
+    if wrong := [f.where for f in v.faults if people_faults.wrong(f)]:
+        raise SystemExit(f"REFUSED: G-PEOPLE: a duplicated or extra person stands at {', '.join(wrong)} after the "
+                         "master ladder's rounds; it never ships flagged -- retake or recast those shots")
     return v
 
 

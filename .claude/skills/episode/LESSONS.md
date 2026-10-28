@@ -90,7 +90,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - An owner's repair runs on its own clock (owner ruling 2026-10-19)
 - A repair re-renders nothing it was handed (2026-10-19, + fix round)
 - A freeze holds at every place that renders (incident 2)
-- The ep01 deadline retro (2026-10-20: where 31 hours went; packages A-H)
+- The ep01 deadline retro (2026-10-20)
 - Instruments first (2026-10-21, craft ruling wave 0)
 - The shot framework (2026-10-21)
 - The voice ruler (2026-10-21)
@@ -100,6 +100,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Jekyll ep04 quality retro
 - Jekyll ep05
 - Jekyll ep01-05 retro
+- Hard people checks
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

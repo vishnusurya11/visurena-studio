@@ -729,6 +729,13 @@ def kept_of(take_dir: Path) -> dict[int, list[dict]]:
     return dead.lifted((current_eye(take_dir) or {}).get("faults", []))
 
 
+def people_wrong(take_dir: Path) -> set[int]:
+    """The takes the current eye names a duplicated or extra person on (G-PEOPLE, owner 2026-10-28):
+    never shipped flagged, whatever the ladder kept."""
+    from studio import people_faults
+    return people_faults.takes((current_eye(take_dir) or {}).get("faults", []))
+
+
 @contextlib.contextmanager
 def within(book: Path, number: int, stage: str, note: str = ""):
     """One inner step of assemble as its own clock row, counted once (net of the outer row)."""
@@ -762,8 +769,9 @@ def dead_plan(placed: dict, takes: dict, stills: dict, take_dir: Path, heads: di
     order = segments_of(placed, takes)
     records = {i: episode_home.read_json(p) for i, _ in order
                if (p := Path(take_dir) / f"T{i:02d}.dq.json").exists()}
-    kept = {i: f for i, f in kept_of(Path(take_dir)).items() if i not in stills}
-    states = {i: dead.state_of(i, stills, records.get(i), i in kept) for i, _ in order}
+    kept = {i: f for i, f in dead.admitted(kept_of(Path(take_dir))).items() if i not in stills}
+    wrong = people_wrong(Path(take_dir))           # G-PEOPLE: a doubled or extra person is failed, kept or not
+    states = {i: "failed" if i in wrong else dead.state_of(i, stills, records.get(i), i in kept) for i, _ in order}
     for i, _ in order:
         if states[i] == "flagged":
             print(dead.flag_line(i, records[i]), flush=True)
