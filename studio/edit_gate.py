@@ -172,10 +172,29 @@ def held_runs(master_dups: set[int], take_dups: set[int], least: int = HOLD_FRAM
     return [r for r in runs if len(r) >= least]
 
 
+CLEAR = 0.85
+"""A segment is clearly its take when its offset-0 mean sits under this share of both one-frame
+shifts.  Jekyll ep05 repair: T11 read 2.40 against 3.18/3.20, T14 1.96 against 2.47/2.57 (ratios
+0.75, 0.79), every frame under SAME_FRAME, over SEGMENT_MEAN_CUT 1.95 -- re-encode noise on a bright,
+detailed picture (grey mean 104), not a wrong frame."""
+
+
+def clear(row: dict) -> bool:
+    """The offset-0 mean clearly beats both one-frame shifts (none measured: not clear)."""
+    shifts = row.get("shifts") or []
+    return len(shifts) == 2 and row["mean"] < CLEAR * min(shifts)
+
+
+def shift_mean(master: np.ndarray, take: np.ndarray, start: int, n: int, off: int) -> float:
+    """master[start:start+n] against the take shifted by `off` frames, inner frames only."""
+    pairs = [(start + i, i + off) for i in range(n) if 0 <= i + off < len(take) and start + i < len(master)]
+    return float(np.mean([frame_diff(master[a], take[b]) for a, b in pairs])) if pairs else float("inf")
+
+
 def segment_ok(row: dict, cap: float, least: int = HOLD_FRAMES) -> bool:
     """The verdict on a measured segment row: offset 0, close, no other picture, no hold."""
     holds = [h for h in row["held"] if len(h) >= least]
-    close = row["mean"] <= cap or row["flat"]
+    close = row["mean"] <= cap or row["flat"] or clear(row)
     return row["offset"] == 0 and close and not row["frames_off"] and not holds
 
 
@@ -189,7 +208,8 @@ def segment_match(master: np.ndarray, take: np.ndarray, start: int, n: int,
     row = {"offset": offset, "mean": round(float(np.mean(per)), 3),
            "frames_off": [i for i, d in enumerate(per) if d > SAME_FRAME],
            "held": held_runs(repeats(master[start:start + n + 1]), repeats(take[:n + 1]), hold),
-           "flat": level_shift(per)}
+           "flat": level_shift(per),
+           "shifts": [round(shift_mean(master, take, start, n, k), 3) for k in (-1, 1)]}
     row["ok"] = segment_ok(row, cap, hold)
     return row
 

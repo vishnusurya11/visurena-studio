@@ -62,7 +62,7 @@ def test_a_lanczos_or_unrecorded_master_keeps_the_old_cap():
 def test_a_sharpened_segment_is_its_take_under_the_rtx_cap():
     take = frames(20)
     master = sharpened(take)
-    assert not eg.segment_match(master, take, 0, 20)["ok"], "the old cap refuses it"
+    assert eg.segment_match(master, take, 0, 20)["mean"] > eg.SEGMENT_MEAN, "its mean is over the old cap"
     assert eg.segment_match(master, take, 0, 20, cap=eg.segment_cap("rtx4x"))["ok"]
 
 
