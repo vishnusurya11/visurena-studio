@@ -2862,6 +2862,8 @@ the 8.0 s take; `plan.cures.jsonl` recorded `cures: []` every round. Three fault
 - **Windows Update rebooted the PC at 00:29** (KB5127936) and the autopilot task runs 'at logon': 4.5 h
   dead until the owner logged in at 05:03. Same as 2026-10-20; the durable fix is the owner's.
 
+**G-WHO false twin (Jekyll ep06 T23/T24, 2026-10-29).** Poole (fair hair, tails) and Utterson (grey hair, bowler) were both right by eye; the reader called Poole's lamp-lit fair hair 'grey', both fell to Utterson and G-DEAD refused the cut with the retake cap spent. Fair and grey are one pair the reader confuses (`figure_who.CONFUSED`): hair never separates looks that differ only there. Look at the frame before believing a people fault; a cast that differs by fair-vs-grey hair alone needs another mark (dress, facial hair) to be checkable.
+
 ## Face refine until 2026-10-29
 
 **Soft faces are refined (09_07, owner 2026-10-17: "I like face improvements a lot in wide shots, go ahead";

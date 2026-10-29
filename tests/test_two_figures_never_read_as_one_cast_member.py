@@ -133,3 +133,25 @@ def test_a_look_with_no_top_wears_its_bases_coat(monkeypatch):
     from studio import continuity
     monkeypatch.setattr(continuity, "card_of", lambda book, who: card({"base": "dapper navy-blue frock coat", "pale": ""}, "base"))
     assert continuity.top_for(None, "lanyon", "pale", {}) == "dapper navy-blue frock coat"
+
+
+def test_fair_hair_read_as_grey_never_makes_a_twin():
+    """Jekyll ep06 T23/T24 (2026-10-29): Poole (fair hair, butler's tails) at the door, Utterson (grey hair,
+    bowler) before him -- both right, by eye.  The reader called Poole's pale hair 'grey' under the lamp, so
+    both figures fell to Utterson and G-DEAD refused the cut.  Fair and grey are one pair the reader
+    confuses: hair never separates two looks that differ only there."""
+    staged = {"poole": {"hair_colour": "fair", "facial_hair": "none", "coat": "dark"},
+              "gabriel_john_utterson": {"hair_colour": "grey", "facial_hair": "none", "coat": "dark"}}
+    figures = [{"hair": "grey", "facial_hair": "none", "coat": "black"},
+               {"hair": "grey", "facial_hair": "none", "coat": "black"}]
+    assert fw.fault(figures, staged) is None
+    assert fw.resolve({"hair": "blond", "facial_hair": "none", "coat": "black"}, staged) is None
+
+
+def test_grey_against_dark_hair_still_tells_two_men_apart():
+    """The confusion is fair-grey only: Utterson (grey) and Guest (dark) seen as two grey heads are a twin."""
+    staged = {"mr_guest": {"hair_colour": "dark", "facial_hair": "beard", "coat": "dark"},
+              "gabriel_john_utterson": {"hair_colour": "grey", "facial_hair": "none", "coat": "dark"}}
+    figures = [{"hair": "grey", "facial_hair": "none", "coat": "black"},
+               {"hair": "white", "facial_hair": "none", "coat": "black"}]
+    assert fw.fault(figures, staged).startswith("who: 2 figures read as 'gabriel_john_utterson'")

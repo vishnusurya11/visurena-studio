@@ -42,7 +42,7 @@ JUDGES = tuple(sorted({"scripts/episode/take_content_check.py", "studio/frames.p
 """The code a take's reads are judged by -- this script, the frames it samples and the import
 closure of the judges (look_table, panel_dq, people_count came in by lazy imports; package H
 skeptic) -- its hash pinned to GATE_VERSION (tests/fixtures/gate_pins.json)."""
-GATE_VERSION = "4"
+GATE_VERSION = "5"
 """What a cached content verdict must have been judged under.  Bump it when the judging changes a
 verdict on unchanged reads; a refactor or a log line re-pins the hash only.  A changed ask needs no
 bump: the asks are in the key (`words_sha8`), as they are in the VL text cache."""

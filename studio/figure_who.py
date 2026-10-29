@@ -60,10 +60,19 @@ def seen_of(fig: dict) -> dict:
             "coat": "" if coat in UNSEEN else COAT_FAMILY.get(coat, coat)}
 
 
+CONFUSED = {frozenset({"fair", "grey"})}
+"""Hair the reader cannot tell apart: Jekyll ep06 T23/T24, Poole's fair hair under the lamp read 'grey'
+and both men fell to Utterson (2026-10-29).  Such a pair never clashes."""
+
+
+def differs(key: str, seen: str, said: str) -> bool:
+    return seen != said and not (key == "hair_colour" and frozenset({seen, said}) in CONFUSED)
+
+
 def clashes(fig: dict, marks: dict) -> int:
     """How many keys the figure shows that the look says otherwise."""
     seen = seen_of(fig)
-    return sum(1 for k in KEYS if seen[k] and marks.get(k) and seen[k] != marks[k])
+    return sum(1 for k in KEYS if seen[k] and marks.get(k) and differs(k, seen[k], marks[k]))
 
 
 def resolve(fig: dict, staged: dict) -> str | None:
