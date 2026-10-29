@@ -118,17 +118,20 @@ def pending(book: Path, number: int, among: list[int] | None = None) -> list[int
     room, home = room_of(book, number), episode_home.home(book, number)
     doc = read(room / DOC, {})
     return [i for i in selection(book, number) if (among is None or i in among) and not current(doc, room, i)
-            and not refined_out(home, i, refund_of(doc.get(f"T{i:02d}")))]
+            and not refined_out(home, i, refund_of(doc.get(f"T{i:02d}"), sha8(room / f"T{i:02d}.mp4")))]
 
 
 def refine_key(index: int) -> str:
     return f"face_refine.T{index:02d}"
 
 
-def refund_of(entry: dict | None) -> int:
-    """1 for a STALE row's jobless round, kept by a clock cut that replaced it (`refund`)."""
+def refund_of(entry: dict | None, current: str = "") -> int:
+    """1 for a STALE row's jobless round, kept by a clock cut that replaced it (`refund`), or for a
+    decision on OTHER bytes than the take's `current` sha8: the one round is per take bytes (Jekyll
+    ep05 repair: eight re-rendered takes had spent theirs on the old bytes and went unrefined)."""
     entry = entry or {}
-    return 1 if entry.get("status") in STALE or entry.get("refund") else 0
+    other = bool(current and entry.get("take_sha8") and entry.get("take_sha8") != current)
+    return 1 if entry.get("status") in STALE or entry.get("refund") or other else 0
 
 
 def refined_out(home: Path, index: int, refund: int = 0) -> bool:
@@ -222,7 +225,7 @@ def owes_reserve(home: Path, doc: dict, card: dict) -> bool:
     room, index = Path(home) / TAKES, int(card["index"])
     if current(doc, room, index) or fr.readable(card, read(room / f"T{index:02d}.dq.json", None)):
         return False
-    return not refined_out(Path(home), index, refund_of(doc.get(f"T{index:02d}")))
+    return not refined_out(Path(home), index, refund_of(doc.get(f"T{index:02d}"), sha8(room / f"T{index:02d}.mp4")))
 
 
 def reserve_takes(home: Path) -> int:

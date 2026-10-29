@@ -46,7 +46,7 @@ def test_a_no_faces_row_of_the_60_px_wall_is_owed_a_look_under_the_new_one(tmp_p
 def test_the_refund_ends_with_the_first_new_decision(tmp_path, monkeypatch):
     book, home, room = stale_room(tmp_path)
     monkeypatch.setattr(cli, "selection", lambda b, n: [6])
-    cli.write_entry(room, 6, {"status": "all_readable", "take_sha8": "0" * 8, "people": []})
+    cli.write_entry(room, 6, {"status": "all_readable", "take_sha8": cli.sha8(room / "T06.mp4"), "people": []})
     assert cli.pending(book, 1) == []
 
 
