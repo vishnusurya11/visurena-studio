@@ -2847,3 +2847,17 @@ the 8.0 s take; `plan.cures.jsonl` recorded `cures: []` every round. Three fault
   shots against G-SHOTS' 28 and their copies repeated `pull_reveal` (5/26 -> 8/29). A split is
   paid for: `join_shots` folds the cheapest same-setup pair (no hook/turn/button/runout, one take,
   dialogue first), and `holds` rebalances its `twin_heads`. ep06: BATTERY CLEAN in 2 code rounds.
+
+## Jekyll ep06 panels (2026-10-29): a detector's size, a wall mid-rung, a reboot
+
+- **YuNet misses big faces at 1024 px**: shots 11 and 26 (a face 30-40 % of the panel) read 0 faces
+  on the 1024 panel and 0.80 / 0.87 on the same picture at 768; the brain parked twice calling them
+  'turned away or backlit' and no redraw could cure a detector. Reading every panel at 768 lost three
+  other faces (ep04 s04, ep05 s01, ep06 s09), so a frame over `face_end.DETECT_MAX` is read at both
+  sizes and merged: ep04-06 replay, +2 faces (the misses), 0 lost. Look at the panel before believing
+  a 'missing' face.
+- **The regrid wall mid-rung** left two 2x2 grids reprosed and undrawn; panels.py refused 'drawn from an
+  older plan'. The rung now gives undrawn grids their old prose (`Climb.unprose`).
+- **A FOCUS on 'the man ... standing in the door'** is a person (`PERSON_SUBJECT`), not a door.
+- **Windows Update rebooted the PC at 00:29** (KB5127936) and the autopilot task runs 'at logon': 4.5 h
+  dead until the owner logged in at 05:03. Same as 2026-10-20; the durable fix is the owner's.

@@ -92,8 +92,40 @@ def edges_of(x: float, y: float, w: float, h: float, fw: int, fh: int) -> list[s
     return out
 
 
+DETECT_MAX = 768
+"""YuNet's own size.  Jekyll ep06's 1024 px panels of big faces (30-40 % of the frame) read 0 faces
+at 1024 and 0.80 / 0.87 at 768; reading every panel at 768 lost three other faces (ep04-06), so a
+larger frame is read at BOTH sizes and a face found at either is there."""
+
+
 def faces(rgb: np.ndarray) -> list[dict] | None:
-    """Every face on one RGB frame, tallest first; None when there is no model."""
+    """Every face on one RGB frame, tallest first; None when there is no model.  A frame over
+    DETECT_MAX is read at its own size and at DETECT_MAX, the two reads merged."""
+    native = detect(rgb)
+    fh, fw = rgb.shape[:2]
+    if native is None or max(fh, fw) <= DETECT_MAX:
+        return native
+    k = DETECT_MAX / max(fh, fw)
+    small = np.asarray(Image.fromarray(rgb).resize((round(fw * k), round(fh * k)), Image.LANCZOS))
+    return merged(native, detect(small) or [])
+
+
+def merged(a: list[dict], b: list[dict]) -> list[dict]:
+    """Two reads of one frame as one: boxes whose centres sit within half a face height are one
+    face (the better score kept), tallest first."""
+    out = list(a)
+    for f in b:
+        same = next((k for k, g in enumerate(out) if abs(g["cx"] - f["cx"]) <= max(g["h"], f["h"]) / 2
+                     and abs(g["cy"] - f["cy"]) <= max(g["h"], f["h"]) / 2), None)
+        if same is None:
+            out.append(f)
+        elif f["score"] > out[same]["score"]:
+            out[same] = f
+    return sorted(out, key=lambda d: -d["h"])
+
+
+def detect(rgb: np.ndarray) -> list[dict] | None:
+    """One YuNet read of one RGB frame at its own size, tallest first; None when there is no model."""
     fh, fw = rgb.shape[:2]
     det = detector((fw, fh))
     if det is None:
