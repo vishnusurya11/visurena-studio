@@ -294,8 +294,8 @@ def audio_parts(cues: list[tuple[float, Path]], bed: int) -> tuple[list[str], li
     """The bed (input `bed`) padded and each cue delayed to its time (the inputs after it)."""
     parts, mixed = [f"[{bed}:a]aresample=48000,apad[bedpad]"], ["[bedpad]"]
     for index, (when, _) in enumerate(cues):
-        parts.append(f"[{index + bed + 1}:a]aresample=48000,"
-                     f"adelay={int(when * 1000)}|{int(when * 1000)}[cue{index}]")
+        ms = max(0, int(when * 1000))       # adelay refuses a negative delay (-22, Jekyll ep06 shot 0)
+        parts.append(f"[{index + bed + 1}:a]aresample=48000,adelay={ms}|{ms}[cue{index}]")
         mixed.append(f"[cue{index}]")
     return parts, mixed
 

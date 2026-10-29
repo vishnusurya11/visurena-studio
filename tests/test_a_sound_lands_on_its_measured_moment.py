@@ -307,3 +307,11 @@ def test_qc_listens_where_the_cue_was_laid_not_where_it_was_planned(tmp_path, mo
     monkeypatch.setattr(es.sfx_cues, "event_db", lambda master, start, seconds, **_: heard.append(start) or 9.0)
     rows = es.presence(home / "cut" / "m.mp4", ep, placed)
     assert heard == [11.82] and rows[0]["at"] == 11.82
+
+
+def test_a_sound_never_starts_before_the_episode():
+    """Jekyll ep06 shot 0 (2026-10-29): the door's event 0.021 s into the first take, less the file's own
+    0.04 s lead-in, laid the cue at -0.019 s; ffmpeg's adelay refused it (-22) and step 10 could not mix."""
+    from studio import sfx_onset
+    assert sfx_onset.cue_start(0.021, 0.04) == 0.0
+    assert sfx_onset.cue_start(5.0, 0.04) == 4.96

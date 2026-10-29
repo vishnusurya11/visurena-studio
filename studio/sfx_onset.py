@@ -239,8 +239,9 @@ def shot_in_take(shot: int, run: list[int], rows: dict, head: float) -> float:
 
 
 def cue_start(event_master: float, onset: float) -> float:
-    """Where the file starts so its own onset lands on the event."""
-    return round(event_master - onset, 4)
+    """Where the file starts so its own onset lands on the event, never before the episode's first frame
+    (Jekyll ep06 shot 0: an event 0.021 s in, less a 0.04 s lead-in, laid the door at -0.019 s)."""
+    return max(0.0, round(event_master - onset, 4))
 
 
 # ---------------------------------------------------------------- laying one cue
@@ -269,7 +270,7 @@ def _laid_steps(cue, wav: Path, rows: dict, offset: float, curves: dict, row: di
     if not slices:
         return _planned(cue, wav, rows, row, "no heel strike measured inside the cue's span")
     start = float(rows[cue.shot]["t_start"]) - offset
-    laid = [(round(start + t - PRE_ROLL, 4), slices[k % len(slices)]) for k, t in enumerate(events)]
+    laid = [(max(0.0, round(start + t - PRE_ROLL, 4)), slices[k % len(slices)]) for k, t in enumerate(events)]
     return laid, {**row, "events_take_s": events, "starts": [t for t, _ in laid]}
 
 

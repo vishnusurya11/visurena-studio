@@ -52,3 +52,8 @@ def test_the_measure_keeps_ffmpegs_tail_when_no_report_comes(monkeypatch):
         stderr = "line one\nbed.wav: Invalid data found when processing input\n"
     monkeypatch.setattr(ta.subprocess, "run", lambda *a, **k: Done())
     assert "Invalid data" in ta._measure_loudness(["ffmpeg"])["_stderr"]
+
+
+def test_a_cue_before_zero_is_delayed_by_nothing_never_by_a_negative():
+    parts, _ = ta.audio_parts([(-0.019, "door.wav"), (2.0, "line.wav")], bed=0)
+    assert parts[1].endswith("adelay=0|0[cue0]") and parts[2].endswith("adelay=2000|2000[cue1]")
