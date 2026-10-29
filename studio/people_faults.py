@@ -13,8 +13,8 @@ KINDS = frozenset({"twin", "clones"})
 
 
 def wrong_line(text: str) -> bool:
-    """One content fault line naming a duplicated or extra person."""
-    return str(text).startswith("twin") or bool(EXTRA.search(str(text)))
+    """One content fault line naming a duplicated or extra person (G-WHO's `who:` among them)."""
+    return str(text).startswith(("twin", "who:")) or bool(EXTRA.search(str(text)))
 
 
 def wrong(fault) -> bool:

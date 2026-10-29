@@ -41,3 +41,10 @@ def test_segment_match_records_the_shifts():
     take = rng.integers(0, 255, (12, eg.GREY_H, eg.GREY_W)).astype(np.float32)
     got = eg.segment_match(take + 2.0, take, 0, 12, cap=eg.SEGMENT_MEAN_CUT)
     assert len(got["shifts"]) == 2 and min(got["shifts"]) > got["mean"]
+
+
+def test_a_clear_segment_far_over_the_cap_is_a_regrade_and_fails():
+    """CLEAR forgives noise just over the cap (T11 sat 1.23x it), never a picture regraded past it:
+    a uniform +3 on every frame beats both shifts and is still not the take's grade."""
+    assert not eg.segment_ok(row(eg.SEGMENT_MEAN_CUT * 1.5, [9.0, 9.0]), eg.SEGMENT_MEAN_CUT)
+    assert eg.segment_ok(row(eg.SEGMENT_MEAN_CUT * 1.25, [9.0, 9.0]), eg.SEGMENT_MEAN_CUT)

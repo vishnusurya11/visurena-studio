@@ -46,6 +46,16 @@ def markers_for(book: Path, who: str, look: str, row: dict) -> dict:
     return card.looks[look].markers.model_dump()
 
 
+def top_for(book: Path, who: str, look: str, row: dict) -> str:
+    """The staged look's top layer words (G-WHO reads its coat colour): the setup's pick, else the
+    row's look, else the base; '' for a book with no look table."""
+    card = card_of(book, who)
+    if card is None:
+        return ""
+    name = next((n for n in (look, (row or {}).get("look"), card.base) if n in card.looks), "")
+    return card.looks[name].layers.top if name else ""
+
+
 def faces_by_setup(episode) -> dict[str, list[str]]:
     """Every person each setup's shots cast, first-appearance order."""
     out: dict[str, list[str]] = {}

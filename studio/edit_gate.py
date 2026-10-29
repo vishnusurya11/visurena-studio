@@ -177,12 +177,15 @@ CLEAR = 0.85
 shifts.  Jekyll ep05 repair: T11 read 2.40 against 3.18/3.20, T14 1.96 against 2.47/2.57 (ratios
 0.75, 0.79), every frame under SAME_FRAME, over SEGMENT_MEAN_CUT 1.95 -- re-encode noise on a bright,
 detailed picture (grey mean 104), not a wrong frame."""
+CLEAR_OVER = 1.3
+"""How far over its cap a clear segment may sit: T11 sat 1.23x SEGMENT_MEAN_CUT.  Past it a segment
+that beats both shifts is a regrade of the take (a uniform +3 on every frame), still refused."""
 
 
-def clear(row: dict) -> bool:
-    """The offset-0 mean clearly beats both one-frame shifts (none measured: not clear)."""
+def clear(row: dict, cap: float) -> bool:
+    """The offset-0 mean clearly beats both one-frame shifts and sits near the cap (none measured: not clear)."""
     shifts = row.get("shifts") or []
-    return len(shifts) == 2 and row["mean"] < CLEAR * min(shifts)
+    return len(shifts) == 2 and row["mean"] < CLEAR * min(shifts) and row["mean"] <= CLEAR_OVER * cap
 
 
 def shift_mean(master: np.ndarray, take: np.ndarray, start: int, n: int, off: int) -> float:
@@ -194,7 +197,7 @@ def shift_mean(master: np.ndarray, take: np.ndarray, start: int, n: int, off: in
 def segment_ok(row: dict, cap: float, least: int = HOLD_FRAMES) -> bool:
     """The verdict on a measured segment row: offset 0, close, no other picture, no hold."""
     holds = [h for h in row["held"] if len(h) >= least]
-    close = row["mean"] <= cap or row["flat"] or clear(row)
+    close = row["mean"] <= cap or row["flat"] or clear(row, cap)
     return row["offset"] == 0 and close and not row["frames_off"] and not holds
 
 

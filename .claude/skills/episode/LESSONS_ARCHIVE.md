@@ -2809,3 +2809,21 @@ made him Enfield's twin, ch7), owner redo orders 51/52/54/56, repair clock; mast
 - **H3 kept Jekyll's hair grey** in every take; the coat and hat tell him from Utterson. G-ALIKE reads
   the rows, not the pixels: a take-level hair read is the open item.
 - **A deleted upload is not published**: the autopilot could not pick ep05 again until rows were read in order.
+
+## G-WHO (2026-10-28): two figures read as one cast member
+
+After ep05 was re-uploaded the owner asked how sure the fix was. Replayed: G-PEOPLE on the iter1 eye
+caught only the fog strangers (shot 18), never the doubled Utterson (T22: his back and his face beside
+Guest), because the take counted 3 figures against a panel that also held 3. Face vectors could not
+help: the doubled faces sat at 6-8 % of frame height (all under READABLE) and their pair cosines
+(0.1-0.7) do not separate one man from two. The twin ask wants the same face AND dress.
+- **The reader lists, code resolves**: per figure hair, facial hair, coat colour; a figure resolves to
+  the one staged look it agrees with while clashing with the others. Hat is not read (bowler read
+  `top_hat` in 6 of 6 frames). The look's coat is the first colour its top layer names ("black
+  overcoat with six white buttons" is dark, not white).
+- **Calibration** on ep05 (fixture `tests/fixtures/who_reads_jekyll_ep05.json`): old T22 fires 2/2;
+  T08, T10, T15, T16, T19, T20, T22 clean; it ALSO fires on the shipped T02 (Poole drawn grey,
+  clean-shaven, black coat: Utterson's look), T03 and T06 (Jekyll grey-haired in a black coat).
+- **Jekyll's hair words named grey**: "thick black hair, silver-grey only at the temples"; his sheet
+  hides the hair under the top hat, so the words were H3's only cue. Cut to "thick black hair brushed
+  back" before ep06 (backups `*.bak_2026-10-28_jekyll_temples`); measure his hair on ep06's takes.

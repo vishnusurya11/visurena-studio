@@ -31,18 +31,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import code_closure, comfy, episode_home, frames, panel_content as pc, panel_dq, take_content as tc
+from studio import code_closure, comfy, episode_home, figure_who as fw, frames, panel_content as pc, panel_dq, take_content as tc
 from studio.episode_home import episode_arg
 
 WORKFLOW = "image_qwen3vl_caption"
 SAMPLES = 3
 ROOT = Path(__file__).resolve().parents[2]
 JUDGES = tuple(sorted({"scripts/episode/take_content_check.py", "studio/frames.py",
-                       *code_closure.closure(ROOT, ("studio/take_content.py",))}))
+                       *code_closure.closure(ROOT, ("studio/take_content.py", "studio/figure_who.py"))}))
 """The code a take's reads are judged by -- this script, the frames it samples and the import
 closure of the judges (look_table, panel_dq, people_count came in by lazy imports; package H
 skeptic) -- its hash pinned to GATE_VERSION (tests/fixtures/gate_pins.json)."""
-GATE_VERSION = "2"
+GATE_VERSION = "3"
 """What a cached content verdict must have been judged under.  Bump it when the judging changes a
 verdict on unchanged reads; a refactor or a log line re-pins the hash only.  A changed ask needs no
 bump: the asks are in the key (`words_sha8`), as they are in the VL text cache."""
@@ -103,6 +103,30 @@ def twin_faults_for(shot, reads: list[pc.Seen], work: Path, stem: str) -> list[s
     return out
 
 
+def read_who_frame(path: Path, seed: int) -> list[dict]:
+    """The G-WHO ask on one already-extracted take frame (seed 31+i, cached)."""
+    values = {"image_1": comfy.stage_image(path), "prompt": fw.ASK, "seed": seed, "max_new_tokens": 512}
+    said = watched(lambda: comfy.cached_text(WORKFLOW, values, readable=fw.readable, timeout=FRAME_READ_S))
+    return fw.parse(said if isinstance(said, str) else str(said))
+
+
+def who_faults_for(shot, reads: list[pc.Seen], work: Path, stem: str, staged: dict) -> list[str]:
+    """G-WHO over the frames `read_take` extracted: two figures of one frame that each read as the
+    same cast member fail the take (owner 2026-10-28); an unreadable ask on these sizes is a fault."""
+    planned, out = len(shot.faces or []), []
+    for i, seen in enumerate(reads):
+        if not fw.applies(planned, shot.size, seen.people):
+            continue
+        try:
+            figures = read_who_frame(work / f"{stem}_{i}.png", seed=31 + i)
+        except pc.Unreadable as why:
+            out.append(f"unread: who {str(why)[:100]}")
+            continue
+        if bad := fw.fault(figures, staged):
+            out.append(bad)
+    return out
+
+
 def with_twins(row: dict, twins: list[str]) -> dict:
     """A take's verdict row with its twin faults carried; any twin fails it."""
     if not twins:
@@ -156,8 +180,11 @@ def judge_take(book: Path, ep, record: dict, take_dir: Path, work: Path) -> dict
         reads = read_take(video, float(record.get("seconds") or 4.0), work)
     except (pc.Unreadable, ValueError) as why:
         return {"passed": False, "faults": [f"unread: {str(why)[:120]}"]}
-    row = verdict_for(book, shot, ep.setups[shot.setup], reads, panel_people_of(book, ep.number, shot.index))
-    return with_twins(row, twin_faults_for(shot, reads, work, video.stem))
+    from studio import cast_refs
+    setup = ep.setups[shot.setup]
+    row = verdict_for(book, shot, setup, reads, panel_people_of(book, ep.number, shot.index))
+    staged = cast_refs.who_marks(book, list(shot.faces or []), setup)
+    return with_twins(row, twin_faults_for(shot, reads, work, video.stem) + who_faults_for(shot, reads, work, video.stem, staged))
 
 
 def judges_sha8() -> str:
@@ -180,7 +207,7 @@ def words_sha8(row: dict, seconds: float) -> str:
     """The judged rows, the asks, the engine, the frames sampled: everything but the bytes that makes a verdict."""
     import hashlib
     import json
-    body = json.dumps({"row": row, "ask": pc.ASK, "twin_ask": pc.TWIN_ASK, "workflow": WORKFLOW,
+    body = json.dumps({"row": row, "ask": pc.ASK, "twin_ask": pc.TWIN_ASK, "who_ask": fw.ASK, "workflow": WORKFLOW,
                        "engine": engine_sha8(), "samples": SAMPLES, "seconds": seconds},
                       sort_keys=True, default=str)
     return hashlib.sha256(body.encode("utf-8")).hexdigest()[:8]
@@ -195,7 +222,10 @@ def verdict_key(video: Path, row: dict, seconds: float) -> dict:
 def take_key(book: Path, ep, record: dict, take_dir: Path) -> dict:
     """The key of the verdict `judge_take` would write for this take now."""
     shot = ep.shot(record["shots"][0])
-    row = judged_row(book, shot, ep.setups[shot.setup], panel_people_of(book, ep.number, shot.index))
+    from studio import cast_refs
+    setup = ep.setups[shot.setup]
+    row = {**judged_row(book, shot, setup, panel_people_of(book, ep.number, shot.index)),
+           "who": cast_refs.who_marks(book, list(shot.faces or []), setup)}
     return verdict_key(take_dir / f"T{record['index']:02d}.mp4", row, float(record.get("seconds") or 4.0))
 
 

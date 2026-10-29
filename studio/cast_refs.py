@@ -71,6 +71,16 @@ def look_markers(book: Path, who: list[str], setup=None) -> list[dict]:
     return [continuity.markers_for(book, name, continuity.look_for(setup, name, r), r) for name, r in zip(who, rows)]
 
 
+def who_marks(book: Path, who: list[str], setup=None) -> dict[str, dict]:
+    """{cast id: the staged look as G-WHO compares it} for everyone a shot casts."""
+    from studio import continuity, figure_who
+    out = {}
+    for name, markers in zip(who, look_markers(book, who, setup)):
+        r = row(book, name)
+        out[name] = figure_who.staged_marks(markers, continuity.top_for(book, name, continuity.look_for(setup, name, r), r))
+    return out
+
+
 def physical(row: dict) -> str:
     """The invariant caption: true in every setup, positive, unconditional."""
     return (row.get("physical") or "").strip()

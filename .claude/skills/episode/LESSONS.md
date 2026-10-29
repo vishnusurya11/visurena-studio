@@ -1,9 +1,7 @@
 # Lessons -- the index
 
-The rules under the episode line, brick first (D17, 2026-10-19). Each line is the rule, then the
-measurement that made it, then where the full story sits in `LESSONS_ARCHIVE.md`. Open the archive
-at the anchor only. A new lesson goes into the archive with its evidence and, when it is a new
-brick or a new instance of one, a line here.
+Brick first (D17): rule, measurement, `LESSONS_ARCHIVE.md` anchor. New lessons go to the archive;
+a new brick also gets a line here.
 
 ## The bricks
 
@@ -26,7 +24,7 @@ brick or a new instance of one, a line here.
    lists them: a new writer of `T<nn>.mp4` fails it until it names its freeze site; a launch runs
    the dry check, which calls the deciders, never a counter; a round counts on bytes its own run
    landed. -> ep01 retro, failures 3, 4; A freeze holds; The ep01 deadline retro.
-5. **A gate that counts cannot see shape; a repair re-stages only what it changed** (B4). ep01:
+5. **A gate that counts cannot see shape or who** (G-WHO); **a repair re-stages only what it changed** (B4). ep01:
    a fading body and a floating hand passed every gate; grids 13-17 were redrawn for one figure.
    -> ep01 retro, failure 5.
 6. **A clock not charged when its process dies is not a clock; liveness is CPU plus output
@@ -102,6 +100,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Jekyll ep01-05 retro
 - Hard people checks
 - Jekyll ep05 repair
+- G-WHO
 
 Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,
