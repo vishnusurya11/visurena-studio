@@ -1766,7 +1766,8 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-SPEAKER line"), "alias_speakers"),
     (re.compile(r"G-PACE plan: words spoken|projects to (?:17[4-9]|1[89]\d|[2-9]\d\d) s; an episode is"), "cut_lines"),
     (re.compile(r"G-PACE plan: planned pauses|G-PACE plan: cuts where the next line"), "breathe"),
-    (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|G-HOLE|hole in speech|of the runtime"), "holds"),
+    # TAKE BUILDER is the row that REFUSES a shot past the take (Jekyll ep06: three writer rounds on it)
+    (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|TAKE BUILDER|G-HOLE|hole in speech|of the runtime"), "holds"),
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"\d+-word style line"), "trim_style"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),
