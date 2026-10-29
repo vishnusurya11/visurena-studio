@@ -47,6 +47,20 @@ def test_takes_with_people_go_first_then_cut_order():
     assert [j["index"] for j in rg.order(jobs)] == [1, 4, 3, 7]
 
 
+def test_a_take_whose_face_warps_goes_before_any_other():
+    """Jekyll ep06 (2026-10-29): the pass ran in cut order on its 60 min floor and T23, T25, T27 -- the takes the
+    eye flagged for a face redrawn frame to frame, the flutter the pass cures -- sat last and were cut for time."""
+    jobs = [{"index": 1, "people": 1}, {"index": 23, "people": 2, "warp": True}, {"index": 5, "people": 0},
+            {"index": 27, "people": 1, "warp": True}]
+    assert [j["index"] for j in rg.order(jobs)] == [23, 27, 1, 5]
+
+
+def test_the_warped_takes_are_read_off_the_current_eye():
+    eye = {"faults": [{"kind": "warp", "where": "T23"}, {"kind": "cut", "where": "T24"}, {"kind": "warp", "where": "T27"}]}
+    assert rg.warped(eye) == {23, 27}
+    assert rg.warped(None) == set()
+
+
 def test_a_job_is_priced_from_the_measured_rate():
     assert rg.projected_s(100) == pytest.approx(100 * rg.SECONDS_PER_FRAME + rg.JOB_OVERHEAD_S)
 

@@ -109,8 +109,8 @@ def budget_s(home: Path) -> float:
         return left
 
 
-def jobs_of(cards: dict[int, dict], rows: list[dict], takes: Path, record: dict) -> list[dict]:
-    """The cut's non-still takes whose regen is not current, with their planned people."""
+def jobs_of(cards: dict[int, dict], rows: list[dict], takes: Path, record: dict, warp: set[int] = frozenset()) -> list[dict]:
+    """The cut's non-still takes whose regen is not current, with their planned people and their warp flag."""
     out = []
     for r in rows:
         i = int(r["index"])
@@ -119,7 +119,7 @@ def jobs_of(cards: dict[int, dict], rows: list[dict], takes: Path, record: dict)
             continue
         if rg.current(record.get(f"T{i:02d}"), yp.sha8(take)) and record[f"T{i:02d}"].get("drawn"):
             continue
-        out.append({"index": i, "take": take, "people": len(rg.sheets(cards[i]["refs"]))})
+        out.append({"index": i, "take": take, "people": len(rg.sheets(cards[i]["refs"])), "warp": i in warp})
     return out
 
 
@@ -134,7 +134,8 @@ def run(book: Path, number: int, engine: str) -> dict:
     rows = json.loads((work / "layout.json").read_text(encoding="utf-8"))
     record = read_record(room)
     left, began = budget_s(home), time.time()
-    for job in rg.order(jobs_of(cards, rows, takes, record)):
+    warp = rg.warped(asm.current_eye(takes))
+    for job in rg.order(jobs_of(cards, rows, takes, record, warp)):
         i, take, card = job["index"], job["take"], cards[job["index"]]
         key, sha = f"T{i:02d}", yp.sha8(take)
         faces = faces_in(take)

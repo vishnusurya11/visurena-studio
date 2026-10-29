@@ -57,8 +57,15 @@ def covered(faces: int, refs: list[str]) -> bool:
 
 
 def order(jobs: list[dict]) -> list[dict]:
-    """Takes with people first (the faces are what the pass is for), then the rest; cut order within each."""
-    return sorted(jobs, key=lambda j: 0 if j.get("people") else 1)
+    """The takes the eye flagged for a warping face first (the flutter the pass cures; Jekyll ep06's T23/T25/T27
+    sat last in cut order and were cut for time), then takes with people, then the rest; cut order within each."""
+    return sorted(jobs, key=lambda j: (0 if j.get("warp") else 1, 0 if j.get("people") else 1))
+
+
+def warped(eye: dict | None) -> set[int]:
+    """The takes the current take-eye verdict names a warp fault on."""
+    return {int(str(f.get("where", ""))[1:]) for f in (eye or {}).get("faults", [])
+            if f.get("kind") == "warp" and str(f.get("where", "")).startswith("T")}
 
 
 def projected_s(frames: int) -> float:
