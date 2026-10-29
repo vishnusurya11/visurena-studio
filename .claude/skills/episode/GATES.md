@@ -563,7 +563,7 @@ holds it equal): edit the registry, never this table.
 | 09 | take_eye | 1 | round | 10 |  |
 | 09 | strip | 1 | round | 2 |  |
 | 09 | retakes | 2 | episode | 45 | EYE_TAKES |
-| 09 | face_refine | 1 | take | 15 |  |
+| 09 | face_refine | 1 | take | 75 |  |
 | 10 | assemble | 1 | pass | 15 |  |
 | 10 | cut_pass | 1 | pass | 15 |  |
 | 11 | qc | 1 | episode | 30 |  |

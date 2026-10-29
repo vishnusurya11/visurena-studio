@@ -102,12 +102,13 @@ def test_a_wide_take_is_pending_until_refined(tmp_path):
     assert cli.pending(w.book, 1) == [0]
 
 
-def test_a_take_the_warp_gate_tracked_readable_is_not(tmp_path):
+def test_a_take_the_warp_gate_tracked_readable_is_pending_too(tmp_path):
+    """Owner 2026-10-29: every human face is refined; a readable take is no longer declined."""
     w = Room(tmp_path, size="wide")
     dq = json.loads((w.room / "T00.dq.json").read_text())
     dq["measures"] = {"warp": {"S": 0.1, "Se": 0.1, "share": 1.0, "tracks": [{"median_px": 150.0, "min_px": 150.0, "life": 22}]}}
     (w.room / "T00.dq.json").write_text(json.dumps(dq))
-    assert cli.pending(w.book, 1) == []
+    assert cli.pending(w.book, 1) == [0]
 
 
 def test_a_closer_take_is_pending_too_the_tracker_decides(tmp_path):
@@ -193,12 +194,13 @@ def test_a_take_with_no_face_found_is_recorded_and_not_rendered(tmp_path):
     assert json.loads((w.room / "refine.json").read_text())["T00"]["status"] == "none_found"
 
 
-def test_a_take_whose_every_face_reads_is_recorded_and_not_rendered(tmp_path):
+def test_a_take_whose_every_face_reads_is_rendered_too(tmp_path):
+    """Owner 2026-10-29: a big face is refined as a small one is (it was `all_readable`, unrendered)."""
     w, engine = Room(tmp_path), Engine(tmp_path)
     big = lambda rgb: [{"box": [300.0, 200.0, 460.0, 360.0], "score": 0.9}]
     cli.refine(w.book, 1, None, engine=engine, detect=big, loose=big, embed=embed, within="")
-    assert engine.graphs == []
-    assert json.loads((w.room / "refine.json").read_text())["T00"]["status"] == "all_readable"
+    assert engine.graphs
+    assert json.loads((w.room / "refine.json").read_text())["T00"]["status"] != "all_readable"
 
 
 def test_the_finder_is_asked_for_the_take_and_closed_after(tmp_path):

@@ -170,11 +170,9 @@ def readable(card: dict, dq: dict | None) -> bool:
 
 
 def soft_faces(card: dict, dq: dict | None) -> int:
-    """The faces a take's refine is priced for: its planned faces less the warp tracks readable
-    at their smallest (a close-up's big face costs no GPU), at least one."""
-    tracks = warp_measure(dq).get("tracks") or []
-    seen = sum(1 for t in tracks if t.get("min_px") is not None and t["min_px"] >= SMALL_FACE_PX)
-    return max(len(card.get("faces") or []) - seen, 1)
+    """The faces a take's refine is priced for: every planned face, at least one (owner 2026-10-29:
+    every human face is refined, a close-up's big face too; it was the faces under SMALL_FACE_PX)."""
+    return max(len(card.get("faces") or []), 1)
 
 
 def retake_owed(dq: dict, taken: int) -> bool:
@@ -185,12 +183,13 @@ def retake_owed(dq: dict, taken: int) -> bool:
 
 
 def eligible(card: dict, sizes: list[str], dq: dict | None, taken: int = 0) -> bool:
-    """A take the tracker looks at: a planned face not already readable, no insert, no hard
-    failure outside BARS, no warp retake owed.  The plan size is not read (ep01 T26 is a
-    medium with a 64 px face) and neither is face-at-end (T06 pushes in from 60 px)."""
+    """A take the tracker looks at: a planned face, no insert, no hard failure outside BARS, no
+    warp retake owed.  A face that already reads is refined too (owner 2026-10-29: "if there is
+    human you fix the eyes and face"; until then `readable` declined it).  The plan size is not
+    read (ep01 T26 is a medium with a 64 px face) and neither is face-at-end."""
     if not card.get("faces") or not dq or any(s in NEVER for s in sizes):
         return False
-    return passed_but_warp(dq) and not retake_owed(dq, taken) and not readable(card, dq)
+    return passed_but_warp(dq) and not retake_owed(dq, taken)
 
 
 def shot_sizes(card: dict, sizes: dict[int, str]) -> list[str]:
@@ -219,8 +218,16 @@ on the master.  It is the refine's eligibility constant, not a gate threshold (o
 STALE = ("no_faces",)
 """A decision under the 60 px wall (before 2026-10-19): `no_faces` meant no face UNDER 60 px, and
 its round was spent with no job (fixed by P07, 41fba62).  Jekyll ep01 T05 T06 T13 T21 T23 T24."""
+RETIRED = ("all_readable",)
+"""A decision the refine no longer makes (owner 2026-10-29: every face is refined): such a row is
+owed again.  It queued no job and spent no round, so nothing is refunded (Jekyll ep06's first 14)."""
 UNREACHED = ("insert", "unplanned")
 """Takes the refine never works on (NEVER sizes, no planned face): shown, never listed."""
+
+
+def owed_again(entry: dict | None) -> bool:
+    """A decision of a retired rule: the take is owed its refine again."""
+    return (entry or {}).get("status") in RETIRED
 
 
 def standing(entry: dict | None, sha: str) -> dict | None:

@@ -199,7 +199,7 @@ RUN(book, n): the autopilot launches drive.py; you read the disk, never call a s
 06 prompts   caps: prompts 1/pass, 2 min
 07 board     caps: grids 1/grid, 30 min
 08 panels    caps: panel_checks 1/round, 30 min; regrid 2/episode, 20 min, gate EYE_PANELS
-09 shoot     caps: takes 1/pass, 120 min; take_dq 1/round, 30 min; take_content 1/round, 20 min; take_eye 1/round, 10 min; strip 1/round, 2 min; retakes 2/episode, 45 min, gate EYE_TAKES; face_refine 1/take, 15 min
+09 shoot     caps: takes 1/pass, 120 min; take_dq 1/round, 30 min; take_content 1/round, 20 min; take_eye 1/round, 10 min; strip 1/round, 2 min; retakes 2/episode, 45 min, gate EYE_TAKES; face_refine 1/take, 75 min
 10 edit      caps: assemble 1/pass, 15 min; cut_pass 1/pass, 15 min
 11 qc        caps: qc 1/episode, 30 min; master_eye 1/episode, 30 min, gate MASTER; upscale 1/pass, 15 min
 12 deliver   caps: deliver 1/pass, 2 min

@@ -83,14 +83,15 @@ def test_a_take_already_decided_holds_no_reserve(tmp_path):
     assert step.refine_reserve(ctx) == 81.0
 
 
-def test_a_take_whose_faces_already_read_holds_no_reserve(tmp_path):
-    """ep01: ten takes the warp gate tracks at 120 px or more at their smallest are never refined."""
+def test_a_take_whose_faces_already_read_holds_its_reserve_too(tmp_path):
+    """Owner 2026-10-29: every human face is refined, so a take read at 211 px holds its reserve
+    as a soft one does (ep01's ten such takes were never refined)."""
     ctx = ctx_at(tmp_path)
     write_cards(ctx, 2)
     dq = {"passed": True, "gates": [], "measures": {"warp": {"state": "pass", "share": 1.0,
                                                              "tracks": [{"median_px": 220.0, "min_px": 211.2}]}}}
     (ctx.home / step.TAKES / "T00.dq.json").write_text(json.dumps(dq), encoding="utf-8")
-    assert step.refine_reserve(ctx) == 81.0
+    assert step.refine_reserve(ctx) == 162.0
 
 
 def test_the_re_measure_is_cut_before_the_refine(tmp_path):

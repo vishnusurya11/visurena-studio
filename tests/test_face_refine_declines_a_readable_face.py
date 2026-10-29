@@ -24,8 +24,9 @@ def card(n=1):
     return {"index": 3, "shots": [3], "faces": ["a", "b"][:n]}
 
 
-def test_a_148_px_face_is_declined_though_the_shot_is_wide():
-    assert not fr.eligible(card(), ["wide"], dq([{"median_px": 148.0, "min_px": 140.0, "life": 60}]))
+def test_a_148_px_face_is_refined_too():
+    """Owner 2026-10-29: every human face is refined, a readable one too (it was declined)."""
+    assert fr.eligible(card(), ["wide"], dq([{"median_px": 148.0, "min_px": 140.0, "life": 60}]))
 
 
 def test_a_34_px_face_is_selected():

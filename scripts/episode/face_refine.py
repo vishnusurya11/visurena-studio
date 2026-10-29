@@ -109,8 +109,10 @@ STALE = fr.STALE
 
 
 def current(doc: dict, room: Path, index: int) -> bool:
-    """A decision exists for exactly these take bytes (a cut or a stale row is still owed)."""
-    return fr.standing(doc.get(f"T{index:02d}"), sha8(room / f"T{index:02d}.mp4")) is not None
+    """A decision exists for exactly these take bytes (a cut, a stale row or a retired rule's row is
+    still owed)."""
+    entry = doc.get(f"T{index:02d}")
+    return fr.standing(entry, sha8(room / f"T{index:02d}.mp4")) is not None and not fr.owed_again(entry)
 
 
 def pending(book: Path, number: int, among: list[int] | None = None) -> list[int]:
@@ -220,10 +222,10 @@ def cut_takes(face: dict) -> list[str]:
 
 
 def owes_reserve(home: Path, doc: dict, card: dict) -> bool:
-    """No standing refine decision on the take's bytes, faces the warp gate does not already read at
-    SMALL_FACE_PX (fr.readable; no dq yet: owed), and a refine left in the cap table."""
+    """No standing refine decision on the take's bytes and a refine left in the cap table (every
+    faced take owes one since 2026-10-29, a readable face too)."""
     room, index = Path(home) / TAKES, int(card["index"])
-    if current(doc, room, index) or fr.readable(card, read(room / f"T{index:02d}.dq.json", None)):
+    if current(doc, room, index):
         return False
     return not refined_out(Path(home), index, refund_of(doc.get(f"T{index:02d}"), sha8(room / f"T{index:02d}.mp4")))
 
@@ -353,15 +355,14 @@ def cut_frames(frames: list[np.ndarray]) -> list[int]:
 
 
 def soft_tracks(work, tracks: list[list], sources: list[str] | None = None) -> tuple[list[list], list[str]]:
-    """The tracks the refine works on (smallest face under SMALL_FACE_PX) and their sources; when
-    there are none the take's status says why: no face found, or every face already reads."""
+    """The tracks the refine works on -- every tracked face (owner 2026-10-29: every human face,
+    big ones too; it was those under SMALL_FACE_PX) -- and their sources; none: `none_found`."""
     sources = sources or ["face"] * len(tracks)
     sizes = [face_track.track_px(tr) for tr in tracks]
     work.yolo_min_px = round(min(sizes), 1) if sizes else None
-    keep = [k for k, px in enumerate(sizes) if px < fr.SMALL_FACE_PX]
-    if not keep:
-        work.status = "all_readable" if tracks else "none_found"
-    return [tracks[k] for k in keep], [sources[k] for k in keep]
+    if not tracks:
+        work.status = "none_found"
+    return list(tracks), list(sources)
 
 
 def head_of(rgb: np.ndarray, box) -> np.ndarray:

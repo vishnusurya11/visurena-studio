@@ -60,18 +60,21 @@ def test_a_push_in_whose_median_is_readable_stays_eligible():
     assert fr.eligible(CARD, ["wide"], dq([{"median_px": 190.0, "min_px": 80.0, "life": 96}]))
 
 
-def test_a_face_readable_from_its_first_frame_is_declined():
-    assert not fr.eligible(CARD, ["wide"], dq([{"median_px": 190.0, "min_px": 150.0, "life": 96}]))
+def test_a_face_readable_from_its_first_frame_is_refined_too():
+    """Owner 2026-10-29: every human face is refined, a readable one too (it was declined)."""
+    assert fr.eligible(CARD, ["wide"], dq([{"median_px": 190.0, "min_px": 150.0, "life": 96}]))
 
 
 def test_a_median_only_record_is_left_to_the_tracker():
     assert fr.eligible(CARD, ["wide"], dq([{"median_px": 190.0, "life": 96}]))
 
 
-def test_the_price_counts_only_the_faces_not_already_readable():
+def test_the_price_counts_every_planned_face():
+    """Owner 2026-10-29: every human face is refined, so every face is priced (it was the soft ones)."""
+
     two = {"index": 3, "faces": ["a", "b"]}
     tracks = [{"median_px": 200.0, "min_px": 150.0, "life": 96}, {"median_px": 50.0, "min_px": 40.0, "life": 96}]
-    assert fr.soft_faces(two, dq(tracks)) == 1
+    assert fr.soft_faces(two, dq(tracks)) == 2
     assert fr.soft_faces(two, dq([])) == 2
     assert fr.soft_faces(two, None) == 2
 

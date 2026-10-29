@@ -52,7 +52,7 @@ def test_the_refund_ends_with_the_first_new_decision(tmp_path, monkeypatch):
 
 def test_the_refine_stops_queueing_at_its_wall():
     wall = step_caps.wall_s("face_refine")
-    assert wall == 15 * 60
+    assert wall == 75 * 60                  # every face since 2026-10-29 (it was 15)
     assert not cli.wall_spent(began=0.0, now=wall - 1)
     assert cli.wall_spent(began=0.0, now=wall)
 

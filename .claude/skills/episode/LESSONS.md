@@ -1,6 +1,6 @@
 # Lessons -- the index
 
-Brick first (D17): rule, measurement, `LESSONS_ARCHIVE.md` anchor. Lessons go to the archive;
+Brick first (D17): rule, measurement, archive anchor. Lessons go to the archive;
 a new brick also gets a line here.
 
 ## The bricks
@@ -102,7 +102,8 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Jekyll ep05 repair
 - G-WHO
 - Jekyll ep06 plan
+- Jekyll ep06 panels
 
-Anchors the code cites, kept in the archive: `3ae4584` (take currency: a swapped roll never
+Anchors the code cites, archived: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,
 `tests/test_take_inputs.py`).

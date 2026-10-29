@@ -575,7 +575,7 @@ stages:
       take_eye:     { step: "09", rounds: 1, per: round,   wall_min: 10, read: step }
       strip:        { step: "09", rounds: 1, per: round,   wall_min: 2, read: step }
       retakes:      { step: "09", rounds: 2, per: episode, wall_min: 45, gate: EYE_TAKES }
-      face_refine:  { step: "09", rounds: 1, per: take,    wall_min: 15 }
+      face_refine:  { step: "09", rounds: 1, per: take,    wall_min: 75 }   # every face (owner 2026-10-29): ~61 min of GPU for 28 takes
       assemble:     { step: "10", rounds: 1, per: pass,    wall_min: 15, read: step }
       cut_pass:     { step: "10", rounds: 1, per: pass,    wall_min: 15, read: step }   # the judged cut at 768
       qc:           { step: "11", rounds: 1, per: episode, wall_min: 30, read: step }
@@ -919,9 +919,9 @@ stages:
           - id: "09_07"
             name: refine
             desc: >-
-              FACE REFINE (owner 2026-10-17, decision 2026-10-17_face_refine): a wide
-              or full take, or one whose face is under 60 px, that PASSED its dq has
-              each small face tracked, matched to the staged cast and re-rendered
+              FACE REFINE (owner 2026-10-17; every human face, owner 2026-10-29): every
+              take with a planned face that PASSED its dq has each face tracked,
+              big or small, matched to the staged cast and re-rendered
               through H3 at denoise 0.45 with only that person's sheet
               (scripts/episode/face_refine.py); gated on identity, seam, flicker
               and face count, else the unrefined take; takes/r2v/refine.json. A

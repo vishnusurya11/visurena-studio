@@ -19,8 +19,9 @@ def tracked(px: float) -> list[dict]:
     return [{"median_px": px, "min_px": px, "life": 120}]
 
 
-def test_a_warn_with_a_face_tracked_readable_is_not_refined():
-    assert not fr.eligible(CARD, ["medium_close"], dq(S_held=0.9, face_w=0.2, tracks=tracked(150.0)))
+def test_a_warn_with_a_face_tracked_readable_is_refined_too():
+    """Owner 2026-10-29: every human face is refined, a readable one too (it was declined)."""
+    assert fr.eligible(CARD, ["medium_close"], dq(S_held=0.9, face_w=0.2, tracks=tracked(150.0)))
 
 
 def test_a_warn_with_a_soft_face_is_refined():
@@ -41,5 +42,6 @@ def test_a_fail_waits_for_its_one_retake_then_a_small_face_goes_to_the_refine():
     assert not fr.eligible(CARD, ["wide"], d, taken=0) and fr.eligible(CARD, ["wide"], d, taken=1)
 
 
-def test_a_failed_face_that_reads_ships_flagged_not_refined():
-    assert not fr.eligible(CARD, ["wide"], dq(S=2.7, tracks=tracked(150.0)), taken=1)
+def test_a_failed_face_that_reads_is_refined_too():
+    """Owner 2026-10-29: every human face is refined, a readable one too (it was declined)."""
+    assert fr.eligible(CARD, ["wide"], dq(S=2.7, tracks=tracked(150.0)), taken=1)

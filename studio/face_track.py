@@ -475,7 +475,10 @@ def hist_correlation(a: np.ndarray, b: np.ndarray) -> float:
 def hist_similarity(a: np.ndarray, b: np.ndarray) -> float:
     """Lab colour histogram correlation of two RGB crops, -1..1.  Lab, not hue: a
     black hat has no hue, and Hyde's black wideawake is what tells him from
-    Enfield's light-brown top hat at 30 px (Jekyll ep01 T07: 0.77 against 0.08)."""
+    Enfield's light-brown top hat at 30 px (Jekyll ep01 T07: 0.77 against 0.08).  An empty crop (a big
+    face's head box past the frame edge) is no evidence: 0.0, never an OpenCV refusal (2026-10-29)."""
+    if not np.asarray(a).size or not np.asarray(b).size:
+        return 0.0
     return hist_correlation(lab_hist(a), lab_hist(b))
 
 
