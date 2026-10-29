@@ -83,6 +83,10 @@ ENGINE_RESTARTS = 2
 LOG_LINES = 40
 ENGINE_DOWN_TICKS = 2
 """Consecutive ticks /system_stats must fail before a non-idle engine is restarted."""
+BOOT_GRACE_S = 300
+"""A restarted engine is let boot this long before another restart: after the 2026-10-29 Windows
+Update reboot ComfyUI took over a minute to answer /system_stats, and act_idle restarted it every
+tick (watch_engine every two), killing each boot before it answered."""
 COMMIT_LOW_GB = 8.0
 COMMIT_HARD_GB = 3.0
 """Host commit headroom: below LOW with an empty queue the engine is told to /free;
@@ -1108,19 +1112,33 @@ def engine_ticks(deps: Deps, signals) -> int:
     return int(read_json(deps.root / "heartbeat.json", {}).get("engine_down_ticks", 0)) + 1
 
 
+def booting(deps: Deps) -> bool:
+    """A restart younger than BOOT_GRACE_S: the engine is still coming up, so it is left alone."""
+    at = float((read_json(deps.root / "engine_restart.json", {}) or {}).get("at") or 0)
+    return deps.now() - at < BOOT_GRACE_S
+
+
+def restart_engine(book: Path, n, deps: Deps) -> None:
+    """One restart, stamped so the next BOOT_GRACE_S lets it boot."""
+    if booting(deps):
+        return
+    deps.engine.restart()
+    write_atomic(deps.root / "engine_restart.json", {"at": deps.now()})
+    event(book, {"event": "engine_restart", "episode": n, "why": "down"})
+
+
 def watch_engine(book: Path, n: int, derived, signals, deps: Deps, ticks: int) -> None:
     """Restart a dead engine after ENGINE_DOWN_TICKS missed polls in any state but
     paused (IDLE restarts itself in act_idle); free host commit when it runs low."""
     state = getattr(derived.state, "name", str(derived.state))
     if signals.engine_up:
         return commit_check(book, n, signals, deps)
-    if ticks < ENGINE_DOWN_TICKS or state == "PAUSED" or is_paused(book):
+    if ticks < ENGINE_DOWN_TICKS or state == "PAUSED" or is_paused(book) or booting(deps):
         return
     event(book, {"event": "engine_down", "episode": n, "ticks": ticks, "log": probe(deps.engine, "log_tail", 3) or [],
                  "commit_free_gb": probe(deps.engine, "commit_free_gb")})
     if state != "IDLE":
-        deps.engine.restart()
-        event(book, {"event": "engine_restart", "episode": n, "why": "down"})
+        restart_engine(book, n, deps)
 
 
 def queue_busy(deps: Deps) -> bool:
@@ -1202,8 +1220,7 @@ def cure(book: Path, codex: str, n: int, derived, deps: Deps) -> dict:
 def act_idle(book: Path, codex: str, n: int, derived, signals, deps: Deps) -> dict:
     """IDLE: the engine up and no live lock -> launch; a dead engine is restarted first."""
     if not signals.engine_up:
-        deps.engine.restart()
-        event(book, {"event": "engine_restart", "episode": n, "why": "down"})
+        restart_engine(book, n, deps)
         return {"action": "restart_engine", "state": "IDLE"}
     if signals.lock and signals.proc_alive:
         return {"action": "wait", "state": "RUNNING"}

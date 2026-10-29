@@ -207,3 +207,32 @@ def test_successor_spawn_is_once_per_head(tmp_path):
     assert cli.spawn_successor(book, fx.CODEX, d, "bbbb", 30) is False
     assert cli.spawn_successor(book, fx.CODEX, d, "cccc", 30) is True
     assert len(d.calls["popen"]) == 2
+
+
+# ---- a restarted engine is let boot (2026-10-29) ------------------------------------
+
+def test_a_restarted_engine_is_let_boot_before_another_restart(tmp_path):
+    """After the Windows Update reboot ComfyUI took over a minute to answer; act_idle restarted it
+    every tick and watch_engine every two, killing each boot.  One restart, then BOOT_GRACE_S."""
+    cli, book = fx.load(), fx.book(tmp_path)
+    engine = HealthEngine(up=False)
+    clock = [1_000_000.0]
+    d = fx.deps(tmp_path, "IDLE", engine=engine, now=lambda: clock[0])
+    for _ in range(4):
+        cli.tick(book, fx.CODEX, d, 1)
+        clock[0] += 30
+    assert engine.calls.count("restart") == 1
+    clock[0] += cli.BOOT_GRACE_S
+    cli.tick(book, fx.CODEX, d, 1)
+    assert engine.calls.count("restart") == 2
+
+
+def test_a_running_units_engine_is_let_boot_too(tmp_path):
+    cli, book = fx.load(), fx.book(tmp_path)
+    engine = HealthEngine(up=False)
+    clock = [1_000_000.0]
+    d = fx.deps(tmp_path, "RUNNING", procs=[_live(cli)], engine=engine, now=lambda: clock[0])
+    for i in range(1, 7):
+        cli.tick(book, fx.CODEX, d, i)
+        clock[0] += 30
+    assert engine.calls.count("restart") == 1
