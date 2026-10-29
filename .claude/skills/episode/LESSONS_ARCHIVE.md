@@ -2827,3 +2827,18 @@ help: the doubled faces sat at 6-8 % of frame height (all under READABLE) and th
 - **Jekyll's hair words named grey**: "thick black hair, silver-grey only at the temples"; his sheet
   hides the hair under the top hat, so the words were H3's only cue. Cut to "thick black hair brushed
   back" before ep06 (backups `*.bak_2026-10-28_jekyll_temples`); measure his hair on ep06's takes.
+
+## Jekyll ep06 plan (2026-10-28): a shot past the take is code's, three layers deep
+
+The plan deferred twice (26 + 23 min of writer rounds) on shots 7, 13, 20, 23 at 8.2-8.9 s against
+the 8.0 s take; `plan.cures.jsonl` recorded `cures: []` every round. Three faults, each hiding the next:
+- **The router** knew `TAKE LENGTH`, never the `TAKE BUILDER` row that refuses (8f0d274).
+- **`button_beat` set `shots[-2]`**: `holds` split shot 23, the shot before the button; its copy (beat 0)
+  became the shot before the button and the contract dropped the WHOLE cure silently (`apply_each`).
+  The breath now lands before the button LINE's shot (`Episode.button`).
+- **A one-line shot was never split**: shot 23 was one 18-word line of two sentences. `split_line`
+  (join_line's inverse) cuts it at the sentence break nearest its middle, then `seat_overflow` seats
+  or splits the shot. Replayed on the deferred draft: 26 shots -> 28, none over, contract valid.
+- **Park once, then go on**: at the climb cap the plan parks ONCE and the next launch runs on the
+  signed draft -- into steps 06/09, which refuse the same long shots. Pause at the boundary, cure with
+  `plan_repair.py --no-llm`, resume; never let a tier-1 line ride into the picture steps.

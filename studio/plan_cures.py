@@ -171,10 +171,12 @@ def pace_words(doc: dict) -> dict:
 
 
 def button_beat(doc: dict) -> dict:
-    """The shot before the button keeps >= 1.0 s of silence (contract)."""
-    shots = doc.get("shots") or []
-    if len(shots) >= 2:
-        pen = shots[-2]
+    """The shot before the button keeps >= 1.0 s of silence (contract): the shot before the button
+    LINE's shot, as Episode.button reads it -- a runout may follow (ep06's split made one)."""
+    shots, lines = doc.get("shots") or [], doc.get("lines") or []
+    at = lines[-1]["shot"] if lines else (shots[-1]["index"] if shots else 0)
+    pen = next((s for s in shots if s["index"] == at - 1), None)
+    if pen is not None:
         pen["beat_s"] = max(1.0, float(pen.get("beat_s") or 0.0))
     return doc
 
@@ -669,7 +671,11 @@ def seat_overflow(doc: dict, rate: float) -> dict:
     for s in doc.get("shots") or []:
         n = s["index"]
         own = [l for l in lines if l["shot"] == n]
-        if len(own) < 2 or _shot_secs(doc, rate)[n] <= TAKE_BUDGET_S:
+        if _shot_secs(doc, rate)[n] <= TAKE_BUDGET_S:
+            continue
+        if len(own) == 1 and (count := len(lines)) and len(split_line(doc, lines.index(own[0]))["lines"]) > count:
+            return seat_overflow(doc, rate)      # one line of two sentences: two lines, then seat them
+        if len(own) < 2:
             continue
         if not (n < last and _room(doc, rate, n + 1, own[-1], cap) and _move(own[-1], n + 1)):
             if not (n > 0 and _room(doc, rate, n - 1, own[0], cap) and _move(own[0], n - 1)):
@@ -847,6 +853,29 @@ def join_line(doc: dict, k: int) -> dict:
     if m and m.group(1) == "line" and int(m.group(2)) > k:
         doc["answer"] = f"line {int(m.group(2)) - 1}"
     return doc
+
+
+SENTENCE_BREAK = re.compile(r"(?<=[.!?])\s+(?=[\"'A-Z])")
+
+
+def split_line(doc: dict, k: int) -> dict:
+    """Line k, narration of two or more sentences, becomes two lines on its shot at the sentence
+    break nearest its middle -- join_line's inverse, for a one-line shot past the take (Jekyll
+    ep06 shot 23, 18 words).  The lines after it renumber; a 'line N' answer moves with them.
+    One sentence, or not narration: the doc comes back unchanged."""
+    lines = doc.get("lines") or []
+    if not 0 <= k < len(lines) or lines[k].get("kind") != "narration":
+        return doc
+    text = str(lines[k]["text"])
+    breaks = list(SENTENCE_BREAK.finditer(text))
+    if not breaks:
+        return doc
+    cut = min(breaks, key=lambda m: abs(m.start() - len(text) / 2))
+    lines.insert(k + 1, {**lines[k], "text": text[cut.end():].strip()})
+    lines[k]["text"] = text[:cut.start()].strip()
+    for i, line in enumerate(lines):
+        line["index"] = i
+    return _remap_answer(doc, k + 1)
 
 
 def insert_line(doc: dict, shot_index: int, text: str, speaker: str) -> dict:

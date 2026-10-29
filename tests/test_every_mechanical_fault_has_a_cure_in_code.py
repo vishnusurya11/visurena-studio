@@ -64,6 +64,7 @@ def test_a_gait_without_a_pace_gets_one():
 def test_the_button_breath_is_restored():
     doc = doc_of()
     doc["shots"][0]["beat_s"] = 0.3                                # penultimate
+    doc["lines"][0]["shot"] = 1                                    # the button line plays on the last shot
     out = pc.button_beat(doc)
     assert out["shots"][0]["beat_s"] >= 1.0
 
