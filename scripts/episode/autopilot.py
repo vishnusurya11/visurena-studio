@@ -1132,7 +1132,8 @@ def watch_engine(book: Path, n: int, derived, signals, deps: Deps, ticks: int) -
     paused (IDLE restarts itself in act_idle); free host commit when it runs low."""
     state = getattr(derived.state, "name", str(derived.state))
     if signals.engine_up:
-        return commit_check(book, n, signals, deps)
+        # a paused series leaves the engine to the owner (2026-10-29: recycled mid-bench on low commit)
+        return None if state == "PAUSED" or is_paused(book) else commit_check(book, n, signals, deps)
     if ticks < ENGINE_DOWN_TICKS or state == "PAUSED" or is_paused(book) or booting(deps):
         return
     event(book, {"event": "engine_down", "episode": n, "ticks": ticks, "log": probe(deps.engine, "log_tail", 3) or [],

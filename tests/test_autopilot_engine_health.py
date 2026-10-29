@@ -236,3 +236,13 @@ def test_a_running_units_engine_is_let_boot_too(tmp_path):
         cli.tick(book, fx.CODEX, d, i)
         clock[0] += 30
     assert engine.calls.count("restart") == 1
+
+
+def test_a_paused_series_never_recycles_the_engine_on_low_commit(tmp_path):
+    """2026-10-29: the owner paused the series to bench Open-H3 in ComfyUI; commit read 2.93 GB under
+    COMMIT_HARD with no drive alive, and the paused autopilot killed the engine mid-bench."""
+    cli, book = fx.load(), fx.book(tmp_path)
+    engine = HealthEngine(commits=(0.8, 0.8))
+    d = fx.deps(tmp_path, "PAUSED", reason="paused", engine=engine)
+    cli.tick(book, fx.CODEX, d, 1)
+    assert "free" not in engine.calls and not any(c.startswith("kill") for c in engine.calls)
