@@ -70,6 +70,27 @@ def twin_check(shot, seen: pc.Seen, path: Path) -> tuple[list[str], dict]:
     return ([bad] if bad else []), {"figures": t.figures, "distinct": t.distinct, "twins": t.twins}
 
 
+def read_who(path: Path, seed: int = 19) -> list[dict]:
+    """The G-WHO ask on one panel (studio/figure_who): every figure's hair, facial hair, coat and headwear."""
+    from studio import figure_who as fw
+    said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": fw.ASK, "seed": seed,
+                                     "max_new_tokens": 512}, readable=fw.readable)
+    return fw.parse(said if isinstance(said, str) else str(said))
+
+
+def who_check(shot, seen: pc.Seen, path: Path, staged: dict) -> list[str]:
+    """G-WHO on the panel (Jekyll ep06 shot 25, 2026-10-29: Utterson drawn twice passed every panel check and
+    the take morphed him into Poole): two figures read as one cast member fail it; an unread ask is a fault."""
+    from studio import figure_who as fw
+    if not fw.applies(len(shot.faces or []), shot.size, seen.people):
+        return []
+    try:
+        bad = fw.fault(read_who(path), staged)
+    except pc.Unreadable as why:
+        return [f"unread: who {str(why)[:100]}"]
+    return [bad] if bad else []
+
+
 def physical_of(book: Path, who: list[str]) -> list[str]:
     """The bound rows of everyone the shot casts, ONE PER FACE (the hair check
     reads each row alone since 2026-09-30). A missing row raises: CAST BOUND
@@ -94,7 +115,8 @@ def row_for(book: Path, shot, setup, path: Path) -> dict:
     except pc.Unreadable as why:
         return {"shot": shot.index, "passed": False, "faults": [f"unread: {str(why)[:120]}"]}
     twins, fields = twin_check(shot, seen, path)                 # G-TWIN (2026-10-05)
-    got = judge(book, shot, setup, seen) + twins
+    got = judge(book, shot, setup, seen) + twins + who_check(                   # G-WHO (2026-10-29)
+        shot, seen, path, cast_refs.who_marks(book, list(shot.faces or []), setup))
     look = pc.look_advisories(seen, cast_refs.look_markers(book, list(shot.faces or []), setup))  # G-LOOK-PANEL, advisory
     if land := pc.landform_advisory(seen, pc.flat_place(book, setup.location)):   # J5: hills, advisory
         look = [*look, land]

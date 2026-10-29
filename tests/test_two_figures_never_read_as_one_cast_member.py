@@ -155,3 +155,42 @@ def test_grey_against_dark_hair_still_tells_two_men_apart():
     figures = [{"hair": "grey", "facial_hair": "none", "coat": "black"},
                {"hair": "white", "facial_hair": "none", "coat": "black"}]
     assert fw.fault(figures, staged).startswith("who: 2 figures read as 'gabriel_john_utterson'")
+
+
+POOLE_UTTERSON = {"poole": {"hair_colour": "fair", "facial_hair": "none", "coat": "dark", "hat": "none"},
+                  "gabriel_john_utterson": {"hair_colour": "grey", "facial_hair": "none", "coat": "dark", "hat": "hat"}}
+
+
+def test_a_hat_against_a_bare_head_tells_two_men_apart():
+    """Jekyll ep06 shot 25 (2026-10-29): the panel drew Utterson (grey hair, bowler) in the doorway where Poole
+    (fair, bareheaded) should stand, Utterson's back in front; the take opened on it and morphed into Poole.
+    Fair-vs-grey cannot tell them apart; the bowler can.  Hat or no hat -- never WHICH hat (bowler read as
+    top hat, ep05) -- is a key."""
+    both_hatted = [{"hair": "grey", "facial_hair": "none", "coat": "black", "headwear": "bowler"},
+                   {"hair": "grey", "facial_hair": "none", "coat": "black", "headwear": "top_hat"}]
+    assert fw.fault(both_hatted, POOLE_UTTERSON).startswith("who: 2 figures read as 'gabriel_john_utterson'")
+
+
+def test_poole_bareheaded_beside_utterson_is_two_men():
+    right = [{"hair": "grey", "facial_hair": "none", "coat": "black", "headwear": "none"},
+             {"hair": "grey", "facial_hair": "none", "coat": "black", "headwear": "bowler"}]
+    assert fw.resolve(right[1], POOLE_UTTERSON) == "gabriel_john_utterson" and fw.fault(right, POOLE_UTTERSON) is None
+
+
+def test_a_bare_head_never_rules_out_a_hatted_look():
+    """ep05 T06: Utterson seen from behind read 'headwear: none'; he is still Utterson."""
+    bare = {"hair": "grey", "facial_hair": "none", "coat": "black", "headwear": "none"}
+    assert fw.clashes(bare, POOLE_UTTERSON["gabriel_john_utterson"]) == 0
+
+
+def test_an_unseen_head_or_an_unsaid_hat_never_clashes():
+    hidden = {"hair": "grey", "facial_hair": "none", "coat": "black", "headwear": "not_visible"}
+    assert fw.clashes(hidden, POOLE_UTTERSON["poole"]) == 0
+    no_hat_said = {"hair_colour": "grey", "facial_hair": "none", "coat": "dark", "hat": ""}
+    assert fw.clashes({"hair": "grey", "facial_hair": "none", "coat": "black", "headwear": "bowler"}, no_hat_said) == 0
+
+
+def test_the_staged_hat_comes_from_the_looks_headwear():
+    assert fw.staged_marks({"headwear": "bowler", "hair_colour": "grey"}, "black overcoat")["hat"] == "hat"
+    assert fw.staged_marks({"headwear": "none", "hair_colour": "fair"}, "black livery")["hat"] == "none"
+    assert fw.staged_marks({"hair_colour": "fair"}, "black livery")["hat"] == ""

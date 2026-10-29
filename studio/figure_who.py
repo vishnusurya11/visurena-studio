@@ -34,7 +34,19 @@ COATS = (("green", r"green"), ("blue", r"blue|navy"), ("red", r"red|crimson|scar
 COAT_FAMILY = {"black": "dark", "grey": "dark"}
 """A black and a grey coat are one family at night; the reader names either."""
 UNSEEN = {"", "not_visible", "other"}
-KEYS = ("hair_colour", "facial_hair", "coat")
+KEYS = ("hair_colour", "facial_hair", "coat", "hat")
+"""What a figure is compared on.  `hat` is hat-or-bare-head, never WHICH hat (the reader calls a bowler a top
+hat): Jekyll ep06 shot 25 drew Utterson (grey, bowler) where Poole (fair, bareheaded) stood, and only the hat
+told them apart once fair-vs-grey hair stopped clashing."""
+NEEDED = ("hair_colour", "facial_hair", "coat")
+"""The keys a member's look must name to be resolved to (the sink guard); an unsaid hat only never clashes."""
+BARE = {"none"}
+
+
+def hat_of(headwear: str) -> str:
+    """'hat' for any headwear, 'none' for a bare head, '' unseen or unsaid."""
+    word = (headwear or "").strip().lower()
+    return "" if word in UNSEEN else ("none" if word in BARE else "hat")
 
 
 def coat_of(top: str) -> str:
@@ -49,7 +61,8 @@ def staged_marks(markers: dict, top: str) -> dict:
     """One staged look as the who-read compares it, every value in its family ('' = unsaid)."""
     hair = (markers or {}).get("hair_colour", "")
     return {"hair_colour": lt.family("hair_colour", hair) if hair else "",
-            "facial_hair": lt.family("facial_hair", (markers or {}).get("facial_hair", "")), "coat": coat_of(top)}
+            "facial_hair": lt.family("facial_hair", (markers or {}).get("facial_hair", "")), "coat": coat_of(top),
+            "hat": hat_of((markers or {}).get("headwear", ""))}
 
 
 def seen_of(fig: dict) -> dict:
@@ -57,7 +70,8 @@ def seen_of(fig: dict) -> dict:
     hair, face, coat = (str(fig.get(k, "") or "") for k in ("hair", "facial_hair", "coat"))
     return {"hair_colour": "" if hair in UNSEEN else lt.family("hair_colour", SEEN_HAIR.get(hair, hair)),
             "facial_hair": "" if face in UNSEEN else lt.family("facial_hair", face),
-            "coat": "" if coat in UNSEEN else COAT_FAMILY.get(coat, coat)}
+            "coat": "" if coat in UNSEEN else COAT_FAMILY.get(coat, coat),
+            "hat": hat_of(str(fig.get("headwear", "") or ""))}
 
 
 CONFUSED = {frozenset({"fair", "grey"})}
@@ -66,6 +80,10 @@ and both men fell to Utterson (2026-10-29).  Such a pair never clashes."""
 
 
 def differs(key: str, seen: str, said: str) -> bool:
+    """A clash on one key.  The hat clashes one way only: a hat seen rules out a bareheaded look, a bare head
+    rules out nothing (hats come off, crop out, hide -- Jekyll ep05 T06's Utterson from behind read 'none')."""
+    if key == "hat":
+        return seen == "hat" and said == "none"
     return seen != said and not (key == "hair_colour" and frozenset({seen, said}) in CONFUSED)
 
 
@@ -80,7 +98,7 @@ def resolve(fig: dict, staged: dict) -> str | None:
     whose look leaves a key unsaid clashes with nothing and is never resolved to: it would be a sink
     (Jekyll ep06 T05: Lanyon's `pale_fallen` named no beard and no coat, and both men fell to him)."""
     agree = [who for who, marks in staged.items() if not clashes(fig, marks)]
-    return agree[0] if len(agree) == 1 and all(staged[agree[0]].get(k) for k in KEYS) else None
+    return agree[0] if len(agree) == 1 and all(staged[agree[0]].get(k) for k in NEEDED) else None
 
 
 def fault(figures: list[dict], staged: dict) -> str | None:
