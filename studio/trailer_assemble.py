@@ -17,6 +17,7 @@ import json
 import os
 import re
 import subprocess
+import time
 from pathlib import Path
 from typing import NamedTuple
 
@@ -269,13 +270,34 @@ def concat(segments: list[Path], output: Path) -> Path:
 
 
 def _measure_loudness(command: list[str]) -> dict:
-    """Run a loudnorm analysis pass and return its JSON report."""
+    """Run a loudnorm analysis pass and return its JSON report; with no report, `_stderr` holds the
+    end of what ffmpeg said (Jekyll ep06: a refusal that read "ffmpeg reported: nothing")."""
     result = subprocess.run(command, capture_output=True, text=True, errors="replace")
     tail = result.stderr[result.stderr.rfind("{"):result.stderr.rfind("}") + 1]
     try:
         return json.loads(tail)
     except ValueError:
-        return {}
+        return {"_stderr": (result.stderr or "")[-600:].strip()}
+
+
+def measured(command: list[str]) -> dict:
+    """The analysis, asked once more after an empty answer: a file another process holds for a moment
+    is not the mix's fault (Jekyll ep06 2026-10-29: the same command measured fine minutes later)."""
+    got = _measure_loudness(command)
+    if "input_i" in got and "input_tp" in got:
+        return got
+    time.sleep(2.0)
+    return _measure_loudness(command)
+
+
+def audio_parts(cues: list[tuple[float, Path]], bed: int) -> tuple[list[str], list[str]]:
+    """The bed (input `bed`) padded and each cue delayed to its time (the inputs after it)."""
+    parts, mixed = [f"[{bed}:a]aresample=48000,apad[bedpad]"], ["[bedpad]"]
+    for index, (when, _) in enumerate(cues):
+        parts.append(f"[{index + bed + 1}:a]aresample=48000,"
+                     f"adelay={int(when * 1000)}|{int(when * 1000)}[cue{index}]")
+        mixed.append(f"[cue{index}]")
+    return parts, mixed
 
 
 def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
@@ -288,16 +310,11 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
     (-1.0 dBTP) because the previous trailer measured -0.03 dBTP, about a dB
     over the EBU R128 ceiling.
     """
-    inputs = ["-i", str(picture), "-i", str(bed)]
+    sound = ["-i", str(bed)]
     for _, path in cues:
-        inputs += ["-i", str(path)]
-    parts = ["[1:a]aresample=48000,apad[bedpad]"]
-    mixed = ["[bedpad]"]
-    for index, (when, _) in enumerate(cues):
-        label = f"cue{index}"
-        parts.append(f"[{index + 2}:a]aresample=48000,"
-                     f"adelay={int(when * 1000)}|{int(when * 1000)}[{label}]")
-        mixed.append(f"[{label}]")
+        sound += ["-i", str(path)]
+    inputs = ["-i", str(picture), *sound]
+    parts, mixed = audio_parts(cues, bed=1)
     # `apad` makes the bed an INFINITE stream and amix defaults to
     # duration=longest, so the mix never ends -- and `-shortest` does not
     # reliably terminate a filter-graph output.  The first run of this hung at
@@ -314,20 +331,23 @@ def mix(picture: Path, bed: Path, cues: list[tuple[float, Path]], output: Path,
     # simpler and actually correct.
     base = f"{''.join(mixed)}amix=inputs={len(mixed)}:normalize=0:duration=first"
     bound = ["-t", frames_arg(seconds)] if seconds else []
+    # The analysis reads the SOUND only: it never maps the picture, and opening it let a picture another
+    # process was rewriting fail the measurement (Jekyll ep06 2026-10-29).
     # The analysis must run the WHOLE graph, not just its last link.  Passing
     # `base` alone referenced [bedpad] and [cue0] without the entries that
     # define them, so ffmpeg errored on undefined labels, the JSON parse
     # returned {}, and the gain silently defaulted to 0.0 -- leaving every mix
     # unnormalised while the failure looked like a tuning problem.
-    analysis = _measure_loudness(
-        ["ffmpeg", "-v", "info", *inputs, "-filter_complex",
-         ";".join(parts + [f"{base},loudnorm=I={TARGET_LUFS}:TP={TARGET_TP}"
+    heard, _ = audio_parts(cues, bed=0)
+    analysis = measured(
+        ["ffmpeg", "-v", "info", *sound, "-filter_complex",
+         ";".join(heard + [f"{base},loudnorm=I={TARGET_LUFS}:TP={TARGET_TP}"
                            f":print_format=json[out]"]),
          *bound, "-map", "[out]", "-f", "null", "-"])
     if "input_i" not in analysis or "input_tp" not in analysis:
         raise RuntimeError(
             "loudness analysis produced no measurement; refusing to guess a "
-            f"gain. ffmpeg reported: {sorted(analysis) or 'nothing'}")
+            f"gain. ffmpeg said: {analysis.get('_stderr') or sorted(analysis) or 'nothing'}")
     to_target = TARGET_LUFS - float(analysis["input_i"])
     to_ceiling = TARGET_TP - float(analysis["input_tp"])
     gain = min(to_target, to_ceiling + LIMITING_DB)
