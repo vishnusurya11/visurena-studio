@@ -1187,6 +1187,7 @@ def upscale_cut(book_id: str, number: int, engine: str = "r2v") -> Path:
     up, why = master_upscale.resolved()
     encoder = video_encoder.encoder_for("master encode")
     picture = upscaled_picture(book, number, cut, work, up, why, encoder)
+    picture = regen_spliced(book, number, engine, work, picture, up, encoder)
     out = finished_file.scratch_for(master, work)
     subprocess.run(master_upscale.with_sound_of(picture, cut, out), check=True)
     return publish_master(home, master, cut, out, up, encoder)
@@ -1204,6 +1205,30 @@ def upscaled_picture(book: Path, number: int, cut: Path, work: Path, up: master_
         master_upscale.master(listing, out, W, H, up, FPS, wrap=None, encoder=encoder,
                               cuts=judged_cuts(work, cut) if up.engine == "av3" else [],
                               expected_frames=video_frames(cut))
+    return out
+
+
+def regen_spliced(book: Path, number: int, engine: str, work: Path, picture: Path, up: master_upscale.Upscale,
+                  encoder: str) -> Path:
+    """The upscaled picture with each shot the 2K pass drew put in its place (studio/regen_2k, owner
+    2026-10-29); the picture unchanged when the pass is off or drew nothing current."""
+    from studio import regen_2k
+    from scripts.episode import regen_2k as runner
+    done = runner.done(book, number, engine) if regen_2k.on() else {}
+    if not done or not (work / "layout.json").exists():
+        return picture
+    rows = episode_home.read_json(work / "layout.json")
+    frames = {int(r["index"]): video_frames(work / f"seg{int(r['index']):02d}.mp4") for r in rows}
+    guards = episode_home.read_json(work / "gutter.json") if (work / "gutter.json").exists() else {}
+    segs = regen_2k.segments(rows, frames, done, guards)
+    out, total = work / "regen_spliced.mp4", video_frames(picture)
+    size = master_upscale.size(W, H, up)
+    note = f"{sum(1 for s in segs if s.regen)} of {len(segs)} shots from the 2K pass; encode {encoder}"
+    with episode_clock.timed(book, number, "regen_splice", note=note, within="assemble"):
+        wrote = regen_2k.splice(picture, out, segs, size, FPS, encoder, total)
+    if wrote != total:
+        raise RuntimeError(f"the 2K splice wrote {wrote} of {total} frames")
+    print(f"2K pass: {note}", flush=True)
     return out
 
 

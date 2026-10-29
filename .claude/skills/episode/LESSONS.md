@@ -103,6 +103,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - G-WHO
 - Jekyll ep06 plan
 - Jekyll ep06 panels
+- Face refine until 2026-10-29
 
 Anchors the code cites, archived: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

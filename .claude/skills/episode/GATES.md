@@ -569,6 +569,7 @@ holds it equal): edit the registry, never this table.
 | 11 | qc | 1 | episode | 30 |  |
 | 11 | master_eye | 1 | episode | 30 | MASTER |
 | 11 | upscale | 1 | pass | 15 |  |
+| 11 | regen_2k | 1 | pass | 200 |  |
 | 12 | deliver | 1 | pass | 2 |  |
 | 13 | publish | 1 | pass | 10 |  |
 <!-- /registry:caps -->

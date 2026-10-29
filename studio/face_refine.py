@@ -187,6 +187,9 @@ def eligible(card: dict, sizes: list[str], dq: dict | None, taken: int = 0) -> b
     warp retake owed.  A face that already reads is refined too (owner 2026-10-29: "if there is
     human you fix the eyes and face"; until then `readable` declined it).  The plan size is not
     read (ep01 T26 is a medium with a 64 px face) and neither is face-at-end."""
+    from studio import regen_2k
+    if regen_2k.on():               # switched off, not deleted: the 2K pass redraws every face (owner 2026-10-29)
+        return False
     if not card.get("faces") or not dq or any(s in NEVER for s in sizes):
         return False
     return passed_but_warp(dq) and not retake_owed(dq, taken)

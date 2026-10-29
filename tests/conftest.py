@@ -233,3 +233,12 @@ def lanes_on_a_bare_double(monkeypatch):
         return None
 
     monkeypatch.setattr(take_overlap, "shoot", shoot)
+
+
+@pytest.fixture(autouse=True)
+def face_refine_tests_keep_the_refine(monkeypatch):
+    """The 2K pass switches the face refine off in production (studio/regen_2k, owner 2026-10-29); the
+    refine is kept, not deleted, so its tests run it with the pass off.  The pass's own tests set the
+    switch themselves (tests/test_the_2k_pass_replaces_the_face_fix_and_upscale.py)."""
+    from studio import regen_2k
+    monkeypatch.setenv(regen_2k.SETTING, "0")

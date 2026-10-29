@@ -28,7 +28,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from scripts.episode import eye_review, face_refine as refine_step  # noqa: E402
 from studio import comfy, episode_home, face_strip as fs, judged_gate, master_ladder, panel_content as pc  # noqa: E402
-from studio import ceiling, gate_policy, master_upscale, step_cli, youtube_publish as yp  # noqa: E402
+from studio import ceiling, gate_policy, master_upscale, regen_2k, step_cli, youtube_publish as yp  # noqa: E402
 from studio.judges import master_eye  # noqa: E402
 
 STEP_ID = "11"
@@ -371,6 +371,8 @@ def deliver_master(ctx, extra: list[str]) -> Path:
     if qc.exists() and traced(ctx.home, engine, episode_home.read_json(qc)) and qc_carried_to(qc, master):
         return master
     if master_upscale.made_from(master) != yp.sha8(cut):
+        if regen_2k.on():           # the 4-step 2K pass draws the cut's takes; the upscale splices them in
+            ctx.run_script("scripts/episode/regen_2k.py", f"--engine={engine}", gpu=True, clock="regen_2k")
         ctx.run_script("scripts/episode/assemble.py", f"--engine={engine}", "--upscale", gpu=True, clock="assemble")
     return carry(ctx, engine)
 

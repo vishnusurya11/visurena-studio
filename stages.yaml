@@ -575,12 +575,13 @@ stages:
       take_eye:     { step: "09", rounds: 1, per: round,   wall_min: 10, read: step }
       strip:        { step: "09", rounds: 1, per: round,   wall_min: 2, read: step }
       retakes:      { step: "09", rounds: 2, per: episode, wall_min: 45, gate: EYE_TAKES }
-      face_refine:  { step: "09", rounds: 1, per: take,    wall_min: 75 }   # every face (owner 2026-10-29): ~61 min of GPU for 28 takes
+      face_refine:  { step: "09", rounds: 1, per: take,    wall_min: 75 }   # OFF under regen_2k (2026-10-29); VISURENA_REGEN_2K=0 restores
       assemble:     { step: "10", rounds: 1, per: pass,    wall_min: 15, read: step }
       cut_pass:     { step: "10", rounds: 1, per: pass,    wall_min: 15, read: step }   # the judged cut at 768
       qc:           { step: "11", rounds: 1, per: episode, wall_min: 30, read: step }
       master_eye:   { step: "11", rounds: 1, per: episode, wall_min: 30, gate: MASTER }
       upscale:      { step: "11", rounds: 1, per: pass,    wall_min: 15, read: step }   # after the master eye (ep03 retro #2)
+      regen_2k:     { step: "11", rounds: 1, per: pass,    wall_min: 200 }   # 4-step 2K pass, before the upscale (owner 2026-10-29)
       deliver:      { step: "12", rounds: 1, per: pass,    wall_min: 2, read: step }
       publish:      { step: "13", rounds: 1, per: pass,    wall_min: 10, read: step }
     steps:
@@ -1023,7 +1024,11 @@ stages:
           - id: "11_04"
             name: upscale
             desc: >-
-              After the master eye signs: the judged cut through the upscale once
+              After the master eye signs: the 4-step 2K pass (scripts/episode/regen_2k.py,
+              studio/regen_2k.py, owner 2026-10-29) re-draws every take of the judged cut whose
+              faces all have sheets, from its own references, people first, within the 6 h
+              clock; then the judged cut through the upscale once, each drawn shot's 2K frames
+              spliced in its place (studio/regen_2k.splice), av3 the fallback for the rest
               (assemble --upscale; studio/master_upscale.py): av3 = hqdn3d per shot +
               realesr-animevideov3 4x -> 3072 by default (2026-10-18); rtx4x / rtx2x /
               lanczos by VISURENA_MASTER_UPSCALE, lanczos the fallback (printed, on the

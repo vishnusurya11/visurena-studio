@@ -2861,3 +2861,20 @@ the 8.0 s take; `plan.cures.jsonl` recorded `cures: []` every round. Three fault
 - **A FOCUS on 'the man ... standing in the door'** is a person (`PERSON_SUBJECT`), not a door.
 - **Windows Update rebooted the PC at 00:29** (KB5127936) and the autopilot task runs 'at logon': 4.5 h
   dead until the owner logged in at 05:03. Same as 2026-10-20; the durable fix is the owner's.
+
+## Face refine until 2026-10-29
+
+**Soft faces are refined (09_07, owner 2026-10-17: "I like face improvements a lot in wide shots, go ahead";
+widened 2026-10-19: "fix that"; round 2 the same day).** Every take with a planned face (never an insert) whose dq lets
+it ship is tracked (`face_yolov8m.pt` in a worker under the embedded python, `studio/face_detect.py`; GPU when idle,
+CPU while rendering, MTCNN if the worker fails; `studio/face_track.py`). Each face whose smallest height is under
+120 px is matched to the staged cast (facenet + the Lab colour of head and hat + the plan's "at the SIDE") and its
+soft span re-rendered through H3 with ONLY that person's sheet at a denoise that follows the face (F2's workflow,
+never edited). The gate (GATES.md, FACE REFINE GATE) reads identity by CCIP and clip_vision_h beside facenet
+(`studio/anime_id.py`), drift, seam, flicker and the face count; the drawn-eye score is logged. Decisions per take:
+`takes/r2v/refine.json` (`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`, `cut`). Step 09 queues it on
+the GPU lane right behind the renders and refines what the ladder left owed once at the end; ~11 s + 0.56 s/frame per face,
+cut LAST for time (V2): a cut take ships flagged and holds the publish. Assemble pastes the kept crops at CUT scale before the one upscale (owner
+2026-10-18, 24caaeb; a face under 40 px through a soft head mask); on `av3` the portable python's worker rebuilds the
+paste from its spans. The render is the SaveVideo node's output by node id (`fr.saved_node`): v0.41.2 echoes the
+LoadVideo input first. A refused 20-40 px face earns one 1024 draw (09_08). By hand: `face_refine.py <book> <n>`.

@@ -201,7 +201,7 @@ RUN(book, n): the autopilot launches drive.py; you read the disk, never call a s
 08 panels    caps: panel_checks 1/round, 30 min; regrid 2/episode, 20 min, gate EYE_PANELS
 09 shoot     caps: takes 1/pass, 120 min; take_dq 1/round, 30 min; take_content 1/round, 20 min; take_eye 1/round, 10 min; strip 1/round, 2 min; retakes 2/episode, 45 min, gate EYE_TAKES; face_refine 1/take, 75 min
 10 edit      caps: assemble 1/pass, 15 min; cut_pass 1/pass, 15 min
-11 qc        caps: qc 1/episode, 30 min; master_eye 1/episode, 30 min, gate MASTER; upscale 1/pass, 15 min
+11 qc        caps: qc 1/episode, 30 min; master_eye 1/episode, 30 min, gate MASTER; upscale 1/pass, 15 min; regen_2k 1/pass, 200 min
 12 deliver   caps: deliver 1/pass, 2 min
 13 publish   caps: publish 1/pass, 10 min
 ```
@@ -536,20 +536,7 @@ is never cut: the voice is the ruler. Jekyll ep01 v2 T14 failed WER 0.56 + tail 
 same-length reseeds and passed both (WER 0.11, tail -48 dB) on its first shorter take
 (coda 1.5 -> 0.75 s).
 
-**Soft faces are refined (09_07, owner 2026-10-17: "I like face improvements a lot in wide shots, go ahead";
-widened 2026-10-19: "fix that"; round 2 the same day).** Every take with a planned face (never an insert) whose dq lets
-it ship is tracked (`face_yolov8m.pt` in a worker under the embedded python, `studio/face_detect.py`; GPU when idle,
-CPU while rendering, MTCNN if the worker fails; `studio/face_track.py`). Each face whose smallest height is under
-120 px is matched to the staged cast (facenet + the Lab colour of head and hat + the plan's "at the SIDE") and its
-soft span re-rendered through H3 with ONLY that person's sheet at a denoise that follows the face (F2's workflow,
-never edited). The gate (GATES.md, FACE REFINE GATE) reads identity by CCIP and clip_vision_h beside facenet
-(`studio/anime_id.py`), drift, seam, flicker and the face count; the drawn-eye score is logged. Decisions per take:
-`takes/r2v/refine.json` (`refined`, `unrefined`, `none_found`, `all_readable`, `no_cast`, `cut`). Step 09 queues it on
-the GPU lane right behind the renders and refines what the ladder left owed once at the end; ~11 s + 0.56 s/frame per face,
-cut LAST for time (V2): a cut take ships flagged and holds the publish. Assemble pastes the kept crops at CUT scale before the one upscale (owner
-2026-10-18, 24caaeb; a face under 40 px through a soft head mask); on `av3` the portable python's worker rebuilds the
-paste from its spans. The render is the SaveVideo node's output by node id (`fr.saved_node`): v0.41.2 echoes the
-LoadVideo input first. A refused 20-40 px face earns one 1024 draw (09_08). By hand: `face_refine.py <book> <n>`.
+**The 4-step 2K pass replaces the face refine and, shot by shot, the upscale (owner 2026-10-29: "4 step 2k", "Fluttering is definitely gone").** Step 11, before the one upscale: every non-still take of the judged cut, people first, is re-drawn by Open-H3-Regenerate-2K at 2x from its OWN sheets and panel (`scripts/episode/regen_2k.py`, `takes/r2v_2k/regen.json`, current by take sha8) and spliced into the master frame for frame (`studio/regen_2k.splice`). A take whose faces outnumber its sheets keeps av3 (ep04 T07: unnamed constables came back as a hatched mesh): every person on screen needs a sheet. Budget: the 6 h clock's remainder, never under 60 min; ~2.9 s/frame. The refine (09_07/09_08) is OFF, kept: `VISURENA_REGEN_2K=0` restores it and the av3-only master (old text: LESSONS_ARCHIVE, Face refine until 2026-10-29).
 
 **G-WARP is HARD on S only (2026-10-19, retro D1-D2, for owner veto).** `take_dq` scores every take that stages a
 face for frame-to-frame face redraw (`studio/warp_gate.py`, CPU lane). FAIL is S > 2.5: one seed retake, then F2 for a
