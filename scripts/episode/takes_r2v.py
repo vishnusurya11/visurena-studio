@@ -55,35 +55,36 @@ ROLLBACK_BASE = "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg"
 turbo LoRA x2 (dedicated lightx2v Ref2V 8-step v1.0 768p, 1.0/0.7, shift 12/3), euler/beta,
 CRF 10, CK int8 attention (cycle-1 bench 2026-10-11).  An FL2VA-lineage LoRA on ref2va pumped
 the camera (owner, 2026-09-10).  Rollback for every take: route both sizes here."""
-SPARK_BASE = "video_minimax_h3_r2v_turbo_ref8_crf_visurena_ckattn_comfyorg_spark_zechengtang"
-"""ROLLBACK_BASE with Spark-H3 SM89 sparse attention (fidelity, top-k 0.2, kitchen dense
-warm-up) in place of CK: the same draw (PSNR 24.7-33.3 dB), identity within noise, -11 %
-warm (2026-10-16 bench V2).  The wide/full model: its warp equals the base's."""
-WULI_BASE = "video_minimax_h3_r2v_wuli8_hqint8_sandpies_spark_zechengtang"
-"""Wuli-Art 8-step F2 hybrid HQ int8 (no turbo LoRA, simple scheduler, shift 12/3) with the
-same Spark attention.  Owner 2026-10-17: "I like the face fix and quality update V4" -- about
-2x face Laplacian, livelier camera.  Its line work BOILS on a small face (WARPING.md 2026-10-18:
-T22 wide warp excess +2.4/+3.3 against about -0.6), equal on close and medium: close sizes only."""
+WIDE_BASE = ROLLBACK_BASE
+"""The wide/full model.  It ran on the Spark-H3 twin (`..._spark_zechengtang`, -11 % warm, the same
+draw) from 2026-10-16 until ComfyUI 0.43 (owner 2026-10-29): 0.43 needs comfy-kitchen 0.2.40 and the
+Spark kitchen (0.2.37+spark) cannot load beside it.  0.43's CK int8 attention measured the same speed
+(T14: 104.8 s cold, 92.4 s warm, against 107 s on Spark; docs/audit/2026-10-29_open_h3_regenerate)."""
+WULI_BASE = "video_minimax_h3_r2v_wuli8_hqint8_sandpies"
+"""Wuli-Art 8-step F2 hybrid HQ int8 (no turbo LoRA, simple scheduler, shift 12/3), CK attention
+(its Spark twin `..._spark_zechengtang` until 0.43, see WIDE_BASE).  Owner 2026-10-17: "I like the
+face fix and quality update V4" -- about 2x face Laplacian, livelier camera.  Its line work BOILS on a
+small face (WARPING.md 2026-10-18: T22 wide warp excess +2.4/+3.3 against about -0.6), equal on close
+and medium: close sizes only."""
 WULI_SIZES = frozenset({"insert", "extreme_close", "close", "medium_close", "medium"})
-"""The planned sizes a Wuli take may hold; one wide or full segment sends the take to Spark."""
-WIDE_DETAIL_BASE = SPARK_BASE + "_wide15_visurena"
-"""SPARK_BASE with 15 steps (sampler and Spark's warm-up counter) and the second turbo LoRA at
-0.4, not 0.7; beta already (face-blur PLAN fix #4, docs/audit/2026-10-19_face_blur/
-prevent_at_render.md D: H3 quality drops below about 15 steps, the turbo LoRA at 8-10 keeps
-texture loss, and a 25-60 px wide face is the first thing lost).  Unmeasured: OFF by default."""
+"""The planned sizes a Wuli take may hold; one wide or full segment sends the take to WIDE_BASE."""
+WIDE_DETAIL_BASE = ROLLBACK_BASE + "_wide15_visurena"
+"""WIDE_BASE with 15 steps and the second turbo LoRA at 0.4, not 0.7; beta already (face-blur PLAN
+fix #4, docs/audit/2026-10-19_face_blur/prevent_at_render.md D: H3 quality drops below about 15
+steps, the turbo LoRA at 8-10 keeps texture loss, and a 25-60 px wide face is the first thing lost).
+Unmeasured: OFF by default."""
 WIDE_DETAIL_STEPS = 15
-TINY_FACE_BASE = SPARK_BASE + "_sq1024_visurena"
-"""SPARK_BASE at 1024x1024, nothing else changed (8 steps, euler/beta, LoRA 1.0/0.7): the tiny-face
+TINY_FACE_BASE = ROLLBACK_BASE + "_sq1024_visurena"
+"""WIDE_BASE at 1024x1024, nothing else changed (8 steps, euler/beta, LoRA 1.0/0.7): the tiny-face
 rung's one draw (scripts/episode/tiny_face.py).  Face-blur round 2 arm A3c on ep01 T01: the only arm
 that gave both 30-36 px faces clean ink lines and a readable eye; 163-201 s, 1.73-1.76x a 768 draw."""
 TINY_FACE_CANVAS = (1024, 1024)
 TINY_FACE = False
 """`--tiny-face`: the retaken takes render on TINY_FACE_BASE at TINY_FACE_CANVAS and land scaled to the
 episode's canvas."""
-MODELS = {WULI_BASE: "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + Spark-H3 attention",
-          SPARK_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention",
-          WIDE_DETAIL_BASE: "MiniMax-H3 ref2va Singularity, 15-step + Ref2V LoRA 1.0/0.4 + Spark-H3 attention",
-          TINY_FACE_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + Spark-H3 attention, 1024x1024",
+MODELS = {WULI_BASE: "MiniMax-H3 ref2va, Wuli 8-step HQ int8 + CK attention",
+          WIDE_DETAIL_BASE: "MiniMax-H3 ref2va Singularity, 15-step + Ref2V LoRA 1.0/0.4 + CK attention",
+          TINY_FACE_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + CK attention, 1024x1024",
           ROLLBACK_BASE: "MiniMax-H3 ref2va Singularity + Ref2V 8-step LoRA x2 + CK attention"}
 
 
@@ -99,16 +100,16 @@ WIDE_DETAIL = wide_detail_on(os.environ)
 
 def workflow_for(card: dict) -> str:
     """The graph a take renders on, by its planned sizes (main session 2026-10-18):
-    every segment close..medium -> Wuli; no sizes known -> Spark; any wide/full -> Spark,
+    every segment close..medium -> Wuli; no sizes known or any wide/full -> WIDE_BASE,
     or the 15-step wide graph when WIDE_DETAIL is on."""
     sizes = card.get("sizes") or []
     if sizes and set(sizes) <= WULI_SIZES:
         return WULI_BASE
-    return WIDE_DETAIL_BASE if sizes and WIDE_DETAIL else SPARK_BASE
+    return WIDE_DETAIL_BASE if sizes and WIDE_DETAIL else WIDE_BASE
 
 
 def steps_for(base: str) -> int:
-    """The sampler steps a graph is injected with: its Spark warm-up counter holds the same."""
+    """The sampler steps a graph is injected with."""
     return WIDE_DETAIL_STEPS if base == WIDE_DETAIL_BASE else STEPS
 
 
@@ -185,7 +186,7 @@ def land_scaled(c: dict, video: Path, out: Path) -> None:
 
 def by_model(jobs: list[tuple[dict, dict]]) -> list[tuple[dict, dict]]:
     """The run's takes grouped by graph, Wuli first, so each model loads once."""
-    order = (WULI_BASE, SPARK_BASE, WIDE_DETAIL_BASE)
+    order = (WULI_BASE, WIDE_BASE, WIDE_DETAIL_BASE)
     rank = {name: k for k, name in enumerate(order)}
     return sorted(jobs, key=lambda job: rank.get(workflow_for(job[0]), len(order)))
 
@@ -1665,7 +1666,7 @@ def main(book_id: str, number: int, retake: list[int] | None = None, approved: b
         episode_home.write_json(out.with_suffix(".graph.json"), recorded(graph, size))  # the exact graph this take ran with
         jobs.append((c, graph))
         wheres[c["index"]] = out
-    jobs = by_model(jobs)      # Wuli's takes, then Spark's: each model loads once (2026-10-18)
+    jobs = by_model(jobs)      # Wuli's takes, then the wide model's: each model loads once (2026-10-18)
     if jobs:
         print(f"  queueing {len(jobs)} takes in one go: "
               f"{', '.join('T%02d' % c['index'] for c, _ in jobs)}", flush=True)

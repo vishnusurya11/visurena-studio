@@ -20,6 +20,6 @@ def save_node(graph: dict) -> dict:
 
 
 def test_every_take_workflow_sets_its_own_crf():
-    for name in (takes.WULI_BASE, takes.SPARK_BASE, takes.ROLLBACK_BASE):
+    for name in (takes.WULI_BASE, takes.WIDE_BASE, takes.ROLLBACK_BASE):
         template, _ = comfy.load_workflow(name)
         assert save_node(template).get("format.codec.encoding.crf", 23) <= 12, name

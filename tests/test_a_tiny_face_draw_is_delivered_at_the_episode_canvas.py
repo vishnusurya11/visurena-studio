@@ -43,7 +43,7 @@ def test_only_a_retaken_card_of_a_tiny_face_pass_renders_on_the_1024_graph(monke
 
 
 def test_the_1024_graph_is_the_spark_take_graph_by_name():
-    assert tr.TINY_FACE_BASE == tr.SPARK_BASE + "_sq1024_visurena"
+    assert tr.TINY_FACE_BASE == tr.WIDE_BASE + "_sq1024_visurena"
     assert tr.TINY_FACE_BASE in tr.MODELS and tr.steps_for(tr.TINY_FACE_BASE) == tr.STEPS
 
 
@@ -57,7 +57,7 @@ def test_the_flag_turns_the_pass_on():
 
 
 def test_the_card_says_what_it_rendered_on_and_at_what_size():
-    card = {"index": 1, "workflow": tr.SPARK_BASE + " + anchors"}
+    card = {"index": 1, "workflow": tr.WIDE_BASE + " + anchors"}
     tr.mark_tiny(card, tr.TINY_FACE_BASE, (1024, 1024))
     assert card["workflow"] == tr.TINY_FACE_BASE + " + anchors" and card["render_canvas"] == [1024, 1024]
     assert card["model"] == tr.MODELS[tr.TINY_FACE_BASE]
