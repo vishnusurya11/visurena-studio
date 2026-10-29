@@ -384,11 +384,18 @@ class Climb:
         self.settle()
         rows = grid_layout.read(self.home)
         kept = {int(i) for r in self.kept(rows, shots_of(verdict.faults)) for i in r.get("shots") or []}
+        from studio import people_faults
         seamed = shots_of([f for f in verdict.faults if f.kind in SEAMED])
         if seamed:
             refs_only.add(self.home, seamed, "seam/stacked after the seam rung: the panel is not staged")
+        # G-PEOPLE (owner 2026-10-28): a panel with a duplicated or extra person never feeds a take
+        # (Jekyll ep05 panel 18: strangers in the fog, kept, drawn into the take).
+        wrong = shots_of([f for f in verdict.faults if people_faults.wrong(f)])
+        if wrong:
+            refs_only.add(self.home, wrong, "a duplicated or extra person after the climb: the panel is not staged")
         faults = [f.model_copy(update={"evidence": {**f.evidence, "climbed": not (set(shots_of([f])) & kept),
-                                                    **({"refs_only": True} if f.kind in SEAMED else {})}})
+                                                    **({"refs_only": True} if f.kind in SEAMED
+                                                       or people_faults.wrong(f) else {})}})
                   for f in verdict.faults]
         return verdict.model_copy(update={"faults": faults})
 

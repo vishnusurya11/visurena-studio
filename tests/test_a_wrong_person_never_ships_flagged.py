@@ -83,3 +83,17 @@ def test_a_passing_take_the_eye_saw_doubled_is_cut_too(tmp_path, monkeypatch):
     from tests.test_a_still_terminal_does_not_hide_the_other_kept_takes import fault
     plan = _cut(tmp_path, monkeypatch, [fault("T03", "keep_best", kind="twin")], failing=None)
     assert 3 in plan["cut"] and plan["flagged"] == []
+
+
+def test_a_panel_with_a_wrong_person_is_never_the_takes_picture(tmp_path):
+    """Jekyll ep05 panel 18 failed its read (3 figures for 1 cast: strangers in the fog) and the
+    panel terminal kept it; its take drew them. At the terminal such a shot renders refs-only."""
+    from studio import panel_ladder, refs_only
+    from tests.test_a_seamed_panel_is_isolated_once_then_rendered_from_refs import SHARED, Ctx, board_of
+    ctx = Ctx(tmp_path)
+    board_of(ctx, [SHARED])
+    climb = panel_ladder.climb(ctx, rebuild=lambda only=None: None, cap=2)
+    v = Verdict(judge="panel_eye", version="1", passed=False, confidence=1.0, reads=25,
+                faults=[Fault(kind="content", where="shot_16", note=EXTRA)])
+    kept = climb.keep_best(v)
+    assert refs_only.read(ctx.home) == {16} and kept.faults[0].evidence["refs_only"] is True

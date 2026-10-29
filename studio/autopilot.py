@@ -292,8 +292,20 @@ def episode_rows(rows: list[dict]) -> list[dict]:
     return [r for r in rows if str(r.get("episode", "")).isdigit()]
 
 
+def public_episodes(uploads_rows: list[dict]) -> set[int]:
+    """The chapters live in public, rows read in order: a public upload adds one, a `deleted` row
+    (the owner took the video down, Jekyll ep05 2026-10-28) removes it until a later upload."""
+    live: set[int] = set()
+    for r in episode_rows(uploads_rows):
+        if r.get("deleted"):
+            live.discard(int(r["episode"]))
+        elif r.get("privacy") == "public":
+            live.add(int(r["episode"]))
+    return live
+
+
 def published(uploads_rows: list[dict], n: int) -> bool:
-    return any(int(r["episode"]) == n and r.get("privacy") == "public" for r in episode_rows(uploads_rows))
+    return n in public_episodes(uploads_rows)
 
 
 def parked(parked_rows: list[dict], n: int) -> dict | None:
@@ -511,8 +523,7 @@ def stale_lock(lock: dict | None, proc_rows: list[procs.ProcInfo], codex: str, n
 def next_unit(chapters: list[int], uploads_rows: list[dict], parked_rows: list[dict], last: int | None) -> int | None:
     """The lowest chapter with no public upload and no parked row, capped at
     `last` (book.json episodes); None means the series is complete."""
-    done = {int(r["episode"]) for r in episode_rows(uploads_rows) if r.get("privacy") == "public"}
-    done |= {int(r["episode"]) for r in parked_rows}
+    done = public_episodes(uploads_rows) | {int(r["episode"]) for r in parked_rows}
     left = [c for c in chapters if c not in done and (last is None or c <= last)]
     return min(left) if left else None
 
