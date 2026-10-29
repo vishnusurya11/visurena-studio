@@ -2794,3 +2794,18 @@ things like that can't be ignored"). Every judge saw it and every terminal shipp
   else refused). Replayed: it stops ep03 s19, ep04 s01/05/06/07/19 (two identical constables), ep05 s18.
 - **A known identity problem is a blocker, never an open item.** Read the contact sheet for one
   person drawn twice before any upload.
+
+## Jekyll ep05 repair (2026-10-28): master_iter2, four stops each a fault of its own
+
+Owner: "fix episode 5". Jekyll redrawn (black hair, bottle-green frock coat; brown first, but brown
+made him Enfield's twin, ch7), owner redo orders 51/52/54/56, repair clock; master_iter2 17:10->19:31.
+- **A redrawn base strands the plans before it**: their tags quote the old row, bind nobody, and
+  step 06 refuses every take (P13 "doctor"). `studio/relook.py` re-tags by layer and clause.
+- **An aim must be a noun the clause determines**: cell_aims took head_noun of a clause ("the door
+  stands small" -> "small"); T15 froze twice on "tracks beside the small;". 309 of 1,918 aims were junk.
+- **One refine per take BYTES**, not per take: eight re-rendered takes had spent theirs on old bytes.
+- **The cut's edit mean is noise on a bright, detailed picture**: a segment whose offset-0 mean is
+  under 0.85 of both one-frame shifts is its take (T11 2.40 vs 3.18).
+- **H3 kept Jekyll's hair grey** in every take; the coat and hat tell him from Utterson. G-ALIKE reads
+  the rows, not the pixels: a take-level hair read is the open item.
+- **A deleted upload is not published**: the autopilot could not pick ep05 again until rows were read in order.
