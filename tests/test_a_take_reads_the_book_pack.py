@@ -131,3 +131,11 @@ def test_a_flat_picture_keeps_its_bare_name(tmp_path):
 def test_a_book_path_routes_back_to_the_book(tmp_path):
     got = sq.picture_path(tmp_path / "boards", tmp_path, "refs/locations/ottershaw/reverse.png")
     assert got == tmp_path / "refs" / "locations" / "ottershaw" / "reverse.png"
+
+
+def test_a_look_picture_is_named_by_its_book_path(tmp_path):
+    """Jekyll ep06 (2026-10-29): Lanyon's `pale_fallen` look lives at
+    refs/characters/reginald_lanyon/looks/pale_fallen.png, one folder deeper than a sheet; its record
+    said the bare 'pale_fallen.png', graph_for resolved it among the cells and step 09 refused."""
+    look = tmp_path / "refs" / "characters" / "reginald_lanyon" / "looks" / "pale_fallen.png"
+    assert takes_r2v.ref_name(tmp_path, look) == "refs/characters/reginald_lanyon/looks/pale_fallen.png"

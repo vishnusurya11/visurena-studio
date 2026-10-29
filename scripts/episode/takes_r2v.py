@@ -312,7 +312,8 @@ def ref_name(book: Path, path: Path) -> str:
     (`refs/characters/<id>/sheet.png`), where the bare name says nothing."""
     path, refs = Path(path), Path(book) / "refs"
     kinds = ("characters", "locations", "props")
-    if path.parent.parent.name in kinds and path.parent.parent.parent == refs:
+    # any depth under an entity's folder: a look is refs/characters/<id>/looks/<look>.png (Jekyll ep06)
+    if path.is_relative_to(refs) and len(parts := path.relative_to(refs).parts) >= 3 and parts[0] in kinds:
         return path.relative_to(book).as_posix()
     # A storyboard panel lives under episodes/epNN/storyboard/h3/ and its bare
     # name says nothing either: `graph_for` resolves a bare name against the
