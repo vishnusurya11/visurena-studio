@@ -348,6 +348,18 @@ class Climb:
                     doc = reprose(doc, int(index), faults)
         write_cured(plan, doc)      # written AND re-signed: a resume must not re-open the plan
 
+    def unprose(self, rows: list[dict], pre: dict) -> None:
+        """The grids the wall left undrawn get their shots' prose back from `pre`: a plan ahead of
+        its pictures refuses panels.py ('drawn from an older plan', Jekyll ep06 shots 8 and 19)."""
+        shots = {int(i) for r in rows for i in r.get("shots") or []}
+        if not shots:
+            return
+        plan = self.home / "plan.json"
+        old = {int(s["index"]): s for s in pre.get("shots") or []}
+        doc = episode_home.read_json(plan)
+        doc["shots"] = [old.get(int(s["index"]), s) if int(s["index"]) in shots else s for s in doc.get("shots") or []]
+        write_cured(plan, doc)
+
     def take(self, rung: Rung, i: int, verdict: Verdict) -> None:
         """One rung: the climbing grids reprosed (that rung only) and ALL
         redrawn back to back (the grid model stays resident), then ONE rebuild
@@ -359,6 +371,7 @@ class Climb:
         self.seams_isolated(verdict)                                   # the seam rung, outside the cap
         faults = [f for f in cured_by_redraw(verdict) if f.kind not in SEAMED]
         rows = self.climbing(grid_layout.read(self.home), shots_of(faults))
+        pre = episode_home.read_json(self.home / "plan.json") if rung.name == "reprose" and rows else None
         if rung.name == "reprose" and rows:
             self.cure_prose(rows, faults)
         split = self.isolated(rows, verdict) if rung.name == "reprose" else []   # G-TWIN rung 2
@@ -370,6 +383,9 @@ class Climb:
                 continue                 # isolate already superseded and drew these rows
             remember_climbed(self.home, grid_layout.name_of(getattr(self.ctx, "number", 0), row))
             self.redraw(row)
+        if pre is not None:
+            self.unprose([r for r in rows if grid_layout.name_of(self.ctx.number, r) not in self.drawn
+                          and not set(r.get("shots") or []) & set(split)], pre)
         touched = sorted({int(i) for r in grid_layout.read(self.home) if grid_layout.name_of(self.ctx.number, r)
                           in self.drawn for i in r.get("shots") or []})
         try:

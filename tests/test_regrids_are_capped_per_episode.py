@@ -61,3 +61,22 @@ def test_the_cap_line_is_said_once_at_the_cap(tmp_path, capsys):
     step_attempts.spend(tmp_path, "regrid", 600.0)
     step_attempts.spend(tmp_path, "regrid", 600.0)
     assert pl.cap_line(tmp_path, 1).startswith("CAP regrid: 2/2 rounds, 20:00, kept best")
+
+
+def test_a_grid_the_wall_stopped_keeps_its_old_prose(tmp_path, monkeypatch):
+    """Jekyll ep06 (2026-10-29): the reprose rung rewrote shots 8 and 19, the wall stopped the
+    redraws before their 2x2 grids, and panels.py refused the run on 'grids drawn from an older
+    plan'.  A grid the wall leaves undrawn gets its shots' prose back."""
+    import json
+    pre = {"shots": [{"index": 5, "frame": "old5"}, {"index": 8, "frame": "old8"}, {"index": 24, "frame": "old24"}]}
+    now = {"shots": [{"index": 5, "frame": "old5"}, {"index": 8, "frame": "NEW8"}, {"index": 24, "frame": "NEW24"}]}
+    (tmp_path / "plan.json").write_text(json.dumps(now), encoding="utf-8")
+    got = {}
+    monkeypatch.setattr(pl, "write_cured", lambda path, doc: got.update(doc=doc))
+    _climb(tmp_path).unprose([{"shots": [5, 6, 7, 8]}], pre)
+    assert [s["frame"] for s in got["doc"]["shots"]] == ["old5", "old8", "NEW24"]
+
+
+def test_nothing_undrawn_writes_nothing(tmp_path, monkeypatch):
+    monkeypatch.setattr(pl, "write_cured", lambda path, doc: (_ for _ in ()).throw(AssertionError("wrote")))
+    _climb(tmp_path).unprose([], {"shots": []})
