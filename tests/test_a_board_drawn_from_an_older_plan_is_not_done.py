@@ -37,3 +37,29 @@ def test_a_stale_grid_is_not_done_and_is_redrawn(tmp_path, monkeypatch):
 def test_current_grids_are_done(tmp_path, monkeypatch):
     ctx = ctx_for(tmp_path, monkeypatch, [{"tag": "hedge"}], stale=[])
     assert board.done(ctx) is True
+
+
+def rendered_ctx(tmp_path, monkeypatch, ordered):
+    rows = [{"tag": "doorstep"}, {"tag": "dining"}]
+    ctx = ctx_for(tmp_path, monkeypatch, rows, stale=["doorstep"])
+    (tmp_path / "takes" / "r2v").mkdir(parents=True)
+    (tmp_path / "takes" / "r2v" / "T00.mp4").write_bytes(b"take")
+    ctx.log = lambda *a, **k: None
+    monkeypatch.setattr(board, "owner_ordered", lambda c: ordered)
+    monkeypatch.setattr(board.boundary, "check", lambda *a, **k: None)
+    return ctx
+
+
+def test_under_rendered_takes_a_stale_grid_is_left_without_an_order(tmp_path, monkeypatch):
+    ctx = rendered_ctx(tmp_path, monkeypatch, ordered=False)
+    board.run(ctx)
+    assert ctx.ran == []
+
+
+def test_an_owner_redo_redraws_the_stale_grids_under_rendered_takes(tmp_path, monkeypatch):
+    """Jekyll ep06 (2026-10-29): Poole was redrawn and step 07 redone by an owner order; the guard
+    against a prompt-builder change walking a resume into redraws returned at once, and seven takes
+    re-rendered from his old picture.  An owner's redo is the order to redraw what is stale."""
+    ctx = rendered_ctx(tmp_path, monkeypatch, ordered=True)
+    board.run(ctx)
+    assert ctx.ran == [("doorstep",)]

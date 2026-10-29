@@ -121,11 +121,19 @@ def done(ctx) -> bool:
             and not any(room_wanted(ctx, rows, row, shots(ctx)) for row in rows))
 
 
+def owner_ordered(ctx) -> bool:
+    """The owner ordered this step redone (a pending redo row): the stale grids are redrawn even under
+    rendered takes (Jekyll ep06, 2026-10-29: Poole's redrawn sheet; the guard returned at once)."""
+    from studio import work_orders
+    conn = getattr(ctx, "conn", None)
+    return conn is not None and STEP_ID in work_orders.redo_steps(conn, ctx.codex_id, ctx.stage, ctx.unit or "book")
+
+
 def run(ctx) -> None:
     rows = layout(ctx)
     if not rows:
         raise SystemExit(f"REFUSED: the plan has no shots to lay out into {LAYOUT}")
-    if rendered(ctx) and all(grid_path(ctx, row).exists() for row in rows):
+    if rendered(ctx) and all(grid_path(ctx, row).exists() for row in rows) and not owner_ordered(ctx):
         ctx.log("the board's takes are rendered: no grid is redrawn under them", step_id=STEP_ID, level="WARNING")
         return
     grid_layout.write(ctx.home, rows)
