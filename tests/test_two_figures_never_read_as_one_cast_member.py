@@ -117,3 +117,19 @@ def test_the_who_ask_is_in_the_verdict_key(monkeypatch):
     before = check.words_sha8({"planned": 2}, 4.0)
     monkeypatch.setattr(fw, "ASK", fw.ASK + " changed")
     assert check.words_sha8({"planned": 2}, 4.0) != before
+
+
+def test_a_look_with_an_unknown_marker_is_never_a_sink():
+    """Jekyll ep06 T05: Lanyon's `pale_fallen` look named no facial hair and no coat, so it clashed with
+    nothing; the reader saw a moustache on both men, Utterson clashed, and both read as Lanyon."""
+    staged = {"utterson": fw.staged_marks({"hair_colour": "grey", "facial_hair": "none"}, "black overcoat"),
+              "lanyon": fw.staged_marks({"hair_colour": "grey"}, "")}
+    figs = [{"hair": "white", "facial_hair": "moustache", "coat": "grey"},
+            {"hair": "white", "facial_hair": "moustache", "coat": "black"}]
+    assert fw.fault(figs, staged) is None
+
+
+def test_a_look_with_no_top_wears_its_bases_coat(monkeypatch):
+    from studio import continuity
+    monkeypatch.setattr(continuity, "card_of", lambda book, who: card({"base": "dapper navy-blue frock coat", "pale": ""}, "base"))
+    assert continuity.top_for(None, "lanyon", "pale", {}) == "dapper navy-blue frock coat"

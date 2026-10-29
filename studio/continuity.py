@@ -53,7 +53,8 @@ def top_for(book: Path, who: str, look: str, row: dict) -> str:
     if card is None:
         return ""
     name = next((n for n in (look, (row or {}).get("look"), card.base) if n in card.looks), "")
-    return card.looks[name].layers.top if name else ""
+    top = card.looks[name].layers.top if name else ""
+    return top or (card.looks[card.base].layers.top if card.base in card.looks else "")   # an empty layer inherits the base's
 
 
 def faces_by_setup(episode) -> dict[str, list[str]]:

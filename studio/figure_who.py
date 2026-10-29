@@ -67,9 +67,11 @@ def clashes(fig: dict, marks: dict) -> int:
 
 
 def resolve(fig: dict, staged: dict) -> str | None:
-    """The one staged member this figure agrees with while clashing with every other, else None."""
+    """The one staged member this figure agrees with while clashing with every other, else None.  A member
+    whose look leaves a key unsaid clashes with nothing and is never resolved to: it would be a sink
+    (Jekyll ep06 T05: Lanyon's `pale_fallen` named no beard and no coat, and both men fell to him)."""
     agree = [who for who, marks in staged.items() if not clashes(fig, marks)]
-    return agree[0] if len(agree) == 1 else None
+    return agree[0] if len(agree) == 1 and all(staged[agree[0]].get(k) for k in KEYS) else None
 
 
 def fault(figures: list[dict], staged: dict) -> str | None:
