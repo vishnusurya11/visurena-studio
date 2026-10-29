@@ -24,6 +24,8 @@ ROWS = {
     "measured 3 against 2": "hold_extra_pushes",
     "G-OTS shot 4: an over-the-shoulder shot tighter than a medium close (the model opens wider and pushes), "
     "measured close against medium_close": "ots_medium_close",
+    # ep06 (2026-10-28): a split is paid for by joining two neighbours; no pair, the writer's
+    "G-SHOTS plan: shots in the cut -- 6.2 h projected against the owner's 6 h, measured 32 against 30": "join_shots",
 }
 CREATIVE = [
     "G-FACES plan: share of the shots with a face at close or medium_close, measured 0.3 against 0.55",
@@ -49,7 +51,6 @@ CREATIVE = [
     "G-MA plan: holds of 1.2 s or more (beat + coda) -- spend the silence after the reveals, never as crumbs "
     "on every shot, measured 2 against 3",
     "G-INNER line 4: an inner line plays over its speaker's own face, measured ['a'] against b",
-    "G-SHOTS plan: shots in the cut -- 6.2 h projected against the owner's 6 h, measured 32 against 30",
 ]
 
 PUSHED = ("The camera pushes in toward the lawyer's face, travelling a hand's breadth, across the whole "
@@ -95,6 +96,7 @@ def test_the_repair_round_runs_the_grammar_cures(tmp_path):
     spec.loader.exec_module(repair)
     doc = _doc()
     doc["shots"][0].update(index=4, frame="Close over the lawyer's shoulder toward Mr. Enfield's face")
-    got, uncured, names = repair.apply(doc, list(ROWS)[:1] + list(ROWS)[2:], tmp_path)
+    rows = [r for r, cure in ROWS.items() if cure in ("strip_amounts", "ots_medium_close")]
+    got, uncured, names = repair.apply(doc, rows, tmp_path)
     assert names == ["ots_medium_close", "strip_amounts"] and uncured == []
     assert got["shots"][0]["size"] == "medium_close" and "breadth" not in got["shots"][0]["motion"]

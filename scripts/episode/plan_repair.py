@@ -240,6 +240,8 @@ def apply(doc: dict, rows: list[str], book, number: int = 0,
             doc, _ = pc.strip_phantoms(doc, *phantom_context(book))
         elif name == "holds":
             doc = pc.holds(doc, rate=rate)
+        elif name == "join_shots":
+            doc = pc.join_shots(doc, rate)
         elif name == "cut_lines":
             doc = pc.cut_lines(doc, rate=rate)
         elif name == "breathe":

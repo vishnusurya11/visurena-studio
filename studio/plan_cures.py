@@ -483,8 +483,10 @@ def _grow_pairs(doc: dict, rate: float) -> list[tuple[int, int]]:
 
 def holds(doc: dict, rate: float = 3.0) -> dict:
     """`holds_and_unsplit` for the callers that only want the doc (the cure
-    table's dispatcher, the older tests): same cure, report dropped."""
-    return holds_and_unsplit(doc, rate)[0]
+    table's dispatcher, the older tests): same cure, report dropped.  A split's copy repeats
+    its source's head; it takes the least-used lawful one (ep06: pull_reveal 5/26 -> 8/29)."""
+    doc = holds_and_unsplit(doc, rate)[0]
+    return rebalance_heads(doc, twins)[0] if (twins := twin_heads(doc)) else doc
 
 
 def holds_and_unsplit(doc: dict, rate: float = 3.0) -> tuple[dict, list[tuple[int, int]]]:
@@ -719,6 +721,71 @@ def split_shot(doc: dict, n: int) -> dict:
     own = [l for l in doc.get("lines") or [] if l["shot"] == n]
     own[-1]["shot"] = n + 1
     return doc
+
+
+FIXED_SECTIONS = ("hook", "turn", "button", "runout")
+"""Shots a join never touches: the shape rule needs exactly one of each."""
+
+
+def join_shots(doc: dict, rate: float, cap: int | None = None) -> dict:
+    """G-SHOTS: while the cut holds more than `cap` shots (episode_capacity.MAX_SHOTS), the
+    cheapest pair of neighbours -- one setup, no fixed section, their lines inside the lines cap
+    and one take, dialogue still first -- becomes one shot.  A split is paid for here (ep06: four
+    long shots split 26 -> 29 against 28).  No such pair: the doc comes back as it is."""
+    from studio.episode_capacity import MAX_SHOTS
+    cap = MAX_SHOTS if cap is None else cap
+    while len([s for s in doc.get("shots") or [] if s["index"] not in (doc.get("omit") or [])]) > cap:
+        pairs = joinable(doc, rate)
+        if not pairs:
+            break
+        doc = join_pair(doc, min(pairs, key=lambda p: p[1])[0])
+    return doc
+
+
+def joinable(doc: dict, rate: float) -> list[tuple[int, float]]:
+    """(n, merged seconds) for every neighbour pair n, n+1 that may become one shot."""
+    from studio.episode_spec import MAX_LINES_PER_SHOT
+    shots, lines, secs = doc.get("shots") or [], doc.get("lines") or [], _shot_secs(doc, rate)
+    out = []
+    for a, b in zip(shots, shots[1:]):
+        if a.get("setup") != b.get("setup") or {a.get("section"), b.get("section")} & set(FIXED_SECTIONS):
+            continue
+        own_a = [l for l in lines if l["shot"] == a["index"]]
+        own_b = [l for l in lines if l["shot"] == b["index"]]
+        merged = secs[a["index"]] + secs[b["index"]] - 2 * HANDLE_S - float(a.get("coda_s") or 0) \
+            - float(b.get("beat_s") or 0) + (BREATH_S if own_a and own_b else 0.0)
+        dialogue_second = own_a and own_b and own_b[0].get("kind") == "dialogue"
+        if len(own_a) + len(own_b) <= MAX_LINES_PER_SHOT and merged <= TAKE_BUDGET_S and not dialogue_second:
+            out.append((a["index"], merged))
+    return out
+
+
+def join_pair(doc: dict, n: int) -> dict:
+    """Shot n+1 folds into shot n: its lines play on n, n keeps its picture and takes n+1's
+    coda; every later reference (lines, beds, omit, a 'shot N' answer) moves down one."""
+    from studio.episode_spec import ANSWER
+    shots = doc["shots"]
+    a, b = next(s for s in shots if s["index"] == n), next(s for s in shots if s["index"] == n + 1)
+    a["coda_s"] = b.get("coda_s") or 0.0
+    shots.remove(b)
+    for line in doc.get("lines") or []:
+        line["shot"] -= 1 if line["shot"] > n else 0
+    for bed in doc.get("beds") or []:
+        bed["from_shot"] = bed["from_shot"] - 1 if bed.get("from_shot", -1) > n else bed.get("from_shot")
+    doc["omit"] = [i - 1 if i > n else i for i in doc.get("omit") or [] if i != n + 1]
+    for s in shots:
+        s["index"] -= 1 if s["index"] > n else 0
+    m = ANSWER.match(str(doc.get("answer") or ""))
+    if m and m.group(1) == "shot" and int(m.group(2)) > n:
+        doc["answer"] = f"shot {int(m.group(2)) - 1}"
+    return doc
+
+
+def twin_heads(doc: dict) -> list[int]:
+    """Shots whose camera head and frame repeat the shot before's -- what a split leaves."""
+    shots = doc.get("shots") or []
+    return [b["index"] for a, b in zip(shots, shots[1:])
+            if b.get("motion") and b.get("motion") == a.get("motion") and b.get("frame") == a.get("frame")]
 
 
 def _room(doc: dict, rate: float, n: int, line: dict, cap: int) -> bool:
@@ -1808,6 +1875,7 @@ CURES: list[tuple[re.Pattern, str]] = [
     (re.compile(r"G-PACE plan: planned pauses|G-PACE plan: cuts where the next line"), "breathe"),
     # TAKE BUILDER is the row that REFUSES a shot past the take (Jekyll ep06: three writer rounds on it)
     (re.compile(r"projects to .* an episode is|ONE PER TAKE|TAKE LENGTH|TAKE BUILDER|G-HOLE|hole in speech|of the runtime"), "holds"),
+    (re.compile(r"G-SHOTS plan"), "join_shots"),                  # a split is paid for (ep06: 29 vs 28)
     (re.compile(r"median (?:frame-edge|at_rest)"), "edge_cases"),
     (re.compile(r"\d+-word style line"), "trim_style"),
     (re.compile(r"G-ASPECT|style line is \d+ words|look"), "pin_series"),

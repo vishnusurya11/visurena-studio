@@ -2842,3 +2842,8 @@ the 8.0 s take; `plan.cures.jsonl` recorded `cures: []` every round. Three fault
 - **Park once, then go on**: at the climb cap the plan parks ONCE and the next launch runs on the
   signed draft -- into steps 06/09, which refuse the same long shots. Pause at the boundary, cure with
   `plan_repair.py --no-llm`, resume; never let a tier-1 line ride into the picture steps.
+- **Every cure is judged by every gate, again**: the first repair seated narration FIRST on a
+  shot that opened on dialogue (G-SYNC; `_keeps_sync` now refuses it), then the splits made 29
+  shots against G-SHOTS' 28 and their copies repeated `pull_reveal` (5/26 -> 8/29). A split is
+  paid for: `join_shots` folds the cheapest same-setup pair (no hook/turn/button/runout, one take,
+  dialogue first), and `holds` rebalances its `twin_heads`. ep06: BATTERY CLEAN in 2 code rounds.

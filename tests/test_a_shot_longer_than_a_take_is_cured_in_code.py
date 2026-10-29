@@ -74,3 +74,45 @@ def test_seating_never_puts_a_line_ahead_of_dialogue():
     lines = out["lines"]
     assert not [l for i, l in enumerate(lines) if l["kind"] == "dialogue" and i and lines[i - 1]["shot"] == l["shot"]]
     assert max(plan_cures._shot_secs(out, 2.55).values()) <= plan_cures.TAKE_BUDGET_S
+
+
+# ---- a split is paid for: the shot cap and the move share -----------------------------------
+
+def four_shots(sections=("hook", "friction", "friction", "button")):
+    return {"answer": "shot 3",
+            "shots": [{"index": i, "beat_s": 0.3, "coda_s": 0.3, "setup": "a", "section": s,
+                       "motion": f"The camera move {i}", "frame": f"Frame {i}."} for i, s in enumerate(sections)],
+            "lines": [{"index": 0, "kind": "narration", "speaker": "narrator", "text": "One two.", "shot": 0},
+                      {"index": 1, "kind": "narration", "speaker": "narrator", "text": "Three four.", "shot": 1},
+                      {"index": 2, "kind": "narration", "speaker": "narrator", "text": "Five six.", "shot": 2},
+                      {"index": 3, "kind": "narration", "speaker": "narrator", "text": "Seven.", "shot": 3}],
+            "beds": [{"from_shot": 3, "tone": "plain"}], "omit": [3]}
+
+
+def test_join_shots_merges_two_neighbours_until_the_cut_fits_the_cap():
+    doc = plan_cures.join_shots(four_shots(), 2.55, cap=2)     # the omitted shot 3 is not in the cut
+    assert [s["index"] for s in doc["shots"]] == [0, 1, 2]
+    assert [l["shot"] for l in doc["lines"]] == [0, 1, 1, 2]
+    assert doc["answer"] == "shot 2" and doc["beds"][0]["from_shot"] == 2 and doc["omit"] == [2]
+
+
+def test_join_shots_never_joins_the_hook_turn_or_button():
+    doc = plan_cures.join_shots(four_shots(("hook", "turn", "friction", "button")), 2.55, cap=3)
+    assert len(doc["shots"]) == 4
+
+
+def test_join_shots_keeps_dialogue_first():
+    doc = four_shots()
+    doc["lines"][2]["kind"] = "dialogue"
+    assert len(plan_cures.join_shots(doc, 2.55, cap=3)["shots"]) == 4
+
+
+def test_the_shot_cap_row_is_cured_by_join_shots():
+    row = "G-SHOTS plan: shots in the cut -- 5.8 h projected against the owner's 6 h, measured 29 against 28"
+    assert plan_cures.cure_for(row) == "join_shots"
+
+
+def test_twin_heads_are_the_shots_that_repeat_the_one_before():
+    doc = four_shots()
+    doc["shots"][2]["motion"], doc["shots"][2]["frame"] = doc["shots"][1]["motion"], doc["shots"][1]["frame"]
+    assert plan_cures.twin_heads(doc) == [2]
