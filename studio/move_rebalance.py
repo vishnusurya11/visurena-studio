@@ -123,6 +123,18 @@ TRACKS_SUBJECT = {"follow"}
 "tracks behind the terrace")."""
 
 
+DETERMINED = r"\b(?:the|a|an|his|her|its|their|this|that|one|two)\s+(?:[\w'-]+(?:,\s*[\w'-]+)*\s+){0,3}?"
+
+
+def determined(noun: str, clause: str) -> bool:
+    """The clause holds `noun` as a noun: after a determiner, at most three words between.
+    `head_noun` reads a noun phrase; given a whole clause it can return the predicate's
+    adjective or verb ("the red baize door stands small at ..." -> "small": Jekyll ep05 shot 15
+    froze twice on "The camera tracks beside the small;").  Replayed over Jekyll and WotW's 1,918
+    at_rest aims: 309 refused, mostly across/lit/orange/along/turned/toward/small."""
+    return re.search(DETERMINED + re.escape(noun) + r"\b", clause, re.I) is not None
+
+
 def cell_aims(shot: dict, setup: dict | None = None) -> list[str]:
     """Aim nouns `at_rest` provably holds: one head noun per clause (a person's
     parenthetical tag removed first), the FOCUS clause first, no layout word,
@@ -136,7 +148,8 @@ def cell_aims(shot: dict, setup: dict | None = None) -> list[str]:
     out: list[str] = []
     for clause in clauses:
         noun = episode_spec.head_noun(clause)
-        if noun and noun not in out and noun not in banned and not possessed(noun, clause):
+        if noun and noun not in out and noun not in banned and not possessed(noun, clause) \
+                and determined(noun, clause):
             out.append(noun)
     return [n for n in out if cell_gates.in_cell(n, probe(shot))]
 
