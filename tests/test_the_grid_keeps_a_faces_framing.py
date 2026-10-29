@@ -65,3 +65,13 @@ def test_neg_skips_the_builders_fixed_sentences():
             f"{sg.UNWRITTEN}")
     assert grid_lint.negations(text) == []
     assert grid_lint.negations(text + " He does not look up.") == ["not look up"]
+
+
+def test_a_person_standing_at_a_door_is_a_face_focus():
+    """Jekyll ep06 shot 0 (2026-10-28): 'the man in <image1> standing in the narrow gap of the black
+    panelled door' read as a FOCUS on a door and refused step 06.  A part counts only as the focus's
+    own subject ('<image1>'s fist'); a place he stands in is no part of him."""
+    assert sg.face_focus("THE FOCUS OF THE PICTURE IS the man in <image1> standing in the narrow gap of the "
+                         "black panelled door at the CENTRE, his head a third of the frame's height.")
+    assert not sg.face_focus("THE FOCUS OF THE PICTURE IS the man in <image1>'s clenched fist on the door at the CENTRE.")
+    assert not sg.face_focus("THE FOCUS OF THE PICTURE IS the hand of the man in <image1> on the door at the CENTRE.")

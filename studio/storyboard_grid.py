@@ -944,7 +944,15 @@ def face_focus(body: str) -> bool:
     a gaze or "the two men" keep the framing tail (wave-2 review: s23 and night_door P2 lost it)."""
     hit = FOCUS.search(body or "")
     said = hit.group(1) if hit else ""
+    if hit and PERSON_SUBJECT.match(said):
+        return True                     # "the man in <image1> standing in the door": a place is no part of him
     return not hit or bool(FACE_WORDS.search(said)) or bool(PERSON.search(said) and not PART.search(said))
+
+
+PERSON_SUBJECT = re.compile(r"(?:the|a|an|both)?\s*(?:[\w-]+\s+){0,2}?" + PERSON.pattern
+                            + r"(?:\s+in\s+<image\d+>)?(?!'s|\s+in\s+<image\d+>'s)", re.I)
+"""The FOCUS is a person when it OPENS on one not followed by a possessive (Jekyll ep06 shot 0); a
+part counts only as the focus's own subject ("<image1>'s fist", "the hand of the man")."""
 
 
 RISE_ROOM, RISE_ROOM_SIZES = ("; the place the camera rises over fills the top third of the panel, and the "
