@@ -56,3 +56,21 @@ def test_a_one_line_shot_past_the_take_splits_its_line_then_its_shot():
     doc = plan_cures.seat_overflow(two_sentence_shot(), 2.55)
     secs = plan_cures._shot_secs(doc, 2.55)
     assert max(secs.values()) <= plan_cures.TAKE_BUDGET_S and len(doc["lines"]) == 4
+
+
+def test_seating_never_puts_a_line_ahead_of_dialogue():
+    """ep06 repair: shot 7 [Lanyon's line, the narrator's] was over the take; its narration was seated
+    FIRST on shot 8, ahead of Utterson's dialogue (G-SYNC), and dialogue_first could not undo it.
+    Where seating would break G-SYNC the shot splits instead."""
+    long = " ".join(["word"] * 9) + "."
+    doc = {"shots": [{"index": i, "beat_s": 0.5, "coda_s": 0.5, "setup": "a", "section": s}
+                     for i, s in enumerate(("hook", "friction", "friction", "button"))],
+           "lines": [{"index": 0, "kind": "narration", "speaker": "narrator", "text": "A start.", "shot": 0},
+                     {"index": 1, "kind": "dialogue", "speaker": "lanyon", "text": long, "shot": 1},
+                     {"index": 2, "kind": "narration", "speaker": "narrator", "text": long, "shot": 1},
+                     {"index": 3, "kind": "dialogue", "speaker": "utterson", "text": "Is he ill?", "shot": 2},
+                     {"index": 4, "kind": "narration", "speaker": "narrator", "text": "Silence.", "shot": 3}]}
+    out = plan_cures.seat_overflow(doc, 2.55)
+    lines = out["lines"]
+    assert not [l for i, l in enumerate(lines) if l["kind"] == "dialogue" and i and lines[i - 1]["shot"] == l["shot"]]
+    assert max(plan_cures._shot_secs(out, 2.55).values()) <= plan_cures.TAKE_BUDGET_S

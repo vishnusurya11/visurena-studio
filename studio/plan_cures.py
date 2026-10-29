@@ -677,8 +677,10 @@ def seat_overflow(doc: dict, rate: float) -> dict:
             return seat_overflow(doc, rate)      # one line of two sentences: two lines, then seat them
         if len(own) < 2:
             continue
-        if not (n < last and _room(doc, rate, n + 1, own[-1], cap) and _move(own[-1], n + 1)):
-            if not (n > 0 and _room(doc, rate, n - 1, own[0], cap) and _move(own[0], n - 1)):
+        if not (n < last and _room(doc, rate, n + 1, own[-1], cap) and _keeps_sync(lines, own[-1], n + 1)
+                and _move(own[-1], n + 1)):
+            if not (n > 0 and _room(doc, rate, n - 1, own[0], cap) and _keeps_sync(lines, own[0], n - 1)
+                    and _move(own[0], n - 1)):
                 return seat_overflow(split_shot(doc, n), rate)   # no neighbour has room: two shots
     return doc
 
@@ -730,6 +732,15 @@ def _room(doc: dict, rate: float, n: int, line: dict, cap: int) -> bool:
 def _move(line: dict, n: int) -> bool:
     line["shot"] = n
     return True
+
+
+def _keeps_sync(lines: list[dict], line: dict, n: int) -> bool:
+    """Seating `line` on shot n keeps G-SYNC: moved forward it opens n, so n must not open on
+    dialogue; moved back it closes n, so a dialogue line may only land on an empty shot (ep06)."""
+    there = [l for l in lines if l["shot"] == n]
+    if n > line["shot"]:
+        return not there or there[0].get("kind") != "dialogue"
+    return line.get("kind") != "dialogue" or not there
 
 
 def trim_measured_holes(doc: dict, placed: dict) -> int:
