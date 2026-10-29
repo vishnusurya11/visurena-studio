@@ -102,7 +102,7 @@ def test_an_owner_redo_of_a_delivered_episode_opens_its_window(conn, book, tmp_p
     order_id = ordered(conn, home)
     window = repair_clock.window_for(conn, home, 1_000.0)
     assert window == {"opened_at": 1_000.0, "cap_s": repair_clock.cap_for(["09"]), "steps": ["09"],
-                      "orders": {"09": order_id}}
+                      "orders": {"09": order_id}, "named": []}
     assert repair_clock.read(home) == window
 
 

@@ -252,11 +252,20 @@ def cast_of(book: Path, shots: list, reserve: int = 1, setup=None,
     people, slots, names = [], {}, name_tokens(book)
     for name in who:
         entry, sheet = person(book, name, setup, aliases or {}, names)
-        if sheet is not None and name in chosen:
+        if sheet is not None and name in chosen and not back_turned(book, name, shots, aliases or {}):
             entry["ref"] = len(slots) + 1
             slots[str(100 + entry["ref"])] = sheet
         people.append(entry)
     return people, slots
+
+
+def back_turned(book: Path, name: str, shots: list, aliases: dict) -> bool:
+    """Seen only from behind in every one of the grid's shots: drawn from his words, no face sheet staged
+    (studio/back_view, Jekyll ep06 retro A: the drawer copied the near man's face into the far man's slot)."""
+    from studio import back_view
+    row = cast_refs.row(book, name)
+    phrases = list(aliases.get(name, [])) + [row.get("display") or "", row.get("name") or ""]
+    return back_view.back_only([p for p in phrases if p], shots)
 
 
 def person(book: Path, name: str, setup, aliases: dict, names: list[str]) -> tuple[dict, Path | None]:

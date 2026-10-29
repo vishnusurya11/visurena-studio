@@ -63,11 +63,23 @@ def read(home) -> dict | None:
         return None
 
 
-def open_window(home, orders: dict, started: float | None = None) -> dict:
-    """Write the window for these receipted orders, opened at `started` (the run's start) or now."""
+def named_takes(conn, orders: dict) -> list[int]:
+    """The takes the orders' own notes name (`T24`): an owner repair re-renders these even when delivered
+    (Jekyll ep06 retro F, 2026-10-29: order 63 named T24/T25 and step 09 still kept both frozen)."""
+    import re
+    ids = [int(v) for v in orders.values()]
+    if not ids:
+        return []
+    rows = conn.execute(f"SELECT note FROM orders WHERE id IN ({','.join('?' * len(ids))})", ids).fetchall()
+    return sorted({int(m) for (note,) in rows for m in re.findall(r"\bT(\d{2})\b", note or "")})
+
+
+def open_window(home, orders: dict, started: float | None = None, named: list[int] | None = None) -> dict:
+    """Write the window for these receipted orders, opened at `started` (the run's start) or now, with the
+    takes their notes name (`named_takes`)."""
     window = {"opened_at": float(started if started is not None else time.time()),
               "cap_s": cap_for(list(orders)), "steps": sorted(orders),
-              "orders": {k: int(v) for k, v in sorted(orders.items())}}
+              "orders": {k: int(v) for k, v in sorted(orders.items())}, "named": sorted(named or [])}
     write(home, window)
     return window
 
@@ -84,21 +96,23 @@ def window_for(conn, home, started: float | None) -> dict | None:
     """The window this drive runs in: the open one (adopting a newer owner order for its steps), else
     one opened now for an owner redo of a delivered episode, else None (a normal run, on the 6 h)."""
     if (window := read(home)) is not None:
-        return adopt(home, window, work_orders.owner_receipts(conn, home))
+        return adopt(home, window, work_orders.owner_receipts(conn, home), conn)
     orders = work_orders.owner_receipts(conn, home)
     if not orders or not delivered(home):
         return None
-    return open_window(home, orders, started)
+    return open_window(home, orders, started, named_takes(conn, orders))
 
 
-def adopt(home, window: dict, receipts: dict[str, int]) -> dict:
+def adopt(home, window: dict, receipts: dict[str, int], conn=None) -> dict:
     """A second owner order for a step the open window names, taken by the runner after the drive's
     start, becomes the window's order (same opening, same cap): the next drive's start backs it."""
     newer = {s: oid for s, oid in receipts.items() if s in (window.get("orders") or {})
              and oid != int(window["orders"][s])}
     if not newer:
         return window
-    window = {**window, "orders": {**window["orders"], **newer}}
+    orders = {**window["orders"], **newer}
+    named = set(window.get("named") or []) | set(named_takes(conn, newer) if conn is not None else [])
+    window = {**window, "orders": orders, "named": sorted(named)}
     write(home, window)
     return window
 

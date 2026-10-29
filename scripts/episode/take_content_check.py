@@ -42,7 +42,7 @@ JUDGES = tuple(sorted({"scripts/episode/take_content_check.py", "studio/frames.p
 """The code a take's reads are judged by -- this script, the frames it samples and the import
 closure of the judges (look_table, panel_dq, people_count came in by lazy imports; package H
 skeptic) -- its hash pinned to GATE_VERSION (tests/fixtures/gate_pins.json)."""
-GATE_VERSION = "6"
+GATE_VERSION = "7"
 """What a cached content verdict must have been judged under.  Bump it when the judging changes a
 verdict on unchanged reads; a refactor or a log line re-pins the hash only.  A changed ask needs no
 bump: the asks are in the key (`words_sha8`), as they are in the VL text cache."""
@@ -127,6 +127,25 @@ def who_faults_for(shot, reads: list[pc.Seen], work: Path, stem: str, staged: di
     return out
 
 
+HEAD_AT = 0.25
+"""G-WHO also reads the take's head at 0.25 s (Jekyll ep06 retro G): T25 opened on its panel's two Uttersons and
+morphed one into Poole inside the first half-second, before the head-leak window the samples skip, and the cut
+played it.  The head leak is a reason to skip the PANEL'S picture in the other reads, not a wrong person."""
+
+
+def who_head_faults(shot, reads: list, video: Path, work: Path, staged: dict) -> list[str]:
+    """G-WHO on the take's head frame, labelled `who (head):`; nothing on a take G-WHO does not apply to."""
+    people = max((getattr(r, "people", 0) or 0 for r in reads), default=0)
+    if not fw.applies(len(shot.faces or []), shot.size, people):
+        return []
+    try:
+        figures = read_who_frame(frames.frame_at(video, HEAD_AT, work / f"{video.stem}_head.png"), seed=41)
+    except pc.Unreadable as why:
+        return [f"unread: who (head) {str(why)[:100]}"]
+    bad = fw.fault(figures, staged)
+    return [bad.replace("who:", "who (head):", 1)] if bad else []
+
+
 def with_twins(row: dict, twins: list[str]) -> dict:
     """A take's verdict row with its twin faults carried; any twin fails it."""
     if not twins:
@@ -184,7 +203,8 @@ def judge_take(book: Path, ep, record: dict, take_dir: Path, work: Path) -> dict
     setup = ep.setups[shot.setup]
     row = verdict_for(book, shot, setup, reads, panel_people_of(book, ep.number, shot.index))
     staged = cast_refs.who_marks(book, list(shot.faces or []), setup)
-    return with_twins(row, twin_faults_for(shot, reads, work, video.stem) + who_faults_for(shot, reads, work, video.stem, staged))
+    return with_twins(row, twin_faults_for(shot, reads, work, video.stem) + who_faults_for(shot, reads, work, video.stem, staged)
+                      + who_head_faults(shot, reads, video, work, staged))
 
 
 def judges_sha8() -> str:

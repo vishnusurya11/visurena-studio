@@ -38,4 +38,6 @@ def test_the_ceiling_still_binds_last():
 
 
 def test_a_panel_rung_is_priced_at_what_it_measured():
-    assert panel_ladder.RUNG_SECONDS >= 1800.0
+    """Jekyll's regrid rounds measured 97-458 s (ep01-06, 2026-10-29); the 1900 s of ep13 predated the incremental
+    content read and never fitted a repair's reserve (ep06 storyboard retro C)."""
+    assert 458.0 <= panel_ladder.RUNG_SECONDS <= 900.0

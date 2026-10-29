@@ -225,9 +225,17 @@ def frozen_in(window: dict | None, take: Path, home: Path) -> str | None:
         return None
     if min(window.get("steps") or ["00"]) < FREEZE_FROM:
         return None
+    if take_index(take) in set(window.get("named") or []):     # the owner's order names it (retro F)
+        return None
     sha = sha8_of(take)
     return next((why for why, got in (("delivered", delivered_sha8(home, take)),
                                       ("measured", measured_sha8(take))) if got == sha), None)
+
+
+def take_index(take: Path) -> int | None:
+    """T24.mp4 -> 24; None for a file that is not a take."""
+    stem = Path(take).stem
+    return int(stem[1:3]) if len(stem) >= 3 and stem[0] == "T" and stem[1:3].isdigit() else None
 
 
 def held(built: str, take: Path, home: Path, pictures: list | None = None,

@@ -43,11 +43,11 @@ GRID_SECONDS = 70.0
 """One warm Qwen-Image 2x2 grid render: 69.7 s measured (2026-10-21_ep02_proof/gpu/COSTS.md; the
 102 s it was held part of a load).  A cold load adds more: 141 s on D: on 10-21, 269 s on 10-22
 under a concurrent copy, unmeasured on the NVMe, so no cold term is priced (fleet C A4)."""
-RUNG_SECONDS = 1900.0
-"""What a rung COSTS, measured on ep13 (2026-09-27): the redraw, the rebuild
-with its content read (1107-1224 s) and the eye's read of every panel (~740 s).
-Priced at one grid, the gate climbed into rungs it could not finish and
-deferred after the work was spent (speed plan #3)."""
+RUNG_SECONDS = 600.0
+"""What a rung COSTS.  1900 s was measured on ep13 (2026-09-27), before the content read went incremental
+(fix 2c); Jekyll's regrid rounds since measured 97-458 s (ep01-06 attempts.json), and inside an owner's
+repair the 1900 s price never fitted the reserve, so ep06's failing panels 24/25 climbed nothing
+(retro C, 2026-10-29).  600 s holds the slowest measured round with margin."""
 CAP = 2
 """Distinct grids that may climb per episode."""
 SUPERSEDED = "superseded"
@@ -180,6 +180,23 @@ def panel_digest(board: Path) -> str:
 def refund_round(home: Path, key: str = REGRID) -> None:
     """Give back one round of `key` (its seconds stay: the time was spent)."""
     step_attempts.refund(home, key)
+
+
+def reopen(home: Path, order: int) -> None:
+    """An owner's redo of step 08 (order `order`) gives the ladder one fresh round and forgets the grids that
+    climbed before it, once per order (retro C: ep06's rounds went to the Poole sheet redraws, and the G-WHO
+    fault found hours later had nothing left)."""
+    import json
+    path = _ladder_path(home)
+    doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    if any(r.get("order") == int(order) for r in doc.get("reopened", [])):
+        return
+    if step_attempts.count(home, REGRID):
+        refund_round(home)
+    doc.setdefault("reopened", []).append({"order": int(order), "forgot": list(doc.get("climbed", []))})
+    doc["climbed"] = []
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
 
 
 def _ladder_path(home: Path) -> Path:

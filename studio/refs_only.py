@@ -37,3 +37,33 @@ def add(home: Path, shots: list[int], why: str) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
     return path
+
+
+def passing(home: Path) -> set[int]:
+    """The shots both panel checks passed in their last verdicts (panel_dq.json and panel_content.json)."""
+    board = Path(home) / "storyboard"
+    rows = []
+    for name in ("panel_dq.json", "panel_content.json"):
+        path = board / name
+        if not path.exists():
+            return set()
+        rows.append({int(r["shot"]): bool(r.get("passed")) for r in json.loads(path.read_text(encoding="utf-8"))})
+    return {s for s, ok in rows[0].items() if ok and rows[1].get(s)}
+
+
+def lift_passing(home: Path) -> list[int]:
+    """Take off the list every shot whose panel now passes both checks (Jekyll ep06 retro, 2026-10-29: panels
+    24/25 were redrawn and passed, and their takes kept rendering from the bare place picture).  Off the list,
+    the take's build stages its panel again and take currency reads the panel-less take as stale.  The lifted
+    shots, in order; each lift recorded under `lifted`."""
+    path = Path(home) / FILE
+    if not path.exists():
+        return []
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    lifted = sorted(set(doc.get("shots", [])) & passing(home))
+    if lifted:
+        doc["shots"] = [s for s in doc["shots"] if s not in lifted]
+        for s in lifted:
+            doc.setdefault("lifted", {})[str(s)] = f"passed both panel checks again (was: {doc.get('why', {}).get(str(s), '')})"
+        path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+    return lifted

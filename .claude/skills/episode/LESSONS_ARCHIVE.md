@@ -2864,6 +2864,25 @@ the 8.0 s take; `plan.cures.jsonl` recorded `cures: []` every round. Three fault
 
 **G-WHO false twin (Jekyll ep06 T23/T24, 2026-10-29).** Poole (fair hair, tails) and Utterson (grey hair, bowler) were both right by eye; the reader called Poole's lamp-lit fair hair 'grey', both fell to Utterson and G-DEAD refused the cut with the retake cap spent. Fair and grey are one pair the reader confuses (`figure_who.CONFUSED`): hair never separates looks that differ only there. Look at the frame before believing a people fault; a cast that differs by fair-vs-grey hair alone needs another mark (dress, facial hair) to be checkable.
 
+## Jekyll ep06 storyboard retro
+
+**2026-10-29, the smear at "The doctor now kept to the cabinet".** Shot 25's panel drew Utterson twice and no Poole
+(the drawer copied the over-the-shoulder's near man into the far slot); every panel check passed it, the take opened
+on it and morphed Utterson into Poole inside half a second; the take check flagged warp, the retake cap was spent, it
+shipped flagged. The fixes (retro A-H):
+- **A** a man seen only from behind in every cell of a grid is drawn from words, no face sheet (`studio/back_view.py`,
+  `grids.back_turned`); replayed, it fires on ep06 s0/8/24/25 and ep05 s22 (the shipped Utterson-twice).
+- **B** G-WHO's rules replay real eye-judged reads (`tests/fixtures/who_reads_*.json`, `scripts/audit/who_fixture.py`)
+  -- a hand-written case let the fair/grey fix hide panel 25.
+- **C** the panel rung costs 600 s (Jekyll rounds 97-458 s; 1900 s from Scarlet ep13 never fitted a repair's reserve,
+  so order 62 climbed nothing); an owner redo of 08 reopens the ladder: one fresh round, climbed grids forgotten.
+- **D+E** a shot leaves `refs_only.json` when its panel passes both checks again; its take then stages the panel and
+  re-renders (T24/T25 kept opening on the bare place picture: hard cut, crash zoom).
+- **F** an owner order naming `T24` in its note unfreezes that delivered take in the repair (order 63 was kept frozen).
+- **G** G-WHO reads panels (step 08) and each take's head at 0.25 s (`who (head):`), past which the samples skip.
+Before believing or dismissing a people fault, look at the frame; a cast told apart only by fair-vs-grey hair needs
+another mark.
+
 ## Face refine until 2026-10-29
 
 **Soft faces are refined (09_07, owner 2026-10-17: "I like face improvements a lot in wide shots, go ahead";

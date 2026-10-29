@@ -194,3 +194,30 @@ def test_the_staged_hat_comes_from_the_looks_headwear():
     assert fw.staged_marks({"headwear": "bowler", "hair_colour": "grey"}, "black overcoat")["hat"] == "hat"
     assert fw.staged_marks({"headwear": "none", "hair_colour": "fair"}, "black livery")["hat"] == "none"
     assert fw.staged_marks({"hair_colour": "fair"}, "black livery")["hat"] == ""
+
+
+def test_the_takes_head_is_read_for_who_too(tmp_path, monkeypatch):
+    """Jekyll ep06 T25 (retro G): the take opened on its panel's two Uttersons and morphed one into Poole inside
+    the first half-second -- before the 1 s head-leak window the samples skip -- and the cut played it."""
+    from types import SimpleNamespace
+    from scripts.episode import take_content_check as tcc
+    grabbed = []
+    monkeypatch.setattr(tcc.frames, "frame_at", lambda video, at, dest: grabbed.append(at) or dest)
+    monkeypatch.setattr(tcc, "read_who_frame", lambda path, seed: [
+        {"hair": "grey", "facial_hair": "none", "coat": "black", "headwear": "bowler"},
+        {"hair": "grey", "facial_hair": "none", "coat": "black", "headwear": "bowler"}])
+    shot = SimpleNamespace(faces=["poole", "gabriel_john_utterson"], size="medium_close")
+    reads = [SimpleNamespace(people=2)]
+    faults = tcc.who_head_faults(shot, reads, tmp_path / "T25.mp4", tmp_path, POOLE_UTTERSON)
+    assert grabbed == [tcc.HEAD_AT] and faults and faults[0].startswith("who (head):")
+
+
+def test_a_one_cast_take_reads_no_head():
+    from types import SimpleNamespace
+    from scripts.episode import take_content_check as tcc
+    shot = SimpleNamespace(faces=["poole"], size="close")
+    assert tcc.who_head_faults(shot, [SimpleNamespace(people=1)], None, None, POOLE_UTTERSON) == []
+
+
+def test_a_head_who_line_is_a_people_fault():
+    assert people_faults.wrong_line("who (head): 2 figures read as 'gabriel_john_utterson' by hair, facial hair and coat")

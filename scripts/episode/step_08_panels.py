@@ -149,8 +149,23 @@ def judge_of(ctx) -> Callable[[], Verdict]:
     return judge
 
 
+def owner_order(ctx) -> int | None:
+    """The owner's redo order for this step, as the open repair window names it, else None."""
+    from studio import repair_clock
+    return ((repair_clock.read(ctx.home) or {}).get("orders") or {}).get(STEP_ID)
+
+
+def reopen_for_owner(ctx) -> None:
+    """Under an owner's redo of 08 the panel ladder gets one fresh round (studio/panel_ladder.reopen)."""
+    if (order := owner_order(ctx)) is not None:
+        panel_ladder.reopen(ctx.home, order)
+        ctx.log(f"PANEL LADDER REOPENED for owner order {order}: one fresh round, the climbed grids forgotten",
+                step_id=STEP_ID)
+
+
 def run(ctx) -> None:
     ctx.open_step(STEP_ID)
+    reopen_for_owner(ctx)
     rebuild(ctx)
     board = ctx.home / BOARD
     policy = gate_policy.of(ctx.stage, GATE)
@@ -158,6 +173,16 @@ def run(ctx) -> None:
     judged_gate.clear(ctx, GATE, judge=judge_of(ctx),
                       sign=lambda v: eye_verdict.sign_verdict(board, panels_of(board), v),
                       ladder=climb.rungs, terminal=climb.keep_best, policy=policy)
+    lift_staged(ctx)
+
+
+def lift_staged(ctx) -> None:
+    """A shot whose panel passes both checks again leaves refs_only.json, so its take stages the panel and
+    re-renders (Jekyll ep06 retro D+E: T24/T25 kept opening on the bare place picture)."""
+    from studio import refs_only
+    if lifted := refs_only.lift_passing(ctx.home):
+        ctx.log(f"REFS-ONLY LIFTED: shots {lifted} pass both panel checks; their takes stage the panel again",
+                step_id=STEP_ID)
 
 
 if __name__ == "__main__":
