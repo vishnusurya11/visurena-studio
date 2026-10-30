@@ -363,11 +363,26 @@ def creature_insert(shot) -> tuple[str, str] | None:
     return (beast.group(0), part.group(0)) if beast and part else None
 
 
+FOCUS_TAG = "THE FOCUS OF THE PICTURE IS"
+WRITTEN = re.compile(r"\b(?:lettered|lettering|inscribed|inscriptions?|written|writing|handwriting|"
+                     r"superscribed|addressed)\b", re.I)
+"""Prose that asks the drawer to write on something; `panel_content.PRINTED` names printed things, not this."""
+
+
+def quiet_tag(at_rest: str, prose: str, size: str) -> str:
+    """The focus tag in lower case where the panel stages print or writing: the drawer letters the only capitals
+    it is given (Jekyll ep06 shot 19, trial 2026-10-30: 4 of 4 envelopes in capitals, 0 of 4 in lower case)."""
+    from studio import panel_content
+    if not (panel_content.lettering_expected(prose, size) or WRITTEN.search(prose)):
+        return at_rest
+    return at_rest.replace(FOCUS_TAG, FOCUS_TAG.lower())
+
+
 def body_of(shot) -> str:
     """The plan's own words: what is in frame, then where everything sits."""
     parts = [shot.frame.strip()]
     if rest := (getattr(shot, "at_rest", "") or "").strip():
-        parts.append(rest)
+        parts.append(quiet_tag(rest, f"{shot.frame} {rest}", shot.size))
     if found := creature_insert(shot):
         parts.append(whole_subject(f"the {found[0]}", f"its {found[1]}"))
     if said := varied_group(" ".join(parts), len(getattr(shot, "faces", None) or []),
