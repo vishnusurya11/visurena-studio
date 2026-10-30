@@ -42,9 +42,10 @@ def test_the_count_is_the_most_seen_in_any_frame():
     assert got.people == 2
 
 
-def test_copies_carry_across_frames_too():
-    got = busiest([seen(people=2, lookalikes=0), seen(people=2, lookalikes=2)])
-    assert got.lookalikes == 2
+def test_a_copy_seen_in_one_frame_only_is_not_carried():
+    """A copy persists: the count two frames agree on is the take's (content gate v9, ep06 T23)."""
+    assert busiest([seen(people=2, lookalikes=0), seen(people=2, lookalikes=2)]).lookalikes == 0
+    assert busiest([seen(people=2, lookalikes=2), seen(people=2, lookalikes=2)]).lookalikes == 2
 
 
 def test_lettering_anywhere_in_the_take_counts():
