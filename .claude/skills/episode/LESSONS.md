@@ -82,7 +82,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Jekyll Kawajiri ep01 under the step caps
 - GPU when idle, CPU when rendering
 - Gate notes moved out of GATES.md
-- Jekyll Kawajiri ep01 retro (the 13 failures, the five bricks, each package's lessons, what is owed)
+- Jekyll Kawajiri ep01 retro (the 13 failures, the five bricks)
 - The framing floor (face-blur fix #3, 2026-10-19)
 - The face refine reaches every soft face (face-blur fixes #1-#2, 2026-10-19)
 - The face refine, round 2 (2026-10-19, + fix round)
@@ -108,6 +108,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Jekyll ep06 storyboard retro
 - Face refine until 2026-10-29
 - The doorstep room (Jekyll ep06, 2026-10-29)
+- Jekyll ep01-06 series retro
 
 Anchors the code cites, archived: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

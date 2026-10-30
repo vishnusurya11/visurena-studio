@@ -2933,3 +2933,34 @@ behind (content gate v11).  Measured on the real panels: fails 24/25, passes 23 
 The ladder's grid cap goes to wrong-person grids first (`panel_ladder.people_first`); a frame line's dress
 parenthetical never reaches the drawer (the slot replaces it), the focus line does.  Also: a model left resident
 in ComfyUI slowed the 2K pass 7x (T21 19 s/frame; 2.6 s after /free): the pass frees ComfyUI first.
+
+## Jekyll ep01-06 series retro (2026-10-30)
+
+Owner: "please do a retro we need to do a retro to find issues", after ep06 went public with the prompt's own
+words on an envelope. Seven lenses + a skeptic; evidence in docs/audit/2026-10-30_jekyll_series_retro/ (RETRO.md).
+
+- **The brick: a gate's finding ships unless it is a people line.** The gates mostly SAW what the owner later
+  caught (5 of 12 catches were in a verdict on the shipped bytes); shipping reads the severity, not the fault
+  (`dead_footage.admitted()` refuses only G-PEOPLE/G-WHO). It predicted ep06 T19 lettering and ep05 T07 grey Jekyll
+  (both public, both confirmed by frame). Do not widen the block wholesale: the broad list parks 4 of 5 episodes,
+  ~30 % false (warp measured pre-2K, the chapter's own letter). The narrow list -- scaffold words read back,
+  hair-vs-row on single-cast closes, plate leak >= 9 frames -- parks exactly the 5 true faults (owner decision).
+- **The drawer letters the only capitals it is given.** A plan that stages writing ("lettered in black ink") next
+  to "THE FOCUS OF THE PICTURE IS" put those words on the envelope; "wordless paint" beside a request for lettering
+  is a contradiction no reseed cures. Trial, 1x1, 4 seeds an arm, by eye: capitals 4/4, lower case 0/4. Fixed
+  7ac13a60 (`grids.quiet_tag`). The OCR plan_word read caught only 2 of the 4 capitals: OCR undercounts stylised type.
+- **Bytes changed after the last gate are unjudged.** regen_2k splices at `assemble --upscale`; step 11 carries the
+  pre-2K cut's eye onto the master (`judged_on`). But the 2K redraw is faithful: it keeps every 768 fault at the
+  same frame (ep06, 14 of 14 morphing shots compared), so a measure on the 768 take does describe what ships.
+- **Morphing is drawn where the take must invent what its first frame lacks** (owner: "some morphing .. unnatural
+  movements", ep06 public). By eye at 4 fps, 14 of 28 shots: hands working a small object (seal, page, envelope,
+  buttons, a hand to the chest grew a black starburst), rising or walking under a tracking camera (coat redrawn),
+  pans/pull-backs that reveal unseen room (props change count). Locked-off faces that only turn or speak: clean.
+  G-WARP reads faces only; no gate reads hands, props or bodies (docs/audit/.../morph/morph.md).
+- **G-WHO runs on 2+ cast only** (`applies()`): a single-cast close drawn with the wrong hair (ep05 Jekyll grey in
+  every shot, row black) is caught by no blocking gate.
+- **A room cut before 2026-10-30 still holds people**: a re-run redraw in that setup copies them (trial: Utterson in
+  every 1x1 of the seal_night insert). New episodes cut fresh, emptied rooms.
+- **Hours:** ep06 15.8 h machine (8.2 + 7.6 repair) vs 6 h; the 2K pass 36 %, 148 min of it on takes retaken later
+  because Poole's sheet contradicted his row and was found only on rendered takes -- check sheet against row before
+  any render. Windows Update rebooted at 00:29 PDT twice (active hours end 00:00; ~4.5 h dead each).
