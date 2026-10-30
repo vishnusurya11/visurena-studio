@@ -2920,3 +2920,8 @@ a room with people.  Measured: "every person is gone" alone kept the doorway but
 ep06 plan cures (`owner_doorstep` in plan.cures.jsonl): 27 the door is shut and the lawyer walks off alone, 25 a push
 in on the face, 26 the door behind him as in 24/25.
 Look at the room before believing a sibling's people fault: a figure the room carries repeats in every grid.
+Second pass, same day: on the emptied room panels 24 and 25 put the lawyer's bowler and double-breasted coat on
+the black-haired man facing camera -- neither Poole nor Utterson -- and G-WHO passed both: it looked only for two
+figures resolving to one member.  G-WHO's second rule (`figure_who.stranger`, content gate v10): a figure ruled out
+of EVERY staged member by hair or hat is a stranger.  Coat and facial hair are not used for it: replayed on the
+calibration set, a coat colour or a missed beard misread on eye-passed ep05 takes T08, T15 and T22.

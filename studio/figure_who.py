@@ -87,10 +87,10 @@ def differs(key: str, seen: str, said: str) -> bool:
     return seen != said and not (key == "hair_colour" and frozenset({seen, said}) in CONFUSED)
 
 
-def clashes(fig: dict, marks: dict) -> int:
-    """How many keys the figure shows that the look says otherwise."""
+def clashes(fig: dict, marks: dict, keys: tuple = KEYS) -> int:
+    """How many of `keys` the figure shows that the look says otherwise."""
     seen = seen_of(fig)
-    return sum(1 for k in KEYS if seen[k] and marks.get(k) and differs(k, seen[k], marks[k]))
+    return sum(1 for k in keys if seen[k] and marks.get(k) and differs(k, seen[k], marks[k]))
 
 
 def resolve(fig: dict, staged: dict) -> str | None:
@@ -102,12 +102,31 @@ def resolve(fig: dict, staged: dict) -> str | None:
 
 
 def fault(figures: list[dict], staged: dict) -> str | None:
-    """The 'who: ...' line when two or more figures resolve to one cast member."""
+    """The 'who: ...' line when two or more figures resolve to one cast member, else when a figure fits none."""
     who = [resolve(f, staged) for f in figures]
     twice = sorted({w for w in who if w and who.count(w) >= 2})
     if not twice:
-        return None
+        return stranger(figures, staged)
     return f"who: {who.count(twice[0])} figures read as {twice[0]!r} by hair, facial hair and coat; the shot casts one"
+
+
+STRANGER_KEYS = ("hair_colour", "hat")
+"""The marks a stranger must be ruled out of every member by.  Replayed on the calibration set: a coat colour
+or a missed beard read wrong on eye-passed ep05 takes T08, T15 and T22; hair and hat did not."""
+
+
+def stranger(figures: list[dict], staged: dict) -> str | None:
+    """The 'who: ...' line for a figure that clashes with EVERY staged member, each look stating every NEEDED
+    key (Jekyll ep06 panels 24/25, 2026-10-29: the lawyer's bowler and coat on a black-haired man facing camera,
+    neither Poole nor Utterson; no double, so the double rule passed it)."""
+    if not staged or not all(all(m.get(k) for k in NEEDED) for m in staged.values()):
+        return None
+    for fig in figures:
+        if all(clashes(fig, marks, STRANGER_KEYS) for marks in staged.values()):
+            seen = seen_of(fig)
+            shown = ", ".join(f"{k} {seen[k]}" for k in KEYS if seen[k])
+            return f"who: a figure fits no cast member ({shown}); the shot casts {', '.join(sorted(staged))}"
+    return None
 
 
 def parse(said: str) -> list[dict]:
