@@ -44,12 +44,19 @@ def busiest(reads: list[Seen]) -> Seen:
     return Seen(
         landform=fullest.landform,
         people=max(r.people for r in reads),
-        lookalikes=max(r.lookalikes for r in reads),
+        lookalikes=confirmed_copies([r.lookalikes for r in reads]),
         text=any(r.text for r in reads),
         hour=fullest.hour,
         subjects=subjects,
         posture=usual_posture(reads),
     )
+
+
+def confirmed_copies(counts: list[int]) -> int:
+    """The copies two frames agree on (the second-highest count; a single read keeps its own): a copy persists,
+    a misread frame does not (Jekyll ep06 T23: one wide frame called Poole and Utterson copies)."""
+    ranked = sorted(counts, reverse=True)
+    return ranked[1] if len(ranked) >= 2 else (ranked[0] if ranked else 0)
 
 
 def usual_posture(reads: list[Seen]) -> str:
