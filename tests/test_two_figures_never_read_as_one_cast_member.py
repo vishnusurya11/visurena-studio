@@ -221,3 +221,16 @@ def test_a_one_cast_take_reads_no_head():
 
 def test_a_head_who_line_is_a_people_fault():
     assert people_faults.wrong_line("who (head): 2 figures read as 'gabriel_john_utterson' by hair, facial hair and coat")
+
+
+def test_a_take_double_must_show_in_two_frames():
+    """Jekyll ep06 T23 (run 22): the reader put a top hat on bareheaded Poole in ONE wide frame of four, on
+    every seed, and G-WHO failed a take the eye passes.  A copied or morphed double persists; a take's who-fault
+    needs two of its read frames (samples and head)."""
+    from scripts.episode import take_content_check as tcc
+    one = ["who: 2 figures read as 'u' by hair, facial hair and coat; the shot casts one"]
+    assert tcc.confirmed(one) == []
+    two = one + ["who (head): 2 figures read as 'u' by hair, facial hair and coat; the shot casts one"]
+    got = tcc.confirmed(two)
+    assert len(got) == 1 and got[0].startswith("who:") and "2 of the frames read" in got[0]
+    assert tcc.confirmed(["unread: who no figures list"]) == ["unread: who no figures list"]

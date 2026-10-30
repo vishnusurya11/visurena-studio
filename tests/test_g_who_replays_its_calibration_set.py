@@ -17,8 +17,12 @@ CASES = [(f.stem, t) for f in FIXTURES for t in json.loads(f.read_text(encoding=
 
 
 def fired(case: dict) -> bool:
+    """A panel (one read) fires on any frame; a take (`kind: take`) only when take_content_check.CONFIRM of its
+    read frames do (ep06 T23 run 22: one wide frame of four misread a hat)."""
+    from scripts.episode.take_content_check import CONFIRM
     staged = {who: fw.staged_marks(row["markers"], row["top"]) for who, row in case["cast"].items()}
-    return any(fw.fault(figs, staged) for figs in case["frames"])
+    hits = sum(1 for figs in case["frames"] if fw.fault(figs, staged))
+    return hits >= (CONFIRM if case.get("kind") == "take" else 1)
 
 
 def test_there_is_a_calibration_set():

@@ -42,7 +42,7 @@ JUDGES = tuple(sorted({"scripts/episode/take_content_check.py", "studio/frames.p
 """The code a take's reads are judged by -- this script, the frames it samples and the import
 closure of the judges (look_table, panel_dq, people_count came in by lazy imports; package H
 skeptic) -- its hash pinned to GATE_VERSION (tests/fixtures/gate_pins.json)."""
-GATE_VERSION = "7"
+GATE_VERSION = "8"
 """What a cached content verdict must have been judged under.  Bump it when the judging changes a
 verdict on unchanged reads; a refactor or a log line re-pins the hash only.  A changed ask needs no
 bump: the asks are in the key (`words_sha8`), as they are in the VL text cache."""
@@ -146,6 +146,22 @@ def who_head_faults(shot, reads: list, video: Path, work: Path, staged: dict) ->
     return [bad.replace("who:", "who (head):", 1)] if bad else []
 
 
+CONFIRM = 2
+"""Frames a take's who-fault must show in (Jekyll ep06 T23, run 22): the reader put a top hat on bareheaded Poole
+in one wide frame of four, on every seed.  A copied panel or a morph persists; a misread moment does not."""
+
+
+def confirmed(lines: list[str]) -> list[str]:
+    """The take's who lines kept only when CONFIRM frames show them, as one line saying how many; unread lines
+    always kept."""
+    who = [x for x in lines if x.startswith(("who:", "who (head):"))]
+    rest = [x for x in lines if x not in who]
+    if len(who) < CONFIRM:
+        return rest
+    first = who[0].replace("who (head):", "who:", 1)
+    return rest + [f"{first} ({len(who)} of the frames read)"]
+
+
 def with_twins(row: dict, twins: list[str]) -> dict:
     """A take's verdict row with its twin faults carried; any twin fails it."""
     if not twins:
@@ -203,8 +219,8 @@ def judge_take(book: Path, ep, record: dict, take_dir: Path, work: Path) -> dict
     setup = ep.setups[shot.setup]
     row = verdict_for(book, shot, setup, reads, panel_people_of(book, ep.number, shot.index))
     staged = cast_refs.who_marks(book, list(shot.faces or []), setup)
-    return with_twins(row, twin_faults_for(shot, reads, work, video.stem) + who_faults_for(shot, reads, work, video.stem, staged)
-                      + who_head_faults(shot, reads, video, work, staged))
+    return with_twins(row, twin_faults_for(shot, reads, work, video.stem) + confirmed(
+        who_faults_for(shot, reads, work, video.stem, staged) + who_head_faults(shot, reads, video, work, staged)))
 
 
 def judges_sha8() -> str:
