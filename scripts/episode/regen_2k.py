@@ -174,6 +174,14 @@ def jobs_of(cards: dict[int, dict], rows: list[dict], takes: Path, record: dict,
     return out
 
 
+def clear_gpu(jobs: list[dict]) -> None:
+    """ComfyUI's models unloaded before the first draw, once, when there is one (Jekyll ep06 run 32: beside a
+    model left resident by the earlier steps T21 drew at 19 s a frame; after /free, T22 at 2.6 s)."""
+    if jobs:
+        from studio import comfy
+        comfy.free_models()
+
+
 def run(book: Path, number: int, engine: str) -> dict:
     from scripts.episode import assemble as asm
     asm.set_canvas(book, number)
@@ -186,7 +194,9 @@ def run(book: Path, number: int, engine: str) -> dict:
     record = read_record(room)
     began, wall = time.time(), wall_s()
     warp = rg.warped(asm.current_eye(takes))
-    for job in rg.order(jobs_of(cards, rows, takes, record, warp)):
+    jobs = rg.order(jobs_of(cards, rows, takes, record, warp))
+    clear_gpu(jobs)
+    for job in jobs:
         i, take, card = job["index"], job["take"], cards[job["index"]]
         key, sha = f"T{i:02d}", yp.sha8(take)
         if runaway(time.time() - began, wall):

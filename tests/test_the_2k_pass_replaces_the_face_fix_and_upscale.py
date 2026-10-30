@@ -270,3 +270,16 @@ def test_step_11_redraws_and_resplices_when_a_cut_take_lacks_its_2k(monkeypatch,
     (tmp_path / "qc_r2v.json").write_text("{}")
     s11.deliver_master(Ctx(), [])
     assert calls == []
+
+
+def test_the_pass_frees_the_gpu_before_its_first_draw(monkeypatch):
+    """Jekyll ep06 run 32: T20 drew at 7.7 s and T21 at 19 s a frame beside a model left resident from the
+    earlier steps; after ComfyUI's /free, T22 drew at 2.6 s.  The pass frees ComfyUI once, and only with work."""
+    from scripts.episode import regen_2k as runner
+    from studio import comfy
+    freed = []
+    monkeypatch.setattr(comfy, "free_models", lambda: freed.append(1))
+    runner.clear_gpu([])
+    assert freed == []
+    runner.clear_gpu([{"index": 1}])
+    assert freed == [1]
