@@ -184,6 +184,22 @@ def eyes_of(picture: Path, reader: Callable) -> str:
         return ""
 
 
+def hair_faults(picture, markers: Markers, reader: Callable, where: str = "") -> list[Fault]:
+    """A HARD row_hair fault when a figure on the sheet shows a hair colour its row rules out, read with G-WHO's
+    own ask (Jekyll ep06: Poole's sheet drew dark hair for a sandy row, found only on rendered takes)."""
+    from studio import figure_who as fw
+    marks = fw.staged_marks(markers.model_dump(), "")
+    if not marks["hair_colour"]:
+        return []
+    try:
+        figures = fw.parse(reader(Path(picture), fw.ASK))
+    except pc.Unreadable as why:
+        return [Fault(kind="unread", where=where, note=str(why), severity="advisory")]
+    off = [fw.seen_of(f)["hair_colour"] for f in figures if fw.clashes(f, marks, ("hair_colour",))]
+    return [Fault(kind="row_hair", where=where, severity="high",
+                  note=f"hair reads {off[0]}; the row says {marks['hair_colour']}")] if off else []
+
+
 def judge(picture: Path, layers: Layers, markers: Markers, reader: Callable, where: str = "") -> Verdict:
     """The verdict on one base sheet against its row: every contradiction refuses."""
     try:

@@ -247,7 +247,7 @@ def read_sheet_row(book_dir, picture: Path, reader, acc: Reads, where: str) -> N
     acc.reads += 1
     verdict = sheet_row.judge(picture, base.layers, base.markers, reader, where)
     acc.readable += 0 if any(f.kind == "unread" for f in verdict.faults) else 1
-    acc.faults.extend(verdict.faults)
+    acc.faults.extend(verdict.faults + sheet_row.hair_faults(picture, base.markers, reader, where))
 
 
 def style_of(picture, tools: Tools):
