@@ -201,7 +201,7 @@ RUN(book, n): the autopilot launches drive.py; you read the disk, never call a s
 08 panels    caps: panel_checks 1/round, 30 min; regrid 2/episode, 20 min, gate EYE_PANELS
 09 shoot     caps: takes 1/pass, 120 min; take_dq 1/round, 30 min; take_content 1/round, 20 min; take_eye 1/round, 10 min; strip 1/round, 2 min; retakes 2/episode, 45 min, gate EYE_TAKES; face_refine 1/take, 75 min
 10 edit      caps: assemble 1/pass, 15 min; cut_pass 1/pass, 15 min
-11 qc        caps: qc 1/episode, 30 min; master_eye 1/episode, 30 min, gate MASTER; upscale 1/pass, 15 min; regen_2k 1/pass, 200 min
+11 qc        caps: qc 1/episode, 30 min; master_eye 1/episode, 30 min, gate MASTER; upscale 1/pass, 15 min; regen_2k 1/pass, 360 min
 12 deliver   caps: deliver 1/pass, 2 min
 13 publish   caps: publish 1/pass, 10 min
 ```
@@ -536,7 +536,7 @@ is never cut: the voice is the ruler. Jekyll ep01 v2 T14 failed WER 0.56 + tail 
 same-length reseeds and passed both (WER 0.11, tail -48 dB) on its first shorter take
 (coda 1.5 -> 0.75 s).
 
-**The 4-step 2K pass replaces the face refine and, shot by shot, the upscale (owner 2026-10-29: "4 step 2k", "Fluttering is definitely gone").** Step 11, before the one upscale: every non-still take of the judged cut, people first, is re-drawn by Open-H3-Regenerate-2K at 2x from its OWN sheets and panel (`scripts/episode/regen_2k.py`, `takes/r2v_2k/regen.json`, current by take sha8) and spliced into the master frame for frame (`studio/regen_2k.splice`). A take whose faces outnumber its sheets keeps av3 (ep04 T07: unnamed constables came back as a hatched mesh): every person on screen needs a sheet. Budget: the 6 h clock's remainder, never under 60 min; ~2.9 s/frame. The refine (09_07/09_08) is OFF, kept: `VISURENA_REGEN_2K=0` restores it and the av3-only master (old text: LESSONS_ARCHIVE, Face refine until 2026-10-29).
+**The 4-step 2K pass replaces the face refine and, shot by shot, the upscale (owner 2026-10-29: "4 step 2k", "Fluttering is definitely gone").** Step 11, before the one upscale: every non-still take of the judged cut, people first, is re-drawn by Open-H3-Regenerate-2K at 2x from its OWN sheets and panel (`scripts/episode/regen_2k.py`, `takes/r2v_2k/regen.json`, current by take sha8) and spliced into the master frame for frame (`studio/regen_2k.splice`). Every take is drawn, none cut for time (owner: "Don't skip any shot"); a take whose faces outnumber its sheets is drawn and its smaller, unreferenced faces pasted back from the take (ep04 T07: unreferenced constables came back as a hatched mesh). ~2.9 s/frame; the 360 min wall is a runaway guard. The refine (09_07/09_08) is OFF, kept: `VISURENA_REGEN_2K=0` restores it and the av3-only master (old text: LESSONS_ARCHIVE, Face refine until 2026-10-29).
 
 **G-WARP is HARD on S only (2026-10-19, retro D1-D2, for owner veto).** `take_dq` scores every take that stages a
 face for frame-to-frame face redraw (`studio/warp_gate.py`, CPU lane). FAIL is S > 2.5: one seed retake, then F2 for a

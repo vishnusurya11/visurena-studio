@@ -368,13 +368,20 @@ def deliver_master(ctx, extra: list[str]) -> Path:
     cut, _cut_qc = judged_pair(ctx.home, engine)
     if not is_cut(cut):                                  # a master judged itself: nothing to carry
         return master
-    if qc.exists() and traced(ctx.home, engine, episode_home.read_json(qc)) and qc_carried_to(qc, master):
+    owed = regen_2k.on() and regen_owed(ctx, engine)     # a cut take without its 2K: draw it and splice again
+    if not owed and qc.exists() and traced(ctx.home, engine, episode_home.read_json(qc)) and qc_carried_to(qc, master):
         return master
-    if master_upscale.made_from(master) != yp.sha8(cut):
+    if owed or master_upscale.made_from(master) != yp.sha8(cut):
         if regen_2k.on():           # the 4-step 2K pass draws the cut's takes; the upscale splices them in
             ctx.run_script("scripts/episode/regen_2k.py", f"--engine={engine}", gpu=True, clock="regen_2k")
         ctx.run_script("scripts/episode/assemble.py", f"--engine={engine}", "--upscale", gpu=True, clock="assemble")
     return carry(ctx, engine)
+
+
+def regen_owed(ctx, engine: str) -> bool:
+    """A take of the judged cut has no current 2K draw (owner 2026-10-29: "Don't skip any shot")."""
+    from scripts.episode import regen_2k as runner
+    return runner.owed(ctx.book_dir, ctx.number, engine)
 
 
 def qc_carried_to(qc: Path, master: Path) -> bool:

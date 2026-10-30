@@ -99,14 +99,65 @@ def draw(book: Path, number: int, card: dict, take: Path, size: tuple[int, int],
     return video_frames(dest)
 
 
-def budget_s(home: Path) -> float:
-    """The seconds the pass may spend now: the 6 h clock's remainder, capped by the regen_2k row."""
-    from studio import run_budget, run_clock, step_caps
-    left = rg.left_s(run_clock.spent(home), run_budget.OWNER_LIMIT_SECONDS)
+def runaway(elapsed: float, wall: float) -> bool:
+    """Past the regen_2k row's wall: the only stop (owner 2026-10-29: "Don't skip any shot" -- no take is cut for
+    time; a 28-take episode is ~3 h at 2.9 s/frame, the wall 6 h)."""
+    return elapsed > wall
+
+
+def wall_s() -> float:
+    from studio import step_caps
     try:
-        return min(left, step_caps.wall_s("regen_2k"))
-    except Exception:            # no cap row: the clock alone
-        return left
+        return step_caps.wall_s("regen_2k")
+    except Exception:            # no cap row: six hours
+        return 6 * 3600.0
+
+
+def face_boxes(take: Path) -> list[list[tuple]]:
+    """Every frame's faces in the take at 768 (MTCNN, score >= 0.9, >= MIN_FACE_PX), as (x0, y0, x1, y1)."""
+    import numpy as np
+    from studio.measure import faces as fz
+    detect, _ = fz.embedder()
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(take), "-vf", "scale=768:768", "-f", "rawvideo",
+                          "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
+    frames = np.frombuffer(raw, np.uint8).reshape(-1, 768, 768, 3)
+    return [[tuple(f["box"]) for f in detect(fr) if f["score"] >= 0.9 and f["box"][3] - f["box"][1] >= rg.MIN_FACE_PX]
+            for fr in frames]
+
+
+def masked(take: Path, regen: Path, keep: int, size: tuple[int, int]) -> None:
+    """The regen with every face but the `keep` largest put back from the take, frame by frame (rg.paste_back),
+    rewritten in place: a take with more faces than sheets is drawn, never skipped (owner 2026-10-29)."""
+    import numpy as np
+    boxes = face_boxes(take)
+    w, h = size
+
+    def frames_of(video: Path, fw: int, fh: int):
+        raw = subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-vf", f"scale={fw}:{fh}", "-f", "rawvideo",
+                              "-pix_fmt", "rgb24", "-"], capture_output=True, check=True).stdout
+        return np.frombuffer(raw, np.uint8).reshape(-1, fh, fw, 3)
+    small, big = frames_of(take, 768, 768), frames_of(regen, w, h)
+    tmp = regen.with_name(regen.stem + ".masked.mp4")
+    enc = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{w}x{h}",
+                            "-framerate", "24", "-i", "-", "-c:v", "libx264", "-crf", "10", "-pix_fmt", "yuv420p",
+                            str(tmp)], stdin=subprocess.PIPE)
+    for k, frame in enumerate(big):
+        out = rg.paste_back(frame, small[min(k, len(small) - 1)], boxes[min(k, len(boxes) - 1)] if boxes else [], keep)
+        enc.stdin.write(np.ascontiguousarray(out).tobytes())
+    enc.stdin.close()
+    if enc.wait():
+        raise RuntimeError(f"{take.stem}: the masked regen did not encode")
+    tmp.replace(regen)
+
+
+def owed(book: Path, number: int, engine: str) -> bool:
+    """A take of the judged cut has no current regen (step 11 then draws it and splices again)."""
+    takes, work = episode_home.takes_dir(book, number, engine), episode_home.work_dir(book, number, engine)
+    if not (takes / "prompts.json").exists() or not (work / "layout.json").exists():
+        return False
+    cards = {c["index"]: c for c in json.loads((takes / "prompts.json").read_text(encoding="utf-8"))}
+    rows = json.loads((work / "layout.json").read_text(encoding="utf-8"))
+    return bool(jobs_of(cards, rows, takes, read_record(room_of(book, number, engine))))
 
 
 def jobs_of(cards: dict[int, dict], rows: list[dict], takes: Path, record: dict, warp: set[int] = frozenset()) -> list[dict]:
@@ -133,30 +184,24 @@ def run(book: Path, number: int, engine: str) -> dict:
     cards = {c["index"]: c for c in json.loads((takes / "prompts.json").read_text(encoding="utf-8"))}
     rows = json.loads((work / "layout.json").read_text(encoding="utf-8"))
     record = read_record(room)
-    left, began = budget_s(home), time.time()
+    began, wall = time.time(), wall_s()
     warp = rg.warped(asm.current_eye(takes))
     for job in rg.order(jobs_of(cards, rows, takes, record, warp)):
         i, take, card = job["index"], job["take"], cards[job["index"]]
         key, sha = f"T{i:02d}", yp.sha8(take)
-        faces = faces_in(take)
-        if not rg.covered(faces, card["refs"]):
-            record[key] = {"take_sha8": sha, "drawn": False, "faces": faces, "sheets": len(rg.sheets(card["refs"])),
-                           "why": "faces outnumber the sheets: av3 keeps it"}
-            print(f"REGEN 2K {key}: {faces} face(s), {len(rg.sheets(card['refs']))} sheet(s) -- skipped, av3 keeps it",
-                  flush=True)
-            write_record(room, record)
-            continue
-        price, spent = rg.projected_s(int(card["frames"])), time.time() - began
-        if price > left - spent:
-            record[key] = {"take_sha8": sha, "drawn": False, "why": f"cut for time: {price:.0f} s > {left - spent:.0f} s left"}
-            print(f"CAP regen_2k {key}: {record[key]['why']}; av3 keeps it", flush=True)
-            write_record(room, record)
-            continue
+        if runaway(time.time() - began, wall):
+            print(f"CAP regen_2k {key}: the pass ran past its {wall / 60:.0f} min wall; av3 keeps the rest", flush=True)
+            break
+        faces, sheets = faces_in(take), len(rg.sheets(card["refs"]))
         t0 = time.time()
         frames = draw(book, number, card, take, size, work, room / f"{key}.mp4")
-        record[key] = {"take_sha8": sha, "drawn": True, "frames": frames, "faces": faces,
-                       "seconds": round(time.time() - t0, 1), "size": list(size)}
-        print(f"REGEN 2K {key}: {frames} frames in {record[key]['seconds']:.0f} s", flush=True)
+        if not rg.covered(faces, card["refs"]):          # more faces than sheets: the extras stay the take's
+            masked(take, room / f"{key}.mp4", sheets, size)
+        record[key] = {"take_sha8": sha, "drawn": True, "frames": frames, "faces": faces, "sheets": sheets,
+                       "masked": not rg.covered(faces, card["refs"]), "seconds": round(time.time() - t0, 1),
+                       "size": list(size)}
+        print(f"REGEN 2K {key}: {frames} frames in {record[key]['seconds']:.0f} s"
+              + (f" ({faces - sheets} unreferenced face(s) pasted back)" if record[key]["masked"] else ""), flush=True)
         write_record(room, record)
     return record
 

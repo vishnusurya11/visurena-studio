@@ -581,7 +581,7 @@ stages:
       qc:           { step: "11", rounds: 1, per: episode, wall_min: 30, read: step }
       master_eye:   { step: "11", rounds: 1, per: episode, wall_min: 30, gate: MASTER }
       upscale:      { step: "11", rounds: 1, per: pass,    wall_min: 15, read: step }   # after the master eye (ep03 retro #2)
-      regen_2k:     { step: "11", rounds: 1, per: pass,    wall_min: 200 }   # 4-step 2K pass, before the upscale (owner 2026-10-29)
+      regen_2k:     { step: "11", rounds: 1, per: pass,    wall_min: 360 }   # 4-step 2K, every take; runaway guard only (owner 2026-10-29)
       deliver:      { step: "12", rounds: 1, per: pass,    wall_min: 2, read: step }
       publish:      { step: "13", rounds: 1, per: pass,    wall_min: 10, read: step }
     steps:

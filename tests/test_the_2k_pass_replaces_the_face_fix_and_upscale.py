@@ -205,9 +205,68 @@ def test_step_11_draws_the_2k_pass_before_the_one_upscale(monkeypatch, tmp_path)
     monkeypatch.setattr(s11.master_upscale, "made_from", lambda master: "")
     monkeypatch.setattr(s11.yp, "sha8", lambda path: "cafe0001")
     monkeypatch.setattr(s11, "carry", lambda ctx, engine: None)
+    monkeypatch.setattr(s11, "regen_owed", lambda ctx, engine: False)
     s11.deliver_master(Ctx(), [])
     assert calls == ["scripts/episode/regen_2k.py", "scripts/episode/assemble.py"]
     calls.clear()
     monkeypatch.setenv(rg.SETTING, "0")
     s11.deliver_master(Ctx(), [])
     assert calls == ["scripts/episode/assemble.py"]
+
+
+# ---- owner 2026-10-29: "Don't skip any shot" ------------------------------------------------------------
+
+def test_the_largest_faces_keep_the_redraw_and_the_rest_are_pasted_back():
+    """A take with more faces than sheets is drawn; its k largest faces (k = sheets) keep the 2K redraw and every
+    smaller one -- a portrait, a passer-by -- is put back from the take, so no unreferenced face is invented."""
+    import numpy as np
+    regen = np.full((8, 8, 3), 200, np.uint8)
+    take = np.full((4, 4, 3), 10, np.uint8)            # the take at half the regen's size
+    boxes = [(0.0, 0.0, 2.0, 2.0), (2.0, 2.0, 3.0, 3.0)]   # a 2 px face and a 1 px face, take pixels
+    out = rg.paste_back(regen, take, boxes, keep=1, feather=0, pad=0.0)
+    assert (out[0:4, 0:4] == 200).all()                  # the largest face keeps the redraw
+    assert (out[4:6, 4:6] == 10).all()                   # the smaller face is the take's, scaled 2x
+    assert (out[7, 0] == 200).all()
+
+
+def test_paste_back_with_every_face_referenced_changes_nothing():
+    import numpy as np
+    regen = np.full((8, 8, 3), 200, np.uint8)
+    out = rg.paste_back(regen, np.zeros((4, 4, 3), np.uint8), [(0.0, 0.0, 2.0, 2.0)], keep=1, feather=0)
+    assert (out == regen).all()
+
+
+def test_no_take_is_cut_for_time(tmp_path, monkeypatch):
+    """The pass draws every take; only a runaway past the regen_2k row's wall stops it (said, never silent)."""
+    from scripts.episode import regen_2k as runner
+    assert not hasattr(runner, "budget_s")
+    assert runner.runaway(elapsed=3 * 3600.0, wall=6 * 3600.0) is False
+    assert runner.runaway(elapsed=6 * 3600.0 + 1, wall=6 * 3600.0) is True
+
+
+def test_step_11_redraws_and_resplices_when_a_cut_take_lacks_its_2k(monkeypatch, tmp_path):
+    from scripts.episode import step_11_qc as s11
+    calls = []
+
+    class Ctx:
+        home = tmp_path
+
+        def run_script(self, script, *extra, gpu=False, clock=None):
+            calls.append(script)
+    monkeypatch.setenv(rg.SETTING, "1")
+    monkeypatch.setattr(s11, "pair", lambda home, engine: (tmp_path / "master_r2v.mp4", tmp_path / "qc_r2v.json"))
+    monkeypatch.setattr(s11, "judged_pair", lambda home, engine: (tmp_path / "cut_r2v.mp4", tmp_path / "qc_cut.json"))
+    monkeypatch.setattr(s11, "is_cut", lambda path: True)
+    monkeypatch.setattr(s11.master_upscale, "made_from", lambda master: "cafe0001")    # master traced to the cut
+    monkeypatch.setattr(s11.yp, "sha8", lambda path: "cafe0001")
+    monkeypatch.setattr(s11, "carry", lambda ctx, engine: None)
+    monkeypatch.setattr(s11, "regen_owed", lambda ctx, engine: True)
+    s11.deliver_master(Ctx(), [])
+    assert calls == ["scripts/episode/regen_2k.py", "scripts/episode/assemble.py"]
+    calls.clear()
+    monkeypatch.setattr(s11, "regen_owed", lambda ctx, engine: False)
+    monkeypatch.setattr(s11, "traced", lambda home, engine, report: True)
+    monkeypatch.setattr(s11, "qc_carried_to", lambda qc, master: True)
+    (tmp_path / "qc_r2v.json").write_text("{}")
+    s11.deliver_master(Ctx(), [])
+    assert calls == []

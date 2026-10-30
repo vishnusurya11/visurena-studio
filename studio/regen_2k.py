@@ -11,9 +11,10 @@ replace that shot in the master, scaled once more to the master's 4x; av3 stays 
 pass did not draw.  The face refine is switched off while this is on (`on`, studio/face_refine.eligible): kept,
 not deleted.
 
-A take whose faces outnumber its reference sheets is NOT drawn: with nothing to hold them, faces come back as a
-hatched mesh (ep04 T07, two constables the plan never named).  The pass spends what the episode's 6 h clock has
-left, people first (`order`); what it cannot afford keeps av3, said in regen.json."""
+Every take is drawn (owner 2026-10-29: "Don't skip any shot"): none is cut for time, and a take whose faces
+outnumber its reference sheets is drawn with its smaller, unreferenced faces pasted back from the take
+(`paste_back`) -- with nothing to hold them, such faces come back as a hatched mesh (ep04 T07).  Warping takes
+first, then people (`order`); av3 keeps only what a runaway past the regen_2k wall leaves."""
 from __future__ import annotations
 
 import copy
@@ -208,3 +209,28 @@ def splice(picture, out, segs: list[Segment], size: tuple[int, int], fps: int, e
     if sink.wait():
         raise RuntimeError(f"the splice encode failed (exit {sink.returncode})")
     return n
+
+
+def paste_back(regen, take, boxes: list[tuple], keep: int, feather: int = 8, pad: float = 0.25):
+    """The regen frame with every face but the `keep` largest put back from the take (owner 2026-10-29: "Don't
+    skip any shot"): a take with more faces than sheets is drawn, and its unreferenced faces -- a portrait, a
+    passer-by -- stay the take's, scaled to the regen's size and feathered, so none comes back as a hatched mesh
+    (ep04 T07).  `boxes` are (x0, y0, x1, y1) in take pixels; each is widened by `pad` of its size."""
+    import cv2
+    import numpy as np
+    extra = sorted(boxes, key=lambda b: (b[2] - b[0]) * (b[3] - b[1]), reverse=True)[keep:]
+    if not extra:
+        return regen.copy()
+    h, w = regen.shape[:2]
+    big = cv2.resize(np.ascontiguousarray(take), (w, h), interpolation=cv2.INTER_LANCZOS4)
+    sx, sy = w / take.shape[1], h / take.shape[0]
+    mask = np.zeros((h, w), np.float32)
+    for x0, y0, x1, y1 in extra:
+        px, py = (x1 - x0) * pad, (y1 - y0) * pad
+        a, b = max(int((x0 - px) * sx), 0), max(int((y0 - py) * sy), 0)
+        c, d = min(int(round((x1 + px) * sx)), w), min(int(round((y1 + py) * sy)), h)
+        mask[b:d, a:c] = 1.0
+    if feather:
+        mask = cv2.GaussianBlur(mask, (0, 0), feather / 2)
+    m = mask[..., None]
+    return (big * m + regen * (1 - m)).astype(regen.dtype)
