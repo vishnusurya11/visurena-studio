@@ -319,7 +319,9 @@ def ref_name(book: Path, path: Path) -> str:
     # A storyboard panel lives under episodes/epNN/storyboard/h3/ and its bare
     # name says nothing either: `graph_for` resolves a bare name against the
     # boards' cell folder, and looked for shot_00.png among the cells.
-    if path.parent.name == "h3" and path.parent.parent.name == "storyboard":
+    # A setup's ROOM (storyboard/anchors/<setup>.png) staged on a panel-less take likewise (Jekyll ep06 run 30:
+    # its bare name was looked for among the cells).
+    if path.parent.name in ("h3", "anchors") and path.parent.parent.name == "storyboard":
         return path.relative_to(book).as_posix()
     return path.name
 
