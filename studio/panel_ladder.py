@@ -183,9 +183,9 @@ def refund_round(home: Path, key: str = REGRID) -> None:
 
 
 def reopen(home: Path, order: int) -> None:
-    """An owner's redo of step 08 (order `order`) gives the ladder one fresh round and forgets the grids that
-    climbed before it, once per order (retro C: ep06's rounds went to the Poole sheet redraws, and the G-WHO
-    fault found hours later had nothing left)."""
+    """An owner's redo of step 08 (order `order`) gives the ladder one fresh round -- the round AND a rung's
+    seconds under the wall -- and forgets the grids that climbed before it, once per order (retro C: ep06's
+    rounds went to the Poole sheet redraws, and the G-WHO fault found hours later had nothing left)."""
     import json
     path = _ladder_path(home)
     doc = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
@@ -193,10 +193,22 @@ def reopen(home: Path, order: int) -> None:
         return
     if step_attempts.count(home, REGRID):
         refund_round(home)
-    doc.setdefault("reopened", []).append({"order": int(order), "forgot": list(doc.get("climbed", []))})
+    before = refund_rung_seconds(home)
+    doc.setdefault("reopened", []).append({"order": int(order), "forgot": list(doc.get("climbed", [])),
+                                           "seconds_before": before})
     doc["climbed"] = []
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(doc, indent=1), encoding="utf-8")
+
+
+def refund_rung_seconds(home: Path) -> float:
+    """Leave one rung's price under the regrid wall (Jekyll ep06 order 69: the round came back, 1310 s of a
+    1200 s wall did not, and the reopened ladder drew nothing).  The seconds it held before."""
+    before = step_attempts.seconds(home, REGRID)
+    room = step_caps.wall_s(REGRID) - RUNG_SECONDS
+    if before > room:
+        step_attempts.add_seconds(home, REGRID, max(0.0, room) - before)     # set_seconds would zero the rounds
+    return before
 
 
 def _ladder_path(home: Path) -> Path:
