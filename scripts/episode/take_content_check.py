@@ -37,12 +37,13 @@ from studio.episode_home import episode_arg
 WORKFLOW = "image_qwen3vl_caption"
 SAMPLES = 3
 ROOT = Path(__file__).resolve().parents[2]
-JUDGES = tuple(sorted({"scripts/episode/take_content_check.py", "studio/frames.py",
+JUDGES = tuple(sorted({"scripts/episode/take_content_check.py", "studio/frames.py", "studio/ship_block.py",
+                       "studio/measure/ocr.py",
                        *code_closure.closure(ROOT, ("studio/take_content.py", "studio/figure_who.py"))}))
 """The code a take's reads are judged by -- this script, the frames it samples and the import
 closure of the judges (look_table, panel_dq, people_count came in by lazy imports; package H
 skeptic) -- its hash pinned to GATE_VERSION (tests/fixtures/gate_pins.json)."""
-GATE_VERSION = "11"
+GATE_VERSION = "12"
 """What a cached content verdict must have been judged under.  Bump it when the judging changes a
 verdict on unchanged reads; a refactor or a log line re-pins the hash only.  A changed ask needs no
 bump: the asks are in the key (`words_sha8`), as they are in the VL text cache."""
@@ -206,6 +207,25 @@ def pc_row(book: Path, who: str) -> str:
     return cast_refs.row(book, who).get("physical", "")
 
 
+def ocr_strings(path: Path) -> list[str]:
+    """Every string EasyOCR reads on one frame with confidence (CPU; studio/measure/ocr)."""
+    from studio.measure import ocr
+    return [r["text"] for r in ocr.read(path) if r["conf"] >= ocr.MIN_CONF]
+
+
+def with_scaffold(row: dict, work: Path, stem: str, reader=None) -> dict:
+    """The row with the ship-block's scaffold line when the reader saw text and OCR reads the prompt's own
+    words on a sampled frame (Jekyll ep06 T19: "THE FOCUS OF THE PICTURE" on the envelope)."""
+    from studio import ship_block
+    if not row.get("text"):
+        return row
+    read = reader or ocr_strings
+    said = [s for i in range(SAMPLES) if (p := work / f"{stem}_{i}.png").exists() for s in read(p)]
+    if not (words := ship_block.scaffold_words(said)):
+        return row
+    return {**row, "passed": False, "faults": [*row.get("faults", []), ship_block.scaffold_line(words)]}
+
+
 def judge_take(book: Path, ep, record: dict, take_dir: Path, work: Path) -> dict:
     """One take's content verdict; an unreadable frame is a failed verdict."""
     index = record["index"]
@@ -217,7 +237,8 @@ def judge_take(book: Path, ep, record: dict, take_dir: Path, work: Path) -> dict
         return {"passed": False, "faults": [f"unread: {str(why)[:120]}"]}
     from studio import cast_refs
     setup = ep.setups[shot.setup]
-    row = verdict_for(book, shot, setup, reads, panel_people_of(book, ep.number, shot.index))
+    row = with_scaffold(verdict_for(book, shot, setup, reads, panel_people_of(book, ep.number, shot.index)),
+                        work, video.stem)
     staged = cast_refs.who_marks(book, list(shot.faces or []), setup)
     return with_twins(row, twin_faults_for(shot, reads, work, video.stem) + confirmed(
         who_faults_for(shot, reads, work, video.stem, staged) + who_head_faults(shot, reads, video, work, staged)))

@@ -730,10 +730,11 @@ def kept_of(take_dir: Path) -> dict[int, list[dict]]:
 
 
 def people_wrong(take_dir: Path) -> set[int]:
-    """The takes the current eye names a duplicated or extra person on (G-PEOPLE, owner 2026-10-28):
+    """The takes the current eye names a fault on the ship-block list on -- a duplicated or extra person
+    (G-PEOPLE, owner 2026-10-28), scaffold words, hair no row allows, a long leak (owner 2026-10-30):
     never shipped flagged, whatever the ladder kept."""
-    from studio import people_faults
-    return people_faults.takes((current_eye(take_dir) or {}).get("faults", []))
+    from studio import ship_block
+    return ship_block.takes((current_eye(take_dir) or {}).get("faults", []))
 
 
 @contextlib.contextmanager

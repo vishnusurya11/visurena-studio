@@ -46,4 +46,5 @@ def test_the_pinned_files_are_the_ones_that_judge():
     assert set(take_content_check.JUDGES) == {"scripts/episode/take_content_check.py", "studio/frames.py",
                                              "studio/take_content.py", "studio/panel_content.py",
                                              "studio/look_table.py", "studio/panel_dq.py", "studio/people_count.py",
-                                             "studio/figure_who.py"}
+                                             "studio/figure_who.py", "studio/ship_block.py",
+                                             "studio/measure/ocr.py"}

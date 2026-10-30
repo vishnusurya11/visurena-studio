@@ -82,10 +82,11 @@ def lifted(faults: list[dict]) -> dict[int, list[dict]]:
 
 
 def admitted(kept: dict[int, list[dict]]) -> dict[int, list[dict]]:
-    """The kept takes that may ship flagged: never one whose settled faults name a duplicated or
-    extra person (G-PEOPLE, owner 2026-10-28)."""
-    from studio import people_faults
-    return {i: f for i, f in kept.items() if not any(people_faults.wrong(x) for x in f)}
+    """The kept takes that may ship flagged: never one whose settled faults are on the block list -- a
+    duplicated or extra person (G-PEOPLE, owner 2026-10-28), scaffold words, hair no row allows, a long
+    leak (studio/ship_block, owner 2026-10-30)."""
+    from studio import ship_block
+    return {i: f for i, f in kept.items() if not any(ship_block.blocks(x) for x in f)}
 
 
 def failing_rows(record: dict) -> list[str]:
