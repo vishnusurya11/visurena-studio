@@ -540,11 +540,12 @@ def style_faults(where: str, light: str) -> list[str]:
 SKY_SOURCE = re.compile(r"\b(?:sun|sunlight|sunshine|daylight|dawn)\b", re.I)
 """What may not light a night setup (L28)."""
 
-NIGHT = re.compile(r"(?<!\blast )\b(?:nights?(?![-\w])|midnight|moon(?:light|lit|rise)?|small hours|after dark|"
+NIGHT = re.compile(r"(?<!\blast )\b(?:nights?(?![-\w])|midnight|(?<!half-)(?<!half )moon(?:light|lit|rise)?|small hours|after dark|"
                    r"(?:in|after) the dark(?=\s*(?:[,.;:…]|in\b|$))|o'clock of a (?:black )?(?:\w+ )?morning|"
                    r"(?:one|two|three|four) in the morning)\b", re.I)
 """The one night vocabulary, `time_of`'s and L33's (wave-2 review: L33 knew "moon" and the reader did not, so
-a moonlit road was "day" and L33 refused its words; "night-watchman" and "last night" are no hour)."""
+a moonlit road was "day" and L33 refused its words; "night-watchman" and "last night" are no hour; nor is a
+"half-moon fanlight", Jekyll ep06 T00)."""
 
 
 def is_night(setup) -> bool:
