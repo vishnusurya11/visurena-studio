@@ -470,6 +470,16 @@ def location_picture(book: Path, boards: Path, setup, name: str, shot=None) -> P
     return path
 
 
+def place_of(home: Path, setup: str, picture: Path, panel: bool) -> Path:
+    """The place a panel-less take stages: its setup's room once it is cut and emptied, else the
+    location picture (Jekyll ep06 2026-10-29: refs-only take 23 staged the warm, gold-lit street
+    picture between four takes drawn on the storyboard's cool room).  A room with people left is
+    never staged: a figure in it is a figure in the take."""
+    from studio import grid_room
+    room = grid_room.room_path(home, setup)
+    return room if not panel and room.exists() and grid_room.emptied(room) else picture
+
+
 def refs_from_cards(book: Path, boards: Path, faces: list[str], setup: str,
                     state: str = "", sizes: list[str] | None = None,
                     place: Path | None = None, panel: bool = False,
@@ -661,10 +671,12 @@ def card(book: Path, episode: Episode, number: int, take: dict, measured: dict) 
     state = episode.setups[first.setup].state
     if FROM_REFS:
         ends, anchors = [], []
-        where = location_picture(book, boards, episode.setups[first.setup], first.setup, first)
+        panel = storyboard_panel(book, number, first.index) is not None
+        where = place_of(episode_home.home(book, number), first.setup,
+                         location_picture(book, boards, episode.setups[first.setup], first.setup, first), panel)
         faces = people_staged(shots, staging_candidates(episode, shots))
         refs = refs_from_cards(book, boards, faces, first.setup, state, sizes, where,
-                               panel=storyboard_panel(book, number, first.index) is not None,
+                               panel=panel,
                                looks=looks_of(book, episode.setups[first.setup], faces))
         # THE SETUP'S PROP SHEETS, after the place (ep02: the cylinder) -- but
         # only the ones THIS TAKE'S OWN PROSE NAMES.  `Setup.props` is a

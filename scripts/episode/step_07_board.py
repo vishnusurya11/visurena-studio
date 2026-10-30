@@ -90,7 +90,33 @@ def room_wanted(ctx, rows: list[dict], row: dict, shots: list[dict]) -> bool:
 
 def cut_room(ctx, row: dict, shots: list[dict]) -> None:
     anchor = grid_room.anchor_shot(shots, row["setup"])
-    grid_room.recut_room(grid_path(ctx, row), row, anchor, grid_room.room_path(ctx.home, row["setup"]))
+    room = grid_room.room_path(ctx.home, row["setup"])
+    grid_room.recut_room(grid_path(ctx, row), row, anchor, room, empty=room_emptier(ctx))
+    if not grid_room.emptied(room):
+        ctx.log(f"room {row['setup']}: people left after {grid_room.EMPTY_TRIES} edits; no take stages it",
+                step_id=STEP_ID, level="WARNING")
+
+
+EDIT = "image_qwen_image_edit_2511_single_image"
+"""The book pictures' one-image edit (scripts/refs/places.py), local; never edited."""
+
+
+def edit_room(prompt: str, source: Path, target: Path, seed: int) -> None:
+    import shutil
+    from studio.comfy import run, stage_image
+    out = run(EDIT, {"prompt": prompt, "image_1": stage_image(source), "lightning": True, "seed": seed})[0]
+    shutil.copyfile(out, target)
+
+
+def people_in(path: Path) -> int:
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import panel_content_check
+    return panel_content_check.read(path).people
+
+
+def room_emptier(ctx):
+    """path -> people left: the cut room edited empty on the GPU, read back by the panel reader."""
+    return lambda path: grid_room.empty_room(path, edit_room, people_in)
 
 
 def rendered(ctx) -> bool:

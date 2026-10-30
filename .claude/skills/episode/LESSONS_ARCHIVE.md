@@ -2899,3 +2899,24 @@ cut LAST for time (V2): a cut take ships flagged and holds the publish. Assemble
 2026-10-18, 24caaeb; a face under 40 px through a soft head mask); on `av3` the portable python's worker rebuilds the
 paste from its spans. The render is the SaveVideo node's output by node id (`fr.saved_node`): v0.41.2 echoes the
 LoadVideo input first. A refused 20-40 px face earns one 1024 draw (09_08). By hand: `face_refine.py <book> <n>`.
+
+## The doorstep room (Jekyll ep06, 2026-10-29)
+
+Owner on master_iter4: "last shot had a man half man on door; some shots the style changes completely where they
+were talking in front of the front door".  One cause, two faults.  The doorstep room was cut from anchor panel 27,
+which held the butler small in the dark doorway and three passers-by.  Every sibling grid staged that room:
+- panel 23 drew a second, tiny butler in the doorway behind the real one, plus the passers-by (3 figures for 2), so
+  the take went refs-only and staged `refs/locations/jekyll_house/front_door_square__...`, a warm, gold-lit wide
+  street, between four takes drawn on the cool blue room: the style jump;
+- take 27 faded the doorway butler into a ghost: the half man.
+Two smaller faults rode along: shot 25's "tilts up to the gleams" invented an arched fanlight and a hanging lantern
+(the camera pointed where the cell had nothing, brick 12), and shot 26's plan put the door at the RIGHT third, so its
+close lost the setup.
+Fixes: the cut room is edited empty with the local one-image edit (`grid_room.empty_room`, 2511 + Lightning) and read
+back by the panel reader until it counts none (2 seeds; sidecar `anchors/<setup>.json` records `people_left`); only an
+emptied room is kept across an anchor repair; a panel-less take stages the emptied room (`takes_r2v.place_of`), never
+a room with people.  Measured: "every person is gone" alone kept the doorway butler (1 left after 2 seeds); naming
+"every small or distant one in a doorway, a window or the far street" emptied it on seed 0 in 34 s.
+ep06 plan cures (`owner_doorstep` in plan.cures.jsonl): 27 the door is shut and the lawyer walks off alone, 25 a push
+in on the face, 26 the door behind him as in 24/25.
+Look at the room before believing a sibling's people fault: a figure the room carries repeats in every grid.

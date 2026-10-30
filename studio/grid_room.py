@@ -12,10 +12,14 @@ classrooms, a mirrored Waterloo, an attic that became a street).  So:
   keep their slots (Jekyll ep01 audit 2026-10-15, 01_staged_refs 3.2; grids.py no
   longer calls `stages_plate`);
 - the grid manifest's `inputs` hash covers the staged bytes, so a redrawn
-  anchor makes every sibling stale and they follow it.
+  anchor makes every sibling stale and they follow it;
+- the room holds NO PEOPLE: the cut is edited empty (`empty_room`) and its
+  sidecar <setup>.json records who is left (Jekyll ep06 2026-10-29: the anchor's
+  small doorway butler became a second butler in panel 23 and a ghost in take 27).
 """
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -123,17 +127,62 @@ def same_place(new: Path, old: Path) -> bool:
     return min(read["prof_same"], read["wings_same"]) >= PLACE_FLOOR and not place.mirrored(read)
 
 
-def recut_room(grid: Path, row: dict, anchor: int, out: Path) -> bool:
+def recut_room(grid: Path, row: dict, anchor: int, out: Path, empty=None) -> bool:
     """Re-cut the room from the (repaired) anchor cell.  A place that matches the old room keeps
     the OLD bytes -- touched fresh -- so the siblings' manifests, which hash them, stay valid
     (Jekyll ep01 2026-10-18: one repaired cell restaged grids 13-17).  Else the new room
-    replaces it and the siblings follow.  True when the old room was kept."""
+    replaces it and the siblings follow.  With `empty` (path -> people left) the candidate is
+    emptied first and only an old room that was emptied too is kept.  True when it was kept."""
     out = Path(out)
     candidate = cut_room(grid, row, anchor, out.with_name(f"{out.stem}.recut.png"))
-    kept = out.exists() and same_place(candidate, out)
+    left = empty(candidate) if empty is not None else None
+    kept = out.exists() and (empty is None or emptied(out)) and same_place(candidate, out)
     if kept:
         candidate.unlink()
         out.touch()
     else:
         candidate.replace(out)
+        if empty is not None:
+            note_people(out, left)
     return kept
+
+
+EMPTY_PROMPT = ("The same place as in the picture: the same walls, windows, doors, steps, railings, lamps and "
+                "trees in the same places, seen from the same camera position, in the same light and the same "
+                "drawing style. Change only: every person is gone -- the near figures and every small or "
+                "distant one in a doorway, a window or the far street -- and the place stands empty.")
+"""ep06 measured: 'every person is gone' alone took the lawyer and the passers-by and kept the butler
+small in the dark doorway, the one figure that doubled panel 23."""
+EMPTY_TRIES = 2
+"""Seeds of the one-image edit before the room is left with what the last one kept."""
+
+
+def empty_room(path: Path, edit, count, tries: int = EMPTY_TRIES) -> int:
+    """Edit every figure out of a cut room, in place, each try from the peopled cut, until the
+    reader counts none (Jekyll ep06 2026-10-29: the doorstep room carried the butler small in the
+    doorway and three passers-by into every sibling).  `edit(prompt, source, target, seed)`,
+    `count(path) -> people`.  The people the room is left with."""
+    path = Path(path)
+    source = path.with_name(f"{path.stem}.peopled.png")
+    path.replace(source)
+    for seed in range(tries):
+        edit(EMPTY_PROMPT, source, path, seed)
+        left = count(path)
+        if left == 0:
+            break
+    source.unlink()
+    return left
+
+
+def record_path(room: Path) -> Path:
+    return Path(room).with_suffix(".json")
+
+
+def note_people(room: Path, left: int) -> None:
+    record_path(room).write_text(json.dumps({"people_left": int(left)}), encoding="utf-8")
+
+
+def emptied(room: Path) -> bool:
+    """The room was emptied and read with no one left; a room cut before the rule has no record."""
+    path = record_path(room)
+    return path.exists() and json.loads(path.read_text(encoding="utf-8")).get("people_left") == 0

@@ -46,7 +46,9 @@ a new brick also gets a line here.
     the cell holds. A face under 96 px (3 tokens of 32 px) has no eye the model can draw: plan it
     closer, refine what stays small. -> Takes; The take model follows the planned size; The framing floor.
 13. **A place is held by pixels, not words**: one room per setup, a recurring place pinned, a
-    state one edit of its master. -> Places; Grids and panels.
+    state one edit of its master. **The room holds no people**: a figure in the room is a figure in
+    every sibling, and a panel-less take stages that emptied room, never a second picture of the
+    place (ep06 doorstep, 2026-10-29). -> Places; Grids and panels; The doorstep room.
 14. **The voice is the ruler**: picture cut to the measured voice; every projection reads a
     recorded line's seconds. -> Process; The anime-TV grammar.
 15. **Measure where the minutes go before moving them; a free per read is harmful.** -> GPU when
@@ -105,6 +107,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Jekyll ep06 panels
 - Jekyll ep06 storyboard retro
 - Face refine until 2026-10-29
+- The doorstep room (Jekyll ep06, 2026-10-29)
 
 Anchors the code cites, archived: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

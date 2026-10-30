@@ -28,7 +28,8 @@ def test_the_word_escalation_is_not_in_step_07():
 
 
 @pytest.fixture()
-def ctx(tmp_path):
+def ctx(tmp_path, monkeypatch):
+    monkeypatch.setattr(step, "room_emptier", lambda ctx: lambda path: 0)     # the GPU edit is not under test here
     conn = db.get_connection(tmp_path / "t.db")
     db.init_db(conn)
     db.insert_codex(conn, "Book", codex_id=CODEX)

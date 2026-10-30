@@ -171,6 +171,9 @@ covers only timing inputs, so a reworded frame does not stale it.
   0.5 on profile and wings, not mirrored); a match keeps the old room bytes (touched fresh, so the
   siblings' manifest inputs hold), else replaces it. ep01 grids 13-17 were redrawn for a figure
   repair. The floor is advisory until calibrated on real anchor repairs.
+- **The room holds no people:** `grid_room.empty_room` edits it empty (2 seeds, read back);
+  only an emptied room is kept or staged on a panel-less take (`takes_r2v.place_of`). -> LESSONS
+  The doorstep room.
 
 ## Take prompts — `takes_r2v.py <book> <n> --from-refs --prompts` ($0, no GPU)
 
