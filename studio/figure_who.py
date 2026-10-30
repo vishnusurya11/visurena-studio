@@ -15,7 +15,7 @@ import re
 from studio import look_table as lt
 from studio import panel_content as pc
 
-ASK_VERSION = "2"
+ASK_VERSION = "3"
 ASK = (
     "List EVERY person you can see in this picture, whether facing the camera, in profile, or seen "
     "from behind. Output strict JSON: {\"figures\": [ ... ]}, one object per person with keys:\n"
@@ -24,6 +24,7 @@ ASK = (
     "\"facial_hair\": one of none, beard, moustache, sideburns, stubble, not_visible.\n"
     "\"coat\": the colour of the outer coat or jacket, one of black, grey, brown, green, blue, red, "
     "white, other, not_visible.\n"
+    "\"back_to_camera\": yes when you see the back of the person's head or body and not the face, else no.\n"
     f"(who ask v{ASK_VERSION})")
 
 SEEN_HAIR = {"black": "dark", "brown": "dark", "blond": "fair"}
@@ -101,12 +102,13 @@ def resolve(fig: dict, staged: dict) -> str | None:
     return agree[0] if len(agree) == 1 and all(staged[agree[0]].get(k) for k in NEEDED) else None
 
 
-def fault(figures: list[dict], staged: dict) -> str | None:
-    """The 'who: ...' line when two or more figures resolve to one cast member, else when a figure fits none."""
+def fault(figures: list[dict], staged: dict, back: frozenset = frozenset()) -> str | None:
+    """The 'who: ...' line when two or more figures resolve to one cast member, else when a figure fits none,
+    else when a figure facing the camera fits none of the members the plan does not see from behind."""
     who = [resolve(f, staged) for f in figures]
     twice = sorted({w for w in who if w and who.count(w) >= 2})
     if not twice:
-        return stranger(figures, staged)
+        return stranger(figures, staged) or turned(figures, staged, back)
     return f"who: {who.count(twice[0])} figures read as {twice[0]!r} by hair, facial hair and coat; the shot casts one"
 
 
@@ -126,6 +128,25 @@ def stranger(figures: list[dict], staged: dict) -> str | None:
             seen = seen_of(fig)
             shown = ", ".join(f"{k} {seen[k]}" for k in KEYS if seen[k])
             return f"who: a figure fits no cast member ({shown}); the shot casts {', '.join(sorted(staged))}"
+    return None
+
+
+def facing(fig: dict) -> bool:
+    """The reader said this figure faces the camera; a read without the key (ask v2) says nothing."""
+    return str(fig.get("back_to_camera", "")).strip().lower() in ("no", "false")
+
+
+def turned(figures: list[dict], staged: dict, back: frozenset) -> str | None:
+    """The 'who: ...' line for a figure facing the camera that the hair or the hat rules out of every member
+    the plan does NOT see from behind (Jekyll ep06 panels 24/25, run 33: over the lawyer's shoulder, the facing
+    man wore the lawyer's bowler; read 'grey' he fitted Utterson, and Poole-from-behind fitted the back)."""
+    front = {who: marks for who, marks in staged.items() if who not in back}
+    if not back or not front:
+        return None
+    for fig in figures:
+        if facing(fig) and all(clashes(fig, marks, STRANGER_KEYS) for marks in front.values()):
+            return (f"who: a figure facing the camera fits none of {', '.join(sorted(front))} "
+                    f"(seen from behind: {', '.join(sorted(back))})")
     return None
 
 

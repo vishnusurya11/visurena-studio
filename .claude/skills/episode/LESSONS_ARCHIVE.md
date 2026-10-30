@@ -2925,3 +2925,11 @@ the black-haired man facing camera -- neither Poole nor Utterson -- and G-WHO pa
 figures resolving to one member.  G-WHO's second rule (`figure_who.stranger`, content gate v10): a figure ruled out
 of EVERY staged member by hair or hat is a stranger.  Coat and facial hair are not used for it: replayed on the
 calibration set, a coat colour or a missed beard misread on eye-passed ep05 takes T08, T15 and T22.
+Third pass (2026-10-30): the redrawn 24/25 still put the lawyer's bowler on the facing man, and the reader read both
+men grey -- which fits "Poole from behind, Utterson facing" once fair and grey are confusable.  Marks cannot say who
+faces the camera; the plan can (`grids.back_turned`).  G-WHO ask v3 lists `back_to_camera` per figure, and
+`figure_who.turned` fails a FACING figure the hair or hat rules out of every member the plan does not see from
+behind (content gate v11).  Measured on the real panels: fails 24/25, passes 23 and shot 8 (Lanyon from behind).
+The ladder's grid cap goes to wrong-person grids first (`panel_ladder.people_first`); a frame line's dress
+parenthetical never reaches the drawer (the slot replaces it), the focus line does.  Also: a model left resident
+in ComfyUI slowed the 2K pass 7x (T21 19 s/frame; 2.6 s after /free): the pass frees ComfyUI first.

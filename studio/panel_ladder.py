@@ -399,7 +399,7 @@ class Climb:
         before = panel_digest(self.home / "storyboard")
         self.seams_isolated(verdict)                                   # the seam rung, outside the cap
         faults = [f for f in cured_by_redraw(verdict) if f.kind not in SEAMED]
-        rows = self.climbing(grid_layout.read(self.home), shots_of(faults))
+        rows = self.climbing(people_first(grid_layout.read(self.home), faults), shots_of(faults))
         pre = episode_home.read_json(self.home / "plan.json") if rung.name == "reprose" and rows else None
         if rung.name == "reprose" and rows:
             self.cure_prose(rows, faults)
@@ -456,6 +456,14 @@ class Climb:
     @property
     def rungs(self) -> judged_gate.Rungs:
         return judged_gate.Rungs(ladder(), self.take, curable=self.curable)
+
+
+def people_first(rows: list[dict], faults: list[Fault]) -> list[dict]:
+    """The layout rows, those holding a wrong-person fault first, each group in layout order (Jekyll ep06 run 33:
+    the cap of 2 went to shot 0's grid and panel 19's lettering while 24/25 kept a stranger)."""
+    from studio import people_faults
+    wrong = set(shots_of([f for f in faults if people_faults.wrong(f)]))
+    return sorted(rows, key=lambda r: not (set(r.get("shots") or []) & wrong))
 
 
 def cured_by_redraw(verdict: Verdict) -> list[Fault]:

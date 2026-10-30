@@ -78,14 +78,14 @@ def read_who(path: Path, seed: int = 19) -> list[dict]:
     return fw.parse(said if isinstance(said, str) else str(said))
 
 
-def who_check(shot, seen: pc.Seen, path: Path, staged: dict) -> list[str]:
+def who_check(shot, seen: pc.Seen, path: Path, staged: dict, back: frozenset = frozenset()) -> list[str]:
     """G-WHO on the panel (Jekyll ep06 shot 25, 2026-10-29: Utterson drawn twice passed every panel check and
     the take morphed him into Poole): two figures read as one cast member fail it; an unread ask is a fault."""
     from studio import figure_who as fw
     if not fw.applies(len(shot.faces or []), shot.size, seen.people):
         return []
     try:
-        bad = fw.fault(read_who(path), staged)
+        bad = fw.fault(read_who(path), staged, back)
     except pc.Unreadable as why:
         return [f"unread: who {str(why)[:100]}"]
     return [bad] if bad else []
@@ -108,7 +108,14 @@ def judge(book: Path, shot, setup, seen: pc.Seen) -> list[str]:
                            markers=cast_refs.look_markers(book, list(shot.faces or []), setup))
 
 
-def row_for(book: Path, shot, setup, path: Path) -> dict:
+def back_of(book: Path, shot, aliases: dict) -> frozenset:
+    """The cast this shot's plan sees only from behind (grids.back_turned, the rule that withholds their sheet)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import grids
+    return frozenset(n for n in shot.faces or [] if grids.back_turned(book, n, [shot], aliases))
+
+
+def row_for(book: Path, shot, setup, path: Path, back: frozenset = frozenset()) -> dict:
     """One panel's verdict row; an unreadable answer is a failed row."""
     try:
         seen = read(path)
@@ -116,7 +123,7 @@ def row_for(book: Path, shot, setup, path: Path) -> dict:
         return {"shot": shot.index, "passed": False, "faults": [f"unread: {str(why)[:120]}"]}
     twins, fields = twin_check(shot, seen, path)                 # G-TWIN (2026-10-05)
     got = judge(book, shot, setup, seen) + twins + who_check(                   # G-WHO (2026-10-29)
-        shot, seen, path, cast_refs.who_marks(book, list(shot.faces or []), setup))
+        shot, seen, path, cast_refs.who_marks(book, list(shot.faces or []), setup), back)
     look = pc.look_advisories(seen, cast_refs.look_markers(book, list(shot.faces or []), setup))  # G-LOOK-PANEL, advisory
     if land := pc.landform_advisory(seen, pc.flat_place(book, setup.location)):   # J5: hills, advisory
         look = [*look, land]
@@ -141,13 +148,15 @@ def main(book_id: str, number: int, only: list[int] | None = None) -> int:
     home = episode_home.home(book, number) / "storyboard"
     wanted = [s for s in ep.shots if not only or s.index in only]
     rows, missing = [], []
+    import grids
+    aliases = grids.alias_table(book, ep)
     with comfy.model_kept():        # the VL model loaded once for the batch (speed plan #6)
         for shot in wanted:
             path = home / f"shot_{shot.index:02d}.png"
             if not path.exists():
                 missing.append(shot.index)
                 continue
-            row = row_for(book, shot, ep.setups[shot.setup], path)
+            row = row_for(book, shot, ep.setups[shot.setup], path, back_of(book, shot, aliases))
             rows.append(row)
             print(f"  {'ok  ' if row['passed'] else 'FAIL'} shot {shot.index:02d}  "
                   f"{'; '.join(row['faults'])}", flush=True)
