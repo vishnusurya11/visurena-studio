@@ -75,7 +75,6 @@ NOT_A_TAKE = {
     "scripts/episode/regen_2k.py:masked": "the r2v_2k draw with extra faces pasted back, in place",
     "scripts/episode/regen_2k.py:staged_take": "the take scaled into ComfyUI's input (it reads the take)",
     "scripts/episode/regen_2k.py:write_record": "takes/r2v_2k/regen.json",
-    "scripts/episode/step_07_board.py:edit_room": "storyboard/anchors/<setup>.png, the emptied room",
     "scripts/episode/qc.py:window": "one line's audio from the master",
     "scripts/episode/qc.py:speech_band": "the master's speech band wav",
     "scripts/episode/runcards.py:final_clip": "a shot's clip and strip cut from the master",

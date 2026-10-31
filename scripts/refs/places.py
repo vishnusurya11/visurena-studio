@@ -34,7 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import episode_home
+from studio import episode_home, qwen21_edit
 from studio.episode_home import episode_arg
 
 ANCHOR = "wide_establishing"
@@ -119,7 +119,7 @@ def draw_missing(book: Path, setups: dict, draw, look: str = "") -> list[Path]:
 
 # ---- continuity (decision 2026-10-10): masters, and states one hop from them ------
 
-EDIT = "image_qwen_image_edit_2511_single_image"
+EDIT = qwen21_edit.WORKFLOW
 """The existing one-image edit workflow (2511 + its Lightning LoRA); never edited."""
 SAME_PLACE_BAND = 0.80
 """DINOv3 cosine of a variant to the picture it was edited from, under which the
@@ -256,14 +256,12 @@ def same_place_flag(source: Path, variant: Path, embed) -> str:
 
 
 def qwen_edit(book: Path):
-    """The 2511 one-image edit on the local GPU, logged to pack.jsonl."""
-    from studio.comfy import run, stage_image
+    """The one-picture edit on Qwen-Image 2.1 on the local GPU (studio/qwen21_edit; Qwen-Image-Edit 2511
+    until 2026-10-30), logged to pack.jsonl."""
 
     def edit(prompt: str, source: Path, target: Path) -> None:
         began = time.time()
-        out = run(EDIT, {"prompt": prompt, "image_1": stage_image(source), "lightning": True,
-                         "seed": zlib_seed(episode_home.relative(book, target))})[0]
-        shutil.copyfile(out, target)
+        qwen21_edit.edit(prompt, source, target, zlib_seed(episode_home.relative(book, target)), prefix="place_state")
         with (Path(book) / "refs" / "pack.jsonl").open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"path": episode_home.relative(book, target), "workflow": EDIT,
                                  "source": episode_home.relative(book, source), "prompt": prompt,

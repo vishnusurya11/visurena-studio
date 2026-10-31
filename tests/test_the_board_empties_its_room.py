@@ -44,18 +44,19 @@ def test_a_room_left_with_people_is_logged(tmp_path, monkeypatch):
 
 
 def test_people_are_counted_by_the_panel_reader(monkeypatch):
+    import sys
+    sys.path.insert(0, str(Path(s7.__file__).resolve().parent))      # as people_in does
     import panel_content_check
     monkeypatch.setattr(panel_content_check, "read", lambda path: SimpleNamespace(people=3))
     assert s7.people_in(Path("x.png")) == 3
 
 
 def test_the_edit_is_the_book_pictures_one_image_edit(tmp_path, monkeypatch):
-    from studio import comfy
+    """Qwen-Image 2.1, as the grids (owner 2026-10-30: "make them qwen 2.1")."""
+    from studio import qwen21_edit
     seen = {}
-    out = tmp_path / "out.png"
-    out.write_bytes(b"edited")
-    monkeypatch.setattr(comfy, "stage_image", lambda p: "staged.png")
-    monkeypatch.setattr(comfy, "run", lambda wf, values: seen.update(wf=wf, **values) or [out])
+    monkeypatch.setattr(qwen21_edit, "edit", lambda prompt, source, target, seed, prefix="": seen.update(
+        prompt=prompt, source=source, target=target, seed=seed))
     s7.edit_room("empty it", tmp_path / "src.png", tmp_path / "t.png", 1)
-    assert seen["wf"] == "image_qwen_image_edit_2511_single_image" and seen["seed"] == 1
-    assert (tmp_path / "t.png").read_bytes() == b"edited"
+    assert s7.EDIT == "image_qwen_image_2_1_edit_multi"
+    assert seen == {"prompt": "empty it", "source": tmp_path / "src.png", "target": tmp_path / "t.png", "seed": 1}

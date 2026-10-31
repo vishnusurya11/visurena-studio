@@ -20,7 +20,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from studio import boundary, episode_home, grid_layout, grid_room, pack_refs, panel_ladder, step_cli  # noqa: E402
+from studio import boundary, episode_home, grid_layout, grid_room, pack_refs, panel_ladder, qwen21_edit, step_cli  # noqa: E402
 
 STEP_ID = "07"
 NAME = "board"
@@ -97,15 +97,12 @@ def cut_room(ctx, row: dict, shots: list[dict]) -> None:
                 step_id=STEP_ID, level="WARNING")
 
 
-EDIT = "image_qwen_image_edit_2511_single_image"
-"""The book pictures' one-image edit (scripts/refs/places.py), local; never edited."""
+EDIT = qwen21_edit.WORKFLOW
+"""The one-picture edit on Qwen-Image 2.1 (studio/qwen21_edit; Qwen-Image-Edit 2511 until 2026-10-30)."""
 
 
 def edit_room(prompt: str, source: Path, target: Path, seed: int) -> None:
-    import shutil
-    from studio.comfy import run, stage_image
-    out = run(EDIT, {"prompt": prompt, "image_1": stage_image(source), "lightning": True, "seed": seed})[0]
-    shutil.copyfile(out, target)
+    qwen21_edit.edit(prompt, source, target, seed, prefix="room_empty")
 
 
 def people_in(path: Path) -> int:
