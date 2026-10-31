@@ -102,11 +102,20 @@ def resolve(fig: dict, staged: dict) -> str | None:
     return agree[0] if len(agree) == 1 and all(staged[agree[0]].get(k) for k in NEEDED) else None
 
 
+def apart(figures: list[dict]) -> bool:
+    """Two figures the reader tells apart by their coats are two people, not one drawn twice: a double reads
+    alike.  The coat FAMILY folds black and grey for the night; the raw read keeps them (Jekyll ep07, dusk:
+    Enfield's grey frock coat and Utterson's black overcoat both fell to Utterson; every eye-confirmed double
+    in the calibration set read one coat, black/black)."""
+    return len({str(f.get("coat", "") or "") for f in figures} - UNSEEN) > 1
+
+
 def fault(figures: list[dict], staged: dict, back: frozenset = frozenset()) -> str | None:
     """The 'who: ...' line when two or more figures resolve to one cast member, else when a figure fits none,
     else when a figure facing the camera fits none of the members the plan does not see from behind."""
     who = [resolve(f, staged) for f in figures]
-    twice = sorted({w for w in who if w and who.count(w) >= 2})
+    twice = sorted({w for w in who if w and who.count(w) >= 2
+                    and not apart([f for f, x in zip(figures, who) if x == w])})
     if not twice:
         return stranger(figures, staged) or turned(figures, staged, back)
     return f"who: {who.count(twice[0])} figures read as {twice[0]!r} by hair, facial hair and coat; the shot casts one"
