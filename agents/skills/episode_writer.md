@@ -409,6 +409,7 @@ again — the gates read the plan, never a diff.
 - Tier 3 voice-measured rows (seconds, shares, counts, tail wording) are advice: never chase one.
 - Edit the previous plan, changing only the rows the REFUSED section names; a line "already fixed, keep fixed: <gates>" names gates not to touch.
 - A setup `crowd` rides only a shot that declares `extras` > 0; G-CROWD asks `extras` >= 1 on a wide over a crowd, and a bigger count comes from the setup's crowd.
+- G-HANDS (advisory): a peopled shot's `motion` never asks fingers to work a small object (break a seal, lift or turn a page, set down or push an envelope, button, grip and work). The hands stay still where the first frame has them, the face carries the beat, and a change in the object is its own insert with no hands in it. Blind trial, 2026-10-30: still hands halved the morphing (7 of 14 takes noticeable -> 3 of 14).
 - G-AIM: the aimed noun in `at_rest` is the bare noun, never with a pace phrase ("girl", not "girl at a walking pace").
 - G-SYNC: a dialogue line is the first line on its shot.
 - G-LAID: a person lying down is seen from above looking down on the face, or level with it.

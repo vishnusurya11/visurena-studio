@@ -492,6 +492,10 @@ def main(book_id: str, number: int, plan: str = "plan.json") -> int:
     for f in gt:
         print("  advisory:", f[:170])
     print("EXPECTS TEXT :", plan_gates.expects_text(ep) or "no shot stages printed matter")
+    hands = plan_gates.handwork_advisories(ep)
+    print("G-HANDS      :", f"{len(hands)} advisory" if hands else "clean")
+    for f in hands:
+        print("  advisory:", f[:170])
     bad, folded = plan_gates.bed_faults(ep)
     print("G-BED        :", len(bad) or "clean"); hard += len(bad)
     for f in bad + folded:

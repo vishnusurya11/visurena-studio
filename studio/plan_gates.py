@@ -825,6 +825,29 @@ def expects_text(episode) -> list[int]:
             if panel_content.lettering_expected(f"{s.frame} {getattr(s, 'at_rest', '')}", s.size)]
 
 
+HANDWORK = re.compile(
+    r"\b(?:breaks?|breaking|tears?|tearing|unfolds?|folds?|unbuttons?|buttons?|thumbs?|"
+    r"fingers? (?:tighten|work|fumble|pick)|turns? (?:over )?(?:the )?(?:next )?(?:page|leaf)|"
+    r"lifts? (?:the )?(?:top )?(?:page|sheet|letter|envelope|packet)|"
+    r"(?:sets?|setting) (?:a |the )?(?:sealed )?(?:envelope|letter|packet)|"
+    r"push(?:es|ing)? (?:the )?(?:packet|envelope|letter)|opens? (?:the )?(?:envelope|letter|packet)|"
+    r"writes?|writing|pours?|pouring)\b", re.I)
+"""Fingers working a small object: the take model redraws the hand and the object frame to frame (ep06 morph
+audit; trial 2026-10-30, blind: 7 of 14 takes noticeable with the action, 3 of 14 with still hands)."""
+
+
+def handwork_advisories(episode) -> list[str]:
+    """ADVISORY: a peopled shot whose motion still asks fingers to work a small object (the brief's still-hands
+    rule), named so the next episode measures whether the brief reached the plan."""
+    out = []
+    for s in episode.shots:
+        said = f"{getattr(s, 'motion', '') or ''} {getattr(s, 'changed', '') or ''}"
+        if (getattr(s, "faces", None) or []) and (hit := HANDWORK.search(said)):
+            out.append(f"G-HANDS shot {s.index}: fingers work an object ({hit.group(0)!r}); hold the hands still "
+                       f"and give the change its own insert")
+    return out
+
+
 def bed_faults(episode: Episode) -> tuple[list[str], list[str]]:
     """(G-BED refusals, advisories): a bed tone outside the five is refused
     before anything renders; a synonym the bed will fold is named as advice.

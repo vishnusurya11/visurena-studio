@@ -70,6 +70,12 @@ PICTURE_RULES = [
     "side the light comes from ('The works lamps come from the RIGHT').",
     "`at_rest` names ONE focus ('THE FOCUS OF THE PICTURE IS ...') and places two or "
     "three other things around it; never an inventory of ten objects.",
+    # ep06 morph trial (2026-10-30, owner "trial then adopt"): fingers working a small object
+    # morphed 7 of 14 blind-judged takes, still hands with a face beat 3 of 14.
+    "No shot asks fingers to work a small object -- break a seal, lift or turn a page, set down or push in "
+    "an envelope, button a coat, grip and work a chair arm: the hands stay still where the first frame has "
+    "them and the face carries the beat; a change in the object is its own insert, the object alone in its "
+    "new state, no hands in it.",
     "At most two faces a shot, each seen whole -- a person who is only a hand or an arm "
     "is not a face; a crowd belongs only on wide shots, as a distant mass, never on a "
     "close or medium shot.",

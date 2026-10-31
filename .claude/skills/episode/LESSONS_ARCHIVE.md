@@ -2957,6 +2957,14 @@ words on an envelope. Seven lenses + a skeptic; evidence in docs/audit/2026-10-3
   buttons, a hand to the chest grew a black starburst), rising or walking under a tracking camera (coat redrawn),
   pans/pull-backs that reveal unseen room (props change count). Locked-off faces that only turn or speak: clean.
   G-WARP reads faces only; no gate reads hands, props or bodies (docs/audit/.../morph/morph.md).
+- **Built after the owner's rulings (2026-10-30):** the narrow ship-block (`studio/ship_block`, 9cb999c5): a wrong
+  person, the prompt's scaffold words read back by OCR, hair no staged row allows, a 9+ frame plate leak never ship
+  flagged; replayed on ep02-06 it refuses exactly the five eye-confirmed faults. SHEET-ROW reads the hair
+  (841c74fc): Poole's superseded sheet fails, his current sheet and three controls pass (local VLM). Still hands
+  (G-HANDS advisory + the writer's rule): the seven ep06 hand-work takes re-rendered both ways, 2 seeds, judged
+  BLIND -- action 1.43 mean (7/14 noticeable, 2 stop), still hands 0.71 (3/14, 0 stop). Not a cure-all: a take
+  whose first frame holds the object mid-task still animates it (T22's safe door swung by itself; T21's envelope
+  flattened) -- the insert carries the change, not the hand. Windows Update: NoAutoRebootWithLoggedOnUsers=1.
 - **G-WHO runs on 2+ cast only** (`applies()`): a single-cast close drawn with the wrong hair (ep05 Jekyll grey in
   every shot, row black) is caught by no blocking gate.
 - **A room cut before 2026-10-30 still holds people**: a re-run redraw in that setup copies them (trial: Utterson in
