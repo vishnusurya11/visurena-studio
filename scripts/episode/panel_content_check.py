@@ -73,8 +73,9 @@ def twin_check(shot, seen: pc.Seen, path: Path) -> tuple[list[str], dict]:
 def read_who(path: Path, seed: int = 19) -> list[dict]:
     """The G-WHO ask on one panel (studio/figure_who): every figure's hair, facial hair, coat and headwear."""
     from studio import figure_who as fw
+    # every figure is listed, as in `read`: at 512 a crowded frame was cut off mid-JSON (Six of Crows, 2026-11-02)
     said = comfy.cached_text(WORKFLOW, {"image_1": comfy.stage_image(path), "prompt": fw.ASK, "seed": seed,
-                                     "max_new_tokens": 512}, readable=fw.readable)
+                                     "max_new_tokens": TOKENS}, readable=fw.readable)
     return fw.parse(said if isinstance(said, str) else str(said))
 
 
