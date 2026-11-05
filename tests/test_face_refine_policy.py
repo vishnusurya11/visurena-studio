@@ -148,6 +148,38 @@ def test_a_match_under_the_floor_is_never_refined():
     assert fr.assign({(0, "a"): fr.MATCH_FLOOR - 0.01}, [0], ["a"]) == {}
 
 
+def brute_total(scores, tracks, people):
+    """The best one-to-one total by trying every pairing (small cases only)."""
+    import itertools
+    k = min(len(tracks), len(people))
+    return max(sum(scores[p] for p in zip(chosen, order))
+               for chosen in itertools.permutations(tracks, k) for order in itertools.permutations(people, k))
+
+
+def test_the_assignment_has_the_best_total_on_small_random_casts():
+    import random
+    rng = random.Random(7)
+    for n_tracks, n_people in [(3, 2), (2, 3), (4, 4), (5, 3)]:
+        tracks, people = list(range(n_tracks)), [f"p{i}" for i in range(n_people)]
+        scores = {(t, p): rng.uniform(0.5, 1.0) for t in tracks for p in people}
+        got = fr.assign(scores, tracks, people)
+        assert sum(scores[pair] for pair in got.items()) == pytest.approx(brute_total(scores, tracks, people))
+
+
+def test_a_crowd_of_tracks_is_assigned_in_well_under_a_second():
+    """Action POC scene 21 (2026-11-04): a market crowd gave ~20 tracks against 8 cast; the brute-force search
+    (k-permutations of tracks x permutations of people) never finished, and face fix sat 60 min on the CPU."""
+    import random
+    import time
+    rng = random.Random(11)
+    tracks, people = list(range(24)), [f"p{i}" for i in range(8)]
+    scores = {(t, p): rng.uniform(0.0, 1.0) for t in tracks for p in people}
+    began = time.perf_counter()
+    got = fr.assign(scores, tracks, people)
+    assert time.perf_counter() - began < 1.0
+    assert len(set(got.values())) == len(got)
+
+
 # ---- the crop's prompt ---------------------------------------------------------------------
 
 def test_the_crop_prompt_defines_only_its_one_person():

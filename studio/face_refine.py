@@ -14,7 +14,6 @@ back to the unrefined take.  No file, no GPU, no model.
 """
 from __future__ import annotations
 
-import itertools
 import math
 import re
 from dataclasses import dataclass
@@ -425,14 +424,20 @@ def match_score(identity: float, x: float, prior: float | None) -> float:
     return identity + POS_WEIGHT * (1.0 - 2.0 * abs(x - prior))
 
 
+UNSCORED = -1e6
+"""A pair with no score: far below any real one, finite so the solver can add it up."""
+
+
 def assign(scores: dict[tuple[int, str], float], tracks: list[int], people: list[str]) -> dict[int, str]:
-    """The one-to-one track -> person map with the best total; a pair under the floor is dropped."""
-    best, best_total = {}, float("-inf")
-    for chosen in itertools.permutations(tracks, min(len(tracks), len(people))):
-        for order in itertools.permutations(people, len(chosen)):
-            total = sum(scores.get(pair, float("-inf")) for pair in zip(chosen, order))
-            if total > best_total:
-                best, best_total = dict(zip(chosen, order)), total
+    """The one-to-one track -> person map with the best total; a pair under the floor is dropped.  Solved as an
+    assignment problem (2026-11-04: the brute-force permutation search never finished on a crowd of ~20 tracks
+    against 8 cast -- action POC scene 21; Jekyll-era scene 04 spun 8 h the same way)."""
+    from scipy.optimize import linear_sum_assignment
+    if not tracks or not people:
+        return {}
+    grid = [[scores.get((t, who), UNSCORED) for who in people] for t in tracks]
+    rows, cols = linear_sum_assignment(grid, maximize=True)
+    best = {tracks[r]: people[c] for r, c in zip(rows, cols)}
     return {t: who for t, who in best.items() if scores.get((t, who), float("-inf")) >= MATCH_FLOOR}
 
 
