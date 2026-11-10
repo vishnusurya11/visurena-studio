@@ -111,10 +111,10 @@ def test_a_third_spent_clock_stop_in_a_row_parks_clock_loop():
     drive = [start, _spent_end(), start, _spent_end(), start, _spent_end()]
     got = ap.derive(_signals(drive_rows=drive, clock_spent_s=EPISODE_CEILING_SECONDS + 1,
                              log_tail="REFUSED: qc FAIL"), 20)
-    assert (got.state, got.reason) == (ap.State.PARKED, "clock_loop")
+    assert got.state is ap.State.PARKED and got.reason.startswith("clock_loop")
     two = ap.derive(_signals(drive_rows=drive[2:], clock_spent_s=EPISODE_CEILING_SECONDS + 1,
                              log_tail="REFUSED: qc FAIL"), 20)
-    assert two.reason != "clock_loop"
+    assert not two.reason.startswith("clock_loop")
 
 
 def test_a_safety_stop_parks_by_its_own_name():

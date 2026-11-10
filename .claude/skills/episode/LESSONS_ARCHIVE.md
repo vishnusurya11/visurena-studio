@@ -2972,3 +2972,40 @@ words on an envelope. Seven lenses + a skeptic; evidence in docs/audit/2026-10-3
 - **Hours:** ep06 15.8 h machine (8.2 + 7.6 repair) vs 6 h; the 2K pass 36 %, 148 min of it on takes retaken later
   because Poole's sheet contradicted his row and was found only on rendered takes -- check sheet against row before
   any render. Windows Update rebooted at 00:29 PDT twice (active hours end 00:00; ~4.5 h dead each).
+
+## Jekyll ep07 retro (2026-11-10)
+
+ep07 "Incident at the Window" took 20 drive runs over 11 days (10-30 -> 11-10) and 7.08 h of machine clock (6 h
+budget); it shipped 2026-11-10 (https://youtu.be/ZSbWJVFDeGE) with four flagged takes. Retro: lead + four experts
+(loops, people gates, motion, time) + a skeptic; docs/audit/2026-11-10_jekyll_ep07_retro/ (EVIDENCE, out/A-E, FINAL).
+
+- **G-WHO was 0 of 7 on ep07's Utterson+Enfield two-shots** (runs 02-05): every refused take was eye-passed or
+  flipped to ok on byte-identical takes when only the gate changed (35b7e603 coats). Runs 06-08 were facenet
+  clones on T10/T17, unproven either way. Two co-cast men a reader cannot tell apart are a sheet fault before
+  they are a take fault: a sheet-time distinguishability check is owed (GPU).
+- **One master frame refused five runs** (10, 13-15, 17; 84 min of drive clock): `master_ladder.flag` blocked on
+  any one frame's people line, and its REFUSED line printed only the shot, so the brain invented a story from
+  stale take rows. Fixed: brick 17 (`ship_block.master_blocks`, `master_eye.look_again`); the line now prints
+  line, time and k of n.
+- **G-GAIT's "4.0 steps/s" was an alias** (brick 18): stride-2 sampling folds H3's 3-frame render pulse (8 Hz)
+  to 4 Hz. T00/T19/T21 were re-rolled six times each on a fault no seed could move, and T00 does not walk at all
+  (travel 0.005 h/s). Fixed: `gait.alias`, take_dq gate v2; replay on the shipped takes: 3 of 3 alias.
+- **The retakes were seed re-rolls with identical prompts** (T21 5 rolls, T05 4 rolls): warp has no plan rung
+  (seed, then terminal) and lettering has no cure at all on a clean panel. The writer invited T21's signs with
+  "shuttered shop fronts". Owed (GPU): a `plan_warp` rung (drop the head turn on a large speaking face) and the
+  shop-front retake with "blank fascias, no signs".
+- **The expired token hid behind `clock_loop`** for six days: `derive` tested the clock backstop before the table,
+  and `youtube_token_told` was written before a send nobody checked. Fixed: `named_park`, `clock_loop: <reason>`,
+  `nudge_parked` (FINISHED, NOT PUBLISHED every 6 h), `notify` returns whether it sent.
+- **`redo 09` was placed three times** with every take "cached (bytes unchanged)". Fixed: `cure_spent` keyed on
+  the refusal lines (the ledger keeps only the error class).
+- **A hand edit of plan.json ('slowly') met the contract only inside step 01.** Fixed: `drive.plan_lines` at
+  preflight (refuse now on a contract failure; an unrecorded edit is said as a re-plan, never refused, because
+  the take ladder's own cures rewrite the plan through plan_provenance), and the TABLE parks `plan_contract`.
+- **Hours:** take_dq 179.6 min, but 124.9 of it ran under GPU renders; the exposed serial passes ran on 2 of 32
+  cores (gait 2.9x faster at 8 threads). Fixed: `take_dq.judge_threads`. The POC efficiency fixes (frame-3 skip,
+  model kept) do not port: production already keeps the model. Projection with the fixes: ~5.3 h.
+- Rejected by the skeptic, with reasons in out/E_skeptic.md: counting clock_loop stops only since a retry (it
+  loosens the only brake), a plan-sha refusal (refuses legitimate cures), 24 fps gait with today's walls (adds a
+  false fire on a shipped WotW walk), the crowd ceiling from the plan alone (unreplayed), lifting CONFIRM to the
+  take hair line (thins the guard that caught ep05 T07).

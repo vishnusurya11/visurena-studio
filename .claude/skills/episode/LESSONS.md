@@ -12,6 +12,8 @@ a new brick also gets a line here.
 2. **A round, climb or cap is spent only when it changed bytes** (B1): never for a call, a
    re-sign, a re-judge or a relaunch. ep01: 2 retake rounds booked at 0.0 s, 3 climbs for 2
    writer entries, 28 panels re-read for 2 changed. -> Jekyll Kawajiri ep01 retro, failures 1, 6, 7.
+   A cure order that left the same refusal lines is spent; the same order is not placed twice
+   (ep07: `redo 09` x3, every take cached; `autopilot.cure_spent` parks `cure_no_change`).
 3. **A gate is only as true as the population it was fitted on** (B2). A wall with no owner
    labels is advisory, a HARD row states its outcome at the cap, and a ruler written for one plan
    form never judges another: replay every downstream gate on a new form, no write, before the
@@ -36,6 +38,9 @@ a new brick also gets a line here.
 8. **A terminal is not a pass, and a refusal needs someone to act on it.** A judge-signed
    terminal ships flagged and listed; a fail-closed refusal on a spent ladder deadlocks (ep01
    G-DEAD). -> ep01 retro, failure 8; Process.
+   A notification is a send, not a read: a finished master that is not public is a state, told
+   every 6 h until a person acts, and every send records whether it went out (ep07 waited 6 days
+   behind a `clock_loop` park that hid an expired token; a park the table names outranks clock_loop).
 9. **An owner ruling retires a sentence.** Grep for it and add it to the retired-phrase list in
    the same commit; on 2026-10-18 five false sentences stood by night. -> ep01 retro (P16).
 10. **Green gates prove only the absence of their own faults.** Watch the master, read the
@@ -58,6 +63,15 @@ a new brick also gets a line here.
     only when replayed on what is delivered. ep01: 6.02 h of machine, then 31 h of wall: two faults
     no gate measured, 11.2 h of agents, 3 launches stopped by unreplayed changes, a 4.68 h silent
     supervisor (silence is a state too). -> The ep01 deadline retro.
+17. **A block stands on a second look, and a second look is another frame.** A per-frame people read
+    refuses only when a different frame of the same shot agrees; the same frame re-read on the same
+    seed is the same misread (ep07 shot_07: one 0.5 s master frame of Jekyll's hair refused five runs,
+    84 min). Scaffold words, a long leak and a measured clone stand on one sighting. Every refusal
+    prints its line, time and frame count. -> Jekyll ep07 retro.
+18. **A rhythm sampled under twice its rate is another rhythm.** G-GAIT read at 12 fps folds H3's 8 Hz
+    render pulse to "4.0 steps/s" (ep07 T00/T19/T21: at 24 fps no step in band, prominence 1.3-2.3); a
+    shuffle stands only when the native-rate read agrees. A gate whose only positive's bytes are gone is
+    advisory until a new label exists. -> Jekyll ep07 retro.
 
 ## Read by question
 
@@ -109,6 +123,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Face refine until 2026-10-29
 - The doorstep room (Jekyll ep06, 2026-10-29)
 - Jekyll ep01-06 series retro
+- Jekyll ep07 retro (2026-11-10)
 
 Anchors the code cites, archived: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

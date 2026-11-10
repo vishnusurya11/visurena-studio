@@ -99,3 +99,12 @@ def test_a_man_who_strides_into_the_room_is_still_a_gait():
     """The exemption is for a MEASURED distance -- a number or an article and a
     noun of length -- not for the preposition alone."""
     assert l8_pace(block("Holmes strides into the room and turns."), {})
+
+
+def test_the_verb_is_never_added_twice():
+    """Jekyll ep07 retro S8: T00's prompt carried '; the walker goes in profile ...' after the plan's own
+    'halt', and a second gait cure would have appended it again."""
+    from studio import gait
+    once = gait.gait_verb("He stops at the sill and halts.")
+    assert gait.gait_verb(once) == once
+    assert once.count(gait.VERB) == 1

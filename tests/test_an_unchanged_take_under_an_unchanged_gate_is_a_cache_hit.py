@@ -45,13 +45,14 @@ def test_changed_bytes_are_a_miss(tmp_path):
     assert take_dq.cached(tmp_path, 0, take) is None
 
 
-def test_ep01s_record_from_before_the_gate_version_is_a_hit(tmp_path):
-    """Skeptic on 92eacc1: ep01 was measured at 42a70889, the code v1 was pinned from (92eacc1
-    changed only the cache), so its 28 takes are not re-measured (about 18 min) on the resume."""
+def test_ep01s_record_from_before_the_gate_version_reads_as_v1(tmp_path):
+    """Skeptic on 92eacc1: ep01 was measured at 42a70889, the code v1 was pinned from, so its legacy
+    hash reads as gate v1.  Under v2 (Jekyll ep07 retro S7: a 12 fps shuffle is re-read at 24 fps) a
+    v1 record is measured once more -- its gait verdict may have changed."""
     take = room(tmp_path)
-    assert "gate_version" not in json.loads(FIXTURE.read_text(encoding="utf-8"))
-    hit = take_dq.cached(tmp_path, 0, take)
-    assert hit is not None and hit["measures_sha8"] == "42a70889"
+    report = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    assert "gate_version" not in report and take_dq.gate_of(report) == "1"
+    assert take_dq.GATE_VERSION == "2" and take_dq.cached(tmp_path, 0, take) is None
 
 
 def test_a_record_from_older_measuring_code_is_measured_once(tmp_path):

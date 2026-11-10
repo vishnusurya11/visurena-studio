@@ -147,9 +147,10 @@ def flag(v: Verdict) -> Verdict:
     block list stands (G-PEOPLE, owner 2026-10-28; scaffold words, hair no row allows, a long leak, owner
     2026-10-30: studio/ship_block), which refuses."""
     from studio import ship_block
-    if wrong := [f.where for f in v.faults if ship_block.blocks(f)]:
+    if wrong := ship_block.master_blocks(v.faults):
+        said = "; ".join(ship_block.block_text(where, rows) for where, rows in wrong.items())
         raise SystemExit(f"REFUSED: G-PEOPLE: a fault on the ship-block list (a wrong person, scaffold words, hair "
-                         f"no row allows, a long leak) stands at {', '.join(wrong)} after the master ladder's "
+                         f"no row allows, a long leak) stands at {said} after the master ladder's "
                          "rounds; it never ships flagged -- retake those shots")
     return v
 

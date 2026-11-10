@@ -46,6 +46,67 @@ def blocks(fault) -> bool:
             or any(line.startswith(SCAFFOLD_LINE) or line.endswith(HAIR_LINE) for line in lines))
 
 
+CONFIRM_FRAMES = 2
+"""Frames of one shot that must agree before a per-frame people read blocks the master (brick 17)."""
+LOOK_FRAMES = 3
+"""Frames a shot must have been read on before a lone people read may stand down; fewer fails closed."""
+
+
+def _dict(fault) -> dict:
+    return fault.model_dump() if hasattr(fault, "model_dump") else dict(fault)
+
+
+def per_frame_people(fault) -> bool:
+    """A master read's people line on one frame, with nothing on it that stands on one sighting."""
+    f = _dict(fault)
+    if f.get("kind") != "content" or (f.get("evidence") or {}).get("at") is None:
+        return False
+    hard = any(line.startswith(SCAFFOLD_LINE) or line.endswith(HAIR_LINE) for line in lines_of(f))
+    return blocks(f) and not hard and not long_leak(f)
+
+
+def _confirmed(rows: list[dict]) -> bool:
+    """Two frames agree, or the shot was read too thinly for a lone frame to stand down."""
+    ats = {r["evidence"]["at"] for r in rows}
+    read_on = max(int(r["evidence"].get("read_on") or 0) for r in rows)
+    return len(ats) >= CONFIRM_FRAMES or read_on < LOOK_FRAMES
+
+
+def master_blocks(faults: list) -> dict[str, list[dict]]:
+    """Shot -> the faults that refuse it at the master (Jekyll ep07 retro S1)."""
+    out: dict[str, list[dict]] = {}
+    lone: dict[str, list[dict]] = {}
+    for f in map(_dict, faults):
+        if per_frame_people(f):
+            lone.setdefault(f.get("where"), []).append(f)
+        elif blocks(f):
+            out.setdefault(f.get("where"), []).append(f)
+    for where, rows in lone.items():
+        if _confirmed(rows):
+            out.setdefault(where, []).extend(rows)
+    return out
+
+
+def lone_people_shots(faults: list) -> list[int]:
+    """The shot indexes whose only people read is one frame: the second look reads more of them."""
+    seen: dict[str, set] = {}
+    for f in filter(per_frame_people, map(_dict, faults)):
+        seen.setdefault(f["where"], set()).add(f["evidence"]["at"])
+    return sorted(int(w.split("_")[1]) for w, ats in seen.items() if len(ats) == 1 and w.startswith("shot_"))
+
+
+def block_text(where: str, rows: list[dict]) -> str:
+    """`shot_07: <line> at 0.5s (2 of 4 frames)`: what a reader needs to act on the refusal."""
+    lines = [ln for r in rows for ln in lines_of(r) if ln]
+    line = lines[0] if lines else rows[0].get("kind", "?")
+    framed = [r for r in rows if (r.get("evidence") or {}).get("at") is not None]
+    if not framed:
+        return f"{where}: {line}"
+    ats = sorted({r["evidence"]["at"] for r in framed})
+    read_on = max(int(r["evidence"].get("read_on") or 0) for r in framed)
+    return f"{where}: {line} at {ats[0]}s ({len(ats)} of {read_on} frames)"
+
+
 def takes(faults: list) -> set[int]:
     """The take indexes (`T06` -> 6) a list of take-eye faults blocks."""
     from studio import dead_footage

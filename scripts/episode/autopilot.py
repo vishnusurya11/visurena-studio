@@ -120,10 +120,10 @@ def git(*args: str) -> str:
                           check=True).stdout
 
 
-def notify(text: str) -> None:
-    """Telegram through drive.py's tested path; a failed send is never fatal there."""
+def notify(text: str) -> bool:
+    """Telegram through drive.py's tested path; a failed send is never fatal there.  True: it went out."""
     from scripts.episode import drive
-    drive.notify(text)
+    return drive.notify(text)
 
 
 def drive_argv(codex: str, n: int) -> list[str]:
@@ -704,6 +704,29 @@ def standing_ok(book: Path, n: int) -> bool:
     return standing_approval.ok(book, n)
 
 
+def told_of(book: Path, n: int) -> list[tuple[float, bool]]:
+    """(at_s, sent) of every owner_nudge for N, oldest first."""
+    return [(float(r.get("at_s", 0.0)), bool(r.get("sent"))) for r in rows_of(paths_of(book).events)
+            if r.get("event") == "owner_nudge" and r.get("episode") == n]
+
+
+def nudge_parked(book: Path, parked: list[dict], uploads: list[dict], deps: Deps) -> list[int]:
+    """Jekyll ep07 retro S3: a parked episode the chain carried to step 13 is told FINISHED, NOT
+    PUBLISHED every NUDGE_EVERY_S until someone acts; the event records whether the send went out."""
+    core, told = importlib.import_module("studio.autopilot"), []
+    for row in parked:
+        n = int(row.get("episode", -1))
+        drive = rows_of(home_of(book, n) / "drive.jsonl")
+        if n in told or not core.nudge_due(drive, standing_ok(book, n), core.published(uploads, n),
+                                           told_of(book, n), deps.now()):
+            continue
+        sent = bool(deps.notify(f"ep{n:02d} FINISHED, NOT PUBLISHED: {row.get('reason', '?')} | then: "
+                                f"uv run python scripts/episode/autopilot.py retry {n} --book {book.name[:14]}"))
+        event(book, {"event": "owner_nudge", "episode": n, "sent": sent, "at_s": deps.now()})
+        told.append(n)
+    return told
+
+
 def holds_still_owed(book: Path, held: list[dict]) -> list[dict]:
     """The held masters the standing file does not list yet: a signature lifts only its own."""
     return [row for row in held if not standing_ok(book, row["episode"])]
@@ -807,8 +830,8 @@ def token_watch(book: Path, n: int, at: str, deps: Deps) -> None:
     except Exception as why:                                   # noqa: BLE001 -- a check never stops a launch
         note = f"the YouTube token check failed ({scrub(repr(why))[:160]}); run youtube_auth.py --paste-link"
     if note:
-        event(book, {"event": "youtube_token_told", "episode": n, "at": at})
-        deps.notify(f"ep{n:02d}: {note}")
+        sent = bool(deps.notify(f"ep{n:02d}: {note}"))
+        event(book, {"event": "youtube_token_told", "episode": n, "at": at, "sent": sent})
 
 
 def running_id(queue: Any) -> str | None:
@@ -1056,10 +1079,15 @@ def is_code_fault(verdict: dict) -> bool:
 
 
 def triage_action(book: Path, codex: str, n: int, said: str, verdict: dict, deps: Deps) -> dict:
-    """A triage answer short of a fix: retry relaunches; cure places the desk order first."""
-    if said == "cure" and verdict.get("order"):
-        deps.order(codex, n, verdict["order"])
-    event(book, {"event": f"brain_{said}", "episode": n, "order": verdict.get("order")})
+    """A triage answer short of a fix: retry relaunches; cure places the desk order first -- unless the
+    same order already ran from a stop with the same refusal lines (Jekyll ep07 retro S4: redo 09 x3)."""
+    sig, order = pure().refusal_sig(log_tail_of(home_of(book, n))), verdict.get("order")
+    if said == "cure" and order:
+        if pure().cure_spent(rows_of(paths_of(book).events), n, order, sig):
+            return park(book, codex, n, f"cure_no_change: {order.get('kind')} {order.get('step_id')} {sig}",
+                        verdict, deps)
+        deps.order(codex, n, order)
+    event(book, {"event": f"brain_{said}", "episode": n, "order": order, "sig": sig})
     return {"action": f"brain_{said}", "state": "IDLE"}
 
 
@@ -1378,6 +1406,7 @@ def tick(book: Path, codex: str, deps: Deps, tick_no: int = 0) -> dict:
     uploads, parked = uploads_of(book), rows_of(p.parked)
     if auto_unpark(book, deps):
         parked = rows_of(p.parked)
+    nudge_parked(book, parked, uploads, deps)
     n = pick_unit(book, deps, series, uploads, parked)
     if n is None:
         derived, signals = SimpleNamespace(state="COMPLETE", reason="", order=None, packet={}), SimpleNamespace(engine_up=None)

@@ -247,6 +247,8 @@ TABLE: list[tuple[str, object]] = [
     (r"OperationalError: database is locked", ("retry", "db_locked", None)),
     (r"google\.auth\.exceptions\.RefreshError|invalid_grant",
      ("park", "youtube_token_expired: run `uv run python scripts/publish/youtube_auth.py` (owner consent), then retry", None)),
+    # Jekyll ep07 retro S5: a plan.json that fails the contract is a hand's fault, never a brain cure
+    (r"ValidationError: \d+ validation errors? for Episode", ("park", "plan_contract: {line}", None)),
     (r"DEFERRED", ("brain", "deferred: {line}", None)),
     (r"REFUSED", ("brain", "refused: {line}", None)),
     (r"Traceback", ("brain", "failed: {line}", None)),
@@ -306,6 +308,41 @@ def public_episodes(uploads_rows: list[dict]) -> set[int]:
 
 def published(uploads_rows: list[dict], n: int) -> bool:
     return n in public_episodes(uploads_rows)
+
+
+REFUSAL_SIG = re.compile(r"G-[A-Z]+ T\d\d|stands at shot_\d\d")
+"""The refusal lines a cure must move: `G-DEAD T10`, `stands at shot_07` (Jekyll ep07 retro S4)."""
+
+
+def refusal_sig(tail: str) -> str:
+    """The stop's refusal lines, sorted and joined; the last line when it names none."""
+    hits = sorted(set(REFUSAL_SIG.findall(tail or "")))
+    return "|".join(hits) if hits else last_line(tail or "")
+
+
+def cure_spent(events: list[dict], n: int, order: dict, sig: str) -> bool:
+    """This order already ran on episode N from a stop with this same signature: it moved nothing."""
+    return any(r.get("event") == "brain_cure" and r.get("episode") == n and r.get("order") == order
+               and r.get("sig") == sig for r in events)
+
+
+NUDGE_EVERY_S = 6 * 3600.0
+"""How often a finished, unpublished, parked episode is told again (Jekyll ep07: six silent days)."""
+RETRY_S = 600.0
+"""A nudge whose send failed is tried again this soon, never every tick."""
+
+
+def nudge_due(drive_rows: list[dict], standing: bool, is_public: bool, told: list[tuple[float, bool]],
+              now: float) -> bool:
+    """A parked episode the chain carried to step 13 with standing approval is told until someone
+    acts: at once, then every NUDGE_EVERY_S; a failed send again after RETRY_S.  `told` is (ts, sent)."""
+    run = last_row(drive_rows, "run")
+    if not (standing and run and str(run.get("step")) == "13") or is_public:
+        return False
+    if not told:
+        return True
+    at, sent = told[-1]
+    return now - at >= (NUDGE_EVERY_S if sent else RETRY_S)
 
 
 def parked(parked_rows: list[dict], n: int) -> dict | None:
@@ -443,6 +480,21 @@ def clock_loop(s: Signals) -> bool:
     return len(ends) == CLOCK_LOOP and all(r.get("code") not in (0, None) and r.get("clock_spent") for r in ends)
 
 
+def named_park(s: Signals, n: int) -> Derived | None:
+    """The table's own park for the last stop (the token, SAFETY, a plan contract), else None.
+    Jekyll ep07: an expired token hid 6 days behind `clock_loop`; a named park outranks it."""
+    kind, reason, _order = classify(s.log_tail, s.home_files)
+    if kind != "park":
+        return None
+    return Derived(State.PARKED, reason, None, packet(s, n, reason))
+
+
+def _clock_loop_park(s: Signals, n: int) -> Derived:
+    """The backstop park, naming the last stop's classified cause so a reader can act on it."""
+    _kind, reason, _order = classify(s.log_tail, s.home_files)
+    return Derived(State.PARKED, f"clock_loop: {reason}", None, packet(s, n, "clock_loop"))
+
+
 def derive(s: Signals, n: int) -> Derived:
     """One episode's state from one tick's signals (ops §3, every row).
     Order: the brakes and the records, the live process, the brain's verdict,
@@ -462,7 +514,7 @@ def derive(s: Signals, n: int) -> Derived:
     if boundary_exit(s):
         return _idle(s, n, "boundary_resume")
     if clock_loop(s):
-        return Derived(State.PARKED, "clock_loop", None, packet(s, n, "clock_loop"))
+        return named_park(s, n) or _clock_loop_park(s, n)
     if crashed(s.drive_rows) and s.exit_code is None:
         return _idle(s, n, "relaunch") if crashes(s.drive_rows) < CRASHES_BEFORE_BRAIN else _brain(s, n, "crash_loop")
     return _ended(s, n)

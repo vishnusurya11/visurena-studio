@@ -384,7 +384,7 @@ class Judges:
 
     def get(self) -> tuple[dict, list[str]]:
         if self.loaded is None:
-            cap_threads(lane_threads())
+            cap_threads(judge_threads(self.cpu_only))
             embed, inputs, deferred = judge_embedder(self.cpu_only)
             person, face = load_vision_judges()
             self.loaded = ({"home": self.home, "embed": embed, "inputs": inputs, "landmarker": landmarker(),
@@ -690,8 +690,9 @@ MEASURES = ("scripts/episode/take_dq.py", "studio/take_verdict.py", "studio/take
 """The code a take verdict is measured by.  Its hash is pinned to GATE_VERSION
 (tests/fixtures/gate_pins.json), so an edit here is a decision, not a re-measure."""
 
-GATE_VERSION = "1"
-"""What a cached verdict must have been measured under (package H, retro 2026-10-20).  Bump it
+GATE_VERSION = "2"
+"""2: a 12 fps shuffle is re-read at 24 fps and an unconfirmed one is `unmeasured: alias` (Jekyll ep07
+retro S7).  What a cached verdict must have been measured under (package H, retro 2026-10-20).  Bump it
 when a verdict or a recorded measure changes; a refactor, a log line or a cure re-pins the hash
 only.  Jekyll ep01 run 15 re-measured 28 unchanged takes (1,070 s) on a hash that four commits
 moved, two of them changing no measure (docs/audit/2026-10-20_deadline_retro/h_diagnosis.md)."""
@@ -748,6 +749,17 @@ def lane_threads(env=None) -> int:
     except ValueError:
         return 2
     return n if n > 0 else 2
+
+
+def judge_threads(cpu_only: bool, env=None, cores: int | None = -1) -> int:
+    """The lane beside a GPU render keeps lane_threads; a serial pass runs with the GPU idle and
+    takes half the cores (Jekyll ep07 retro S6: gait 2.9x faster at 8 threads than at 2)."""
+    import os
+    lane = lane_threads(env)
+    if cpu_only:
+        return lane
+    cores = os.cpu_count() if cores == -1 else cores
+    return max(lane, (cores or 4) // 2)
 
 
 def cap_threads(n: int, torch=None, cv2=None) -> int:

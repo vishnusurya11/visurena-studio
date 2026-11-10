@@ -546,6 +546,26 @@ def read_all(pics: list[np.ndarray], times: list[float], placed: dict, reader: R
 
 # ---- the judge -----------------------------------------------------------------------
 
+def second_times(faults: list[Fault], placed: dict, times: list[float]) -> list[float]:
+    """New frames inside every shot whose only people read is one frame (Jekyll ep07 retro S1)."""
+    from studio import ship_block
+    have = set(times)
+    return [t for t in with_extra([], placed, ship_block.lone_people_shots(faults)) if t not in have]
+
+
+def look_again(master: Path, placed: dict, plan: dict, times: list[float], pics: list, reads: list[Read], *,
+               frames: Frames, reader: Reader, embed: Embed, cache: "EyeCache | None") -> tuple[list, list, list]:
+    """The second look: a lone people frame's shot read on EXTRA_FRAMES more frames, in time order."""
+    shots = {int(s["index"]): s for s in plan.get("shots", [])}
+    more = second_times(read_faults({"grouped": by_shot(reads), "shots": shots}, plan), placed, times)
+    if not more:
+        return times, pics, reads
+    new_pics = frames(master, more)
+    rows = sorted(zip(times + more, pics + list(new_pics),
+                      reads + read_all(new_pics, more, placed, reader, embed, plan, cache)), key=lambda r: r[0])
+    return [r[0] for r in rows], [r[1] for r in rows], [r[2] for r in rows]
+
+
 def measures(home: Path, master: Path, plan: dict, placed: dict, *, frames: Frames, reader: Reader,
              embed: Embed, count: int = FRAMES, cache: "EyeCache | None" = None,
              strip: list[dict] | None = None, face_reader: Reader | None = None) -> dict:
@@ -554,6 +574,8 @@ def measures(home: Path, master: Path, plan: dict, placed: dict, *, frames: Fram
     times = with_extra(sample_times(float(placed["duration_s"]), count), placed, flagged)
     pics = frames(master, times)
     reads = read_all(pics, times, placed, reader, embed, plan, cache)
+    times, pics, reads = look_again(master, placed, plan, times, pics, reads, frames=frames, reader=reader,
+                                    embed=embed, cache=cache)
     grouped, sigs = by_shot(reads), dict(zip(times, signatures(pics)))
     shots = {int(s["index"]): s for s in plan.get("shots", [])}
     setups = {i: s.get("setup", "") for i, s in shots.items()}
@@ -602,7 +624,8 @@ def read_faults(m: dict, plan: dict) -> list[Fault]:
         setup = setups.get(spec.get("setup", ""), {}) if isinstance(setups, dict) else {}
         for read in rows:
             if got := content_faults(read, spec, setup):
-                out.append(Fault(kind="content", where=f"shot_{shot:02d}", evidence={"at": read.at, "faults": got}))
+                out.append(Fault(kind="content", where=f"shot_{shot:02d}",
+                                 evidence={"at": read.at, "faults": got, "read_on": len(rows)}))
     return out
 
 

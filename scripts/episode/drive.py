@@ -71,16 +71,21 @@ def quiet(env=os.environ) -> bool:
     return env.get("DRIVE_QUIET", "").strip().lower() in ("1", "true", "yes")
 
 
-def notify(text: str) -> None:
-    """Telegram, through the sibling project's tested script; a failed send is printed, never fatal."""
+def notify(text: str) -> bool:
+    """Telegram, through the sibling project's tested script; a failed send is printed, never fatal.
+    True only when the script exited 0 (Jekyll ep07 retro S3: a 'told' row proved no delivery)."""
     print(f"[drive] {text}", flush=True)
     if quiet():
-        return
+        return False
     try:
-        subprocess.run(["uv", "run", "--no-sync", "python", str(NOTIFY), "text", "--message", text[:3500]],
-                       cwd=NOTIFY.parents[1], timeout=120, check=False)
+        done = subprocess.run(["uv", "run", "--no-sync", "python", str(NOTIFY), "text", "--message", text[:3500]],
+                              cwd=NOTIFY.parents[1], timeout=120, check=False)
     except (OSError, subprocess.SubprocessError) as why:
         print(f"[drive] notify failed: {why}", flush=True)
+        return False
+    if done.returncode != 0:
+        print(f"[drive] notify failed: exit {done.returncode}", flush=True)
+    return done.returncode == 0
 
 
 def ledger(home: Path, row: dict) -> None:
@@ -189,7 +194,27 @@ def preflight(book: Path, number: int, env: Path | None = None, now: float | Non
     `series`).  The proof harness's chapter audit, then the two publish doors it does not hold."""
     env = ROOT / ".env" if env is None else Path(env)
     now = time.time() if now is None else now
-    return audit_lines(Path(book), number) + standing_lines(Path(book), number) + token_lines(env, now)
+    return (audit_lines(Path(book), number) + plan_lines(Path(book), number) + standing_lines(Path(book), number)
+            + token_lines(env, now))
+
+
+def plan_lines(book: Path, number: int) -> list[str]:
+    """Jekyll ep07 retro S5: the plan read at t=0.  A contract failure refuses now (a hand edit's
+    'slowly' crashed step 01 after launch); bytes no recorded cure carried since the verdict are said."""
+    from pydantic import ValidationError
+    from studio import episode_home, plan_provenance, plan_verdict
+    plan = episode_home.plan_path(book, number)
+    if not plan.exists():
+        return []
+    try:
+        episode_home.load_plan(book, number)
+    except ValidationError as why:
+        first = next((ln.strip() for ln in str(why).splitlines()[1:] if "error" in ln.lower()), str(why)[:160])
+        return [f"refuse now: plan.json fails the Episode contract: {first[:200]}"]
+    signed = (plan_verdict.read(plan) or {}).get("plan_sha8") or ""
+    if signed and plan_provenance.chain(plan.parent, signed, plan_verdict.plan_sha8(plan)) is None:
+        return ["will re-plan at step 02: plan.json changed outside a recorded cure since its verdict"]
+    return []
 
 
 def audit_lines(book: Path, number: int) -> list[str]:

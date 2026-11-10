@@ -69,7 +69,10 @@ PACE = re.compile(r"\s*\b(?:at a (?:\w+ )?walking pace|a walking pace)\b", re.I)
 
 def gait_verb(motion: str) -> str:
     """The motion with its FIRST pace phrase rewritten to VERB and later ones dropped; the camera
-    head and every other clause stay.  No pace phrase: the verb is added as a clause (Jekyll ep01 T01)."""
+    head and every other clause stay.  No pace phrase: the verb is added as a clause (Jekyll ep01 T01),
+    once -- a motion already carrying VERB is returned as it is (Jekyll ep07 retro S8)."""
+    if VERB in (motion or ""):
+        return motion
     seen = []
 
     def swap(_m) -> str:
@@ -85,12 +88,12 @@ def walks(motion: str) -> bool:
     return bool(GAIT.search(text))
 
 
-def cadence(rows: list[dict]) -> tuple[float, float]:
-    """(steps per second, prominence) of the legs' articulation, per body height."""
+def cadence(rows: list[dict], fps: float = FPS) -> tuple[float, float]:
+    """(steps per second, prominence) of the legs' articulation, per body height, read at `fps`."""
     a = np.array([r["art"] / r["h"] for r in rows], dtype=float)
     a = a - a.mean()
     spec = np.abs(np.fft.rfft(a * np.hanning(len(a))))
-    freq = np.fft.rfftfreq(len(a), 1 / FPS)
+    freq = np.fft.rfftfreq(len(a), 1 / fps)
     band = (freq >= BAND[0]) & (freq <= BAND[1])
     if not band.any() or spec[1:].mean() <= 0:
         return 0.0, 0.0
@@ -126,11 +129,31 @@ def judge(rows: list) -> dict:
             "travel_hps": round(travel, 3), "step_h": round(step, 3)}
 
 
+ALIAS_HZ = 0.3
+"""How far the 24 fps cadence may sit from the 12 fps one and still be the same rhythm (brick 18)."""
+
+
+def alias(rows24: list, freq12: float) -> dict | None:
+    """A 12 fps shuffle the native 24 fps read does not repeat is a folded render pulse (Jekyll ep07
+    retro S7: H3's 8 Hz pulse read 4.0 steps/s at 12 fps).  None: the shuffle stands."""
+    run = longest_run(rows24)
+    if len(run) < 2 * MIN_RUN:
+        return None
+    f24, prominence = cadence(run, fps=2 * FPS)
+    if prominence >= PROMINENCE and abs(f24 - freq12) <= ALIAS_HZ:
+        return None
+    return {"state": "unmeasured: alias", "frames": len(run), "freq_12": round(freq12, 2),
+            "peak_24": round(f24, 2), "prominence_24": round(prominence, 2)}
+
+
 def row(m: dict | None, motion: str):
     """The take gate's `gait` row: HARD on a shuffle by a walker the plan asked for."""
     from studio.take_verdict import Gate
     if not walks(motion):
         return Gate("gait", None, True, True, "n/a by the plan")
+    if m and m.get("state") == "unmeasured: alias":
+        return Gate("gait", None, True, True, f"not measured (alias: {m['freq_12']} steps/s at 12 fps, "
+                                              f"{m['peak_24']} at 24 fps -- a render pulse, not a step)")
     if not m or m.get("state", "").startswith("unmeasured") or "step_h" not in m:
         return Gate("gait", None, True, True, "not measured" + (f" ({m['state']})" if m else ""))
     note = f"{m['freq']:.1f} steps/s, {m['step_h']:.3f} heights a step over {m['travel_hps']:.2f} heights/s"
@@ -181,13 +204,11 @@ def largest(people: list):
     return max(people, key=lambda p: (p[0][3] - p[0][1]) * p[1])[0]
 
 
-def measure(frames: list, detect: Detect | None = None, stride: int = 2) -> dict:
-    """The gait state of a take's RGB frames (24 fps native; `stride` 2 reads 12)."""
+def frame_rows(frames: list, detect: Detect, stride: int) -> list:
+    """Per frame pair at 24/stride fps: the walker's travel and leg articulation, None without a person."""
     import cv2
-    if detect is None:
-        return {"state": "unmeasured: no person detector"}
     small = [cv2.resize(np.asarray(f), (SIZE, SIZE)) for f in frames[::stride]]
-    rows, prev_box = [], None
+    rows, prev_box, fps = [], None, 2 * FPS / stride
     for i in range(1, len(small)):
         box = largest(detect(small[i]))
         if box is None:
@@ -196,10 +217,21 @@ def measure(frames: list, detect: Detect | None = None, stride: int = 2) -> dict
             continue
         r = per_frame(small[i - 1], small[i], box)
         if r.get("feet") and prev_box is not None:
-            r["grow"] = float(np.log(max(1.0, box[3] - box[1]) / max(1.0, prev_box[3] - prev_box[1])) * FPS)
+            r["grow"] = float(np.log(max(1.0, box[3] - box[1]) / max(1.0, prev_box[3] - prev_box[1])) * fps)
         rows.append(r)
         prev_box = box
-    return judge(rows)
+    return rows
+
+
+def measure(frames: list, detect: Detect | None = None, stride: int = 2) -> dict:
+    """The gait state of a take's RGB frames (24 fps native; `stride` 2 reads 12).  A shuffle read at
+    12 fps is read again at 24 and stands only if the native cadence agrees (brick 18)."""
+    if detect is None:
+        return {"state": "unmeasured: no person detector"}
+    m = judge(frame_rows(frames, detect, stride))
+    if m.get("state") == "shuffle" and stride == 2:
+        return alias(frame_rows(frames, detect, 1), m["freq"]) or m
+    return m
 
 
 DETECTOR = Path("models") / "detection" / "yolov10m.onnx"

@@ -102,7 +102,8 @@ def test_drive_quiet_keeps_telegram_for_the_supervisor(monkeypatch, capsys):
     owns the owner's channel -- PUBLISHED, PARKED, SERIES_COMPLETE, once each."""
     from scripts.episode import drive as launcher
     sent = []
-    monkeypatch.setattr(launcher.subprocess, "run", lambda *a, **k: sent.append(a[0]))
+    from types import SimpleNamespace
+    monkeypatch.setattr(launcher.subprocess, "run", lambda *a, **k: sent.append(a[0]) or SimpleNamespace(returncode=0))
     monkeypatch.setenv("DRIVE_QUIET", "1")
     launcher.notify("ep20 PUBLISHED")
     assert sent == [] and "[drive] ep20 PUBLISHED" in capsys.readouterr().out
