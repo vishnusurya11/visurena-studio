@@ -164,7 +164,7 @@ Run (CPU, scratch dir, `master_blocks` injected into `ship_block` by a conftest,
 `SystemExit: REFUSED: G-PEOPLE ... stands at shot_07 after the master ladder's rounds` (the five-run refusal reproduced
 from the real code path); tests 2-4 pass. Without the function all four fail on the missing attribute. Test 1 passes
 once `flag` calls `master_blocks`. Scratch copy:
-C:\Users\vishn\AppData\Local\Temp\claude\8f3d28396239f147\53388bed-712c-4d9b-972d-6c2de9a9f94e\scratchpad\t\test_master_people_block_needs_two_frames.py
+(scratch)/test_master_people_block_needs_two_frames.py
 
 ## 6. Replayed effect and what is unproven
 - ep07 G-PEOPLE: all 5 refusals (shot_07) drop to flagged IF the 0.5 s read was the only blocking frame, which is what the
