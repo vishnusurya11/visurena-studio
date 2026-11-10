@@ -3009,3 +3009,8 @@ budget); it shipped 2026-11-10 (https://youtu.be/ZSbWJVFDeGE) with four flagged 
   loosens the only brake), a plan-sha refusal (refuses legitimate cures), 24 fps gait with today's walls (adds a
   false fire on a shipped WotW walk), the crowd ceiling from the plan alone (unreplayed), lifting CONFIRM to the
   take hair line (thins the guard that caught ep05 T07).
+- **Second batch, same day:** lettering on a clean panel earns one seed (`take_ladder.cure_of`; T21's panel read
+  text false, its take text true, and five rolls never aimed at it), its rate row counted from (0, 0); the take
+  who-read stops once CONFIRM frames agree, never on clean frames (an unread last frame is still a fault); the
+  take eye's facenet clone pairs are kept beside the take (`T07.clones.json`) on its bytes and the clone code's
+  hash, so a relaunch re-sign of unchanged takes reads nothing.

@@ -125,6 +125,8 @@ def who_faults_for(shot, reads: list[pc.Seen], work: Path, stem: str, staged: di
             continue
         if bad := fw.fault(figures, staged):
             out.append(bad)
+        if sum(x.startswith("who:") for x in out) >= CONFIRM:
+            break                      # confirmed: another read cannot change it (Jekyll ep07 retro S10)
     return out
 
 

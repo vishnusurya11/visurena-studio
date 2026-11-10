@@ -90,7 +90,8 @@ def panel_clean(room: Path, index: int) -> bool:
 
 CURE_RATES_AS_OF = "2026-10-19"
 CURE_RATES = {("warp_se", "seed"): (0, 4), ("lag", "shorter_take"): (0, 15),
-              ("content", "replan_cell"): (3, 21), ("motion", "move_type"): (9, 10)}
+              ("content", "replan_cell"): (3, 21), ("motion", "move_type"): (9, 10),
+              ("lettering", "seed"): (0, 0)}
 """(hits, tries) per (fault class, cure), measured: warp_se = a warp over the Se wall alone (Jekyll ep01
 T21/T24 reseeds: 0 of 4 drawn after the stale-input retake); lag shorter_take 0/15 and content replan
 3/21 (ep13-ep21); move_type 89-100 % on frozen/held (9 of 10 kept as the floor).  Dated: a constant
@@ -156,8 +157,8 @@ def cure_of(faults: list[Fault], panel_clean: bool = False, taken: int = 0) -> s
     kinds = {f.kind for f in faults}
     if kinds == {"clones"} and early_clones(faults):
         return "head_cut"                         # free: heads.json, tried before any render
-    if panel_clean and kinds <= {"content", "clones"}:
-        kinds = kinds - {"content", "clones"} | {"render-content"}
+    if panel_clean and kinds <= {"content", "clones", "lettering"}:   # lettering: Jekyll ep07 retro S11
+        kinds = kinds - {"content", "clones", "lettering"} | {"render-content"}
     if kinds & MOVABLE:
         return "move_type"
     if kinds & LAG:

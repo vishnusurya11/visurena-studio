@@ -201,12 +201,41 @@ def clones_by(embed, detect=None, seconds=None) -> Clones:
     return read
 
 
+CLONE_CODE = ("studio/judges/take_eye.py", "studio/measure/faces.py", "studio/identity_gate.py")
+"""The code clone pairs are read by: a cached read is current only under the same hash (S9)."""
+
+
+def clone_code() -> str:
+    """The clone-reading code's fingerprint (line endings normalised)."""
+    import hashlib
+    root = Path(__file__).resolve().parents[2]
+    body = b"".join((root / rel).read_bytes().replace(b"\r\n", b"\n") for rel in CLONE_CODE)
+    return hashlib.sha256(body).hexdigest()[:8]
+
+
+def cached_clones(clones: Clones, code: str | None = None) -> Clones:
+    """Clone pairs kept beside the take (`T07.clones.json`) on its bytes and the clone code (Jekyll ep07
+    retro S9: an unchanged take re-signed on a relaunch re-read facenet); `None` (cannot tell) is never kept."""
+    def read(take: Path) -> list | None:
+        import hashlib
+        key = f"{hashlib.sha256(Path(take).read_bytes()).hexdigest()[:16]}_{code or clone_code()}"
+        path = Path(take).with_name(f"{Path(take).stem}.clones.json")
+        kept = read_json(path) or {}
+        if kept.get("key") == key:
+            return kept.get("pairs")
+        pairs = clones(take)
+        if pairs is not None:
+            path.write_text(json.dumps({"key": key, "pairs": pairs}), encoding="utf-8")
+        return pairs
+    return read
+
+
 def facenet_clones(take: Path) -> list | None:
     """The production clone reader: facenet on the CPU, or `None` (cannot
-    tell) when the library is not installed."""
+    tell) when the library is not installed; cached on bytes and code."""
     try:
         from studio.measure import faces
         detect, embed = faces.embedder()
     except ImportError:
         return None
-    return clones_by(embed, detect)(take)
+    return cached_clones(clones_by(embed, detect))(take)
