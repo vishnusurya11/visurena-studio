@@ -436,8 +436,9 @@ def settled(prompt_id: str, record: dict) -> None:
         raise EngineLost(f"{prompt_id} vanished: the engine restarted")
 
 
-def wait(prompt_id: str, timeout: float = 3600.0, poll: float = 5.0) -> list[Path]:
-    """Block until a job finishes; the files it wrote."""
+def wait(prompt_id: str, timeout: float = 3600.0, poll: float = 0.5) -> list[Path]:
+    """Block until a job finishes; the files it wrote.  Polls at wait_record's 0.5 s: a 5 s poll cost a paired mean
+    of 1.693 s per job (efficiency debate 2026-11-09, e3_io_poll_ab, n=10 pairs)."""
     return outputs_of(wait_record(prompt_id, timeout, poll))
 
 
