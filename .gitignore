@@ -100,3 +100,14 @@ ffmpeg2pass-*.log.mbtree
 *.db-journal
 *.db-wal
 *.db-shm
+
+# Research write-ups are text only in git; their images, audio and video stay on disk (owner 2026-11-10)
+docs/research_site/**/*.png
+docs/research_site/**/*.jpg
+docs/research_site/**/*.jpeg
+docs/research_site/**/*.gif
+docs/research_site/**/*.webp
+docs/research_site/**/*.wav
+docs/research_site/**/*.mp3
+docs/research_site/**/*.mp4
+docs/research_site/**/*.mov
