@@ -40,15 +40,10 @@ master as `cut/master_iterN.mp4`, and never overwrite the only copy.
 its cast are the only inputs.
 
 **The series runs itself (decision 2026-10-06, `architecture/decisions/2026-10-06_autopilot_and_brain.md`).**
-The scheduled task `visurena-autopilot` runs `scripts/episode/autopilot.py run --book <codex>`
-at logon and every 5 minutes. Every 30 s it reads the disk, names ONE state (IDLE, RUNNING,
-PUBLISHED, HELD_PUBLISH, NEEDS_BRAIN, BRAIN_RUNNING, WAIT_TREE, WAIT_QUOTA, PARKED, PAUSED, COMPLETE), takes ONE
-action, and writes `library/<book>/autopilot/status.json` + `events.jsonl`. It launches
-`drive.py` for the next chapter, retries what retries, cures through work orders, restarts a
-hung ComfyUI, asks the brain (read-only triage, a JSON verdict) when a stop is not in its
-table, and PARKS with a reason (a parked.jsonl row), never a wait on
-a person. Two consecutive parks pause the series. A commit restarts the loop on the new code
-once no drive runs (a live drive keeps its code); a dirty tree is WAIT_TREE, a shut window WAIT_QUOTA.
+The scheduled task `visurena-autopilot` runs `scripts/episode/autopilot.py run --book <codex>`; every 30 s it
+names ONE state, takes ONE action (launch, retry, cure, restart ComfyUI, ask the brain, PARK with a reason)
+and writes `library/<book>/autopilot/status.json` + `events.jsonl`. Two parks in a row pause the series; a
+commit restarts the loop once no drive runs; a dirty tree is WAIT_TREE. States and acts: `OPERATOR.md`.
 
 **Your job is WATCH + REPORT, never a hand:** what you read, every act on a live run or a
 repair, and the symptom table are `OPERATOR.md`.
@@ -132,7 +127,7 @@ hold (2026-09-23), and each cost ep09 renders before it existed:**
 - **G-HAT:** a hat worn and held in one picture draws two hats. Tag the
   person without it and say "bareheaded".
 - **G-PLACE:** a landmark the setup's words and picture lack is dropped or
-  invented (ep09 shot 18's bridge on the lawn).
+  invented.
 - **G-LAID:** a close on one person lying down says "above him looking down"
   or "on the ground level with his face". "Low over him" drew the landlord
   upright, and H3 turned the world round his face to lay him down (ep10 T18,
@@ -506,10 +501,10 @@ first second that is not the panel. The gates passed ep09 T02 at 92.6 before
 |---|---|
 | a moving take froze | re-roll the seed |
 | a still take froze | change the move TYPE, not its amount |
-| a take froze after its OWN length changed | put the length back; a fresh seed is not the cure (ep08 T16: 51%, then 75%, then 10% frozen once restored) |
-| lip-sync lags (HARD mux lag) | the edit lays the line where the take's soundtrack put it (`studio/line_laid`); an advisory lag or rotation is points off, never a rung (ep13: five lag rounds, 157 min, none cured) |
+| a take froze after its OWN length changed | put the length back; a fresh seed is not the cure |
+| lip-sync lags (HARD mux lag) | the edit lays the line where the take's soundtrack put it (`studio/line_laid`); an advisory lag or rotation is points off, never a rung |
 | a hard cut appears early | the take opened on another staged picture, or on the place its prompt names three times |
-| the same fault on a fresh seed | the PLAN: re-aim the move at what the cell holds (ep09 shots 14, 15, 18 repeated on new seeds) |
+| the same fault on a fresh seed | the PLAN: re-aim the move at what the cell holds |
 | a person pinned while the set slides | the plan: push in or crane instead of the truck (G-ANCHOR) |
 
 **The GPU never waits on a check (owner, 2026-10-14).** Step 09 runs the renders and the CPU
@@ -536,7 +531,7 @@ is never cut: the voice is the ruler. Jekyll ep01 v2 T14 failed WER 0.56 + tail 
 same-length reseeds and passed both (WER 0.11, tail -48 dB) on its first shorter take
 (coda 1.5 -> 0.75 s).
 
-**The 4-step 2K pass replaces the face refine and, shot by shot, the upscale (owner 2026-10-29: "4 step 2k", "Fluttering is definitely gone").** Step 11, before the one upscale: every non-still take of the judged cut, people first, is re-drawn by Open-H3-Regenerate-2K at 2x from its OWN sheets and panel (`scripts/episode/regen_2k.py`, `takes/r2v_2k/regen.json`, current by take sha8) and spliced into the master frame for frame (`studio/regen_2k.splice`). Every take is drawn, none cut for time (owner: "Don't skip any shot"); a take whose faces outnumber its sheets is drawn and its smaller, unreferenced faces pasted back from the take (ep04 T07: unreferenced constables came back as a hatched mesh). ~2.9 s/frame; the 360 min wall is a runaway guard. The refine (09_07/09_08) is OFF, kept: `VISURENA_REGEN_2K=0` restores it and the av3-only master (old text: LESSONS_ARCHIVE, Face refine until 2026-10-29).
+**The 4-step 2K pass replaces the face refine and, shot by shot, the upscale (owner 2026-10-29: "4 step 2k", "Fluttering is definitely gone").** Step 11, before the one upscale: every non-still take of the judged cut, people first, is re-drawn by Open-H3-Regenerate-2K at 2x from its OWN sheets and panel (`scripts/episode/regen_2k.py`, `takes/r2v_2k/regen.json`, current by take sha8) and spliced into the master frame for frame (`studio/regen_2k.splice`). Every take is drawn, none cut for time (owner: "Don't skip any shot"); a take whose faces outnumber its sheets is drawn and its smaller, unreferenced faces pasted back from the take. ~2.9 s/frame; the 360 min wall is a runaway guard. The refine (09_07/09_08) is OFF, kept: `VISURENA_REGEN_2K=0` restores it and the av3-only master (old text: LESSONS_ARCHIVE, Face refine until 2026-10-29).
 
 **G-WARP is HARD on S only (2026-10-19, retro D1-D2, for owner veto).** `take_dq` scores every take that stages a
 face for frame-to-frame face redraw (`studio/warp_gate.py`, CPU lane). FAIL is S > 2.5: one seed retake, then F2 for a

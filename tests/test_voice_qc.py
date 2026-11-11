@@ -120,6 +120,30 @@ def test_a_numeral_heard_for_a_number_word_is_the_same_word():
     assert voice_qc.normalised("twenty-nine days") == voice_qc.normalised("29 days")
 
 
+class TestContractions:
+    """Jekyll ep08 (2026-11-11): Poole's "I think there's been foul play." was heard
+    "there has been" and Utterson's "It's Hyde's!" heard "It is Hyde's" on all 8 takes
+    each -- the right words, scored 0.33, and step 04 refused the episode."""
+
+    def test_a_contraction_heard_spelled_out_is_the_line(self):
+        assert voice_qc.error_rate("I think there has been foul play.", "I think there's been foul play.") == 0.0
+        assert voice_qc.error_rate("It is Hyde's, down with the door.", "It's Hyde's! Down with the door!") == 0.0
+
+    def test_a_spelled_out_line_heard_contracted_is_the_line(self):
+        assert voice_qc.error_rate("I'll not go, it's late.", "I will not go, it is late.") == 0.0
+        assert voice_qc.error_rate("We can't stay.", "We cannot stay.") == 0.0
+
+    def test_a_possessive_is_not_expanded(self):
+        assert voice_qc.error_rate("It is Hyde is.", "It's Hyde's!") > 0.0
+
+    def test_a_wrong_word_beside_a_contraction_still_counts(self):
+        assert voice_qc.error_rate("I think there has been fair play.", "I think there's been foul play.") > 0.0
+
+    def test_spoken_forms_are_capped(self):
+        line = " ".join(["it's"] * 12)
+        assert 1 < len(voice_qc.spoken_forms(line)) <= voice_qc.FORMS_CAP
+
+
 class TestPhonemeEqualEar:
     """Jekyll ep01 l11: whisper heard 'check' for 'cheque' eight times -- a ruler fault."""
 

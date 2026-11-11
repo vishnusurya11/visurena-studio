@@ -1666,6 +1666,22 @@ the old grammar the owner replaced. Jekyll ep01 `plan_v3.json`: 0 rows, VERDICT 
   (`bench.py --exhibits`) on a clean clone. The owner's label queue is
   `scripts/calibration/label_queue.py`.
 
+
+### Moved 2026-11-11 (skill budget): replay and calibration evidence
+
+- Calibrated over ep01-09: G-ANCHOR fires on 7 shots of ep05-09, 5 visible faults (ep09 T02 the owner's, T10, T20; ep07 T13; ep08 T14), silent on the walker ep08 T05
+- Replay over every plan on disk: WotW ep01-27 108, Scarlet ep01-14 88, Jekyll ep01 3 (shots 5, 12, 19) -- 103 of the 199 open on a wide/full that holds nobody (the owner's fault), the rest on a single/insert; all 42 plans are rendered, so all are advice; zero refused
+- Replay: WotW 28, Scarlet 23, Jekyll 0.
+- Replay: the lace girl 3/3 refused, the redrawn girl passes, 7 other Jekyll sheets: Lanyon refused (true), the constable refused (eyes; his helmet row vs cap sheet flagged)
+- Replays 14/14 on by-eye counts of the ep01 leak takes and 0/28 on the clean finals; VL counts unmeasured (the E1 local replay is owed)
+- Calibrated on the owner-liked WotW ep01-03 (69 takes): 0 fire (max 2.68x on a pan, 3.29x on a push, pulls to 9.1x liked). Fires on Jekyll ep01 T14 (a tilt rendered as a 4.75x push into a caricature) and WotW ep20 T06 (a 4.26x push). Does NOT fire on Jekyll T13 (2.54x push): WotW pushed further and was liked, so scale cannot call it.
+- The camera record's `scale_curve` now compounds quarter-second steps (it was clamped at 1.25x); its stillness boolean is `still_ok` (was `camera_ok`), still unread
+- Replay over 204 shipped dialogue takes: fails exactly wotw ep10/T21 ("Moving!") and ep26/T25 (mouth branch, armed on 0 false fails); the laugh ep25/T21 exempt; the 5 overwritten early-Scarlet guides unmeasurable.
+- (take_dq gate v2, Jekyll ep07 retro 2026-11-10: T00/T19/T21's "4.0 steps/s" was H3's 8 Hz render pulse folded at 12 fps; at 24 fps they read 1.51/0.76/3.27 Hz at prominence 2.31/1.63/1.29, no rhythm)
+- Old replay: 91 walker takes, 20 measurable, 0 fires on WotW ep01-27 and Scarlet ep01-14 (nearest non-fire WotW ep06 T23 4.04/0.048; liked WotW ep03 T07 3.1/0.052).
+- ep07 shot_07 refused 5 runs (84 min) on one 0.5 s frame the owner called a misread.
+- History: LESSONS_ARCHIVE.md, gate notes.
+
 ## Jekyll Kawajiri ep01 retro (2026-10-19; 15 code packages P01-P15, docs P16)
 
 The run: `episodes/ep01/cut/master_iter1.mp4`, 2026-10-18 22:54 PDT, 3,348 frames, QC passed with
@@ -3014,3 +3030,66 @@ budget); it shipped 2026-11-10 (https://youtu.be/ZSbWJVFDeGE) with four flagged 
   who-read stops once CONFIRM frames agree, never on clean frames (an unread last frame is still a fault); the
   take eye's facenet clone pairs are kept beside the take (`T07.clones.json`) on its bytes and the clone code's
   hash, so a relaunch re-sign of unchanged takes reads nothing.
+
+## Jekyll ep08 (2026-11-11)
+
+- **A contraction spelled out is the same line (brick 7: a ruler fault).** Step 04 refused the
+  episode after 8 takes each of two lines that were read right: Poole's "I think there's been foul
+  play." heard "there has been", Utterson's "It's Hyde's! Down with the door!" heard "It is Hyde's"
+  -- WER 0.33 on the right words. `voice_qc.error_rate` now scores the best of the line's spoken
+  forms (`spoken_forms`: n't / 'll / 've / 're / 'm / 'd, and 's only after it/there/here/that/what/
+  who/where/he/she/how/when, so a possessive like Hyde's never expands), both directions, at most
+  `FORMS_CAP` 16 forms. A wrong word beside a contraction still counts (tests/test_voice_qc.py
+  TestContractions).
+- **A new speaker in a chapter is cast before the drive, not by it.** The preflight printed "will
+  park at step 04: voice jekyll_servants" at t=0; `cast_voices.py <codex> --only <id>` plus the
+  listen check took 3 min and saved a park. Read the preflight's will-park lines on every launch.
+
+### Condensed 2026-11-11 (skill budget): the full text before
+
+- OPERATOR.md: | step 13 prints `G-INORDER: in order on <playlist url>` | after the public flip (2026-10-21) the episode joined its book playlist at its episode-order place, its description got the "— Watch in order —" block and the previous episode a Next line; each act is an `uploads.jsonl` row (`playlist`, `playlist_item`, `watch_block`, `next_line`, `in_order`), the id read from the book video's `compilation/youtube.json` or the previous episode's live block; a playlist is made only when the book has none | nothing; a failed upkeep prints `G-INORDER: in-order upkeep failed: ...` and is a `flag` row in `learnings.jsonl`, never a stop (the video is public; decision 2026-10-21, for the owner's veto): the /shorts/ poll and done() go on, a re-run of step 13 retries it (every recorded act skipped) and a landed retry writes a `pass` row so a recut's publish lock does not hold on it |
+- OPERATOR.md: | parked `clock_loop: <reason>` | three spent-clock stops in a row; the reason is the LAST stop's (2026-11-10) | act on the reason, not the clock: a token -> "OAuth" above; `refused: ... stands at shot_NN: <line> at <t>s (k of n frames)` -> read that frame before any retake; then `retry N` |
+- OPERATOR.md: | Telegram: "epNN FINISHED, NOT PUBLISHED: <reason>" (every 6 h) | a parked episode the chain carried to step 13 (ep07 sat 6 days unseen) | fix the reason (usually the token), then the `retry` command the message names; it stops once the episode is public or no longer parked |
+- OPERATOR.md: | parked `cure_no_change: <order> <lines>` | the brain's cure order already ran from a stop with the same refusal lines and moved nothing | the order is spent: find the fault's birth (brick 11) -- a sheet, a plan row, a gate's ruler -- never re-place the order |
+- OPERATOR.md: | parked `plan_contract: ...` / preflight `refuse now: plan.json fails the Episode contract` | plan.json was hand-edited past the contract | fix it with `plan_repair` (recorded), never by hand; `retry N` |
+- OPERATOR.md: | take row `gait: not measured (alias: 4.0 steps/s at 12 fps, ...)` | H3's 8 Hz render pulse folded at 12 fps, not a step (brick 18) | nothing; a real shuffle still fails when the 24 fps read agrees |
+- LESSONS.md: 17. **A block stands on a second look, and a second look is another frame.** A per-frame people read
+      refuses only when a different frame of the same shot agrees; the same frame re-read on the same
+      seed is the same misread (ep07 shot_07: one 0.5 s master frame of Jekyll's hair refused five runs,
+      84 min). Scaffold words, a long leak and a measured clone stand on one sighting. Every refusal
+      prints its line, time and frame count. -> Jekyll ep07 retro.
+- LESSONS.md: 18. **A rhythm sampled under twice its rate is another rhythm.** G-GAIT read at 12 fps folds H3's 8 Hz
+      render pulse to "4.0 steps/s" (ep07 T00/T19/T21: at 24 fps no step in band, prominence 1.3-2.3); a
+      shuffle stands only when the native-rate read agrees. A gate whose only positive's bytes are gone is
+      advisory until a new label exists. -> Jekyll ep07 retro.
+- SKILL.md: **The series runs itself (decision 2026-10-06, `architecture/decisions/2026-10-06_autopilot_and_brain.md`).**
+  The scheduled task `visurena-autopilot` runs `scripts/episode/autopilot.py run --book <codex>`
+  at logon and every 5 minutes. Every 30 s it reads the disk, names ONE state (IDLE, RUNNING,
+  PUBLISHED, HELD_PUBLISH, NEEDS_BRAIN, BRAIN_RUNNING, WAIT_TREE, WAIT_QUOTA, PARKED, PAUSED, COMPLETE), takes ONE
+  action, and writes `library/<book>/autopilot/status.json` + `events.jsonl`. It launches
+  `drive.py` for the next chapter, retries what retries, cures through work orders, restarts a
+  hung ComfyUI, asks the brain (read-only triage, a JSON verdict) when a stop is not in its
+  table, and PARKS with a reason (a parked.jsonl row), never a wait on
+  a person. Two consecutive parks pause the series. A commit restarts the loop on the new code
+  once no drive runs (a live drive keeps its code); a dirty tree is WAIT_TREE, a shut window WAIT_QUOTA.
+
+### Evidence asides dropped 2026-11-11 (skill budget)
+
+- OPERATOR.md: (one unit: a take ~4 min, a grid ~5 min, a plan rung 4-10 min)
+- OPERATOR.md: (22 of 23 kills over ep19-27 were this, 527 waste-minutes)
+- OPERATOR.md: (P03 at 11:18)
+- OPERATOR.md: (the line once summed both against the second cap)
+- OPERATOR.md: (memory `project_kill_run_tree` is for a run already lost)
+- SKILL.md: (ep04 T07: unreferenced constables came back as a hatched mesh)
+- SKILL.md: (ep08 T16: 51%, then 75%, then 10% frozen once restored)
+- SKILL.md: (ep09 shots 14, 15, 18 repeated on new seeds)
+- SKILL.md: (ep13: five lag rounds, 157 min, none cured)
+- SKILL.md: (ep09 shot 18's bridge on the lawn)
+- GATES.md: (ep05 T19, ep06 T08, ep07 T09/T19/T24/T26)
+- GATES.md: (WotW ep21, 32 shots, 9.2 h measured)
+- GATES.md: (WotW ep22 curate, ep24 artilleryman)
+- GATES.md: (Scarlet ep08 shot 14 is the sky)
+- GATES.md: (ep07 13 stacked, ep09 12 empty)
+- GATES.md: (ep01 T01 already fails gait)
+- GATES.md: (ep01: 5.53 after the hold cure)
+- GATES.md: (Jekyll ep01 review, `docs/audit/2026-10-13_jekyll_ep01_review/`)

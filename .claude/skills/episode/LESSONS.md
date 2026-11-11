@@ -64,14 +64,9 @@ a new brick also gets a line here.
     no gate measured, 11.2 h of agents, 3 launches stopped by unreplayed changes, a 4.68 h silent
     supervisor (silence is a state too). -> The ep01 deadline retro.
 17. **A block stands on a second look, and a second look is another frame.** A per-frame people read
-    refuses only when a different frame of the same shot agrees; the same frame re-read on the same
-    seed is the same misread (ep07 shot_07: one 0.5 s master frame of Jekyll's hair refused five runs,
-    84 min). Scaffold words, a long leak and a measured clone stand on one sighting. Every refusal
-    prints its line, time and frame count. -> Jekyll ep07 retro.
-18. **A rhythm sampled under twice its rate is another rhythm.** G-GAIT read at 12 fps folds H3's 8 Hz
-    render pulse to "4.0 steps/s" (ep07 T00/T19/T21: at 24 fps no step in band, prominence 1.3-2.3); a
-    shuffle stands only when the native-rate read agrees. A gate whose only positive's bytes are gone is
-    advisory until a new label exists. -> Jekyll ep07 retro.
+    refuses only when another frame of the shot agrees (ep07 shot_07: one frame, 5 runs). -> Jekyll ep07 retro.
+18. **A rhythm sampled under twice its rate is another rhythm.** G-GAIT at 12 fps folds H3's 8 Hz pulse to
+    4 steps/s; a shuffle stands only when the 24 fps read agrees. -> Jekyll ep07 retro.
 
 ## Read by question
 
@@ -109,10 +104,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - The shot framework (2026-10-21)
 - The voice ruler (2026-10-21)
 - Speed and models parked (fleet C)
-- Jekyll ep02 first pass
-- Jekyll ep03
-- Jekyll ep04 quality retro
-- Jekyll ep05
+- Jekyll ep02 first pass; Jekyll ep03; Jekyll ep04 quality retro; Jekyll ep05
 - Jekyll ep01-05 retro
 - Hard people checks
 - Jekyll ep05 repair
@@ -123,7 +115,7 @@ Every section of `LESSONS_ARCHIVE.md`, oldest first:
 - Face refine until 2026-10-29
 - The doorstep room (Jekyll ep06, 2026-10-29)
 - Jekyll ep01-06 series retro
-- Jekyll ep07 retro (2026-11-10)
+- Jekyll ep07 retro (2026-11-10); Jekyll ep08 (2026-11-11)
 
 Anchors the code cites, archived: `3ae4584` (take currency: a swapped roll never
 carries another render's graph; `studio/take_currency.py`, `studio/episode_home.py`,

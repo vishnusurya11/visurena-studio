@@ -39,7 +39,7 @@ To rehearse, never on the real run: `uv run --no-sync python scripts/proof/rehea
 
 | you want | do | never |
 |---|---|---|
-| land a fix | the failing test, `may-commit`; on exit 3 `autopilot.py pause --at-boundary --by <you> --why "..." --book <codex>`, wait for `paused_at_boundary` in the drive log (one unit: a take ~4 min, a grid ~5 min, a plan rung 4-10 min), apply the patch file, run the touched tests NOW (the drive is paused), commit by explicit path, `autopilot.py resume` | edit a file a running drive will load (every subprocess it starts loads it); run pytest or a plan_check beside a Qwen edit; kill a drive (22 of 23 kills over ep19-27 were this, 527 waste-minutes) |
+| land a fix | the failing test, `may-commit`; on exit 3 `autopilot.py pause --at-boundary --by <you> --why "..." --book <codex>`, wait for `paused_at_boundary` in the drive log, apply the patch file, run the touched tests NOW (the drive is paused), commit by explicit path, `autopilot.py resume` | edit a file a running drive will load (every subprocess it starts loads it); run pytest or a plan_check beside a Qwen edit; kill a drive |
 | a plan row is wrong | `plan_repair` (records the cure in `plan.cures.jsonl`); an owner order is a recorded plan edit named `owner_order_<shots>`, judged first as a scratch plan by `plan_check.py <book> <n> --plan=<scratch>.json`; the next entry re-signs over carried rows, no writer round | patch `plan.json` unrecorded; touch a timestamp |
 | a gate accuses correct work | read the MEASURE against the WALL; a wall calibrated on another form is a ruler fault: fix the ruler test-first (cheque/check, packs at 8 s, the 240-word floor), then `retry N` | re-roll a render; raise a wall without its replay |
 | the owner changes an order mid-run | state the pictures it stales ("inputs: 2 of 28 takes stale"), redraw by the registry route only | a tagged one-off redraw the next step 07 supersedes |
@@ -102,7 +102,7 @@ with `step_attempts.refund`.
 2. Resume through the autopilot only: `autopilot.py retry N --book <codex>` for a parked episode,
    `autopilot.py resume --book <codex>` for a paused series. Never launch drive.py.
 3. The autopilot restarts a dead ComfyUI after 2 missed ticks. If a job ignores `/interrupt`, see memory
-   `project_comfy_restart`. Never kill a drive (memory `project_kill_run_tree` is for a run already lost).
+   `project_comfy_restart`. Never kill a drive.
 
 ## OAuth (the YouTube token)
 
@@ -118,7 +118,7 @@ minted after the switch has lived 8 days. Nothing uploads unless the owner asks.
 
 | symptom | cause | do |
 |---|---|---|
-| every delivered take reads stale ("not current to its card") after a commit | prompt words changed (P03 at 11:18) | `regress_delivered.py` names the takes; under a repair of 09+ the freeze keeps them; never launch a pass that writes them unordered |
+| every delivered take reads stale ("not current to its card") after a commit | prompt words changed | `regress_delivered.py` names the takes; under a repair of 09+ the freeze keeps them; never launch a pass that writes them unordered |
 | the ladder queues a frozen take for a retake (`queueing 1 takes ... T01`) | a decider that skips the freeze (P08's early round, 12:29) | `pause --at-boundary`; the writer lint names the site; fix it test-first |
 | a guard killed a legal draw | the guard waited on a line the code prints later | "Guards" above; refund the round |
 | `REFUSED to start: the dry check lists N delivered take(s)` | a delivered take would be written with no owner order | name it `T<nn>` in an owner order, or fix the decider, then `retry N`; a bare relaunch changes nothing |
@@ -127,14 +127,14 @@ minted after the switch has lived 8 days. Nothing uploads unless the owner asks.
 | Telegram: "autopilot supervisor silent for N min" | the PC restarted (Windows Update) or the loop died | log on, or `schtasks /run /tn visurena-autopilot`; then `status` |
 | Telegram: "YouTube token ... open <link>" | the 7-day token | "OAuth" above |
 | state `HELD_PUBLISH` | the master is finished; step 13 waits until `publish/standing.json` lists this episode in `episodes` (2026-10-20), which only the owner writes | nothing: the series moves on; never write that file, never `retry` a held episode |
-| step 13 prints `G-INORDER: in order on <playlist url>` | after the public flip (2026-10-21) the episode joined its book playlist at its episode-order place, its description got the "— Watch in order —" block and the previous episode a Next line; each act is an `uploads.jsonl` row (`playlist`, `playlist_item`, `watch_block`, `next_line`, `in_order`), the id read from the book video's `compilation/youtube.json` or the previous episode's live block; a playlist is made only when the book has none | nothing; a failed upkeep prints `G-INORDER: in-order upkeep failed: ...` and is a `flag` row in `learnings.jsonl`, never a stop (the video is public; decision 2026-10-21, for the owner's veto): the /shorts/ poll and done() go on, a re-run of step 13 retries it (every recorded act skipped) and a landed retry writes a `pass` row so a recut's publish lock does not hold on it |
+| step 13 prints `G-INORDER: in order on <playlist url>` | after the public flip the episode joined its book playlist in order, with the Watch-in-order block and the previous episode's Next line (each act an `uploads.jsonl` row) | nothing; `G-INORDER: in-order upkeep failed` is a `flag` learning, never a stop; a re-run of step 13 retries it, recorded acts skipped |
 | event `code_moved_during_run` | HEAD moved under a live drive | normal; the supervisor keeps its code until the drive ends |
-| parked `clock_loop: <reason>` | three spent-clock stops in a row; the reason is the LAST stop's (2026-11-10) | act on the reason, not the clock: a token -> "OAuth" above; `refused: ... stands at shot_NN: <line> at <t>s (k of n frames)` -> read that frame before any retake; then `retry N` |
-| Telegram: "epNN FINISHED, NOT PUBLISHED: <reason>" (every 6 h) | a parked episode the chain carried to step 13 (ep07 sat 6 days unseen) | fix the reason (usually the token), then the `retry` command the message names; it stops once the episode is public or no longer parked |
-| parked `cure_no_change: <order> <lines>` | the brain's cure order already ran from a stop with the same refusal lines and moved nothing | the order is spent: find the fault's birth (brick 11) -- a sheet, a plan row, a gate's ruler -- never re-place the order |
-| parked `plan_contract: ...` / preflight `refuse now: plan.json fails the Episode contract` | plan.json was hand-edited past the contract | fix it with `plan_repair` (recorded), never by hand; `retry N` |
-| take row `gait: not measured (alias: 4.0 steps/s at 12 fps, ...)` | H3's 8 Hz render pulse folded at 12 fps, not a step (brick 18) | nothing; a real shuffle still fails when the 24 fps read agrees |
-| finish line `repair X h of a Y h cap` | each repair window against its own cap (the line once summed both against the second cap) | read each window alone |
+| parked `clock_loop: <reason>` | three spent-clock stops in a row; the reason is the last stop's | act on the reason (a token -> "OAuth"; `refused: ... at shot_NN ... (k of n frames)` -> read that frame), then `retry N` |
+| Telegram: "epNN FINISHED, NOT PUBLISHED: <reason>" (every 6 h) | a parked episode carried to step 13 | fix the reason, then the `retry` the message names |
+| parked `cure_no_change: <order> <lines>` | that cure already ran on the same refusal and moved nothing | find the fault's birth (brick 11); never re-place the order |
+| parked `plan_contract: ...` / preflight `plan.json fails the Episode contract` | plan.json hand-edited | `plan_repair`, then `retry N` |
+| take row `gait: not measured (alias: ...)` | H3's 8 Hz pulse folded at 12 fps (brick 18) | nothing |
+| finish line `repair X h of a Y h cap` | each repair window against its own cap | read each window alone |
 | finish line `killed X h in N runs` | a share of the charge and the repair the line already holds | never add it as a third part |
 | state `WAIT_TREE` | uncommitted runtime code | commit your own paths the moment a run stops |
 | state `WAIT_QUOTA` | the usage window is shut; `library/.autopilot/quota.json` holds the wake time for every book | nothing: one Telegram, no brain call, it relaunches past the reset; over 8 days it parks |

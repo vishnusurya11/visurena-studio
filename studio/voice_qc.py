@@ -265,12 +265,54 @@ def distance(said: list[str], meant: list[str]) -> int:
     return row[-1]
 
 
+CONTRACTION = re.compile(r"\b([A-Za-z]+)['‘’ʼ](s|ll|ve|re|m|d|t)\b", re.IGNORECASE)
+"""A word with a contracted tail.  A possessive is the same shape, so `'s` expands
+only after the words below; "Hyde's" stays Hyde's."""
+
+S_HOSTS = {"it", "there", "here", "that", "what", "who", "where", "he", "she", "how", "when"}
+TAILS = {"ll": ["will"], "ve": ["have"], "re": ["are"], "m": ["am"], "d": ["would", "had"],
+         "s": ["is", "has"]}
+NOT_WHOLE = {"ca": ["cannot", "can not"], "wo": ["will not"], "sha": ["shall not"]}
+FORMS_CAP = 16
+"""Most spoken forms one line is tried as: 2 per contraction, so 4 contractions."""
+
+
+def expansions(head: str, tail: str) -> list[str]:
+    """The spelled-out forms of one contraction (Jekyll ep08: "there's" heard "there has")."""
+    low, tail = head.lower(), tail.lower()
+    if tail == "t":
+        if not low.endswith("n"):
+            return []
+        stem = low[:-1]
+        return NOT_WHOLE.get(stem, [f"{stem} not"])
+    if tail == "s" and low not in S_HOSTS:
+        return []
+    if tail == "s" and low == "let":
+        return ["let us"]
+    return [f"{low} {word}" for word in TAILS[tail]]
+
+
+def spoken_forms(text: str) -> list[str]:
+    """The line as written, then with each contraction spelled out every way it is said."""
+    forms = [text]
+    for found in CONTRACTION.finditer(text):
+        options = expansions(found.group(1), found.group(2))
+        if not options:
+            continue
+        grown = [form.replace(found.group(0), option, 1) for form in forms for option in options]
+        forms = (forms + grown)[:FORMS_CAP]
+    return forms
+
+
 def error_rate(heard: str, intended: str) -> float:
-    """Word error rate of a transcript against the line it should be."""
+    """Word error rate of a transcript against the line it should be; a contraction
+    heard spelled out (or the reverse) is the same words."""
     meant = normalised(intended)
     if not meant:
         return 0.0
-    return distance(normalised(heard), meant) / len(meant)
+    best = min(distance(normalised(h), normalised(m)) for h in spoken_forms(heard)
+               for m in spoken_forms(intended))
+    return best / len(meant)
 
 
 def heard_as(heard: str, lexicon: dict[str, str]) -> str:
